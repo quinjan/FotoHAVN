@@ -16,6 +16,10 @@ _Avoid_: Session, transaction
 One photograph taken during a Guest Cycle.
 _Avoid_: Shot, image
 
+**Camera Tuning**:
+The operator's adjustment of the selected camera's supported image controls against its live preview during Event setup, retained for that Event.
+_Avoid_: Camera Profile, filter
+
 **Photo Strip**:
 A single narrow keepsake composition containing an ordered set of Captures.
 _Avoid_: Template, composite
