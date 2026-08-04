@@ -1,6 +1,6 @@
 # DNP DS-RX1HS printing and status on Windows
 
-Research date: 2026-08-04  
+Research date: 2026-08-04
 Resolves: [#3](https://github.com/quinjan/FotoHAVN/issues/3)
 
 ## Decision summary
@@ -147,4 +147,3 @@ New decisions/prototypes required:
 3. Prototype physical completion and detailed fault reporting on the real RX1HS; decide between verified Windows TrueEndOfJob/device status and a separately licensed DNP SDK.
 4. Measure outer-edge and center-cut variation on printed calibration sheets before freezing content-safe margins. DNP publishes the raster and nominal cut, but no cutter-tolerance specification.
 5. Obtain written DNP redistribution/SDK terms if the installer is expected to carry any DNP software.
-
