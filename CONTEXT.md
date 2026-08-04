@@ -4,6 +4,10 @@ FotoHAVN coordinates the guest-facing flow from taking photos to receiving a phy
 
 ## Language
 
+**Event**:
+A named booth run that fixes the camera and printer used by its Guest Cycles and groups their saved artifacts.
+_Avoid_: Booth session, job
+
 **Guest Cycle**:
 One guest group's interaction with the booth, beginning at Start and ending when the booth returns to Start after the print is complete.
 _Avoid_: Session, transaction
