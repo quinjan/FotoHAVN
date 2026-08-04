@@ -1,0 +1,70 @@
+using System.Collections.Concurrent;
+using FotoHavn.Core;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
+
+namespace FotoHavn.App;
+
+public partial class App : Application
+{
+    private static readonly ConcurrentQueue<AppActivationArguments> PendingActivations = new();
+    private static App? currentApp;
+    private static int windowReady;
+    private MainWindow? window;
+    private Windows.UI.ViewManagement.UISettings? uiSettings;
+
+    public App()
+    {
+        currentApp = this;
+        InitializeComponent();
+    }
+
+    internal static void ForwardActivation(AppActivationArguments args)
+    {
+        PendingActivations.Enqueue(args);
+        if (Volatile.Read(ref windowReady) == 1)
+        {
+            currentApp?.ScheduleActivationDrain();
+        }
+    }
+
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        var orchestrator = new EventGuestCycleOrchestrator(
+            new ExecutableRelativeEventFileSystem(),
+            new CameraBoundary(),
+            new PhotoStripCompositor(),
+            new SystemClock());
+
+        window = new MainWindow(orchestrator);
+        await window.LoadPresentationAsync();
+        window.ShowCentered();
+        RefreshMotionResources();
+        Volatile.Write(ref windowReady, 1);
+        DrainPendingActivations();
+    }
+
+    private void ScheduleActivationDrain()
+    {
+        window?.DispatcherQueue.TryEnqueue(DrainPendingActivations);
+    }
+
+    private void DrainPendingActivations()
+    {
+        while (PendingActivations.TryDequeue(out _))
+        {
+            RefreshMotionResources();
+            window?.Activate();
+        }
+    }
+
+    private void RefreshMotionResources()
+    {
+        uiSettings ??= new Windows.UI.ViewManagement.UISettings();
+        var duration = MotionPolicy.ResolveDuration(
+            uiSettings.AnimationsEnabled,
+            TimeSpan.FromMilliseconds(180));
+        Resources["FotoHavnStandardMotionDuration"] = new Duration(duration);
+    }
+}
