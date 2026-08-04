@@ -1,0 +1,9 @@
+{
+  "name": "fotohavn-prototypes",
+  "private": true,
+  "scripts": {
+    "prototype:event-grid": "node prototypes/event-grid/server.mjs",
+    "prototype:event-deletion": "node prototypes/event-deletion/server.mjs",
+    "prototype:event-camera-tuning": "node prototypes/event-camera-tuning/server.mjs"
+  }
+}
