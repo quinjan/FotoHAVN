@@ -20,6 +20,10 @@ _Avoid_: Session, transaction
 One photograph taken during a Guest Cycle.
 _Avoid_: Shot, image
 
+**Eligible Camera**:
+A Camera that FotoHAVN permits an Event to select because it can provide the required live preview and Capture output.
+_Avoid_: Supported Camera, compatible Camera
+
 **Camera Tuning**:
 The operator's adjustment of a Camera's supported image controls against its live preview during Event setup. Each Event retains separate tuning for every Camera configured in it.
 _Avoid_: Camera Profile, filter
