@@ -92,7 +92,7 @@ public sealed class EventGuestCycleOrchestrator
         var savedEvents = await fileSystem.LoadEventsAsync(cancellationToken).ConfigureAwait(false);
         var tiles = new List<EventTilePresentation>(savedEvents.Count + 1)
         {
-            new(EventTileKind.NewEvent, "New Event", "Set up a booth Event", "＋"),
+            new(EventTileKind.NewEvent, "New Event", "Set up a new booth run", "＋"),
         };
 
         tiles.AddRange(savedEvents
@@ -100,7 +100,7 @@ public sealed class EventGuestCycleOrchestrator
             .Select(savedEvent => new EventTilePresentation(
                 EventTileKind.SavedEvent,
                 savedEvent.Name,
-                $"Last saved {savedEvent.LastSavedAt.ToLocalTime():g}",
+                FormatSavedAt(savedEvent.LastSavedAt),
                 "▶",
                 savedEvent.Id,
                 savedEvent.LastSavedAt)));
@@ -356,10 +356,19 @@ public sealed class EventGuestCycleOrchestrator
 
     private static ApplicationPresentation CreateSavedEventsPresentation(IReadOnlyList<EventTilePresentation> tiles) =>
         new(
-            "Saved Events",
+            "Choose an Event",
             tiles,
             EmptyStateMessage: null,
             new ApplicationCanvasPresentation(1280, 720, AllowsReflow: false));
+
+    private string FormatSavedAt(DateTimeOffset savedAt)
+    {
+        var localSavedAt = savedAt.ToLocalTime();
+        var localToday = Clock.UtcNow.ToLocalTime().Date;
+        return localSavedAt.Date == localToday
+            ? $"Saved today, {localSavedAt:h:mm tt}"
+            : $"Saved {localSavedAt:MMM d, yyyy, h:mm tt}";
+    }
 
     private sealed record EventSetupDraft(
         EventId? EventId,

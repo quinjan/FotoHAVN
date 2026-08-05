@@ -14,6 +14,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly EventGuestCycleOrchestrator orchestrator;
     private readonly CameraBoundary camera;
+    private readonly HashSet<Border> hoveredEventCards = [];
     private ApplicationCanvasPresentation? canvas;
     private bool applyingPresentation;
 
@@ -80,6 +81,95 @@ public sealed partial class MainWindow : Window
         {
             await ExecuteAsync(new DeleteSavedEvent(eventId));
         }
+    }
+
+    private void SavedEventCardPointerEntered(object sender, PointerRoutedEventArgs args)
+    {
+        if (sender is Border card)
+        {
+            hoveredEventCards.Add(card);
+            ApplySavedEventCardState(card, isActive: true);
+        }
+    }
+
+    private void SavedEventCardPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        if (sender is Border card)
+        {
+            hoveredEventCards.Remove(card);
+            if (FindNamedDescendant<Button>(card, "StartEventButton") is not { FocusState: not FocusState.Unfocused })
+            {
+                ApplySavedEventCardState(card, isActive: false);
+            }
+        }
+    }
+
+    private void StartEventButtonGotFocus(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button && FindAncestor<Border>(button, "SavedEventCard") is { } card)
+        {
+            ApplySavedEventCardState(card, isActive: true);
+        }
+    }
+
+    private void StartEventButtonLostFocus(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button &&
+            FindAncestor<Border>(button, "SavedEventCard") is { } card &&
+            !hoveredEventCards.Contains(card))
+        {
+            ApplySavedEventCardState(card, isActive: false);
+        }
+    }
+
+    private static void ApplySavedEventCardState(Border card, bool isActive)
+    {
+        if (FindNamedDescendant<Button>(card, "StartEventButton") is { } startButton)
+        {
+            startButton.Opacity = isActive ? 1 : 0;
+        }
+
+        if (FindNamedDescendant<StackPanel>(card, "SavedEventMetadata") is { } metadata)
+        {
+            metadata.Opacity = isActive ? 0.16 : 1;
+        }
+
+        card.Background = (Brush)Application.Current.Resources[
+            isActive ? "EventHoverBrush" : "SurfaceBrush"];
+    }
+
+    private static T? FindNamedDescendant<T>(DependencyObject root, string name)
+        where T : FrameworkElement
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            var child = VisualTreeHelper.GetChild(root, index);
+            if (child is T { Name: var childName } match && childName == name)
+            {
+                return match;
+            }
+
+            if (FindNamedDescendant<T>(child, name) is { } descendant)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
+    }
+
+    private static T? FindAncestor<T>(DependencyObject child, string name)
+        where T : FrameworkElement
+    {
+        for (var current = VisualTreeHelper.GetParent(child); current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is T { Name: var currentName } match && currentName == name)
+            {
+                return match;
+            }
+        }
+
+        return null;
     }
 
     private async void EventNameTextChanged(object sender, TextChangedEventArgs args)

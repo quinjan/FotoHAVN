@@ -17,50 +17,91 @@
             VerticalAlignment="Center"
             Background="{StaticResource CanvasBrush}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="112" />
+                <RowDefinition Height="54" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Margin="56,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center" Spacing="3">
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="FotoHAVN" />
-                    <TextBlock Foreground="{StaticResource TextMutedBrush}" Text="Operator console" />
-                </StackPanel>
-                <Border
-                    Grid.Column="1"
-                    Padding="12,6"
-                    VerticalAlignment="Center"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource HairlineBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16">
-                    <TextBlock FontSize="12" FontWeight="SemiBold" Text="SAVED EVENTS" />
-                </Border>
-            </Grid>
+            <Border
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1">
+                <Grid Margin="17,0">
+                    <StackPanel
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="10">
+                        <Border
+                            Width="20"
+                            Height="20"
+                            Background="#FF202124"
+                            CornerRadius="5">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="White"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="F" />
+                        </Border>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            Text="FotoHAVN" />
+                    </StackPanel>
+                    <TextBlock
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        CharacterSpacing="180"
+                        FontSize="9"
+                        FontWeight="Bold"
+                        Text="OPERATOR CONSOLE" />
+                </Grid>
+            </Border>
 
-            <Grid Grid.Row="1" Margin="56,42,56,56">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="36" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <StackPanel Spacing="7">
+            <ScrollViewer
+                x:Name="EventScrollViewer"
+                Grid.Row="1"
+                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollMode="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                VerticalScrollMode="Enabled"
+                ZoomMode="Disabled">
+                <ScrollViewer.Resources>
+                    <SolidColorBrush x:Key="ScrollBarThumbFill" Color="#FFB6BBC2" />
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#FF858B93" />
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#FF5F656D" />
+                    <SolidColorBrush x:Key="ScrollBarTrackFill" Color="Transparent" />
+                    <SolidColorBrush x:Key="ScrollBarTrackFillPointerOver" Color="#12000000" />
+                    <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="#FFB6BBC2" />
+                </ScrollViewer.Resources>
+                <StackPanel
+                    Width="1012"
+                    Padding="0,48,0,56"
+                    HorizontalAlignment="Center">
+                    <TextBlock
+                        CharacterSpacing="180"
+                        FontSize="9"
+                        FontWeight="Bold"
+                        Text="SAVED EVENTS" />
                     <TextBlock
                         x:Name="HeadingText"
-                        FontSize="36"
-                        FontWeight="SemiBold"
-                        Text="Saved Events" />
+                        Margin="0,10,0,0"
+                        FontSize="32"
+                        FontWeight="Bold"
+                        Text="Choose an Event" />
                     <TextBlock
+                        Margin="0,4,0,0"
                         Foreground="{StaticResource TextMutedBrush}"
                         FontSize="15"
-                        Text="Choose an Event to run or create a new one." />
-                </StackPanel>
+                        Text="Open one to adjust its setup, or start a Guest Cycle." />
 
-                <ItemsControl x:Name="EventTiles" Grid.Row="2">
+                    <ItemsControl
+                        x:Name="EventTiles"
+                        Width="1026"
+                        Margin="0,36,0,0"
+                        HorizontalAlignment="Left">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
@@ -68,70 +109,149 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="core:EventTilePresentation">
-                            <Border
-                                Width="344"
-                                Height="212"
-                                Margin="0,0,20,20"
-                                Padding="26"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
-                                BorderThickness="1"
-                                CornerRadius="10">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Border
-                                        Width="48"
-                                        Height="48"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Background="#FF17181A"
-                                        CornerRadius="24"
-                                        Visibility="{x:Bind ShowsCreate}">
-                                        <TextBlock
+                            <Grid
+                                Width="328"
+                                Height="188"
+                                Margin="0,0,14,14">
+                                <Button
+                                    AutomationProperties.Name="{x:Bind Label}"
+                                    Click="EventTileClicked"
+                                    Style="{StaticResource EventTileButtonStyle}"
+                                    Visibility="{x:Bind ShowsCreate}">
+                                    <Button.Resources>
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FFF1F2F4" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FFE8EAED" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FFC8CCD2" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#FFBFC4CB" />
+                                    </Button.Resources>
+                                    <StackPanel
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                        <Border
+                                            Width="36"
+                                            Height="36"
+                                            HorizontalAlignment="Center"
+                                            Background="#FF1C1D1F"
+                                            CornerRadius="18">
+                                            <FontIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="16"
+                                                Foreground="White"
+                                                Glyph="&#xE710;" />
+                                        </Border>
+                                        <StackPanel HorizontalAlignment="Center" Spacing="6">
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                FontSize="15"
+                                                FontWeight="Bold"
+                                                Text="{x:Bind Label}" />
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                Foreground="{StaticResource TextMutedBrush}"
+                                                FontSize="11"
+                                                Text="{x:Bind SupportingText}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Button>
+
+                                <Border
+                                    x:Name="SavedEventCard"
+                                    Padding="24"
+                                    Background="{StaticResource SurfaceBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="9"
+                                    PointerEntered="SavedEventCardPointerEntered"
+                                    PointerExited="SavedEventCardPointerExited"
+                                    Visibility="{x:Bind ShowsStart}">
+                                    <Grid>
+                                        <StackPanel
+                                            x:Name="SavedEventMetadata"
+                                            Margin="0,0,46,0"
+                                            VerticalAlignment="Bottom"
+                                            Spacing="5">
+                                            <TextBlock
+                                                FontSize="15"
+                                                FontWeight="Bold"
+                                                Text="{x:Bind Label}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTipService.ToolTip="{x:Bind Label}" />
+                                            <TextBlock
+                                                Foreground="{StaticResource TextMutedBrush}"
+                                                FontSize="11"
+                                                Text="{x:Bind SupportingText}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+
+                                        <Button
+                                            x:Name="StartEventButton"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            Foreground="White"
-                                            FontSize="22"
-                                            Text="{x:Bind Glyph}" />
-                                    </Border>
-                                    <StackPanel Grid.Row="1" Spacing="5">
-                                        <TextBlock
-                                            FontSize="21"
-                                            FontWeight="SemiBold"
-                                            Text="{x:Bind Label}"
-                                            TextWrapping="WrapWholeWords"
-                                            ToolTipService.ToolTip="{x:Bind Label}" />
-                                        <TextBlock
-                                            Foreground="{StaticResource TextMutedBrush}"
-                                            FontSize="13"
-                                            Text="{x:Bind SupportingText}" />
-                                    </StackPanel>
-                                    <Button
-                                        Grid.RowSpan="3"
-                                        AutomationProperties.Name="{x:Bind Label}"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Click="EventTileClicked"
-                                        Visibility="{x:Bind ShowsCreate}" />
-                                    <StackPanel
-                                        Grid.Row="2"
-                                        Margin="0,16,0,0"
-                                        Orientation="Horizontal"
-                                        Spacing="8">
-                                        <Button Content="Start" Click="StartSavedEventClicked" Visibility="{x:Bind ShowsStart}" />
-                                        <Button Content="Edit" Click="EditSavedEventClicked" Visibility="{x:Bind ShowsEdit}" />
-                                        <Button Content="Delete" Click="DeleteSavedEventClicked" Visibility="{x:Bind ShowsDelete}" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                                            AutomationProperties.Name="Start Event"
+                                            Click="StartSavedEventClicked"
+                                            GotFocus="StartEventButtonGotFocus"
+                                            LostFocus="StartEventButtonLostFocus"
+                                            Opacity="0"
+                                            Style="{StaticResource EventStartButtonStyle}"
+                                            Visibility="{x:Bind ShowsStart}">
+                                            <Button.Resources>
+                                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                                                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                                                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                                            </Button.Resources>
+                                            <StackPanel HorizontalAlignment="Center" Spacing="7">
+                                                <FontIcon
+                                                    HorizontalAlignment="Center"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="26"
+                                                    Glyph="&#xF5B0;" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="12"
+                                                    Text="Start Event" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button
+                                            Margin="0,-12,-12,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Top"
+                                            AutomationProperties.Name="Delete Event"
+                                            Click="DeleteSavedEventClicked"
+                                            Foreground="{StaticResource DangerBrush}"
+                                            Style="{StaticResource EventActionButtonStyle}"
+                                            Visibility="{x:Bind ShowsDelete}">
+                                            <FontIcon
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="12"
+                                                Glyph="&#xE74D;" />
+                                        </Button>
+
+                                        <Button
+                                            Margin="0,0,-12,-12"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            AutomationProperties.Name="Edit Event"
+                                            Click="EditSavedEventClicked"
+                                            Style="{StaticResource EventActionButtonStyle}"
+                                            Visibility="{x:Bind ShowsEdit}">
+                                            <FontIcon
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="12"
+                                                Glyph="&#xE713;" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
 
             <Grid
                 x:Name="SetupLayer"

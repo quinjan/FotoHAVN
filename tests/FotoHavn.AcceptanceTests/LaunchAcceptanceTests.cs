@@ -14,7 +14,7 @@ public sealed class LaunchAcceptanceTests
             new LaunchApplication(),
             TestContext.Current.CancellationToken);
 
-        Assert.Equal("Saved Events", state.Heading);
+        Assert.Equal("Choose an Event", state.Heading);
         var tile = Assert.Single(state.EventTiles);
         Assert.Equal("New Event", tile.Label);
         Assert.Equal(EventTileKind.NewEvent, tile.Kind);
