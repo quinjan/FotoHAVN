@@ -292,6 +292,12 @@
                                     AutomationProperties.Name="Event name"
                                     PlaceholderText="Enter Event name"
                                     TextChanged="EventNameTextChanged" />
+                                <TextBlock
+                                    x:Name="NameDirtyText"
+                                    Foreground="{StaticResource FocusVisualPrimaryBrush}"
+                                    FontSize="11"
+                                    Text="Changed from the saved Event"
+                                    Visibility="Collapsed" />
                             </StackPanel>
 
                             <StackPanel Spacing="7">
@@ -329,6 +335,12 @@
                                     </Button.Flyout>
                                 </Button>
                                 <TextBlock x:Name="CameraStatusText" Foreground="{StaticResource TextMutedBrush}" Text="Select a Camera" />
+                                <TextBlock
+                                    x:Name="CameraDirtyText"
+                                    Foreground="{StaticResource FocusVisualPrimaryBrush}"
+                                    FontSize="11"
+                                    Text="Changed from the saved Event"
+                                    Visibility="Collapsed" />
                             </StackPanel>
 
                             <StackPanel Spacing="7">
@@ -342,6 +354,13 @@
                                     SelectionChanged="PrinterSelectionChanged">
                                     <ComboBoxItem Content="No Printer" />
                                 </ComboBox>
+                                <TextBlock
+                                    x:Name="StorageStatusText"
+                                    Foreground="{StaticResource DangerBrush}"
+                                    FontSize="11"
+                                    Text="Event storage is not writable. Nothing was saved or started."
+                                    TextWrapping="Wrap"
+                                    Visibility="Collapsed" />
                             </StackPanel>
                         </StackPanel>
 
@@ -392,14 +411,39 @@
                         Background="{StaticResource SurfaceBrush}"
                         CornerRadius="12">
                         <StackPanel Spacing="18">
-                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Discard this draft?" />
+                            <TextBlock x:Name="DiscardTitleText" FontSize="24" FontWeight="SemiBold" Text="Discard this draft?" />
                             <TextBlock
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Text="Your unsaved Event changes will be lost."
                                 TextWrapping="Wrap" />
                             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
                                 <Button Content="Keep Editing" Click="KeepEditingClicked" />
-                                <Button Content="Discard Draft" Click="DiscardDraftClicked" />
+                                <Button x:Name="DiscardActionButton" Content="Discard Draft" Click="DiscardDraftClicked" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid
+                    x:Name="SaveChangesLayer"
+                    Background="#B817181A"
+                    Visibility="Collapsed">
+                    <Border
+                        Width="500"
+                        Padding="28"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource SurfaceBrush}"
+                        CornerRadius="12">
+                        <StackPanel Spacing="18">
+                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Save Event changes?" />
+                            <TextBlock
+                                Foreground="{StaticResource TextMutedBrush}"
+                                Text="The new Event name and Camera Binding affect only future Guest Cycles. Completed Guest Cycles and their artifacts will not change."
+                                TextWrapping="Wrap" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                                <Button Content="Keep Editing" Click="CancelSaveClicked" />
+                                <Button x:Name="ConfirmSaveButton" Content="Save Changes" Click="ConfirmSaveClicked" />
                             </StackPanel>
                         </StackPanel>
                     </Border>

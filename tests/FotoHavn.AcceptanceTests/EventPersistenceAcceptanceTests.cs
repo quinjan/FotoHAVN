@@ -219,6 +219,7 @@ public sealed class EventPersistenceAcceptanceTests
         await orchestrator.ExecuteAsync(new ChangeEventName("Renamed Event"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
 
         var updated = Assert.Single(fileSystem.Events);
         Assert.Equal(allocated, updated.Id);
@@ -228,6 +229,172 @@ public sealed class EventPersistenceAcceptanceTests
         Assert.Equal(
             [EventSaveMode.CreateNew, EventSaveMode.CreateNew, EventSaveMode.UpdateExisting],
             fileSystem.SaveModes);
+    }
+
+    [Fact]
+    public async Task Saving_dirty_Event_edits_requires_confirmation_and_preserves_the_saved_baseline_when_cancelled()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt));
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
+        var clock = new StubClock(savedAt.AddHours(1));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            clock,
+            new StubIdentityGenerator(new EventId("unused")));
+
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+
+        var confirmation = await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
+
+        Assert.True(confirmation.Setup!.ShowsSaveConfirmation);
+        Assert.Equal("Summer Party", fileSystem.Events.Single().Name);
+
+        var kept = await orchestrator.ExecuteAsync(new CancelEventSetupSave(), TestContext.Current.CancellationToken);
+        Assert.False(kept.Setup!.ShowsSaveConfirmation);
+        Assert.Equal("Winter Party", kept.Setup.EventName);
+
+        await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
+        var saved = await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Null(saved.Setup);
+        Assert.Equal("Winter Party", fileSystem.Events.Single().Name);
+        Assert.Equal(clock.UtcNow, fileSystem.Events.Single().LastSavedAt);
+        Assert.Equal(1, camera.ReleaseCount);
+    }
+
+    [Fact]
+    public async Task Save_Start_rechecks_storage_before_persisting_or_activating_an_edited_Event()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt));
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            new StubClock(savedAt.AddHours(1)),
+            new StubIdentityGenerator(new EventId("unused")));
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
+        fileSystem.StorageReady = false;
+
+        var blocked = await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Null(blocked.ActiveEvent);
+        Assert.NotNull(blocked.Setup);
+        Assert.False(blocked.Setup.IsStorageReady);
+        Assert.False(blocked.Setup.ShowsSaveConfirmation);
+        Assert.Equal("Summer Party", fileSystem.Events.Single().Name);
+        Assert.Empty(fileSystem.SaveModes);
+    }
+
+    [Fact]
+    public async Task Confirmed_Save_Start_persists_edits_reuses_the_healthy_stream_and_activates_the_Event()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt));
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            new StubClock(savedAt.AddHours(1)),
+            new StubIdentityGenerator(new EventId("unused")));
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        var confirmation = await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
+
+        Assert.True(confirmation.Setup!.ShowsSaveConfirmation);
+        Assert.True(confirmation.Setup.SaveConfirmationStartsEvent);
+        var active = await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Null(active.Setup);
+        Assert.Equal("Winter Party", active.ActiveEvent!.Name);
+        Assert.Equal(camera.StreamId, active.ActiveEvent.CameraStreamId);
+        Assert.Equal("Winter Party", fileSystem.Events.Single().Name);
+        Assert.Equal(1, camera.OpenCount);
+        Assert.Equal(0, camera.ReleaseCount);
+        Assert.Equal(2, fileSystem.ProbeStorageCount);
+    }
+
+    [Fact]
+    public async Task Name_only_edits_preserve_the_complete_saved_Camera_Binding()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt) with
+        {
+            Camera = new CameraBinding("camera-1", "Saved Camera Name"),
+        });
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Runtime Camera Name", "Port 4"));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            new StubClock(savedAt.AddHours(1)),
+            new StubIdentityGenerator(new EventId("unused")));
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
+
+        await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(new CameraBinding("camera-1", "Saved Camera Name"), fileSystem.Events.Single().Camera);
+    }
+
+    [Fact]
+    public async Task Save_Start_does_not_persist_when_the_stream_is_lost_during_storage_preflight()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt));
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            new StubClock(savedAt.AddHours(1)),
+            new StubIdentityGenerator(new EventId("unused")));
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
+        fileSystem.OnProbeStorage = camera.LoseStream;
+
+        var blocked = await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Null(blocked.ActiveEvent);
+        Assert.Equal(CameraConnectionState.Disconnected, blocked.Setup!.CameraState);
+        Assert.False(blocked.Setup.ShowsSaveConfirmation);
+        Assert.Equal("Summer Party", fileSystem.Events.Single().Name);
+        Assert.Empty(fileSystem.SaveModes);
+    }
+
+    [Fact]
+    public async Task Save_Start_does_not_activate_with_a_stream_lost_during_persistence()
+    {
+        var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+        var fileSystem = new RecordingFileSystem();
+        fileSystem.Events.Add(Configuration("event-1", "Summer Party", savedAt));
+        var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
+        var orchestrator = CreateOrchestrator(
+            fileSystem,
+            camera,
+            new StubClock(savedAt.AddHours(1)),
+            new StubIdentityGenerator(new EventId("unused")));
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(new EventId("event-1")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
+        fileSystem.OnSaveEvent = camera.LoseStream;
+
+        var blocked = await orchestrator.ExecuteAsync(new ConfirmEventSetupSave(), TestContext.Current.CancellationToken);
+
+        Assert.Null(blocked.ActiveEvent);
+        Assert.Equal(CameraConnectionState.Disconnected, blocked.Setup!.CameraState);
+        Assert.False(blocked.Setup.IsDirty);
+        Assert.Equal("Winter Party", fileSystem.Events.Single().Name);
     }
 
     private static async Task CompleteValidSetupAsync(
@@ -287,9 +454,12 @@ public sealed class EventPersistenceAcceptanceTests
     private sealed class RecordingFileSystem : IEventFileSystem
     {
         public EventId? CollidingIdentity { get; init; }
-        public bool StorageReady { get; init; } = true;
+        public bool StorageReady { get; set; } = true;
         public List<EventConfiguration> Events { get; } = [];
         public List<EventSaveMode> SaveModes { get; } = [];
+        public int ProbeStorageCount { get; private set; }
+        public Action? OnProbeStorage { get; set; }
+        public Action? OnSaveEvent { get; set; }
         public TaskCompletionSource SaveStarted { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         public TaskCompletionSource? AllowSaveToComplete { get; init; }
@@ -302,7 +472,12 @@ public sealed class EventPersistenceAcceptanceTests
         public Task<EventConfiguration?> LoadEventAsync(EventId eventId, CancellationToken cancellationToken) =>
             Task.FromResult<EventConfiguration?>(Events.SingleOrDefault(item => item.Id == eventId));
 
-        public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(StorageReady);
+        public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken)
+        {
+            ProbeStorageCount++;
+            OnProbeStorage?.Invoke();
+            return Task.FromResult(StorageReady);
+        }
 
         public async Task<EventSaveResult> SaveEventAtomicallyAsync(
             EventConfiguration configuration,
@@ -323,6 +498,7 @@ public sealed class EventPersistenceAcceptanceTests
 
             Events.RemoveAll(item => item.Id == configuration.Id);
             Events.Add(configuration);
+            OnSaveEvent?.Invoke();
             return EventSaveResult.Saved;
         }
 
@@ -360,6 +536,8 @@ public sealed class EventPersistenceAcceptanceTests
             StreamId = null;
             return Task.CompletedTask;
         }
+
+        public void LoseStream() => StreamId = null;
     }
 
     private sealed class StubClock(DateTimeOffset utcNow) : IApplicationClock
