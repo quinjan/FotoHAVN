@@ -48,6 +48,8 @@ public sealed record CancelExitActiveEvent : ApplicationCommand;
 
 public sealed record StartGuestCycle : ApplicationCommand;
 
+public sealed record RetryGuestStartReadiness : ApplicationCommand;
+
 public sealed record RetryGuestCycle : ApplicationCommand;
 
 public sealed record ConfirmPhotoStripVisible : ApplicationCommand;
@@ -253,6 +255,7 @@ public sealed record ActiveEventPresentation(
     CameraBinding Camera,
     string CameraStreamId,
     bool ShowsExitConfirmation = false,
+    GuestStartPresentation? GuestStartState = null,
     GuestCyclePresentation? Cycle = null)
 {
     public string Heading => "Let’s take some photos.";
@@ -261,6 +264,42 @@ public sealed record ActiveEventPresentation(
     public GuestCyclePresentation GuestCycle => Cycle ?? GuestCyclePresentation.Start;
     public bool ShowsExitEvent => GuestCycle.Phase is GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable;
     public bool ShowsHardwareStatus => false;
+    public GuestStartPresentation GuestStart => GuestStartState ?? GuestStartPresentation.Unavailable;
+}
+
+public enum GuestStartFailure
+{
+    None,
+    CameraUnavailable,
+    StorageUnavailable,
+}
+
+public sealed record GuestStartPresentation(
+    bool IsCameraReady,
+    bool IsStorageReady,
+    GuestStartFailure Failure = GuestStartFailure.None,
+    bool RequiresEventSetupCorrection = false)
+{
+    public static GuestStartPresentation Unavailable { get; } =
+        new(false, false, GuestStartFailure.CameraUnavailable);
+
+    public bool IsStartVisible => true;
+    public bool IsStartEnabled => IsCameraReady && IsStorageReady && Failure == GuestStartFailure.None;
+    public string? StatusMessage => IsStartEnabled ? null : "Please call the operator";
+    public bool ShowsRetry => !IsStartEnabled && !RequiresEventSetupCorrection;
+    public string RetryActionLabel => "Retry";
+
+    public static GuestStartPresentation FromReadiness(
+        bool isCameraReady,
+        bool isStorageReady,
+        bool requiresEventSetupCorrection = false) =>
+        new(
+            isCameraReady,
+            isStorageReady,
+            isCameraReady
+                ? isStorageReady ? GuestStartFailure.None : GuestStartFailure.StorageUnavailable
+                : GuestStartFailure.CameraUnavailable,
+            requiresEventSetupCorrection);
 }
 
 public enum GuestCyclePhase
@@ -323,6 +362,12 @@ public interface ICameraBoundary
 {
     event EventHandler? AvailableCamerasChanged;
 
+    event EventHandler? StreamHealthChanged
+    {
+        add { }
+        remove { }
+    }
+
     IReadOnlyList<AvailableCamera> AvailableCameras { get; }
 
     string? StreamId { get; }
@@ -346,6 +391,8 @@ public enum CameraStreamFailure
     None,
     Unavailable,
     Removed,
+    StreamFailure,
+    ExclusiveOwnershipLost,
 }
 
 public sealed record CameraStreamHealth(
@@ -355,6 +402,15 @@ public sealed record CameraStreamHealth(
     DateTimeOffset? LatestFrameAt,
     CameraStreamFailure Failure)
 {
+    public CameraStreamHealth(
+        CameraDeviceId? deviceId,
+        string? streamId,
+        DateTimeOffset? latestFrameAt,
+        CameraStreamFailure failure)
+        : this(deviceId, streamId, 0, latestFrameAt, failure)
+    {
+    }
+
     public static CameraStreamHealth Unavailable { get; } =
         new(null, null, 0, null, CameraStreamFailure.Unavailable);
 }
