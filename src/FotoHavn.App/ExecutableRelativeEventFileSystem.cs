@@ -27,6 +27,7 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
     internal ExecutableRelativeEventFileSystem(string eventsRoot)
     {
         this.eventsRoot = Path.GetFullPath(eventsRoot);
+        Directory.CreateDirectory(this.eventsRoot);
         quarantineRoot = Path.Combine(this.eventsRoot, ".deletion-quarantine");
     }
 

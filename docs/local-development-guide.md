@@ -76,6 +76,17 @@ src/FotoHavn.App/bin/Release/net10.0-windows10.0.26100.0/win-x64/publish
 
 Launch `FotoHAVN.exe` from that directory. Its Event data will be stored in the adjacent `Events` directory.
 
+## Produce a field-test candidate
+
+Use the repository's qualified publish entry point when producing a folder for booth testing:
+
+```powershell
+./scripts/publish-field-test.ps1
+./scripts/test-portable-launch.ps1
+```
+
+The first command requires the exact SDK in `global.json`, restores the checked-in NuGet lock files in locked mode, publishes with `FieldTest-win-x64.pubxml`, verifies the portable-folder shape, probes the adjacent location for write access, and emits `field-test-build.json`. The second proves that the app creates its executable-relative `Events` root, foregrounds the existing window on a second launch, and leaves one process owner. Complete [`field-test/qualification-record.md`](field-test/qualification-record.md) on the actual booth laptop before calling that candidate qualified.
+
 ## Common Camera problems
 
 - **Access denied**: enable Windows Camera privacy access for desktop applications.
