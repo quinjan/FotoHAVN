@@ -820,7 +820,7 @@ public sealed class EventGuestCycleOrchestrator
         }
 
         guestCycle = null;
-        return PublishGuestCycle(GuestCyclePresentation.Start);
+        return await PublishCurrentGuestStartReadinessAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ApplicationPresentation> RetryGuestCycleAsync(CancellationToken cancellationToken)
@@ -842,11 +842,6 @@ public sealed class EventGuestCycleOrchestrator
                 return CurrentPresentation;
             }
 
-            await fileSystem.RecordGuestCycleInterruptionAsync(
-                activeEvent.Id,
-                run.Id,
-                run.LastInterruption,
-                cancellationToken).ConfigureAwait(false);
             if (await fileSystem.PrepareGuestCycleRetryAsync(
                     activeEvent.Id,
                     run.Id,
@@ -861,8 +856,9 @@ public sealed class EventGuestCycleOrchestrator
             return CurrentPresentation;
         }
 
-        if (interrupted.Failure != GuestCycleFailure.CameraUnavailable &&
-            IsCameraReady(activeEvent.Camera, activeEvent.CameraStreamId, Clock.UtcNow))
+        if (run.LastInterruption.Step != GuestCycleInterruptedStep.Capture ||
+            (interrupted.Failure != GuestCycleFailure.CameraUnavailable &&
+             IsCameraReady(activeEvent.Camera, activeEvent.CameraStreamId, Clock.UtcNow)))
         {
             return await RunGuestCycleAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -1103,6 +1099,35 @@ public sealed class EventGuestCycleOrchestrator
             return CurrentPresentation;
         }
 
+        return Publish(CurrentPresentation with
+        {
+            ActiveEvent = activeEvent with
+            {
+                GuestStartState = guestStart,
+                Cycle = ToGuestCyclePresentation(guestStart),
+            },
+        });
+    }
+
+    private async Task<ApplicationPresentation> PublishCurrentGuestStartReadinessAsync(
+        CancellationToken cancellationToken)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent
+            ?? throw new InvalidOperationException("No Event is Active.");
+        bool storageReady;
+        try
+        {
+            storageReady = await fileSystem.ProbeEventStorageAsync(activeEvent.Id, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            storageReady = false;
+        }
+
+        var guestStart = CreateGuestStartPresentation(
+            activeEvent.Camera,
+            activeEvent.CameraStreamId,
+            storageReady);
         return Publish(CurrentPresentation with
         {
             ActiveEvent = activeEvent with

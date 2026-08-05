@@ -49,6 +49,45 @@ public sealed class PhotoStripCompositorIntegrationTests
         }
     }
 
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("invalid")]
+    public async Task Missing_or_invalid_Capture_makes_composition_unavailable(string damage)
+    {
+        var root = Path.Combine(Path.GetTempPath(), "FotoHAVN-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var references = new List<CaptureReference>();
+            for (var captureNumber = 1; captureNumber <= 4; captureNumber++)
+            {
+                var path = Path.Combine(root, $"capture-{captureNumber}.jpg");
+                if (captureNumber != 3 || damage == "invalid")
+                {
+                    await File.WriteAllBytesAsync(
+                        path,
+                        captureNumber == 3 ? [1, 2, 3] : await EncodeWideFrameAsync(),
+                        TestContext.Current.CancellationToken);
+                }
+                references.Add(new CaptureReference(path));
+            }
+
+            var result = await new PhotoStripCompositor().ComposeAsync(
+                new PhotoStripCompositionRequest("Mika & Paolo's Wedding", references),
+                TestContext.Current.CancellationToken);
+
+            Assert.False(result.IsAvailable);
+            Assert.True(result.PngBytes.IsEmpty);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
     private static async Task<byte[]> EncodeWideFrameAsync()
     {
         const int width = 80;

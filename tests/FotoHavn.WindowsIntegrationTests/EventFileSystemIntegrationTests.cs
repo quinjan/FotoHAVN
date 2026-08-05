@@ -93,6 +93,15 @@ public sealed class EventFileSystemIntegrationTests
             guestCycleId,
             new PhotoStripCompositionResult(true, png, 2, 6),
             TestContext.Current.CancellationToken);
+        var replacement = await fileSystem.CommitPhotoStripAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new PhotoStripCompositionResult(
+                true,
+                await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6, red: 64),
+                2,
+                6),
+            TestContext.Current.CancellationToken);
         await fileSystem.CompleteGuestCycleAsync(
             savedEvent.Id,
             guestCycleId,
@@ -101,6 +110,8 @@ public sealed class EventFileSystemIntegrationTests
 
         Assert.Equal(GuestCycleCreateResult.Created, created);
         Assert.True(strip.Committed);
+        Assert.False(replacement.Committed);
+        Assert.Equal(png, await File.ReadAllBytesAsync(strip.ArtifactPath, TestContext.Current.CancellationToken));
         var guestCycleDirectory = Path.Combine(directory.Path, savedEvent.Id.Value, "GuestCycles", guestCycleId.Value);
         Assert.Equal(
             ["capture-1.jpg", "capture-2.jpg", "capture-3.jpg", "capture-4.jpg", "guest-cycle.json", "photo-strip.png"],
@@ -110,6 +121,12 @@ public sealed class EventFileSystemIntegrationTests
             TestContext.Current.CancellationToken);
         Assert.Contains("\"completedAt\"", manifest, StringComparison.Ordinal);
         Assert.DoesNotContain(".partial", manifest, StringComparison.Ordinal);
+        using var record = JsonDocument.Parse(manifest);
+        var photoStrip = record.RootElement.GetProperty("photoStrip");
+        Assert.Equal("photo-strip.png", photoStrip.GetProperty("fileName").GetString());
+        Assert.Equal(png.LongLength, photoStrip.GetProperty("byteLength").GetInt64());
+        Assert.Equal(2, photoStrip.GetProperty("width").GetInt32());
+        Assert.Equal(6, photoStrip.GetProperty("height").GetInt32());
     }
 
     [Fact]
@@ -319,6 +336,135 @@ public sealed class EventFileSystemIntegrationTests
         Assert.Equal(changedBytes, await File.ReadAllBytesAsync(durablePath, cancellationToken));
     }
 
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("changed")]
+    [InlineData("invalid")]
+    public async Task Retry_rejects_a_missing_changed_or_invalid_canonical_Photo_Strip(string damage)
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await fileSystem.SaveEventAtomicallyAsync(savedEvent, EventSaveMode.CreateNew, cancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(savedEvent.Id, guestCycleId, savedEvent.LastSavedAt, cancellationToken);
+        var jpeg = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+        var captures = new List<CaptureReference>();
+        for (var captureNumber = 1; captureNumber <= 4; captureNumber++)
+        {
+            var committed = await fileSystem.CommitCaptureAsync(
+                savedEvent.Id,
+                guestCycleId,
+                captureNumber,
+                new CapturedFrame(captureNumber, savedEvent.LastSavedAt, 6, 4, jpeg),
+                cancellationToken);
+            captures.Add(committed.Capture);
+        }
+
+        var png = await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6);
+        var strip = await fileSystem.CommitPhotoStripAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new PhotoStripCompositionResult(true, png, 2, 6),
+            cancellationToken);
+        await fileSystem.RecordGuestCycleInterruptionAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new GuestCycleInterruption(
+                GuestCycleFailureSource.Storage,
+                GuestCycleInterruptedStep.Preview,
+                4,
+                4,
+                savedEvent.LastSavedAt.AddSeconds(5)),
+            cancellationToken);
+
+        if (damage == "missing")
+        {
+            File.Delete(strip.ArtifactPath);
+        }
+        else if (damage == "changed")
+        {
+            await File.WriteAllBytesAsync(
+                strip.ArtifactPath,
+                await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6, red: 64),
+                cancellationToken);
+        }
+        else
+        {
+            await File.WriteAllBytesAsync(strip.ArtifactPath, [1, 2, 3], cancellationToken);
+        }
+
+        var validation = await fileSystem.PrepareGuestCycleRetryAsync(
+            savedEvent.Id,
+            guestCycleId,
+            captures,
+            cancellationToken);
+
+        Assert.Equal(GuestCycleRetryValidation.Unrecoverable, validation);
+    }
+
+    [Fact]
+    public async Task Retry_does_not_adopt_a_changed_Photo_Strip_left_by_an_interrupted_manifest_commit()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await fileSystem.SaveEventAtomicallyAsync(savedEvent, EventSaveMode.CreateNew, cancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(savedEvent.Id, guestCycleId, savedEvent.LastSavedAt, cancellationToken);
+        var jpeg = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+        for (var captureNumber = 1; captureNumber <= 4; captureNumber++)
+        {
+            await fileSystem.CommitCaptureAsync(
+                savedEvent.Id,
+                guestCycleId,
+                captureNumber,
+                new CapturedFrame(captureNumber, savedEvent.LastSavedAt, 6, 4, jpeg),
+                cancellationToken);
+        }
+        await fileSystem.RecordGuestCycleInterruptionAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new GuestCycleInterruption(
+                GuestCycleFailureSource.Storage,
+                GuestCycleInterruptedStep.PhotoStrip,
+                4,
+                4,
+                savedEvent.LastSavedAt.AddSeconds(5)),
+            cancellationToken);
+        var orphanPath = Path.Combine(
+            directory.Path,
+            savedEvent.Id.Value,
+            "GuestCycles",
+            guestCycleId.Value,
+            "photo-strip.png");
+        var orphanBytes = await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6);
+        await File.WriteAllBytesAsync(orphanPath, orphanBytes, cancellationToken);
+
+        var committed = await fileSystem.CommitPhotoStripAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new PhotoStripCompositionResult(
+                true,
+                await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6, red: 64),
+                2,
+                6),
+            cancellationToken);
+
+        Assert.False(committed.Committed);
+        Assert.Equal(orphanBytes, await File.ReadAllBytesAsync(orphanPath, cancellationToken));
+    }
+
     [Fact]
     public async Task Concurrent_Guest_Cycle_creation_has_exactly_one_winner_and_preserves_its_manifest()
     {
@@ -364,10 +510,10 @@ public sealed class EventFileSystemIntegrationTests
         Assert.Contains(startedAt, new[] { firstStartedAt, secondStartedAt });
     }
 
-    private static async Task<byte[]> EncodeSolidAsync(Guid encoderId, int width, int height)
+    private static async Task<byte[]> EncodeSolidAsync(Guid encoderId, int width, int height, byte red = 192)
     {
         using var bitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8, width, height, BitmapAlphaMode.Premultiplied);
-        var pixels = Enumerable.Repeat(new byte[] { 32, 96, 192, 255 }, width * height)
+        var pixels = Enumerable.Repeat(new byte[] { 32, 96, red, 255 }, width * height)
             .SelectMany(pixel => pixel)
             .ToArray();
         bitmap.CopyFromBuffer(pixels.AsBuffer());
