@@ -1,9 +1,25 @@
 .playwright/
 node_modules/
 
+# Local Codex/tool scratch files
+.codex-ticket-bodies/
+
+# Browser automation output
+.playwright-cli/
+output/playwright/
+
+# Frontend build output and Vite cache
+dist/
+.vite/
+
 # .NET build output and local IDE settings
 [Bb]in/
 [Oo]bj/
 *.user
 *.suo
 artifacts/
+.vs/
+
+# Test output
+TestResults/
+*.trx
