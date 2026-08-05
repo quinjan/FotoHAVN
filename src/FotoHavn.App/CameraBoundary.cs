@@ -6,6 +6,8 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Media.MediaProperties;
+using Windows.Storage.Streams;
+using CoreCapturedFrame = FotoHavn.Core.CapturedFrame;
 
 namespace FotoHavn.App;
 
@@ -22,6 +24,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     private readonly object discoverySync = new();
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
+    private readonly object frameSync = new();
+    private PendingCapture? pendingCapture;
+    private long latestFrameSequence;
+    private long latestFrameAtUtcTicks;
+    private volatile CameraStreamFailure streamFailure = CameraStreamFailure.Unavailable;
     private DeviceWatcher? watcher;
 
     public event EventHandler? AvailableCamerasChanged;
@@ -35,6 +42,23 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         .ToArray();
 
     public string? StreamId => sessionOwner.StreamId;
+
+    public CameraStreamHealth StreamHealth
+    {
+        get
+        {
+            lock (frameSync)
+            {
+                var ticks = latestFrameAtUtcTicks;
+                return new CameraStreamHealth(
+                    sessionOwner.DeviceId,
+                    sessionOwner.StreamId,
+                    latestFrameSequence,
+                    ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero),
+                    streamFailure);
+            }
+        }
+    }
 
     public async Task StartDiscoveryAsync(CancellationToken cancellationToken)
     {
@@ -142,6 +166,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                         deviceId,
                         Guid.NewGuid().ToString("N"),
                         new CameraOwnedStream(nextCapture, fallback.Value, OnFrameArrived)).ConfigureAwait(false);
+                    streamFailure = CameraStreamFailure.None;
                     return CameraOpenResult.Ready;
                 }
 
@@ -175,10 +200,60 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         try
         {
             await DisposeCurrentAsync().ConfigureAwait(false);
+            streamFailure = CameraStreamFailure.Unavailable;
         }
         finally
         {
             ownershipGate.Release();
+        }
+    }
+
+    public async Task<CoreCapturedFrame?> CaptureFirstFreshFrameAsync(
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
+        if (StreamHealth is not { Failure: CameraStreamFailure.None, StreamId: not null })
+        {
+            return null;
+        }
+
+        PendingCapture request;
+        lock (frameSync)
+        {
+            if (pendingCapture is not null)
+            {
+                throw new InvalidOperationException("A fresh Camera frame is already being requested.");
+            }
+
+            request = new PendingCapture(
+                latestFrameSequence,
+                new TaskCompletionSource<CoreCapturedFrame>(TaskCreationOptions.RunContinuationsAsynchronously));
+            pendingCapture = request;
+        }
+
+        try
+        {
+            using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutSource.CancelAfter(timeout);
+            try
+            {
+                return await request.Completion.Task.WaitAsync(timeoutSource.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return null;
+            }
+        }
+        finally
+        {
+            lock (frameSync)
+            {
+                if (ReferenceEquals(pendingCapture, request))
+                {
+                    pendingCapture = null;
+                }
+            }
         }
     }
 
@@ -249,6 +324,8 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         AvailableCamerasChanged?.Invoke(this, EventArgs.Empty);
         if (sessionOwner.IsOwnedDevice(update.Id))
         {
+            streamFailure = CameraStreamFailure.Removed;
+            CancelPendingCapture();
             _ = ReleaseAfterRemovalAsync(update.Id);
         }
     }
@@ -282,11 +359,69 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             return;
         }
 
+        var receivedAt = DateTimeOffset.UtcNow;
+        PendingCapture? request;
+        SoftwareBitmap? capturedBitmap = null;
+        long sequence;
+        lock (frameSync)
+        {
+            sequence = ++latestFrameSequence;
+            latestFrameAtUtcTicks = receivedAt.UtcTicks;
+            request = pendingCapture;
+            if (request is not null && sequence > request.AfterSequence)
+            {
+                pendingCapture = null;
+                capturedBitmap = SoftwareBitmap.Copy(bitmap);
+            }
+        }
+
+        if (request is not null && capturedBitmap is not null)
+        {
+            _ = EncodeCapturedFrameAsync(
+                capturedBitmap,
+                sequence,
+                receivedAt,
+                request.Completion);
+        }
+
         PreviewFrameAvailable?.Invoke(this, SoftwareBitmap.Copy(bitmap));
+    }
+
+    private static async Task EncodeCapturedFrameAsync(
+        SoftwareBitmap bitmap,
+        long sequence,
+        DateTimeOffset receivedAt,
+        TaskCompletionSource<CoreCapturedFrame> completion)
+    {
+        using (bitmap)
+        using (var stream = new InMemoryRandomAccessStream())
+        {
+            try
+            {
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+                encoder.SetSoftwareBitmap(bitmap);
+                await encoder.FlushAsync();
+                var bytes = new byte[checked((int)stream.Size)];
+                using var reader = new DataReader(stream.GetInputStreamAt(0));
+                await reader.LoadAsync((uint)bytes.Length);
+                reader.ReadBytes(bytes);
+                completion.TrySetResult(new CoreCapturedFrame(
+                    sequence,
+                    receivedAt,
+                    bitmap.PixelWidth,
+                    bitmap.PixelHeight,
+                    bytes));
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }
     }
 
     private async Task DisposeCurrentAsync()
     {
+        CancelPendingCapture();
         await sessionOwner.ReleaseAsync().ConfigureAwait(false);
     }
 
@@ -305,6 +440,22 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
         return CameraIdentityLabel.FromDeviceId(device.Id);
     }
+
+    private void CancelPendingCapture()
+    {
+        PendingCapture? request;
+        lock (frameSync)
+        {
+            request = pendingCapture;
+            pendingCapture = null;
+        }
+
+        request?.Completion.TrySetResult(null!);
+    }
+
+    private sealed record PendingCapture(
+        long AfterSequence,
+        TaskCompletionSource<CoreCapturedFrame> Completion);
 }
 
 internal sealed class CameraOwnedStream(
