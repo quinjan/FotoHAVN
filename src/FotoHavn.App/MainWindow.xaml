@@ -1,0 +1,110 @@
+<Window
+    x:Class="FotoHavn.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="FotoHAVN">
+
+    <Grid x:Name="WindowRoot" Background="#FF24262A">
+        <Grid
+            x:Name="FixedCanvas"
+            Width="1280"
+            Height="720"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{StaticResource CanvasBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="112" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Margin="56,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Spacing="3">
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="FotoHAVN" />
+                    <TextBlock Foreground="{StaticResource TextMutedBrush}" Text="Operator console" />
+                </StackPanel>
+                <Border
+                    Grid.Column="1"
+                    Padding="12,6"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16">
+                    <TextBlock FontSize="12" FontWeight="SemiBold" Text="SAVED EVENTS" />
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="56,42,56,56">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="36" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Spacing="7">
+                    <TextBlock
+                        x:Name="HeadingText"
+                        FontSize="36"
+                        FontWeight="SemiBold"
+                        Text="Saved Events" />
+                    <TextBlock
+                        Foreground="{StaticResource TextMutedBrush}"
+                        FontSize="15"
+                        Text="Choose an Event to run or create a new one." />
+                </StackPanel>
+
+                <ItemsControl x:Name="EventTiles" Grid.Row="2">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                Width="344"
+                                Height="212"
+                                Margin="0,0,20,20"
+                                AutomationProperties.Name="{Binding Label}"
+                                Style="{StaticResource EventTileButtonStyle}">
+                                <Grid Margin="26">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Border
+                                        Width="48"
+                                        Height="48"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Background="#FF17181A"
+                                        CornerRadius="24">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Foreground="White"
+                                            FontSize="22"
+                                            Text="{Binding Glyph}" />
+                                    </Border>
+                                    <StackPanel Grid.Row="1" Spacing="5">
+                                        <TextBlock FontSize="21" FontWeight="SemiBold" Text="{Binding Label}" />
+                                        <TextBlock
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            FontSize="13"
+                                            Text="{Binding SupportingText}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

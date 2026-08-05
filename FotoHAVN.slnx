@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FotoHavn.App/FotoHavn.App.csproj" />
+    <Project Path="src/FotoHavn.Core/FotoHavn.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FotoHavn.AcceptanceTests/FotoHavn.AcceptanceTests.csproj" />
+  </Folder>
+</Solution>

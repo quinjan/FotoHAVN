@@ -13,8 +13,12 @@ The single Event currently admitting Guest Cycles in the running FotoHAVN proces
 _Avoid_: Current session, resumed Event
 
 **Guest Cycle**:
-One guest group's interaction with the booth, beginning at Start and ending when the booth returns to Start after the print is complete.
+One guest group's interaction with the booth, beginning at Start and ending when the final Photo Strip preview completes and the booth returns to Start.
 _Avoid_: Session, transaction
+
+**Operator Assistance**:
+The paused condition of an active Guest Cycle after a Camera or storage failure, retaining its durable progress until an operator can Retry.
+_Avoid_: Error screen, recovery mode
 
 **Capture**:
 One photograph taken during a Guest Cycle.
