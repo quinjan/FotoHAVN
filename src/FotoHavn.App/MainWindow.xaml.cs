@@ -218,9 +218,16 @@ public sealed partial class MainWindow : Window
     private async void SaveStartClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new SaveAndStartEvent());
 
+    private async void CancelSaveClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new CancelEventSetupSave());
+
+    private async void ConfirmSaveClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new ConfirmEventSetupSave());
+
     private async void SetupLayerKeyDown(object sender, KeyRoutedEventArgs args)
     {
-        if (orchestrator.CurrentPresentation.Setup?.ShowsDiscardConfirmation == true)
+        if (orchestrator.CurrentPresentation.Setup is { } setup &&
+            (setup.ShowsDiscardConfirmation || setup.ShowsSaveConfirmation))
         {
             args.Handled = true;
             return;
@@ -257,7 +264,11 @@ public sealed partial class MainWindow : Window
             DiscardDraftLayer.Visibility = setup?.ShowsDiscardConfirmation == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            SetupDialog.IsHitTestVisible = setup?.ShowsDiscardConfirmation != true;
+            SaveChangesLayer.Visibility = setup?.ShowsSaveConfirmation == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SetupDialog.IsHitTestVisible = setup is null ||
+                (!setup.ShowsDiscardConfirmation && !setup.ShowsSaveConfirmation);
             if (setup is null)
             {
                 PreviewImage.Source = null;
@@ -270,6 +281,15 @@ public sealed partial class MainWindow : Window
             }
 
             SetupTitleText.Text = setup.Title;
+            NameDirtyText.Visibility = setup.IsNameDirty ? Visibility.Visible : Visibility.Collapsed;
+            CameraDirtyText.Visibility = setup.IsCameraDirty ? Visibility.Visible : Visibility.Collapsed;
+            StorageStatusText.Visibility = setup.IsStorageReady ? Visibility.Collapsed : Visibility.Visible;
+            var editingSavedEvent = setup.EventId is not null;
+            DiscardTitleText.Text = editingSavedEvent ? "Discard changes?" : "Discard this draft?";
+            DiscardActionButton.Content = editingSavedEvent ? "Discard Changes" : "Discard Draft";
+            ConfirmSaveButton.Content = setup.SaveConfirmationStartsEvent
+                ? "Save & Start Event"
+                : "Save & Close";
 
             CameraList.ItemsSource = setup.AvailableCameras;
             CameraMenuButtonText.Text = setup.SelectedCamera?.DisplayName ?? "Select Camera";

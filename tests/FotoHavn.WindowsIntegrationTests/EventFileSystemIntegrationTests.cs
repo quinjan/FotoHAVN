@@ -90,6 +90,45 @@ public sealed class EventFileSystemIntegrationTests
         }
     }
 
+    [Fact]
+    public async Task Updating_an_Event_leaves_existing_Guest_Cycle_manifests_and_artifacts_byte_for_byte_unchanged()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "FotoHAVN-tests", Guid.NewGuid().ToString("N"));
+        var eventId = new EventId("01989c3a-61d2-7000-8000-000000000004");
+        try
+        {
+            var fileSystem = new ExecutableRelativeEventFileSystem(root);
+            var createdAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+            await fileSystem.SaveEventAtomicallyAsync(
+                Configuration(eventId, "Summer Party", createdAt, createdAt),
+                EventSaveMode.CreateNew,
+                TestContext.Current.CancellationToken);
+            var guestCycleDirectory = Path.Combine(root, eventId.Value, "guest-cycles", "cycle-1");
+            Directory.CreateDirectory(guestCycleDirectory);
+            var manifestPath = Path.Combine(guestCycleDirectory, "manifest.json");
+            var artifactPath = Path.Combine(guestCycleDirectory, "capture-1.jpg");
+            byte[] manifest = [0x7B, 0x22, 0x76, 0x22, 0x3A, 0x31, 0x7D];
+            byte[] artifact = [0xFF, 0xD8, 0x00, 0x7F, 0xFF, 0xD9];
+            await File.WriteAllBytesAsync(manifestPath, manifest, TestContext.Current.CancellationToken);
+            await File.WriteAllBytesAsync(artifactPath, artifact, TestContext.Current.CancellationToken);
+
+            await fileSystem.SaveEventAtomicallyAsync(
+                Configuration(eventId, "Winter Party", createdAt, createdAt.AddHours(1)),
+                EventSaveMode.UpdateExisting,
+                TestContext.Current.CancellationToken);
+
+            Assert.Equal(manifest, await File.ReadAllBytesAsync(manifestPath, TestContext.Current.CancellationToken));
+            Assert.Equal(artifact, await File.ReadAllBytesAsync(artifactPath, TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
     private static EventConfiguration Configuration(
         EventId id,
         string name,
