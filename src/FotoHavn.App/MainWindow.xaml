@@ -254,6 +254,124 @@
             </ScrollViewer>
 
             <Grid
+                x:Name="ActiveEventLayer"
+                Grid.RowSpan="2"
+                Background="{StaticResource CanvasBrush}"
+                Visibility="Collapsed">
+                <Button
+                    x:Name="ExitEventButton"
+                    Margin="28"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    AutomationProperties.Name="Exit Event"
+                    Click="ExitEventClicked"
+                    Content="Exit Event" />
+                <StackPanel
+                    Width="720"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="16">
+                    <TextBlock
+                        x:Name="ActiveEventNameText"
+                        HorizontalAlignment="Center"
+                        CharacterSpacing="120"
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        x:Name="ActiveEventHeadingText"
+                        HorizontalAlignment="Center"
+                        FontSize="44"
+                        FontWeight="Bold"
+                        TextAlignment="Center" />
+                    <TextBlock
+                        x:Name="ActiveEventExplanationText"
+                        HorizontalAlignment="Center"
+                        Foreground="{StaticResource TextMutedBrush}"
+                        FontSize="18"
+                        TextAlignment="Center" />
+                    <Button
+                        x:Name="StartGuestCycleButton"
+                        MinWidth="280"
+                        MinHeight="68"
+                        Margin="0,28,0,0"
+                        HorizontalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        AutomationProperties.Name="Touch to start"
+                        Background="#FF111214"
+                        BorderBrush="#FF111214"
+                        Content="Touch to start"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        Foreground="White" />
+                </StackPanel>
+
+                <Grid
+                    x:Name="ExitEventConfirmationLayer"
+                    Background="#8A17181A"
+                    Visibility="Collapsed">
+                    <Border
+                        Width="440"
+                        Padding="28"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource SurfaceBrush}"
+                        CornerRadius="12">
+                        <StackPanel Spacing="20">
+                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Exit Event?" />
+                            <TextBlock
+                                Foreground="{StaticResource TextMutedBrush}"
+                                Text="The Camera will be released and FotoHAVN will return to Saved Events."
+                                TextWrapping="Wrap" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                                <Button Click="CancelExitEventClicked" Content="Keep Event Active" />
+                                <Button
+                                    Click="ConfirmExitEventClicked"
+                                    Background="{StaticResource DangerBrush}"
+                                    Content="Exit Event"
+                                    Foreground="White" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <Grid
+                x:Name="StartEventConfirmationLayer"
+                Grid.RowSpan="2"
+                Background="#8A17181A"
+                Visibility="Collapsed">
+                <Border
+                    Width="440"
+                    Padding="28"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource SurfaceBrush}"
+                    CornerRadius="12">
+                    <StackPanel Spacing="20">
+                        <TextBlock
+                            x:Name="StartEventConfirmationText"
+                            FontSize="24"
+                            FontWeight="SemiBold"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Foreground="{StaticResource TextMutedBrush}"
+                            Text="FotoHAVN will confirm the saved Camera and storage before starting."
+                            TextWrapping="Wrap" />
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                            <Button Click="CancelStartEventClicked" Content="Cancel" />
+                            <Button
+                                Click="ConfirmStartEventClicked"
+                                Background="#FF111214"
+                                Content="Start Event"
+                                Foreground="White" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid
                 x:Name="SetupLayer"
                 Grid.RowSpan="2"
                 Background="#8A17181A"
@@ -343,6 +461,28 @@
                                     <ComboBoxItem Content="No Printer" />
                                 </ComboBox>
                             </StackPanel>
+
+                            <Border
+                                x:Name="SetupFailureBorder"
+                                Padding="12"
+                                Background="#FFFFF4F2"
+                                BorderBrush="#FFD58B82"
+                                BorderThickness="1"
+                                CornerRadius="7"
+                                Visibility="Collapsed">
+                                <StackPanel Spacing="10">
+                                    <TextBlock
+                                        x:Name="SetupFailureText"
+                                        Foreground="#FF74342D"
+                                        TextWrapping="Wrap" />
+                                    <Button
+                                        x:Name="RetryStorageButton"
+                                        HorizontalAlignment="Left"
+                                        Click="RetryStorageClicked"
+                                        Content="Check storage again"
+                                        Visibility="Collapsed" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,28,0,0" Spacing="8">
