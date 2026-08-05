@@ -113,7 +113,8 @@ public sealed class EventSetupAcceptanceTests
             new EventId("event-1"),
             "Summer Party",
             new CameraBinding("missing-camera", "Booth Camera"),
-            PrinterId: null,
+            PrinterChoice.NoPrinter,
+            DateTimeOffset.UnixEpoch,
             DateTimeOffset.UnixEpoch);
         var fileSystem = new FakeFileSystem();
         fileSystem.SavedEvents.Add(saved);
@@ -125,6 +126,7 @@ public sealed class EventSetupAcceptanceTests
         Assert.Equal("missing-camera", state.Setup!.SelectedCamera!.DeviceId.Value);
         Assert.Equal("Booth Camera", state.Setup.SelectedCamera.DisplayName);
         Assert.Equal(CameraAvailability.Unavailable, state.Setup.SelectedCamera.Availability);
+        Assert.Equal("Edit Event", state.Setup.Title);
         Assert.Equal(0, camera.OpenCount);
     }
 
@@ -185,7 +187,7 @@ public sealed class EventSetupAcceptanceTests
         var saved = Assert.Single(fileSystem.SavedEvents);
         Assert.Equal("camera-1", saved.Camera.DeviceId.Value);
         Assert.Equal("USB Camera", saved.Camera.DisplayName);
-        Assert.Null(saved.PrinterId);
+        Assert.Equal(PrinterChoice.NoPrinter, saved.Printer);
     }
 
     [Fact]
@@ -208,7 +210,7 @@ public sealed class EventSetupAcceptanceTests
     }
 
     [Fact]
-    public async Task Replacing_a_Camera_and_Cancel_both_release_the_owned_stream()
+    public async Task Replacing_a_Camera_and_discarding_the_dirty_draft_release_the_owned_stream()
     {
         var camera = new FakeCameraBoundary(
             new AvailableCamera("camera-1", "USB Camera", "Port 4"),
@@ -218,8 +220,10 @@ public sealed class EventSetupAcceptanceTests
         await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SelectCamera("camera-2"), TestContext.Current.CancellationToken);
 
-        var state = await orchestrator.ExecuteAsync(new CancelEventSetup(), TestContext.Current.CancellationToken);
+        var confirmation = await orchestrator.ExecuteAsync(new CancelEventSetup(), TestContext.Current.CancellationToken);
+        var state = await orchestrator.ExecuteAsync(new DiscardEventSetupDraft(), TestContext.Current.CancellationToken);
 
+        Assert.True(confirmation.Setup!.ShowsDiscardConfirmation);
         Assert.Null(state.Setup);
         Assert.Equal(2, camera.ReleaseCount);
     }
@@ -282,9 +286,19 @@ public sealed class EventSetupAcceptanceTests
 
         public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
-        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken)
+        public Task<EventSaveResult> SaveEventAtomicallyAsync(
+            EventConfiguration configuration,
+            EventSaveMode mode,
+            CancellationToken cancellationToken)
         {
+            SavedEvents.RemoveAll(saved => saved.Id == configuration.Id);
             SavedEvents.Add(configuration);
+            return Task.FromResult(EventSaveResult.Saved);
+        }
+
+        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken)
+        {
+            SavedEvents.RemoveAll(saved => saved.Id == eventId);
             return Task.CompletedTask;
         }
     }

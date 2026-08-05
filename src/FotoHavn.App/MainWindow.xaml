@@ -2,6 +2,7 @@
     x:Class="FotoHavn.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="using:FotoHavn.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -66,17 +67,20 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button
+                        <DataTemplate x:DataType="core:EventTilePresentation">
+                            <Border
                                 Width="344"
                                 Height="212"
                                 Margin="0,0,20,20"
-                                AutomationProperties.Name="{Binding Label}"
-                                Click="EventTileClicked"
-                                Style="{StaticResource EventTileButtonStyle}">
-                                <Grid Margin="26">
+                                Padding="26"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Border
@@ -85,23 +89,45 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
                                         Background="#FF17181A"
-                                        CornerRadius="24">
+                                        CornerRadius="24"
+                                        Visibility="{x:Bind ShowsCreate}">
                                         <TextBlock
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Foreground="White"
                                             FontSize="22"
-                                            Text="{Binding Glyph}" />
+                                            Text="{x:Bind Glyph}" />
                                     </Border>
                                     <StackPanel Grid.Row="1" Spacing="5">
-                                        <TextBlock FontSize="21" FontWeight="SemiBold" Text="{Binding Label}" />
+                                        <TextBlock
+                                            FontSize="21"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Label}"
+                                            TextWrapping="WrapWholeWords"
+                                            ToolTipService.ToolTip="{x:Bind Label}" />
                                         <TextBlock
                                             Foreground="{StaticResource TextMutedBrush}"
                                             FontSize="13"
-                                            Text="{Binding SupportingText}" />
+                                            Text="{x:Bind SupportingText}" />
+                                    </StackPanel>
+                                    <Button
+                                        Grid.RowSpan="3"
+                                        AutomationProperties.Name="{x:Bind Label}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Click="EventTileClicked"
+                                        Visibility="{x:Bind ShowsCreate}" />
+                                    <StackPanel
+                                        Grid.Row="2"
+                                        Margin="0,16,0,0"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <Button Content="Start" Click="StartSavedEventClicked" Visibility="{x:Bind ShowsStart}" />
+                                        <Button Content="Edit" Click="EditSavedEventClicked" Visibility="{x:Bind ShowsEdit}" />
+                                        <Button Content="Delete" Click="DeleteSavedEventClicked" Visibility="{x:Bind ShowsDelete}" />
                                     </StackPanel>
                                 </Grid>
-                            </Button>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -113,6 +139,7 @@
                 Background="#8A17181A"
                 Visibility="Collapsed">
                 <Border
+                    x:Name="SetupDialog"
                     Width="1100"
                     Height="640"
                     HorizontalAlignment="Center"
@@ -133,7 +160,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.ColumnSpan="3" Spacing="4">
-                            <TextBlock FontSize="28" FontWeight="SemiBold" Text="New Event" />
+                            <TextBlock x:Name="SetupTitleText" FontSize="28" FontWeight="SemiBold" Text="New Event" />
                             <TextBlock Foreground="{StaticResource TextMutedBrush}" Text="Choose the exact Camera for this Event." />
                         </StackPanel>
 
@@ -232,6 +259,31 @@
                         </Grid>
                     </Grid>
                 </Border>
+
+                <Grid
+                    x:Name="DiscardDraftLayer"
+                    Background="#B817181A"
+                    Visibility="Collapsed">
+                    <Border
+                        Width="430"
+                        Padding="28"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource SurfaceBrush}"
+                        CornerRadius="12">
+                        <StackPanel Spacing="18">
+                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Discard this draft?" />
+                            <TextBlock
+                                Foreground="{StaticResource TextMutedBrush}"
+                                Text="Your unsaved Event changes will be lost."
+                                TextWrapping="Wrap" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                                <Button Content="Keep Editing" Click="KeepEditingClicked" />
+                                <Button Content="Discard Draft" Click="DiscardDraftClicked" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

@@ -96,7 +96,12 @@ public sealed class LaunchAcceptanceTests
 
         public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
-        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventSaveResult> SaveEventAtomicallyAsync(
+            EventConfiguration configuration,
+            EventSaveMode mode,
+            CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
+
+        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     private sealed class StubCamera : ICameraBoundary
@@ -135,7 +140,12 @@ public sealed class LaunchAcceptanceTests
 
         public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
-        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventSaveResult> SaveEventAtomicallyAsync(
+            EventConfiguration configuration,
+            EventSaveMode mode,
+            CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
+
+        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
 

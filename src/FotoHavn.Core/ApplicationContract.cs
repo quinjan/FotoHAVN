@@ -20,9 +20,17 @@ public sealed record SelectNoPrinter : ApplicationCommand;
 
 public sealed record CancelEventSetup : ApplicationCommand;
 
+public sealed record KeepEditingEventSetup : ApplicationCommand;
+
+public sealed record DiscardEventSetupDraft : ApplicationCommand;
+
 public sealed record SaveAndCloseEventSetup : ApplicationCommand;
 
 public sealed record SaveAndStartEvent : ApplicationCommand;
+
+public sealed record StartSavedEvent(EventId EventId) : ApplicationCommand;
+
+public sealed record DeleteSavedEvent(EventId EventId) : ApplicationCommand;
 
 public enum EventTileKind
 {
@@ -36,7 +44,13 @@ public sealed record EventTilePresentation(
     string SupportingText,
     string Glyph,
     EventId? EventId = null,
-    DateTimeOffset? LastSavedAt = null);
+    DateTimeOffset? LastSavedAt = null)
+{
+    public bool ShowsCreate => Kind == EventTileKind.NewEvent;
+    public bool ShowsStart => Kind == EventTileKind.SavedEvent;
+    public bool ShowsEdit => Kind == EventTileKind.SavedEvent;
+    public bool ShowsDelete => Kind == EventTileKind.SavedEvent;
+}
 
 public sealed record ApplicationPresentation(
     string Heading,
@@ -86,8 +100,14 @@ public sealed record EventConfiguration(
     EventId Id,
     string Name,
     CameraBinding Camera,
-    string? PrinterId,
+    PrinterChoice Printer,
+    DateTimeOffset CreatedAt,
     DateTimeOffset LastSavedAt);
+
+public enum PrinterChoice
+{
+    NoPrinter,
+}
 
 public readonly record struct EventId
 {
@@ -158,7 +178,11 @@ public sealed record EventSetupPresentation(
     CameraPreviewPresentation Preview,
     bool IsNoPrinterSelected,
     bool IsStorageReady,
-    bool CanSave);
+    bool CanSave,
+    EventId? EventId = null,
+    bool IsDirty = false,
+    bool ShowsDiscardConfirmation = false,
+    string Title = "New Event");
 
 public sealed record ActiveEventPresentation(
     EventId Id,
@@ -208,6 +232,28 @@ public interface IApplicationClock
     Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken);
 }
 
+public interface IEventIdentityGenerator
+{
+    EventId Create();
+}
+
+public sealed class UuidV7EventIdentityGenerator : IEventIdentityGenerator
+{
+    public EventId Create() => new(Guid.CreateVersion7().ToString());
+}
+
+public enum EventSaveMode
+{
+    CreateNew,
+    UpdateExisting,
+}
+
+public enum EventSaveResult
+{
+    Saved,
+    IdentityCollision,
+}
+
 public interface IEventFileSystem
 {
     Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken);
@@ -216,7 +262,12 @@ public interface IEventFileSystem
 
     Task<bool> ProbeStorageAsync(CancellationToken cancellationToken);
 
-    Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken);
+    Task<EventSaveResult> SaveEventAtomicallyAsync(
+        EventConfiguration configuration,
+        EventSaveMode mode,
+        CancellationToken cancellationToken);
+
+    Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken);
 }
 
 public static class MotionPolicy

@@ -58,6 +58,30 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void StartSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new StartSavedEvent(eventId));
+        }
+    }
+
+    private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new OpenSavedEvent(eventId));
+        }
+    }
+
+    private async void DeleteSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new DeleteSavedEvent(eventId));
+        }
+    }
+
     private async void EventNameTextChanged(object sender, TextChangedEventArgs args)
     {
         if (!applyingPresentation)
@@ -92,6 +116,12 @@ public sealed partial class MainWindow : Window
     private async void CancelSetupClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelEventSetup());
 
+    private async void KeepEditingClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new KeepEditingEventSetup());
+
+    private async void DiscardDraftClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new DiscardEventSetupDraft());
+
     private async void SaveCloseClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new SaveAndCloseEventSetup());
 
@@ -100,6 +130,12 @@ public sealed partial class MainWindow : Window
 
     private async void SetupLayerKeyDown(object sender, KeyRoutedEventArgs args)
     {
+        if (orchestrator.CurrentPresentation.Setup?.ShowsDiscardConfirmation == true)
+        {
+            args.Handled = true;
+            return;
+        }
+
         if (args.Key == Windows.System.VirtualKey.Escape)
         {
             if (CameraFlyout.IsOpen)
@@ -124,8 +160,14 @@ public sealed partial class MainWindow : Window
         applyingPresentation = true;
         try
         {
+            HeadingText.Text = presentation.Heading;
+            EventTiles.ItemsSource = presentation.EventTiles;
             var setup = presentation.Setup;
             SetupLayer.Visibility = setup is null ? Visibility.Collapsed : Visibility.Visible;
+            DiscardDraftLayer.Visibility = setup?.ShowsDiscardConfirmation == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SetupDialog.IsHitTestVisible = setup?.ShowsDiscardConfirmation != true;
             if (setup is null)
             {
                 PreviewImage.Source = null;
@@ -136,6 +178,8 @@ public sealed partial class MainWindow : Window
             {
                 EventNameTextBox.Text = setup.EventName;
             }
+
+            SetupTitleText.Text = setup.Title;
 
             CameraList.ItemsSource = setup.AvailableCameras;
             CameraMenuButtonText.Text = setup.SelectedCamera?.DisplayName ?? "Select Camera";
