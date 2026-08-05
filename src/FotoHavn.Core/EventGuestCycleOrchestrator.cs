@@ -3,6 +3,7 @@ namespace FotoHavn.Core;
 public sealed class EventGuestCycleOrchestrator
 {
     private readonly IEventFileSystem fileSystem;
+    private readonly IEventIdentityGenerator identityGenerator;
     private readonly object presentationLock = new();
     private readonly SemaphoreSlim commandGate = new(1, 1);
     private EventSetupDraft? setup;
@@ -12,12 +13,14 @@ public sealed class EventGuestCycleOrchestrator
         IEventFileSystem fileSystem,
         ICameraBoundary camera,
         IPhotoStripCompositor compositor,
-        IApplicationClock clock)
+        IApplicationClock clock,
+        IEventIdentityGenerator? identityGenerator = null)
     {
         this.fileSystem = fileSystem;
         Camera = camera;
         Compositor = compositor;
         Clock = clock;
+        this.identityGenerator = identityGenerator ?? new UuidV7EventIdentityGenerator();
         Camera.AvailableCamerasChanged += OnAvailableCamerasChanged;
     }
 
@@ -49,6 +52,12 @@ public sealed class EventGuestCycleOrchestrator
 
         try
         {
+            if (setup?.ShowsDiscardConfirmation == true &&
+                command is not KeepEditingEventSetup and not DiscardEventSetupDraft)
+            {
+                return CurrentPresentation;
+            }
+
             var presentation = command switch
             {
                 LaunchApplication => await LaunchAsync(cancellationToken).ConfigureAwait(false),
@@ -61,8 +70,12 @@ public sealed class EventGuestCycleOrchestrator
                 SelectCamera select => await SelectCameraAsync(select.DeviceId, cancellationToken).ConfigureAwait(false),
                 SelectNoPrinter => PublishSetup(setup!.WithNoPrinterSelected()),
                 CancelEventSetup => await CloseSetupAsync(releaseCamera: true, cancellationToken).ConfigureAwait(false),
+                KeepEditingEventSetup when setup is not null => PublishSetup(setup with { ShowsDiscardConfirmation = false }),
+                DiscardEventSetupDraft => await CloseSetupAsync(releaseCamera: true, cancellationToken, force: true).ConfigureAwait(false),
                 SaveAndCloseEventSetup => await SaveSetupAsync(startEvent: false, cancellationToken).ConfigureAwait(false),
                 SaveAndStartEvent => await SaveSetupAsync(startEvent: true, cancellationToken).ConfigureAwait(false),
+                StartSavedEvent start => await StartSavedEventAsync(start.EventId, cancellationToken).ConfigureAwait(false),
+                DeleteSavedEvent delete => await DeleteSavedEventAsync(delete.EventId, cancellationToken).ConfigureAwait(false),
                 _ => throw new ArgumentOutOfRangeException(nameof(command), command, "Unknown application command."),
             };
 
@@ -79,7 +92,7 @@ public sealed class EventGuestCycleOrchestrator
         var savedEvents = await fileSystem.LoadEventsAsync(cancellationToken).ConfigureAwait(false);
         var tiles = new List<EventTilePresentation>(savedEvents.Count + 1)
         {
-            new(EventTileKind.NewEvent, "New Event", "Set up a booth Event", "＋"),
+            new(EventTileKind.NewEvent, "New Event", "Set up a new booth run", "＋"),
         };
 
         tiles.AddRange(savedEvents
@@ -87,7 +100,7 @@ public sealed class EventGuestCycleOrchestrator
             .Select(savedEvent => new EventTilePresentation(
                 EventTileKind.SavedEvent,
                 savedEvent.Name,
-                $"Last saved {savedEvent.LastSavedAt.ToLocalTime():g}",
+                FormatSavedAt(savedEvent.LastSavedAt),
                 "▶",
                 savedEvent.Id,
                 savedEvent.LastSavedAt)));
@@ -105,17 +118,8 @@ public sealed class EventGuestCycleOrchestrator
 
     private async Task<ApplicationPresentation> OpenSavedEventAsync(EventId eventId, CancellationToken cancellationToken)
     {
-        var configuration = await fileSystem.LoadEventAsync(eventId, cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"Event '{eventId}' was not found.");
-        await Camera.StartDiscoveryAsync(cancellationToken).ConfigureAwait(false);
-        var storageReady = await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false);
-        var available = Camera.AvailableCameras.FirstOrDefault(camera => camera.DeviceId == configuration.Camera.DeviceId);
-        var selected = available ?? new AvailableCamera(
-            configuration.Camera.DeviceId,
-            configuration.Camera.DisplayName,
-            configuration.Camera.DeviceId.Value,
-            CameraAvailability.Unavailable);
-        setup = EventSetupDraft.From(configuration, selected, storageReady);
+        var savedEvent = await DiscoverSavedEventAsync(eventId, cancellationToken).ConfigureAwait(false);
+        setup = await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false);
         return PublishSetup(setup);
     }
 
@@ -136,15 +140,7 @@ public sealed class EventGuestCycleOrchestrator
             result = CameraOpenResult.Disconnected;
         }
 
-        var state = result switch
-        {
-            CameraOpenResult.Ready => CameraConnectionState.Ready,
-            CameraOpenResult.Unavailable => CameraConnectionState.Unavailable,
-            CameraOpenResult.AccessDenied => CameraConnectionState.AccessDenied,
-            CameraOpenResult.InUse => CameraConnectionState.InUseByAnotherApp,
-            CameraOpenResult.Disconnected => CameraConnectionState.Disconnected,
-            _ => throw new ArgumentOutOfRangeException(nameof(result), result, null),
-        };
+        var state = ToConnectionState(result);
         return PublishSetup(setup.WithCameraState(state));
     }
 
@@ -156,13 +152,30 @@ public sealed class EventGuestCycleOrchestrator
             throw new InvalidOperationException("Event setup is not ready to save.");
         }
 
-        var configuration = new EventConfiguration(
-            draft.EventId,
-            draft.EventName.Trim(),
-            new CameraBinding(draft.SelectedCamera!.DeviceId, draft.SelectedCamera.DisplayName),
-            PrinterId: null,
-            Clock.UtcNow);
-        await fileSystem.SaveEventAsync(configuration, cancellationToken).ConfigureAwait(false);
+        var lastSavedAt = Clock.UtcNow.ToUniversalTime();
+        var mode = draft.EventId is null ? EventSaveMode.CreateNew : EventSaveMode.UpdateExisting;
+        EventConfiguration configuration;
+        while (true)
+        {
+            var eventId = draft.EventId ?? identityGenerator.Create();
+            configuration = new EventConfiguration(
+                eventId,
+                draft.EventName.Trim(),
+                new CameraBinding(draft.SelectedCamera!.DeviceId, draft.SelectedCamera.DisplayName),
+                PrinterChoice.NoPrinter,
+                draft.CreatedAt ?? lastSavedAt,
+                lastSavedAt);
+            var result = await fileSystem.SaveEventAtomicallyAsync(configuration, mode, cancellationToken).ConfigureAwait(false);
+            if (result == EventSaveResult.Saved)
+            {
+                break;
+            }
+
+            if (mode != EventSaveMode.CreateNew)
+            {
+                throw new IOException($"The existing Event '{eventId}' could not be saved.");
+            }
+        }
 
         if (startEvent)
         {
@@ -175,12 +188,20 @@ public sealed class EventGuestCycleOrchestrator
             });
         }
 
-        await CloseSetupAsync(releaseCamera: true, cancellationToken).ConfigureAwait(false);
+        await CloseSetupAsync(releaseCamera: true, cancellationToken, force: true).ConfigureAwait(false);
         return await LaunchAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<ApplicationPresentation> CloseSetupAsync(bool releaseCamera, CancellationToken cancellationToken)
+    private async Task<ApplicationPresentation> CloseSetupAsync(
+        bool releaseCamera,
+        CancellationToken cancellationToken,
+        bool force = false)
     {
+        if (!force && setup is { IsDirty: true, ShowsDiscardConfirmation: false })
+        {
+            return PublishSetup(setup with { ShowsDiscardConfirmation = true });
+        }
+
         if (releaseCamera && setup?.SelectedCamera is not null)
         {
             await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
@@ -188,6 +209,67 @@ public sealed class EventGuestCycleOrchestrator
 
         setup = null;
         return Publish(CurrentPresentation with { Setup = null });
+    }
+
+    private async Task<ApplicationPresentation> DeleteSavedEventAsync(EventId eventId, CancellationToken cancellationToken)
+    {
+        await fileSystem.DeleteEventAsync(eventId, cancellationToken).ConfigureAwait(false);
+        return await LaunchAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApplicationPresentation> StartSavedEventAsync(EventId eventId, CancellationToken cancellationToken)
+    {
+        var savedEvent = await DiscoverSavedEventAsync(eventId, cancellationToken).ConfigureAwait(false);
+        if (savedEvent.AvailableCamera is null)
+        {
+            setup = await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false);
+            return PublishSetup(setup);
+        }
+
+        var result = await Camera.OpenAsync(savedEvent.Configuration.Camera.DeviceId, cancellationToken).ConfigureAwait(false);
+        if (result != CameraOpenResult.Ready || Camera.StreamId is not { } streamId)
+        {
+            var state = result == CameraOpenResult.Ready
+                ? CameraConnectionState.Disconnected
+                : ToConnectionState(result);
+            setup = (await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false))
+                .WithCameraState(state);
+            return PublishSetup(setup);
+        }
+
+        return Publish(CurrentPresentation with
+        {
+            Setup = null,
+            ActiveEvent = new ActiveEventPresentation(
+                savedEvent.Configuration.Id,
+                savedEvent.Configuration.Name,
+                savedEvent.Configuration.Camera,
+                streamId),
+        });
+    }
+
+    private async Task<SavedEventDiscovery> DiscoverSavedEventAsync(
+        EventId eventId,
+        CancellationToken cancellationToken)
+    {
+        var configuration = await fileSystem.LoadEventAsync(eventId, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Event '{eventId}' was not found.");
+        await Camera.StartDiscoveryAsync(cancellationToken).ConfigureAwait(false);
+        var available = Camera.AvailableCameras.FirstOrDefault(camera => camera.DeviceId == configuration.Camera.DeviceId);
+        return new SavedEventDiscovery(configuration, available);
+    }
+
+    private async Task<EventSetupDraft> CreateSavedEventDraftAsync(
+        SavedEventDiscovery savedEvent,
+        CancellationToken cancellationToken)
+    {
+        var storageReady = await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false);
+        var selected = savedEvent.AvailableCamera ?? new AvailableCamera(
+            savedEvent.Configuration.Camera.DeviceId,
+            savedEvent.Configuration.Camera.DisplayName,
+            savedEvent.Configuration.Camera.DeviceId.Value,
+            CameraAvailability.Unavailable);
+        return EventSetupDraft.From(savedEvent.Configuration, selected, storageReady);
     }
 
     private void OnAvailableCamerasChanged(object? sender, EventArgs args)
@@ -231,7 +313,11 @@ public sealed class EventGuestCycleOrchestrator
                 UsesSelectedCameraStream: true),
             draft.NoPrinterSelected,
             draft.StorageReady,
-            draft.CanSave);
+            draft.CanSave,
+            draft.EventId,
+            draft.IsDirty,
+            draft.ShowsDiscardConfirmation,
+            draft.EventId is null ? "New Event" : "Edit Event");
         return Publish(CurrentPresentation with { Setup = presentation });
     }
 
@@ -258,21 +344,43 @@ public sealed class EventGuestCycleOrchestrator
             .ToArray();
     }
 
+    private static CameraConnectionState ToConnectionState(CameraOpenResult result) => result switch
+    {
+        CameraOpenResult.Ready => CameraConnectionState.Ready,
+        CameraOpenResult.Unavailable => CameraConnectionState.Unavailable,
+        CameraOpenResult.AccessDenied => CameraConnectionState.AccessDenied,
+        CameraOpenResult.InUse => CameraConnectionState.InUseByAnotherApp,
+        CameraOpenResult.Disconnected => CameraConnectionState.Disconnected,
+        _ => throw new ArgumentOutOfRangeException(nameof(result), result, null),
+    };
+
     private static ApplicationPresentation CreateSavedEventsPresentation(IReadOnlyList<EventTilePresentation> tiles) =>
         new(
-            "Saved Events",
+            "Choose an Event",
             tiles,
             EmptyStateMessage: null,
             new ApplicationCanvasPresentation(1280, 720, AllowsReflow: false));
 
+    private string FormatSavedAt(DateTimeOffset savedAt)
+    {
+        var localSavedAt = savedAt.ToLocalTime();
+        var localToday = Clock.UtcNow.ToLocalTime().Date;
+        return localSavedAt.Date == localToday
+            ? $"Saved today, {localSavedAt:h:mm tt}"
+            : $"Saved {localSavedAt:MMM d, yyyy, h:mm tt}";
+    }
+
     private sealed record EventSetupDraft(
-        EventId EventId,
+        EventId? EventId,
         string EventName,
         AvailableCamera? SelectedCamera,
         CameraConnectionState CameraState,
         bool CameraMenuOpen,
         bool NoPrinterSelected,
-        bool StorageReady)
+        bool StorageReady,
+        DateTimeOffset? CreatedAt,
+        EventDraftBaseline Baseline,
+        bool ShowsDiscardConfirmation)
     {
         public bool CanSave =>
             !string.IsNullOrWhiteSpace(EventName) &&
@@ -280,8 +388,16 @@ public sealed class EventGuestCycleOrchestrator
             NoPrinterSelected &&
             StorageReady;
 
+        public bool IsDirty =>
+            !string.Equals(EventName, Baseline.Name, StringComparison.Ordinal) ||
+            SelectedCamera is { } selected &&
+                new CameraBinding(selected.DeviceId, selected.DisplayName) != Baseline.Camera ||
+            SelectedCamera is null && Baseline.Camera is not null ||
+            NoPrinterSelected != Baseline.NoPrinterSelected;
+
         public static EventSetupDraft New(bool storageReady) =>
-            new(new EventId(Guid.NewGuid().ToString("N")), string.Empty, null, CameraConnectionState.NotSelected, false, false, storageReady);
+            new(null, string.Empty, null, CameraConnectionState.NotSelected, false, false, storageReady,
+                null, EventDraftBaseline.Empty, false);
 
         public static EventSetupDraft From(EventConfiguration configuration, AvailableCamera camera, bool storageReady) =>
             new(
@@ -290,8 +406,14 @@ public sealed class EventGuestCycleOrchestrator
                 camera,
                 camera.Availability == CameraAvailability.Available ? CameraConnectionState.NotSelected : CameraConnectionState.Unavailable,
                 false,
-                configuration.PrinterId is null,
-                storageReady);
+                configuration.Printer == PrinterChoice.NoPrinter,
+                storageReady,
+                configuration.CreatedAt,
+                new EventDraftBaseline(
+                    configuration.Name,
+                    configuration.Camera,
+                    configuration.Printer == PrinterChoice.NoPrinter),
+                false);
 
         public EventSetupDraft WithName(string name) => this with { EventName = name };
         public EventSetupDraft WithCameraMenuOpen(bool isOpen) => this with { CameraMenuOpen = isOpen };
@@ -300,4 +422,13 @@ public sealed class EventGuestCycleOrchestrator
         public EventSetupDraft WithCameraState(CameraConnectionState state) => this with { CameraState = state };
         public EventSetupDraft WithNoPrinterSelected() => this with { NoPrinterSelected = true };
     }
+
+    private sealed record EventDraftBaseline(string Name, CameraBinding? Camera, bool NoPrinterSelected)
+    {
+        public static EventDraftBaseline Empty { get; } = new(string.Empty, null, false);
+    }
+
+    private sealed record SavedEventDiscovery(
+        EventConfiguration Configuration,
+        AvailableCamera? AvailableCamera);
 }

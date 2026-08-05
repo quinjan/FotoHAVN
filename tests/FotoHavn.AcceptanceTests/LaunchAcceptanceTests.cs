@@ -14,7 +14,7 @@ public sealed class LaunchAcceptanceTests
             new LaunchApplication(),
             TestContext.Current.CancellationToken);
 
-        Assert.Equal("Saved Events", state.Heading);
+        Assert.Equal("Choose an Event", state.Heading);
         var tile = Assert.Single(state.EventTiles);
         Assert.Equal("New Event", tile.Label);
         Assert.Equal(EventTileKind.NewEvent, tile.Kind);
@@ -96,7 +96,12 @@ public sealed class LaunchAcceptanceTests
 
         public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
-        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventSaveResult> SaveEventAtomicallyAsync(
+            EventConfiguration configuration,
+            EventSaveMode mode,
+            CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
+
+        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     private sealed class StubCamera : ICameraBoundary
@@ -135,7 +140,12 @@ public sealed class LaunchAcceptanceTests
 
         public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
-        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventSaveResult> SaveEventAtomicallyAsync(
+            EventConfiguration configuration,
+            EventSaveMode mode,
+            CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
+
+        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
 

@@ -14,6 +14,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly EventGuestCycleOrchestrator orchestrator;
     private readonly CameraBoundary camera;
+    private readonly HashSet<Border> hoveredEventCards = [];
     private ApplicationCanvasPresentation? canvas;
     private bool applyingPresentation;
 
@@ -58,6 +59,119 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void StartSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new StartSavedEvent(eventId));
+        }
+    }
+
+    private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new OpenSavedEvent(eventId));
+        }
+    }
+
+    private async void DeleteSavedEventClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new DeleteSavedEvent(eventId));
+        }
+    }
+
+    private void SavedEventCardPointerEntered(object sender, PointerRoutedEventArgs args)
+    {
+        if (sender is Border card)
+        {
+            hoveredEventCards.Add(card);
+            ApplySavedEventCardState(card, isActive: true);
+        }
+    }
+
+    private void SavedEventCardPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        if (sender is Border card)
+        {
+            hoveredEventCards.Remove(card);
+            if (FindNamedDescendant<Button>(card, "StartEventButton") is not { FocusState: not FocusState.Unfocused })
+            {
+                ApplySavedEventCardState(card, isActive: false);
+            }
+        }
+    }
+
+    private void StartEventButtonGotFocus(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button && FindAncestor<Border>(button, "SavedEventCard") is { } card)
+        {
+            ApplySavedEventCardState(card, isActive: true);
+        }
+    }
+
+    private void StartEventButtonLostFocus(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button &&
+            FindAncestor<Border>(button, "SavedEventCard") is { } card &&
+            !hoveredEventCards.Contains(card))
+        {
+            ApplySavedEventCardState(card, isActive: false);
+        }
+    }
+
+    private static void ApplySavedEventCardState(Border card, bool isActive)
+    {
+        if (FindNamedDescendant<Button>(card, "StartEventButton") is { } startButton)
+        {
+            startButton.Opacity = isActive ? 1 : 0;
+        }
+
+        if (FindNamedDescendant<StackPanel>(card, "SavedEventMetadata") is { } metadata)
+        {
+            metadata.Opacity = isActive ? 0.16 : 1;
+        }
+
+        card.Background = (Brush)Application.Current.Resources[
+            isActive ? "EventHoverBrush" : "SurfaceBrush"];
+    }
+
+    private static T? FindNamedDescendant<T>(DependencyObject root, string name)
+        where T : FrameworkElement
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            var child = VisualTreeHelper.GetChild(root, index);
+            if (child is T { Name: var childName } match && childName == name)
+            {
+                return match;
+            }
+
+            if (FindNamedDescendant<T>(child, name) is { } descendant)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
+    }
+
+    private static T? FindAncestor<T>(DependencyObject child, string name)
+        where T : FrameworkElement
+    {
+        for (var current = VisualTreeHelper.GetParent(child); current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is T { Name: var currentName } match && currentName == name)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
     private async void EventNameTextChanged(object sender, TextChangedEventArgs args)
     {
         if (!applyingPresentation)
@@ -92,6 +206,12 @@ public sealed partial class MainWindow : Window
     private async void CancelSetupClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelEventSetup());
 
+    private async void KeepEditingClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new KeepEditingEventSetup());
+
+    private async void DiscardDraftClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new DiscardEventSetupDraft());
+
     private async void SaveCloseClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new SaveAndCloseEventSetup());
 
@@ -100,6 +220,12 @@ public sealed partial class MainWindow : Window
 
     private async void SetupLayerKeyDown(object sender, KeyRoutedEventArgs args)
     {
+        if (orchestrator.CurrentPresentation.Setup?.ShowsDiscardConfirmation == true)
+        {
+            args.Handled = true;
+            return;
+        }
+
         if (args.Key == Windows.System.VirtualKey.Escape)
         {
             if (CameraFlyout.IsOpen)
@@ -124,8 +250,14 @@ public sealed partial class MainWindow : Window
         applyingPresentation = true;
         try
         {
+            HeadingText.Text = presentation.Heading;
+            EventTiles.ItemsSource = presentation.EventTiles;
             var setup = presentation.Setup;
             SetupLayer.Visibility = setup is null ? Visibility.Collapsed : Visibility.Visible;
+            DiscardDraftLayer.Visibility = setup?.ShowsDiscardConfirmation == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SetupDialog.IsHitTestVisible = setup?.ShowsDiscardConfirmation != true;
             if (setup is null)
             {
                 PreviewImage.Source = null;
@@ -136,6 +268,8 @@ public sealed partial class MainWindow : Window
             {
                 EventNameTextBox.Text = setup.EventName;
             }
+
+            SetupTitleText.Text = setup.Title;
 
             CameraList.ItemsSource = setup.AvailableCameras;
             CameraMenuButtonText.Text = setup.SelectedCamera?.DisplayName ?? "Select Camera";
