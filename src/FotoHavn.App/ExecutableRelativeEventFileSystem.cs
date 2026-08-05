@@ -1,14 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Security.Cryptography;
 using FotoHavn.Core;
 using Windows.Graphics.Imaging;
-using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace FotoHavn.App;
 
 internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
 {
     private const int CurrentRecordVersion = 1;
+    private const int CurrentGuestCycleVersion = 2;
     private const int CurrentQuarantineVersion = 1;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
@@ -339,12 +341,13 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
             await SaveGuestCycleManifestAsync(
                 guestCycleDirectory,
                 new GuestCycleManifest(
-                    CurrentRecordVersion,
+                    CurrentGuestCycleVersion,
                     guestCycleId.Value,
                     startedAt,
                     CompletedAt: null,
                     Captures: [],
-                    PhotoStrip: null),
+                    PhotoStrip: null,
+                    Interruptions: []),
                 cancellationToken).ConfigureAwait(false);
             return GuestCycleCreateResult.Created;
         }
@@ -375,7 +378,7 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         if (File.Exists(canonicalPath))
         {
             var interruptedManifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
-            if (interruptedManifest.Captures.Contains(canonicalName, StringComparer.Ordinal) ||
+            if (interruptedManifest.Captures.Any(capture => capture.FileName == canonicalName) ||
                 !await ValidateImageAsync(
                     canonicalPath,
                     BitmapDecoder.JpegDecoderId,
@@ -385,11 +388,17 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
                 return new CaptureCommitResult(false, new CaptureReference(canonicalPath));
             }
 
+            var existingCapture = await CreateCaptureArtifactAsync(
+                canonicalPath,
+                canonicalName,
+                frame.Width,
+                frame.Height,
+                cancellationToken).ConfigureAwait(false);
             await SaveGuestCycleManifestAsync(
                 guestCycleDirectory,
-                interruptedManifest with { Captures = [.. interruptedManifest.Captures, canonicalName] },
+                interruptedManifest with { Captures = [.. interruptedManifest.Captures, existingCapture] },
                 cancellationToken).ConfigureAwait(false);
-            return new CaptureCommitResult(true, new CaptureReference(canonicalPath));
+            return new CaptureCommitResult(true, existingCapture.ToReference(canonicalPath));
         }
 
         var committed = await CommitValidatedImageAsync(
@@ -406,11 +415,112 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         }
 
         var manifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
+        var capture = await CreateCaptureArtifactAsync(
+            canonicalPath,
+            canonicalName,
+            frame.Width,
+            frame.Height,
+            cancellationToken).ConfigureAwait(false);
         await SaveGuestCycleManifestAsync(
             guestCycleDirectory,
-            manifest with { Captures = [.. manifest.Captures, canonicalName] },
+            manifest with { Captures = [.. manifest.Captures, capture] },
             cancellationToken).ConfigureAwait(false);
-        return new CaptureCommitResult(true, new CaptureReference(canonicalPath));
+        return new CaptureCommitResult(true, capture.ToReference(canonicalPath));
+    }
+
+    public async Task RecordGuestCycleInterruptionAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        GuestCycleInterruption interruption,
+        CancellationToken cancellationToken)
+    {
+        var guestCycleDirectory = GetGuestCycleDirectory(eventId, guestCycleId);
+        var manifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
+        if (manifest.Version != CurrentGuestCycleVersion ||
+            manifest.Id != guestCycleId.Value ||
+            manifest.CompletedAt is not null ||
+            manifest.Captures.Count != interruption.CompletedCaptures)
+        {
+            throw new InvalidDataException("The interrupted Guest Cycle checkpoint does not match its durable manifest.");
+        }
+
+        if (manifest.Interruptions.LastOrDefault() != interruption)
+        {
+            await SaveGuestCycleManifestAsync(
+                guestCycleDirectory,
+                manifest with { Interruptions = [.. manifest.Interruptions, interruption] },
+                cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    public async Task<GuestCycleRetryValidation> PrepareGuestCycleRetryAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        IReadOnlyList<CaptureReference> completedCaptures,
+        CancellationToken cancellationToken)
+    {
+        var guestCycleDirectory = GetGuestCycleDirectory(eventId, guestCycleId);
+        if (!Directory.Exists(guestCycleDirectory))
+        {
+            return GuestCycleRetryValidation.Unrecoverable;
+        }
+
+        GuestCycleManifest manifest;
+        try
+        {
+            manifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or JsonException)
+        {
+            return GuestCycleRetryValidation.Unrecoverable;
+        }
+
+        if (manifest.Version != CurrentGuestCycleVersion ||
+            manifest.Id != guestCycleId.Value ||
+            manifest.CompletedAt is not null ||
+            manifest.Captures.Count != completedCaptures.Count ||
+            manifest.Interruptions.LastOrDefault()?.CompletedCaptures != completedCaptures.Count)
+        {
+            return GuestCycleRetryValidation.Unrecoverable;
+        }
+
+        for (var index = 0; index < manifest.Captures.Count; index++)
+        {
+            var artifact = manifest.Captures[index];
+            var expectedName = $"capture-{index + 1}.jpg";
+            var path = Path.Combine(guestCycleDirectory, expectedName);
+            var inProcess = completedCaptures[index];
+            if (artifact.FileName != expectedName ||
+                !Path.GetFullPath(inProcess.ArtifactPath).Equals(Path.GetFullPath(path), StringComparison.OrdinalIgnoreCase) ||
+                artifact.ByteLength != inProcess.ByteLength ||
+                artifact.Sha256 != inProcess.Sha256 ||
+                artifact.Width != inProcess.Width ||
+                artifact.Height != inProcess.Height ||
+                !File.Exists(path))
+            {
+                return GuestCycleRetryValidation.Unrecoverable;
+            }
+
+            var bytes = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
+            if (bytes.LongLength != artifact.ByteLength ||
+                !CreateSha256(bytes).Equals(artifact.Sha256, StringComparison.Ordinal) ||
+                !await ValidateImageAsync(
+                    path,
+                    BitmapDecoder.JpegDecoderId,
+                    artifact.Width,
+                    artifact.Height).ConfigureAwait(false))
+            {
+                return GuestCycleRetryValidation.Unrecoverable;
+            }
+        }
+
+        var nextCaptureName = $"capture-{completedCaptures.Count + 1}.jpg";
+        if (File.Exists(Path.Combine(guestCycleDirectory, nextCaptureName)))
+        {
+            return GuestCycleRetryValidation.Unrecoverable;
+        }
+
+        return GuestCycleRetryValidation.Ready;
     }
 
     public async Task<PhotoStripCommitResult> CommitPhotoStripAsync(
@@ -538,6 +648,25 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         }
     }
 
+    private static async Task<CaptureArtifactManifest> CreateCaptureArtifactAsync(
+        string canonicalPath,
+        string canonicalName,
+        int width,
+        int height,
+        CancellationToken cancellationToken)
+    {
+        var bytes = await File.ReadAllBytesAsync(canonicalPath, cancellationToken).ConfigureAwait(false);
+        return new CaptureArtifactManifest(
+            canonicalName,
+            bytes.LongLength,
+            CreateSha256(bytes),
+            width,
+            height);
+    }
+
+    private static string CreateSha256(ReadOnlySpan<byte> bytes) =>
+        Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+
     private static async Task<bool> ValidateImageAsync(
         string path,
         Guid expectedCodecId,
@@ -546,8 +675,15 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(path);
-            using var imageStream = await file.OpenReadAsync();
+            var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
+            using var imageStream = new InMemoryRandomAccessStream();
+            using (var writer = new DataWriter(imageStream))
+            {
+                writer.WriteBytes(bytes);
+                await writer.StoreAsync();
+                writer.DetachStream();
+            }
+            imageStream.Seek(0);
             var decoder = await BitmapDecoder.CreateAsync(imageStream);
             return decoder.DecoderInformation.CodecId == expectedCodecId &&
                 decoder.PixelWidth == expectedWidth &&
@@ -567,9 +703,16 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         string guestCycleDirectory,
         CancellationToken cancellationToken)
     {
-        await using var stream = File.OpenRead(Path.Combine(guestCycleDirectory, "guest-cycle.json"));
-        return await JsonSerializer.DeserializeAsync<GuestCycleManifest>(stream, JsonOptions, cancellationToken)
-            ?? throw new InvalidDataException("The Guest Cycle manifest is invalid.");
+        try
+        {
+            await using var stream = File.OpenRead(Path.Combine(guestCycleDirectory, "guest-cycle.json"));
+            return await JsonSerializer.DeserializeAsync<GuestCycleManifest>(stream, JsonOptions, cancellationToken)
+                ?? throw new InvalidDataException("The Guest Cycle manifest is invalid.");
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidDataException("The Guest Cycle manifest is invalid.", exception);
+        }
     }
 
     private static async Task SaveGuestCycleManifestAsync(
@@ -688,6 +831,18 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         string Id,
         DateTimeOffset StartedAt,
         DateTimeOffset? CompletedAt,
-        IReadOnlyList<string> Captures,
-        string? PhotoStrip);
+        IReadOnlyList<CaptureArtifactManifest> Captures,
+        string? PhotoStrip,
+        IReadOnlyList<GuestCycleInterruption> Interruptions);
+
+    private sealed record CaptureArtifactManifest(
+        string FileName,
+        long ByteLength,
+        string Sha256,
+        int Width,
+        int Height)
+    {
+        public CaptureReference ToReference(string artifactPath) =>
+            new(artifactPath, ByteLength, Sha256, Width, Height);
+    }
 }
