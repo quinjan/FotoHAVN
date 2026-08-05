@@ -6,6 +6,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI;
+using Windows.Storage;
 using Windows.Graphics.Imaging;
 using Windows.Graphics;
 
@@ -18,6 +21,9 @@ public sealed partial class MainWindow : Window
     private readonly HashSet<Border> hoveredEventCards = [];
     private ApplicationCanvasPresentation? canvas;
     private bool applyingPresentation;
+    private string? loadingPhotoStripPath;
+    private bool photoStripVisibleSignaled;
+    private bool photoStripFadeStarted;
 
     public MainWindow(EventGuestCycleOrchestrator orchestrator, CameraBoundary camera)
     {
@@ -86,8 +92,8 @@ public sealed partial class MainWindow : Window
     private async void StartGuestCycleClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new StartGuestCycle());
 
-    private async void RetryGuestStartClicked(object sender, RoutedEventArgs args) =>
-        await ExecuteAsync(new RetryGuestStartReadiness());
+    private async void RetryGuestCycleClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new RetryGuestCycle());
 
     private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
     {
@@ -288,25 +294,10 @@ public sealed partial class MainWindow : Window
             StartEventConfirmationText.Text = presentation.StartEventConfirmation?.Prompt ?? string.Empty;
             if (activeEvent is not null)
             {
-                ActiveEventNameText.Text = activeEvent.Name;
+                ActiveEventNameText.Text = activeEvent.Name.ToUpperInvariant();
                 ActiveEventHeadingText.Text = activeEvent.Heading;
                 ActiveEventExplanationText.Text = activeEvent.Explanation;
-                StartGuestCycleButton.Content = activeEvent.StartActionLabel;
-                StartGuestCycleButton.IsEnabled = activeEvent.GuestStart.IsStartEnabled;
-                GuestStartAssistancePanel.Visibility = activeEvent.GuestStart.StatusMessage is null
-                    ? Visibility.Collapsed
-                    : Visibility.Visible;
-                GuestStartStatusText.Text = activeEvent.GuestStart.StatusMessage ?? string.Empty;
-                RetryGuestStartButton.Content = activeEvent.GuestStart.RetryActionLabel;
-                RetryGuestStartButton.Visibility = activeEvent.GuestStart.ShowsRetry
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-                GuestStartCorrectionText.Text = activeEvent.GuestStart.RequiresEventSetupCorrection
-                    ? "Exit Event and correct the Camera Binding in Event setup."
-                    : string.Empty;
-                GuestStartCorrectionText.Visibility = activeEvent.GuestStart.RequiresEventSetupCorrection
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
+                ApplyGuestCyclePresentation(activeEvent.GuestCycle);
             }
 
             var setup = presentation.Setup;
@@ -384,7 +375,11 @@ public sealed partial class MainWindow : Window
 
     private void PreviewFrameAvailable(object? sender, SoftwareBitmap bitmap)
     {
-        if (orchestrator.CurrentPresentation.Setup is null)
+        var presentation = orchestrator.CurrentPresentation;
+        var showsSetupPreview = presentation.Setup is not null;
+        var showsGuestPreview = presentation.ActiveEvent?.GuestCycle.Phase is
+            GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved;
+        if (!showsSetupPreview && !showsGuestPreview)
         {
             bitmap.Dispose();
             return;
@@ -402,13 +397,167 @@ public sealed partial class MainWindow : Window
                 {
                     var source = new SoftwareBitmapSource();
                     await source.SetBitmapAsync(displayBitmap);
-                    PreviewImage.Source = source;
+                    if (orchestrator.CurrentPresentation.Setup is not null)
+                    {
+                        PreviewImage.Source = source;
+                    }
+                    else
+                    {
+                        GuestPreviewImage.Source = source;
+                    }
                 }
             }
         }))
         {
             bitmap.Dispose();
         }
+    }
+
+    private void ApplyGuestCyclePresentation(GuestCyclePresentation guestCycle)
+    {
+        var isStart = guestCycle.Phase == GuestCyclePhase.Start;
+        var isAssistance = guestCycle.Phase is GuestCyclePhase.StartUnavailable or GuestCyclePhase.OperatorAssistance;
+        var isCapture = guestCycle.Phase is GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved;
+        var isStrip = guestCycle.Phase is GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading;
+        StartGuestLayer.Visibility = isStart ? Visibility.Visible : Visibility.Collapsed;
+        GuestAssistanceLayer.Visibility = isAssistance ? Visibility.Visible : Visibility.Collapsed;
+        GuestCaptureLayer.Visibility = isCapture ? Visibility.Visible : Visibility.Collapsed;
+        PhotoStripLayer.Visibility = isStrip ? Visibility.Visible : Visibility.Collapsed;
+        ExitEventButton.Visibility = isStart ? Visibility.Visible : Visibility.Collapsed;
+        AssistanceExitEventButton.Visibility = guestCycle.Phase == GuestCyclePhase.StartUnavailable
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        if (isCapture)
+        {
+            CountdownOverlay.Visibility = guestCycle.Phase == GuestCyclePhase.Countdown
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            FlashOverlay.Visibility = guestCycle.Phase == GuestCyclePhase.Flash
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            CaptureSavedOverlay.Visibility = guestCycle.Phase == GuestCyclePhase.CaptureSaved
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            CountdownText.Text = guestCycle.CountdownSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            CaptureProgressText.Text = guestCycle.ProgressText.ToUpperInvariant();
+            UpdateCaptureProgress(guestCycle.CaptureNumber, guestCycle.CompletedCaptures);
+        }
+
+        if (isAssistance)
+        {
+            var beforeAdmission = guestCycle.Phase == GuestCyclePhase.StartUnavailable;
+            AssistanceEyebrowText.Text = beforeAdmission ? "THE BOOTH ISN’T READY" : "WE PAUSED YOUR PHOTOS";
+            AssistanceMessageText.Text = beforeAdmission
+                ? $"{guestCycle.AssistanceDetail} Please call the operator."
+                : $"{guestCycle.AssistanceDetail} Your {guestCycle.CompletedCaptures} completed Captures are safe.";
+            AssistanceDetailTitle.Text = guestCycle.Failure == GuestCycleFailure.CameraUnavailable
+                ? "Camera unavailable"
+                : "Storage unavailable";
+            AssistanceProgressText.Text = beforeAdmission
+                ? "No Guest Cycle has begun"
+                : $"Guest Cycle paused · {guestCycle.CompletedCaptures} of 4 Captures retained";
+        }
+
+        if (isStrip)
+        {
+            var remaining = guestCycle.PreviewSecondsRemaining;
+            PhotoStripReturnText.Text = $"Looking good! The booth will be ready for the next guests in {remaining}.";
+            ReturnProgressFill.Width = 310 * (remaining / 10d);
+            if (guestCycle.PhotoStripPath is { } path &&
+                (!string.Equals(loadingPhotoStripPath, path, StringComparison.Ordinal) || !photoStripVisibleSignaled))
+            {
+                _ = LoadPhotoStripAsync(path);
+            }
+
+            if (guestCycle.Phase == GuestCyclePhase.Fading)
+            {
+                StartPhotoStripFade();
+            }
+            else
+            {
+                PhotoStripLayer.Opacity = 1;
+                photoStripFadeStarted = false;
+            }
+        }
+        else
+        {
+            PhotoStripImage.Source = null;
+            loadingPhotoStripPath = null;
+            photoStripVisibleSignaled = false;
+            photoStripFadeStarted = false;
+            PhotoStripLayer.Opacity = 1;
+        }
+    }
+
+    private void UpdateCaptureProgress(int activeCapture, int completedCaptures)
+    {
+        Border[] borders = [CaptureStep1Border, CaptureStep2Border, CaptureStep3Border, CaptureStep4Border];
+        TextBlock[] numbers = [CaptureStep1Number, CaptureStep2Number, CaptureStep3Number, CaptureStep4Number];
+        FontIcon[] checks = [CaptureStep1Check, CaptureStep2Check, CaptureStep3Check, CaptureStep4Check];
+        var primary = (Brush)Application.Current.Resources["TextPrimaryBrush"];
+        var hairline = (Brush)Application.Current.Resources["HairlineBrush"];
+        for (var index = 0; index < borders.Length; index++)
+        {
+            var captureNumber = index + 1;
+            var complete = captureNumber <= completedCaptures;
+            var active = captureNumber == activeCapture && !complete;
+            borders[index].Background = complete ? primary : new SolidColorBrush(Colors.White);
+            borders[index].BorderBrush = complete || active ? primary : hairline;
+            borders[index].BorderThickness = new Thickness(active ? 2 : 1);
+            numbers[index].Visibility = complete ? Visibility.Collapsed : Visibility.Visible;
+            checks[index].Visibility = complete ? Visibility.Visible : Visibility.Collapsed;
+            checks[index].Foreground = new SolidColorBrush(Colors.White);
+        }
+    }
+
+    private async Task LoadPhotoStripAsync(string path)
+    {
+        if (string.Equals(loadingPhotoStripPath, path, StringComparison.Ordinal) && photoStripVisibleSignaled)
+        {
+            return;
+        }
+
+        loadingPhotoStripPath = path;
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(path);
+            using var stream = await file.OpenReadAsync();
+            var source = new BitmapImage();
+            await source.SetSourceAsync(stream);
+            PhotoStripImage.Source = source;
+            photoStripVisibleSignaled = true;
+            await ExecuteAsync(new ConfirmPhotoStripVisible());
+        }
+        catch (Exception exception) when (
+            exception is FileNotFoundException or
+            IOException or
+            System.Runtime.InteropServices.COMException)
+        {
+            photoStripVisibleSignaled = false;
+            await ExecuteAsync(new ReportPhotoStripDecodeFailure());
+        }
+    }
+
+    private void StartPhotoStripFade()
+    {
+        if (photoStripFadeStarted)
+        {
+            return;
+        }
+
+        photoStripFadeStarted = true;
+        var storyboard = new Storyboard();
+        var animation = new DoubleAnimation
+        {
+            From = 1,
+            To = 0,
+            Duration = (Duration)Application.Current.Resources["FotoHavnPreviewFadeDuration"],
+        };
+        Storyboard.SetTarget(animation, PhotoStripLayer);
+        Storyboard.SetTargetProperty(animation, "Opacity");
+        storyboard.Children.Add(animation);
+        storyboard.Begin();
     }
 
     private async Task ExecuteAsync(ApplicationCommand command)

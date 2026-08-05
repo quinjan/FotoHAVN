@@ -50,6 +50,12 @@ public sealed record StartGuestCycle : ApplicationCommand;
 
 public sealed record RetryGuestStartReadiness : ApplicationCommand;
 
+public sealed record RetryGuestCycle : ApplicationCommand;
+
+public sealed record ConfirmPhotoStripVisible : ApplicationCommand;
+
+public sealed record ReportPhotoStripDecodeFailure : ApplicationCommand;
+
 public sealed record ShutdownApplication : ApplicationCommand;
 
 public sealed record DeleteSavedEvent(EventId EventId) : ApplicationCommand;
@@ -249,12 +255,14 @@ public sealed record ActiveEventPresentation(
     CameraBinding Camera,
     string CameraStreamId,
     bool ShowsExitConfirmation = false,
-    GuestStartPresentation? GuestStartState = null)
+    GuestStartPresentation? GuestStartState = null,
+    GuestCyclePresentation? Cycle = null)
 {
     public string Heading => "Let’s take some photos.";
-    public string Explanation => "We’ll take four photos to create your Photo Strip.";
+    public string Explanation => "Four Captures. A quick countdown before each one.";
     public string StartActionLabel => "Touch to start";
-    public bool ShowsExitEvent => true;
+    public GuestCyclePresentation GuestCycle => Cycle ?? GuestCyclePresentation.Start;
+    public bool ShowsExitEvent => GuestCycle.Phase is GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable;
     public bool ShowsHardwareStatus => false;
     public GuestStartPresentation GuestStart => GuestStartState ?? GuestStartPresentation.Unavailable;
 }
@@ -294,6 +302,48 @@ public sealed record GuestStartPresentation(
             requiresEventSetupCorrection);
 }
 
+public enum GuestCyclePhase
+{
+    Start,
+    StartUnavailable,
+    Countdown,
+    Flash,
+    CaptureSaved,
+    OperatorAssistance,
+    PhotoStripPreview,
+    Fading,
+}
+
+public enum GuestCycleFailure
+{
+    None,
+    CameraUnavailable,
+    StorageUnavailable,
+}
+
+public sealed record GuestCyclePresentation(
+    GuestCyclePhase Phase,
+    int CaptureNumber = 0,
+    int CompletedCaptures = 0,
+    int CountdownSeconds = 0,
+    GuestCycleFailure Failure = GuestCycleFailure.None,
+    string? PhotoStripPath = null,
+    int PreviewSecondsRemaining = 0)
+{
+    public static GuestCyclePresentation Start { get; } = new(GuestCyclePhase.Start);
+
+    public string ProgressText => CaptureNumber is >= 1 and <= 4
+        ? $"Capture {CaptureNumber} of 4"
+        : $"{CompletedCaptures} of 4 Captures saved";
+
+    public string AssistanceDetail => Failure switch
+    {
+        GuestCycleFailure.CameraUnavailable => "The Camera isn’t available right now.",
+        GuestCycleFailure.StorageUnavailable => "Event storage isn’t available right now.",
+        _ => string.Empty,
+    };
+}
+
 public interface IActiveEventWakeLock
 {
     Task AcquireAsync(CancellationToken cancellationToken);
@@ -328,6 +378,11 @@ public interface ICameraBoundary
 
     Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken);
 
+    Task<CapturedFrame?> CaptureFirstFreshFrameAsync(
+        TimeSpan timeout,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<CapturedFrame?>(null);
+
     Task ReleaseAsync(CancellationToken cancellationToken);
 }
 
@@ -343,12 +398,29 @@ public enum CameraStreamFailure
 public sealed record CameraStreamHealth(
     CameraDeviceId? DeviceId,
     string? StreamId,
+    long LatestFrameSequence,
     DateTimeOffset? LatestFrameAt,
     CameraStreamFailure Failure)
 {
+    public CameraStreamHealth(
+        CameraDeviceId? deviceId,
+        string? streamId,
+        DateTimeOffset? latestFrameAt,
+        CameraStreamFailure failure)
+        : this(deviceId, streamId, 0, latestFrameAt, failure)
+    {
+    }
+
     public static CameraStreamHealth Unavailable { get; } =
-        new(null, null, null, CameraStreamFailure.Unavailable);
+        new(null, null, 0, null, CameraStreamFailure.Unavailable);
 }
+
+public sealed record CapturedFrame(
+    long Sequence,
+    DateTimeOffset ReceivedAt,
+    int Width,
+    int Height,
+    ReadOnlyMemory<byte> JpegBytes);
 
 public sealed record CaptureReference(string ArtifactPath);
 
@@ -382,6 +454,29 @@ public interface IEventIdentityGenerator
     EventId Create();
 }
 
+public readonly record struct GuestCycleId
+{
+    public GuestCycleId(string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+        Value = value;
+    }
+
+    public string Value { get; }
+
+    public override string ToString() => Value;
+}
+
+public interface IGuestCycleIdentityGenerator
+{
+    GuestCycleId Create();
+}
+
+public sealed class UuidV7GuestCycleIdentityGenerator : IGuestCycleIdentityGenerator
+{
+    public GuestCycleId Create() => new(Guid.CreateVersion7().ToString());
+}
+
 public sealed class UuidV7EventIdentityGenerator : IEventIdentityGenerator
 {
     public EventId Create() => new(Guid.CreateVersion7().ToString());
@@ -407,13 +502,54 @@ public interface IEventFileSystem
 
     Task<bool> ProbeStorageAsync(CancellationToken cancellationToken);
 
+    Task<bool> ProbeEventStorageAsync(EventId eventId, CancellationToken cancellationToken) =>
+        ProbeStorageAsync(cancellationToken);
+
     Task<EventSaveResult> SaveEventAtomicallyAsync(
         EventConfiguration configuration,
         EventSaveMode mode,
         CancellationToken cancellationToken);
 
     Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken);
+
+    Task<GuestCycleCreateResult> CreateGuestCycleAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        DateTimeOffset startedAt,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(GuestCycleCreateResult.IdentityCollision);
+
+    Task<CaptureCommitResult> CommitCaptureAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        int captureNumber,
+        CapturedFrame frame,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new CaptureCommitResult(false, new CaptureReference(string.Empty)));
+
+    Task<PhotoStripCommitResult> CommitPhotoStripAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        PhotoStripCompositionResult composition,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(new PhotoStripCommitResult(false, string.Empty));
+
+    Task CompleteGuestCycleAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        DateTimeOffset completedAt,
+        CancellationToken cancellationToken) => Task.CompletedTask;
 }
+
+public enum GuestCycleCreateResult
+{
+    Created,
+    IdentityCollision,
+}
+
+public sealed record CaptureCommitResult(bool Committed, CaptureReference Capture);
+
+public sealed record PhotoStripCommitResult(bool Committed, string ArtifactPath);
 
 public static class MotionPolicy
 {

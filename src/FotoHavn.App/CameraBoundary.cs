@@ -6,6 +6,8 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Media.MediaProperties;
+using Windows.Storage.Streams;
+using CoreCapturedFrame = FotoHavn.Core.CapturedFrame;
 
 namespace FotoHavn.App;
 
@@ -22,8 +24,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     private readonly object discoverySync = new();
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
+    private readonly object frameSync = new();
+    private PendingCapture? pendingCapture;
+    private long latestFrameSequence;
     private long latestFrameAtUtcTicks;
-    private int streamFailure = (int)CameraStreamFailure.Unavailable;
+    private CameraStreamFailure streamFailure = CameraStreamFailure.Unavailable;
     private int staleFramePublished = 1;
     private Timer? freshnessTimer;
     private DeviceWatcher? watcher;
@@ -46,12 +51,16 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     {
         get
         {
-            var ticks = Interlocked.Read(ref latestFrameAtUtcTicks);
-            return new CameraStreamHealth(
-                sessionOwner.DeviceId,
-                sessionOwner.StreamId,
-                ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero),
-                (CameraStreamFailure)Volatile.Read(ref streamFailure));
+            lock (frameSync)
+            {
+                var ticks = latestFrameAtUtcTicks;
+                return new CameraStreamHealth(
+                    sessionOwner.DeviceId,
+                    sessionOwner.StreamId,
+                    latestFrameSequence,
+                    ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero),
+                    streamFailure);
+            }
         }
     }
 
@@ -169,7 +178,10 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                             OnFrameArrived,
                             OnCameraStreamFailed,
                             OnExclusiveControlStatusChanged)).ConfigureAwait(false);
-                    Volatile.Write(ref streamFailure, (int)CameraStreamFailure.None);
+                    lock (frameSync)
+                    {
+                        streamFailure = CameraStreamFailure.None;
+                    }
                     Interlocked.Exchange(ref staleFramePublished, 0);
                     StartFreshnessTimer();
                     StreamHealthChanged?.Invoke(this, EventArgs.Empty);
@@ -206,10 +218,60 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         try
         {
             await DisposeCurrentAsync().ConfigureAwait(false);
+            streamFailure = CameraStreamFailure.Unavailable;
         }
         finally
         {
             ownershipGate.Release();
+        }
+    }
+
+    public async Task<CoreCapturedFrame?> CaptureFirstFreshFrameAsync(
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
+        if (StreamHealth is not { Failure: CameraStreamFailure.None, StreamId: not null })
+        {
+            return null;
+        }
+
+        PendingCapture request;
+        lock (frameSync)
+        {
+            if (pendingCapture is not null)
+            {
+                throw new InvalidOperationException("A fresh Camera frame is already being requested.");
+            }
+
+            request = new PendingCapture(
+                latestFrameSequence,
+                new TaskCompletionSource<CoreCapturedFrame>(TaskCreationOptions.RunContinuationsAsynchronously));
+            pendingCapture = request;
+        }
+
+        try
+        {
+            using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutSource.CancelAfter(timeout);
+            try
+            {
+                return await request.Completion.Task.WaitAsync(timeoutSource.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return null;
+            }
+        }
+        finally
+        {
+            lock (frameSync)
+            {
+                if (ReferenceEquals(pendingCapture, request))
+                {
+                    pendingCapture = null;
+                }
+            }
         }
     }
 
@@ -281,7 +343,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         AvailableCamerasChanged?.Invoke(this, EventArgs.Empty);
         if (sessionOwner.IsOwnedDevice(update.Id))
         {
-            Volatile.Write(ref streamFailure, (int)CameraStreamFailure.Removed);
+            lock (frameSync)
+            {
+                streamFailure = CameraStreamFailure.Removed;
+            }
+            CancelPendingCapture();
             StreamHealthChanged?.Invoke(this, EventArgs.Empty);
             _ = ReleaseAfterRemovalAsync(update.Id);
         }
@@ -316,15 +382,79 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             return;
         }
 
-        RecordFrameReceived();
+        var receivedAt = DateTimeOffset.UtcNow;
+        PendingCapture? request;
+        SoftwareBitmap? capturedBitmap = null;
+        long sequence;
+        lock (frameSync)
+        {
+            sequence = ++latestFrameSequence;
+            latestFrameAtUtcTicks = receivedAt.UtcTicks;
+            request = pendingCapture;
+            if (request is not null && sequence > request.AfterSequence)
+            {
+                pendingCapture = null;
+                capturedBitmap = SoftwareBitmap.Copy(bitmap);
+            }
+        }
+
+        if (Interlocked.Exchange(ref staleFramePublished, 0) == 1)
+        {
+            StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (request is not null && capturedBitmap is not null)
+        {
+            _ = EncodeCapturedFrameAsync(
+                capturedBitmap,
+                sequence,
+                receivedAt,
+                request.Completion);
+        }
+
         PreviewFrameAvailable?.Invoke(this, SoftwareBitmap.Copy(bitmap));
+    }
+
+    private static async Task EncodeCapturedFrameAsync(
+        SoftwareBitmap bitmap,
+        long sequence,
+        DateTimeOffset receivedAt,
+        TaskCompletionSource<CoreCapturedFrame> completion)
+    {
+        using (bitmap)
+        using (var stream = new InMemoryRandomAccessStream())
+        {
+            try
+            {
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+                encoder.SetSoftwareBitmap(bitmap);
+                await encoder.FlushAsync();
+                var bytes = new byte[checked((int)stream.Size)];
+                using var reader = new DataReader(stream.GetInputStreamAt(0));
+                await reader.LoadAsync((uint)bytes.Length);
+                reader.ReadBytes(bytes);
+                completion.TrySetResult(new CoreCapturedFrame(
+                    sequence,
+                    receivedAt,
+                    bitmap.PixelWidth,
+                    bitmap.PixelHeight,
+                    bytes));
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        }
     }
 
     private void RecordFrameReceived()
     {
-        Interlocked.Exchange(ref latestFrameAtUtcTicks, DateTimeOffset.UtcNow.UtcTicks);
-        if (Interlocked.Exchange(ref staleFramePublished, 0) == 1 &&
-            (CameraStreamFailure)Volatile.Read(ref streamFailure) == CameraStreamFailure.None)
+        lock (frameSync)
+        {
+            latestFrameAtUtcTicks = DateTimeOffset.UtcNow.UtcTicks;
+        }
+
+        if (Interlocked.Exchange(ref staleFramePublished, 0) == 1)
         {
             StreamHealthChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -332,7 +462,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
     private void OnCameraStreamFailed(MediaCapture sender, MediaCaptureFailedEventArgs errorEventArgs)
     {
-        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.StreamFailure);
+        lock (frameSync)
+        {
+            streamFailure = CameraStreamFailure.StreamFailure;
+        }
+        CancelPendingCapture();
         StreamHealthChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -345,7 +479,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             return;
         }
 
-        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.ExclusiveOwnershipLost);
+        lock (frameSync)
+        {
+            streamFailure = CameraStreamFailure.ExclusiveOwnershipLost;
+        }
+        CancelPendingCapture();
         StreamHealthChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -361,10 +499,17 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
     private void PublishStaleFrameIfNeeded()
     {
-        var ticks = Interlocked.Read(ref latestFrameAtUtcTicks);
+        long ticks;
+        CameraStreamFailure failure;
+        lock (frameSync)
+        {
+            ticks = latestFrameAtUtcTicks;
+            failure = streamFailure;
+        }
+
         if (ticks == 0 ||
             sessionOwner.StreamId is null ||
-            (CameraStreamFailure)Volatile.Read(ref streamFailure) != CameraStreamFailure.None ||
+            failure != CameraStreamFailure.None ||
             DateTimeOffset.UtcNow - new DateTimeOffset(ticks, TimeSpan.Zero) <= TimeSpan.FromSeconds(2) ||
             Interlocked.Exchange(ref staleFramePublished, 1) == 1)
         {
@@ -378,9 +523,13 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     {
         freshnessTimer?.Dispose();
         freshnessTimer = null;
+        CancelPendingCapture();
         await sessionOwner.ReleaseAsync().ConfigureAwait(false);
-        Interlocked.Exchange(ref latestFrameAtUtcTicks, 0);
-        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.Unavailable);
+        lock (frameSync)
+        {
+            latestFrameAtUtcTicks = 0;
+            streamFailure = CameraStreamFailure.Unavailable;
+        }
         Interlocked.Exchange(ref staleFramePublished, 1);
         StreamHealthChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -407,6 +556,22 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
         return CameraIdentityLabel.FromDeviceId(device.Id);
     }
+
+    private void CancelPendingCapture()
+    {
+        PendingCapture? request;
+        lock (frameSync)
+        {
+            request = pendingCapture;
+            pendingCapture = null;
+        }
+
+        request?.Completion.TrySetResult(null!);
+    }
+
+    private sealed record PendingCapture(
+        long AfterSequence,
+        TaskCompletionSource<CoreCapturedFrame> Completion);
 }
 
 internal sealed class CameraOwnedStream(
