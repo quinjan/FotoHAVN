@@ -208,10 +208,10 @@ public sealed record EventSetupPresentation(
         ? "Event storage is not writable. Fix access to the Events folder, then check storage again."
         : CameraState switch
         {
-            CameraConnectionState.Unavailable => "Connect the saved Camera, then choose that exact Camera again.",
-            CameraConnectionState.AccessDenied => "Allow Camera access in Windows, then choose the saved Camera again.",
-            CameraConnectionState.InUseByAnotherApp => "Close the app using this Camera, then choose the saved Camera again.",
-            CameraConnectionState.Disconnected => "Reconnect the saved Camera, then choose that exact Camera again.",
+            CameraConnectionState.Unavailable => "Connect the Camera bound to this Event, then choose that exact Camera again.",
+            CameraConnectionState.AccessDenied => "Allow Windows access to the Camera bound to this Event, then choose it again.",
+            CameraConnectionState.InUseByAnotherApp => "Close the app using the Camera bound to this Event, then choose it again.",
+            CameraConnectionState.Disconnected => "Reconnect the Camera bound to this Event, then choose that exact Camera again.",
             _ => null,
         };
 }

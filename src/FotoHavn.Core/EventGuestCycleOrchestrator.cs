@@ -275,15 +275,7 @@ public sealed class EventGuestCycleOrchestrator
 
     private async Task<ApplicationPresentation> ExitActiveEventAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            await wakeLock.ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
+        await ReleaseActiveEventResourcesAsync(cancellationToken).ConfigureAwait(false);
         Publish(CurrentPresentation with { ActiveEvent = null });
         return await LaunchAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -292,14 +284,7 @@ public sealed class EventGuestCycleOrchestrator
     {
         if (CurrentPresentation.ActiveEvent is not null)
         {
-            try
-            {
-                await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                await wakeLock.ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
-            }
+            await ReleaseActiveEventResourcesAsync(cancellationToken).ConfigureAwait(false);
         }
         else if (setup?.SelectedCamera is not null)
         {
@@ -310,6 +295,18 @@ public sealed class EventGuestCycleOrchestrator
         return Publish(CreateSavedEventsPresentation([]));
     }
 
+    private async Task ReleaseActiveEventResourcesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            await wakeLock.ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+    }
+
     private async Task<ApplicationPresentation> ConfirmStartSavedEventAsync(CancellationToken cancellationToken)
     {
         var eventId = CurrentPresentation.StartEventConfirmation?.EventId
@@ -317,9 +314,8 @@ public sealed class EventGuestCycleOrchestrator
         var savedEvent = await DiscoverSavedEventAsync(eventId, cancellationToken).ConfigureAwait(false);
         if (savedEvent.AvailableCamera is null)
         {
-            setup = await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false);
-            var failed = PublishSetup(setup);
-            return Publish(failed with { StartEventConfirmation = null });
+            var failedSetup = await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false);
+            return PublishFailedStart(failedSetup);
         }
 
         var result = await Camera.OpenAsync(savedEvent.Configuration.Camera.DeviceId, cancellationToken).ConfigureAwait(false);
@@ -328,19 +324,17 @@ public sealed class EventGuestCycleOrchestrator
             var state = result == CameraOpenResult.Ready
                 ? CameraConnectionState.Disconnected
                 : ToConnectionState(result);
-            setup = (await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false))
+            var failedSetup = (await CreateSavedEventDraftAsync(savedEvent, cancellationToken).ConfigureAwait(false))
                 .WithCameraState(state);
-            var failed = PublishSetup(setup);
-            return Publish(failed with { StartEventConfirmation = null });
+            return PublishFailedStart(failedSetup);
         }
 
         var storageReady = await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false);
         if (!storageReady)
         {
-            setup = EventSetupDraft.From(savedEvent.Configuration, savedEvent.AvailableCamera, storageReady)
+            var failedSetup = EventSetupDraft.From(savedEvent.Configuration, savedEvent.AvailableCamera, storageReady)
                 .WithCameraState(CameraConnectionState.Ready);
-            var failed = PublishSetup(setup);
-            return Publish(failed with { StartEventConfirmation = null });
+            return PublishFailedStart(failedSetup);
         }
 
         await wakeLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
@@ -354,6 +348,12 @@ public sealed class EventGuestCycleOrchestrator
                 savedEvent.Configuration.Camera,
                 streamId),
         });
+    }
+
+    private ApplicationPresentation PublishFailedStart(EventSetupDraft failedSetup)
+    {
+        var failed = PublishSetup(failedSetup);
+        return Publish(failed with { StartEventConfirmation = null });
     }
 
     private async Task<SavedEventDiscovery> DiscoverSavedEventAsync(

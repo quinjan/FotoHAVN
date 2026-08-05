@@ -357,7 +357,7 @@
                             TextWrapping="Wrap" />
                         <TextBlock
                             Foreground="{StaticResource TextMutedBrush}"
-                            Text="FotoHAVN will confirm the saved Camera and storage before starting."
+                            Text="FotoHAVN will confirm the Camera bound to this Event and storage before starting."
                             TextWrapping="Wrap" />
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
                             <Button Click="CancelStartEventClicked" Content="Cancel" />

@@ -18,6 +18,8 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     ];
 
     private readonly ConcurrentDictionary<string, DeviceInformation> devices = new(StringComparer.Ordinal);
+    private readonly TaskCompletionSource discoveryCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly object discoverySync = new();
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
     private DeviceWatcher? watcher;
@@ -34,22 +36,28 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
     public string? StreamId => sessionOwner.StreamId;
 
-    public Task StartDiscoveryAsync(CancellationToken cancellationToken)
+    public async Task StartDiscoveryAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (watcher is not null)
+        Task discoveryTask;
+        lock (discoverySync)
         {
-            return Task.CompletedTask;
+            if (watcher is null)
+            {
+                watcher = DeviceInformation.CreateWatcher(
+                    DeviceInformation.GetAqsFilterFromDeviceClass(DeviceClass.VideoCapture),
+                    RequestedProperties);
+                watcher.Added += OnDeviceAdded;
+                watcher.Updated += OnDeviceUpdated;
+                watcher.Removed += OnDeviceRemoved;
+                watcher.EnumerationCompleted += OnEnumerationCompleted;
+                watcher.Start();
+            }
+
+            discoveryTask = discoveryCompleted.Task;
         }
 
-        watcher = DeviceInformation.CreateWatcher(
-            DeviceInformation.GetAqsFilterFromDeviceClass(DeviceClass.VideoCapture),
-            RequestedProperties);
-        watcher.Added += OnDeviceAdded;
-        watcher.Updated += OnDeviceUpdated;
-        watcher.Removed += OnDeviceRemoved;
-        watcher.Start();
-        return Task.CompletedTask;
+        await discoveryTask.WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken)
@@ -182,7 +190,9 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             watcher.Added -= OnDeviceAdded;
             watcher.Updated -= OnDeviceUpdated;
             watcher.Removed -= OnDeviceRemoved;
+            watcher.EnumerationCompleted -= OnEnumerationCompleted;
             watcher = null;
+            discoveryCompleted.TrySetCanceled();
         }
 
         await ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
@@ -242,6 +252,9 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             _ = ReleaseAfterRemovalAsync(update.Id);
         }
     }
+
+    private void OnEnumerationCompleted(DeviceWatcher sender, object args) =>
+        discoveryCompleted.TrySetResult();
 
     private async Task ReleaseAfterRemovalAsync(CameraDeviceId deviceId)
     {
