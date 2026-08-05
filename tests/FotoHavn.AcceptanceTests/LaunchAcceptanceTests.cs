@@ -90,12 +90,24 @@ public sealed class LaunchAcceptanceTests
                 Interlocked.Decrement(ref activeReads);
             }
         }
+
+        public Task<EventConfiguration?> LoadEventAsync(EventId eventId, CancellationToken cancellationToken) =>
+            Task.FromResult<EventConfiguration?>(null);
+
+        public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
+
+        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     private sealed class StubCamera : ICameraBoundary
     {
-        public Task<CameraReadiness> GetReadinessAsync(CancellationToken cancellationToken) =>
-            Task.FromResult(CameraReadiness.NotChecked);
+        public event EventHandler? AvailableCamerasChanged { add { } remove { } }
+        public IReadOnlyList<AvailableCamera> AvailableCameras => [];
+        public string? StreamId => null;
+        public Task StartDiscoveryAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken) =>
+            Task.FromResult(CameraOpenResult.Unavailable);
+        public Task ReleaseAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     private sealed class StubCompositor : IPhotoStripCompositor
@@ -117,6 +129,13 @@ public sealed class LaunchAcceptanceTests
     {
         public Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<SavedEventSummary>>([]);
+
+        public Task<EventConfiguration?> LoadEventAsync(EventId eventId, CancellationToken cancellationToken) =>
+            Task.FromResult<EventConfiguration?>(null);
+
+        public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
+
+        public Task SaveEventAsync(EventConfiguration configuration, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
 
