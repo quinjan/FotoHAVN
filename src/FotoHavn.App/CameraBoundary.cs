@@ -100,13 +100,13 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             }
 
             var mediaCapture = new MediaCapture();
-            mediaCapture.Failed += OnCameraStreamFailed;
-            mediaCapture.CaptureDeviceExclusiveControlStatusChanged += OnExclusiveControlStatusChanged;
             try
             {
                 await mediaCapture.InitializeAsync(CameraOpenPolicy.CreateSettings(deviceId))
                     .AsTask(cancellationToken)
                     .ConfigureAwait(false);
+                mediaCapture.Failed += OnCameraStreamFailed;
+                mediaCapture.CaptureDeviceExclusiveControlStatusChanged += OnExclusiveControlStatusChanged;
 
                 var source = FindColorVideoSource(mediaCapture);
                 if (source is null)
@@ -175,9 +175,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                         new CameraOwnedStream(
                             mediaCapture,
                             fallback.Value,
-                            OnFrameArrived,
-                            OnCameraStreamFailed,
-                            OnExclusiveControlStatusChanged)).ConfigureAwait(false);
+                            OnFrameArrived)).ConfigureAwait(false);
                     lock (frameSync)
                     {
                         streamFailure = CameraStreamFailure.None;
@@ -536,8 +534,6 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
     private void DisposeUnownedMediaCapture(MediaCapture mediaCapture)
     {
-        mediaCapture.Failed -= OnCameraStreamFailed;
-        mediaCapture.CaptureDeviceExclusiveControlStatusChanged -= OnExclusiveControlStatusChanged;
         mediaCapture.Dispose();
     }
 
@@ -577,15 +573,11 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 internal sealed class CameraOwnedStream(
     MediaCapture mediaCapture,
     MediaFrameReader reader,
-    TypedEventHandler<MediaFrameReader, MediaFrameArrivedEventArgs> frameHandler,
-    MediaCaptureFailedEventHandler failureHandler,
-    TypedEventHandler<MediaCapture, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs> exclusiveControlHandler) : IAsyncDisposable
+    TypedEventHandler<MediaFrameReader, MediaFrameArrivedEventArgs> frameHandler) : IAsyncDisposable
 {
     public async ValueTask DisposeAsync()
     {
         reader.FrameArrived -= frameHandler;
-        mediaCapture.Failed -= failureHandler;
-        mediaCapture.CaptureDeviceExclusiveControlStatusChanged -= exclusiveControlHandler;
         try
         {
             await reader.StopAsync();
