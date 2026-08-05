@@ -301,10 +301,39 @@
                         AutomationProperties.Name="Touch to start"
                         Background="#FF111214"
                         BorderBrush="#FF111214"
+                        Click="StartGuestCycleClicked"
                         Content="Touch to start"
                         FontSize="20"
                         FontWeight="SemiBold"
                         Foreground="White" />
+                    <StackPanel
+                        x:Name="GuestStartAssistancePanel"
+                        HorizontalAlignment="Center"
+                        Spacing="10"
+                        Visibility="Collapsed">
+                        <TextBlock
+                            x:Name="GuestStartStatusText"
+                            HorizontalAlignment="Center"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Text="Please call the operator" />
+                        <TextBlock
+                            x:Name="GuestStartCorrectionText"
+                            MaxWidth="520"
+                            HorizontalAlignment="Center"
+                            Foreground="{StaticResource TextMutedBrush}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                        <Button
+                            x:Name="RetryGuestStartButton"
+                            MinWidth="180"
+                            MinHeight="68"
+                            HorizontalAlignment="Center"
+                            HorizontalContentAlignment="Center"
+                            AutomationProperties.Name="Retry guest Start readiness"
+                            Click="RetryGuestStartClicked"
+                            Content="Retry" />
+                    </StackPanel>
                 </StackPanel>
 
                 <Grid

@@ -46,6 +46,10 @@ public sealed record ConfirmExitActiveEvent : ApplicationCommand;
 
 public sealed record CancelExitActiveEvent : ApplicationCommand;
 
+public sealed record StartGuestCycle : ApplicationCommand;
+
+public sealed record RetryGuestStartReadiness : ApplicationCommand;
+
 public sealed record ShutdownApplication : ApplicationCommand;
 
 public sealed record DeleteSavedEvent(EventId EventId) : ApplicationCommand;
@@ -244,13 +248,50 @@ public sealed record ActiveEventPresentation(
     string Name,
     CameraBinding Camera,
     string CameraStreamId,
-    bool ShowsExitConfirmation = false)
+    bool ShowsExitConfirmation = false,
+    GuestStartPresentation? GuestStartState = null)
 {
     public string Heading => "Let’s take some photos.";
     public string Explanation => "We’ll take four photos to create your Photo Strip.";
     public string StartActionLabel => "Touch to start";
     public bool ShowsExitEvent => true;
     public bool ShowsHardwareStatus => false;
+    public GuestStartPresentation GuestStart => GuestStartState ?? GuestStartPresentation.Unavailable;
+}
+
+public enum GuestStartFailure
+{
+    None,
+    CameraUnavailable,
+    StorageUnavailable,
+}
+
+public sealed record GuestStartPresentation(
+    bool IsCameraReady,
+    bool IsStorageReady,
+    GuestStartFailure Failure = GuestStartFailure.None,
+    bool RequiresEventSetupCorrection = false)
+{
+    public static GuestStartPresentation Unavailable { get; } =
+        new(false, false, GuestStartFailure.CameraUnavailable);
+
+    public bool IsStartVisible => true;
+    public bool IsStartEnabled => IsCameraReady && IsStorageReady && Failure == GuestStartFailure.None;
+    public string? StatusMessage => IsStartEnabled ? null : "Please call the operator";
+    public bool ShowsRetry => !IsStartEnabled && !RequiresEventSetupCorrection;
+    public string RetryActionLabel => "Retry";
+
+    public static GuestStartPresentation FromReadiness(
+        bool isCameraReady,
+        bool isStorageReady,
+        bool requiresEventSetupCorrection = false) =>
+        new(
+            isCameraReady,
+            isStorageReady,
+            isCameraReady
+                ? isStorageReady ? GuestStartFailure.None : GuestStartFailure.StorageUnavailable
+                : GuestStartFailure.CameraUnavailable,
+            requiresEventSetupCorrection);
 }
 
 public interface IActiveEventWakeLock
@@ -271,15 +312,42 @@ public interface ICameraBoundary
 {
     event EventHandler? AvailableCamerasChanged;
 
+    event EventHandler? StreamHealthChanged
+    {
+        add { }
+        remove { }
+    }
+
     IReadOnlyList<AvailableCamera> AvailableCameras { get; }
 
     string? StreamId { get; }
+
+    CameraStreamHealth StreamHealth => CameraStreamHealth.Unavailable;
 
     Task StartDiscoveryAsync(CancellationToken cancellationToken);
 
     Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken);
 
     Task ReleaseAsync(CancellationToken cancellationToken);
+}
+
+public enum CameraStreamFailure
+{
+    None,
+    Unavailable,
+    Removed,
+    StreamFailure,
+    ExclusiveOwnershipLost,
+}
+
+public sealed record CameraStreamHealth(
+    CameraDeviceId? DeviceId,
+    string? StreamId,
+    DateTimeOffset? LatestFrameAt,
+    CameraStreamFailure Failure)
+{
+    public static CameraStreamHealth Unavailable { get; } =
+        new(null, null, null, CameraStreamFailure.Unavailable);
 }
 
 public sealed record CaptureReference(string ArtifactPath);

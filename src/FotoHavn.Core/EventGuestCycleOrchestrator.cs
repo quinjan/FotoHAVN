@@ -25,6 +25,7 @@ public sealed class EventGuestCycleOrchestrator
         this.identityGenerator = identityGenerator ?? new UuidV7EventIdentityGenerator();
         this.wakeLock = wakeLock ?? new NoOpActiveEventWakeLock();
         Camera.AvailableCamerasChanged += OnAvailableCamerasChanged;
+        Camera.StreamHealthChanged += OnStreamHealthChanged;
     }
 
     public event EventHandler<ApplicationPresentation>? PresentationChanged;
@@ -59,6 +60,8 @@ public sealed class EventGuestCycleOrchestrator
                 command is not ExitActiveEvent and
                 not ConfirmExitActiveEvent and
                 not CancelExitActiveEvent and
+                not StartGuestCycle and
+                not RetryGuestStartReadiness and
                 not ShutdownApplication)
             {
                 return CurrentPresentation;
@@ -118,6 +121,11 @@ public sealed class EventGuestCycleOrchestrator
                     ActiveEvent = CurrentPresentation.ActiveEvent! with { ShowsExitConfirmation = false },
                 }),
                 ConfirmExitActiveEvent => await ExitActiveEventAsync(cancellationToken).ConfigureAwait(false),
+                StartGuestCycle when CurrentPresentation.ActiveEvent is not null =>
+                    await CheckGuestStartAdmissionAsync(cancellationToken).ConfigureAwait(false),
+                RetryGuestStartReadiness when CurrentPresentation.ActiveEvent is not null =>
+                    await RetryGuestStartReadinessAsync(cancellationToken).ConfigureAwait(false),
+                StartGuestCycle or RetryGuestStartReadiness => CurrentPresentation,
                 ShutdownApplication => await ShutdownAsync(cancellationToken).ConfigureAwait(false),
                 DeleteSavedEvent delete => await DeleteSavedEventAsync(delete.EventId, cancellationToken).ConfigureAwait(false),
                 _ => throw new ArgumentOutOfRangeException(nameof(command), command, "Unknown application command."),
@@ -298,7 +306,7 @@ public sealed class EventGuestCycleOrchestrator
             return Publish(CurrentPresentation with
             {
                 Setup = null,
-                ActiveEvent = new ActiveEventPresentation(configuration.Id, configuration.Name, configuration.Camera, streamId!),
+                ActiveEvent = CreateActiveEventPresentation(configuration, streamId!, storageReady: true),
             });
         }
 
@@ -412,11 +420,104 @@ public sealed class EventGuestCycleOrchestrator
         {
             Setup = null,
             StartEventConfirmation = null,
-            ActiveEvent = new ActiveEventPresentation(
-                savedEvent.Configuration.Id,
-                savedEvent.Configuration.Name,
-                savedEvent.Configuration.Camera,
-                streamId),
+            ActiveEvent = CreateActiveEventPresentation(savedEvent.Configuration, streamId, storageReady: true),
+        });
+    }
+
+    private ActiveEventPresentation CreateActiveEventPresentation(
+        EventConfiguration configuration,
+        string streamId,
+        bool storageReady) =>
+        new(
+            configuration.Id,
+            configuration.Name,
+            configuration.Camera,
+            streamId,
+            GuestStartState: CreateGuestStartPresentation(
+                configuration.Camera,
+                streamId,
+                storageReady));
+
+    private GuestStartPresentation CreateGuestStartPresentation(
+        CameraBinding binding,
+        string streamId,
+        bool storageReady)
+    {
+        var cameraReady = IsCameraReady(binding, streamId, Clock.UtcNow);
+        return GuestStartPresentation.FromReadiness(cameraReady, storageReady);
+    }
+
+    private bool IsCameraReady(CameraBinding binding, string streamId, DateTimeOffset now)
+    {
+        var health = Camera.StreamHealth;
+        return health.DeviceId == binding.DeviceId &&
+            health.StreamId == streamId &&
+            health.Failure == CameraStreamFailure.None &&
+            health.LatestFrameAt is { } latestFrameAt &&
+            latestFrameAt <= now &&
+            now - latestFrameAt <= TimeSpan.FromSeconds(2);
+    }
+
+    private async Task<ApplicationPresentation> CheckGuestStartAdmissionAsync(CancellationToken cancellationToken)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent
+            ?? throw new InvalidOperationException("No Event is Active.");
+        var storageReady = await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false);
+        var guestStart = CreateGuestStartPresentation(
+            activeEvent.Camera,
+            activeEvent.CameraStreamId,
+            storageReady);
+        if (guestStart.IsStartEnabled)
+        {
+            return CurrentPresentation;
+        }
+
+        return Publish(CurrentPresentation with
+        {
+            ActiveEvent = activeEvent with { GuestStartState = guestStart },
+        });
+    }
+
+    private async Task<ApplicationPresentation> RetryGuestStartReadinessAsync(CancellationToken cancellationToken)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent
+            ?? throw new InvalidOperationException("No Event is Active.");
+        var streamId = activeEvent.CameraStreamId;
+        var cameraReady = IsCameraReady(activeEvent.Camera, streamId, Clock.UtcNow);
+        if (!cameraReady)
+        {
+            await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
+            await Camera.StartDiscoveryAsync(cancellationToken).ConfigureAwait(false);
+            if (Camera.AvailableCameras.All(camera => camera.DeviceId != activeEvent.Camera.DeviceId))
+            {
+                var missing = GuestStartPresentation.FromReadiness(
+                    isCameraReady: false,
+                    activeEvent.GuestStart.IsStorageReady,
+                    requiresEventSetupCorrection: true);
+                return Publish(CurrentPresentation with
+                {
+                    ActiveEvent = activeEvent with { GuestStartState = missing },
+                });
+            }
+
+            var openResult = await Camera.OpenAsync(activeEvent.Camera.DeviceId, cancellationToken).ConfigureAwait(false);
+            if (openResult == CameraOpenResult.Ready && Camera.StreamId is { } newStreamId)
+            {
+                streamId = newStreamId;
+                cameraReady = IsCameraReady(activeEvent.Camera, streamId, Clock.UtcNow);
+            }
+        }
+
+        var storageReady = activeEvent.GuestStart.IsStorageReady ||
+            await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false);
+        var guestStart = GuestStartPresentation.FromReadiness(cameraReady, storageReady);
+        return Publish(CurrentPresentation with
+        {
+            ActiveEvent = activeEvent with
+            {
+                CameraStreamId = streamId,
+                GuestStartState = guestStart,
+            },
         });
     }
 
@@ -470,6 +571,24 @@ public sealed class EventGuestCycleOrchestrator
         }
 
         PublishSetup(setup);
+    }
+
+    private void OnStreamHealthChanged(object? sender, EventArgs args)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent;
+        if (activeEvent is null)
+        {
+            return;
+        }
+
+        var guestStart = CreateGuestStartPresentation(
+            activeEvent.Camera,
+            activeEvent.CameraStreamId,
+            activeEvent.GuestStart.IsStorageReady);
+        Publish(CurrentPresentation with
+        {
+            ActiveEvent = activeEvent with { GuestStartState = guestStart },
+        });
     }
 
     private ApplicationPresentation PublishSetup(EventSetupDraft draft)

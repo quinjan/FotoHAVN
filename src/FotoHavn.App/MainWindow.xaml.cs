@@ -83,6 +83,12 @@ public sealed partial class MainWindow : Window
     private async void CancelExitEventClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelExitActiveEvent());
 
+    private async void StartGuestCycleClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new StartGuestCycle());
+
+    private async void RetryGuestStartClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new RetryGuestStartReadiness());
+
     private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
     {
         if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
@@ -286,6 +292,21 @@ public sealed partial class MainWindow : Window
                 ActiveEventHeadingText.Text = activeEvent.Heading;
                 ActiveEventExplanationText.Text = activeEvent.Explanation;
                 StartGuestCycleButton.Content = activeEvent.StartActionLabel;
+                StartGuestCycleButton.IsEnabled = activeEvent.GuestStart.IsStartEnabled;
+                GuestStartAssistancePanel.Visibility = activeEvent.GuestStart.StatusMessage is null
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+                GuestStartStatusText.Text = activeEvent.GuestStart.StatusMessage ?? string.Empty;
+                RetryGuestStartButton.Content = activeEvent.GuestStart.RetryActionLabel;
+                RetryGuestStartButton.Visibility = activeEvent.GuestStart.ShowsRetry
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+                GuestStartCorrectionText.Text = activeEvent.GuestStart.RequiresEventSetupCorrection
+                    ? "Exit Event and correct the Camera Binding in Event setup."
+                    : string.Empty;
+                GuestStartCorrectionText.Visibility = activeEvent.GuestStart.RequiresEventSetupCorrection
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
             }
 
             var setup = presentation.Setup;

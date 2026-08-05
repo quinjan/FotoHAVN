@@ -22,9 +22,15 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     private readonly object discoverySync = new();
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
+    private long latestFrameAtUtcTicks;
+    private int streamFailure = (int)CameraStreamFailure.Unavailable;
+    private int staleFramePublished = 1;
+    private Timer? freshnessTimer;
     private DeviceWatcher? watcher;
 
     public event EventHandler? AvailableCamerasChanged;
+
+    public event EventHandler? StreamHealthChanged;
 
     public event EventHandler<SoftwareBitmap>? PreviewFrameAvailable;
 
@@ -35,6 +41,19 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         .ToArray();
 
     public string? StreamId => sessionOwner.StreamId;
+
+    public CameraStreamHealth StreamHealth
+    {
+        get
+        {
+            var ticks = Interlocked.Read(ref latestFrameAtUtcTicks);
+            return new CameraStreamHealth(
+                sessionOwner.DeviceId,
+                sessionOwner.StreamId,
+                ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero),
+                (CameraStreamFailure)Volatile.Read(ref streamFailure));
+        }
+    }
 
     public async Task StartDiscoveryAsync(CancellationToken cancellationToken)
     {
@@ -71,24 +90,26 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                 return CameraOpenResult.Unavailable;
             }
 
-            var nextCapture = new MediaCapture();
+            var mediaCapture = new MediaCapture();
+            mediaCapture.Failed += OnCameraStreamFailed;
+            mediaCapture.CaptureDeviceExclusiveControlStatusChanged += OnExclusiveControlStatusChanged;
             try
             {
-                await nextCapture.InitializeAsync(CameraOpenPolicy.CreateSettings(deviceId))
+                await mediaCapture.InitializeAsync(CameraOpenPolicy.CreateSettings(deviceId))
                     .AsTask(cancellationToken)
                     .ConfigureAwait(false);
 
-                var source = FindColorVideoSource(nextCapture);
+                var source = FindColorVideoSource(mediaCapture);
                 if (source is null)
                 {
-                    nextCapture.Dispose();
+                    DisposeUnownedMediaCapture(mediaCapture);
                     return CameraOpenResult.Unavailable;
                 }
 
                 var formats = CameraFormatSelector.SelectOnePerTier(source.SupportedFormats);
                 if (formats.Count == 0)
                 {
-                    nextCapture.Dispose();
+                    DisposeUnownedMediaCapture(mediaCapture);
                     return CameraOpenResult.Unavailable;
                 }
 
@@ -100,7 +121,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                         try
                         {
                             await source.SetFormatAsync(format).AsTask(cancellationToken).ConfigureAwait(false);
-                            nextReader = await nextCapture.CreateFrameReaderAsync(source, MediaEncodingSubtypes.Bgra8)
+                            nextReader = await mediaCapture.CreateFrameReaderAsync(source, MediaEncodingSubtypes.Bgra8)
                                 .AsTask(cancellationToken)
                                 .ConfigureAwait(false);
                             nextReader.AcquisitionMode = MediaFrameReaderAcquisitionMode.Realtime;
@@ -124,6 +145,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                                 var bitmap = frame?.VideoMediaFrame?.SoftwareBitmap;
                                 if (bitmap is not null && CameraFrameEligibility.IsEligible(bitmap.PixelWidth, bitmap.PixelHeight, isDecoded: true))
                                 {
+                                    RecordFrameReceived();
                                     firstFrame.TrySetResult();
                                 }
                             }
@@ -141,24 +163,33 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                     await sessionOwner.AdoptAsync(
                         deviceId,
                         Guid.NewGuid().ToString("N"),
-                        new CameraOwnedStream(nextCapture, fallback.Value, OnFrameArrived)).ConfigureAwait(false);
+                        new CameraOwnedStream(
+                            mediaCapture,
+                            fallback.Value,
+                            OnFrameArrived,
+                            OnCameraStreamFailed,
+                            OnExclusiveControlStatusChanged)).ConfigureAwait(false);
+                    Volatile.Write(ref streamFailure, (int)CameraStreamFailure.None);
+                    Interlocked.Exchange(ref staleFramePublished, 0);
+                    StartFreshnessTimer();
+                    StreamHealthChanged?.Invoke(this, EventArgs.Empty);
                     return CameraOpenResult.Ready;
                 }
 
-                nextCapture.Dispose();
+                DisposeUnownedMediaCapture(mediaCapture);
                 return fallback.LastFailure is null
                     ? CameraOpenResult.Unavailable
                     : CameraFailureMapper.Map(fallback.LastFailure);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                nextCapture.Dispose();
+                DisposeUnownedMediaCapture(mediaCapture);
                 await DisposeCurrentAsync().ConfigureAwait(false);
                 return CameraFailureMapper.Map(exception);
             }
             catch (OperationCanceledException)
             {
-                nextCapture.Dispose();
+                DisposeUnownedMediaCapture(mediaCapture);
                 await DisposeCurrentAsync().ConfigureAwait(false);
                 throw;
             }
@@ -196,6 +227,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         }
 
         await ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
+        freshnessTimer?.Dispose();
         ownershipGate.Dispose();
     }
 
@@ -249,6 +281,8 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         AvailableCamerasChanged?.Invoke(this, EventArgs.Empty);
         if (sessionOwner.IsOwnedDevice(update.Id))
         {
+            Volatile.Write(ref streamFailure, (int)CameraStreamFailure.Removed);
+            StreamHealthChanged?.Invoke(this, EventArgs.Empty);
             _ = ReleaseAfterRemovalAsync(update.Id);
         }
     }
@@ -282,12 +316,80 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
             return;
         }
 
+        RecordFrameReceived();
         PreviewFrameAvailable?.Invoke(this, SoftwareBitmap.Copy(bitmap));
+    }
+
+    private void RecordFrameReceived()
+    {
+        Interlocked.Exchange(ref latestFrameAtUtcTicks, DateTimeOffset.UtcNow.UtcTicks);
+        if (Interlocked.Exchange(ref staleFramePublished, 0) == 1 &&
+            (CameraStreamFailure)Volatile.Read(ref streamFailure) == CameraStreamFailure.None)
+        {
+            StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void OnCameraStreamFailed(MediaCapture sender, MediaCaptureFailedEventArgs errorEventArgs)
+    {
+        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.StreamFailure);
+        StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnExclusiveControlStatusChanged(
+        MediaCapture sender,
+        MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
+    {
+        if (args.Status == MediaCaptureDeviceExclusiveControlStatus.ExclusiveControlAvailable)
+        {
+            return;
+        }
+
+        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.ExclusiveOwnershipLost);
+        StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void StartFreshnessTimer()
+    {
+        freshnessTimer?.Dispose();
+        freshnessTimer = new Timer(
+            static state => ((CameraBoundary)state!).PublishStaleFrameIfNeeded(),
+            this,
+            TimeSpan.FromMilliseconds(250),
+            TimeSpan.FromMilliseconds(250));
+    }
+
+    private void PublishStaleFrameIfNeeded()
+    {
+        var ticks = Interlocked.Read(ref latestFrameAtUtcTicks);
+        if (ticks == 0 ||
+            sessionOwner.StreamId is null ||
+            (CameraStreamFailure)Volatile.Read(ref streamFailure) != CameraStreamFailure.None ||
+            DateTimeOffset.UtcNow - new DateTimeOffset(ticks, TimeSpan.Zero) <= TimeSpan.FromSeconds(2) ||
+            Interlocked.Exchange(ref staleFramePublished, 1) == 1)
+        {
+            return;
+        }
+
+        StreamHealthChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task DisposeCurrentAsync()
     {
+        freshnessTimer?.Dispose();
+        freshnessTimer = null;
         await sessionOwner.ReleaseAsync().ConfigureAwait(false);
+        Interlocked.Exchange(ref latestFrameAtUtcTicks, 0);
+        Volatile.Write(ref streamFailure, (int)CameraStreamFailure.Unavailable);
+        Interlocked.Exchange(ref staleFramePublished, 1);
+        StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void DisposeUnownedMediaCapture(MediaCapture mediaCapture)
+    {
+        mediaCapture.Failed -= OnCameraStreamFailed;
+        mediaCapture.CaptureDeviceExclusiveControlStatusChanged -= OnExclusiveControlStatusChanged;
+        mediaCapture.Dispose();
     }
 
     private static string ResolveStableLabel(DeviceInformation device)
@@ -308,13 +410,17 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 }
 
 internal sealed class CameraOwnedStream(
-    MediaCapture capture,
+    MediaCapture mediaCapture,
     MediaFrameReader reader,
-    TypedEventHandler<MediaFrameReader, MediaFrameArrivedEventArgs> frameHandler) : IAsyncDisposable
+    TypedEventHandler<MediaFrameReader, MediaFrameArrivedEventArgs> frameHandler,
+    MediaCaptureFailedEventHandler failureHandler,
+    TypedEventHandler<MediaCapture, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs> exclusiveControlHandler) : IAsyncDisposable
 {
     public async ValueTask DisposeAsync()
     {
         reader.FrameArrived -= frameHandler;
+        mediaCapture.Failed -= failureHandler;
+        mediaCapture.CaptureDeviceExclusiveControlStatusChanged -= exclusiveControlHandler;
         try
         {
             await reader.StopAsync();
@@ -322,7 +428,7 @@ internal sealed class CameraOwnedStream(
         finally
         {
             reader.Dispose();
-            capture.Dispose();
+            mediaCapture.Dispose();
         }
     }
 }
