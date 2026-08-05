@@ -176,10 +176,14 @@ public sealed class EventPersistenceAcceptanceTests
             new StubIdentityGenerator(new EventId("unused")));
         await orchestrator.ExecuteAsync(new LaunchApplication(), TestContext.Current.CancellationToken);
 
-        var active = await orchestrator.ExecuteAsync(
+        var confirmation = await orchestrator.ExecuteAsync(
             new StartSavedEvent(new EventId("event-1")),
             TestContext.Current.CancellationToken);
+        var active = await orchestrator.ExecuteAsync(
+            new ConfirmStartSavedEvent(),
+            TestContext.Current.CancellationToken);
 
+        Assert.Equal("Start “Summer Party”?", confirmation.StartEventConfirmation!.Prompt);
         Assert.Null(active.Setup);
         Assert.Equal(new EventId("event-1"), active.ActiveEvent!.Id);
         Assert.Equal("camera-1", camera.OpenedDeviceIds.Single().Value);

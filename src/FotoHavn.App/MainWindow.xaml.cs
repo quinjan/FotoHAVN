@@ -67,6 +67,21 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void ConfirmStartEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new ConfirmStartSavedEvent());
+
+    private async void CancelStartEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new CancelStartSavedEvent());
+
+    private async void ExitEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new ExitActiveEvent());
+
+    private async void ConfirmExitEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new ConfirmExitActiveEvent());
+
+    private async void CancelExitEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new CancelExitActiveEvent());
+
     private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
     {
         if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
@@ -203,6 +218,9 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void RetryStorageClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new RetryEventStorage());
+
     private async void CancelSetupClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelEventSetup());
 
@@ -259,6 +277,24 @@ public sealed partial class MainWindow : Window
         {
             HeadingText.Text = presentation.Heading;
             EventTiles.ItemsSource = presentation.EventTiles;
+            var activeEvent = presentation.ActiveEvent;
+            EventScrollViewer.Visibility = activeEvent is null ? Visibility.Visible : Visibility.Collapsed;
+            ActiveEventLayer.Visibility = activeEvent is null ? Visibility.Collapsed : Visibility.Visible;
+            ExitEventConfirmationLayer.Visibility = activeEvent?.ShowsExitConfirmation == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            StartEventConfirmationLayer.Visibility = presentation.StartEventConfirmation is null
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            StartEventConfirmationText.Text = presentation.StartEventConfirmation?.Prompt ?? string.Empty;
+            if (activeEvent is not null)
+            {
+                ActiveEventNameText.Text = activeEvent.Name;
+                ActiveEventHeadingText.Text = activeEvent.Heading;
+                ActiveEventExplanationText.Text = activeEvent.Explanation;
+                StartGuestCycleButton.Content = activeEvent.StartActionLabel;
+            }
+
             var setup = presentation.Setup;
             SetupLayer.Visibility = setup is null ? Visibility.Collapsed : Visibility.Visible;
             DiscardDraftLayer.Visibility = setup?.ShowsDiscardConfirmation == true
@@ -304,9 +340,16 @@ public sealed partial class MainWindow : Window
                 CameraConnectionState.Disconnected => "Disconnected",
                 _ => throw new ArgumentOutOfRangeException(),
             };
+            SetupFailureText.Text = setup.ActionableFailureMessage ?? string.Empty;
+            SetupFailureBorder.Visibility = setup.ActionableFailureMessage is null
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            RetryStorageButton.Visibility = setup.IsStorageReady
+                ? Visibility.Collapsed
+                : Visibility.Visible;
             PrinterComboBox.SelectedIndex = setup.IsNoPrinterSelected ? 0 : -1;
             SaveCloseButton.IsEnabled = setup.CanSave;
-            SaveStartButton.IsEnabled = setup.CanSave;
+            SaveStartButton.IsEnabled = setup.CanStart;
 
             if (setup.CameraMenu.IsOpen && !CameraFlyout.IsOpen)
             {

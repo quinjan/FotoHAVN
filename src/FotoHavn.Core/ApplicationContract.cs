@@ -18,6 +18,8 @@ public sealed record SelectCamera(CameraDeviceId DeviceId) : ApplicationCommand;
 
 public sealed record SelectNoPrinter : ApplicationCommand;
 
+public sealed record RetryEventStorage : ApplicationCommand;
+
 public sealed record CancelEventSetup : ApplicationCommand;
 
 public sealed record KeepEditingEventSetup : ApplicationCommand;
@@ -33,6 +35,18 @@ public sealed record ConfirmEventSetupSave : ApplicationCommand;
 public sealed record CancelEventSetupSave : ApplicationCommand;
 
 public sealed record StartSavedEvent(EventId EventId) : ApplicationCommand;
+
+public sealed record ConfirmStartSavedEvent : ApplicationCommand;
+
+public sealed record CancelStartSavedEvent : ApplicationCommand;
+
+public sealed record ExitActiveEvent : ApplicationCommand;
+
+public sealed record ConfirmExitActiveEvent : ApplicationCommand;
+
+public sealed record CancelExitActiveEvent : ApplicationCommand;
+
+public sealed record ShutdownApplication : ApplicationCommand;
 
 public sealed record DeleteSavedEvent(EventId EventId) : ApplicationCommand;
 
@@ -62,7 +76,13 @@ public sealed record ApplicationPresentation(
     string? EmptyStateMessage,
     ApplicationCanvasPresentation Canvas,
     EventSetupPresentation? Setup = null,
-    ActiveEventPresentation? ActiveEvent = null);
+    ActiveEventPresentation? ActiveEvent = null,
+    StartEventConfirmationPresentation? StartEventConfirmation = null);
+
+public sealed record StartEventConfirmationPresentation(EventId EventId, string EventName)
+{
+    public string Prompt => $"Start “{EventName}”?";
+}
 
 public sealed record ApplicationCanvasPresentation(
     int Width,
@@ -201,13 +221,51 @@ public sealed record EventSetupPresentation(
     public bool ShowsDiscardConfirmation => Confirmation == EventSetupConfirmation.DiscardChanges;
     public bool ShowsSaveConfirmation => Confirmation is EventSetupConfirmation.SaveAndClose or EventSetupConfirmation.SaveAndStart;
     public bool SaveConfirmationStartsEvent => Confirmation == EventSetupConfirmation.SaveAndStart;
+    public bool CanStart =>
+        !string.IsNullOrWhiteSpace(EventName) &&
+        CameraState == CameraConnectionState.Ready &&
+        IsNoPrinterSelected &&
+        IsStorageReady;
+
+    public string? ActionableFailureMessage => !IsStorageReady
+        ? "Event storage is not writable. Fix access to the Events folder, then check storage again."
+        : CameraState switch
+        {
+            CameraConnectionState.Unavailable => "Connect the Camera bound to this Event, then choose that exact Camera again.",
+            CameraConnectionState.AccessDenied => "Allow Windows access to the Camera bound to this Event, then choose it again.",
+            CameraConnectionState.InUseByAnotherApp => "Close the app using the Camera bound to this Event, then choose it again.",
+            CameraConnectionState.Disconnected => "Reconnect the Camera bound to this Event, then choose that exact Camera again.",
+            _ => null,
+        };
 }
 
 public sealed record ActiveEventPresentation(
     EventId Id,
     string Name,
     CameraBinding Camera,
-    string CameraStreamId);
+    string CameraStreamId,
+    bool ShowsExitConfirmation = false)
+{
+    public string Heading => "Let’s take some photos.";
+    public string Explanation => "We’ll take four photos to create your Photo Strip.";
+    public string StartActionLabel => "Touch to start";
+    public bool ShowsExitEvent => true;
+    public bool ShowsHardwareStatus => false;
+}
+
+public interface IActiveEventWakeLock
+{
+    Task AcquireAsync(CancellationToken cancellationToken);
+
+    Task ReleaseAsync(CancellationToken cancellationToken);
+}
+
+public sealed class NoOpActiveEventWakeLock : IActiveEventWakeLock
+{
+    public Task AcquireAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task ReleaseAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}
 
 public interface ICameraBoundary
 {

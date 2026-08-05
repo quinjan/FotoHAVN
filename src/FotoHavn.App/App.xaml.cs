@@ -13,6 +13,7 @@ public partial class App : Application
     private static int windowReady;
     private MainWindow? window;
     private CameraBoundary? camera;
+    private EventGuestCycleOrchestrator? orchestrator;
     private Windows.UI.ViewManagement.UISettings? uiSettings;
 
     public App()
@@ -33,11 +34,12 @@ public partial class App : Application
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         camera = new CameraBoundary();
-        var orchestrator = new EventGuestCycleOrchestrator(
+        orchestrator = new EventGuestCycleOrchestrator(
             new ExecutableRelativeEventFileSystem(),
             camera,
             new PhotoStripCompositor(),
-            new SystemClock());
+            new SystemClock(),
+            wakeLock: new WindowsActiveEventWakeLock());
 
         window = new MainWindow(orchestrator, camera);
         window.Closed += WindowClosed;
@@ -50,10 +52,21 @@ public partial class App : Application
 
     private async void WindowClosed(object sender, WindowEventArgs args)
     {
-        if (camera is not null)
+        try
         {
-            await camera.DisposeAsync();
-            camera = null;
+            if (orchestrator is not null)
+            {
+                await orchestrator.ExecuteAsync(new ShutdownApplication());
+                orchestrator = null;
+            }
+        }
+        finally
+        {
+            if (camera is not null)
+            {
+                await camera.DisposeAsync();
+                camera = null;
+            }
         }
     }
 
