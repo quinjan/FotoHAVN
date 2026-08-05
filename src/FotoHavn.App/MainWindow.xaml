@@ -413,6 +413,7 @@
                         </StackPanel>
                     </StackPanel>
                     <Border
+                        x:Name="GuestPreviewViewport"
                         Grid.Row="1"
                         Width="922.5"
                         HorizontalAlignment="Center"
@@ -421,9 +422,7 @@
                         BorderThickness="1"
                         CornerRadius="10">
                         <Grid>
-                            <Image x:Name="GuestPreviewImage" RenderTransformOrigin="0.5,0.5" Stretch="UniformToFill">
-                                <Image.RenderTransform><ScaleTransform ScaleX="-1" /></Image.RenderTransform>
-                            </Image>
+                            <Image x:Name="GuestPreviewImage" Stretch="UniformToFill" />
                             <Border
                                 Margin="0,17,17,0"
                                 Padding="9,7"

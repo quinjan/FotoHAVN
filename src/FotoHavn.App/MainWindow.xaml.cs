@@ -39,6 +39,12 @@ public sealed partial class MainWindow : Window
             ScaleX = mirror.ScaleX,
             CenterX = mirror.CenterX,
         };
+        var guestMirror = CameraPreviewRenderPolicy.CreateMirror(GuestPreviewViewport.Width);
+        GuestPreviewImage.RenderTransform = new ScaleTransform
+        {
+            ScaleX = guestMirror.ScaleX,
+            CenterX = guestMirror.CenterX,
+        };
         orchestrator.PresentationChanged += PresentationChanged;
         camera.PreviewFrameAvailable += PreviewFrameAvailable;
     }
