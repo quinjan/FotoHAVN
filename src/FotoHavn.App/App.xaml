@@ -74,6 +74,53 @@
                 <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="UseSystemFocusVisuals" Value="False" />
             </Style>
+
+            <Style x:Key="ModalTextButtonStyle" TargetType="Button">
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Medium" />
+            </Style>
+
+            <Style x:Key="ModalOutlineButtonStyle" TargetType="Button">
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Background" Value="White" />
+                <Setter Property="BorderBrush" Value="#FFAEB2B7" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="Foreground" Value="#FF000000" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Medium" />
+            </Style>
+
+            <Style x:Key="ModalPrimaryButtonStyle" TargetType="Button">
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Background" Value="#FF000000" />
+                <Setter Property="BorderBrush" Value="#FF000000" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Medium" />
+            </Style>
+
+            <Style x:Key="ModalDangerButtonStyle" TargetType="Button">
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Background" Value="#FFD4382E" />
+                <Setter Property="BorderBrush" Value="#FFA9231D" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="7" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Medium" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

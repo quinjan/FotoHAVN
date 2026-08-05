@@ -398,88 +398,110 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.ColumnSpan="3" Spacing="4">
-                            <TextBlock x:Name="SetupTitleText" FontSize="28" FontWeight="SemiBold" Text="New Event" />
-                            <TextBlock Foreground="{StaticResource TextMutedBrush}" Text="Choose the exact Camera for this Event." />
+                            <TextBlock
+                                CharacterSpacing="180"
+                                FontSize="9"
+                                FontWeight="Bold"
+                                Text="EVENT SETUP" />
+                            <TextBlock
+                                x:Name="SetupTitleText"
+                                Margin="0,6,0,0"
+                                FontSize="28"
+                                FontWeight="SemiBold"
+                                Text="New Event" />
+                            <TextBlock
+                                Foreground="{StaticResource TextMutedBrush}"
+                                Text="Name the Event and choose its Camera and Printer." />
                         </StackPanel>
 
-                        <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="18">
-                            <StackPanel Spacing="7">
-                                <TextBlock FontWeight="SemiBold" Text="Event name" />
-                                <TextBox
-                                    x:Name="EventNameTextBox"
-                                    AutomationProperties.Name="Event name"
-                                    PlaceholderText="Enter Event name"
-                                    TextChanged="EventNameTextChanged" />
-                                <TextBlock
-                                    x:Name="NameDirtyText"
-                                    Foreground="{StaticResource FocusVisualPrimaryBrush}"
-                                    FontSize="11"
-                                    Text="Changed from the saved Event"
-                                    Visibility="Collapsed" />
-                            </StackPanel>
+                        <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="12">
+                            <Border
+                                Width="410"
+                                Padding="16"
+                                HorizontalAlignment="Left"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <StackPanel Spacing="18">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock FontWeight="SemiBold" Text="Event name" />
+                                        <Grid Width="370" HorizontalAlignment="Left">
+                                            <TextBox
+                                                x:Name="EventNameTextBox"
+                                                Width="370"
+                                                AutomationProperties.Name="Event name"
+                                                PlaceholderText="Enter Event name"
+                                                TextChanged="EventNameTextChanged" />
+                                            <Border
+                                                x:Name="NameDirtyIndicator"
+                                                Width="3"
+                                                Margin="1"
+                                                HorizontalAlignment="Left"
+                                                Background="{StaticResource FocusVisualPrimaryBrush}"
+                                                CornerRadius="5,0,0,5"
+                                                IsHitTestVisible="False"
+                                                Visibility="Collapsed" />
+                                        </Grid>
+                                        <TextBlock
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            FontSize="11"
+                                            Text="Names do not need to be unique." />
+                                    </StackPanel>
 
-                            <StackPanel Spacing="7">
-                                <TextBlock FontWeight="SemiBold" Text="Camera" />
-                                <Button
-                                    x:Name="CameraMenuButton"
-                                    HorizontalContentAlignment="Stretch"
-                                    AutomationProperties.Name="Camera"
-                                    Click="CameraMenuButtonClicked">
-                                    <Grid Width="350">
-                                        <TextBlock x:Name="CameraMenuButtonText" HorizontalAlignment="Left" Text="Select Camera" />
-                                        <TextBlock HorizontalAlignment="Right" Text="⌄" />
-                                    </Grid>
-                                    <Button.Flyout>
-                                        <Flyout
-                                            x:Name="CameraFlyout"
-                                            Closed="CameraFlyoutClosed"
-                                            Placement="BottomEdgeAlignedLeft">
-                                            <ListView
-                                                x:Name="CameraList"
-                                                Width="350"
-                                                MaxHeight="230"
-                                                IsItemClickEnabled="True"
-                                                ItemClick="CameraItemClicked">
-                                                <ListView.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <StackPanel Padding="4" Spacing="2">
-                                                            <TextBlock FontWeight="SemiBold" Text="{Binding DisplayName}" />
-                                                            <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="{Binding SecondaryLabel}" />
-                                                        </StackPanel>
-                                                    </DataTemplate>
-                                                </ListView.ItemTemplate>
-                                            </ListView>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <TextBlock x:Name="CameraStatusText" Foreground="{StaticResource TextMutedBrush}" Text="Select a Camera" />
-                                <TextBlock
-                                    x:Name="CameraDirtyText"
-                                    Foreground="{StaticResource FocusVisualPrimaryBrush}"
-                                    FontSize="11"
-                                    Text="Changed from the saved Event"
-                                    Visibility="Collapsed" />
-                            </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock FontWeight="SemiBold" Text="Camera" />
+                                        <Grid Width="370" HorizontalAlignment="Left">
+                                            <ComboBox
+                                                x:Name="CameraComboBox"
+                                                Width="370"
+                                                AutomationProperties.Name="Camera"
+                                                DisplayMemberPath="DisplayName"
+                                                MaxDropDownHeight="230"
+                                                PlaceholderText="Select Camera"
+                                                SelectionChanged="CameraSelectionChanged" />
+                                            <Border
+                                                x:Name="CameraDirtyIndicator"
+                                                Width="3"
+                                                Margin="1"
+                                                HorizontalAlignment="Left"
+                                                Background="{StaticResource FocusVisualPrimaryBrush}"
+                                                CornerRadius="5,0,0,5"
+                                                IsHitTestVisible="False"
+                                                Visibility="Collapsed" />
+                                        </Grid>
+                                        <TextBlock
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            FontSize="11"
+                                            Text="Only available Cameras are shown." />
+                                    </StackPanel>
 
-                            <StackPanel Spacing="7">
-                                <TextBlock FontWeight="SemiBold" Text="Printer" />
-                                <ComboBox
-                                    x:Name="PrinterComboBox"
-                                    Width="370"
-                                    HorizontalAlignment="Left"
-                                    AutomationProperties.Name="Printer"
-                                    PlaceholderText="Choose Printer"
-                                    SelectionChanged="PrinterSelectionChanged">
-                                    <ComboBoxItem Content="No Printer" />
-                                </ComboBox>
-                                <TextBlock
-                                    x:Name="StorageStatusText"
-                                    Foreground="{StaticResource DangerBrush}"
-                                    FontSize="11"
-                                    Text="Event storage is not writable. Nothing was saved or started."
-                                    TextWrapping="Wrap"
-                                    Visibility="Collapsed" />
-                            </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock FontWeight="SemiBold" Text="Printer" />
+                                        <ComboBox
+                                            x:Name="PrinterComboBox"
+                                            Width="370"
+                                            HorizontalAlignment="Left"
+                                            AutomationProperties.HelpText="Printing is optional for this Event."
+                                            AutomationProperties.Name="Printer"
+                                            PlaceholderText="Choose Printer"
+                                            SelectionChanged="PrinterSelectionChanged">
+                                            <ComboBoxItem Content="No Printer" />
+                                        </ComboBox>
+                                        <TextBlock
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            FontSize="11"
+                                            Text="Printing is optional for this Event." />
+                                        <TextBlock
+                                            x:Name="StorageStatusText"
+                                            Foreground="{StaticResource DangerBrush}"
+                                            FontSize="11"
+                                            Text="Event storage is not writable. Nothing was saved or started."
+                                            TextWrapping="Wrap"
+                                            Visibility="Collapsed" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
 
                             <Border
                                 x:Name="SetupFailureBorder"
@@ -514,7 +536,11 @@
                                 CornerRadius="8">
                                 <Grid>
                                     <Grid x:Name="PreviewSurface">
-                                        <Image x:Name="PreviewImage" Stretch="UniformToFill" />
+                                        <Image
+                                            x:Name="PreviewImage"
+                                            AutomationProperties.HelpText="Mirrored preview of the 3:2 Capture area."
+                                            AutomationProperties.Name="Live preview from the selected Camera"
+                                            Stretch="UniformToFill" />
                                     </Grid>
                                     <!-- The full preview viewport is the deterministic 3:2 Capture crop. -->
                                     <Border BorderBrush="White" BorderThickness="2" CornerRadius="5" Opacity="0.82" />
@@ -530,10 +556,10 @@
                         </StackPanel>
 
                         <Grid Grid.Row="2" Grid.ColumnSpan="3" Margin="0,24,0,0">
-                            <Button Content="Cancel" Click="CancelSetupClicked" />
+                            <Button Content="Cancel" Click="CancelSetupClicked" Style="{StaticResource ModalTextButtonStyle}" />
                             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                                <Button x:Name="SaveCloseButton" Content="Save &amp; Close" Click="SaveCloseClicked" IsEnabled="False" />
-                                <Button x:Name="SaveStartButton" Content="Save &amp; Start Event" Click="SaveStartClicked" IsEnabled="False" />
+                                <Button x:Name="SaveCloseButton" Content="Save &amp; Close" Click="SaveCloseClicked" IsEnabled="False" Style="{StaticResource ModalOutlineButtonStyle}" />
+                                <Button x:Name="SaveStartButton" Content="Save &amp; Start Event" Click="SaveStartClicked" IsEnabled="False" Style="{StaticResource ModalPrimaryButtonStyle}" />
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -557,8 +583,8 @@
                                 Text="Your unsaved Event changes will be lost."
                                 TextWrapping="Wrap" />
                             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                                <Button Content="Keep Editing" Click="KeepEditingClicked" />
-                                <Button x:Name="DiscardActionButton" Content="Discard Draft" Click="DiscardDraftClicked" />
+                                <Button Content="Keep Editing" Click="KeepEditingClicked" Style="{StaticResource ModalTextButtonStyle}" />
+                                <Button x:Name="DiscardActionButton" Content="Discard Draft" Click="DiscardDraftClicked" Style="{StaticResource ModalDangerButtonStyle}" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -582,8 +608,8 @@
                                 Text="The new Event name and Camera Binding affect only future Guest Cycles. Completed Guest Cycles and their artifacts will not change."
                                 TextWrapping="Wrap" />
                             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                                <Button Content="Keep Editing" Click="CancelSaveClicked" />
-                                <Button x:Name="ConfirmSaveButton" Content="Save Changes" Click="ConfirmSaveClicked" />
+                                <Button Content="Keep Editing" Click="CancelSaveClicked" Style="{StaticResource ModalTextButtonStyle}" />
+                                <Button x:Name="ConfirmSaveButton" Content="Save Changes" Click="ConfirmSaveClicked" Style="{StaticResource ModalPrimaryButtonStyle}" />
                             </StackPanel>
                         </StackPanel>
                     </Border>

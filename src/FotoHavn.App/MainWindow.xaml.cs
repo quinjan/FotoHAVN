@@ -1,6 +1,7 @@
 using FotoHavn.Core;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -195,17 +196,10 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void CameraMenuButtonClicked(object sender, RoutedEventArgs args) =>
-        await ExecuteAsync(new ToggleCameraMenu());
-
-    private async void CameraFlyoutClosed(object? sender, object args) =>
-        await ExecuteAsync(new DismissCameraMenu());
-
-    private async void CameraItemClicked(object sender, ItemClickEventArgs args)
+    private async void CameraSelectionChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (args.ClickedItem is AvailableCamera selected)
+        if (!applyingPresentation && CameraComboBox.SelectedItem is AvailableCamera selected)
         {
-            CameraFlyout.Hide();
             await ExecuteAsync(new SelectCamera(selected.DeviceId));
         }
     }
@@ -253,10 +247,9 @@ public sealed partial class MainWindow : Window
 
         if (args.Key == Windows.System.VirtualKey.Escape)
         {
-            if (CameraFlyout.IsOpen)
+            if (CameraComboBox.IsDropDownOpen)
             {
-                CameraFlyout.Hide();
-                await ExecuteAsync(new DismissCameraMenu());
+                CameraComboBox.IsDropDownOpen = false;
             }
             else
             {
@@ -317,29 +310,21 @@ public sealed partial class MainWindow : Window
             }
 
             SetupTitleText.Text = setup.Title;
-            NameDirtyText.Visibility = setup.IsNameDirty ? Visibility.Visible : Visibility.Collapsed;
-            CameraDirtyText.Visibility = setup.IsCameraDirty ? Visibility.Visible : Visibility.Collapsed;
-            StorageStatusText.Visibility = setup.IsStorageReady ? Visibility.Collapsed : Visibility.Visible;
             var editingSavedEvent = setup.EventId is not null;
+            ApplyDirtyFieldState(EventNameTextBox, NameDirtyIndicator, setup.IsNameDirty, editingSavedEvent);
+            ApplyDirtyFieldState(CameraComboBox, CameraDirtyIndicator, setup.IsCameraDirty, editingSavedEvent);
+            StorageStatusText.Visibility = setup.IsStorageReady ? Visibility.Collapsed : Visibility.Visible;
             DiscardTitleText.Text = editingSavedEvent ? "Discard changes?" : "Discard this draft?";
             DiscardActionButton.Content = editingSavedEvent ? "Discard Changes" : "Discard Draft";
             ConfirmSaveButton.Content = setup.SaveConfirmationStartsEvent
                 ? "Save & Start Event"
                 : "Save & Close";
 
-            CameraList.ItemsSource = setup.AvailableCameras;
-            CameraMenuButtonText.Text = setup.SelectedCamera?.DisplayName ?? "Select Camera";
-            CameraStatusText.Text = setup.CameraState switch
-            {
-                CameraConnectionState.NotSelected => "Select a Camera",
-                CameraConnectionState.Connecting => "Connecting…",
-                CameraConnectionState.Ready => "Ready",
-                CameraConnectionState.Unavailable => "Unavailable",
-                CameraConnectionState.AccessDenied => "Access denied",
-                CameraConnectionState.InUseByAnotherApp => "In use by another app",
-                CameraConnectionState.Disconnected => "Disconnected",
-                _ => throw new ArgumentOutOfRangeException(),
-            };
+            CameraComboBox.ItemsSource = setup.AvailableCameras;
+            CameraComboBox.SelectedItem = setup.SelectedCamera is null
+                ? null
+                : setup.AvailableCameras.FirstOrDefault(camera =>
+                    camera.DeviceId == setup.SelectedCamera.DeviceId);
             SetupFailureText.Text = setup.ActionableFailureMessage ?? string.Empty;
             SetupFailureBorder.Visibility = setup.ActionableFailureMessage is null
                 ? Visibility.Collapsed
@@ -351,19 +336,29 @@ public sealed partial class MainWindow : Window
             SaveCloseButton.IsEnabled = setup.CanSave;
             SaveStartButton.IsEnabled = setup.CanStart;
 
-            if (setup.CameraMenu.IsOpen && !CameraFlyout.IsOpen)
-            {
-                CameraFlyout.ShowAt(CameraMenuButton);
-            }
-            else if (!setup.CameraMenu.IsOpen && CameraFlyout.IsOpen)
-            {
-                CameraFlyout.Hide();
-            }
         }
         finally
         {
             applyingPresentation = false;
         }
+    }
+
+    private static void ApplyDirtyFieldState(
+        Control control,
+        FrameworkElement indicator,
+        bool isDirty,
+        bool editingSavedEvent)
+    {
+        control.ClearValue(Control.BorderBrushProperty);
+        control.ClearValue(Control.BorderThicknessProperty);
+        indicator.Visibility = isDirty ? Visibility.Visible : Visibility.Collapsed;
+        AutomationProperties.SetHelpText(
+            control,
+            isDirty
+                ? editingSavedEvent
+                    ? "Changed from the saved Event."
+                    : "Changed from the initial value."
+                : string.Empty);
     }
 
     private void PreviewFrameAvailable(object? sender, SoftwareBitmap bitmap)
