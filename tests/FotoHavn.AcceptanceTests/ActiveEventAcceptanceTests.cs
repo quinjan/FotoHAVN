@@ -88,6 +88,8 @@ public sealed class ActiveEventAcceptanceTests
         var active = await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
 
         Assert.True(retried.Setup!.IsStorageReady);
+        Assert.False(retried.Setup.CanSave);
+        Assert.True(retried.Setup.CanStart);
         Assert.Equal("stream-1", active.ActiveEvent!.CameraStreamId);
         Assert.Equal(1, camera.OpenCount);
         Assert.Equal(0, camera.ReleaseCount);

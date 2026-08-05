@@ -30,6 +30,10 @@ public sealed record SaveAndCloseEventSetup : ApplicationCommand;
 
 public sealed record SaveAndStartEvent : ApplicationCommand;
 
+public sealed record ConfirmEventSetupSave : ApplicationCommand;
+
+public sealed record CancelEventSetupSave : ApplicationCommand;
+
 public sealed record StartSavedEvent(EventId EventId) : ApplicationCommand;
 
 public sealed record ConfirmStartSavedEvent : ApplicationCommand;
@@ -185,6 +189,14 @@ public sealed record CameraPreviewPresentation(
     int CropHeightRatio,
     bool UsesSelectedCameraStream);
 
+public enum EventSetupConfirmation
+{
+    None,
+    DiscardChanges,
+    SaveAndClose,
+    SaveAndStart,
+}
+
 public sealed record EventSetupPresentation(
     bool IsOpen,
     bool IsBackdropInert,
@@ -201,9 +213,20 @@ public sealed record EventSetupPresentation(
     bool CanSave,
     EventId? EventId = null,
     bool IsDirty = false,
-    bool ShowsDiscardConfirmation = false,
+    bool IsNameDirty = false,
+    bool IsCameraDirty = false,
+    EventSetupConfirmation Confirmation = EventSetupConfirmation.None,
     string Title = "New Event")
 {
+    public bool ShowsDiscardConfirmation => Confirmation == EventSetupConfirmation.DiscardChanges;
+    public bool ShowsSaveConfirmation => Confirmation is EventSetupConfirmation.SaveAndClose or EventSetupConfirmation.SaveAndStart;
+    public bool SaveConfirmationStartsEvent => Confirmation == EventSetupConfirmation.SaveAndStart;
+    public bool CanStart =>
+        !string.IsNullOrWhiteSpace(EventName) &&
+        CameraState == CameraConnectionState.Ready &&
+        IsNoPrinterSelected &&
+        IsStorageReady;
+
     public string? ActionableFailureMessage => !IsStorageReady
         ? "Event storage is not writable. Fix access to the Events folder, then check storage again."
         : CameraState switch

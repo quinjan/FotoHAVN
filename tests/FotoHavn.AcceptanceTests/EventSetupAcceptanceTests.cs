@@ -131,6 +131,81 @@ public sealed class EventSetupAcceptanceTests
     }
 
     [Fact]
+    public async Task Editing_a_saved_Event_opens_its_available_Camera_and_tracks_dirty_fields_independently()
+    {
+        var saved = new EventConfiguration(
+            new EventId("event-1"),
+            "Summer Party",
+            new CameraBinding("camera-1", "Saved Camera Name"),
+            PrinterChoice.NoPrinter,
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var fileSystem = new FakeFileSystem();
+        fileSystem.SavedEvents.Add(saved);
+        var camera = new FakeCameraBoundary(
+            new AvailableCamera("camera-1", "Current Camera Name", "Port 4"),
+            new AvailableCamera("camera-2", "Backup Camera", "Port 7"));
+        var orchestrator = CreateOrchestrator(camera, fileSystem);
+
+        var opened = await orchestrator.ExecuteAsync(new OpenSavedEvent(saved.Id), TestContext.Current.CancellationToken);
+
+        Assert.Equal(CameraConnectionState.Ready, opened.Setup!.CameraState);
+        Assert.Equal(2, opened.Setup.AvailableCameras.Count);
+        Assert.Equal("camera-1", camera.OpenedDeviceIds.Single().Value);
+        Assert.False(opened.Setup.IsDirty);
+        Assert.False(opened.Setup.IsNameDirty);
+        Assert.False(opened.Setup.IsCameraDirty);
+        Assert.False(opened.Setup.CanSave);
+
+        var renamed = await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        Assert.True(renamed.Setup!.IsNameDirty);
+        Assert.False(renamed.Setup.IsCameraDirty);
+
+        var nameRestored = await orchestrator.ExecuteAsync(new ChangeEventName("Summer Party"), TestContext.Current.CancellationToken);
+        Assert.False(nameRestored.Setup!.IsNameDirty);
+        Assert.False(nameRestored.Setup!.IsDirty);
+
+        var rebound = await orchestrator.ExecuteAsync(new SelectCamera("camera-2"), TestContext.Current.CancellationToken);
+        Assert.False(rebound.Setup!.IsNameDirty);
+        Assert.True(rebound.Setup.IsCameraDirty);
+
+        var bindingRestored = await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
+        Assert.False(bindingRestored.Setup!.IsCameraDirty);
+        Assert.False(bindingRestored.Setup!.IsDirty);
+    }
+
+    [Fact]
+    public async Task Discarding_saved_Event_edits_restores_the_complete_persisted_configuration()
+    {
+        var saved = new EventConfiguration(
+            new EventId("event-1"),
+            "Summer Party",
+            new CameraBinding("camera-1", "Booth Camera"),
+            PrinterChoice.NoPrinter,
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var fileSystem = new FakeFileSystem();
+        fileSystem.SavedEvents.Add(saved);
+        var camera = new FakeCameraBoundary(
+            new AvailableCamera("camera-1", "Booth Camera", "Port 4"),
+            new AvailableCamera("camera-2", "Backup Camera", "Port 7"));
+        var orchestrator = CreateOrchestrator(camera, fileSystem);
+        await orchestrator.ExecuteAsync(new OpenSavedEvent(saved.Id), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new ChangeEventName("Winter Party"), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new SelectCamera("camera-2"), TestContext.Current.CancellationToken);
+
+        var confirmation = await orchestrator.ExecuteAsync(new CancelEventSetup(), TestContext.Current.CancellationToken);
+        Assert.True(confirmation.Setup!.ShowsDiscardConfirmation);
+        await orchestrator.ExecuteAsync(new DiscardEventSetupDraft(), TestContext.Current.CancellationToken);
+        var reopened = await orchestrator.ExecuteAsync(new OpenSavedEvent(saved.Id), TestContext.Current.CancellationToken);
+
+        Assert.Equal("Summer Party", reopened.Setup!.EventName);
+        Assert.Equal("camera-1", reopened.Setup.SelectedCamera!.DeviceId.Value);
+        Assert.True(reopened.Setup.IsNoPrinterSelected);
+        Assert.False(reopened.Setup.IsDirty);
+    }
+
+    [Fact]
     public async Task Camera_can_be_reselected_after_a_failed_open_without_reusing_failed_state()
     {
         var camera = new FakeCameraBoundary(new AvailableCamera("camera-1", "USB Camera", "Port 4"))
@@ -245,6 +320,7 @@ public sealed class EventSetupAcceptanceTests
         public int StartDiscoveryCount { get; private set; }
         public int OpenCount { get; private set; }
         public int ReleaseCount { get; private set; }
+        public List<CameraDeviceId> OpenedDeviceIds { get; } = [];
 
         public Task StartDiscoveryAsync(CancellationToken cancellationToken)
         {
@@ -255,6 +331,7 @@ public sealed class EventSetupAcceptanceTests
         public Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken)
         {
             OpenCount++;
+            OpenedDeviceIds.Add(deviceId);
             StreamId = NextOpenResult is CameraOpenResult.Ready ? $"stream-{OpenCount}" : null;
             return Task.FromResult(NextOpenResult);
         }
