@@ -91,5 +91,8 @@ public partial class App : Application
             uiSettings.AnimationsEnabled,
             TimeSpan.FromMilliseconds(180));
         Resources["FotoHavnStandardMotionDuration"] = new Duration(duration);
+        Resources["FotoHavnPreviewFadeDuration"] = new Duration(MotionPolicy.ResolveDuration(
+            uiSettings.AnimationsEnabled,
+            TimeSpan.FromMilliseconds(450)));
     }
 }

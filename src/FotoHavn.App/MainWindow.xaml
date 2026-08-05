@@ -267,54 +267,276 @@
                 Grid.RowSpan="2"
                 Background="{StaticResource CanvasBrush}"
                 Visibility="Collapsed">
-                <Button
-                    x:Name="ExitEventButton"
-                    Margin="28"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    AutomationProperties.Name="Exit Event"
-                    Click="ExitEventClicked"
-                    Content="Exit Event" />
-                <StackPanel
-                    Width="720"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="16">
-                    <TextBlock
-                        x:Name="ActiveEventNameText"
+                <Grid x:Name="StartGuestLayer">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="58" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border
+                        Background="#D1FFFFFF"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="0,0,0,1">
+                        <Grid Margin="28,0,19,0">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
+                                <Border Width="22" Height="22" Background="#FF202124" CornerRadius="5">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="White"
+                                        FontSize="13"
+                                        FontWeight="Bold"
+                                        Text="F" />
+                                </Border>
+                                <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
+                            </StackPanel>
+                            <Button
+                                x:Name="ExitEventButton"
+                                MinWidth="96"
+                                MinHeight="44"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="Exit Event"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Click="ExitEventClicked">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="14" Glyph="&#xE7E8;" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="12" Text="Exit Event" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <StackPanel
+                        Grid.Row="1"
+                        Width="780"
+                        Padding="0,0,0,28"
                         HorizontalAlignment="Center"
-                        CharacterSpacing="120"
-                        FontSize="18"
-                        FontWeight="SemiBold"
-                        TextAlignment="Center"
-                        TextWrapping="Wrap" />
+                        VerticalAlignment="Center"
+                        Spacing="0">
+                        <TextBlock
+                            x:Name="ActiveEventNameText"
+                            HorizontalAlignment="Center"
+                            CharacterSpacing="150"
+                            FontSize="10"
+                            FontWeight="Bold"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Name="ActiveEventHeadingText"
+                            Margin="0,17,0,0"
+                            HorizontalAlignment="Center"
+                            CharacterSpacing="-40"
+                            FontSize="60"
+                            FontWeight="Bold"
+                            AutomationProperties.HeadingLevel="Level1"
+                            TextAlignment="Center" />
+                        <TextBlock
+                            x:Name="ActiveEventExplanationText"
+                            Margin="0,13,0,0"
+                            HorizontalAlignment="Center"
+                            Foreground="{StaticResource TextMutedBrush}"
+                            FontSize="16"
+                            TextAlignment="Center" />
+                        <Button
+                            x:Name="StartGuestCycleButton"
+                            MinWidth="204"
+                            MinHeight="68"
+                            Margin="0,33,0,0"
+                            HorizontalAlignment="Center"
+                            HorizontalContentAlignment="Center"
+                            AutomationProperties.Name="Touch to start"
+                            Background="Black"
+                            BorderBrush="Black"
+                            BorderThickness="1"
+                            Click="StartGuestCycleClicked"
+                            CornerRadius="9"
+                            FocusVisualPrimaryThickness="3"
+                            FocusVisualSecondaryThickness="0"
+                            FontSize="17"
+                            FontWeight="SemiBold"
+                            Foreground="White">
+                            <Button.Resources>
+                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF000000" />
+                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FF1C1D1F" />
+                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFFFF" />
+                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFFFF" />
+                                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FF000000" />
+                                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#FF1C1D1F" />
+                            </Button.Resources>
+                            <StackPanel Orientation="Horizontal" Spacing="11">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="19" Glyph="&#xE768;" />
+                                <TextBlock VerticalAlignment="Center" Foreground="White" Text="Touch to start" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                     <TextBlock
-                        x:Name="ActiveEventHeadingText"
+                        Grid.Row="1"
+                        Margin="0,0,0,66"
                         HorizontalAlignment="Center"
-                        FontSize="44"
-                        FontWeight="Bold"
-                        TextAlignment="Center" />
-                    <TextBlock
-                        x:Name="ActiveEventExplanationText"
+                        VerticalAlignment="Bottom"
+                        Foreground="#FF8B8E92"
+                        FontSize="10"
+                        Text="Photos stay with this Event." />
+                </Grid>
+
+                <Grid x:Name="GuestCaptureLayer" Padding="24,20,24,42" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="43" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Border Width="22" Height="22" Background="#FF202124" CornerRadius="5">
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="13" FontWeight="Bold" Text="F" />
+                        </Border>
+                        <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="12">
+                        <TextBlock
+                            x:Name="CaptureProgressText"
+                            VerticalAlignment="Center"
+                            CharacterSpacing="100"
+                            FontSize="10"
+                            FontWeight="Bold" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border x:Name="CaptureStep1Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
+                                <Grid><TextBlock x:Name="CaptureStep1Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="1" /><FontIcon x:Name="CaptureStep1Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
+                            </Border>
+                            <Border x:Name="CaptureStep2Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
+                                <Grid><TextBlock x:Name="CaptureStep2Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="2" /><FontIcon x:Name="CaptureStep2Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
+                            </Border>
+                            <Border x:Name="CaptureStep3Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
+                                <Grid><TextBlock x:Name="CaptureStep3Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="3" /><FontIcon x:Name="CaptureStep3Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
+                            </Border>
+                            <Border x:Name="CaptureStep4Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
+                                <Grid><TextBlock x:Name="CaptureStep4Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="4" /><FontIcon x:Name="CaptureStep4Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                    <Border
+                        Grid.Row="1"
+                        Width="922.5"
                         HorizontalAlignment="Center"
-                        Foreground="{StaticResource TextMutedBrush}"
-                        FontSize="18"
-                        TextAlignment="Center" />
+                        Background="#FF17181A"
+                        BorderBrush="#FFBFC3C7"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                        <Grid>
+                            <Image x:Name="GuestPreviewImage" RenderTransformOrigin="0.5,0.5" Stretch="UniformToFill">
+                                <Image.RenderTransform><ScaleTransform ScaleX="-1" /></Image.RenderTransform>
+                            </Image>
+                            <Border
+                                Margin="0,17,17,0"
+                                Padding="9,7"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Background="#E6FFFFFF"
+                                CornerRadius="6">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE722;" />
+                                    <TextBlock CharacterSpacing="90" FontSize="9" FontWeight="Bold" Text="LIVE · MIRRORED" />
+                                </StackPanel>
+                            </Border>
+                            <Grid x:Name="CountdownOverlay" Background="#1A0F1011">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock HorizontalAlignment="Center" CharacterSpacing="200" Foreground="White" FontSize="13" FontWeight="Bold" Text="GET READY" />
+                                    <TextBlock x:Name="CountdownText" HorizontalAlignment="Center" Foreground="White" FontSize="190" FontWeight="Bold" Text="5" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid x:Name="FlashOverlay" Background="White" Visibility="Collapsed" />
+                            <Border
+                                x:Name="CaptureSavedOverlay"
+                                MinWidth="240"
+                                MinHeight="65"
+                                Margin="0,0,0,38"
+                                Padding="20,10"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Background="#E6121314"
+                                CornerRadius="9"
+                                Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="White" Glyph="&#xE73E;" />
+                                    <StackPanel><TextBlock Foreground="White" FontSize="14" FontWeight="SemiBold" Text="Capture saved" /><TextBlock Foreground="#FFD9DBDD" FontSize="10" Text="Get ready for the next one" /></StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid
+                    x:Name="GuestAssistanceLayer"
+                    Padding="28"
+                    AutomationProperties.LiveSetting="Assertive"
+                    Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Border Width="22" Height="22" Background="#FF202124" CornerRadius="5"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="13" FontWeight="Bold" Text="F" /></Border>
+                        <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
+                    </StackPanel>
                     <Button
-                        x:Name="StartGuestCycleButton"
-                        MinWidth="280"
-                        MinHeight="68"
-                        Margin="0,28,0,0"
-                        HorizontalAlignment="Center"
-                        HorizontalContentAlignment="Center"
-                        AutomationProperties.Name="Touch to start"
-                        Background="#FF111214"
-                        BorderBrush="#FF111214"
-                        Content="Touch to start"
-                        FontSize="20"
-                        FontWeight="SemiBold"
-                        Foreground="White" />
-                </StackPanel>
+                        x:Name="AssistanceExitEventButton"
+                        MinWidth="96"
+                        MinHeight="44"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        AutomationProperties.Name="Exit Event"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="ExitEventClicked"
+                        Content="Exit Event" />
+                    <StackPanel Width="600" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="52" Height="52" HorizontalAlignment="Center" Background="#FFFFF0EE" CornerRadius="26">
+                            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="25" Foreground="#FFC7362F" Glyph="&#xEA39;" />
+                        </Border>
+                        <TextBlock x:Name="AssistanceEyebrowText" Margin="0,24,0,0" HorizontalAlignment="Center" CharacterSpacing="150" FontSize="10" FontWeight="Bold" Text="WE PAUSED YOUR PHOTOS" />
+                        <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="Level1" CharacterSpacing="-40" FontSize="48" FontWeight="Bold" Text="Please call the operator." />
+                        <TextBlock x:Name="AssistanceMessageText" Margin="0,12,0,0" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="15" TextAlignment="Center" TextWrapping="Wrap" />
+                        <Border Width="365" Margin="0,28,0,0" Padding="14" HorizontalAlignment="Center" Background="White" BorderBrush="#FFE0AAA5" BorderThickness="1" CornerRadius="8">
+                            <StackPanel Orientation="Horizontal" Spacing="13">
+                                <Border Width="36" Height="36" Background="#FFFFF0EE" CornerRadius="7"><FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#FFC7362F" Glyph="&#xE722;" /></Border>
+                                <StackPanel><TextBlock x:Name="AssistanceDetailTitle" FontSize="12" FontWeight="SemiBold" /><TextBlock x:Name="AssistanceProgressText" Margin="0,4,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="10" /></StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Button
+                            MinWidth="160"
+                            MinHeight="68"
+                            Margin="0,24,0,0"
+                            HorizontalAlignment="Center"
+                            AutomationProperties.Name="Retry"
+                            Background="Black"
+                            BorderBrush="Black"
+                            Click="RetryGuestCycleClicked"
+                            CornerRadius="9"
+                            FocusVisualPrimaryThickness="3"
+                            FocusVisualSecondaryThickness="0"
+                            Foreground="White">
+                            <Button.Resources>
+                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF000000" />
+                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FF1C1D1F" />
+                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFFFF" />
+                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFFFF" />
+                                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FF000000" />
+                                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#FF1C1D1F" />
+                            </Button.Resources>
+                            <StackPanel Orientation="Horizontal" Spacing="11"><FontIcon FontFamily="Segoe MDL2 Assets" FontSize="19" Glyph="&#xE72C;" /><TextBlock VerticalAlignment="Center" Foreground="White" FontSize="17" FontWeight="SemiBold" Text="Retry" /></StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="PhotoStripLayer" Padding="120,46" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="420" /></Grid.ColumnDefinitions>
+                    <StackPanel Width="520" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock CharacterSpacing="150" FontSize="10" FontWeight="Bold" Text="ALL FOUR CAPTURES SAVED" />
+                        <TextBlock Margin="0,17,0,0" AutomationProperties.HeadingLevel="Level1" CharacterSpacing="-40" FontSize="50" FontWeight="Bold" Text="Here’s your Photo Strip." />
+                        <TextBlock x:Name="PhotoStripReturnText" Margin="0,14,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="15" TextWrapping="Wrap" />
+                        <Grid Width="310" Height="3" Margin="0,30,0,0" HorizontalAlignment="Left" Background="#FFD8DADE">
+                            <Border x:Name="ReturnProgressFill" Width="310" HorizontalAlignment="Left" Background="#FF1C1D1F" />
+                        </Grid>
+                    </StackPanel>
+                    <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Background="White">
+                        <Border.RenderTransform><RotateTransform Angle="1.5" /></Border.RenderTransform>
+                        <Image x:Name="PhotoStripImage" Width="190" Height="570" Stretch="Uniform" />
+                    </Border>
+                </Grid>
 
                 <Grid
                     x:Name="ExitEventConfirmationLayer"

@@ -22,7 +22,7 @@ public sealed class ActiveEventAcceptanceTests
         Assert.Null(state.Setup);
         Assert.Equal("Mika & Paolo's Wedding", state.ActiveEvent!.Name);
         Assert.Equal("Let’s take some photos.", state.ActiveEvent.Heading);
-        Assert.Equal("We’ll take four photos to create your Photo Strip.", state.ActiveEvent.Explanation);
+        Assert.Equal("Four Captures. A quick countdown before each one.", state.ActiveEvent.Explanation);
         Assert.Equal("Touch to start", state.ActiveEvent.StartActionLabel);
         Assert.True(state.ActiveEvent.ShowsExitEvent);
         Assert.False(state.ActiveEvent.ShowsHardwareStatus);

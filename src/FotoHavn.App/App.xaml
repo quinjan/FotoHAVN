@@ -29,6 +29,7 @@
 
             <!-- Motion is opt-in. Later views resolve preferred durations through MotionPolicy. -->
             <Duration x:Key="FotoHavnStandardMotionDuration">0:0:0</Duration>
+            <Duration x:Key="FotoHavnPreviewFadeDuration">0:0:0</Duration>
 
             <Style TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource FotoHavnFontFamily}" />

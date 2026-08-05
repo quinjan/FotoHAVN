@@ -1,6 +1,9 @@
 using System.Text.Json;
 using FotoHavn.App;
 using FotoHavn.Core;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Graphics.Imaging;
+using Windows.Storage.Streams;
 using Xunit;
 
 namespace FotoHavn.WindowsIntegrationTests;
@@ -49,6 +52,200 @@ public sealed class EventFileSystemIntegrationTests
                 Directory.Delete(root, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public async Task Guest_Cycle_commits_only_validated_canonical_artifacts_and_completion_manifest()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            TestContext.Current.CancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        var jpeg = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+
+        var created = await fileSystem.CreateGuestCycleAsync(
+            savedEvent.Id,
+            guestCycleId,
+            savedEvent.LastSavedAt,
+            TestContext.Current.CancellationToken);
+        for (var captureNumber = 1; captureNumber <= 4; captureNumber++)
+        {
+            var committed = await fileSystem.CommitCaptureAsync(
+                savedEvent.Id,
+                guestCycleId,
+                captureNumber,
+                new CapturedFrame(captureNumber, savedEvent.LastSavedAt, 6, 4, jpeg),
+                TestContext.Current.CancellationToken);
+            Assert.True(committed.Committed);
+        }
+
+        var png = await EncodeSolidAsync(BitmapEncoder.PngEncoderId, 2, 6);
+        var strip = await fileSystem.CommitPhotoStripAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new PhotoStripCompositionResult(true, png, 2, 6),
+            TestContext.Current.CancellationToken);
+        await fileSystem.CompleteGuestCycleAsync(
+            savedEvent.Id,
+            guestCycleId,
+            savedEvent.LastSavedAt.AddMinutes(1),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(GuestCycleCreateResult.Created, created);
+        Assert.True(strip.Committed);
+        var guestCycleDirectory = Path.Combine(directory.Path, savedEvent.Id.Value, "GuestCycles", guestCycleId.Value);
+        Assert.Equal(
+            ["capture-1.jpg", "capture-2.jpg", "capture-3.jpg", "capture-4.jpg", "guest-cycle.json", "photo-strip.png"],
+            Directory.GetFiles(guestCycleDirectory).Select(path => Path.GetFileName(path)!).Order().ToArray());
+        var manifest = await File.ReadAllTextAsync(
+            Path.Combine(guestCycleDirectory, "guest-cycle.json"),
+            TestContext.Current.CancellationToken);
+        Assert.Contains("\"completedAt\"", manifest, StringComparison.Ordinal);
+        Assert.DoesNotContain(".partial", manifest, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Invalid_Capture_never_replaces_or_creates_a_canonical_artifact()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            TestContext.Current.CancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(
+            savedEvent.Id,
+            guestCycleId,
+            savedEvent.LastSavedAt,
+            TestContext.Current.CancellationToken);
+
+        var committed = await fileSystem.CommitCaptureAsync(
+            savedEvent.Id,
+            guestCycleId,
+            1,
+            new CapturedFrame(1, savedEvent.LastSavedAt, 6, 4, new byte[] { 1, 2, 3 }),
+            TestContext.Current.CancellationToken);
+
+        Assert.False(committed.Committed);
+        var guestCycleDirectory = Path.Combine(directory.Path, savedEvent.Id.Value, "GuestCycles", guestCycleId.Value);
+        Assert.Equal(["guest-cycle.json"], Directory.GetFiles(guestCycleDirectory).Select(path => Path.GetFileName(path)!));
+    }
+
+    [Fact]
+    public async Task Retry_repairs_a_valid_canonical_Capture_missing_from_the_manifest_without_overwriting_it()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            TestContext.Current.CancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(
+            savedEvent.Id,
+            guestCycleId,
+            savedEvent.LastSavedAt,
+            TestContext.Current.CancellationToken);
+        var guestCycleDirectory = Path.Combine(directory.Path, savedEvent.Id.Value, "GuestCycles", guestCycleId.Value);
+        var canonicalPath = Path.Combine(guestCycleDirectory, "capture-1.jpg");
+        var canonicalBytes = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+        await File.WriteAllBytesAsync(canonicalPath, canonicalBytes, TestContext.Current.CancellationToken);
+
+        var committed = await fileSystem.CommitCaptureAsync(
+            savedEvent.Id,
+            guestCycleId,
+            1,
+            new CapturedFrame(1, savedEvent.LastSavedAt, 6, 4, new byte[] { 1, 2, 3 }),
+            TestContext.Current.CancellationToken);
+
+        Assert.True(committed.Committed);
+        Assert.Equal(canonicalBytes, await File.ReadAllBytesAsync(canonicalPath, TestContext.Current.CancellationToken));
+        using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(
+            Path.Combine(guestCycleDirectory, "guest-cycle.json"),
+            TestContext.Current.CancellationToken));
+        Assert.Equal("capture-1.jpg", manifest.RootElement.GetProperty("captures")[0].GetString());
+    }
+
+    [Fact]
+    public async Task Concurrent_Guest_Cycle_creation_has_exactly_one_winner_and_preserves_its_manifest()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            TestContext.Current.CancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        var firstStartedAt = savedEvent.LastSavedAt.AddSeconds(1);
+        var secondStartedAt = savedEvent.LastSavedAt.AddSeconds(2);
+
+        var results = await Task.WhenAll(
+            fileSystem.CreateGuestCycleAsync(
+                savedEvent.Id,
+                guestCycleId,
+                firstStartedAt,
+                TestContext.Current.CancellationToken),
+            fileSystem.CreateGuestCycleAsync(
+                savedEvent.Id,
+                guestCycleId,
+                secondStartedAt,
+                TestContext.Current.CancellationToken));
+
+        Assert.Single(results, result => result == GuestCycleCreateResult.Created);
+        Assert.Single(results, result => result == GuestCycleCreateResult.IdentityCollision);
+        var manifestPath = Path.Combine(
+            directory.Path,
+            savedEvent.Id.Value,
+            "GuestCycles",
+            guestCycleId.Value,
+            "guest-cycle.json");
+        using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(
+            manifestPath,
+            TestContext.Current.CancellationToken));
+        var startedAt = manifest.RootElement.GetProperty("startedAt").GetDateTimeOffset();
+        Assert.Contains(startedAt, new[] { firstStartedAt, secondStartedAt });
+    }
+
+    private static async Task<byte[]> EncodeSolidAsync(Guid encoderId, int width, int height)
+    {
+        using var bitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8, width, height, BitmapAlphaMode.Premultiplied);
+        var pixels = Enumerable.Repeat(new byte[] { 32, 96, 192, 255 }, width * height)
+            .SelectMany(pixel => pixel)
+            .ToArray();
+        bitmap.CopyFromBuffer(pixels.AsBuffer());
+        using var stream = new InMemoryRandomAccessStream();
+        var encoder = await BitmapEncoder.CreateAsync(encoderId, stream);
+        encoder.SetSoftwareBitmap(bitmap);
+        await encoder.FlushAsync();
+        var result = new byte[checked((int)stream.Size)];
+        using var reader = new DataReader(stream.GetInputStreamAt(0));
+        await reader.LoadAsync((uint)result.Length);
+        reader.ReadBytes(result);
+        return result;
     }
 
     [Fact]
@@ -185,4 +382,25 @@ public sealed class EventFileSystemIntegrationTests
             PrinterChoice.NoPrinter,
             createdAt,
             lastSavedAt);
+
+    private sealed class TemporaryDirectory : IDisposable
+    {
+        public TemporaryDirectory()
+        {
+            Path = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "FotoHAVN-tests",
+                Guid.NewGuid().ToString("N"));
+        }
+
+        public string Path { get; }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(Path))
+            {
+                Directory.Delete(Path, recursive: true);
+            }
+        }
+    }
 }
