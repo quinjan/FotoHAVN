@@ -11,6 +11,16 @@ namespace FotoHavn.WindowsIntegrationTests;
 public sealed class EventFileSystemIntegrationTests
 {
     [Fact]
+    public void Construction_creates_the_executable_relative_Events_root()
+    {
+        using var directory = new TemporaryDirectory();
+
+        _ = new ExecutableRelativeEventFileSystem(directory.Path);
+
+        Assert.True(Directory.Exists(directory.Path));
+    }
+
+    [Fact]
     public async Task Quarantine_survives_a_new_file_system_instance_and_success_removes_the_complete_Event_tree()
     {
         var root = Path.Combine(Path.GetTempPath(), "FotoHAVN-tests", Guid.NewGuid().ToString("N"));
