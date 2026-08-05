@@ -50,6 +50,14 @@ public sealed record ShutdownApplication : ApplicationCommand;
 
 public sealed record DeleteSavedEvent(EventId EventId) : ApplicationCommand;
 
+public sealed record ConfirmDeleteSavedEvent : ApplicationCommand;
+
+public sealed record CancelDeleteSavedEvent : ApplicationCommand;
+
+public sealed record RetryEventDeletion(EventId EventId) : ApplicationCommand;
+
+public sealed record DismissEventDeletionResult : ApplicationCommand;
+
 public enum EventTileKind
 {
     NewEvent,
@@ -62,12 +70,15 @@ public sealed record EventTilePresentation(
     string SupportingText,
     string Glyph,
     EventId? EventId = null,
-    DateTimeOffset? LastSavedAt = null)
+    DateTimeOffset? LastSavedAt = null,
+    bool DeletionIncomplete = false)
 {
     public bool ShowsCreate => Kind == EventTileKind.NewEvent;
-    public bool ShowsStart => Kind == EventTileKind.SavedEvent;
-    public bool ShowsEdit => Kind == EventTileKind.SavedEvent;
-    public bool ShowsDelete => Kind == EventTileKind.SavedEvent;
+    public bool ShowsSavedEventCard => Kind == EventTileKind.SavedEvent;
+    public bool ShowsStart => Kind == EventTileKind.SavedEvent && !DeletionIncomplete;
+    public bool ShowsEdit => Kind == EventTileKind.SavedEvent && !DeletionIncomplete;
+    public bool ShowsDelete => Kind == EventTileKind.SavedEvent && !DeletionIncomplete;
+    public bool ShowsRetryDeletion => Kind == EventTileKind.SavedEvent && DeletionIncomplete;
 }
 
 public sealed record ApplicationPresentation(
@@ -77,7 +88,55 @@ public sealed record ApplicationPresentation(
     ApplicationCanvasPresentation Canvas,
     EventSetupPresentation? Setup = null,
     ActiveEventPresentation? ActiveEvent = null,
-    StartEventConfirmationPresentation? StartEventConfirmation = null);
+    StartEventConfirmationPresentation? StartEventConfirmation = null,
+    EventDeletionPresentation? EventDeletion = null);
+
+public enum EventDeletionStage
+{
+    Confirmation,
+    Deleting,
+    CouldNotStart,
+    Incomplete,
+    Deleted,
+}
+
+public sealed record EventDeletionPresentation(
+    EventId EventId,
+    string EventName,
+    EventDeletionStage Stage)
+{
+    public string Title => Stage switch
+    {
+        EventDeletionStage.Confirmation => $"Delete “{EventName}”?",
+        EventDeletionStage.Deleting => $"Deleting “{EventName}”…",
+        EventDeletionStage.CouldNotStart => $"Couldn’t start deleting “{EventName}”",
+        EventDeletionStage.Incomplete => $"Couldn’t finish deleting “{EventName}”",
+        EventDeletionStage.Deleted => "Event deleted",
+        _ => throw new ArgumentOutOfRangeException(),
+    };
+
+    public string Warning =>
+        "The Event, all Guest Cycles, and all photos will be permanently deleted and cannot be recovered.";
+
+    public string Message => Stage switch
+    {
+        EventDeletionStage.Deleting => "Deletion is in progress. Please keep FotoHAVN open.",
+        EventDeletionStage.CouldNotStart => "FotoHAVN could not create the safety record, so no Event data was removed. Check storage access and try again.",
+        EventDeletionStage.Incomplete => "Some data could not be removed. The Event is quarantined; retry deletion when storage is available.",
+        EventDeletionStage.Deleted => $"“{EventName}” and all of its data were permanently deleted.",
+        _ => Warning,
+    };
+
+    public string? CancelActionLabel => Stage == EventDeletionStage.Confirmation ? "Cancel" : null;
+    public string PrimaryActionLabel => Stage switch
+    {
+        EventDeletionStage.Confirmation => "Delete Event",
+        EventDeletionStage.Deleting => string.Empty,
+        _ => "Done",
+    };
+    public bool IsBusy => Stage == EventDeletionStage.Deleting;
+    public bool IsDismissible => Stage != EventDeletionStage.Deleting;
+}
 
 public sealed record StartEventConfirmationPresentation(EventId EventId, string EventName)
 {
@@ -331,6 +390,17 @@ public enum EventSaveResult
     IdentityCollision,
 }
 
+public sealed record EventDeletionQuarantine(
+    EventId EventId,
+    string EventName,
+    DateTimeOffset LastSavedAt);
+
+public enum EventDeletionResult
+{
+    Deleted,
+    Incomplete,
+}
+
 public interface IEventFileSystem
 {
     Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken);
@@ -344,7 +414,16 @@ public interface IEventFileSystem
         EventSaveMode mode,
         CancellationToken cancellationToken);
 
-    Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+        CancellationToken cancellationToken);
+
+    Task QuarantineEventForDeletionAsync(
+        EventDeletionQuarantine quarantine,
+        CancellationToken cancellationToken);
+
+    Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+        EventId eventId,
+        CancellationToken cancellationToken);
 }
 
 public static class MotionPolicy

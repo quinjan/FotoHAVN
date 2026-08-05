@@ -7,11 +7,13 @@ namespace FotoHavn.App;
 internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
 {
     private const int CurrentRecordVersion = 1;
+    private const int CurrentQuarantineVersion = 1;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
     private readonly string eventsRoot;
+    private readonly string quarantineRoot;
 
     public ExecutableRelativeEventFileSystem()
         : this(Path.Combine(AppContext.BaseDirectory, "Events"))
@@ -21,6 +23,7 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
     internal ExecutableRelativeEventFileSystem(string eventsRoot)
     {
         this.eventsRoot = Path.GetFullPath(eventsRoot);
+        quarantineRoot = Path.Combine(this.eventsRoot, ".deletion-quarantine");
     }
 
     public async Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken)
@@ -30,9 +33,23 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
             return [];
         }
 
+        var quarantinedIds = (await LoadEventDeletionQuarantinesAsync(cancellationToken))
+            .Select(item => item.EventId.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var events = new List<SavedEventSummary>();
-        foreach (var manifestPath in Directory.EnumerateFiles(eventsRoot, "event.json", SearchOption.AllDirectories))
+        foreach (var eventDirectory in Directory.EnumerateDirectories(eventsRoot, "*", SearchOption.TopDirectoryOnly))
         {
+            if (quarantinedIds.Contains(Path.GetFileName(eventDirectory)))
+            {
+                continue;
+            }
+
+            var manifestPath = Path.Combine(eventDirectory, "event.json");
+            if (!File.Exists(manifestPath))
+            {
+                continue;
+            }
+
             await using var stream = File.OpenRead(manifestPath);
             var savedEvent = await JsonSerializer.DeserializeAsync<SavedEventManifest>(
                 stream,
@@ -169,17 +186,100 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         }
     }
 
-    public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+        CancellationToken cancellationToken)
+    {
+        if (!Directory.Exists(quarantineRoot))
+        {
+            return [];
+        }
+
+        var quarantines = new List<EventDeletionQuarantine>();
+        foreach (var quarantinePath in Directory.EnumerateFiles(quarantineRoot, "*.json", SearchOption.TopDirectoryOnly))
+        {
+            await using var stream = File.OpenRead(quarantinePath);
+            var manifest = await JsonSerializer.DeserializeAsync<EventDeletionQuarantineManifest>(
+                stream,
+                JsonOptions,
+                cancellationToken);
+            if (manifest?.ToQuarantine() is { } quarantine)
+            {
+                quarantines.Add(quarantine);
+            }
+        }
+
+        return quarantines;
+    }
+
+    public async Task QuarantineEventForDeletionAsync(
+        EventDeletionQuarantine quarantine,
+        CancellationToken cancellationToken)
+    {
+        _ = GetEventDirectory(quarantine.EventId);
+        Directory.CreateDirectory(quarantineRoot);
+        var quarantinePath = GetQuarantinePath(quarantine.EventId);
+        var temporaryPath = Path.Combine(quarantineRoot, $".{Guid.NewGuid():N}.tmp");
+        try
+        {
+            await using (var stream = new FileStream(
+                temporaryPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 4096,
+                FileOptions.Asynchronous | FileOptions.WriteThrough))
+            {
+                await JsonSerializer.SerializeAsync(
+                    stream,
+                    EventDeletionQuarantineManifest.From(quarantine),
+                    JsonOptions,
+                    cancellationToken);
+                await stream.FlushAsync(cancellationToken);
+            }
+
+            File.Move(temporaryPath, quarantinePath, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(temporaryPath);
+        }
+    }
+
+    public Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+        EventId eventId,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var eventDirectory = GetEventDirectory(eventId);
-        if (Directory.Exists(eventDirectory))
+        var quarantinePath = GetQuarantinePath(eventId);
+        return Task.Run(() =>
         {
-            Directory.Delete(eventDirectory, recursive: true);
-        }
+            try
+            {
+                if (Directory.Exists(eventDirectory))
+                {
+                    Directory.Delete(eventDirectory, recursive: true);
+                }
 
-        return Task.CompletedTask;
+                if (Directory.Exists(eventDirectory))
+                {
+                    return EventDeletionResult.Incomplete;
+                }
+
+                File.Delete(quarantinePath);
+                return File.Exists(quarantinePath)
+                    ? EventDeletionResult.Incomplete
+                    : EventDeletionResult.Deleted;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                return EventDeletionResult.Incomplete;
+            }
+        }, cancellationToken);
     }
+
+    private string GetQuarantinePath(EventId eventId) =>
+        Path.Combine(quarantineRoot, $"{eventId.Value}.json");
 
     private string GetEventDirectory(EventId eventId)
     {
@@ -230,4 +330,23 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
     }
 
     private sealed record SavedCameraBinding(string DeviceId, string DisplayName);
+
+    private sealed record EventDeletionQuarantineManifest(
+        int Version,
+        string EventId,
+        string EventName,
+        DateTimeOffset LastSavedAt)
+    {
+        public EventDeletionQuarantine? ToQuarantine() =>
+            Version == CurrentQuarantineVersion
+                ? new EventDeletionQuarantine(new EventId(EventId), EventName, LastSavedAt)
+                : null;
+
+        public static EventDeletionQuarantineManifest From(EventDeletionQuarantine quarantine) =>
+            new(
+                CurrentQuarantineVersion,
+                quarantine.EventId.Value,
+                quarantine.EventName,
+                quarantine.LastSavedAt);
+    }
 }

@@ -8,6 +8,50 @@ namespace FotoHavn.WindowsIntegrationTests;
 public sealed class EventFileSystemIntegrationTests
 {
     [Fact]
+    public async Task Quarantine_survives_a_new_file_system_instance_and_success_removes_the_complete_Event_tree()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "FotoHAVN-tests", Guid.NewGuid().ToString("N"));
+        var eventId = new EventId("01989c3a-61d2-7000-8000-000000000005");
+        try
+        {
+            var fileSystem = new ExecutableRelativeEventFileSystem(root);
+            var savedAt = new DateTimeOffset(2026, 8, 5, 10, 0, 0, TimeSpan.Zero);
+            await fileSystem.SaveEventAtomicallyAsync(
+                Configuration(eventId, "Summer Party", savedAt, savedAt),
+                EventSaveMode.CreateNew,
+                TestContext.Current.CancellationToken);
+            var artifact = Path.Combine(root, eventId.Value, "guest-cycles", "cycle-1", "capture.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(artifact)!);
+            await File.WriteAllBytesAsync(artifact, [0xFF, 0xD8, 0xFF, 0xD9], TestContext.Current.CancellationToken);
+            var quarantine = new EventDeletionQuarantine(eventId, "Summer Party", savedAt);
+            await fileSystem.QuarantineEventForDeletionAsync(quarantine, TestContext.Current.CancellationToken);
+            await File.WriteAllTextAsync(
+                Path.Combine(root, eventId.Value, "event.json"),
+                "partially deleted",
+                TestContext.Current.CancellationToken);
+
+            var restarted = new ExecutableRelativeEventFileSystem(root);
+            Assert.Equal(
+                quarantine,
+                Assert.Single(await restarted.LoadEventDeletionQuarantinesAsync(TestContext.Current.CancellationToken)));
+            Assert.Empty(await restarted.LoadEventsAsync(TestContext.Current.CancellationToken));
+
+            Assert.Equal(
+                EventDeletionResult.Deleted,
+                await restarted.DeleteQuarantinedEventAsync(eventId, TestContext.Current.CancellationToken));
+            Assert.False(Directory.Exists(Path.Combine(root, eventId.Value)));
+            Assert.Empty(await restarted.LoadEventDeletionQuarantinesAsync(TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public async Task Cancelled_first_save_leaves_no_Event_identity_or_record()
     {
         var root = Path.Combine(Path.GetTempPath(), "FotoHAVN-tests", Guid.NewGuid().ToString("N"));

@@ -127,7 +127,8 @@ public sealed class EventPersistenceAcceptanceTests
             tile => AssertSavedTile(tile, "event-2", "Duplicate", now),
             tile => AssertSavedTile(tile, "event-1", "Duplicate", now.AddHours(-1)));
 
-        var afterDelete = await orchestrator.ExecuteAsync(new DeleteSavedEvent(new EventId("event-2")), TestContext.Current.CancellationToken);
+        await orchestrator.ExecuteAsync(new DeleteSavedEvent(new EventId("event-2")), TestContext.Current.CancellationToken);
+        var afterDelete = await orchestrator.ExecuteAsync(new ConfirmDeleteSavedEvent(), TestContext.Current.CancellationToken);
         Assert.DoesNotContain(afterDelete.EventTiles, tile => tile.EventId == new EventId("event-2"));
     }
 
@@ -460,6 +461,7 @@ public sealed class EventPersistenceAcceptanceTests
         public EventId? CollidingIdentity { get; init; }
         public bool StorageReady { get; set; } = true;
         public List<EventConfiguration> Events { get; } = [];
+        public List<EventDeletionQuarantine> Quarantines { get; } = [];
         public List<EventSaveMode> SaveModes { get; } = [];
         public int ProbeStorageCount { get; private set; }
         public Action? OnProbeStorage { get; set; }
@@ -506,10 +508,26 @@ public sealed class EventPersistenceAcceptanceTests
             return EventSaveResult.Saved;
         }
 
-        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<EventDeletionQuarantine>>([.. Quarantines]);
+
+        public Task QuarantineEventForDeletionAsync(
+            EventDeletionQuarantine quarantine,
+            CancellationToken cancellationToken)
+        {
+            Quarantines.RemoveAll(item => item.EventId == quarantine.EventId);
+            Quarantines.Add(quarantine);
+            return Task.CompletedTask;
+        }
+
+        public Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+            EventId eventId,
+            CancellationToken cancellationToken)
         {
             Events.RemoveAll(item => item.Id == eventId);
-            return Task.CompletedTask;
+            Quarantines.RemoveAll(item => item.EventId == eventId);
+            return Task.FromResult(EventDeletionResult.Deleted);
         }
     }
 

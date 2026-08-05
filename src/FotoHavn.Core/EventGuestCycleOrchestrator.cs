@@ -70,6 +70,19 @@ public sealed class EventGuestCycleOrchestrator
                 return CurrentPresentation;
             }
 
+            if (CurrentPresentation.EventDeletion is { Stage: EventDeletionStage.Confirmation } &&
+                command is not ConfirmDeleteSavedEvent and not CancelDeleteSavedEvent)
+            {
+                return CurrentPresentation;
+            }
+
+            if (CurrentPresentation.EventDeletion is
+                { Stage: EventDeletionStage.CouldNotStart or EventDeletionStage.Incomplete or EventDeletionStage.Deleted } &&
+                command is not DismissEventDeletionResult)
+            {
+                return CurrentPresentation;
+            }
+
             if (setup?.Confirmation == EventSetupConfirmation.DiscardChanges &&
                 command is not KeepEditingEventSetup and not DiscardEventSetupDraft)
             {
@@ -119,7 +132,11 @@ public sealed class EventGuestCycleOrchestrator
                 }),
                 ConfirmExitActiveEvent => await ExitActiveEventAsync(cancellationToken).ConfigureAwait(false),
                 ShutdownApplication => await ShutdownAsync(cancellationToken).ConfigureAwait(false),
-                DeleteSavedEvent delete => await DeleteSavedEventAsync(delete.EventId, cancellationToken).ConfigureAwait(false),
+                DeleteSavedEvent delete => RequestDeleteSavedEvent(delete.EventId),
+                ConfirmDeleteSavedEvent => await ConfirmDeleteSavedEventAsync(cancellationToken).ConfigureAwait(false),
+                CancelDeleteSavedEvent => Publish(CurrentPresentation with { EventDeletion = null }),
+                RetryEventDeletion retry => await RetryEventDeletionAsync(retry.EventId, cancellationToken).ConfigureAwait(false),
+                DismissEventDeletionResult => Publish(CurrentPresentation with { EventDeletion = null }),
                 _ => throw new ArgumentOutOfRangeException(nameof(command), command, "Unknown application command."),
             };
 
@@ -134,12 +151,15 @@ public sealed class EventGuestCycleOrchestrator
     private async Task<ApplicationPresentation> LaunchAsync(CancellationToken cancellationToken)
     {
         var savedEvents = await fileSystem.LoadEventsAsync(cancellationToken).ConfigureAwait(false);
+        var quarantines = await fileSystem.LoadEventDeletionQuarantinesAsync(cancellationToken).ConfigureAwait(false);
+        var quarantinedIds = quarantines.Select(item => item.EventId).ToHashSet();
         var tiles = new List<EventTilePresentation>(savedEvents.Count + 1)
         {
             new(EventTileKind.NewEvent, "New Event", "Set up a new booth run", "＋"),
         };
 
         tiles.AddRange(savedEvents
+            .Where(savedEvent => !quarantinedIds.Contains(savedEvent.Id))
             .OrderByDescending(savedEvent => savedEvent.LastSavedAt)
             .Select(savedEvent => new EventTilePresentation(
                 EventTileKind.SavedEvent,
@@ -148,6 +168,17 @@ public sealed class EventGuestCycleOrchestrator
                 "▶",
                 savedEvent.Id,
                 savedEvent.LastSavedAt)));
+
+        tiles.AddRange(quarantines
+            .OrderByDescending(item => item.LastSavedAt)
+            .Select(item => new EventTilePresentation(
+                EventTileKind.SavedEvent,
+                item.EventName,
+                "Deletion incomplete",
+                "!",
+                item.EventId,
+                item.LastSavedAt,
+                DeletionIncomplete: true)));
 
         return Publish(CreateSavedEventsPresentation(tiles));
     }
@@ -325,10 +356,75 @@ public sealed class EventGuestCycleOrchestrator
         return Publish(CurrentPresentation with { Setup = null });
     }
 
-    private async Task<ApplicationPresentation> DeleteSavedEventAsync(EventId eventId, CancellationToken cancellationToken)
+    private ApplicationPresentation RequestDeleteSavedEvent(EventId eventId)
     {
-        await fileSystem.DeleteEventAsync(eventId, cancellationToken).ConfigureAwait(false);
-        return await LaunchAsync(cancellationToken).ConfigureAwait(false);
+        var tile = CurrentPresentation.EventTiles.SingleOrDefault(item => item.EventId == eventId && !item.DeletionIncomplete)
+            ?? throw new InvalidOperationException($"Event '{eventId}' is not available for deletion.");
+        return Publish(CurrentPresentation with
+        {
+            EventDeletion = new EventDeletionPresentation(eventId, tile.Label, EventDeletionStage.Confirmation),
+        });
+    }
+
+    private async Task<ApplicationPresentation> ConfirmDeleteSavedEventAsync(CancellationToken cancellationToken)
+    {
+        var deletion = CurrentPresentation.EventDeletion
+            ?? throw new InvalidOperationException("No Event is awaiting deletion confirmation.");
+        var tile = CurrentPresentation.EventTiles.Single(item => item.EventId == deletion.EventId);
+        return await QuarantineAndDeleteEventAsync(
+            deletion.EventId,
+            deletion.EventName,
+            tile.LastSavedAt ?? Clock.UtcNow,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApplicationPresentation> RetryEventDeletionAsync(
+        EventId eventId,
+        CancellationToken cancellationToken)
+    {
+        var tile = CurrentPresentation.EventTiles.SingleOrDefault(item => item.EventId == eventId && item.DeletionIncomplete)
+            ?? throw new InvalidOperationException($"Event '{eventId}' is not quarantined.");
+        return await QuarantineAndDeleteEventAsync(
+            eventId,
+            tile.Label,
+            tile.LastSavedAt ?? Clock.UtcNow,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApplicationPresentation> QuarantineAndDeleteEventAsync(
+        EventId eventId,
+        string eventName,
+        DateTimeOffset lastSavedAt,
+        CancellationToken cancellationToken)
+    {
+        Publish(CurrentPresentation with
+        {
+            EventDeletion = new EventDeletionPresentation(eventId, eventName, EventDeletionStage.Deleting),
+        });
+
+        try
+        {
+            await fileSystem.QuarantineEventForDeletionAsync(
+                new EventDeletionQuarantine(eventId, eventName, lastSavedAt),
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return Publish(CurrentPresentation with
+            {
+                EventDeletion = new EventDeletionPresentation(eventId, eventName, EventDeletionStage.CouldNotStart),
+            });
+        }
+
+        var result = await fileSystem.DeleteQuarantinedEventAsync(eventId, cancellationToken).ConfigureAwait(false);
+        var refreshed = await LaunchAsync(cancellationToken).ConfigureAwait(false);
+        return Publish(refreshed with
+        {
+            EventDeletion = new EventDeletionPresentation(
+                eventId,
+                eventName,
+                result == EventDeletionResult.Deleted ? EventDeletionStage.Deleted : EventDeletionStage.Incomplete),
+        });
     }
 
     private async Task<ApplicationPresentation> RequestStartSavedEventAsync(

@@ -373,10 +373,19 @@ public sealed class EventSetupAcceptanceTests
             return Task.FromResult(EventSaveResult.Saved);
         }
 
-        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+            CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<EventDeletionQuarantine>>([]);
+
+        public Task QuarantineEventForDeletionAsync(
+            EventDeletionQuarantine quarantine,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+            EventId eventId,
+            CancellationToken cancellationToken)
         {
             SavedEvents.RemoveAll(saved => saved.Id == eventId);
-            return Task.CompletedTask;
+            return Task.FromResult(EventDeletionResult.Deleted);
         }
     }
 
