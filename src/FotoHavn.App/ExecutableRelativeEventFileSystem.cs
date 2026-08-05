@@ -203,28 +203,39 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         CancellationToken cancellationToken)
     {
         var guestCycleDirectory = GetGuestCycleDirectory(eventId, guestCycleId);
-        if (Directory.Exists(guestCycleDirectory))
-        {
-            return GuestCycleCreateResult.IdentityCollision;
-        }
-
-        Directory.CreateDirectory(guestCycleDirectory);
-        var claimPath = Path.Combine(guestCycleDirectory, ".identity-claim");
-        var ownsIdentity = false;
+        var guestCyclesDirectory = Path.GetDirectoryName(guestCycleDirectory)
+            ?? throw new InvalidOperationException("The Guest Cycle directory has no parent.");
+        Directory.CreateDirectory(guestCyclesDirectory);
+        var claimPath = Path.Combine(guestCyclesDirectory, $".{guestCycleId.Value}.identity-claim");
+        FileStream claim;
         try
         {
-            await using (var claim = new FileStream(
+            claim = new FileStream(
                 claimPath,
                 FileMode.CreateNew,
                 FileAccess.Write,
                 FileShare.None,
                 bufferSize: 1,
-                FileOptions.Asynchronous | FileOptions.WriteThrough))
+                FileOptions.Asynchronous | FileOptions.WriteThrough);
+        }
+        catch (IOException) when (File.Exists(claimPath) || Directory.Exists(guestCycleDirectory))
+        {
+            return GuestCycleCreateResult.IdentityCollision;
+        }
+
+        try
+        {
+            await using (claim)
             {
                 await claim.FlushAsync(cancellationToken);
             }
-            ownsIdentity = true;
 
+            if (Directory.Exists(guestCycleDirectory))
+            {
+                return GuestCycleCreateResult.IdentityCollision;
+            }
+
+            Directory.CreateDirectory(guestCycleDirectory);
             await SaveGuestCycleManifestAsync(
                 guestCycleDirectory,
                 new GuestCycleManifest(
@@ -236,10 +247,6 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
                     PhotoStrip: null),
                 cancellationToken).ConfigureAwait(false);
             return GuestCycleCreateResult.Created;
-        }
-        catch (IOException) when (!ownsIdentity)
-        {
-            return GuestCycleCreateResult.IdentityCollision;
         }
         finally
         {

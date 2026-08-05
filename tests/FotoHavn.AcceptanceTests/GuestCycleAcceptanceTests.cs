@@ -68,6 +68,13 @@ public sealed class GuestCycleAcceptanceTests
         var fileSystem = new GuestCycleFileSystem(savedEvent);
         var compositor = new RecordingCompositor();
         var clock = new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero));
+        clock.DelayCompleted = (_, delayNumber) =>
+        {
+            if (delayNumber == 5)
+            {
+                camera.DeliverFrameAtCountdownBoundary();
+            }
+        };
         var orchestrator = new EventGuestCycleOrchestrator(fileSystem, camera, compositor, clock);
         var cancellationToken = TestContext.Current.CancellationToken;
 
@@ -85,7 +92,8 @@ public sealed class GuestCycleAcceptanceTests
         var guestCycleId = Assert.Single(fileSystem.CreatedGuestCycles);
         Assert.Equal(7, Guid.Parse(guestCycleId.Value).Version);
         Assert.Equal([1, 2, 3, 4], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
-        Assert.Equal([0L, 1L, 2L, 3L], camera.RequestedAfterSequences);
+        Assert.Equal([41L, 42L, 43L, 44L], camera.RequestedAfterSequences);
+        Assert.Equal([42L, 43L, 44L, 45L], fileSystem.CommittedFrames.Select(frame => frame.Sequence));
         Assert.Equal(4, compositor.LastRequest?.Captures.Count);
         Assert.Equal(savedEvent.Name, compositor.LastRequest?.EventName);
         Assert.Equal(guestCycleId, Assert.Single(fileSystem.CompletedGuestCycles));
@@ -95,6 +103,93 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(4, clock.Delays.Count(delay => delay == TimeSpan.FromMilliseconds(600)));
         Assert.Equal(4, clock.Delays.Count(delay => delay == TimeSpan.FromMilliseconds(900)));
         Assert.Contains(TimeSpan.FromMilliseconds(450), clock.Delays);
+    }
+
+    [Fact]
+    public async Task Completion_storage_failure_enters_assistance_and_Retry_finishes_without_replaying_the_preview()
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera);
+        var fileSystem = new GuestCycleFileSystem(savedEvent) { FailCompletionOnce = true };
+        var compositor = new RecordingCompositor();
+        var clock = new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero));
+        var orchestrator = new EventGuestCycleOrchestrator(fileSystem, camera, compositor, clock);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+        orchestrator.PresentationChanged += (_, presentation) =>
+        {
+            if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
+            {
+                _ = orchestrator.ExecuteAsync(new ConfirmPhotoStripVisible(), cancellationToken);
+            }
+        };
+
+        var paused = await orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        var delaysAfterPreview = clock.Delays.Count;
+        var completed = await orchestrator.ExecuteAsync(new RetryGuestCycle(), cancellationToken);
+
+        Assert.Equal(GuestCyclePhase.OperatorAssistance, paused.ActiveEvent?.GuestCycle.Phase);
+        Assert.Equal(GuestCycleFailure.StorageUnavailable, paused.ActiveEvent?.GuestCycle.Failure);
+        Assert.Equal(2, fileSystem.CompletionAttempts);
+        Assert.Equal(4, fileSystem.CommittedFrames.Count);
+        Assert.Equal(1, compositor.ComposeCount);
+        Assert.Equal(delaysAfterPreview, clock.Delays.Count);
+        Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
+    }
+
+    [Fact]
+    public async Task Shutdown_preempts_a_Guest_Cycle_waiting_for_visible_decode_and_releases_the_Camera()
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera);
+        var orchestrator = new EventGuestCycleOrchestrator(
+            new GuestCycleFileSystem(savedEvent),
+            camera,
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero)));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+        var previewReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        orchestrator.PresentationChanged += (_, presentation) =>
+        {
+            if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
+            {
+                previewReached.TrySetResult();
+            }
+        };
+
+        var cycle = orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        await previewReached.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+        var shutdown = orchestrator.ExecuteAsync(new ShutdownApplication(), cancellationToken);
+        await Task.WhenAll(cycle, shutdown).WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+
+        Assert.Null(camera.StreamId);
+        Assert.Null(orchestrator.CurrentPresentation.ActiveEvent);
+    }
+
+    [Fact]
+    public async Task Shutdown_preempts_Guest_Cycle_admission_before_identity_creation()
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera);
+        var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var orchestrator = new EventGuestCycleOrchestrator(
+            fileSystem,
+            camera,
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero)));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+        fileSystem.BlockStorageProbe = true;
+
+        var cycle = orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        await fileSystem.StorageProbeEntered.Task.WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+        var shutdown = orchestrator.ExecuteAsync(new ShutdownApplication(), cancellationToken);
+        await Task.WhenAll(cycle, shutdown).WaitAsync(TimeSpan.FromSeconds(2), cancellationToken);
+
+        Assert.Empty(fileSystem.CreatedGuestCycles);
+        Assert.Null(camera.StreamId);
+        Assert.Null(orchestrator.CurrentPresentation.ActiveEvent);
     }
 
     private static async Task ActivateAsync(
@@ -118,7 +213,7 @@ public sealed class GuestCycleAcceptanceTests
 
     private sealed class GuestCycleCamera(CameraBinding binding) : ICameraBoundary
     {
-        private long sequence;
+        private long sequence = 40;
 
         public event EventHandler? AvailableCamerasChanged
         {
@@ -143,6 +238,8 @@ public sealed class GuestCycleAcceptanceTests
         public TimeSpan? LastCaptureTimeout { get; private set; }
 
         private int captureAttempts;
+
+        public void DeliverFrameAtCountdownBoundary() => sequence++;
 
         public CameraStreamHealth StreamHealth => new(
             binding.DeviceId,
@@ -193,7 +290,20 @@ public sealed class GuestCycleAcceptanceTests
     {
         public List<GuestCycleId> CreatedGuestCycles { get; } = [];
         public List<(int CaptureNumber, CaptureReference Reference)> CommittedCaptures { get; } = [];
+        public List<CapturedFrame> CommittedFrames { get; } = [];
         public List<GuestCycleId> CompletedGuestCycles { get; } = [];
+
+        public bool FailCompletionOnce { get; init; }
+
+        public bool BlockStorageProbe { get; set; }
+
+        public TaskCompletionSource StorageProbeEntered { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public TaskCompletionSource ReleaseStorageProbe { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public int CompletionAttempts { get; private set; }
 
         public Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<SavedEventSummary>>(
@@ -202,7 +312,16 @@ public sealed class GuestCycleAcceptanceTests
         public Task<EventConfiguration?> LoadEventAsync(EventId eventId, CancellationToken cancellationToken) =>
             Task.FromResult<EventConfiguration?>(savedEvent);
 
-        public Task<bool> ProbeStorageAsync(CancellationToken cancellationToken) => Task.FromResult(true);
+        public async Task<bool> ProbeStorageAsync(CancellationToken cancellationToken)
+        {
+            if (BlockStorageProbe)
+            {
+                StorageProbeEntered.TrySetResult();
+                await ReleaseStorageProbe.Task.WaitAsync(cancellationToken);
+            }
+
+            return true;
+        }
 
         public Task<EventSaveResult> SaveEventAtomicallyAsync(
             EventConfiguration configuration,
@@ -230,6 +349,7 @@ public sealed class GuestCycleAcceptanceTests
         {
             var reference = new CaptureReference($"capture-{captureNumber}.jpg");
             CommittedCaptures.Add((captureNumber, reference));
+            CommittedFrames.Add(frame);
             return Task.FromResult(new CaptureCommitResult(true, reference));
         }
 
@@ -246,6 +366,12 @@ public sealed class GuestCycleAcceptanceTests
             DateTimeOffset completedAt,
             CancellationToken cancellationToken)
         {
+            CompletionAttempts++;
+            if (FailCompletionOnce && CompletionAttempts == 1)
+            {
+                throw new IOException("Storage was unavailable while completing the Guest Cycle.");
+            }
+
             CompletedGuestCycles.Add(guestCycleId);
             return Task.CompletedTask;
         }
@@ -255,10 +381,13 @@ public sealed class GuestCycleAcceptanceTests
     {
         public PhotoStripCompositionRequest? LastRequest { get; private set; }
 
+        public int ComposeCount { get; private set; }
+
         public Task<PhotoStripCompositionResult> ComposeAsync(
             PhotoStripCompositionRequest request,
             CancellationToken cancellationToken)
         {
+            ComposeCount++;
             LastRequest = request;
             return Task.FromResult(new PhotoStripCompositionResult(true, new byte[] { 1, 2, 3 }, 600, 1800));
         }
@@ -270,10 +399,13 @@ public sealed class GuestCycleAcceptanceTests
 
         public List<TimeSpan> Delays { get; } = [];
 
+        public Action<TimeSpan, int>? DelayCompleted { get; set; }
+
         public Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken)
         {
             Delays.Add(delay);
             UtcNow += delay;
+            DelayCompleted?.Invoke(delay, Delays.Count);
             return Task.CompletedTask;
         }
     }

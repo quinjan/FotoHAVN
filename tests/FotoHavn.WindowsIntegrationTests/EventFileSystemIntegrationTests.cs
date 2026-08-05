@@ -141,6 +141,51 @@ public sealed class EventFileSystemIntegrationTests
         Assert.Equal("capture-1.jpg", manifest.RootElement.GetProperty("captures")[0].GetString());
     }
 
+    [Fact]
+    public async Task Concurrent_Guest_Cycle_creation_has_exactly_one_winner_and_preserves_its_manifest()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            TestContext.Current.CancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        var firstStartedAt = savedEvent.LastSavedAt.AddSeconds(1);
+        var secondStartedAt = savedEvent.LastSavedAt.AddSeconds(2);
+
+        var results = await Task.WhenAll(
+            fileSystem.CreateGuestCycleAsync(
+                savedEvent.Id,
+                guestCycleId,
+                firstStartedAt,
+                TestContext.Current.CancellationToken),
+            fileSystem.CreateGuestCycleAsync(
+                savedEvent.Id,
+                guestCycleId,
+                secondStartedAt,
+                TestContext.Current.CancellationToken));
+
+        Assert.Single(results, result => result == GuestCycleCreateResult.Created);
+        Assert.Single(results, result => result == GuestCycleCreateResult.IdentityCollision);
+        var manifestPath = Path.Combine(
+            directory.Path,
+            savedEvent.Id.Value,
+            "GuestCycles",
+            guestCycleId.Value,
+            "guest-cycle.json");
+        using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(
+            manifestPath,
+            TestContext.Current.CancellationToken));
+        var startedAt = manifest.RootElement.GetProperty("startedAt").GetDateTimeOffset();
+        Assert.Contains(startedAt, new[] { firstStartedAt, secondStartedAt });
+    }
+
     private static async Task<byte[]> EncodeSolidAsync(Guid encoderId, int width, int height)
     {
         using var bitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8, width, height, BitmapAlphaMode.Premultiplied);
