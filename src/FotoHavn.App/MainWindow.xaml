@@ -166,7 +166,7 @@
                                     CornerRadius="9"
                                     PointerEntered="SavedEventCardPointerEntered"
                                     PointerExited="SavedEventCardPointerExited"
-                                    Visibility="{x:Bind ShowsStart}">
+                                    Visibility="{x:Bind ShowsSavedEventCard}">
                                     <Grid>
                                         <StackPanel
                                             x:Name="SavedEventMetadata"
@@ -215,6 +215,15 @@
                                                     Text="Start Event" />
                                             </StackPanel>
                                         </Button>
+
+                                        <Button
+                                            x:Name="RetryDeletionButton"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="Retry Deletion"
+                                            Click="RetryEventDeletionClicked"
+                                            Content="Retry Deletion"
+                                            Visibility="{x:Bind ShowsRetryDeletion}" />
 
                                         <Button
                                             Margin="0,-12,-12,0"
@@ -557,6 +566,55 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+            </Grid>
+
+            <Grid
+                x:Name="EventDeletionLayer"
+                Grid.RowSpan="2"
+                Background="#8A17181A"
+                Visibility="Collapsed">
+                <Border
+                    Width="500"
+                    Padding="28"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource SurfaceBrush}"
+                    CornerRadius="12">
+                    <StackPanel Spacing="20">
+                        <TextBlock
+                            x:Name="EventDeletionTitleText"
+                            FontSize="24"
+                            FontWeight="SemiBold"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Name="EventDeletionMessageText"
+                            Foreground="{StaticResource TextMutedBrush}"
+                            TextWrapping="Wrap" />
+                        <ProgressRing
+                            x:Name="EventDeletionProgressRing"
+                            Width="36"
+                            Height="36"
+                            HorizontalAlignment="Left"
+                            IsActive="False"
+                            Visibility="Collapsed" />
+                        <StackPanel
+                            x:Name="EventDeletionActions"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <Button
+                                x:Name="CancelEventDeletionButton"
+                                Click="CancelEventDeletionClicked"
+                                Content="Cancel" />
+                            <Button
+                                x:Name="ConfirmEventDeletionButton"
+                                Click="ConfirmEventDeletionClicked"
+                                Background="{StaticResource DangerBrush}"
+                                Content="Delete Event"
+                                Foreground="White" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <Grid

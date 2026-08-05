@@ -111,6 +111,29 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void RetryEventDeletionClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        {
+            await ExecuteAsync(new RetryEventDeletion(eventId));
+        }
+    }
+
+    private async void ConfirmEventDeletionClicked(object sender, RoutedEventArgs args)
+    {
+        if (orchestrator.CurrentPresentation.EventDeletion?.Stage == EventDeletionStage.Confirmation)
+        {
+            await ExecuteAsync(new ConfirmDeleteSavedEvent());
+        }
+        else
+        {
+            await ExecuteAsync(new DismissEventDeletionResult());
+        }
+    }
+
+    private async void CancelEventDeletionClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new CancelDeleteSavedEvent());
+
     private void SavedEventCardPointerEntered(object sender, PointerRoutedEventArgs args)
     {
         if (sender is Border card)
@@ -152,6 +175,12 @@ public sealed partial class MainWindow : Window
 
     private static void ApplySavedEventCardState(Border card, bool isActive)
     {
+        if (card.DataContext is EventTilePresentation { DeletionIncomplete: true })
+        {
+            card.Background = (Brush)Application.Current.Resources["SurfaceBrush"];
+            return;
+        }
+
         if (FindNamedDescendant<Button>(card, "StartEventButton") is { } startButton)
         {
             startButton.Opacity = isActive ? 1 : 0;
@@ -292,6 +321,28 @@ public sealed partial class MainWindow : Window
                 ? Visibility.Collapsed
                 : Visibility.Visible;
             StartEventConfirmationText.Text = presentation.StartEventConfirmation?.Prompt ?? string.Empty;
+            var deletion = presentation.EventDeletion;
+            EventDeletionLayer.Visibility = deletion is null ? Visibility.Collapsed : Visibility.Visible;
+            EventDeletionTitleText.Text = deletion?.Title ?? string.Empty;
+            EventDeletionMessageText.Text = deletion?.Message ?? string.Empty;
+            EventDeletionProgressRing.Visibility = deletion?.IsBusy == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            EventDeletionProgressRing.IsActive = deletion?.IsBusy == true;
+            EventDeletionActions.Visibility = deletion?.IsBusy == true
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            CancelEventDeletionButton.Visibility = deletion?.CancelActionLabel is null
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            CancelEventDeletionButton.Content = deletion?.CancelActionLabel ?? string.Empty;
+            ConfirmEventDeletionButton.Content = deletion?.PrimaryActionLabel ?? string.Empty;
+            ConfirmEventDeletionButton.Background = deletion?.Stage == EventDeletionStage.Confirmation
+                ? (Brush)Application.Current.Resources["DangerBrush"]
+                : (Brush)Application.Current.Resources["ButtonBackground"];
+            ConfirmEventDeletionButton.Foreground = deletion?.Stage == EventDeletionStage.Confirmation
+                ? new SolidColorBrush(Microsoft.UI.Colors.White)
+                : (Brush)Application.Current.Resources["TextPrimaryBrush"];
             if (activeEvent is not null)
             {
                 ActiveEventNameText.Text = activeEvent.Name.ToUpperInvariant();

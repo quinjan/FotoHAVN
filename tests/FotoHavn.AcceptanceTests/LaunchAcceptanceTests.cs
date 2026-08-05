@@ -101,7 +101,14 @@ public sealed class LaunchAcceptanceTests
             EventSaveMode mode,
             CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
 
-        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+            CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<EventDeletionQuarantine>>([]);
+        public Task QuarantineEventForDeletionAsync(
+            EventDeletionQuarantine quarantine,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+            EventId eventId,
+            CancellationToken cancellationToken) => Task.FromResult(EventDeletionResult.Deleted);
     }
 
     private sealed class StubCamera : ICameraBoundary
@@ -145,7 +152,14 @@ public sealed class LaunchAcceptanceTests
             EventSaveMode mode,
             CancellationToken cancellationToken) => Task.FromResult(EventSaveResult.Saved);
 
-        public Task DeleteEventAsync(EventId eventId, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<IReadOnlyList<EventDeletionQuarantine>> LoadEventDeletionQuarantinesAsync(
+            CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<EventDeletionQuarantine>>([]);
+        public Task QuarantineEventForDeletionAsync(
+            EventDeletionQuarantine quarantine,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<EventDeletionResult> DeleteQuarantinedEventAsync(
+            EventId eventId,
+            CancellationToken cancellationToken) => Task.FromResult(EventDeletionResult.Deleted);
     }
 }
 
