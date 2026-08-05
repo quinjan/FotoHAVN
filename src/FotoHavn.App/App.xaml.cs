@@ -12,6 +12,7 @@ public partial class App : Application
     private static App? currentApp;
     private static int windowReady;
     private MainWindow? window;
+    private CameraBoundary? camera;
     private Windows.UI.ViewManagement.UISettings? uiSettings;
 
     public App()
@@ -31,18 +32,29 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        camera = new CameraBoundary();
         var orchestrator = new EventGuestCycleOrchestrator(
             new ExecutableRelativeEventFileSystem(),
-            new CameraBoundary(),
+            camera,
             new PhotoStripCompositor(),
             new SystemClock());
 
-        window = new MainWindow(orchestrator);
+        window = new MainWindow(orchestrator, camera);
+        window.Closed += WindowClosed;
         await window.LoadPresentationAsync();
         window.ShowCentered();
         RefreshMotionResources();
         Volatile.Write(ref windowReady, 1);
         DrainPendingActivations();
+    }
+
+    private async void WindowClosed(object sender, WindowEventArgs args)
+    {
+        if (camera is not null)
+        {
+            await camera.DisposeAsync();
+            camera = null;
+        }
     }
 
     private void ScheduleActivationDrain()
