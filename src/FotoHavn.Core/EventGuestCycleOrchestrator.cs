@@ -11,6 +11,9 @@ public sealed class EventGuestCycleOrchestrator
     private readonly CancellationTokenSource shutdownCancellation = new();
     private EventSetupDraft? setup;
     private GuestCycleRun? guestCycle;
+    private CancellationTokenSource? guestCycleAttemptCancellation;
+    private CameraStreamFailure interruptedCameraFailure = CameraStreamFailure.None;
+    private bool guestCycleCameraSensitive;
     private TaskCompletionSource<bool>? photoStripVisible;
     private ApplicationPresentation currentPresentation = CreateSavedEventsPresentation([]);
 
@@ -79,6 +82,11 @@ public sealed class EventGuestCycleOrchestrator
             using var guestCycleCommandCancellation = command is StartGuestCycle or RetryGuestCycle
                 ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, shutdownCancellation.Token)
                 : null;
+            if (guestCycleCommandCancellation is not null)
+            {
+                interruptedCameraFailure = CameraStreamFailure.None;
+                guestCycleAttemptCancellation = guestCycleCommandCancellation;
+            }
             var commandCancellationToken = guestCycleCommandCancellation?.Token ?? cancellationToken;
 
             if (CurrentPresentation.ActiveEvent is not null &&
@@ -167,7 +175,7 @@ public sealed class EventGuestCycleOrchestrator
                 StartGuestCycle when CurrentPresentation.ActiveEvent?.GuestCycle.Phase is GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable =>
                     await StartGuestCycleAsync(commandCancellationToken).ConfigureAwait(false),
                 RetryGuestCycle when CurrentPresentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.OperatorAssistance =>
-                    await RunGuestCycleAsync(commandCancellationToken).ConfigureAwait(false),
+                    await RetryGuestCycleAsync(commandCancellationToken).ConfigureAwait(false),
                 RetryGuestCycle when CurrentPresentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.StartUnavailable =>
                     await RetryGuestStartReadinessAsync(commandCancellationToken).ConfigureAwait(false),
                 StartGuestCycle or RetryGuestStartReadiness or RetryGuestCycle or ConfirmPhotoStripVisible or ReportPhotoStripDecodeFailure => CurrentPresentation,
@@ -183,6 +191,19 @@ public sealed class EventGuestCycleOrchestrator
             return presentation;
         }
         catch (OperationCanceledException) when (
+            interruptedCameraFailure != CameraStreamFailure.None &&
+            !shutdownCancellation.IsCancellationRequested &&
+            !cancellationToken.IsCancellationRequested)
+        {
+            var captureNumber = Math.Min((guestCycle?.Captures.Count ?? 0) + 1, 4);
+            return await PauseGuestCycleAsync(
+                ResolveCameraFailureSource(GuestCycleFailureSource.CameraStale),
+                GuestCycleInterruptedStep.Capture,
+                captureNumber,
+                GuestCycleFailure.CameraUnavailable,
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (
             shutdownCancellation.IsCancellationRequested &&
             !cancellationToken.IsCancellationRequested)
         {
@@ -191,6 +212,9 @@ public sealed class EventGuestCycleOrchestrator
         }
         finally
         {
+            guestCycleAttemptCancellation = null;
+            interruptedCameraFailure = CameraStreamFailure.None;
+            guestCycleCameraSensitive = false;
             commandGate.Release();
         }
     }
@@ -546,7 +570,7 @@ public sealed class EventGuestCycleOrchestrator
             }
             if (createResult == GuestCycleCreateResult.Created)
             {
-                guestCycle = new GuestCycleRun(guestCycleId, []);
+                guestCycle = new GuestCycleRun(activeEvent.Id, guestCycleId, []);
                 break;
             }
         }
@@ -562,6 +586,17 @@ public sealed class EventGuestCycleOrchestrator
 
         for (var captureNumber = run.Captures.Count + 1; captureNumber <= 4; captureNumber++)
         {
+            if (Camera.StreamHealth.Failure != CameraStreamFailure.None)
+            {
+                return await PauseGuestCycleAsync(
+                    ResolveCameraFailureSource(GuestCycleFailureSource.CameraStale),
+                    GuestCycleInterruptedStep.Capture,
+                    captureNumber,
+                    GuestCycleFailure.CameraUnavailable,
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            guestCycleCameraSensitive = true;
             for (var remaining = 5; remaining >= 1; remaining--)
             {
                 PublishGuestCycle(new GuestCyclePresentation(
@@ -581,15 +616,32 @@ public sealed class EventGuestCycleOrchestrator
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                frame = null;
+                guestCycleCameraSensitive = false;
+                return await PauseGuestCycleAsync(
+                    ResolveCameraFailureSource(GuestCycleFailureSource.JpegEncoding),
+                    GuestCycleInterruptedStep.Capture,
+                    captureNumber,
+                    GuestCycleFailure.CameraUnavailable,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            guestCycleCameraSensitive = false;
+            if (interruptedCameraFailure != CameraStreamFailure.None)
+            {
+                return await PauseGuestCycleAsync(
+                    ResolveCameraFailureSource(GuestCycleFailureSource.CameraStale),
+                    GuestCycleInterruptedStep.Capture,
+                    captureNumber,
+                    GuestCycleFailure.CameraUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
             if (frame is null)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
+                return await PauseGuestCycleAsync(
+                    ResolveCameraFailureSource(GuestCycleFailureSource.FreshFrameTimeout),
+                    GuestCycleInterruptedStep.Capture,
                     captureNumber,
-                    run.Captures.Count,
-                    Failure: GuestCycleFailure.CameraUnavailable));
+                    GuestCycleFailure.CameraUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             CaptureCommitResult committed;
@@ -604,20 +656,22 @@ public sealed class EventGuestCycleOrchestrator
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.Capture,
                     captureNumber,
-                    run.Captures.Count,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             if (!committed.Committed)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.JpegValidation,
+                    GuestCycleInterruptedStep.Capture,
                     captureNumber,
-                    run.Captures.Count,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             run.Captures.Add(committed.Capture);
@@ -635,16 +689,30 @@ public sealed class EventGuestCycleOrchestrator
 
         if (run.PhotoStripPath is null)
         {
-            var composition = await Compositor.ComposeAsync(
-                new PhotoStripCompositionRequest(activeEvent.Name, run.Captures),
-                cancellationToken).ConfigureAwait(false);
+            PhotoStripCompositionResult composition;
+            try
+            {
+                composition = await Compositor.ComposeAsync(
+                    new PhotoStripCompositionRequest(activeEvent.Name, run.Captures),
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.PhotoStrip,
+                    4,
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
+            }
             if (!composition.IsAvailable)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
-                    CaptureNumber: 4,
-                    CompletedCaptures: 4,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.PhotoStrip,
+                    4,
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             PhotoStripCommitResult strip;
@@ -658,20 +726,22 @@ public sealed class EventGuestCycleOrchestrator
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
-                    CaptureNumber: 4,
-                    CompletedCaptures: 4,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.PhotoStrip,
+                    4,
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             if (!strip.Committed)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
-                    CaptureNumber: 4,
-                    CompletedCaptures: 4,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.PhotoStrip,
+                    4,
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             run.PhotoStripPath = strip.ArtifactPath;
@@ -697,11 +767,12 @@ public sealed class EventGuestCycleOrchestrator
             }
             if (!visible)
             {
-                return PublishGuestCycle(new GuestCyclePresentation(
-                    GuestCyclePhase.OperatorAssistance,
-                    CaptureNumber: 4,
-                    CompletedCaptures: 4,
-                    Failure: GuestCycleFailure.StorageUnavailable));
+                return await PauseGuestCycleAsync(
+                    GuestCycleFailureSource.Storage,
+                    GuestCycleInterruptedStep.Preview,
+                    4,
+                    GuestCycleFailure.StorageUnavailable,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             PublishGuestCycle(new GuestCyclePresentation(
@@ -740,16 +811,142 @@ public sealed class EventGuestCycleOrchestrator
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            return PublishGuestCycle(new GuestCyclePresentation(
-                GuestCyclePhase.OperatorAssistance,
-                CaptureNumber: 4,
-                CompletedCaptures: 4,
-                Failure: GuestCycleFailure.StorageUnavailable));
+            return await PauseGuestCycleAsync(
+                GuestCycleFailureSource.Storage,
+                GuestCycleInterruptedStep.Completion,
+                4,
+                GuestCycleFailure.StorageUnavailable,
+                cancellationToken).ConfigureAwait(false);
         }
 
         guestCycle = null;
         return PublishGuestCycle(GuestCyclePresentation.Start);
     }
+
+    private async Task<ApplicationPresentation> RetryGuestCycleAsync(CancellationToken cancellationToken)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent
+            ?? throw new InvalidOperationException("No Event is Active.");
+        var run = guestCycle ?? throw new InvalidOperationException("No Guest Cycle is in progress.");
+        if (run.EventId != activeEvent.Id)
+        {
+            return CurrentPresentation;
+        }
+        var interrupted = activeEvent.GuestCycle;
+
+        try
+        {
+            if (!await fileSystem.ProbeEventStorageAsync(activeEvent.Id, cancellationToken).ConfigureAwait(false) ||
+                run.LastInterruption is null)
+            {
+                return CurrentPresentation;
+            }
+
+            await fileSystem.RecordGuestCycleInterruptionAsync(
+                activeEvent.Id,
+                run.Id,
+                run.LastInterruption,
+                cancellationToken).ConfigureAwait(false);
+            if (await fileSystem.PrepareGuestCycleRetryAsync(
+                    activeEvent.Id,
+                    run.Id,
+                    run.Captures,
+                    cancellationToken).ConfigureAwait(false) != GuestCycleRetryValidation.Ready)
+            {
+                return CurrentPresentation;
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            return CurrentPresentation;
+        }
+
+        if (interrupted.Failure != GuestCycleFailure.CameraUnavailable &&
+            IsCameraReady(activeEvent.Camera, activeEvent.CameraStreamId, Clock.UtcNow))
+        {
+            return await RunGuestCycleAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        try
+        {
+            await Camera.ReleaseAsync(cancellationToken).ConfigureAwait(false);
+            if (Camera.AvailableCameras.All(camera => camera.DeviceId != activeEvent.Camera.DeviceId))
+            {
+                return CurrentPresentation;
+            }
+
+            var result = await Camera.OpenAsync(activeEvent.Camera.DeviceId, cancellationToken).ConfigureAwait(false);
+            var streamId = Camera.StreamId;
+            var streamHealth = Camera.StreamHealth;
+            if (result != CameraOpenResult.Ready ||
+                streamId is null ||
+                streamHealth.DeviceId != activeEvent.Camera.DeviceId ||
+                streamHealth.StreamId != streamId ||
+                streamHealth.LatestFrameAt is null ||
+                streamHealth.Failure != CameraStreamFailure.None)
+            {
+                return CurrentPresentation;
+            }
+
+            Publish(CurrentPresentation with
+            {
+                ActiveEvent = activeEvent with { CameraStreamId = streamId },
+            });
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            return CurrentPresentation;
+        }
+
+        return await RunGuestCycleAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApplicationPresentation> PauseGuestCycleAsync(
+        GuestCycleFailureSource source,
+        GuestCycleInterruptedStep step,
+        int captureNumber,
+        GuestCycleFailure failure,
+        CancellationToken cancellationToken)
+    {
+        var activeEvent = CurrentPresentation.ActiveEvent
+            ?? throw new InvalidOperationException("No Event is Active.");
+        var run = guestCycle ?? throw new InvalidOperationException("No Guest Cycle is in progress.");
+        var interruption = new GuestCycleInterruption(
+            source,
+            step,
+            captureNumber,
+            run.Captures.Count,
+            Clock.UtcNow);
+        run.LastInterruption = interruption;
+        try
+        {
+            await fileSystem.RecordGuestCycleInterruptionAsync(
+                activeEvent.Id,
+                run.Id,
+                interruption,
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            // Operator Assistance still preserves the in-process checkpoint when storage cannot record the failure.
+        }
+
+        return PublishGuestCycle(new GuestCyclePresentation(
+            GuestCyclePhase.OperatorAssistance,
+            captureNumber,
+            run.Captures.Count,
+            Failure: failure));
+    }
+
+    private GuestCycleFailureSource ResolveCameraFailureSource(GuestCycleFailureSource fallback) =>
+        Camera.StreamHealth.Failure switch
+        {
+            CameraStreamFailure.Removed => GuestCycleFailureSource.CameraRemoved,
+            CameraStreamFailure.StreamFailure => GuestCycleFailureSource.CameraStreamFailure,
+            CameraStreamFailure.ExclusiveOwnershipLost => GuestCycleFailureSource.CameraExclusiveOwnershipLost,
+            CameraStreamFailure.Stale => GuestCycleFailureSource.CameraStale,
+            _ => fallback,
+        };
 
     private ApplicationPresentation PublishGuestCycle(GuestCyclePresentation cycle)
     {
@@ -1019,6 +1216,24 @@ public sealed class EventGuestCycleOrchestrator
     private void OnStreamHealthChanged(object? sender, EventArgs args)
     {
         var activeEvent = CurrentPresentation.ActiveEvent;
+        var streamFailure = Camera.StreamHealth.Failure;
+        if (activeEvent?.GuestCycle is
+                { Phase: GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved, CompletedCaptures: < 4 } &&
+            guestCycleCameraSensitive &&
+            streamFailure != CameraStreamFailure.None)
+        {
+            interruptedCameraFailure = streamFailure;
+            try
+            {
+                guestCycleAttemptCancellation?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // The attempt completed while the Camera notification was being delivered.
+            }
+            return;
+        }
+
         if (activeEvent is null ||
             activeEvent.GuestCycle.Phase is not (GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable))
         {
@@ -1192,11 +1407,15 @@ public sealed class EventGuestCycleOrchestrator
         EventConfiguration Configuration,
         AvailableCamera? AvailableCamera);
 
-    private sealed class GuestCycleRun(GuestCycleId id, List<CaptureReference> captures)
+    private sealed class GuestCycleRun(EventId eventId, GuestCycleId id, List<CaptureReference> captures)
     {
+        public EventId EventId { get; } = eventId;
+
         public GuestCycleId Id { get; } = id;
 
         public List<CaptureReference> Captures { get; } = captures;
+
+        public GuestCycleInterruption? LastInterruption { get; set; }
 
         public string? PhotoStripPath { get; set; }
 

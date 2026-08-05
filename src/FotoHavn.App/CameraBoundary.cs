@@ -390,6 +390,10 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         {
             sequence = ++latestFrameSequence;
             latestFrameAtUtcTicks = receivedAt.UtcTicks;
+            if (streamFailure == CameraStreamFailure.Stale)
+            {
+                streamFailure = CameraStreamFailure.None;
+            }
             request = pendingCapture;
             if (request is not null && sequence > request.AfterSequence)
             {
@@ -452,6 +456,10 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         lock (frameSync)
         {
             latestFrameAtUtcTicks = DateTimeOffset.UtcNow.UtcTicks;
+            if (streamFailure == CameraStreamFailure.Stale)
+            {
+                streamFailure = CameraStreamFailure.None;
+            }
         }
 
         if (Interlocked.Exchange(ref staleFramePublished, 0) == 1)
@@ -499,21 +507,18 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
 
     private void PublishStaleFrameIfNeeded()
     {
-        long ticks;
-        CameraStreamFailure failure;
         lock (frameSync)
         {
-            ticks = latestFrameAtUtcTicks;
-            failure = streamFailure;
-        }
+            if (latestFrameAtUtcTicks == 0 ||
+                sessionOwner.StreamId is null ||
+                streamFailure != CameraStreamFailure.None ||
+                DateTimeOffset.UtcNow - new DateTimeOffset(latestFrameAtUtcTicks, TimeSpan.Zero) <= TimeSpan.FromSeconds(2) ||
+                Interlocked.Exchange(ref staleFramePublished, 1) == 1)
+            {
+                return;
+            }
 
-        if (ticks == 0 ||
-            sessionOwner.StreamId is null ||
-            failure != CameraStreamFailure.None ||
-            DateTimeOffset.UtcNow - new DateTimeOffset(ticks, TimeSpan.Zero) <= TimeSpan.FromSeconds(2) ||
-            Interlocked.Exchange(ref staleFramePublished, 1) == 1)
-        {
-            return;
+            streamFailure = CameraStreamFailure.Stale;
         }
 
         StreamHealthChanged?.Invoke(this, EventArgs.Empty);

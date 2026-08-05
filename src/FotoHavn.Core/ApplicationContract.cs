@@ -452,6 +452,7 @@ public enum CameraStreamFailure
     Removed,
     StreamFailure,
     ExclusiveOwnershipLost,
+    Stale,
 }
 
 public sealed record CameraStreamHealth(
@@ -481,7 +482,50 @@ public sealed record CapturedFrame(
     int Height,
     ReadOnlyMemory<byte> JpegBytes);
 
-public sealed record CaptureReference(string ArtifactPath);
+public sealed record CaptureReference(
+    string ArtifactPath,
+    long ByteLength = 0,
+    string Sha256 = "",
+    int Width = 0,
+    int Height = 0);
+
+public enum GuestCycleFailureSource
+{
+    CameraRemoved,
+    CameraStreamFailure,
+    CameraExclusiveOwnershipLost,
+    CameraStale,
+    FreshFrameTimeout,
+    JpegEncoding,
+    JpegValidation,
+    Storage,
+}
+
+public enum GuestCycleInterruptedStep
+{
+    Capture,
+    PhotoStrip,
+    Preview,
+    Completion,
+}
+
+public sealed record GuestCycleInterruption(
+    GuestCycleFailureSource Source,
+    GuestCycleInterruptedStep Step,
+    int CaptureNumber,
+    int CompletedCaptures,
+    DateTimeOffset FailedAt)
+{
+    public string LastDurableCheckpoint => CompletedCaptures == 0
+        ? "guestCycleCreated"
+        : $"capture{CompletedCaptures}Committed";
+}
+
+public enum GuestCycleRetryValidation
+{
+    Ready,
+    Unrecoverable,
+}
 
 public sealed record PhotoStripCompositionRequest(
     string EventName,
@@ -608,6 +652,18 @@ public interface IEventFileSystem
         CapturedFrame frame,
         CancellationToken cancellationToken) =>
         Task.FromResult(new CaptureCommitResult(false, new CaptureReference(string.Empty)));
+
+    Task RecordGuestCycleInterruptionAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        GuestCycleInterruption interruption,
+        CancellationToken cancellationToken) => Task.CompletedTask;
+
+    Task<GuestCycleRetryValidation> PrepareGuestCycleRetryAsync(
+        EventId eventId,
+        GuestCycleId guestCycleId,
+        IReadOnlyList<CaptureReference> completedCaptures,
+        CancellationToken cancellationToken) => Task.FromResult(GuestCycleRetryValidation.Ready);
 
     Task<PhotoStripCommitResult> CommitPhotoStripAsync(
         EventId eventId,

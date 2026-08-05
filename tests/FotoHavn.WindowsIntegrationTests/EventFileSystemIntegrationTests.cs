@@ -182,7 +182,141 @@ public sealed class EventFileSystemIntegrationTests
         using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(
             Path.Combine(guestCycleDirectory, "guest-cycle.json"),
             TestContext.Current.CancellationToken));
-        Assert.Equal("capture-1.jpg", manifest.RootElement.GetProperty("captures")[0].GetString());
+        Assert.Equal(
+            "capture-1.jpg",
+            manifest.RootElement.GetProperty("captures")[0].GetProperty("fileName").GetString());
+    }
+
+    [Fact]
+    public async Task Interrupted_manifest_records_failure_checkpoint_and_immutable_Capture_metadata()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await fileSystem.SaveEventAtomicallyAsync(
+            savedEvent,
+            EventSaveMode.CreateNew,
+            cancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(
+            savedEvent.Id,
+            guestCycleId,
+            savedEvent.LastSavedAt,
+            cancellationToken);
+        var jpeg = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+        var committed = await fileSystem.CommitCaptureAsync(
+            savedEvent.Id,
+            guestCycleId,
+            1,
+            new CapturedFrame(1, savedEvent.LastSavedAt, 6, 4, jpeg),
+            cancellationToken);
+        var interruption = new GuestCycleInterruption(
+            GuestCycleFailureSource.CameraRemoved,
+            GuestCycleInterruptedStep.Capture,
+            2,
+            1,
+            savedEvent.LastSavedAt.AddSeconds(5));
+
+        await fileSystem.RecordGuestCycleInterruptionAsync(
+            savedEvent.Id,
+            guestCycleId,
+            interruption,
+            cancellationToken);
+
+        var manifestPath = Path.Combine(
+            directory.Path,
+            savedEvent.Id.Value,
+            "GuestCycles",
+            guestCycleId.Value,
+            "guest-cycle.json");
+        using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(manifestPath, cancellationToken));
+        var capture = manifest.RootElement.GetProperty("captures")[0];
+        Assert.Equal("capture-1.jpg", capture.GetProperty("fileName").GetString());
+        Assert.Equal(committed.Capture.ByteLength, capture.GetProperty("byteLength").GetInt64());
+        Assert.Equal(committed.Capture.Sha256, capture.GetProperty("sha256").GetString());
+        Assert.Equal(6, capture.GetProperty("width").GetInt32());
+        Assert.Equal(4, capture.GetProperty("height").GetInt32());
+        var failure = manifest.RootElement.GetProperty("interruptions")[0];
+        Assert.Equal("cameraRemoved", failure.GetProperty("source").GetString());
+        Assert.Equal("capture", failure.GetProperty("step").GetString());
+        Assert.Equal(2, failure.GetProperty("captureNumber").GetInt32());
+        Assert.Equal(1, failure.GetProperty("completedCaptures").GetInt32());
+        Assert.Equal("capture1Committed", failure.GetProperty("lastDurableCheckpoint").GetString());
+    }
+
+    [Fact]
+    public async Task Retry_preserves_canonical_evidence_and_ignores_safely_replaceable_partial_data()
+    {
+        using var directory = new TemporaryDirectory();
+        var fileSystem = new ExecutableRelativeEventFileSystem(directory.Path);
+        var savedEvent = Configuration(
+            new EventId("event-1"),
+            "Wedding",
+            DateTimeOffset.UnixEpoch,
+            DateTimeOffset.UnixEpoch);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await fileSystem.SaveEventAtomicallyAsync(savedEvent, EventSaveMode.CreateNew, cancellationToken);
+        var guestCycleId = new GuestCycleId(Guid.CreateVersion7().ToString());
+        await fileSystem.CreateGuestCycleAsync(savedEvent.Id, guestCycleId, savedEvent.LastSavedAt, cancellationToken);
+        var jpeg = await EncodeSolidAsync(BitmapEncoder.JpegEncoderId, 6, 4);
+        var first = await fileSystem.CommitCaptureAsync(
+            savedEvent.Id,
+            guestCycleId,
+            1,
+            new CapturedFrame(1, savedEvent.LastSavedAt, 6, 4, jpeg),
+            cancellationToken);
+        await fileSystem.RecordGuestCycleInterruptionAsync(
+            savedEvent.Id,
+            guestCycleId,
+            new GuestCycleInterruption(
+                GuestCycleFailureSource.Storage,
+                GuestCycleInterruptedStep.Capture,
+                2,
+                1,
+                savedEvent.LastSavedAt.AddSeconds(5)),
+            cancellationToken);
+        var guestCycleDirectory = Path.Combine(directory.Path, savedEvent.Id.Value, "GuestCycles", guestCycleId.Value);
+        var failedCanonical = Path.Combine(guestCycleDirectory, "capture-2.jpg");
+        var failedPartial = Path.Combine(guestCycleDirectory, ".capture-2.jpg-injected.partial");
+        await File.WriteAllBytesAsync(failedPartial, [4, 5, 6], cancellationToken);
+
+        var ready = await fileSystem.PrepareGuestCycleRetryAsync(
+            savedEvent.Id,
+            guestCycleId,
+            [first.Capture],
+            cancellationToken);
+
+        Assert.Equal(GuestCycleRetryValidation.Ready, ready);
+        Assert.True(File.Exists(failedPartial));
+        var failedCanonicalBytes = new byte[] { 1, 2, 3 };
+        await File.WriteAllBytesAsync(failedCanonical, failedCanonicalBytes, cancellationToken);
+
+        var canonicalRejected = await fileSystem.PrepareGuestCycleRetryAsync(
+            savedEvent.Id,
+            guestCycleId,
+            [first.Capture],
+            cancellationToken);
+
+        Assert.Equal(GuestCycleRetryValidation.Unrecoverable, canonicalRejected);
+        Assert.Equal(failedCanonicalBytes, await File.ReadAllBytesAsync(failedCanonical, cancellationToken));
+        File.Delete(failedCanonical);
+        var durablePath = first.Capture.ArtifactPath;
+        var changedBytes = new byte[] { 9, 8, 7 };
+        await File.WriteAllBytesAsync(durablePath, changedBytes, cancellationToken);
+
+        var rejected = await fileSystem.PrepareGuestCycleRetryAsync(
+            savedEvent.Id,
+            guestCycleId,
+            [first.Capture],
+            cancellationToken);
+
+        Assert.Equal(GuestCycleRetryValidation.Unrecoverable, rejected);
+        Assert.Equal(changedBytes, await File.ReadAllBytesAsync(durablePath, cancellationToken));
     }
 
     [Fact]

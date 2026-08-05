@@ -44,6 +44,14 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(GuestCyclePhase.OperatorAssistance, paused.ActiveEvent?.GuestCycle.Phase);
         Assert.Equal(2, paused.ActiveEvent?.GuestCycle.CompletedCaptures);
         Assert.Equal([1, 2], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Equal(
+            new GuestCycleInterruption(
+                GuestCycleFailureSource.FreshFrameTimeout,
+                GuestCycleInterruptedStep.Capture,
+                3,
+                2,
+                clock.UtcNow),
+            Assert.Single(fileSystem.Interruptions));
         Assert.Equal(TimeSpan.FromSeconds(2), camera.LastCaptureTimeout);
         orchestrator.PresentationChanged += (_, presentation) =>
         {
@@ -57,7 +65,174 @@ public sealed class GuestCycleAcceptanceTests
 
         Assert.Single(fileSystem.CreatedGuestCycles);
         Assert.Equal([1, 2, 3, 4], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Equal(1, camera.ReleaseCount);
+        Assert.Equal([savedEvent.Camera.DeviceId, savedEvent.Camera.DeviceId], camera.OpenedDeviceIds);
         Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
+    }
+
+    [Fact]
+    public async Task Retry_rejects_changed_durable_history_without_reopening_or_overwriting_anything()
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera) { FailOnceOnCaptureAttempt = 3 };
+        var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var clock = new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero));
+        var orchestrator = new EventGuestCycleOrchestrator(
+            fileSystem,
+            camera,
+            new RecordingCompositor(),
+            clock);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+        await orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        fileSystem.NextRetryValidation = GuestCycleRetryValidation.Unrecoverable;
+
+        var rejected = await orchestrator.ExecuteAsync(new RetryGuestCycle(), cancellationToken);
+
+        Assert.Equal(GuestCyclePhase.OperatorAssistance, rejected.ActiveEvent?.GuestCycle.Phase);
+        Assert.Equal([1, 2], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Single(fileSystem.CreatedGuestCycles);
+        Assert.Equal(1, camera.OpenCount);
+        Assert.Equal(0, camera.ReleaseCount);
+    }
+
+    [Theory]
+    [InlineData(CameraStreamFailure.Removed, GuestCycleFailureSource.CameraRemoved)]
+    [InlineData(CameraStreamFailure.StreamFailure, GuestCycleFailureSource.CameraStreamFailure)]
+    [InlineData(CameraStreamFailure.ExclusiveOwnershipLost, GuestCycleFailureSource.CameraExclusiveOwnershipLost)]
+    [InlineData(CameraStreamFailure.Stale, GuestCycleFailureSource.CameraStale)]
+    public async Task Camera_stream_failures_record_their_exact_source(
+        CameraStreamFailure streamFailure,
+        GuestCycleFailureSource expectedSource)
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera)
+        {
+            FailOnceOnCaptureAttempt = 1,
+            FailureOnFailedCapture = streamFailure,
+        };
+        var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var orchestrator = new EventGuestCycleOrchestrator(
+            fileSystem,
+            camera,
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero)));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+
+        var paused = await orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+
+        Assert.Equal(GuestCyclePhase.OperatorAssistance, paused.ActiveEvent?.GuestCycle.Phase);
+        Assert.Equal(expectedSource, Assert.Single(fileSystem.Interruptions).Source);
+    }
+
+    [Fact]
+    public async Task Stream_failure_during_countdown_immediately_pauses_the_active_attempt()
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera);
+        var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var clock = new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero));
+        clock.DelayCompleted = (_, delayNumber) =>
+        {
+            if (delayNumber == 2)
+            {
+                camera.ReportStreamFailure(CameraStreamFailure.StreamFailure);
+            }
+        };
+        var orchestrator = new EventGuestCycleOrchestrator(
+            fileSystem,
+            camera,
+            new RecordingCompositor(),
+            clock);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+
+        var paused = await orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+
+        Assert.Equal(GuestCyclePhase.OperatorAssistance, paused.ActiveEvent?.GuestCycle.Phase);
+        Assert.Empty(camera.RequestedAfterSequences);
+        Assert.Equal(GuestCycleFailureSource.CameraStreamFailure, Assert.Single(fileSystem.Interruptions).Source);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public async Task Storage_failure_at_each_Capture_checkpoint_retries_only_the_first_missing_Capture(
+        int failedCapture)
+    {
+        var savedEvent = SavedEvent();
+        var camera = new GuestCycleCamera(savedEvent.Camera);
+        var fileSystem = new GuestCycleFileSystem(savedEvent) { FailCommitOnceOnCaptureNumber = failedCapture };
+        var orchestrator = new EventGuestCycleOrchestrator(
+            fileSystem,
+            camera,
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero)));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
+
+        var paused = await orchestrator.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        camera.LatestFrameAt = orchestrator.Clock.UtcNow;
+        orchestrator.PresentationChanged += (_, presentation) =>
+        {
+            if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
+            {
+                _ = orchestrator.ExecuteAsync(new ConfirmPhotoStripVisible(), cancellationToken);
+            }
+        };
+        var completed = await orchestrator.ExecuteAsync(new RetryGuestCycle(), cancellationToken);
+
+        Assert.Equal(failedCapture - 1, paused.ActiveEvent?.GuestCycle.CompletedCaptures);
+        Assert.Equal(GuestCycleFailureSource.Storage, Assert.Single(fileSystem.Interruptions).Source);
+        Assert.Equal([1, 2, 3, 4], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Equal(0, camera.ReleaseCount);
+        Assert.Equal([savedEvent.Camera.DeviceId], camera.OpenedDeviceIds);
+        Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
+    }
+
+    [Fact]
+    public async Task Process_restart_leaves_the_interrupted_Guest_Cycle_untouched_and_Start_uses_a_new_identity()
+    {
+        var savedEvent = SavedEvent();
+        var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var interrupted = new EventGuestCycleOrchestrator(
+            fileSystem,
+            new GuestCycleCamera(savedEvent.Camera) { FailOnceOnCaptureAttempt = 1 },
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero)),
+            guestCycleIdentityGenerator: new FixedGuestCycleIdentityGenerator("interrupted-cycle"));
+        await ActivateAsync(interrupted, savedEvent.Id, cancellationToken);
+        await interrupted.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+        var recordedInterruption = Assert.Single(fileSystem.Interruptions);
+
+        var restarted = new EventGuestCycleOrchestrator(
+            fileSystem,
+            new GuestCycleCamera(savedEvent.Camera)
+            {
+                LatestFrameAt = new DateTimeOffset(2026, 8, 5, 2, 0, 0, TimeSpan.Zero),
+            },
+            new RecordingCompositor(),
+            new RecordingClock(new DateTimeOffset(2026, 8, 5, 2, 0, 0, TimeSpan.Zero)),
+            guestCycleIdentityGenerator: new FixedGuestCycleIdentityGenerator("new-cycle"));
+        await ActivateAsync(restarted, savedEvent.Id, cancellationToken);
+        restarted.PresentationChanged += (_, presentation) =>
+        {
+            if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
+            {
+                _ = restarted.ExecuteAsync(new ConfirmPhotoStripVisible(), cancellationToken);
+            }
+        };
+
+        await restarted.ExecuteAsync(new StartGuestCycle(), cancellationToken);
+
+        Assert.Equal(
+            [new GuestCycleId("interrupted-cycle"), new GuestCycleId("new-cycle")],
+            fileSystem.CreatedGuestCycles);
+        Assert.Equal(recordedInterruption, Assert.Single(fileSystem.Interruptions));
     }
 
     [Fact]
@@ -214,12 +389,15 @@ public sealed class GuestCycleAcceptanceTests
     private sealed class GuestCycleCamera(CameraBinding binding) : ICameraBoundary
     {
         private long sequence = 40;
+        private CameraStreamFailure currentFailure;
 
         public event EventHandler? AvailableCamerasChanged
         {
             add { }
             remove { }
         }
+
+        public event EventHandler? StreamHealthChanged;
 
         public IReadOnlyList<AvailableCamera> AvailableCameras { get; } =
             [new(binding.DeviceId, binding.DisplayName, null)];
@@ -228,6 +406,10 @@ public sealed class GuestCycleAcceptanceTests
 
         public int OpenCount { get; private set; }
 
+        public int ReleaseCount { get; private set; }
+
+        public List<CameraDeviceId> OpenedDeviceIds { get; } = [];
+
         public List<long> RequestedAfterSequences { get; } = [];
 
         public DateTimeOffset LatestFrameAt { get; set; } =
@@ -235,25 +417,35 @@ public sealed class GuestCycleAcceptanceTests
 
         public int? FailOnceOnCaptureAttempt { get; init; }
 
+        public CameraStreamFailure FailureOnFailedCapture { get; init; }
+
         public TimeSpan? LastCaptureTimeout { get; private set; }
 
         private int captureAttempts;
 
         public void DeliverFrameAtCountdownBoundary() => sequence++;
 
+        public void ReportStreamFailure(CameraStreamFailure failure)
+        {
+            currentFailure = failure;
+            StreamHealthChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         public CameraStreamHealth StreamHealth => new(
             binding.DeviceId,
             StreamId,
             sequence,
             LatestFrameAt,
-            CameraStreamFailure.None);
+            currentFailure);
 
         public Task StartDiscoveryAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         public Task<CameraOpenResult> OpenAsync(CameraDeviceId deviceId, CancellationToken cancellationToken)
         {
             OpenCount++;
+            OpenedDeviceIds.Add(deviceId);
             StreamId = "stream-1";
+            currentFailure = CameraStreamFailure.None;
             return Task.FromResult(CameraOpenResult.Ready);
         }
 
@@ -267,6 +459,7 @@ public sealed class GuestCycleAcceptanceTests
             captureAttempts++;
             if (captureAttempts == FailOnceOnCaptureAttempt)
             {
+                currentFailure = FailureOnFailedCapture;
                 return Task.FromResult<CapturedFrame?>(null);
             }
 
@@ -281,6 +474,7 @@ public sealed class GuestCycleAcceptanceTests
 
         public Task ReleaseAsync(CancellationToken cancellationToken)
         {
+            ReleaseCount++;
             StreamId = null;
             return Task.CompletedTask;
         }
@@ -292,8 +486,13 @@ public sealed class GuestCycleAcceptanceTests
         public List<(int CaptureNumber, CaptureReference Reference)> CommittedCaptures { get; } = [];
         public List<CapturedFrame> CommittedFrames { get; } = [];
         public List<GuestCycleId> CompletedGuestCycles { get; } = [];
+        public List<GuestCycleInterruption> Interruptions { get; } = [];
 
         public bool FailCompletionOnce { get; init; }
+
+        public int? FailCommitOnceOnCaptureNumber { get; init; }
+
+        private bool captureCommitFailed;
 
         public bool BlockStorageProbe { get; set; }
 
@@ -304,6 +503,8 @@ public sealed class GuestCycleAcceptanceTests
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public int CompletionAttempts { get; private set; }
+
+        public GuestCycleRetryValidation NextRetryValidation { get; set; } = GuestCycleRetryValidation.Ready;
 
         public Task<IReadOnlyList<SavedEventSummary>> LoadEventsAsync(CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<SavedEventSummary>>(
@@ -347,6 +548,12 @@ public sealed class GuestCycleAcceptanceTests
             CapturedFrame frame,
             CancellationToken cancellationToken)
         {
+            if (!captureCommitFailed && captureNumber == FailCommitOnceOnCaptureNumber)
+            {
+                captureCommitFailed = true;
+                throw new IOException("Injected Capture commit failure.");
+            }
+
             var reference = new CaptureReference($"capture-{captureNumber}.jpg");
             CommittedCaptures.Add((captureNumber, reference));
             CommittedFrames.Add(frame);
@@ -359,6 +566,25 @@ public sealed class GuestCycleAcceptanceTests
             PhotoStripCompositionResult composition,
             CancellationToken cancellationToken) =>
             Task.FromResult(new PhotoStripCommitResult(true, "photo-strip.png"));
+
+        public Task RecordGuestCycleInterruptionAsync(
+            EventId eventId,
+            GuestCycleId guestCycleId,
+            GuestCycleInterruption interruption,
+            CancellationToken cancellationToken)
+        {
+            if (Interruptions.LastOrDefault() != interruption)
+            {
+                Interruptions.Add(interruption);
+            }
+            return Task.CompletedTask;
+        }
+
+        public Task<GuestCycleRetryValidation> PrepareGuestCycleRetryAsync(
+            EventId eventId,
+            GuestCycleId guestCycleId,
+            IReadOnlyList<CaptureReference> completedCaptures,
+            CancellationToken cancellationToken) => Task.FromResult(NextRetryValidation);
 
         public Task CompleteGuestCycleAsync(
             EventId eventId,
@@ -393,6 +619,11 @@ public sealed class GuestCycleAcceptanceTests
         }
     }
 
+    private sealed class FixedGuestCycleIdentityGenerator(string value) : IGuestCycleIdentityGenerator
+    {
+        public GuestCycleId Create() => new(value);
+    }
+
     private sealed class RecordingClock(DateTimeOffset utcNow) : IApplicationClock
     {
         public DateTimeOffset UtcNow { get; private set; } = utcNow;
@@ -403,6 +634,7 @@ public sealed class GuestCycleAcceptanceTests
 
         public Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             Delays.Add(delay);
             UtcNow += delay;
             DelayCompleted?.Invoke(delay, Delays.Count);
