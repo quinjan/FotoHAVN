@@ -10,7 +10,7 @@ namespace FotoHavn.App;
 internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
 {
     private const int CurrentRecordVersion = 1;
-    private const int CurrentGuestCycleVersion = 2;
+    private const int CurrentGuestCycleVersion = 3;
     private const int CurrentQuarantineVersion = 1;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
@@ -478,8 +478,7 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         if (manifest.Version != CurrentGuestCycleVersion ||
             manifest.Id != guestCycleId.Value ||
             manifest.CompletedAt is not null ||
-            manifest.Captures.Count != completedCaptures.Count ||
-            manifest.Interruptions.LastOrDefault()?.CompletedCaptures != completedCaptures.Count)
+            manifest.Captures.Count != completedCaptures.Count)
         {
             return GuestCycleRetryValidation.Unrecoverable;
         }
@@ -514,6 +513,33 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
             }
         }
 
+        if (manifest.PhotoStrip is { } photoStrip)
+        {
+            var expectedName = "photo-strip.png";
+            var path = Path.Combine(guestCycleDirectory, expectedName);
+            if (photoStrip.FileName != expectedName || !File.Exists(path))
+            {
+                return GuestCycleRetryValidation.Unrecoverable;
+            }
+
+            var bytes = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
+            if (bytes.LongLength != photoStrip.ByteLength ||
+                !CreateSha256(bytes).Equals(photoStrip.Sha256, StringComparison.Ordinal) ||
+                !await ValidateImageAsync(
+                    path,
+                    BitmapDecoder.PngDecoderId,
+                    photoStrip.Width,
+                    photoStrip.Height).ConfigureAwait(false))
+            {
+                return GuestCycleRetryValidation.Unrecoverable;
+            }
+        }
+        else if (manifest.Interruptions.LastOrDefault()?.Step is
+                 GuestCycleInterruptedStep.Preview or GuestCycleInterruptedStep.Completion)
+        {
+            return GuestCycleRetryValidation.Unrecoverable;
+        }
+
         var nextCaptureName = $"capture-{completedCaptures.Count + 1}.jpg";
         if (File.Exists(Path.Combine(guestCycleDirectory, nextCaptureName)))
         {
@@ -540,7 +566,9 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         if (File.Exists(canonicalPath))
         {
             var interruptedManifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
+            var canonicalBytes = await File.ReadAllBytesAsync(canonicalPath, cancellationToken).ConfigureAwait(false);
             if (interruptedManifest.PhotoStrip is not null ||
+                !canonicalBytes.AsSpan().SequenceEqual(composition.PngBytes.Span) ||
                 !await ValidateImageAsync(
                     canonicalPath,
                     BitmapDecoder.PngDecoderId,
@@ -552,7 +580,15 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
 
             await SaveGuestCycleManifestAsync(
                 guestCycleDirectory,
-                interruptedManifest with { PhotoStrip = canonicalName },
+                interruptedManifest with
+                {
+                    PhotoStrip = await CreatePhotoStripArtifactAsync(
+                        canonicalPath,
+                        canonicalName,
+                        composition.Width,
+                        composition.Height,
+                        cancellationToken).ConfigureAwait(false),
+                },
                 cancellationToken).ConfigureAwait(false);
             return new PhotoStripCommitResult(true, canonicalPath);
         }
@@ -573,7 +609,15 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         var manifest = await LoadGuestCycleManifestAsync(guestCycleDirectory, cancellationToken).ConfigureAwait(false);
         await SaveGuestCycleManifestAsync(
             guestCycleDirectory,
-            manifest with { PhotoStrip = canonicalName },
+            manifest with
+            {
+                PhotoStrip = await CreatePhotoStripArtifactAsync(
+                    canonicalPath,
+                    canonicalName,
+                    composition.Width,
+                    composition.Height,
+                    cancellationToken).ConfigureAwait(false),
+            },
             cancellationToken).ConfigureAwait(false);
         return new PhotoStripCommitResult(true, canonicalPath);
     }
@@ -657,6 +701,22 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
     {
         var bytes = await File.ReadAllBytesAsync(canonicalPath, cancellationToken).ConfigureAwait(false);
         return new CaptureArtifactManifest(
+            canonicalName,
+            bytes.LongLength,
+            CreateSha256(bytes),
+            width,
+            height);
+    }
+
+    private static async Task<PhotoStripArtifactManifest> CreatePhotoStripArtifactAsync(
+        string canonicalPath,
+        string canonicalName,
+        int width,
+        int height,
+        CancellationToken cancellationToken)
+    {
+        var bytes = await File.ReadAllBytesAsync(canonicalPath, cancellationToken).ConfigureAwait(false);
+        return new PhotoStripArtifactManifest(
             canonicalName,
             bytes.LongLength,
             CreateSha256(bytes),
@@ -832,8 +892,15 @@ internal sealed class ExecutableRelativeEventFileSystem : IEventFileSystem
         DateTimeOffset StartedAt,
         DateTimeOffset? CompletedAt,
         IReadOnlyList<CaptureArtifactManifest> Captures,
-        string? PhotoStrip,
+        PhotoStripArtifactManifest? PhotoStrip,
         IReadOnlyList<GuestCycleInterruption> Interruptions);
+
+    private sealed record PhotoStripArtifactManifest(
+        string FileName,
+        long ByteLength,
+        string Sha256,
+        int Width,
+        int Height);
 
     private sealed record CaptureArtifactManifest(
         string FileName,
