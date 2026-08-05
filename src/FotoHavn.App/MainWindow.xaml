@@ -207,7 +207,9 @@
                                 Background="#FF17181A"
                                 CornerRadius="8">
                                 <Grid>
-                                    <Image x:Name="PreviewImage" Stretch="UniformToFill" RenderTransformOrigin="0.5,0.5" />
+                                    <Grid x:Name="PreviewSurface">
+                                        <Image x:Name="PreviewImage" Stretch="UniformToFill" />
+                                    </Grid>
                                     <!-- The full preview viewport is the deterministic 3:2 Capture crop. -->
                                     <Border BorderBrush="White" BorderThickness="2" CornerRadius="5" Opacity="0.82" />
                                     <TextBlock

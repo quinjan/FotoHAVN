@@ -22,7 +22,13 @@ public sealed class CameraPolicyIntegrationTests
     [Fact]
     public void Preview_mirroring_is_render_only_and_uses_the_shared_Photo_Strip_crop()
     {
-        Assert.Equal(-1, CameraPreviewRenderPolicy.MirrorScaleX);
+        const double viewportWidth = 588;
+        var mirror = CameraPreviewRenderPolicy.CreateMirror(viewportWidth);
+
+        Assert.Equal(-1, mirror.ScaleX);
+        Assert.Equal(viewportWidth / 2, mirror.CenterX);
+        Assert.Equal(viewportWidth, mirror.TransformX(0));
+        Assert.Equal(0, mirror.TransformX(viewportWidth));
         Assert.Equal(CaptureCropPolicy.AspectRatio, CameraPreviewRenderPolicy.CropAspectRatio);
         Assert.Equal(CaptureCropPolicy.AspectRatio, new PhotoStripCompositionRequest("Event", []).CaptureCropAspectRatio);
     }

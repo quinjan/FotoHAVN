@@ -23,7 +23,14 @@ public sealed partial class MainWindow : Window
         this.camera = camera;
         InitializeComponent();
         PreviewViewport.Width = PreviewViewport.Height * CameraPreviewRenderPolicy.CropAspectRatio;
-        PreviewImage.RenderTransform = new ScaleTransform { ScaleX = CameraPreviewRenderPolicy.MirrorScaleX };
+        PreviewSurface.Width = PreviewViewport.Width;
+        PreviewSurface.Height = PreviewViewport.Height;
+        var mirror = CameraPreviewRenderPolicy.CreateMirror(PreviewSurface.Width);
+        PreviewSurface.RenderTransform = new ScaleTransform
+        {
+            ScaleX = mirror.ScaleX,
+            CenterX = mirror.CenterX,
+        };
         orchestrator.PresentationChanged += PresentationChanged;
         camera.PreviewFrameAvailable += PreviewFrameAvailable;
     }
