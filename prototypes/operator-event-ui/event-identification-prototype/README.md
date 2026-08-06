@@ -1,14 +1,16 @@
-# Duplicate Event identification UI prototype
+# Event identification in consequential flows
 
 > PROTOTYPE — throwaway code. Do not promote directly to production.
 
-Question: **How should FotoHAVN distinguish Events with duplicate names across saved-Event cards and consequential start, edit, and permanent-delete flows?**
+Question: **Which concrete presentation of the approved Event identification model works best across saved-Event cards and consequential confirmations at supported booth sizes and scaling levels?**
 
-Three identity contracts are mounted in one browser prototype, switchable with `?variant=A|B|C`. The same two `Summer Social` Events appear in every variant.
+The approved saved-card identity is fixed in all variants: Event name, `EVENT ID`, grouped final eight UUID characters, then saved recency. Three full-ID presentations are switchable with `?variant=A|B|C`:
 
-- **A — Event ID:** cards show a grouped UUIDv7 fingerprint such as `7A2F · 91C4`; edit and consequential flows show the complete UUID. Saved recency remains directly below the identity. Delete uses the ordinary confirmation.
-- **B — Duplicate-aware:** creation metadata is elevated only for duplicate names; delete requires typing the Event name.
-- **C — Identity band:** every surface repeats a compact name + creation identity block; delete requires checking that exact identity.
+- **A — Identity panel:** a compact bordered identity block.
+- **B — Sentence-led:** a plain-language compact-ID sentence followed by the full identifier.
+- **C — Verification rows:** explicit Event and Full Event ID label/value rows.
+
+The state control covers Edit, Start confirmation, Starting, Could not start, permanent-delete confirmation, Deleting, Deletion incomplete/Retry, and Deletion complete. The view control covers 1280 × 720, 1024 × 768, 125%, 150%, and a 200% zoom-equivalent stress case.
 
 Run from this directory:
 
@@ -16,8 +18,6 @@ Run from this directory:
 .\run.ps1
 ```
 
-Then open <http://127.0.0.1:4181/event-identification-prototype/?variant=A> at a 1280 × 720 viewport.
+Then open <http://127.0.0.1:4181/event-identification-prototype/?variant=A&flow=start&viewport=canonical>.
 
-Use the on-screen flow and viewport controls to inspect cards, edit, start, delete, deleting, and result states at the canonical frame or a narrow/150%-scale stress case. `Left` / `Right` cycles variants without intercepting text entry.
-
-This prototype records no data and makes no production mutations. Issue #54 stays open until the operator explicitly approves an identification contract.
+This prototype records no data and makes no production mutations. Issue #55 stays open until the operator selects or combines a presentation.

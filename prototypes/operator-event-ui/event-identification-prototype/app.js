@@ -1,52 +1,62 @@
-// PROTOTYPE — throwaway UI. Three duplicate-Event identity contracts on one route.
+// PROTOTYPE — throwaway UI. Three full Event-ID presentations in consequential flows.
 const variants = {
-  A: "Event ID",
-  B: "Duplicate-aware",
-  C: "Identity band",
+  A: "Identity panel",
+  B: "Sentence-led",
+  C: "Verification rows",
 };
 
 const events = [
-  { id: "summer-am", uuid: "01989c3a-61d2-7000-8000-00007a2f91c4", displayId: "7A2F · 91C4", name: "Summer Social", created: "Created Aug 5, 2026, 9:15 AM", saved: "Saved today, 4:42 PM", camera: "Canon EOS R100 · Front hall" },
-  { id: "summer-pm", uuid: "01989c3a-cc82-7000-8000-0000c8064d3b", displayId: "C806 · 4D3B", name: "Summer Social", created: "Created Aug 5, 2026, 8:30 PM", saved: "Saved today, 9:18 PM", camera: "Canon EOS R100 · Garden booth" },
-  { id: "market", uuid: "01983aa1-e3f1-7000-8000-0000d91eb4f0", displayId: "D91E · B4F0", name: "Saturday Market", created: "Created Jul 28, 2026, 7:05 AM", saved: "Saved Jul 28, 2026, 11:06 AM", camera: "Logitech BRIO · Market booth" },
+  { id: "summer-am", uuid: "01989c3a-61d2-7000-8000-00007a2f91c4", displayId: "7A2F · 91C4", name: "Summer Social", saved: "Saved today, 4:42 PM", camera: "Canon EOS R100 · Front hall" },
+  { id: "summer-pm", uuid: "01989c3a-cc82-7000-8000-0000c8064d3b", displayId: "C806 · 4D3B", name: "Summer Social", saved: "Saved today, 9:18 PM", camera: "Canon EOS R100 · Garden booth" },
+  { id: "market", uuid: "01983aa1-e3f1-7000-8000-0000d91eb4f0", displayId: "D91E · B4F0", name: "Saturday Market", saved: "Saved Jul 28, 2026, 11:06 AM", camera: "Logitech BRIO · Market booth" },
 ];
+
+const flows = {
+  cards: "Saved Events",
+  edit: "Edit",
+  start: "Start confirmation",
+  starting: "Starting",
+  startFailed: "Could not start",
+  delete: "Delete confirmation",
+  deleting: "Deleting",
+  deleteFailed: "Deletion incomplete",
+  deleted: "Deletion complete",
+};
 
 let params = new URLSearchParams(location.search);
 let variant = variants[params.get("variant")] ? params.get("variant") : "A";
-let flow = params.get("flow") || "cards";
+let flow = flows[params.get("flow")] ? params.get("flow") : "start";
 let selectedId = params.get("event") || "summer-pm";
 let viewport = params.get("viewport") || "canonical";
-let typedName = "";
-let acknowledged = false;
 const app = document.querySelector("#app");
 
 const selected = () => events.find(item => item.id === selectedId) || events[1];
-const duplicate = item => events.filter(candidate => candidate.name === item.name).length > 1;
 
-function identity(item, context = "default") {
+function compactIdentity(item) {
+  return `<div class="compact-identity"><strong>${item.name}</strong><span><i>Event ID</i><code>${item.displayId}</code></span></div>`;
+}
+
+function fullIdentity(item, context = "default") {
   if (variant === "A") {
-    const compact = context === "card";
-    return `<div class="identity identity-a ${context}"><strong>${item.name}</strong><span class="event-id ${compact ? "compact" : "full"}"><i>Event ID</i><code>${compact ? item.displayId : item.uuid}</code></span></div>`;
+    return `<section class="full-identity identity-panel ${context}" aria-label="Full Event identity"><strong>${item.name}</strong><span><i>Event ID</i><code>${item.uuid}</code></span></section>`;
   }
-  if (variant === "B") return `<div class="identity identity-b ${context}"><strong>${item.name}</strong>${duplicate(item) ? `<span><i>Same-name Event</i>${item.created}</span>` : ""}</div>`;
-  return `<div class="identity identity-c ${context}"><strong>${item.name}</strong><span>${item.created}</span></div>`;
+  if (variant === "B") {
+    return `<section class="full-identity sentence-led ${context}" aria-label="Full Event identity"><p><strong>${item.name}</strong> is the Event ending in <code>${item.displayId}</code>.</p><span><i>Full Event ID</i><code>${item.uuid}</code></span></section>`;
+  }
+  return `<dl class="full-identity verification-rows ${context}" aria-label="Full Event identity"><div><dt>Event</dt><dd>${item.name}</dd></div><div><dt>Full Event ID</dt><dd><code>${item.uuid}</code></dd></div></dl>`;
 }
 
 function shell(content) {
-  return `<div class="frame ${viewport}">
-    <header><a><b>F</b><span>FotoHAVN</span></a><span>OPERATOR CONSOLE</span></header>
-    ${content}
-  </div>`;
+  return `<div class="frame ${viewport}"><header><a><b>F</b><span>FotoHAVN</span></a><span>OPERATOR CONSOLE</span></header>${content}</div>`;
 }
 
 function cards() {
   return shell(`<main class="page"><p class="eyebrow">Saved Events</p><h1>Choose an Event</h1><p class="lede">Open one to adjust its setup, or start a Guest Cycle.</p>
-    <section class="event-grid variant-${variant.toLowerCase()}">
+    <section class="event-grid">
       <article class="new-event"><span>＋</span><strong>New Event</strong><small>Set up a new booth run</small></article>
-      ${events.map(item => `<article class="event-card ${duplicate(item) ? "duplicate" : ""}">
-        <button class="trash" data-open="delete" data-event="${item.id}" aria-label="Delete ${item.name}">Delete</button>
-        ${identity(item, "card")}
-        ${variant === "C" ? `<p class="saved">${item.saved}</p>` : `<small class="saved">${item.saved}</small>`}
+      ${events.map(item => `<article class="event-card">
+        <button class="trash" data-open="delete" data-event="${item.id}" aria-label="Delete ${item.name}, Event ID ending in ${item.displayId.replace(" · ", ", ")}">Delete</button>
+        ${compactIdentity(item)}<small class="saved">${item.saved}</small>
         <div class="card-actions"><button data-open="edit" data-event="${item.id}">Edit</button><button class="primary" data-open="start" data-event="${item.id}">Start</button></div>
       </article>`).join("")}
     </section>
@@ -57,74 +67,72 @@ function edit() {
   const item = selected();
   return shell(`<main class="page"><button class="back" data-flow="cards">← Saved Events</button>
     <section class="edit-surface">
-      <div class="edit-head"><div><p class="eyebrow">Edit Event</p>${identity(item, "header")}</div><button data-flow="cards" aria-label="Close">×</button></div>
+      <div class="edit-head"><div><p class="eyebrow">Edit Event</p><h1>${item.name}</h1></div><button data-flow="cards" aria-label="Close">×</button></div>
+      <div class="edit-identity">${fullIdentity(item, "edit-context")}</div>
       <div class="edit-body"><label>Event name<input value="${item.name}" /></label><label>Camera<input value="${item.camera}" /></label><div class="preview">LIVE CAMERA PREVIEW</div></div>
-      <footer><span>${variant === "A" ? item.saved : "Changes stay with this exact Event."}</span><button data-flow="cards">Cancel</button><button class="primary" data-open="start">Save & Start</button></footer>
+      <footer><span>${item.saved}</span><button data-flow="cards">Cancel</button><button class="primary">Save changes</button></footer>
     </section>
   </main>`);
 }
 
-function modal(kind) {
+function confirmation(kind) {
   const item = selected();
   const isDelete = kind === "delete";
-  const canDelete = variant === "A" || (variant === "B" && typedName === item.name) || (variant === "C" && acknowledged);
-  return cards() + `<div class="scrim"><section class="dialog ${isDelete ? "danger" : ""}" role="dialog" aria-modal="true">
+  return cards() + `<div class="scrim ${viewport}"><section class="dialog ${isDelete ? "danger" : ""}" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
     <p class="eyebrow">${isDelete ? "Permanent deletion" : "Start Event"}</p>
-    <h2>${isDelete ? "Delete this Event?" : "Start this Event?"}</h2>
-    ${identity(item, "dialog-identity")}
+    <h2 id="dialog-title">${isDelete ? "Delete this Event?" : "Start this Event?"}</h2>
+    ${fullIdentity(item, "dialog-identity")}
     <p>${isDelete ? "The Event, all Guest Cycles, and all photos will be permanently deleted and cannot be recovered." : "FotoHAVN will confirm the Camera bound to this Event and storage before starting."}</p>
-    ${isDelete && variant === "B" ? `<label class="safeguard">Type <strong>${item.name}</strong> to confirm<input data-confirm-name value="${typedName}" autocomplete="off" /></label>` : ""}
-    ${isDelete && variant === "C" ? `<label class="check"><input data-ack type="checkbox" ${acknowledged ? "checked" : ""} /> I checked the name and creation time above.</label>` : ""}
-    <footer><button data-flow="cards">Cancel</button><button class="${isDelete ? "destructive" : "primary"}" data-confirm="${kind}" ${isDelete && !canDelete ? "disabled" : ""}>${isDelete ? "Delete Event" : "Start Event"}</button></footer>
+    <footer><button data-flow="cards">Cancel</button><button class="${isDelete ? "destructive" : "primary"}" data-confirm="${kind}">${isDelete ? "Delete Event" : "Start Event"}</button></footer>
   </section></div>`;
 }
 
-function progress() {
+function working(kind) {
   const item = selected();
-  return cards() + `<div class="scrim"><section class="dialog progress" role="status"><span class="spinner"></span><p class="eyebrow">Deleting Event</p>${identity(item, "dialog-identity")}<p>Removing Guest Cycles and photos…</p><button data-flow="deleted">Show result</button></section></div>`;
+  const deleting = kind === "deleting";
+  return cards() + `<div class="scrim ${viewport}"><section class="dialog progress" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><p class="eyebrow">${deleting ? "Deleting Event" : "Starting Event"}</p><h2>${deleting ? "Removing Event data…" : "Checking booth readiness…"}</h2>${fullIdentity(item, "dialog-identity")}<p>${deleting ? "Guest Cycles and photos are being permanently removed." : "FotoHAVN is checking the bound Camera and storage."}</p><button data-flow="${deleting ? "deleteFailed" : "startFailed"}">Show failure state</button></section></div>`;
 }
 
-function result() {
+function failed(kind) {
   const item = selected();
-  return shell(`<main class="page result"><span class="result-icon">✓</span><p class="eyebrow">Deletion complete</p><h1>Event deleted</h1>${identity(item, "result-identity")}<p>Its Guest Cycles and photos were permanently removed.</p><button class="primary" data-flow="cards">Return to Saved Events</button></main>`);
+  const deleting = kind === "deleteFailed";
+  return cards() + `<div class="scrim ${viewport}"><section class="dialog failure" role="alertdialog" aria-modal="true"><p class="eyebrow">${deleting ? "Deletion incomplete" : "Could not start"}</p><h2>${deleting ? "Some Event data remains" : "This Event did not start"}</h2>${fullIdentity(item, "dialog-identity")}<div class="status-callout"><strong>${deleting ? "Storage is unavailable." : "The bound Camera is unavailable."}</strong><span>${deleting ? "The Event is still saved. Retry when storage is available." : "Reconnect the Camera, then retry this exact Event."}</span></div><footer><button data-flow="cards">Return to Events</button><button class="primary" data-flow="${deleting ? "deleting" : "starting"}">Retry</button></footer></section></div>`;
+}
+
+function deleted() {
+  const item = selected();
+  return shell(`<main class="page result"><span class="result-icon">✓</span><p class="eyebrow">Deletion complete</p><h1>Event deleted</h1>${fullIdentity(item, "result-identity")}<p>Its Guest Cycles and photos were permanently removed.</p><button class="primary" data-flow="cards">Return to Saved Events</button></main>`);
 }
 
 function controls() {
-  return `<aside class="prototype-controls"><button data-cycle="-1" aria-label="Previous variant">←</button><strong>${variant} — ${variants[variant]}</strong><button data-cycle="1" aria-label="Next variant">→</button><span></span><label>View<select data-viewport><option value="canonical" ${viewport === "canonical" ? "selected" : ""}>1280 × 720</option><option value="narrow" ${viewport === "narrow" ? "selected" : ""}>Narrow / 150%</option></select></label><button data-reset>Reset flow</button></aside>`;
+  return `<aside class="prototype-controls"><button data-cycle="-1" aria-label="Previous variant">←</button><strong>${variant} — ${variants[variant]}</strong><button data-cycle="1" aria-label="Next variant">→</button><span></span><label>State<select data-flow-select>${Object.entries(flows).map(([key, label]) => `<option value="${key}" ${flow === key ? "selected" : ""}>${label}</option>`).join("")}</select></label><label>View<select data-viewport><option value="canonical" ${viewport === "canonical" ? "selected" : ""}>1280 × 720</option><option value="tablet" ${viewport === "tablet" ? "selected" : ""}>1024 × 768</option><option value="scale125" ${viewport === "scale125" ? "selected" : ""}>125%</option><option value="scale150" ${viewport === "scale150" ? "selected" : ""}>150%</option><option value="stress200" ${viewport === "stress200" ? "selected" : ""}>200% stress</option></select></label></aside>`;
 }
 
 function render() {
-  const views = { cards, edit, start: () => modal("start"), delete: () => modal("delete"), deleting: progress, deleted: result };
-  app.innerHTML = (views[flow] || cards)() + controls();
+  const views = { cards, edit, start: () => confirmation("start"), starting: () => working("starting"), startFailed: () => failed("startFailed"), delete: () => confirmation("delete"), deleting: () => working("deleting"), deleteFailed: () => failed("deleteFailed"), deleted };
+  app.innerHTML = views[flow]() + controls();
   bind();
 }
 
 function navigate(next = {}) {
-  variant = next.variant || variant;
-  flow = next.flow || flow;
-  selectedId = next.event || selectedId;
-  viewport = next.viewport || viewport;
+  variant = next.variant || variant; flow = next.flow || flow; selectedId = next.event || selectedId; viewport = next.viewport || viewport;
   params.set("variant", variant); params.set("flow", flow); params.set("event", selectedId); params.set("viewport", viewport);
-  history.replaceState({}, "", `${location.pathname}?${params}`);
-  render();
+  history.replaceState({}, "", `${location.pathname}?${params}`); render();
 }
 
 function cycle(direction) {
   const keys = Object.keys(variants);
-  typedName = ""; acknowledged = false;
   navigate({ variant: keys[(keys.indexOf(variant) + direction + keys.length) % keys.length] });
 }
 
 function bind() {
   document.querySelectorAll("[data-cycle]").forEach(button => button.addEventListener("click", () => cycle(Number(button.dataset.cycle))));
   document.querySelectorAll("[data-flow]").forEach(button => button.addEventListener("click", () => navigate({ flow: button.dataset.flow })));
-  document.querySelectorAll("[data-open]").forEach(button => button.addEventListener("click", () => { typedName = ""; acknowledged = false; navigate({ flow: button.dataset.open, event: button.dataset.event }); }));
-  document.querySelector("[data-confirm='start']")?.addEventListener("click", () => navigate({ flow: "edit" }));
+  document.querySelectorAll("[data-open]").forEach(button => button.addEventListener("click", () => navigate({ flow: button.dataset.open, event: button.dataset.event })));
+  document.querySelector("[data-confirm='start']")?.addEventListener("click", () => navigate({ flow: "starting" }));
   document.querySelector("[data-confirm='delete']")?.addEventListener("click", () => navigate({ flow: "deleting" }));
-  document.querySelector("[data-confirm-name]")?.addEventListener("input", event => { typedName = event.target.value; render(); document.querySelector("[data-confirm-name]")?.focus(); });
-  document.querySelector("[data-ack]")?.addEventListener("change", event => { acknowledged = event.target.checked; render(); });
+  document.querySelector("[data-flow-select]")?.addEventListener("change", event => navigate({ flow: event.target.value }));
   document.querySelector("[data-viewport]")?.addEventListener("change", event => navigate({ viewport: event.target.value }));
-  document.querySelector("[data-reset]")?.addEventListener("click", () => { typedName = ""; acknowledged = false; navigate({ flow: "cards", event: "summer-pm" }); });
 }
 
 document.addEventListener("keydown", event => {
