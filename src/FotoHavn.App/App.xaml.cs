@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using FotoHavn.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -80,7 +81,17 @@ public partial class App : Application
         while (PendingActivations.TryDequeue(out _))
         {
             RefreshMotionResources();
-            window?.Activate();
+            if (window is not null)
+            {
+                var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                if (IsIconic(windowHandle))
+                {
+                    _ = ShowWindow(windowHandle, RestoreWindow);
+                }
+
+                window.Activate();
+                _ = SetForegroundWindow(windowHandle);
+            }
         }
     }
 
@@ -95,4 +106,18 @@ public partial class App : Application
             uiSettings.AnimationsEnabled,
             TimeSpan.FromMilliseconds(450)));
     }
+
+    private const int RestoreWindow = 9;
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsIconic(IntPtr windowHandle);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindow(IntPtr windowHandle, int command);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr windowHandle);
 }

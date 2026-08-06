@@ -20,6 +20,7 @@ public sealed class EventSetupAcceptanceTests
         Assert.Single(state.Setup!.AvailableCameras);
         Assert.Null(state.Setup.SelectedCamera);
         Assert.Equal(CameraConnectionState.NotSelected, state.Setup.CameraState);
+        Assert.True(state.Setup.IsNoPrinterSelected);
         Assert.Equal(0, camera.OpenCount);
         Assert.Equal(1, camera.StartDiscoveryCount);
     }
@@ -244,15 +245,17 @@ public sealed class EventSetupAcceptanceTests
     }
 
     [Fact]
-    public async Task No_Printer_validates_without_querying_printer_hardware_and_Save_Close_releases_Camera()
+    public async Task Fixed_No_Printer_validates_without_selection_or_hardware_query_and_Save_Close_releases_Camera()
     {
         var camera = new FakeCameraBoundary(new AvailableCamera("camera-1", "USB Camera", "Port 4"));
         var fileSystem = new FakeFileSystem();
         var orchestrator = CreateOrchestrator(camera, fileSystem);
-        await orchestrator.ExecuteAsync(new OpenNewEvent(), TestContext.Current.CancellationToken);
+        var opened = await orchestrator.ExecuteAsync(new OpenNewEvent(), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new ChangeEventName("Summer Party"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
-        await orchestrator.ExecuteAsync(new SelectNoPrinter(), TestContext.Current.CancellationToken);
+
+        Assert.True(opened.Setup!.IsNoPrinterSelected);
+        Assert.Equal(0, fileSystem.PrinterQueryCount);
 
         var state = await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
 
