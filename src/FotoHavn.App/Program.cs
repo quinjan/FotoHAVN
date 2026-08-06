@@ -18,6 +18,7 @@ public static class Program
 
         if (!primary.IsCurrent)
         {
+            _ = AllowSetForegroundWindow(primary.ProcessId);
             RedirectActivation(activation, primary);
             return 0;
         }
@@ -75,4 +76,8 @@ public static class Program
         ulong handleCount,
         IntPtr[] handles,
         out uint index);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AllowSetForegroundWindow(uint processId);
 }

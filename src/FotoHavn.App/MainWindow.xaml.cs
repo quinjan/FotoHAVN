@@ -24,6 +24,7 @@ public sealed partial class MainWindow : Window
     private string? loadingPhotoStripPath;
     private bool photoStripVisibleSignaled;
     private bool photoStripFadeStarted;
+    private bool setupWasOpen;
 
     public MainWindow(EventGuestCycleOrchestrator orchestrator, CameraBoundary camera)
     {
@@ -251,14 +252,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void PrinterSelectionChanged(object sender, SelectionChangedEventArgs args)
-    {
-        if (!applyingPresentation && PrinterComboBox.SelectedIndex == 0)
-        {
-            await ExecuteAsync(new SelectNoPrinter());
-        }
-    }
-
     private async void RetryStorageClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new RetryEventStorage());
 
@@ -312,6 +305,7 @@ public sealed partial class MainWindow : Window
 
     private void ApplyPresentation(ApplicationPresentation presentation)
     {
+        var shouldFocusEventName = false;
         applyingPresentation = true;
         try
         {
@@ -358,6 +352,8 @@ public sealed partial class MainWindow : Window
             }
 
             var setup = presentation.Setup;
+            shouldFocusEventName = setup is not null && !setupWasOpen;
+            setupWasOpen = setup is not null;
             SetupLayer.Visibility = setup is null ? Visibility.Collapsed : Visibility.Visible;
             DiscardDraftLayer.Visibility = setup?.ShowsDiscardConfirmation == true
                 ? Visibility.Visible
@@ -401,7 +397,6 @@ public sealed partial class MainWindow : Window
             RetryStorageButton.Visibility = setup.IsStorageReady
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-            PrinterComboBox.SelectedIndex = setup.IsNoPrinterSelected ? 0 : -1;
             SaveCloseButton.IsEnabled = setup.CanSave;
             SaveStartButton.IsEnabled = setup.CanStart;
 
@@ -409,6 +404,19 @@ public sealed partial class MainWindow : Window
         finally
         {
             applyingPresentation = false;
+        }
+
+        if (shouldFocusEventName)
+        {
+            CameraComboBox.IsDropDownOpen = false;
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (orchestrator.CurrentPresentation.Setup is not null)
+                {
+                    CameraComboBox.IsDropDownOpen = false;
+                    EventNameTextBox.Focus(FocusState.Programmatic);
+                }
+            });
         }
     }
 

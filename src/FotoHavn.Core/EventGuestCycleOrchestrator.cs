@@ -1395,7 +1395,7 @@ public sealed class EventGuestCycleOrchestrator
             NoPrinterSelected != Baseline.NoPrinterSelected;
 
         public static EventSetupDraft New(bool storageReady) =>
-            new(null, string.Empty, null, CameraConnectionState.NotSelected, false, false, storageReady,
+            new(null, string.Empty, null, CameraConnectionState.NotSelected, false, true, storageReady,
                 null, EventDraftBaseline.Empty, EventSetupConfirmation.None);
 
         public static EventSetupDraft From(EventConfiguration configuration, AvailableCamera camera, bool storageReady) =>
@@ -1425,7 +1425,7 @@ public sealed class EventGuestCycleOrchestrator
 
     private sealed record EventDraftBaseline(string Name, CameraBinding? Camera, bool NoPrinterSelected)
     {
-        public static EventDraftBaseline Empty { get; } = new(string.Empty, null, false);
+        public static EventDraftBaseline Empty { get; } = new(string.Empty, null, true);
     }
 
     private sealed record SavedEventDiscovery(

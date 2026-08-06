@@ -15,7 +15,7 @@ public sealed class EventPersistenceAcceptanceTests
     }
 
     [Fact]
-    public async Task Event_validation_requires_name_Eligible_Camera_writable_storage_and_No_Printer()
+    public async Task Event_validation_requires_name_Eligible_Camera_and_writable_storage_with_fixed_No_Printer()
     {
         var camera = new StubCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
         var fileSystem = new RecordingFileSystem();
@@ -30,8 +30,7 @@ public sealed class EventPersistenceAcceptanceTests
         state = await orchestrator.ExecuteAsync(new ChangeEventName("Summer Party"), TestContext.Current.CancellationToken);
         Assert.False(state.Setup!.CanSave);
         state = await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
-        Assert.False(state.Setup!.CanSave);
-        state = await orchestrator.ExecuteAsync(new SelectNoPrinter(), TestContext.Current.CancellationToken);
+        Assert.True(state.Setup!.IsNoPrinterSelected);
         Assert.True(state.Setup!.CanSave);
 
         var unwritable = new RecordingFileSystem { StorageReady = false };
