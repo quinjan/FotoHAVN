@@ -8,6 +8,10 @@ FotoHAVN coordinates the guest-facing flow from taking photos to receiving a phy
 A named booth run that fixes the camera and printer used by its Guest Cycles and groups their saved artifacts.
 _Avoid_: Booth session, job
 
+**Event ID**:
+The stable identifier of one Event, distinct from its non-unique name and unchanged when the Event is edited.
+_Avoid_: Event code, fingerprint
+
 **Active Event**:
 The single Event currently admitting Guest Cycles in the running FotoHAVN process. Activity does not survive closing or restarting FotoHAVN.
 _Avoid_: Current session, resumed Event
