@@ -362,7 +362,6 @@ function ActiveEventScreen({ onReturn }) {
           <span className="neutral-icon"><Power20Regular /></span>
           <h2 id="exit-title">Exit Event?</h2>
           <p>The Camera will be released and FotoHAVN will return to Saved Events.</p>
-          <InlineFeedback state={state} action="exit" message={state === "busy" ? "Releasing Camera…" : state === "success" ? "Camera released. Returning to Saved Events…" : "Guests will not be able to start a new Guest Cycle."} onRetry={exitEvent} />
           <div className="button-row"><button data-autofocus className="outline-action" disabled={state === "busy"} onClick={() => setDialog(false)}>Keep Event Active</button><button className="danger-action" disabled={state === "busy"} onClick={exitEvent}>{state === "busy" && <SpinnerIos20Regular className="spinner" />}{state === "busy" ? "Exiting Event…" : "Exit Event"}</button></div>
         </AccessibleDialog>
       )}
