@@ -25,7 +25,7 @@ No actionable P0, P1, or P2 differences remain.
 
 The error capture shows both approved field messages in context, disabled save actions, an unavailable preview, and no setup-wide footer notice. The valid capture shows no passive checks, status labels, helper copy, or readiness banner anywhere beside the form or above its actions.
 
-The insufficient-storage capture isolates Storage as the only failing requirement: Event name and Camera are valid, capacity reads `480 MB free`, recovery guidance specifies that at least 2 GB must be freed, and both save actions remain disabled.
+The insufficient-storage capture isolates Storage as the only failing requirement: Event name and Camera are valid, capacity reads `480 MB free`, recovery guidance specifies that at least 1 GB must be freed, and both save actions remain disabled.
 
 ## Focused comparison evidence
 

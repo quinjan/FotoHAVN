@@ -224,7 +224,7 @@ function SetupScreen({ initialAction = "save", initialCamera = "", insufficientS
               <div className="field-row storage-row">
                 <span className="field-label">Storage</span>
                 <div className="storage-value">{insufficientStorage ? "480 MB free" : "120 GB free"}</div>
-                {insufficientStorage && <FieldMessage kind="error">Not enough space. Free up at least 2 GB to continue.</FieldMessage>}
+                {insufficientStorage && <FieldMessage kind="error">Not enough space. Free up at least 1 GB to continue.</FieldMessage>}
               </div>
             </div>
 
