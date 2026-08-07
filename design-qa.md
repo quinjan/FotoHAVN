@@ -88,6 +88,92 @@ final result: passed
 
 ---
 
+# Design QA: Guest Cycle assistance alignment
+
+## Comparison target
+
+- Visual truth: `docs/design-system/reference-states/targets/operator-assistance/camera-3-preserved--1280x720.png`, the established Operator Assistance composition.
+- Browser-rendered implementation: `docs/design-system/reference-states/review/guest-start-unavailable-implementation.png`.
+- Responsive evidence: `docs/design-system/reference-states/review/guest-start-unavailable-stress-640x360.png`.
+- Primary state: `guest-start-unavailable.camera-retry.standard`; responsive-risk state: `guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent`.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatches remain.
+- Shared composition: pass — Guest Start unavailable now uses the same centered white Operator Assistance panel, eyebrow, heading hierarchy, reason copy, and centered recovery action as the established assistance state.
+- Capture-progress exception: pass — the unavailable state renders zero Capture progress circles and zero saved-photo summary elements, as required before a Guest Cycle has begun.
+- Exit safeguard: pass — unavailable and in-cycle Operator Assistance states both use the revised key-icon hold-to-exit control in the shared header.
+- Guest Cycle header context: pass — Guest Start, Capture, Operator Assistance, and Photo Strip render no Event name in their header region. Guest Start retains the Event name only as centered stage context.
+- Responsive behavior: pass — at 640 x 360 the long recovery copy, destructive action, brand lockup, and guarded Exit action remain visible without horizontal or vertical overflow.
+
+## Primary interaction checks
+
+- The unavailable state exposes `Please call the operator`, one appropriate recovery action, and the accessible `Hold to exit Event` header action.
+- The unavailable state rendered zero `.step` and `.preserved` elements.
+- Guest Start, Capture, Operator Assistance, and Photo Strip exposed no Event-name header context.
+- All 103 registered targets were recaptured; the evidence builder reported `complete: true` and zero missing targets.
+
+## Comparison history
+
+1. The previous unavailable state used a separate left-aligned recovery layout with its own callout treatment.
+2. It was replaced with the established centered Operator Assistance panel anatomy.
+3. Capture progress and preserved-photo messaging were intentionally omitted, while the revised Exit safeguard and empty Guest Cycle header context were applied consistently.
+
+final result: passed
+
+---
+
+# Design QA: Guest Start and shared brand header
+
+## Comparison target
+
+- Source visual truth: `docs/design-system/reference-states/review/guest-start-selected-reference.png` and `docs/design-system/reference-states/review/guest-start-hold-selected-reference.png`, supplied as the approved Guest Start and Exit hold references.
+- Browser-rendered implementation: `docs/design-system/reference-states/review/guest-start-implementation.png` and `docs/design-system/reference-states/review/guest-start-hold-implementation.png`.
+- First-pass implementation evidence: `docs/design-system/reference-states/review/guest-start-first-pass.png`.
+- Responsive evidence: `docs/design-system/reference-states/review/guest-start-stress-640x360.png`.
+- Full-view comparison: `docs/design-system/reference-states/review/guest-start-full-comparison.png`.
+- Focused stage comparison: `docs/design-system/reference-states/review/guest-start-focused-comparison.png`.
+- Focused Exit hold comparison: `docs/design-system/reference-states/review/guest-start-hold-comparison.png`.
+- Source dimensions: 2647 × 1232 px for Guest Start and 341 × 120 px for the hold reference. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
+- Normalization: full views were proportionally resized to a common 1280 px width. The centered-stage crops were normalized to 960 px width. The source and implementation hold controls were cropped from their actual screenshots and normalized to a common 470 px width without stretching.
+- States: `guest-start.ready.standard`, `guest-start.exit-holding.standard`, and `guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent`.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatches remain.
+- Fonts and typography: pass — the renderer uses FotoHAVN’s Inter stack, reproduces the centered tracked Event name, 60 px guest heading, muted instruction line, compact header action, and strong Start label without clipping or unintended wrapping.
+- Spacing and layout rhythm: pass — Guest Start is now a true centered flex stage beneath the fixed header. The Event name sits immediately above the heading, the Start action follows the reference spacing, and the retention note is centered near the bottom edge. Compact and Stress preserve the hierarchy without scrolling.
+- Colors and visual tokens: pass — the off-white stage, white header, neutral divider, black Start action, monochrome Exit treatment, and restrained gray supporting copy match the source and existing tokens.
+- Image quality and asset fidelity: pass — the shared header uses a source-derived lossless FotoHAVN mark asset with the product name, not a CSS approximation. Play, Permissions/key, and Refresh use the installed Windows icon font.
+- Copy and content: pass — the screen reads `Let’s take some photos.`, `Four Captures. A quick countdown before each one.`, `Touch to start`, and `Photos stay with this Event.` The Event name is absent from the header and retained in the centered stage.
+- Exit safeguard: pass — idle Exit is a key-icon action at the top right. Holding switches to the bordered `Keep holding…` control, shows Refresh on the right, and exposes black determinate progress on the bottom edge. A quick release cancels without navigation.
+- Shared header: pass — every rendered application page now uses the same source-derived `F` mark plus `FotoHAVN` lockup through the shared App Header. Setup overlays remain intentionally self-contained and do not duplicate the brand inside their modal panel.
+- Responsive behavior: pass — the 640 × 360 long-name/hold target keeps the full brand lockup, Event name, heading, instructions, Start action, and guarded Exit control visible without overlap, clipping, or scroll.
+
+## Primary interaction checks
+
+- Touch to start navigated from Guest Start to Capture 1.
+- A quick click/release on Hold to exit Event remained on Guest Start.
+- The canonical hold and Exit confirmation states rendered with the expected progress and confirmation handoff.
+- The shared brand image loaded in the header and exposed one combined `FotoHAVN` accessible name.
+- Browser console warning/error check: none observed.
+- All 103 registered targets were recaptured after the shared header change; the evidence builder reported `complete: true` and zero missing targets.
+
+## Comparison history
+
+1. The first browser pass exposed a P1 composition mismatch: Guest Start content flowed from the top instead of being vertically centered, and the retention note landed at the bottom left.
+2. The first pass also exposed a P1 icon mismatch: the WinUI code point in the older source mapped to Power Button in the browser font instead of the reference key symbol.
+3. The stage became a centered flex column, the retention note received explicit horizontal centering, and the Exit action moved to the browser’s Permissions/key glyph.
+4. Post-fix full, focused, hold, and Stress comparisons preserve the reference hierarchy and control anatomy with no remaining actionable P0/P1/P2 differences.
+
+## Follow-up polish
+
+- P3 intentional difference: the supplied Guest Start source is a much wider 2647 × 1232 capture. The canonical renderer remains 1280 × 720 and preserves the same relative vertical hierarchy without stretching the source.
+
+final result: passed
+
+---
+
 # Design QA: Shared confirmation dialog standard
 
 ## Comparison target

@@ -9,23 +9,23 @@ viewport: "1024x576"
 effectiveMode: "compact"
 audience: "guest"
 heading:
-  text: "Let’s take some photos"
+  text: "Let’s take some photos."
   level: 1
 automation:
-  name: "Let’s take some photos"
+  name: "Let’s take some photos."
   role: "window"
   description: "Guest Start, long-event-name-and-exit-hold"
   state: "ready"
 readingOrder:
-  - "FotoHAVN header"
+  - "FotoHAVN brand header"
   - "Event name"
   - "heading"
   - "instructions"
   - "Touch to start"
-  - "Exit event"
+  - "Exit Event"
 focus:
   initial: "primary guest action when present"
-  order: "FotoHAVN header -> Event name -> heading -> instructions -> Touch to start -> Exit event"
+  order: "FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event"
   returnTarget: "not applicable"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:

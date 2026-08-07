@@ -17,16 +17,15 @@ automation:
   description: "Operator Assistance, exit-only"
   state: "unavailable"
 readingOrder:
-  - "FotoHAVN header"
-  - "Event name"
+  - "FotoHAVN brand header"
   - "Operator Assistance heading"
   - "cause"
   - "preserved progress"
   - "recovery action"
-  - "Exit event"
+  - "Exit Event"
 focus:
   initial: "primary guest action when present"
-  order: "FotoHAVN header -> Event name -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit event"
+  order: "FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event"
   returnTarget: "not applicable"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:

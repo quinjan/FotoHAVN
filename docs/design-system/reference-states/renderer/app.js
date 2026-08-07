@@ -12,7 +12,11 @@
   const button = (label, cls='', disabled=false, loading=false, action='') => `<button class="${cls}${loading?' loading':''}" ${disabled?'disabled':''} ${loading?'aria-busy="true"':''} ${action?`data-action="${action}"`:''}>${loading?`<span class="button-loader" aria-hidden="true"></span><span>${esc(label)}</span>`:esc(label)}</button>`;
   const iconButton = (label, glyph, action, cls='', disabled=false) => `<button class="icon-action ${cls}" aria-label="${esc(label)}" title="${esc(label)}" data-action="${action}" ${disabled?'disabled':''}><span class="mdl2" aria-hidden="true">&#x${glyph};</span></button>`;
   const callout = (kind, text) => `<div class="callout ${kind}"><strong>${kind === 'danger' ? 'Needs attention' : kind === 'warning' ? 'Check setup' : kind === 'success' ? 'Complete' : 'In progress'}</strong><span>${esc(text)}</span></div>`;
-  const header = (context='', action='') => `<header class="header"><div class="brand">FotoHAVN</div><div class="header-context">${esc(context)}</div><div class="header-actions">${action}</div></header>`;
+  const brand = () => `<div class="brand" aria-label="FotoHAVN"><img src="/docs/design-system/reference-states/renderer/assets/fotohavn-mark.png" alt=""><span>FotoHAVN</span></div>`;
+  const header = (context='', action='') => `<header class="header">${brand()}<div class="header-context">${esc(context)}</div><div class="header-actions">${action}</div></header>`;
+  const operatorHeader = () => `<header class="header operator-header">${brand()}<div class="operator-console">Operator console</div></header>`;
+  const guestStartButton = () => `<button class="primary guest guest-start-action" data-action="start-guest-cycle"><span class="mdl2" aria-hidden="true">&#xE768;</span><span>Touch to start</span></button>`;
+  const exitEventButton = ({holding=false,cancelled=false}={}) => `<button class="exit-event hold ${holding?'holding canonical-hold ':''}${cancelled?'focus':''}" aria-label="Hold to exit Event" data-hold-exit><span class="mdl2 exit-key" aria-hidden="true">&#xE8D7;</span><span class="exit-label">${holding?'Keep holding…':'Exit Event'}</span><span class="mdl2 exit-refresh" aria-hidden="true">&#xE72C;</span></button>`;
   const decisionIdentity = () => `<div class="decision-identity"><div class="event-id-label">EVENT</div><strong>${esc(eventName)}</strong><div class="event-id-label decision-id-label">EVENT ID</div><div class="full-id">${fullId}</div></div>`;
   const camera = (overlays='') => `<div class="camera"><img class="camera-source" src="${media}" alt=""><div class="media-label">LIVE · MIRRORED</div>${overlays}</div>`;
 
@@ -34,8 +38,8 @@
         <div class="card-bottom">${cardStatus}<div class="card-actions">${iconButton('Edit Event','E70F','edit-event','',busy)}${iconButton('Delete Event','E74D','delete-event','delete',busy)}</div></div>
       </article>`;
     }).join('');
-    const top = state === 'new-event' ? callout('info','New Event setup opens without changing existing Events.') : deletionBanner(state);
-    return `<section class="screen">${header('Operator')}<div class="content"><div class="page-head"><div><div class="eyebrow">Operator</div><h1>Saved Events</h1></div><button class="primary" data-action="new-event">New Event</button></div>${top}<div class="cards" style="margin-top:${top?'18px':'0'}">${cards}</div></div></section>`;
+    const top = deletionBanner(state);
+    return `<section class="screen">${operatorHeader()}<div class="content"><div class="page-head"><h1>Saved Events</h1><button class="primary" data-action="new-event">New Event</button></div>${top}<div class="cards" style="margin-top:${top?'18px':'0'}">${cards}</div></div></section>`;
   }
   function deletionBanner(s){ return s==='deletion-incomplete'?callout('danger','Deletion did not finish. Review the Event and try again.'):''; }
 
@@ -67,19 +71,21 @@
   }
 
   function guestStart() {
-    const holding = state === 'exit-holding';
+    const holding = state === 'exit-holding' || state === 'long-event-name-and-exit-hold';
     const cancelled = state === 'exit-hold-cancelled';
-    const action = button(holding?'Keep holding…':'Exit event',`hold ${(cancelled || state==='exit-hold-idle')?'focus':''}`,false,holding);
+    const action = exitEventButton({holding,cancelled:cancelled || state==='exit-hold-idle'});
     const confirmation = state === 'exit-confirmation-open' ? dialog('exit-idle') : '';
-    return `<section class="screen">${header(eventName,action)}<div class="guest-stage content"><div class="eyebrow">${esc(eventName)}</div><h1>Let’s take some photos</h1><p class="lead">Four photos. A quick countdown before each one.</p>${button('Touch to start','primary guest')}<p class="guest-note">Photos stay with this Event.</p></div>${confirmation}</section>`;
+    return `<section class="screen">${header('',action)}<div class="guest-stage content"><div class="eyebrow guest-event-name">${esc(eventName)}</div><h1>Let’s take some photos.</h1><p class="lead">Four Captures. A quick countdown before each one.</p>${guestStartButton()}<p class="guest-note">Photos stay with this Event.</p></div>${confirmation}</section>`;
   }
 
   function guestUnavailable() {
     const cameraProblem = state.startsWith('camera');
     const retry = state.includes('retry') || state === 'retrying' || state === 'retry-failed';
     const failed = state === 'retry-failed';
-    const action = state === 'retrying' ? button('Checking Camera…','primary',true,true) : retry ? button('Retry','primary') : button('Exit event','destructive');
-    return `<section class="screen">${header(eventName,button('Exit event'))}<div class="guest-stage content"><div class="unavailable-stage"><div class="eyebrow">Photo session unavailable</div><h1 style="margin:8px 0 12px">${cameraProblem?'Camera needs attention':'Storage needs attention'}</h1>${callout(failed?'danger':'warning',failed?'The Camera is still unavailable. Ask the operator to check the setup.':cameraProblem?'The Camera is not ready. The operator can retry or update setup.':'Photos cannot be saved right now. The operator must restore storage access.')}<div class="actions">${action}</div></div></div></section>`;
+    const action = state === 'retrying' ? button('Checking Camera…','primary',true,true) : retry ? button('Retry','primary') : button('Exit Event','destructive');
+    const cause = failed ? 'The Camera is still unavailable.' : cameraProblem ? 'The Camera is not ready.' : 'Photos cannot be saved right now.';
+    const guidance = failed ? 'Check the Camera connection before trying again.' : retry ? 'The operator can check the setup and Retry.' : 'The operator must exit the Event and update setup.';
+    return `<section class="screen">${header('',exitEventButton())}<div class="assistance"><div class="assist-panel unavailable-assistance"><div class="eyebrow">Operator Assistance</div><h1>Please call the operator</h1><p>${esc(cause)}</p><p class="assist-guidance">${esc(guidance)}</p><div class="assist-action">${action}</div></div></div></section>`;
   }
 
   function capture() {
@@ -88,7 +94,7 @@
     let overlay = countdownNumber ? `<div class="countdown"><div><small>GET READY</small>${countdownNumber}</div></div>` : state === 'flash' ? '<div class="flash"></div>' : state === 'photo-saved' ? '<div class="saved-badge">Photo saved</div>' : '';
     if (state.includes('failure')) return operatorAssistance(state==='camera-failure'?'camera-3-preserved':'storage-3-preserved');
     const steps = [1,2,3,4].map(x=>`<span class="step ${x<n?'done':x===n?'active':''}">${x}</span>`).join('');
-    return `<section class="screen">${header(eventName)}<div class="capture-stage"><div class="capture-meta"><div class="eyebrow">Photo ${n} of 4</div><div class="steps">${steps}</div></div>${camera(overlay)}</div></section>`;
+    return `<section class="screen">${header('')}<div class="capture-stage"><div class="capture-meta"><div class="eyebrow">Photo ${n} of 4</div><div class="steps">${steps}</div></div>${camera(overlay)}</div></section>`;
   }
 
   function operatorAssistance(forced) {
@@ -100,7 +106,7 @@
     const recovered = s === 'recovered';
     const exitOnly = s === 'exit-only';
     const steps = [1,2,3,4].map(x=>`<span class="${x<=preserved?'done':''}">${x}</span>`).join('');
-    return `<section class="screen">${header(eventName,button('Exit event'))}<div class="assistance"><div class="assist-panel"><div class="eyebrow">Operator Assistance</div><h1>${recovered?'Ready to continue':'Please call the operator'}</h1><p>${recovered?'The Camera is ready. Your saved photos are still here.':cause}</p><div class="preserved">${steps}</div><p><strong>${preserved} of 4 photos saved.</strong> ${failed?'Retry did not work. Check the Camera connection before trying again.':'Saved photos will not be lost.'}</p><div style="margin-top:22px">${recovered?button('Continue','primary guest'):exitOnly?button('Exit event','destructive'):button(retrying?'Retrying…':'Retry','primary guest',retrying,retrying)}</div></div></div></section>`;
+    return `<section class="screen">${header('',exitEventButton())}<div class="assistance"><div class="assist-panel"><div class="eyebrow">Operator Assistance</div><h1>${recovered?'Ready to continue':'Please call the operator'}</h1><p>${recovered?'The Camera is ready. Your saved photos are still here.':cause}</p><div class="preserved">${steps}</div><p><strong>${preserved} of 4 photos saved.</strong> ${failed?'Retry did not work. Check the Camera connection before trying again.':'Saved photos will not be lost.'}</p><div class="assist-action">${recovered?button('Continue','primary guest'):exitOnly?button('Exit Event','destructive'):button(retrying?'Retrying…':'Retry','primary guest',retrying,retrying)}</div></div></div></section>`;
   }
 
   function stripFrame(cls='') { return `<div class="strip-frame ${cls}"><img src="${strip}" alt="Photo strip preview">${cls==='preparing'?'<div class="strip-loader">Preparing…</div>':''}</div>`; }
@@ -110,7 +116,7 @@
     const returning = state === 'returning' || state === 'preparing-or-returning';
     const five = state === 'visible-5-seconds';
     const seconds = five?5:returning?1:10;
-    return `<section class="screen">${header(eventName)}<div class="photo-stage"><div class="photo-copy"><div class="eyebrow">${preparing?'All four photos saved':'Photo Strip ready'}</div><h1>${preparing?'Preparing your Photo Strip…':returning?'Ready for the next guest':'Here’s your Photo Strip'}</h1><p class="muted">${preparing?'Your saved photos are being arranged.':returning?'Returning to start now.':`Returning to start in ${seconds} seconds.`}</p><div class="progress-line" style="--progress:${preparing?'38%':returning?'100%':five?'50%':'12%'}"></div></div>${stripFrame(preparing?'preparing':returning?'returning':'')}</div></section>`;
+    return `<section class="screen">${header('')}<div class="photo-stage"><div class="photo-copy"><div class="eyebrow">${preparing?'All four photos saved':'Photo Strip ready'}</div><h1>${preparing?'Preparing your Photo Strip…':returning?'Ready for the next guest':'Here’s your Photo Strip'}</h1><p class="muted">${preparing?'Your saved photos are being arranged.':returning?'Returning to start now.':`Returning to start in ${seconds} seconds.`}</p><div class="progress-line" style="--progress:${preparing?'38%':returning?'100%':five?'50%':'12%'}"></div></div>${stripFrame(preparing?'preparing':returning?'returning':'')}</div></section>`;
   }
 
   function acknowledgementDialog({ intent='success', title, message, action='Continue' }) {
@@ -141,7 +147,7 @@
     const confirmAction = failed && ['start','delete'].includes(type) ? `retry-${type}` : failed ? '' : `confirm-${type}`;
     return `<div class="scrim"><section class="dialog decision ${destructive?'danger':''}" role="dialog" aria-modal="true" aria-labelledby="decision-title" ${consequence?'aria-describedby="decision-consequence"':''}><div class="dialog-body">${decisionIcon(glyphs[type]||'E8AD',destructive)}<h1 id="decision-title">${esc(title)}</h1>${consequence?`<p id="decision-consequence" class="muted">${esc(consequence)}</p>`:''}${showEventIdentity?decisionIdentity():''}${status}</div><div class="dialog-actions">${button(type==='exit'?'Keep event active':'Cancel',busy?'':'focus',busy,false,cancelAction)}${button(failed?'Retry':(busy?busyVerbs[type]||'Working…':verbs[type]||'Continue'),destructive?'destructive':'primary',busy,busy,confirmAction)}</div></section></div>`;
   }
-  function confirmation() { return `<section class="screen">${header('Operator')}<div class="content"><div class="page-head"><h1>Saved Events</h1>${button('New Event','primary')}</div><div class="cards"><article class="event-card"><div class="card-name">${esc(eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">7A2F · 91C4</div></article></div></div>${dialog()}</section>`; }
+  function confirmation() { return `<section class="screen">${operatorHeader()}<div class="content"><div class="page-head"><h1>Saved Events</h1>${button('New Event','primary')}</div><div class="cards"><article class="event-card"><div class="card-name">${esc(eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">7A2F · 91C4</div></article></div></div>${dialog()}</section>`; }
 
   const renderers = {'saved-events':savedEvents,'event-setup':setup,'guest-start':guestStart,'guest-start-unavailable':guestUnavailable,capture, 'operator-assistance':operatorAssistance,'photo-strip':photoStrip,confirmation};
   document.getElementById('app').innerHTML = (renderers[surface] || savedEvents)() + `<div class="sr-only">Target annotation: ${esc(surface)}.${esc(state)}, ${esc(viewport)}, design-v1.0.0 at 1a20bc6. Full accessibility annotation is registered in the same-name YAML sidecar.</div>`;
@@ -160,12 +166,45 @@
       'confirm-exit': ['saved-events','card-idle'],
       'confirm-delete': ['saved-events','card-idle'],
       'retry-start': ['confirmation','start-busy'],
-      'retry-delete': ['confirmation','delete-busy']
+      'retry-delete': ['confirmation','delete-busy'],
+      'start-guest-cycle': ['capture','capture-1']
     };
     const destination = destinations[control.dataset.action];
     if (!destination) return;
     const next = new URLSearchParams({surface:destination[0],state:destination[1],viewport});
     location.search = next.toString();
   }));
+  document.querySelectorAll('[data-hold-exit]').forEach(control => {
+    let holdTimer;
+    const label = control.querySelector('.exit-label');
+    const startHold = event => {
+      if (event.type === 'keydown' && !['Enter',' '].includes(event.key)) return;
+      if (event.type === 'keydown') event.preventDefault();
+      if (control.classList.contains('active-hold')) return;
+      clearTimeout(holdTimer);
+      control.classList.remove('canonical-hold');
+      control.classList.add('holding','active-hold');
+      label.textContent = 'Keep holding…';
+      control.setAttribute('aria-busy','true');
+      holdTimer = setTimeout(() => {
+        const next = new URLSearchParams({surface:'guest-start',state:'exit-confirmation-open',viewport});
+        location.search = next.toString();
+      },1500);
+    };
+    const cancelHold = event => {
+      if (event.type === 'keyup' && !['Enter',' '].includes(event.key)) return;
+      clearTimeout(holdTimer);
+      control.classList.remove('holding','active-hold');
+      label.textContent = 'Exit Event';
+      control.removeAttribute('aria-busy');
+    };
+    control.addEventListener('pointerdown', startHold);
+    control.addEventListener('pointerup', cancelHold);
+    control.addEventListener('pointercancel', cancelHold);
+    control.addEventListener('pointerleave', cancelHold);
+    control.addEventListener('keydown', startHold);
+    control.addEventListener('keyup', cancelHold);
+    control.addEventListener('blur', cancelHold);
+  });
   document.documentElement.dataset.ready = 'true';
 })();

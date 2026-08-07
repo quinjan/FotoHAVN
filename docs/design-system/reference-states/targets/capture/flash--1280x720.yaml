@@ -17,14 +17,13 @@ automation:
   description: "Capture, flash"
   state: "ready"
 readingOrder:
-  - "FotoHAVN header"
-  - "Event name"
+  - "FotoHAVN brand header"
   - "Capture progress"
   - "Camera preview"
   - "countdown or saved status"
 focus:
   initial: "primary guest action when present"
-  order: "FotoHAVN header -> Event name -> Capture progress -> Camera preview -> countdown or saved status"
+  order: "FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status"
   returnTarget: "not applicable"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:

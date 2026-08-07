@@ -17,14 +17,13 @@ automation:
   description: "Photo Strip, failed"
   state: "unavailable"
 readingOrder:
-  - "FotoHAVN header"
-  - "Event name"
+  - "FotoHAVN brand header"
   - "heading"
   - "Photo Strip preview"
   - "return status and progress"
 focus:
   initial: "primary guest action when present"
-  order: "FotoHAVN header -> Event name -> heading -> Photo Strip preview -> return status and progress"
+  order: "FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress"
   returnTarget: "not applicable"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:

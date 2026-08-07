@@ -9,22 +9,22 @@ viewport: "1280x720"
 effectiveMode: "standard"
 audience: "guest"
 heading:
-  text: "Camera needs attention"
+  text: "Please call the operator"
   level: 1
 automation:
-  name: "Camera needs attention"
+  name: "Please call the operator"
   role: "window"
   description: "Guest Start unavailable, retrying"
   state: "busy"
 readingOrder:
-  - "FotoHAVN header"
-  - "Event name"
+  - "FotoHAVN brand header"
+  - "Operator Assistance label"
   - "heading"
   - "reason"
-  - "Retry or Exit event"
+  - "Retry or Exit Event"
 focus:
   initial: "primary guest action when present"
-  order: "FotoHAVN header -> Event name -> heading -> reason -> Retry or Exit event"
+  order: "FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
   returnTarget: "not applicable"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:
