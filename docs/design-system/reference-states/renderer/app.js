@@ -9,11 +9,11 @@
   const media = '/design-qa/issue-28-countdown-implementation.jpg';
   const strip = '/design-qa/issue-20-photo-strip-reference.png';
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const button = (label, cls='', disabled=false, loading=false) => `<button class="${cls}${loading?' loading':''}" ${disabled?'disabled':''} ${loading?'aria-busy="true"':''}>${loading?`<span class="button-loader" aria-hidden="true"></span><span>${esc(label)}</span>`:esc(label)}</button>`;
+  const button = (label, cls='', disabled=false, loading=false, action='') => `<button class="${cls}${loading?' loading':''}" ${disabled?'disabled':''} ${loading?'aria-busy="true"':''} ${action?`data-action="${action}"`:''}>${loading?`<span class="button-loader" aria-hidden="true"></span><span>${esc(label)}</span>`:esc(label)}</button>`;
   const iconButton = (label, glyph, action, cls='', disabled=false) => `<button class="icon-action ${cls}" aria-label="${esc(label)}" title="${esc(label)}" data-action="${action}" ${disabled?'disabled':''}><span class="mdl2" aria-hidden="true">&#x${glyph};</span></button>`;
   const callout = (kind, text) => `<div class="callout ${kind}"><strong>${kind === 'danger' ? 'Needs attention' : kind === 'warning' ? 'Check setup' : kind === 'success' ? 'Complete' : 'In progress'}</strong><span>${esc(text)}</span></div>`;
   const header = (context='', action='') => `<header class="header"><div class="brand">FotoHAVN</div><div class="header-context">${esc(context)}</div><div class="header-actions">${action}</div></header>`;
-  const identity = () => `<div class="identity"><div class="event-id-label">EVENT</div><strong>${esc(eventName)}</strong><div class="event-id-label" style="margin-top:10px">EVENT ID</div><div class="full-id">${fullId}</div></div>`;
+  const decisionIdentity = () => `<div class="decision-identity"><div class="event-id-label">EVENT</div><strong>${esc(eventName)}</strong><div class="event-id-label decision-id-label">EVENT ID</div><div class="full-id">${fullId}</div></div>`;
   const camera = (overlays='') => `<div class="camera"><img class="camera-source" src="${media}" alt=""><div class="media-label">LIVE · MIRRORED</div>${overlays}</div>`;
 
   function savedEvents() {
@@ -113,18 +113,33 @@
     return `<section class="screen">${header(eventName)}<div class="photo-stage"><div class="photo-copy"><div class="eyebrow">${preparing?'All four photos saved':'Photo Strip ready'}</div><h1>${preparing?'Preparing your Photo Strip…':returning?'Ready for the next guest':'Here’s your Photo Strip'}</h1><p class="muted">${preparing?'Your saved photos are being arranged.':returning?'Returning to start now.':`Returning to start in ${seconds} seconds.`}</p><div class="progress-line" style="--progress:${preparing?'38%':returning?'100%':five?'50%':'12%'}"></div></div>${stripFrame(preparing?'preparing':returning?'returning':'')}</div></section>`;
   }
 
+  function acknowledgementDialog({ intent='success', title, message, action='Continue' }) {
+    const glyph = intent === 'information' ? 'E946' : 'E930';
+    return `<div class="scrim"><section class="dialog acknowledgement ${intent}" role="dialog" aria-modal="true" aria-labelledby="acknowledgement-title" aria-describedby="acknowledgement-message"><div class="dialog-body"><span class="mdl2 acknowledgement-icon" aria-hidden="true">&#x${glyph};</span><h1 id="acknowledgement-title">${esc(title)}</h1><p id="acknowledgement-message" class="muted">${esc(message)}</p></div><div class="dialog-actions"><button class="primary" data-action="acknowledge" autofocus>${esc(action)}</button></div></section></div>`;
+  }
+
+  function decisionIcon(glyph, destructive=false) {
+    return `<span class="decision-icon ${destructive?'danger':''}" aria-hidden="true"><span class="mdl2 decision-icon-ring">&#xF138;</span><span class="mdl2 decision-icon-glyph">&#x${glyph};</span></span>`;
+  }
+
   function dialog(requested=state) {
     const s = requested === 'destructive-busy-with-long-event-id' ? 'delete-busy' : requested;
+    if (s === 'success-destination') return acknowledgementDialog({ title:'Event saved', message:'Your changes have been saved.' });
     const type = s.split('-')[0];
     const busy = s.includes('busy');
     const failed = s.includes('failed') || s === 'retry';
     const titles = {start:'Start this Event?',save:'Save changes?',discard:'Discard changes?',exit:'Exit this Event?',delete:'Delete this Event?'};
     const verbs = {start:'Start Event',save:'Save changes',discard:'Discard changes',exit:'Exit Event',delete:'Delete Event'};
     const busyVerbs = {start:'Starting Event…',exit:'Exiting Event…',delete:'Deleting Event…'};
+    const glyphs = {start:'E768',save:'E74E',discard:'E74D',exit:'F3B1',delete:'E74D'};
     const destructive = ['discard','exit','delete'].includes(type);
+    const showEventIdentity = !['discard','exit'].includes(type);
     const status = failed ? callout('danger',`${type==='delete'?'Deletion':'The action'} did not finish. Review the Event and try again.`) : '';
-    const title = s === 'success-destination' ? 'Event saved' : (titles[type] || 'Confirm this action');
-    return `<div class="scrim"><section class="dialog" role="dialog" aria-modal="true"><div class="dialog-body"><div class="eyebrow">Confirmation</div><h1>${esc(title)}</h1><p class="muted">${type==='delete'?'This permanently removes the Event and its saved photos.':type==='exit'?'The current Guest Cycle will end and FotoHAVN will return to Saved Events.':'Review the Event before continuing.'}</p>${identity()}${status}</div><div class="dialog-actions">${button(type==='exit'?'Keep event active':'Cancel',failed?'':'focus',busy)}${button(failed?'Retry':(busy?busyVerbs[type]||'Working…':verbs[type]||'Continue'),destructive?'destructive':'primary',busy,busy)}</div></section></div>`;
+    const title = titles[type] || 'Confirm this action';
+    const consequence = type==='delete' ? 'This permanently removes the Event and its saved photos.' : type==='exit' ? 'The current Guest Cycle will end and FotoHAVN will return to Saved Events.' : type==='discard' ? 'Unsaved changes will be lost.' : '';
+    const cancelAction = surface === 'guest-start' ? 'cancel-exit' : 'cancel-dialog';
+    const confirmAction = failed && ['start','delete'].includes(type) ? `retry-${type}` : failed ? '' : `confirm-${type}`;
+    return `<div class="scrim"><section class="dialog decision ${destructive?'danger':''}" role="dialog" aria-modal="true" aria-labelledby="decision-title" ${consequence?'aria-describedby="decision-consequence"':''}><div class="dialog-body">${decisionIcon(glyphs[type]||'E8AD',destructive)}<h1 id="decision-title">${esc(title)}</h1>${consequence?`<p id="decision-consequence" class="muted">${esc(consequence)}</p>`:''}${showEventIdentity?decisionIdentity():''}${status}</div><div class="dialog-actions">${button(type==='exit'?'Keep event active':'Cancel',busy?'':'focus',busy,false,cancelAction)}${button(failed?'Retry':(busy?busyVerbs[type]||'Working…':verbs[type]||'Continue'),destructive?'destructive':'primary',busy,busy,confirmAction)}</div></section></div>`;
   }
   function confirmation() { return `<section class="screen">${header('Operator')}<div class="content"><div class="page-head"><h1>Saved Events</h1>${button('New Event','primary')}</div><div class="cards"><article class="event-card"><div class="card-name">${esc(eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">7A2F · 91C4</div></article></div></div>${dialog()}</section>`; }
 
@@ -135,7 +150,17 @@
       'start-event': ['confirmation','start-idle'],
       'edit-event': ['event-setup','edit-clean'],
       'delete-event': ['confirmation','delete-idle'],
-      'new-event': ['event-setup','new-empty']
+      'new-event': ['event-setup','new-empty'],
+      'acknowledge': ['saved-events','card-idle'],
+      'cancel-dialog': ['saved-events','card-idle'],
+      'cancel-exit': ['guest-start','ready'],
+      'confirm-start': ['guest-start','ready'],
+      'confirm-save': ['confirmation','success-destination'],
+      'confirm-discard': ['saved-events','card-idle'],
+      'confirm-exit': ['saved-events','card-idle'],
+      'confirm-delete': ['saved-events','card-idle'],
+      'retry-start': ['confirmation','start-busy'],
+      'retry-delete': ['confirmation','delete-busy']
     };
     const destination = destinations[control.dataset.action];
     if (!destination) return;

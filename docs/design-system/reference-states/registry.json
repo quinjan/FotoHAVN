@@ -520,7 +520,7 @@
       "target": "targets/guest-start/exit-confirmation-open--1280x720.png",
       "annotation": "targets/guest-start/exit-confirmation-open--1280x720.yaml",
       "renderer": "renderer/index.html?surface=guest-start&state=exit-confirmation-open&viewport=1280x720",
-      "sha256": "11021ba710c4f10a79e66ddff54ee4f1fd76b2db3a9f8f92a2fec331ea3928a2"
+      "sha256": "c6d23d23156aa31f90acf403cdff43fb7abb79f5c4beea9d27493d2a3205d2d4"
     },
     {
       "id": "guest-start.long-event-name-and-exit-hold.compact-aspect",
@@ -1183,7 +1183,7 @@
       "target": "targets/confirmation/start-idle--1280x720.png",
       "annotation": "targets/confirmation/start-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=start-idle&viewport=1280x720",
-      "sha256": "c62f9dea8b38a547d328cefc694603d2af1deeac9c46b6f965a63eeef94692d3"
+      "sha256": "2c05b9a73838d2d30d5df330704c6ca346f746dac99206558891eca9100ff86a"
     },
     {
       "id": "confirmation.start-busy.standard",
@@ -1196,7 +1196,7 @@
       "target": "targets/confirmation/start-busy--1280x720.png",
       "annotation": "targets/confirmation/start-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=start-busy&viewport=1280x720",
-      "sha256": "3758036045090fe40641e89353eb3b453a3ef7fc12e912987e5db16b290721c0"
+      "sha256": "6821171220ed7f3cd7afc66a8d057cb249a2a9f825ab62ef4934eb432e6252ce"
     },
     {
       "id": "confirmation.start-failed.standard",
@@ -1209,7 +1209,7 @@
       "target": "targets/confirmation/start-failed--1280x720.png",
       "annotation": "targets/confirmation/start-failed--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=start-failed&viewport=1280x720",
-      "sha256": "e8785164e1de8ed5231f415ea2927667a3c0c5470fc239902c24009967aa8540"
+      "sha256": "94397ce529e37197a92dc894c72323474b9812662bd01159d0a72110a6bcf291"
     },
     {
       "id": "confirmation.save-idle.standard",
@@ -1222,7 +1222,7 @@
       "target": "targets/confirmation/save-idle--1280x720.png",
       "annotation": "targets/confirmation/save-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=save-idle&viewport=1280x720",
-      "sha256": "58f83ac63ad01ff16cd6e1241feebd8aaabc739232f3ceac0afdd2d416efc788"
+      "sha256": "f644a4ed48972a29977c95c5de92f1d7a80ce59153aa268c7087c7383ba2adfe"
     },
     {
       "id": "confirmation.discard-idle.standard",
@@ -1235,7 +1235,7 @@
       "target": "targets/confirmation/discard-idle--1280x720.png",
       "annotation": "targets/confirmation/discard-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=discard-idle&viewport=1280x720",
-      "sha256": "5cd37905fae1221fe174e54dbc7da40fc3467f722a9d4a213bc3b2c9f5cce6c1"
+      "sha256": "469840d830d633b518e35df09533d63e65ad1b80c32e61af7b8f26a7c19bb475"
     },
     {
       "id": "confirmation.exit-idle.standard",
@@ -1248,7 +1248,7 @@
       "target": "targets/confirmation/exit-idle--1280x720.png",
       "annotation": "targets/confirmation/exit-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=exit-idle&viewport=1280x720",
-      "sha256": "45ef28152b3c097d051820a1e97b2d900af13d8720a3c2eafc070b78f75a99f2"
+      "sha256": "88540163948747d082452d879f5d24b989e820d47f45dd137d774abaaea9a68b"
     },
     {
       "id": "confirmation.exit-busy.standard",
@@ -1261,7 +1261,7 @@
       "target": "targets/confirmation/exit-busy--1280x720.png",
       "annotation": "targets/confirmation/exit-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=exit-busy&viewport=1280x720",
-      "sha256": "4f39ba76ac16ed9f49b03fd15e107975633af0381c1b10cd80cb5884e6031738"
+      "sha256": "42cf684295a6bb2cf4afd780b72308fb1f9b3dce9d260e5813c4ddbacfc368ec"
     },
     {
       "id": "confirmation.delete-idle.standard",
@@ -1274,7 +1274,7 @@
       "target": "targets/confirmation/delete-idle--1280x720.png",
       "annotation": "targets/confirmation/delete-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=delete-idle&viewport=1280x720",
-      "sha256": "8da7e2a0d9c2a5d162ba5aa07eff7ecee75bad15269cea8a712dc3156d3d95f8"
+      "sha256": "d702d24a9f6598f8e3607a10d3489baadd5f4f31d6cb88c0980203b308135f75"
     },
     {
       "id": "confirmation.delete-busy.standard",
@@ -1287,7 +1287,7 @@
       "target": "targets/confirmation/delete-busy--1280x720.png",
       "annotation": "targets/confirmation/delete-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=delete-busy&viewport=1280x720",
-      "sha256": "c8272bb1241d3afe8ef9fb4312759da939252399553a0f7426befcaf1720617b"
+      "sha256": "d83e05fd33225b83dcdcc3f9fb6618c8492ceb97f375beaa1a956ce1b686da79"
     },
     {
       "id": "confirmation.delete-failed.standard",
@@ -1300,7 +1300,7 @@
       "target": "targets/confirmation/delete-failed--1280x720.png",
       "annotation": "targets/confirmation/delete-failed--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=delete-failed&viewport=1280x720",
-      "sha256": "75cd545665318f56188da5ef63541cee2db06f196c0daa20fbedc182bf1c6bfa"
+      "sha256": "921fb4c6efa4cdc900daa117136d181b8deca6a2f018f2f5a2fbe3622762c022"
     },
     {
       "id": "confirmation.retry.standard",
@@ -1313,7 +1313,7 @@
       "target": "targets/confirmation/retry--1280x720.png",
       "annotation": "targets/confirmation/retry--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=retry&viewport=1280x720",
-      "sha256": "15414e56983b4627edf9f050a6c435d69c1455598e30a625c75fe411144f4b6d"
+      "sha256": "ae882c3aa5b95bf9a960c2b1139dcd3919fa27a79dd668c8fee1e275938aef27"
     },
     {
       "id": "confirmation.success-destination.standard",
@@ -1326,7 +1326,7 @@
       "target": "targets/confirmation/success-destination--1280x720.png",
       "annotation": "targets/confirmation/success-destination--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=success-destination&viewport=1280x720",
-      "sha256": "a46a0b3995721a616bbc0c39ded134cf1ace8866f5f9bd40f0d0c0a44181d117"
+      "sha256": "f62ac830aca3d70f173fd9e173a237ca85d645f00a4b049cd98fe27cdc096f15"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.compact-aspect",
@@ -1339,7 +1339,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--1024x768.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--1024x768.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=1024x768",
-      "sha256": "41a6de9aae20237620ea1d9356d4b245271c4369677884b2fe13b7b2201cd0b2"
+      "sha256": "89e0d4ed1161e206babf8400d380e55caf10d28b258b6c8f92f1e08d42bcbbe7"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
@@ -1352,7 +1352,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--1024x576.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--1024x576.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=1024x576",
-      "sha256": "8a3ba41e0586945c7ff6b8f418e0acbbf66d97f20b6113403ae1b5f8060a43ea"
+      "sha256": "d4ab2c1b32ec0e5d8ca5648737949af024f6b5c8ede0bc379cbe3341de81da87"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
@@ -1365,7 +1365,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--853x480.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--853x480.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=853x480",
-      "sha256": "42951df041b99ed1530bb9567062c40bf764069e8ea8118e70eaf8c14e93d2ba"
+      "sha256": "be1021475e15976cdbb5aed5cb50cc7c23ca5cd0c19e2b30d2aba0d8f7fb3ae7"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
@@ -1378,7 +1378,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--640x360.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--640x360.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=640x360",
-      "sha256": "5cde9503b9994afd6259c9db603cfc5372d3b6677567d6f1306b11e515e86fea"
+      "sha256": "73e20d1c095e05702364c6acbe5b7b3a91fc1156f6f92ddec364d54080c46846"
     }
   ]
 }

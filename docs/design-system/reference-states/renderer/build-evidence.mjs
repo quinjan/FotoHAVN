@@ -19,7 +19,7 @@ const surfaces = [
   { id:'capture', name:'Capture', audience:'guest', states:['capture-1','capture-2','capture-3','capture-4','countdown-3','countdown-2','countdown-1','flash','photo-saved','camera-failure','storage-failure'], risk:'capture-4-countdown', heading:'Photo capture', order:['FotoHAVN header','Event name','Capture progress','Camera preview','countdown or saved status'] },
   { id:'operator-assistance', name:'Operator Assistance', audience:'guest', states:['camera-0-preserved','camera-3-preserved','storage-3-preserved','photo-strip-4-preserved','retrying','recovered','retry-failed','exit-only'], risk:'retry-failed-with-3-preserved', heading:'Please call the operator', order:['FotoHAVN header','Event name','Operator Assistance heading','cause','preserved progress','recovery action','Exit event'] },
   { id:'photo-strip', name:'Photo Strip', audience:'guest', states:['preparing','visible-10-seconds','visible-5-seconds','returning','failed'], risk:'preparing-or-returning', heading:'Here’s your Photo Strip', order:['FotoHAVN header','Event name','heading','Photo Strip preview','return status and progress'] },
-  { id:'confirmation', name:'Confirmation', audience:'operator', states:['start-idle','start-busy','start-failed','save-idle','discard-idle','exit-idle','exit-busy','delete-idle','delete-busy','delete-failed','retry','success-destination'], risk:'destructive-busy-with-long-event-id', heading:'Confirmation', order:['dialog heading','consequence','Event identity','status','safe action','confirming action'] },
+  { id:'confirmation', name:'Confirmation', audience:'operator', states:['start-idle','start-busy','start-failed','save-idle','discard-idle','exit-idle','exit-busy','delete-idle','delete-busy','delete-failed','retry','success-destination'], risk:'destructive-busy-with-long-event-id', heading:'Confirmation', order:['semantic icon','dialog heading','consequence when present','Event identity when relevant','status when present','safe action','confirming action'] },
 ];
 const viewports = [
   { id:'standard', size:'1280x720', mode:'standard' },
@@ -42,7 +42,12 @@ for (const frame of frames) {
   const png = join(folder, `${basename}.png`);
   const annotation = join(folder, `${basename}.yaml`);
   const id = `${frame.surface.id}.${frame.state}.${frame.viewport.id}`;
-  const headingText = frame.surface.id === 'event-setup' ? (frame.state.startsWith('edit-') ? 'Edit Event' : 'New Event') : frame.surface.heading;
+  const acknowledgement = frame.surface.id === 'confirmation' && frame.state === 'success-destination';
+  const confirmationState = frame.state === 'destructive-busy-with-long-event-id' ? 'delete-busy' : frame.state;
+  const confirmationType = confirmationState.split('-')[0];
+  const confirmationTitles = {start:'Start this Event?',save:'Save changes?',discard:'Discard changes?',exit:'Exit this Event?',delete:'Delete this Event?',retry:'Confirm this action'};
+  const headingText = acknowledgement ? 'Event saved' : frame.surface.id === 'confirmation' ? (confirmationTitles[confirmationType] || frame.surface.heading) : frame.surface.id === 'event-setup' ? (frame.state.startsWith('edit-') ? 'Edit Event' : 'New Event') : frame.surface.heading;
+  const readingOrder = acknowledgement ? ['success status','dialog heading','message','primary action'] : frame.surface.order;
   const active = /(busy|saving|checking|retrying|countdown|returning|preparing|holding)/.test(frame.state);
   const blocking = /(failure|failed|unavailable|access-denied|in-use|disconnected|insufficient|exit-only|incomplete)/.test(frame.state);
   const lines = [
@@ -65,10 +70,10 @@ for (const frame of frames) {
     `  description: ${quote(`${frame.surface.name}, ${frame.state}`)}`,
     `  state: ${quote(active ? 'busy' : blocking ? 'unavailable' : 'ready')}`,
     `readingOrder:`,
-    ...frame.surface.order.map(value => `  - ${quote(value)}`),
+    ...readingOrder.map(value => `  - ${quote(value)}`),
     `focus:`,
-    `  initial: ${quote(frame.surface.id === 'confirmation' ? 'safe action' : frame.surface.audience === 'guest' ? 'primary guest action when present' : 'page heading')}`,
-    `  order: ${quote(frame.surface.order.join(' -> '))}`,
+    `  initial: ${quote(acknowledgement ? 'primary action' : frame.surface.id === 'confirmation' ? 'safe action' : frame.surface.audience === 'guest' ? 'primary guest action when present' : 'page heading')}`,
+    `  order: ${quote(readingOrder.join(' -> '))}`,
     `  returnTarget: ${quote(frame.surface.id === 'confirmation' ? 'invoking control' : 'not applicable')}`,
     `  reflowBehavior: ${quote('Focus follows visible task order and remains revealed without horizontal scrolling.')}`,
     `keyboard:`,
@@ -79,7 +84,7 @@ for (const frame of frames) {
     `  activation: ${quote('release')}`,
     `  gesture: ${quote(frame.surface.id === 'guest-start' && frame.state.includes('hold') ? 'continuous 1.5-second hold for Exit event only' : 'none')}`,
     `announcements:`,
-    `  - text: ${quote(blocking ? `${frame.surface.name} needs attention.` : active ? `${frame.surface.name} in progress.` : `${frame.surface.name} ready.`)}`,
+    `  - text: ${quote(acknowledgement ? 'Event saved. Your changes have been saved.' : blocking ? `${frame.surface.name} needs attention.` : active ? `${frame.surface.name} in progress.` : `${frame.surface.name} ready.`)}`,
     `    trigger: ${quote('semantic state transition')}`,
     `    priority: ${quote(blocking ? 'assertive' : 'polite')}`,
     `    deduplicate: ${quote('semantic-transition')}`,

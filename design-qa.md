@@ -85,3 +85,99 @@ Previous report result: passed
 - P3 intentional difference: the ImageGen source uses taller illustrative cards than the canonical six-Event desktop matrix. The implementation keeps the same design direction at a denser operator-friendly height.
 
 final result: passed
+
+---
+
+# Design QA: Shared confirmation dialog standard
+
+## Comparison target
+
+- Source visual truth: `docs/design-system/reference-states/review/confirmation-dialog-selected-reference.png`, selected Product Design option 3.
+- Browser-rendered implementation: `docs/design-system/reference-states/review/confirmation-dialog-implementation.png`.
+- First-pass implementation evidence: `docs/design-system/reference-states/review/confirmation-dialog-first-pass.png`.
+- Full-view comparison: `docs/design-system/reference-states/review/confirmation-dialog-full-comparison.png`.
+- Focused modal comparison: `docs/design-system/reference-states/review/confirmation-dialog-focused-comparison.png`.
+- Exit/Discard exception comparison: `docs/design-system/reference-states/review/confirmation-dialog-exit-discard-comparison.png`, stacking the selected standard with the two identity-free variants at a common 720 px modal width.
+- Source dimensions: 1453 × 1082 px at 1× density. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
+- Normalization: full views were proportionally resized to a common 960 px display width. Modal crops were proportionally resized to a common 720 px display width; neither artifact was stretched.
+- Primary state: `confirmation.start-idle.standard`. Supporting states include Save, Discard, Exit, Delete, busy, failed/Retry, and the four registered responsive-risk viewports.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatches remain.
+- Fonts and typography: pass — FotoHAVN’s Inter stack reproduces the selected centered title, tracked Event labels, bold Event name, muted monospace ID, and balanced action labels without clipping.
+- Spacing and layout rhythm: pass — the renderer follows the selected icon/title/divider/identity/divider/action-rail anatomy. The 500 px contract width keeps the dialog compact in the 1280 × 720 product surface while preserving the reference hierarchy.
+- Colors and visual tokens: pass — neutral decisions use near-black iconography and Primary action styling. Exit, Delete, and Discard use the existing dark-red destructive token for both icon and confirming action. The white panel, gray scrim, borders, and focus ring remain token-aligned.
+- Image quality and asset fidelity: pass — no raster artwork is required. The icons use layered Segoe MDL2/Fluent system glyphs, including a ring plus action-specific glyph, rather than custom SVG, CSS illustration, emoji, or placeholder art.
+- Copy and content: pass — Start, Save, Delete, and retained-context Retry preserve Event name and full Event ID. Exit and Discard intentionally omit Event identity because the current-flow consequence already provides sufficient context. Start and Save avoid generic filler copy; destructive decisions add one specific consequence sentence. Confirmation eyebrows and bordered identity cards are absent.
+- Interaction and accessibility: pass — each dialog exposes one level-1 heading, the consequence through `aria-describedby` when present, a hidden redundant icon, initial focus on the safe action, and 48 px controls. Busy states retain the leading loader and disable conflicting actions.
+- Responsive behavior: pass — all 16 Confirmation references were recaptured. At 640 × 360 the long-name destructive busy state keeps 16 px margins, two 48 px actions, no page overflow, and no internal clipping.
+
+## Primary interaction checks
+
+- Start Event navigated to Guest Start.
+- Save changes navigated to the approved success acknowledgement.
+- Delete Retry navigated to the Delete busy state.
+- Exit and Discard each rendered zero Event identity sections while retaining their specific consequence copy and both actions.
+- Keep event active returned to Guest Start, and Discard changes returned to Saved Events.
+- Browser console warning/error check: none observed.
+- The evidence builder reported 103 frames, `complete: true`, and zero missing targets after recapturing the Confirmation family and embedded Exit confirmation.
+
+## Comparison history
+
+1. The first implementation pass had a P1 icon mismatch: the selected outline circle rendered as a solid black disk because the wrong system status-circle layer was used. Evidence: `docs/design-system/reference-states/review/confirmation-dialog-first-pass.png`.
+2. The icon layer was replaced with the system ring glyph while retaining the action-specific center glyph.
+3. Post-fix full and focused comparisons show the selected outline icon, centered heading, divider-based identity, and paired full-width action rail with no remaining actionable P0/P1/P2 differences.
+4. Product refinement removed Event identity from Exit and Discard only. The combined comparison confirms that both variants preserve the selected icon, centered hierarchy, consequence copy, and paired action rail without leaving an empty divider or awkward vertical gap.
+
+## Follow-up polish
+
+- P3 intentional difference: the generated reference presents a taller, larger modal relative to its canvas. The renderer uses FotoHAVN’s 500 px maximum and tighter product spacing so confirmations remain practical at all required desktop sizes.
+- P3 intentional difference: the renderer shows the required initial keyboard focus ring on the safe action; the generated reference depicts an unfocused pointer state.
+
+final result: passed
+
+---
+
+# Design QA: Success and information acknowledgement dialog
+
+## Comparison target
+
+- Source visual truth: `docs/design-system/reference-states/review/success-dialog-selected-reference.png`, the selected Product Design option 3.
+- Browser-rendered implementation: `docs/design-system/reference-states/review/success-dialog-implementation.png`.
+- Full-view comparison: `docs/design-system/reference-states/review/success-dialog-full-comparison.png`.
+- Focused modal comparison: `docs/design-system/reference-states/review/success-dialog-focused-comparison.png`.
+- Source dimensions: 1535 × 1024 px at 1× density. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
+- Normalization: full views were proportionally resized to a common 960 px display width. Modal crops were proportionally resized to a common 720 px display width; neither artifact was stretched.
+- State: `confirmation.success-destination.standard`.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatches remain.
+- Fonts and typography: pass — the renderer uses FotoHAVN’s Inter stack, preserves the selected centered hierarchy, and keeps the title, one-sentence message, and action readable without wrapping.
+- Spacing and layout rhythm: pass — the implementation follows the selected icon/title/message/full-width-action anatomy with balanced vertical spacing. The 440 px modal maximum follows the repository dialog contract; the larger generated canvas presentation was normalized for the focused comparison.
+- Colors and visual tokens: pass — the white panel, near-black copy/action, gray scrim, and restrained semantic green use existing FotoHAVN tokens. The dialog adds no gradient or decorative color.
+- Image quality and asset fidelity: pass — no raster artwork is required. The circular check is the installed Segoe MDL2 `Completed` icon, not custom SVG, CSS art, emoji, or a placeholder.
+- Copy and content: pass — the dialog contains only `Event saved`, `Your changes have been saved.`, and `Continue`. Event name, Event ID, confirmation eyebrow, and Cancel are absent.
+- Interaction and accessibility: pass — the dialog has one programmatic level-1 heading, an accessible description, one 48 px Primary action with initial focus, and a redundant status icon hidden from accessibility. Continue returns to Saved Events.
+- Responsive behavior: pass — at 640 × 360 the dialog keeps 16 px margins, a 48 px full-width action, zero horizontal overflow, and no clipped content. Evidence: `docs/design-system/reference-states/review/success-dialog-stress-640x360.png`.
+
+## Primary interaction checks
+
+- The 1280 × 720 browser render contained zero Event identity panels and zero Cancel buttons.
+- Initial focus entered on Continue.
+- Clicking Continue navigated to `saved-events.card-idle`.
+- Browser console warning/error check: none observed.
+- The evidence builder reported 103 frames, `complete: true`, and zero missing targets.
+
+## Comparison history
+
+1. The selected visual established the centered completion icon, concise acknowledgement copy, and single full-width action.
+2. The implementation translated that structure into FotoHAVN’s 440 px standard acknowledgement dialog and existing type, spacing, color, and icon tokens.
+3. The first browser-rendered full and focused comparisons found no actionable P0/P1/P2 mismatch; no visual correction loop was required.
+
+## Follow-up polish
+
+- P3 intentional difference: the ImageGen source presents the modal at a larger relative canvas scale. The renderer uses the approved 440 px acknowledgement maximum so it remains consistent with FotoHAVN’s desktop dialog system.
+
+final result: passed

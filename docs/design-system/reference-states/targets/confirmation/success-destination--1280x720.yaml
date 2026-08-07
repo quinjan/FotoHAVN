@@ -9,23 +9,21 @@ viewport: "1280x720"
 effectiveMode: "standard"
 audience: "operator"
 heading:
-  text: "Confirmation"
+  text: "Event saved"
   level: 1
 automation:
-  name: "Confirmation"
+  name: "Event saved"
   role: "dialog"
   description: "Confirmation, success-destination"
   state: "ready"
 readingOrder:
+  - "success status"
   - "dialog heading"
-  - "consequence"
-  - "Event identity"
-  - "status"
-  - "safe action"
-  - "confirming action"
+  - "message"
+  - "primary action"
 focus:
-  initial: "safe action"
-  order: "dialog heading -> consequence -> Event identity -> status -> safe action -> confirming action"
+  initial: "primary action"
+  order: "success status -> dialog heading -> message -> primary action"
   returnTarget: "invoking control"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:
@@ -36,7 +34,7 @@ touch:
   activation: "release"
   gesture: "none"
 announcements:
-  - text: "Confirmation ready."
+  - text: "Event saved. Your changes have been saved."
     trigger: "semantic state transition"
     priority: "polite"
     deduplicate: "semantic-transition"

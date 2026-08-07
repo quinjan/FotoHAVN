@@ -9,23 +9,24 @@ viewport: "1280x720"
 effectiveMode: "standard"
 audience: "operator"
 heading:
-  text: "Confirmation"
+  text: "Delete this Event?"
   level: 1
 automation:
-  name: "Confirmation"
+  name: "Delete this Event?"
   role: "dialog"
   description: "Confirmation, delete-failed"
   state: "unavailable"
 readingOrder:
+  - "semantic icon"
   - "dialog heading"
-  - "consequence"
-  - "Event identity"
-  - "status"
+  - "consequence when present"
+  - "Event identity when relevant"
+  - "status when present"
   - "safe action"
   - "confirming action"
 focus:
   initial: "safe action"
-  order: "dialog heading -> consequence -> Event identity -> status -> safe action -> confirming action"
+  order: "semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action"
   returnTarget: "invoking control"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
 keyboard:
