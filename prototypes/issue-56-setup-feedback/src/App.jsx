@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft20Regular,
   ArrowRight20Regular,
@@ -92,6 +92,7 @@ function AccessibleDialog({ labelledBy, onDismiss, returnFocusRef, children }) {
 }
 
 function StatusIcon({ kind }) {
+  if (kind === "checking") return <SpinnerIos20Regular className="status-icon spinner" />;
   if (kind === "warning") return <Warning20Regular className="status-icon warning" />;
   if (kind === "error") return <DismissCircle20Regular className="status-icon error" />;
   return null;
@@ -127,10 +128,10 @@ function InlineFeedback({ state, action, message, onRetry, onChooseCamera, retry
 function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
   const [eventName, setEventName] = useState("UX Audit Test Event");
   const [camera, setCamera] = useState("");
+  const [cameraCheck, setCameraCheck] = useState("idle");
   const [printer, setPrinter] = useState("none");
   const [state, setState] = useState("idle");
   const [action, setAction] = useState(initialAction);
-  const retryRef = useRef(null);
   const cameraRef = useRef(null);
 
   useEffect(() => {
@@ -142,41 +143,37 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
     cameraRef.current?.focus({ preventScroll: true });
   }, []);
 
-  const nameReady = eventName.trim().length > 0;
-  const cameraReady = camera.length > 0;
-  const ready = nameReady && cameraReady;
+  useEffect(() => {
+    if (!camera) {
+      setCameraCheck("idle");
+      return undefined;
+    }
 
-  const feedback = useMemo(() => {
-    if (state === "busy") return action === "start" ? "Checking Camera and storage…" : "Saving Event…";
-    if (state === "success") return action === "start" ? "Event is ready. Opening the booth…" : "Event saved.";
-    if (state === "error") return action === "start" ? "FotoHAVN could not open the selected Camera." : "FotoHAVN could not save this Event.";
-    if (!nameReady && !cameraReady) return "Enter an Event name and select a Camera to continue.";
-    if (!nameReady) return "Enter an Event name to save this Event.";
-    if (!cameraReady) return "Select a Camera to save this Event.";
-    return action === "start" ? "Ready to check the Camera and storage." : "Ready to save this Event.";
-  }, [action, cameraReady, nameReady, state]);
+    setCameraCheck("checking");
+    setState("idle");
+    const timer = window.setTimeout(() => {
+      setCameraCheck(camera === "unavailable" ? "error" : "ready");
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [camera]);
+
+  const nameReady = eventName.trim().length > 0;
+  const cameraReady = cameraCheck === "ready";
+  const ready = nameReady && cameraReady;
 
   async function runAction(nextAction = action) {
     setAction(nextAction);
     if (!ready) return;
     setState("busy");
     await wait(1100);
-    if (camera === "unavailable") {
-      setState("error");
-      requestAnimationFrame(() => retryRef.current?.focus());
+    setState("success");
+    if (nextAction === "save") {
+      await wait(650);
+      onSaved();
     } else {
-      setState("success");
-      if (nextAction === "save") {
-        await wait(650);
-        onSaved();
-      }
+      await wait(650);
+      setState("idle");
     }
-  }
-
-  function chooseAnotherCamera() {
-    setCamera("");
-    setState("idle");
-    requestAnimationFrame(() => document.querySelector("#camera")?.focus());
   }
 
   return (
@@ -194,26 +191,22 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
             <div className="form-section">
               <div className="field-row">
                 <label htmlFor="event-name">Event name</label>
-                <div className="control-with-status event-control">
-                  <input id="event-name" value={eventName} aria-describedby={!nameReady ? "event-name-message" : undefined} onChange={(event) => { setEventName(event.target.value); setState("idle"); }} />
-                  {nameReady && <CheckmarkCircle20Regular className="control-state ready" aria-label="Event name ready" />}
-                </div>
+                <input id="event-name" value={eventName} aria-describedby={!nameReady ? "event-name-message" : undefined} onChange={(event) => { setEventName(event.target.value); setState("idle"); }} />
                 {!nameReady && <div id="event-name-message"><FieldMessage kind="warning">Enter an Event name to continue.</FieldMessage></div>}
               </div>
 
               <div className="field-row">
                 <label htmlFor="camera">Camera</label>
-                <div className="control-with-status camera-control">
-                  <select ref={cameraRef} id="camera" value={camera} aria-describedby={!cameraReady || (state === "error" && action === "start") ? "camera-message" : undefined} onChange={(event) => { setCamera(event.target.value); setState("idle"); }}>
-                    <option value="">Select Camera</option>
-                    <option value="ready">FJ Camera 01 (3:2)</option>
-                    <option value="unavailable">FJ Camera 02 (unavailable)</option>
-                  </select>
-                  {cameraReady && !(state === "error" && action === "start") && <CheckmarkCircle20Regular className="control-state ready" aria-label="Camera connected" />}
-                </div>
-                {state === "error" && action === "start" ? (
+                <select ref={cameraRef} id="camera" value={camera} aria-describedby={cameraCheck !== "ready" ? "camera-message" : undefined} onChange={(event) => setCamera(event.target.value)}>
+                  <option value="">Select Camera</option>
+                  <option value="ready">FJ Camera 01 (3:2)</option>
+                  <option value="unavailable">FJ Camera 02 (unavailable)</option>
+                </select>
+                {cameraCheck === "checking" ? (
+                  <div id="camera-message"><FieldMessage kind="checking">Checking Camera…</FieldMessage></div>
+                ) : cameraCheck === "error" ? (
                   <div id="camera-message"><FieldMessage kind="error">Camera unavailable. Choose another Camera or try again.</FieldMessage></div>
-                ) : !cameraReady ? (
+                ) : !camera ? (
                   <div id="camera-message"><FieldMessage kind="warning">Select a Camera to continue.</FieldMessage></div>
                 ) : null}
               </div>
@@ -224,7 +217,6 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
                   <option value="none">Not printing</option>
                   <option value="dnp">DNP DS620</option>
                 </select>
-                {printer === "dnp" && <p className="field-helper">Photo Strips will print on DNP DS620.</p>}
               </div>
 
               <div className="field-row storage-row">
@@ -235,8 +227,8 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
 
             <div className="preview-section">
               <h2>Live preview</h2>
-              <div className={`preview-viewport ${camera === "ready" ? "active" : ""}`}>
-                {camera === "ready" ? <Camera20Regular className="preview-camera" /> : <span>{camera === "unavailable" ? "Preview unavailable. Choose another Camera or try again." : "Select a Camera to start the preview."}</span>}
+              <div className={`preview-viewport ${cameraReady ? "active" : ""}`}>
+                {cameraReady ? <Camera20Regular className="preview-camera" /> : <span>{cameraCheck === "checking" ? "Checking Camera…" : cameraCheck === "error" ? "Preview unavailable. Choose another Camera or try again." : "Select a Camera to start the preview."}</span>}
                 <small>3:2 Capture area</small>
               </div>
             </div>
@@ -245,12 +237,11 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
           <footer className="setup-footer">
             <button className="text-action" onClick={onCancel}>Cancel</button>
             <div className="footer-actions">
-              <InlineFeedback state={state} action={action} message={feedback} onRetry={() => runAction(action)} onChooseCamera={chooseAnotherCamera} retryRef={retryRef} />
               <div className="button-row">
-                <button className="outline-action" disabled={!ready || state === "busy"} onClick={() => runAction("save")}>Save &amp; Close</button>
+                <button className="outline-action" disabled={!ready || state === "busy"} onClick={() => runAction("save")}>{state === "busy" && action === "save" && <SpinnerIos20Regular className="spinner" />}{state === "busy" && action === "save" ? "Saving Event…" : "Save & Close"}</button>
                 <button className="primary-action" disabled={!ready || state === "busy"} onClick={() => runAction("start")}>
                   {state === "busy" && action === "start" && <SpinnerIos20Regular className="spinner" />}
-                  {state === "busy" && action === "start" ? "Starting Event…" : "Save & Start Event"}
+                  {state === "busy" && action === "start" ? "Starting Event…" : state === "success" && action === "start" ? "Event Ready" : "Save & Start Event"}
                 </button>
               </div>
             </div>
