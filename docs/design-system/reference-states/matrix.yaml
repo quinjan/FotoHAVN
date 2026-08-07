@@ -1,0 +1,80 @@
+schemaVersion: 1
+contractVersion: 1.0.0
+canonicalViewport: 1280x720
+theme: light
+surfaces:
+  - id: saved-events
+    audience: operator
+    zeroScroll: false
+    canonicalStates: [new-event, card-idle, card-hover, card-focus, unavailable, busy, deletion-incomplete, maximum-cards]
+    responsiveRisk: maximum-cards
+    fixedRegions: [page-header]
+    essential: [event-name, compact-event-id, readiness, start, edit, delete]
+  - id: event-setup
+    audience: operator
+    zeroScroll: false
+    canonicalStates: [new-empty, new-valid, edit-clean, edit-dirty, camera-checking, camera-ready, camera-unavailable, camera-access-denied, camera-in-use, camera-disconnected, storage-insufficient, storage-unavailable, actions-disabled, saving, save-error, save-success]
+    responsiveRisk: camera-error-and-insufficient-storage
+    fixedRegions: [title-header, action-footer]
+    essential: [event-name, camera-status, preview, printer, storage, cancel, save-close, save-start]
+  - id: guest-start
+    audience: guest
+    zeroScroll: true
+    canonicalStates: [ready, exit-hold-idle, exit-holding, exit-hold-cancelled, exit-confirmation-open]
+    responsiveRisk: long-event-name-and-exit-hold
+    fixedRegions: [app-header]
+    essential: [event-name, stage-heading, start, guarded-exit]
+  - id: guest-start-unavailable
+    audience: guest
+    zeroScroll: true
+    canonicalStates: [camera-retry, camera-exit-only, storage-retry, storage-exit-only, retrying, retry-failed]
+    responsiveRisk: longest-recovery-copy
+    fixedRegions: [app-header]
+    essential: [event-name, reason, retry-or-exit]
+  - id: capture
+    audience: guest
+    zeroScroll: true
+    canonicalStates: [capture-1, capture-2, capture-3, capture-4, countdown-3, countdown-2, countdown-1, flash, photo-saved, camera-failure, storage-failure]
+    responsiveRisk: capture-4-countdown
+    fixedRegions: [app-header]
+    essential: [event-name, camera-viewport, capture-progress, countdown-or-saved-status]
+  - id: operator-assistance
+    audience: guest
+    zeroScroll: true
+    canonicalStates: [camera-0-preserved, camera-3-preserved, storage-3-preserved, photo-strip-4-preserved, retrying, recovered, retry-failed, exit-only]
+    responsiveRisk: retry-failed-with-3-preserved
+    fixedRegions: [app-header]
+    essential: [call-operator, cause, preserved-progress, recovery, guarded-exit]
+  - id: photo-strip
+    audience: guest
+    zeroScroll: true
+    canonicalStates: [preparing, visible-10-seconds, visible-5-seconds, returning, failed]
+    responsiveRisk: preparing-or-returning
+    fixedRegions: [app-header]
+    essential: [event-name, full-photo-strip, remaining-time, return-progress]
+  - id: confirmation
+    audience: operator
+    zeroScroll: false
+    canonicalStates: [start-idle, start-busy, start-failed, save-idle, discard-idle, exit-idle, exit-busy, delete-idle, delete-busy, delete-failed, retry, success-destination]
+    responsiveRisk: destructive-busy-with-long-event-id
+    fixedRegions: [title, event-identity, status, actions]
+    essential: [heading, consequence, safe-action, confirming-action]
+viewports:
+  - id: standard
+    size: 1280x720
+    coverage: all-canonical-states
+  - id: compact-aspect
+    size: 1024x768
+    coverage: responsive-risk-per-surface
+  - id: scale-125-equivalent
+    size: 1024x576
+    coverage: responsive-risk-per-surface
+  - id: scale-150-equivalent
+    size: 853x480
+    coverage: responsive-risk-per-surface
+  - id: scale-200-stress-equivalent
+    size: 640x360
+    coverage: responsive-risk-per-surface
+acceptance:
+  prohibit: [clipping, overlap, horizontal-scroll, hidden-essential-content, unreachable-focus, undersized-targets, distorted-media, guest-vertical-scroll]
+  require: [semantic-annotations, measured-contrast, keyboard-operation, narrator-contract, touch-operation, high-contrast, reduced-motion]
