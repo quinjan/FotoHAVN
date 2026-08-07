@@ -1,0 +1,243 @@
+schemaVersion: 1
+contractVersion: 1.0.0
+approvalStatus: candidate-until-default-branch-and-design-tag
+implementationStatus: planned
+authority: docs/design-system
+winui:
+  project: src/FotoHavn.App/FotoHavn.App.csproj
+  targetDictionary: src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml
+  targetNamespace: FotoHavn.App.Controls
+
+naming:
+  semanticId: lowercase.dot.separated
+  resourceKey: PascalCase semantic ID; color values use a Color suffix and brushes use a Brush suffix
+  componentStyle: FotoHavn<Component><Variant>Style
+  note: Exact entries below override the convention.
+
+tokens:
+  - { id: color.surface.canvas, resource: ColorSurfaceCanvasBrush, kind: SolidColorBrush }
+  - { id: color.surface.panel, resource: ColorSurfacePanelBrush, kind: SolidColorBrush }
+  - { id: color.surface.raised, resource: ColorSurfaceRaisedBrush, kind: SolidColorBrush }
+  - { id: color.surface.hover, resource: ColorSurfaceHoverBrush, kind: SolidColorBrush }
+  - { id: color.surface.media, resource: ColorSurfaceMediaBrush, kind: SolidColorBrush }
+  - { id: color.text.primary, resource: ColorTextPrimaryBrush, kind: SolidColorBrush }
+  - { id: color.text.muted, resource: ColorTextMutedBrush, kind: SolidColorBrush }
+  - { id: color.text.inverse, resource: ColorTextInverseBrush, kind: SolidColorBrush }
+  - { id: color.text.disabled, resource: ColorTextDisabledBrush, kind: SolidColorBrush }
+  - { id: color.border.default, resource: ColorBorderDefaultBrush, kind: SolidColorBrush }
+  - { id: color.border.strong, resource: ColorBorderStrongBrush, kind: SolidColorBrush }
+  - { id: color.border.disabled, resource: ColorBorderDisabledBrush, kind: SolidColorBrush }
+  - { id: color.action.primary.idle, resource: ColorActionPrimaryIdleBrush, kind: SolidColorBrush }
+  - { id: color.action.primary.hover, resource: ColorActionPrimaryHoverBrush, kind: SolidColorBrush }
+  - { id: color.action.primary.pressed, resource: ColorActionPrimaryPressedBrush, kind: SolidColorBrush }
+  - { id: color.action.primary.disabled, resource: ColorActionPrimaryDisabledBrush, kind: SolidColorBrush }
+  - { id: color.action.primary.foreground, resource: ColorActionPrimaryForegroundBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.idle, resource: ColorActionSecondaryIdleBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.hover, resource: ColorActionSecondaryHoverBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.pressed, resource: ColorActionSecondaryPressedBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.disabled, resource: ColorActionSecondaryDisabledBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.foreground, resource: ColorActionSecondaryForegroundBrush, kind: SolidColorBrush }
+  - { id: color.action.secondary.border, resource: ColorActionSecondaryBorderBrush, kind: SolidColorBrush }
+  - { id: color.action.tertiary.idle, resource: ColorActionTertiaryIdleBrush, kind: SolidColorBrush }
+  - { id: color.action.tertiary.hover, resource: ColorActionTertiaryHoverBrush, kind: SolidColorBrush }
+  - { id: color.action.tertiary.pressed, resource: ColorActionTertiaryPressedBrush, kind: SolidColorBrush }
+  - { id: color.action.tertiary.disabled, resource: ColorActionTertiaryDisabledBrush, kind: SolidColorBrush }
+  - { id: color.action.tertiary.foreground, resource: ColorActionTertiaryForegroundBrush, kind: SolidColorBrush }
+  - { id: color.action.destructive.idle, resource: ColorActionDestructiveIdleBrush, kind: SolidColorBrush }
+  - { id: color.action.destructive.hover, resource: ColorActionDestructiveHoverBrush, kind: SolidColorBrush }
+  - { id: color.action.destructive.pressed, resource: ColorActionDestructivePressedBrush, kind: SolidColorBrush }
+  - { id: color.action.destructive.disabled, resource: ColorActionDestructiveDisabledBrush, kind: SolidColorBrush }
+  - { id: color.action.destructive.foreground, resource: ColorActionDestructiveForegroundBrush, kind: SolidColorBrush }
+  - { id: color.status.info.foreground, resource: ColorStatusInfoForegroundBrush, kind: SolidColorBrush }
+  - { id: color.status.info.surface, resource: ColorStatusInfoSurfaceBrush, kind: SolidColorBrush }
+  - { id: color.status.info.border, resource: ColorStatusInfoBorderBrush, kind: SolidColorBrush }
+  - { id: color.status.success.foreground, resource: ColorStatusSuccessForegroundBrush, kind: SolidColorBrush }
+  - { id: color.status.success.surface, resource: ColorStatusSuccessSurfaceBrush, kind: SolidColorBrush }
+  - { id: color.status.success.border, resource: ColorStatusSuccessBorderBrush, kind: SolidColorBrush }
+  - { id: color.status.warning.foreground, resource: ColorStatusWarningForegroundBrush, kind: SolidColorBrush }
+  - { id: color.status.warning.surface, resource: ColorStatusWarningSurfaceBrush, kind: SolidColorBrush }
+  - { id: color.status.warning.border, resource: ColorStatusWarningBorderBrush, kind: SolidColorBrush }
+  - { id: color.status.danger.foreground, resource: ColorStatusDangerForegroundBrush, kind: SolidColorBrush }
+  - { id: color.status.danger.surface, resource: ColorStatusDangerSurfaceBrush, kind: SolidColorBrush }
+  - { id: color.status.danger.border, resource: ColorStatusDangerBorderBrush, kind: SolidColorBrush }
+  - { id: color.focus.ring, resource: ColorFocusRingBrush, kind: SolidColorBrush }
+  - { id: color.focus.separator, resource: ColorFocusSeparatorBrush, kind: SolidColorBrush }
+  - { id: color.overlay.scrim, resource: ColorOverlayScrimBrush, kind: SolidColorBrush }
+  - { id: type.display.countdown, resource: TypeDisplayCountdownStyle, kind: Style/TextBlock }
+  - { id: type.display.guest, resource: TypeDisplayGuestStyle, kind: Style/TextBlock }
+  - { id: type.heading.page, resource: TypeHeadingPageStyle, kind: Style/TextBlock }
+  - { id: type.heading.dialog, resource: TypeHeadingDialogStyle, kind: Style/TextBlock }
+  - { id: type.body.default, resource: TypeBodyDefaultStyle, kind: Style/TextBlock }
+  - { id: type.label.control, resource: TypeLabelControlStyle, kind: Style/TextBlock }
+  - { id: type.caption, resource: TypeCaptionStyle, kind: Style/TextBlock }
+  - { id: type.eyebrow, resource: TypeEyebrowStyle, kind: Style/TextBlock }
+  - { id: space.inline, resource: SpaceInline, kind: Double }
+  - { id: space.stack.tight, resource: SpaceStackTight, kind: Double }
+  - { id: space.stack.default, resource: SpaceStackDefault, kind: Double }
+  - { id: space.section, resource: SpaceSection, kind: Double }
+  - { id: space.control.horizontal, resource: SpaceControlHorizontal, kind: Double }
+  - { id: space.panel, resource: SpacePanel, kind: Double }
+  - { id: space.dialog, resource: SpaceDialog, kind: Double }
+  - { id: space.page, resource: SpacePage, kind: Double }
+  - { id: radius.control, resource: RadiusControl, kind: CornerRadius }
+  - { id: radius.panel, resource: RadiusPanel, kind: CornerRadius }
+  - { id: radius.dialog, resource: RadiusDialog, kind: CornerRadius }
+  - { id: radius.round, resource: RadiusRound, kind: CornerRadius }
+  - { id: stroke.default, resource: StrokeDefault, kind: Thickness }
+  - { id: stroke.emphasis, resource: StrokeEmphasis, kind: Thickness }
+  - { id: icon.small, resource: IconSmall, kind: Double }
+  - { id: icon.default, resource: IconDefault, kind: Double }
+  - { id: icon.large, resource: IconLarge, kind: Double }
+  - { id: icon.display, resource: IconDisplay, kind: Double }
+  - { id: target.operator.minimum, resource: TargetOperatorMinimum, kind: Double }
+  - { id: target.guest.prominent, resource: TargetGuestProminent, kind: Double }
+  - { id: target.separation, resource: TargetSeparation, kind: Double }
+  - { id: focus.ring, resource: FocusRingThickness, kind: Thickness }
+  - { id: focus.gap, resource: FocusRingGap, kind: Double }
+  - { id: elevation.dialog, resource: ElevationDialogThemeShadow, kind: ThemeShadow }
+  - { id: motion.instant, resource: MotionInstantDuration, kind: Duration }
+  - { id: motion.fast, resource: MotionFastDuration, kind: Duration }
+  - { id: motion.standard, resource: MotionStandardDuration, kind: Duration }
+  - { id: motion.slow, resource: MotionSlowDuration, kind: Duration }
+  - { id: motion.easing, resource: MotionStandardEasing, kind: CubicEase }
+  - { id: responsive.standard.minimumWidth, resource: ResponsiveStandardMinimumWidth, kind: Double }
+  - { id: responsive.standard.minimumHeight, resource: ResponsiveStandardMinimumHeight, kind: Double }
+  - { id: responsive.compact.minimumWidth, resource: ResponsiveCompactMinimumWidth, kind: Double }
+  - { id: responsive.compact.minimumHeight, resource: ResponsiveCompactMinimumHeight, kind: Double }
+  - { id: responsive.stress.minimumWidth, resource: ResponsiveStressMinimumWidth, kind: Double }
+  - { id: responsive.stress.minimumHeight, resource: ResponsiveStressMinimumHeight, kind: Double }
+
+components:
+  - id: component.action-button
+    control: Microsoft.UI.Xaml.Controls.Button
+    styles: [FotoHavnActionButtonPrimaryStyle, FotoHavnActionButtonSecondaryStyle, FotoHavnActionButtonTertiaryStyle, FotoHavnActionButtonDestructiveStyle, FotoHavnActionButtonGuestProminentStyle]
+    properties: [Content, IsEnabled, IsTabStop, AutomationProperties.Name]
+    visualStateGroups: { CommonStates: [Normal, PointerOver, Pressed, Disabled], FocusStates: [Focused, PointerFocused, Unfocused], ActionStates: [Idle, Busy] }
+    accessibility: [native-button-pattern, label-in-accessible-name, busy-announcement, 48px-minimum, 64px-guest-prominent]
+    verification: [DS-BUTTON-KEYBOARD, DS-BUTTON-TOUCH, DS-BUTTON-BUSY, DS-FOCUS]
+  - id: component.icon-action
+    control: Microsoft.UI.Xaml.Controls.Button
+    styles: [FotoHavnIconActionStyle, FotoHavnIconActionDestructiveStyle]
+    properties: [Content, IsEnabled, AutomationProperties.Name, ToolTipService.ToolTip]
+    visualStateGroups: { CommonStates: [Normal, PointerOver, Pressed, Disabled], FocusStates: [Focused, PointerFocused, Unfocused] }
+    accessibility: [mandatory-name, matching-tooltip, 48x48-target]
+    verification: [DS-ICON-NAME, DS-ICON-TOUCH, DS-FOCUS]
+  - id: component.text-field
+    control: Microsoft.UI.Xaml.Controls.TextBox
+    styles: [FotoHavnTextFieldStyle]
+    properties: [Header, Text, PlaceholderText, IsEnabled, AutomationProperties.Name, AutomationProperties.HelpText]
+    visualStateGroups: { CommonStates: [Normal, PointerOver, Focused, Disabled], ValidationStates: [Valid, Invalid, Unavailable] }
+    accessibility: [label-association, invalid-status, first-invalid-focus]
+    verification: [DS-FIELD-KEYBOARD, DS-FIELD-ERROR, DS-NARRATOR]
+  - id: component.select-field
+    control: Microsoft.UI.Xaml.Controls.ComboBox
+    styles: [FotoHavnSelectFieldStyle]
+    properties: [Header, ItemsSource, SelectedItem, PlaceholderText, IsEnabled, AutomationProperties.Name, AutomationProperties.HelpText]
+    visualStateGroups: { CommonStates: [Normal, PointerOver, Focused, Disabled], ValidationStates: [Valid, Invalid, Unavailable] }
+    accessibility: [selection-pattern, label-association, invalid-status]
+    verification: [DS-SELECT-KEYBOARD, DS-SELECT-ERROR, DS-NARRATOR]
+  - id: component.read-only-value
+    control: Microsoft.UI.Xaml.Controls.TextBlock
+    styles: [FotoHavnReadOnlyValueStyle]
+    properties: [Text, AutomationProperties.Name]
+    visualStateGroups: {}
+    accessibility: [label-value-relationship, no-false-editability]
+    verification: [DS-READONLY-NARRATOR, DS-REFLOW]
+  - id: component.inline-status
+    control: FotoHavn.App.Controls.InlineStatus
+    styles: [FotoHavnInlineStatusStyle]
+    properties: [Severity, Message, AnnouncementPriority]
+    visualStateGroups: { SeverityStates: [Neutral, Info, Success, Warning, Danger] }
+    accessibility: [text-plus-noncolor, deduplicated-live-region]
+    verification: [DS-STATUS-CONTRAST, DS-STATUS-ANNOUNCE]
+  - id: component.status-callout
+    control: FotoHavn.App.Controls.StatusCallout
+    styles: [FotoHavnStatusCalloutStyle]
+    properties: [Severity, Title, Message, Action]
+    visualStateGroups: { SeverityStates: [Neutral, Info, Success, Warning, Danger] }
+    accessibility: [region-association, actionable-error-copy]
+    verification: [DS-CALLOUT-CONTRAST, DS-CALLOUT-NARRATOR, DS-REFLOW]
+  - id: component.progress-indicator
+    control: Microsoft.UI.Xaml.Controls.ProgressRing | Microsoft.UI.Xaml.Controls.ProgressBar
+    styles: [FotoHavnProgressRingStyle, FotoHavnProgressBarStyle]
+    properties: [IsIndeterminate, IsActive, Minimum, Maximum, Value, AutomationProperties.Name]
+    visualStateGroups: {}
+    accessibility: [range-value-when-determinate, no-frame-announcements]
+    verification: [DS-PROGRESS-NARRATOR, DS-REDUCED-MOTION]
+  - id: component.toast
+    control: FotoHavn.App.Controls.InAppToast
+    styles: [FotoHavnToastStyle]
+    properties: [Message, IsOpen, DismissCommand]
+    visualStateGroups: { DisplayStates: [Closed, Open] }
+    accessibility: [polite-announcement, no-focus-steal, dismissible]
+    verification: [DS-TOAST-NARRATOR, DS-TOAST-FOCUS, DS-REFLOW]
+  - id: component.modal-dialog
+    control: Microsoft.UI.Xaml.Controls.ContentDialog
+    styles: [FotoHavnModalDialogStyle]
+    properties: [Title, Content, PrimaryButtonText, SecondaryButtonText, IsPrimaryButtonEnabled, IsSecondaryButtonEnabled, XamlRoot]
+    visualStateGroups: { DialogStates: [Idle, Busy, Failed], LayoutStates: [Standard, Stress] }
+    accessibility: [dialog-pattern, level1-heading, initial-safe-focus, focus-containment, inert-background, escape-idle-only, focus-restoration]
+    verification: [DS-MODAL-FOCUS, DS-MODAL-ESCAPE, DS-MODAL-BUSY, DS-MODAL-NARRATOR, DS-REFLOW]
+  - id: component.app-header
+    control: FotoHavn.App.Controls.AppHeader
+    styles: [FotoHavnAppHeaderStyle]
+    properties: [Context, EventName, TrailingContent]
+    visualStateGroups: { ContextStates: [Operator, GuestCycle], LayoutStates: [Standard, Compact, Stress] }
+    accessibility: [single-product-name, decorative-mark-hidden]
+    verification: [DS-HEADER-NARRATOR, DS-HEADER-REFLOW]
+  - id: component.event-card
+    control: FotoHavn.App.Controls.EventCard
+    styles: [FotoHavnEventCardStyle]
+    properties: [EventName, CompactEventId, SavedMetadata, Readiness, StartCommand, EditCommand, DeleteCommand]
+    visualStateGroups: { CommonStates: [Ready, PointerOver, Focused, Unavailable, Busy, DeletionIncomplete], LayoutStates: [Standard, Stress] }
+    accessibility: [group-semantics, disambiguated-actions, complete-name, compact-id-announcement]
+    verification: [DS-EVENTCARD-KEYBOARD, DS-EVENTCARD-TOUCH, DS-EVENTCARD-NARRATOR, DS-EVENTCARD-REFLOW]
+  - id: component.setup-field-group
+    control: FotoHavn.App.Controls.SetupFieldGroup
+    styles: [FotoHavnSetupFieldGroupStyle]
+    properties: [Label, FieldContent, HelperContent, Status, IsDirty]
+    visualStateGroups: { FieldStates: [Clean, Dirty, Checking, Ready, Invalid, Unavailable] }
+    accessibility: [label-field-status-association, asynchronous-no-focus-steal]
+    verification: [DS-SETUP-VALIDATION, DS-SETUP-NARRATOR, DS-SETUP-REFLOW]
+  - id: component.camera-viewport
+    control: FotoHavn.App.Controls.CameraViewport
+    styles: [FotoHavnCameraViewportStyle]
+    properties: [Mode, Source, IsMirrored, Status, ShowCaptureGuide, OverlayContent]
+    visualStateGroups: { CameraStates: [Connecting, Live, Countdown, Flash, CaptureSaved, Unavailable], LayoutStates: [Standard, Compact, Stress] }
+    accessibility: [functional-image-name, state-separate, decorative-overlays-hidden]
+    verification: [DS-CAMERA-ASPECT, DS-CAMERA-NARRATOR, DS-CAMERA-REFLOW]
+  - id: component.capture-progress
+    control: FotoHavn.App.Controls.CaptureProgress
+    styles: [FotoHavnCaptureProgressStyle]
+    properties: [ActiveCapture, Phase]
+    visualStateGroups: { CaptureStates: [NotStarted, Capture1, Capture2, Capture3, Capture4, Complete] }
+    accessibility: [single-progress-concept, shape-and-stroke-meaning]
+    verification: [DS-CAPTURE-PROGRESS-NARRATOR, DS-CAPTURE-PROGRESS-CONTRAST]
+  - id: component.operator-assistance
+    control: FotoHavn.App.Controls.OperatorAssistance
+    styles: [FotoHavnOperatorAssistanceStyle]
+    properties: [Cause, Stage, DurableCaptureCount, Recovery, ActionState]
+    visualStateGroups: { ActionStates: [Idle, Retrying, Recovered, RetryFailed], LayoutStates: [Standard, Compact, Stress] }
+    accessibility: [assertive-activation, preserved-progress, bounded-actionable-copy]
+    verification: [DS-ASSISTANCE-NARRATOR, DS-ASSISTANCE-KEYBOARD, DS-ASSISTANCE-REFLOW]
+  - id: component.photo-strip-result
+    control: FotoHavn.App.Controls.PhotoStripResult
+    styles: [FotoHavnPhotoStripResultStyle]
+    properties: [ImageSource, RemainingSeconds, ReturnProgress, Title, Message]
+    visualStateGroups: { ResultStates: [Preparing, Visible, Returning, Failed], LayoutStates: [Standard, Compact, Stress] }
+    accessibility: [photo-strip-preview-name, milestone-announcements, automatic-return]
+    verification: [DS-STRIP-ASPECT, DS-STRIP-NARRATOR, DS-STRIP-REFLOW, DS-REDUCED-MOTION]
+
+verificationSeams:
+  visual:
+    matrix: docs/design-system/reference-states/matrix.yaml
+    references: [1280x720, 1024x768, 1024x576, 853x480, 640x360]
+    assertions: [no-clipping, no-overlap, no-horizontal-scroll, no-distorted-media, no-guest-vertical-scroll]
+  accessibility:
+    assertions: [keyboard-complete, visible-focus, narrator-names-states-announcements, 48px-targets, 64px-guest-actions, measured-contrast, high-contrast, reduced-motion]
+  behavior:
+    project: tests/FotoHavn.AcceptanceTests/FotoHavn.AcceptanceTests.csproj
+    assertions: [state-destinations, durable-capture-progress, retry-preserves-context, automatic-photo-strip-return]
+  windowsIntegration:
+    project: tests/FotoHavn.WindowsIntegrationTests/FotoHavn.WindowsIntegrationTests.csproj
+    assertions: [camera-status-seams, storage-status-seams, media-aspect-seams]
