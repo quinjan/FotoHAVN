@@ -45,28 +45,33 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .setup-heading { padding: 28px 34px 18px; }
 .setup-heading h1, .saved-events h1 { margin: 8px 0 4px; font-size: 28px; line-height: 1.08; }
 .setup-heading p, .saved-events > p { margin: 0; color: var(--muted); font-size: 14px; }
-.setup-content { min-height: 0; padding: 0 34px 22px; display: grid; grid-template-columns: minmax(490px, .98fr) 1.16fr; gap: 34px; }
+.setup-content { min-height: 0; padding: 0 34px; display: grid; grid-template-columns: minmax(490px, .98fr) 1.16fr; gap: 34px; }
 .form-section { min-height: 0; border-top: 1px solid var(--line); }
-.field-row { min-height: 98px; padding: 14px 0; display: grid; grid-template-columns: minmax(250px, 1fr) 185px; grid-template-rows: auto auto; column-gap: 22px; border-bottom: 1px solid var(--line); }
+.field-row { min-height: 98px; padding: 14px 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; border-bottom: 1px solid var(--line); }
 .field-row label, .field-label { grid-column: 1; font-size: 14px; font-weight: 650; }
 .field-row label span { font-weight: 400; color: var(--muted); }
 .field-row input, .field-row select { grid-column: 1; width: 100%; height: 42px; margin-top: 6px; padding: 0 12px; border: 1px solid #c9ccd0; border-radius: 5px; background: #fff; }
 .field-row input:focus, .field-row select:focus { border-color: var(--focus); }
-.field-status { grid-column: 2; grid-row: 1 / span 2; display: grid; grid-template-columns: 22px 1fr; align-self: center; gap: 10px; }
-.field-status strong, .field-status span { display: block; }
-.field-status strong { margin-bottom: 4px; font-size: 13px; }
-.field-status span { color: var(--muted); font-size: 11px; line-height: 1.4; }
-.status-icon { width: 20px; height: 20px; }
-.status-icon.ready { color: var(--success); }
+.control-with-status { grid-column: 1; position: relative; margin-top: 6px; }
+.control-with-status input, .control-with-status select { margin-top: 0; }
+.event-control input { padding-right: 42px; }
+.event-control .control-state { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); }
+.camera-control { display: grid; grid-template-columns: minmax(0, 1fr) 18px; align-items: center; gap: 9px; }
+.camera-control select { grid-column: 1; }
+.camera-control .control-state { grid-column: 2; }
+.control-state { width: 16px; height: 16px; color: var(--success); }
+.field-message { grid-column: 1; margin-top: 6px; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.field-message.error { color: var(--danger); }
+.field-message.warning { color: var(--warning); }
+.status-icon { width: 15px; height: 15px; flex: 0 0 auto; }
 .status-icon.warning { color: var(--warning); }
 .status-icon.error { color: var(--danger); }
-.status-icon.neutral { color: var(--muted); }
-.storage-row { min-height: 90px; }
+.field-helper { grid-column: 1; margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.storage-row { min-height: 90px; border-bottom: 0; }
 .setup-dialog.has-error .field-row { min-height: 82px; padding-block: 9px; }
 .setup-dialog.has-error .storage-row { min-height: 72px; }
 .setup-dialog.has-error .preview-viewport { min-height: 240px; }
-.storage-value { grid-column: 1; margin-top: 6px; display: grid; grid-template-columns: 20px 1fr; gap: 8px; align-items: center; font-size: 13px; }
-.storage-value small { grid-column: 2; color: var(--muted); }
+.storage-value { grid-column: 1; margin-top: 8px; color: var(--muted); font-size: 13px; }
 .preview-section { min-height: 0; display: flex; flex-direction: column; }
 .preview-section h2 { margin: 0 0 10px; font-size: 14px; }
 .preview-viewport { height: auto; min-height: 270px; max-height: 350px; flex: 1; padding: 16px; position: relative; display: grid; place-items: center; overflow: hidden; border: 1px solid #333; border-radius: 7px; background: #17181a; color: #aeb1b5; }

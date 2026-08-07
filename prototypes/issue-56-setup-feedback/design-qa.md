@@ -1,65 +1,58 @@
-# Design QA — setup readiness and asynchronous feedback prototype
+# Design QA — compact setup status redesign
 
 ## Comparison target
 
-- Source visual truth: `reference/field-anchored-direction.png`
-- Final implementation evidence: `audit/after/06-setup-final.png`
-- Full-view combined evidence: `audit/after/qa-comparison-final.png`
-- Focused field/readiness evidence: `audit/after/qa-comparison-focused.png`
-- State: New Event setup, Event name ready, Camera missing, Printer set to Not printing, storage ready, save actions disabled with an inline reason
-- Viewport: 1280 × 720 CSS px at device pixel ratio 1
-- Source pixels: 1672 × 945, normalized to 1280 × 720 for comparison
-- Implementation pixels: 1280 × 720
+- Source visual truth: `C:/Users/QUINJ3875/.codex/generated_images/019fd6b1-8872-7611-b9c3-19ca5698128e/exec-a3a70b73-d3f3-496f-b8a1-1b439351ab1b.png`
+- Browser-rendered implementation: `audit/after/08-option-3-compact-status.png`
+- Focused implementation evidence: `audit/after/09-option-3-focused-form.png`
+- Canonical desktop evidence: `audit/after/10-option-3-1280x720.png`
+- State: Event name valid, FJ Camera 01 connected, DNP DS620 selected, 120 GB free
+- Annotated viewport: 1256 × 1032 CSS px, device scale factor 1
+- Canonical viewport: 1280 × 720 CSS px, device scale factor 1
+- Source pixels: 1792 × 891
+- Implementation pixels: 1256 × 1032; focused crop 820 × 407; canonical capture 1280 × 720
+- Density normalization: screenshots and CSS pixels are 1:1. The focused crop preserves the implementation scale; the source is a wider concept crop, so fidelity was judged by shared component anatomy rather than a stretched overlay.
 
 ## Findings
 
 No actionable P0, P1, or P2 differences remain.
 
-- Fonts and typography: Segoe UI Variable/Segoe UI provides the intended Inter-like Windows product character. Weight, hierarchy, line height, muted copy, and compact operator labels match the reference closely.
-- Spacing and layout rhythm: The seamless left readiness/form section and right live-preview section are preserved. Field rows, dividers, footer separation, modal proportions, and touch-target spacing are consistent and unclipped.
-- Colors and visual tokens: The light neutral canvas, white surface, black actions, neutral borders, blue focus, restrained green readiness, amber action-needed state, and accessible dark red error treatment follow the reference and FotoHAVN audit.
-- Image quality and asset fidelity: The selected mock contains no photographic or decorative raster assets. The live preview is an intentional empty camera surface, and UI icons use Microsoft Fluent icons rather than code-drawn substitutes.
-- Copy and content: Readiness stays adjacent to its field; Printer is explicitly optional and neutral; disabled actions explain the missing Camera. The global `Opening Event setup…` banner from the generated source was intentionally removed per the user's selection feedback.
+- Fonts and typography: Inter/Segoe UI retains FotoHAVN's compact operator-console hierarchy. Labels remain strong, while printer and storage metadata are visibly quieter, matching the selected concept.
+- Spacing and layout rhythm: the former status column is removed, controls use the recovered width, and success indicators sit inside or immediately beside their control. Storage ends 9.8 px before the footer at the annotated state, with no overlap.
+- Colors and visual tokens: the established white, gray, black, blue-focus, and restrained green-success tokens are preserved. Success no longer introduces a competing block of green copy.
+- Image quality and asset fidelity: the selected mock contains no photographic assets. Microsoft Fluent icons remain vector components from the existing icon library; no custom-drawn substitute assets were introduced.
+- Copy and content: redundant `Ready`, `Selected`, `Looks good`, and `Plenty of space` blocks are gone. Printer helper copy appears only when it adds useful output context; Storage shows only its useful capacity metadata. Error and missing-field copy remains actionable.
 
-## Focused comparison
+## Full-view comparison evidence
 
-The field/readiness crop confirms matching row anatomy, label-to-control rhythm, Camera focus treatment, optional Printer treatment, storage status, preview framing, and capture-area label. The implementation adds only product-relevant empty-preview guidance and the separate prototype scenario control.
+The 1256 × 1032 implementation preserves the prototype's established two-column dialog while applying the selected concept's quiet status hierarchy. The 1280 × 720 capture confirms the dialog, preview, footer actions, and scenario control remain visible and unclipped.
+
+## Focused comparison evidence
+
+The focused crop makes the four shared rows legible at native scale. It confirms the Event-name trailing check, Camera-adjacent connection mark, optional Printer label and conditional helper, simplified Storage metadata, thin row separators, and live-preview edge against the generated reference.
 
 ## Comparison history
 
-1. Initial pass — blocked.
-   - P2: the live-preview height collided visually with the footer feedback line.
-   - P2: the bottom-centered prototype scenario control obscured footer actions.
-   - Fixes: reduced the preview height and moved the prototype control to the unused left gutter; hide it on narrower viewports.
-   - Post-fix evidence: `implementation-save-incomplete-v2.png` and `qa-comparison-save-incomplete.png`.
-2. Focused pass — blocked.
-   - P2: the selected Camera field did not carry the source's visible focus treatment.
-   - P3: storage copy drifted from the selected reference.
-   - Fixes: autofocus the blocking Camera field; align storage copy to `Local storage (C:)`, `120 GB free`, and `Plenty of space.`
-   - Post-fix evidence: `implementation-save-incomplete-final.png` and `qa-comparison-final.png`.
-3. Audit pass — blocked.
-   - P1: failed-Start feedback collided with the content/footer boundary and described an unavailable Camera as selected/usable.
-   - P1: Exit/Delete confirmations lacked initial focus, focus containment, Escape, background isolation, and working safe dismissal.
-   - P1: the saved Event card omitted the persistent Start task and readiness summary.
-   - P2: Delete success remained trapped in the confirmation.
-   - Fixes: responsive recovery sizing and truthful Camera state; accessible dialog behavior; persistent Start/Edit/readiness; Save/Delete destination confirmations.
-   - Post-fix evidence: `audit/after/01-saved-events.png` through `audit/after/06-setup-final.png`.
-4. Final pass — passed.
-   - No actionable P0/P1/P2 differences remain. The omitted top loading banner is an explicit user-directed change, not unresolved drift.
+1. Initial redesign pass — blocked.
+   - P2: Storage extended about 21 px into the footer at the annotated viewport because the content region retained obsolete bottom padding.
+   - P2: Storage and the footer both drew a boundary, creating the overlapping underline called out in the browser annotation.
+   - Fixes: removed the redundant content bottom padding and Storage bottom border; the footer now owns the sole divider.
+   - Post-fix evidence: `audit/after/08-option-3-compact-status.png`; measured overlap is 0 px.
+2. Status fidelity pass — passed.
+   - Removed the separate icon/title/helper status blocks and implemented control-level success marks plus action-only field messages.
+   - Post-fix evidence: `audit/after/09-option-3-focused-form.png` and `audit/after/10-option-3-1280x720.png`.
 
-## Interaction and responsive verification
+## Interaction and browser verification
 
-- Readiness: selecting a Camera enables both save actions.
-- Busy/success: Save & Start immediately exposes `Checking Camera and storage…`, keeps the button width stable, then announces success.
-- Error/recovery: selecting the unavailable Camera retains entered values, explains the failure, offers Try Again, and returns focus to Camera from Choose another Camera.
-- Shared actions: Open, Save, Start, Exit, and Delete scenarios expose local idle/busy/success/error feedback without a global banner.
-- Modal behavior: safe initial focus, cyclic Tab/Shift+Tab, Escape, inert/hidden background, dismissal, and focus restoration verified for Exit and Delete.
-- Destinations: Save returns to Saved Events with `Event saved`; Delete removes the card and focuses `Event deleted`.
-- Browser console: no errors.
-- Responsive references: verified at 1024 × 768; 853 × 640 scaling stress; and 640 × 360 200%-zoom-equivalent stress. Controls remain reachable with vertical scrolling and no horizontal document overflow.
+- Changing Camera and Printer updates the compact states without shifting the two-column layout.
+- Selecting the unavailable Camera and starting the Event exposes both the field-level recovery message and retained footer recovery actions.
+- Returning to FJ Camera 01 clears the error and restores the quiet connected state.
+- Event-name editing preserves the trailing valid-state mark and existing form behavior.
+- Browser console errors: none.
+- Storage/footer boundary: 0 px overlap at 1256 × 1032; Storage has no bottom border and the footer has one 1 px top border.
 
 ## Follow-up polish
 
-- P3: replace the empty-preview Camera glyph with a real camera feed only when this pattern is promoted into production WinUI.
+- P3: the Camera connection mark uses the same small circled-check family as Event name instead of the generated concept's solid dot. This improves semantic clarity and stays within the existing Fluent icon system.
 
 final result: passed

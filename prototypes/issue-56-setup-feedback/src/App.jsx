@@ -7,8 +7,6 @@ import {
   Delete20Regular,
   DismissCircle20Regular,
   Edit20Regular,
-  Folder20Regular,
-  Info20Regular,
   Power20Regular,
   Play20Regular,
   Print20Regular,
@@ -94,17 +92,16 @@ function AccessibleDialog({ labelledBy, onDismiss, returnFocusRef, children }) {
 }
 
 function StatusIcon({ kind }) {
-  if (kind === "ready") return <CheckmarkCircle20Regular className="status-icon ready" />;
   if (kind === "warning") return <Warning20Regular className="status-icon warning" />;
   if (kind === "error") return <DismissCircle20Regular className="status-icon error" />;
-  return <Info20Regular className="status-icon neutral" />;
+  return null;
 }
 
-function FieldStatus({ kind, title, detail }) {
+function FieldMessage({ kind, children }) {
   return (
-    <div className={`field-status ${kind}`} aria-live={kind === "error" ? "assertive" : undefined}>
+    <div className={`field-message ${kind}`} role={kind === "error" ? "alert" : undefined}>
       <StatusIcon kind={kind} />
-      <div><strong>{title}</strong><span>{detail}</span></div>
+      <span>{children}</span>
     </div>
   );
 }
@@ -197,22 +194,28 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
             <div className="form-section">
               <div className="field-row">
                 <label htmlFor="event-name">Event name</label>
-                <input id="event-name" value={eventName} onChange={(event) => { setEventName(event.target.value); setState("idle"); }} />
-                <FieldStatus kind={nameReady ? "ready" : "warning"} title={nameReady ? "Ready" : "Event name required"} detail={nameReady ? "Looks good." : "Enter a name to continue."} />
+                <div className="control-with-status event-control">
+                  <input id="event-name" value={eventName} aria-describedby={!nameReady ? "event-name-message" : undefined} onChange={(event) => { setEventName(event.target.value); setState("idle"); }} />
+                  {nameReady && <CheckmarkCircle20Regular className="control-state ready" aria-label="Event name ready" />}
+                </div>
+                {!nameReady && <div id="event-name-message"><FieldMessage kind="warning">Enter an Event name to continue.</FieldMessage></div>}
               </div>
 
               <div className="field-row">
                 <label htmlFor="camera">Camera</label>
-                <select ref={cameraRef} id="camera" value={camera} onChange={(event) => { setCamera(event.target.value); setState("idle"); }}>
-                  <option value="">Select Camera</option>
-                  <option value="ready">FJ Camera 01 (3:2)</option>
-                  <option value="unavailable">FJ Camera 02 (unavailable)</option>
-                </select>
-                <FieldStatus
-                  kind={state === "error" && action === "start" ? "error" : cameraReady ? "ready" : "warning"}
-                  title={state === "error" && action === "start" ? "Camera unavailable" : cameraReady ? "Selected" : "Select Camera"}
-                  detail={state === "error" && action === "start" ? "FotoHAVN could not open this Camera." : camera === "ready" ? "Live preview uses this Camera." : camera === "unavailable" ? "FotoHAVN will check this Camera before starting." : "Select a Camera to continue."}
-                />
+                <div className="control-with-status camera-control">
+                  <select ref={cameraRef} id="camera" value={camera} aria-describedby={!cameraReady || (state === "error" && action === "start") ? "camera-message" : undefined} onChange={(event) => { setCamera(event.target.value); setState("idle"); }}>
+                    <option value="">Select Camera</option>
+                    <option value="ready">FJ Camera 01 (3:2)</option>
+                    <option value="unavailable">FJ Camera 02 (unavailable)</option>
+                  </select>
+                  {cameraReady && !(state === "error" && action === "start") && <CheckmarkCircle20Regular className="control-state ready" aria-label="Camera connected" />}
+                </div>
+                {state === "error" && action === "start" ? (
+                  <div id="camera-message"><FieldMessage kind="error">Camera unavailable. Choose another Camera or try again.</FieldMessage></div>
+                ) : !cameraReady ? (
+                  <div id="camera-message"><FieldMessage kind="warning">Select a Camera to continue.</FieldMessage></div>
+                ) : null}
               </div>
 
               <div className="field-row">
@@ -221,13 +224,12 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
                   <option value="none">Not printing</option>
                   <option value="dnp">DNP DS620</option>
                 </select>
-                <FieldStatus kind="neutral" title={printer === "none" ? "Not printing" : "Selected"} detail={printer === "none" ? "Printing is optional. You can change this later." : "Photo Strips will print on DNP DS620."} />
+                {printer === "dnp" && <p className="field-helper">Photo Strips will print on DNP DS620.</p>}
               </div>
 
               <div className="field-row storage-row">
                 <span className="field-label">Storage</span>
-                <div className="storage-value"><Folder20Regular /><span>Local storage (C:)</span><small>120 GB free</small></div>
-                <FieldStatus kind="ready" title="Ready" detail="Plenty of space." />
+                <div className="storage-value">120 GB free</div>
               </div>
             </div>
 
