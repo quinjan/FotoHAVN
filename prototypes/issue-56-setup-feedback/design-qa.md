@@ -6,6 +6,8 @@
 - Browser-rendered error state: `audit/after/11-field-only-error.png`
 - Browser-rendered valid state: `audit/after/12-field-only-ready.png`
 - Browser-rendered insufficient-storage state: `audit/after/14-storage-path-1gb.png`
+- Compact-footer evidence: `audit/after/15-tight-footer.png`
+- Expanded-form evidence: `audit/after/16-expanded-form-scroll.png` and `audit/after/17-expanded-form-scrolled.png`
 - Viewport: 1256 × 1032 CSS px at device scale factor 1
 - Source pixels: 515 × 35, 510 × 42, and 597 × 98 focused annotation crops
 - Implementation pixels: 1256 × 1032 for both states
@@ -50,6 +52,7 @@ The supplied crops are already focused references. Their icon scale, single-line
 - Start progress appears only inside the initiating button as `Starting Event…`; no footer notice is created.
 - The Storage scenario shows field-level recovery guidance, keeps the Storage/footer overlap at 0 px, and disables both save actions while all other required fields remain valid.
 - The final Storage state exposes `C:\Program Files\FotoHAVN\Events`, enforces the approved 1 GB minimum, and preserves a 0 px Storage/footer overlap after the additional path line.
+- The footer is 80 px high and remains fully inside the modal. With Event-name, Camera, and Storage guidance visible together, the content region becomes independently scrollable (`418 px` client height, `436 px` scroll height) while the footer stays fixed and unobscured.
 - Browser console errors: none.
 - Build and Sites worker tests: passed.
 

@@ -45,7 +45,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .setup-heading { padding: 28px 34px 18px; }
 .setup-heading h1, .saved-events h1 { margin: 8px 0 4px; font-size: 28px; line-height: 1.08; }
 .setup-heading p, .saved-events > p { margin: 0; color: var(--muted); font-size: 14px; }
-.setup-content { min-height: 0; padding: 0 34px; display: grid; grid-template-columns: minmax(490px, .98fr) 1.16fr; gap: 34px; }
+.setup-content { min-height: 0; padding: 0 34px 12px; display: grid; grid-template-columns: minmax(490px, .98fr) 1.16fr; gap: 34px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .form-section { min-height: 0; border-top: 1px solid var(--line); }
 .field-row { min-height: 98px; padding: 14px 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; border-bottom: 1px solid var(--line); }
 .field-row label, .field-label { grid-column: 1; font-size: 14px; font-weight: 650; }
@@ -75,7 +75,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .preview-viewport > span { font-size: 13px; }
 .preview-viewport small { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: 11px; }
 
-.setup-footer { min-height: 96px; padding: 12px 34px 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); }
+.setup-footer { min-height: 80px; padding: 10px 34px 12px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); }
 .footer-actions { min-width: 460px; display: flex; justify-content: flex-end; }
 .button-row { display: flex; justify-content: flex-end; gap: 10px; }
 .primary-action, .outline-action, .danger-action, .guest-action { min-height: 48px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; font-weight: 650; cursor: pointer; }
@@ -140,7 +140,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   body { overflow: auto; }
   .scrim { min-height: calc(100vh - 54px); height: auto; padding: 20px; align-items: start; }
   .setup-dialog { height: auto; min-height: 650px; }
-  .setup-content { grid-template-columns: 1fr; }
+  .setup-content { grid-template-columns: 1fr; overflow: visible; }
   .preview-section { order: -1; }
   .preview-viewport { height: 300px; }
   .setup-footer { position: sticky; bottom: 0; background: #fff; }
