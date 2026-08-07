@@ -117,7 +117,7 @@
       "target": "targets/saved-events/busy--1280x720.png",
       "annotation": "targets/saved-events/busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=busy&viewport=1280x720",
-      "sha256": "05550d0f47db20bc587fb58dc8d6a990733afb349b39faa94344c4ad22e5b843"
+      "sha256": "63a1dc5443ce14e066bf89e0cb9ba1f7debbba0ac6a1210c0d2b5c313392dea8"
     },
     {
       "id": "saved-events.deletion-incomplete.standard",
@@ -377,7 +377,7 @@
       "target": "targets/event-setup/saving--1280x720.png",
       "annotation": "targets/event-setup/saving--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=saving&viewport=1280x720",
-      "sha256": "3e234362ff7e65462ac53315b951a60a3816b7cd3f4f1be0173334f5b09162f2"
+      "sha256": "6a709ad91de72d3f9fff5e383a4176c33dd24500046edfea83d89ceb712c1ca2"
     },
     {
       "id": "event-setup.save-error.standard",
@@ -494,7 +494,7 @@
       "target": "targets/guest-start/exit-holding--1280x720.png",
       "annotation": "targets/guest-start/exit-holding--1280x720.yaml",
       "renderer": "renderer/index.html?surface=guest-start&state=exit-holding&viewport=1280x720",
-      "sha256": "087613233b33fcabe4ea5fe1c882faea5e573286f6cdcc1b2ba67f3168ab1bf2"
+      "sha256": "0e64ae8e1166ab85f09f85bcabb7f6ebd1a9bb309bb7f9970f486f0380e3b0ec"
     },
     {
       "id": "guest-start.exit-hold-cancelled.standard",
@@ -637,7 +637,7 @@
       "target": "targets/guest-start-unavailable/retrying--1280x720.png",
       "annotation": "targets/guest-start-unavailable/retrying--1280x720.yaml",
       "renderer": "renderer/index.html?surface=guest-start-unavailable&state=retrying&viewport=1280x720",
-      "sha256": "11ec45d3bfdaf7ac30a61feba0af5ea53f2e933c1971227bc031354fe11ba48a"
+      "sha256": "9ab60d877f14dd91fd51882db914f4ee840a0c362e39d055738f3616c2cea869"
     },
     {
       "id": "guest-start-unavailable.retry-failed.standard",
@@ -962,7 +962,7 @@
       "target": "targets/operator-assistance/retrying--1280x720.png",
       "annotation": "targets/operator-assistance/retrying--1280x720.yaml",
       "renderer": "renderer/index.html?surface=operator-assistance&state=retrying&viewport=1280x720",
-      "sha256": "c8eeeb520bf21ba91dcbda7bf84d67c4db60ddcf539dff65b41cf6cb54b4ffd9"
+      "sha256": "6027fc21432ad71ba04f02557dab00f8849586261121547325ffbaf5749e77de"
     },
     {
       "id": "operator-assistance.recovered.standard",
@@ -1196,7 +1196,7 @@
       "target": "targets/confirmation/start-busy--1280x720.png",
       "annotation": "targets/confirmation/start-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=start-busy&viewport=1280x720",
-      "sha256": "e4a0ff64e0f65b0f719b0bff1d133fa9fe823394b45f222f97016a7804b44af2"
+      "sha256": "3758036045090fe40641e89353eb3b453a3ef7fc12e912987e5db16b290721c0"
     },
     {
       "id": "confirmation.start-failed.standard",
@@ -1261,7 +1261,7 @@
       "target": "targets/confirmation/exit-busy--1280x720.png",
       "annotation": "targets/confirmation/exit-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=exit-busy&viewport=1280x720",
-      "sha256": "189f11dbe056abb00dd1c682f5790a6a73d11647b098dc67ff4f6802a87d0dee"
+      "sha256": "4f39ba76ac16ed9f49b03fd15e107975633af0381c1b10cd80cb5884e6031738"
     },
     {
       "id": "confirmation.delete-idle.standard",
@@ -1287,7 +1287,7 @@
       "target": "targets/confirmation/delete-busy--1280x720.png",
       "annotation": "targets/confirmation/delete-busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=delete-busy&viewport=1280x720",
-      "sha256": "c51fba215a61185b5a0773a360cad3ace05edadaf5cf8fe484ad926705e9f6c4"
+      "sha256": "c8272bb1241d3afe8ef9fb4312759da939252399553a0f7426befcaf1720617b"
     },
     {
       "id": "confirmation.delete-failed.standard",
@@ -1339,7 +1339,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--1024x768.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--1024x768.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=1024x768",
-      "sha256": "ee40c6b9ea646b38686b7e643a31b76ac049ea0c7fc82dcab6374a51161fa0d9"
+      "sha256": "41a6de9aae20237620ea1d9356d4b245271c4369677884b2fe13b7b2201cd0b2"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
@@ -1352,7 +1352,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--1024x576.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--1024x576.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=1024x576",
-      "sha256": "17f3990097fbae3cbaea811adf040e372efd2f36d5e17487d82812333840a9bf"
+      "sha256": "8a3ba41e0586945c7ff6b8f418e0acbbf66d97f20b6113403ae1b5f8060a43ea"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
@@ -1365,7 +1365,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--853x480.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--853x480.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=853x480",
-      "sha256": "f1905d37d9108995bfa09853bcaf683c95531add33179b3549faf9c8265db902"
+      "sha256": "42951df041b99ed1530bb9567062c40bf764069e8ea8118e70eaf8c14e93d2ba"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
@@ -1378,7 +1378,7 @@
       "target": "targets/confirmation/destructive-busy-with-long-event-id--640x360.png",
       "annotation": "targets/confirmation/destructive-busy-with-long-event-id--640x360.yaml",
       "renderer": "renderer/index.html?surface=confirmation&state=destructive-busy-with-long-event-id&viewport=640x360",
-      "sha256": "318820624a6f925d93e6cbde4c7422d8556312665c0e2422a89f38c155a3c2d2"
+      "sha256": "5cde9503b9994afd6259c9db603cfc5372d3b6677567d6f1306b11e515e86fea"
     }
   ]
 }
