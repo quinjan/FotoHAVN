@@ -182,7 +182,7 @@ function SetupScreen({ initialAction = "save", initialCamera = "", insufficientS
     <div className="app-shell setup-shell">
       <AppHeader />
       <div className="scrim">
-        <section className={`setup-dialog ${state === "error" ? "has-error" : ""}`} aria-labelledby="setup-title">
+        <section className={`setup-dialog ${state === "error" ? "has-error" : ""} ${insufficientStorage ? "has-storage-error" : ""}`} aria-labelledby="setup-title">
           <div className="setup-heading">
             <span className="eyebrow">EVENT SETUP</span>
             <h1 id="setup-title">New Event</h1>
@@ -223,7 +223,10 @@ function SetupScreen({ initialAction = "save", initialCamera = "", insufficientS
 
               <div className="field-row storage-row">
                 <span className="field-label">Storage</span>
-                <div className="storage-value">{insufficientStorage ? "480 MB free" : "120 GB free"}</div>
+                <div className="storage-details">
+                  <span className="storage-path">C:\Program Files\FotoHAVN\Events</span>
+                  <span className="storage-value">{insufficientStorage ? "480 MB free" : "120 GB free"}</span>
+                </div>
                 {insufficientStorage && <FieldMessage kind="error">Not enough space. Free up at least 1 GB to continue.</FieldMessage>}
               </div>
             </div>

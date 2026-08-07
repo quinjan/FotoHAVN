@@ -5,7 +5,7 @@
 - Source visual truth: `reference/annotation-field-warning.png`, `reference/annotation-camera-error.png`, and `reference/annotation-remove-footer-notice.png`
 - Browser-rendered error state: `audit/after/11-field-only-error.png`
 - Browser-rendered valid state: `audit/after/12-field-only-ready.png`
-- Browser-rendered insufficient-storage state: `audit/after/13-insufficient-storage.png`
+- Browser-rendered insufficient-storage state: `audit/after/14-storage-path-1gb.png`
 - Viewport: 1256 × 1032 CSS px at device scale factor 1
 - Source pixels: 515 × 35, 510 × 42, and 597 × 98 focused annotation crops
 - Implementation pixels: 1256 × 1032 for both states
@@ -25,7 +25,7 @@ No actionable P0, P1, or P2 differences remain.
 
 The error capture shows both approved field messages in context, disabled save actions, an unavailable preview, and no setup-wide footer notice. The valid capture shows no passive checks, status labels, helper copy, or readiness banner anywhere beside the form or above its actions.
 
-The insufficient-storage capture isolates Storage as the only failing requirement: Event name and Camera are valid, capacity reads `480 MB free`, recovery guidance specifies that at least 1 GB must be freed, and both save actions remain disabled.
+The insufficient-storage capture isolates Storage as the only failing requirement: Event name and Camera are valid, the Event destination is identified as `C:\Program Files\FotoHAVN\Events`, capacity reads `480 MB free`, recovery guidance specifies that at least 1 GB must be freed, and both save actions remain disabled.
 
 ## Focused comparison evidence
 
@@ -49,6 +49,7 @@ The supplied crops are already focused references. Their icon scale, single-line
 - FJ Camera 02 leaves the Camera error beneath the select and keeps both save actions disabled.
 - Start progress appears only inside the initiating button as `Starting Event…`; no footer notice is created.
 - The Storage scenario shows field-level recovery guidance, keeps the Storage/footer overlap at 0 px, and disables both save actions while all other required fields remain valid.
+- The final Storage state exposes `C:\Program Files\FotoHAVN\Events`, enforces the approved 1 GB minimum, and preserves a 0 px Storage/footer overlap after the additional path line.
 - Browser console errors: none.
 - Build and Sites worker tests: passed.
 

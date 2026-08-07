@@ -60,10 +60,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .status-icon.warning { color: var(--warning); }
 .status-icon.error { color: var(--danger); }
 .storage-row { min-height: 90px; border-bottom: 0; }
+.setup-dialog.has-storage-error .storage-row { padding-block: 10px; }
 .setup-dialog.has-error .field-row { min-height: 82px; padding-block: 9px; }
 .setup-dialog.has-error .storage-row { min-height: 72px; }
 .setup-dialog.has-error .preview-viewport { min-height: 240px; }
-.storage-value { grid-column: 1; margin-top: 8px; color: var(--muted); font-size: 13px; }
+.storage-details { grid-column: 1; margin-top: 8px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.storage-path { color: var(--ink); }
+.storage-value { color: var(--muted); font-size: 11px; }
 .preview-section { min-height: 0; display: flex; flex-direction: column; }
 .preview-section h2 { margin: 0 0 10px; font-size: 14px; }
 .preview-viewport { height: auto; min-height: 270px; max-height: 350px; flex: 1; padding: 16px; position: relative; display: grid; place-items: center; overflow: hidden; border: 1px solid #333; border-radius: 7px; background: #17181a; color: #aeb1b5; }
