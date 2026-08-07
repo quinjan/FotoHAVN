@@ -108,24 +108,6 @@ function FieldMessage({ kind, children }) {
   );
 }
 
-function InlineFeedback({ state, action, message, onRetry, onChooseCamera, retryRef }) {
-  if (state === "idle") return <p className="action-hint">{message}</p>;
-  if (state === "busy") {
-    return <div className="action-feedback busy" role="status"><SpinnerIos20Regular className="spinner" /> <span>{message}</span></div>;
-  }
-  if (state === "success") {
-    return <div className="action-feedback success" role="status"><CheckmarkCircle20Regular /> <span>{message}</span></div>;
-  }
-  return (
-    <div className="action-feedback error" role="alert">
-      <DismissCircle20Regular />
-      <div><strong>{message}</strong><span>Your Event details are still here.</span></div>
-      {action === "start" && <button className="text-action" onClick={onChooseCamera}>Choose another Camera</button>}
-      <button ref={retryRef} className="outline-action compact" onClick={onRetry}>Try Again</button>
-    </div>
-  );
-}
-
 function SetupScreen({ initialAction = "save", initialCamera = "", insufficientStorage = false, onCancel, onSaved }) {
   const [eventName, setEventName] = useState("UX Audit Test Event");
   const [camera, setCamera] = useState(initialCamera);
@@ -278,7 +260,7 @@ function SavedEventsScreen({ mode, notice = "", onOpenSetup, onStartEvent }) {
   }, [toast]);
 
   async function openSetup() {
-    setState("busy");
+    setState("opening");
     await wait(1100);
     onOpenSetup();
   }
@@ -304,10 +286,10 @@ function SavedEventsScreen({ mode, notice = "", onOpenSetup, onStartEvent }) {
           <h1 tabIndex="-1">Choose an Event</h1>
           <p>Open one to adjust its setup, or start a Guest Cycle.</p>
           <div className="event-grid">
-            <button className="new-event-card" aria-label="New Event" onClick={openSetup} disabled={state === "busy"}>
-              {state === "busy" ? <SpinnerIos20Regular className="spinner large" /> : <span className="plus">+</span>}
-              <strong>{state === "busy" ? "Opening Event setup…" : "New Event"}</strong>
-              <span>{state === "busy" ? "Please wait" : "Set up a new booth run"}</span>
+            <button className="new-event-card" aria-label="New Event" onClick={openSetup} disabled={state === "opening"}>
+              {state === "opening" ? <SpinnerIos20Regular className="spinner large" /> : <span className="plus">+</span>}
+              <strong>{state === "opening" ? "Opening Event setup…" : "New Event"}</strong>
+              <span>{state === "opening" ? "Please wait" : "Set up a new booth run"}</span>
             </button>
             {!deleted && (
               <article className="event-card">
@@ -330,7 +312,6 @@ function SavedEventsScreen({ mode, notice = "", onOpenSetup, onStartEvent }) {
           <h2 id="delete-title">Delete “UX Audit Test Event”?</h2>
           <p>This permanently deletes the Event, its Guest Cycles, and saved photos.</p>
           <div className="identity-panel"><strong>UX Audit Test Event</strong><span>Event 01JZ-7M2K</span></div>
-          <InlineFeedback state={state} action="delete" message={state === "busy" ? "Deleting Event…" : state === "success" ? "Event deleted." : "This action cannot be undone."} onRetry={deleteEvent} />
           <div className="button-row"><button data-autofocus className="outline-action" disabled={state === "busy"} onClick={() => setDialog(false)}>Cancel</button><button className="danger-action" disabled={state === "busy" || state === "success"} onClick={deleteEvent}>{state === "busy" && <SpinnerIos20Regular className="spinner" />}{state === "busy" ? "Deleting Event…" : "Delete Event"}</button></div>
         </AccessibleDialog>
       )}

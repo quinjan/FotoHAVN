@@ -21,5 +21,6 @@ When implementing from a selected generated mock, treat that image as the source
 - Failed Camera checks must change the Camera status truthfully, retain setup context, and focus the first recovery action without breaking the left/right layout.
 - Confirmation dialogs focus the safe action, contain keyboard focus, support Escape, isolate the background, and restore focus; successful destructive actions close the dialog and announce the destination state.
 - Exit Event progress is identified only inside the initiating button as `Exiting Event…`; do not add a second Camera-release spinner or loading row to the confirmation.
+- Delete Event progress is identified only inside the initiating button as `Deleting Event…`; do not add a second deletion status or loading row to the confirmation.
 
 Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.

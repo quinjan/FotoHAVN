@@ -83,15 +83,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .outline-action { border: 1px solid #c9ccd0; background: #fff; }
 .danger-action { border: 1px solid var(--danger); background: var(--danger); color: #fff; }
 .primary-action:disabled, .outline-action:disabled, .danger-action:disabled { border-color: #dedfe2; background: #f3f3f4; color: #a5a7aa; cursor: not-allowed; }
-.action-hint { margin: 0; color: var(--muted); font-size: 12px; }
-.action-feedback { min-height: 28px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.action-feedback.success { color: var(--success); }
-.action-feedback.error { max-width: 570px; padding: 10px 12px; border: 1px solid #d58b82; border-radius: 7px; background: var(--danger-soft); color: #74342d; }
-.action-feedback.error { width: 100%; flex-wrap: wrap; }
-.action-feedback.error > div { min-width: 220px; flex: 1; margin-right: 8px; }
-.action-feedback.error strong, .action-feedback.error span { display: block; }
-.action-feedback.error span { margin-top: 2px; font-size: 11px; }
-.action-feedback .compact { min-height: 36px; padding: 0 12px; }
 .spinner { animation: spin .85s linear infinite; }
 .spinner.large { width: 32px; height: 32px; }
 @keyframes spin { to { transform: rotate(360deg); } }

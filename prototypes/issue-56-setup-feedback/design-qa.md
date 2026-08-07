@@ -9,6 +9,7 @@
 - Compact-footer evidence: `audit/after/15-tight-footer.png`
 - Expanded-form evidence: `audit/after/16-expanded-form-scroll.png` and `audit/after/17-expanded-form-scrolled.png`
 - Exit progress evidence: `audit/after/18-exit-button-only-loading.png`
+- Delete progress evidence: `audit/after/19-delete-button-only-loading.png`
 - Viewport: 1256 × 1032 CSS px at device scale factor 1
 - Source pixels: 515 × 35, 510 × 42, and 597 × 98 focused annotation crops
 - Implementation pixels: 1256 × 1032 for both states
@@ -55,9 +56,11 @@ The supplied crops are already focused references. Their icon scale, single-line
 - The final Storage state exposes `C:\Program Files\FotoHAVN\Events`, enforces the approved 1 GB minimum, and preserves a 0 px Storage/footer overlap after the additional path line.
 - The footer is 80 px high and remains fully inside the modal. With Event-name, Camera, and Storage guidance visible together, the content region becomes independently scrollable (`418 px` client height, `436 px` scroll height) while the footer stays fixed and unobscured.
 - The Exit confirmation removes the duplicate `Releasing Camera…` loading row. Its only busy indicator is the spinner and `Exiting Event…` label inside the initiating button.
+- The Delete confirmation follows the same rule: its only busy indicator is the spinner and `Deleting Event…` label inside the initiating button. The background New Event card remains idle during deletion.
 - Browser console errors: none.
 - Build and Sites worker tests: passed.
 - Exit progress disables both confirmation actions, exposes one loading indicator, and returns to Saved Events after completion.
+- Delete progress disables both confirmation actions, exposes one loading indicator, removes the Event card, and focuses the `Event deleted.` destination status after completion.
 
 ## Follow-up polish
 
