@@ -1,3 +1,4 @@
+@font-face { font-family: "FotoHAVN Inter"; src: url("/src/FotoHavn.App/Assets/Fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype"); font-style: normal; font-weight: 100 900; font-display: block; }
 :root {
   font-family: Inter, "Segoe UI", sans-serif;
   color: #17181a;
@@ -38,7 +39,7 @@ button.loading { display: inline-flex; align-items: center; justify-content: cen
 .brand { font-weight: 800; font-size: 17px; letter-spacing: -.2px; }
 .header-context { min-width: 0; max-width: 52%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 14px; }
 .header-actions { display: flex; align-items: center; gap: 12px; }
-.content { flex: 1 1 auto; min-height: 0; padding: 32px 48px; }
+.content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 32px 48px; }
 .page-head { display: flex; align-items: start; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
 h1 { margin: 0; font-size: 32px; line-height: 40px; letter-spacing: -.7px; }
 h2 { margin: 0; font-size: 24px; line-height: 32px; letter-spacing: -.3px; }
@@ -46,16 +47,28 @@ p { margin: 0; line-height: 1.48; }
 .muted { color: var(--muted); }
 .eyebrow { font-size: 10px; line-height: 14px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
-.event-card { min-height: 208px; display: flex; flex-direction: column; padding: 18px; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.event-card { min-height: 256px; position: relative; display: flex; flex-direction: column; padding: 22px; overflow: hidden; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-family: "FotoHAVN Inter", Inter, "Segoe UI", sans-serif; }
 .event-card.hover { background: #fafafb; border-color: var(--strong); }
+.event-card.focus { outline: 2px solid var(--focus); outline-offset: 2px; }
 .event-card.unavailable { border-color: #d5b65a; }
-.card-name { font-size: 20px; font-weight: 750; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-start-hit { position: absolute; inset: 0; z-index: 0; min-height: 0; width: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; }
+.card-start-hit:not(:disabled):hover { background: #fafafb; }
+.card-start-hit:focus-visible { outline: 2px solid var(--focus); outline-offset: -4px; }
+.card-body { position: relative; z-index: 1; pointer-events: none; }
+.card-name { font-size: 21px; font-weight: 750; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .event-id-label { font-size: 10px; letter-spacing: 1.3px; font-weight: 800; color: var(--muted); }
 .event-id { margin-top: 3px; font-weight: 650; letter-spacing: .6px; }
-.card-status { min-height: 42px; margin: 16px 0; color: var(--muted); font-size: 14px; }
-.card-actions { margin-top: auto; display: flex; gap: 8px; align-items: center; }
-.card-actions .start { flex: 1; }
-.mini { padding: 0 14px; }
+.card-saved { margin-top: 8px; color: var(--muted); font-size: 12px; }
+.card-bottom { position: relative; z-index: 2; margin-top: auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.card-progress, .card-message { margin-right: auto; display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; pointer-events: none; }
+.card-progress .button-loader { width: 18px; height: 18px; flex-basis: 18px; }
+.card-message.warning { color: var(--warning-fg); }
+.card-message.danger { color: var(--danger-fg); }
+.card-actions { display: flex; gap: 8px; align-items: center; }
+.icon-action { width: 48px; min-width: 48px; height: 48px; padding: 0; display: grid; place-items: center; background: #fff; }
+.icon-action.delete { color: var(--danger); }
+.icon-action:disabled { background: #f1f2f4; border-color: #d5d8dc; color: #a9adb2; }
+.mdl2 { font-family: "Segoe MDL2 Assets", "Segoe Fluent Icons"; font-size: 20px; font-weight: 400; line-height: 1; }
 .callout { border: 1px solid; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; line-height: 1.35; }
 .callout.info { color: var(--info-fg); background: var(--info-bg); border-color: #9bb3ee; }
 .callout.success { color: var(--success-fg); background: var(--success-bg); border-color: #91c79c; }
@@ -159,10 +172,10 @@ p { margin: 0; line-height: 1.48; }
   .page-head { margin-bottom: 14px; }
   h1 { font-size: 25px; line-height: 31px; }
   .cards { grid-template-columns: 1fr; gap: 10px; }
-  .event-card { min-height: 142px; padding: 14px; display: grid; grid-template-columns: 1fr auto; column-gap: 12px; }
+  .event-card { min-height: 142px; padding: 14px; }
   .card-name { font-size: 17px; margin-bottom: 6px; }
-  .card-status { margin: 6px 0; min-height: auto; }
-  .card-actions { grid-column: 2; grid-row: 1 / span 3; flex-direction: column; }
+  .card-saved { margin-top: 4px; }
+  .card-bottom { margin-top: 8px; }
   .setup { padding: 0; }
   .setup-shell { border-radius: 0; box-shadow: none; }
   .setup-title { padding: 12px 16px 6px; }

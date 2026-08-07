@@ -52,7 +52,7 @@
       "target": "targets/saved-events/new-event--1280x720.png",
       "annotation": "targets/saved-events/new-event--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=new-event&viewport=1280x720",
-      "sha256": "39cb4374b585c07c405f1e6f839f2555db539415c0555eeb7a6da204d66dee06"
+      "sha256": "56a948a8c57b7b1af4ccf927185fa878e763d897dde650cc499d915a6b705c06"
     },
     {
       "id": "saved-events.card-idle.standard",
@@ -65,7 +65,7 @@
       "target": "targets/saved-events/card-idle--1280x720.png",
       "annotation": "targets/saved-events/card-idle--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=card-idle&viewport=1280x720",
-      "sha256": "8a5146a163a12d2253c80cac4db041781ddfe12dee65db42b97d1fb24e244a6d"
+      "sha256": "f8ce50273de8e43e06d8f5409d9a38f757501585b77d3d03933c2833f79e1a72"
     },
     {
       "id": "saved-events.card-hover.standard",
@@ -78,7 +78,7 @@
       "target": "targets/saved-events/card-hover--1280x720.png",
       "annotation": "targets/saved-events/card-hover--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=card-hover&viewport=1280x720",
-      "sha256": "55a8df71e652984429979103715da6adfe4ca7540f1f56627d6587561477c0f2"
+      "sha256": "85d56376b4e8dcc42ba56d387046387b068c32183f7dd0db6470cceb9686a6bb"
     },
     {
       "id": "saved-events.card-focus.standard",
@@ -91,7 +91,7 @@
       "target": "targets/saved-events/card-focus--1280x720.png",
       "annotation": "targets/saved-events/card-focus--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=card-focus&viewport=1280x720",
-      "sha256": "f889dfd40e07add77f55f3e0ada07330780a160b499f9bc74a9427ee6307b940"
+      "sha256": "dc7ece352395274aad11619fe8b0c5ec3ece605cf44a6fee81c4d9b1c22cfac4"
     },
     {
       "id": "saved-events.unavailable.standard",
@@ -104,7 +104,7 @@
       "target": "targets/saved-events/unavailable--1280x720.png",
       "annotation": "targets/saved-events/unavailable--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=unavailable&viewport=1280x720",
-      "sha256": "1ed55a4f492a8aa85e67abb32b0218cd33590a246e736f952004b52b59ad7b05"
+      "sha256": "f597878030068d56017a4344f466420b9b5f48a12f8d050985a9f757f1ec5534"
     },
     {
       "id": "saved-events.busy.standard",
@@ -117,7 +117,7 @@
       "target": "targets/saved-events/busy--1280x720.png",
       "annotation": "targets/saved-events/busy--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=busy&viewport=1280x720",
-      "sha256": "63a1dc5443ce14e066bf89e0cb9ba1f7debbba0ac6a1210c0d2b5c313392dea8"
+      "sha256": "65b0035add89201c3648f2e1f78e1e4a5f6f15b05d35c3aa1bce93eaafa41ccf"
     },
     {
       "id": "saved-events.deletion-incomplete.standard",
@@ -130,7 +130,7 @@
       "target": "targets/saved-events/deletion-incomplete--1280x720.png",
       "annotation": "targets/saved-events/deletion-incomplete--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=deletion-incomplete&viewport=1280x720",
-      "sha256": "78e1ce2c85e2af0b81d44d483400db46a38c1f78e2382f81dd150034d3d89fa6"
+      "sha256": "13d71f355d80d54ebe6d403171730b8a7ebc344b6a99cacd058c9eb6fda3ab6f"
     },
     {
       "id": "saved-events.maximum-cards.standard",
@@ -143,7 +143,7 @@
       "target": "targets/saved-events/maximum-cards--1280x720.png",
       "annotation": "targets/saved-events/maximum-cards--1280x720.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=maximum-cards&viewport=1280x720",
-      "sha256": "8305d83eb0b767cfc69170ce1db80f74195a47c30e79a716d16e4389ef9c1f96"
+      "sha256": "2a9d090b93915ea41643a14be104e5e676f890811627c6310cf7290e0755bfa0"
     },
     {
       "id": "saved-events.maximum-cards.compact-aspect",
@@ -156,7 +156,7 @@
       "target": "targets/saved-events/maximum-cards--1024x768.png",
       "annotation": "targets/saved-events/maximum-cards--1024x768.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=maximum-cards&viewport=1024x768",
-      "sha256": "92218674b425e7dc3c9a3013b1460d90e54a08d5fa5d54f996446d4b0a9a9193"
+      "sha256": "19e21dec0df4b843da7348eda5b5c42f29bed268d10801ee969963e58ebee31a"
     },
     {
       "id": "saved-events.maximum-cards.scale-125-equivalent",
@@ -169,7 +169,7 @@
       "target": "targets/saved-events/maximum-cards--1024x576.png",
       "annotation": "targets/saved-events/maximum-cards--1024x576.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=maximum-cards&viewport=1024x576",
-      "sha256": "9f9da25c473068106ce23cb1a8289a088bc9b6b958a588bc0964a652acd2561b"
+      "sha256": "53a6c306f2234f4ab9c6ce0552be615d97d593c5ea9b587bcacb18454ca66660"
     },
     {
       "id": "saved-events.maximum-cards.scale-150-equivalent",
@@ -182,7 +182,7 @@
       "target": "targets/saved-events/maximum-cards--853x480.png",
       "annotation": "targets/saved-events/maximum-cards--853x480.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=maximum-cards&viewport=853x480",
-      "sha256": "7c3f525bda96da1454e9c7b7a89eb73044b7e884aa79afa0f761a45dd8b31898"
+      "sha256": "0c54df542dc1d4cf237aa15079217e62df7138928a914798a64c74ff93ae86ac"
     },
     {
       "id": "saved-events.maximum-cards.scale-200-stress-equivalent",
@@ -195,7 +195,7 @@
       "target": "targets/saved-events/maximum-cards--640x360.png",
       "annotation": "targets/saved-events/maximum-cards--640x360.yaml",
       "renderer": "renderer/index.html?surface=saved-events&state=maximum-cards&viewport=640x360",
-      "sha256": "af1c0fd6de42249491bddfb290d13ed54ef839193a73d76018d151a23e5ffe1c"
+      "sha256": "fb22e8417fc53cdfef4e65feca14e254ceab2b569350981bc723c10515db5074"
     },
     {
       "id": "event-setup.new-empty.standard",

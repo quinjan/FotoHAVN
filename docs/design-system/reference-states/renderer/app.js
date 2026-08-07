@@ -10,6 +10,7 @@
   const strip = '/design-qa/issue-20-photo-strip-reference.png';
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const button = (label, cls='', disabled=false, loading=false) => `<button class="${cls}${loading?' loading':''}" ${disabled?'disabled':''} ${loading?'aria-busy="true"':''}>${loading?`<span class="button-loader" aria-hidden="true"></span><span>${esc(label)}</span>`:esc(label)}</button>`;
+  const iconButton = (label, glyph, action, cls='', disabled=false) => `<button class="icon-action ${cls}" aria-label="${esc(label)}" title="${esc(label)}" data-action="${action}" ${disabled?'disabled':''}><span class="mdl2" aria-hidden="true">&#x${glyph};</span></button>`;
   const callout = (kind, text) => `<div class="callout ${kind}"><strong>${kind === 'danger' ? 'Needs attention' : kind === 'warning' ? 'Check setup' : kind === 'success' ? 'Complete' : 'In progress'}</strong><span>${esc(text)}</span></div>`;
   const header = (context='', action='') => `<header class="header"><div class="brand">FotoHAVN</div><div class="header-context">${esc(context)}</div><div class="header-actions">${action}</div></header>`;
   const identity = () => `<div class="identity"><div class="event-id-label">EVENT</div><strong>${esc(eventName)}</strong><div class="event-id-label" style="margin-top:10px">EVENT ID</div><div class="full-id">${fullId}</div></div>`;
@@ -23,14 +24,18 @@
       const busy = target && state === 'busy';
       const unavailable = target && state === 'unavailable';
       const deletion = target && state === 'deletion-incomplete';
+      const name = i ? ['Summer reunion','Graduation portraits','Studio open day','Town fiesta','Family weekend'][i-1] : eventName;
+      const eventId = i ? '03B1 · '+String(7710+i).padStart(4,'0') : '7A2F · 91C4';
+      const cardStatus = busy ? '<div class="card-progress"><span class="button-loader" aria-hidden="true"></span><span>Opening Event…</span></div>' : unavailable ? '<div class="card-message warning">Camera unavailable</div>' : deletion ? '<div class="card-message danger">Deletion did not finish</div>' : '';
+      const startBlocked = busy || unavailable || deletion;
       return `<article class="event-card ${cls}">
-        <div><div class="card-name">${esc(i ? ['Summer reunion','Graduation portraits','Studio open day','Town fiesta','Family weekend'][i-1] : eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">${i?'03B1 · '+String(7710+i).padStart(4,'0'):'7A2F · 91C4'}</div><div class="muted" style="font-size:12px;margin-top:7px">Saved ${i+1} day${i?'s':''} ago</div></div>
-        <div class="card-status">${unavailable?'Camera unavailable — edit setup to continue.':deletion?'Deletion did not finish. The Event is still saved.':busy?'Opening Event…':'Ready to start'}</div>
-        <div class="card-actions">${button(busy?'Opening…':unavailable?'Edit setup':'Start','start primary',busy,busy)}${button('Edit','mini',busy)}${button('Delete','mini',busy)}</div>
+        <button class="card-start-hit" aria-label="Start ${esc(name)}" data-action="start-event" ${startBlocked?'disabled':''}></button>
+        <div class="card-body"><div class="card-name">${esc(name)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">${eventId}</div><div class="card-saved">Saved ${i+1} day${i?'s':''} ago</div></div>
+        <div class="card-bottom">${cardStatus}<div class="card-actions">${iconButton('Edit Event','E70F','edit-event','',busy)}${iconButton('Delete Event','E74D','delete-event','delete',busy)}</div></div>
       </article>`;
     }).join('');
     const top = state === 'new-event' ? callout('info','New Event setup opens without changing existing Events.') : deletionBanner(state);
-    return `<section class="screen">${header('Operator')}<div class="content"><div class="page-head"><div><div class="eyebrow">Operator</div><h1>Saved Events</h1></div>${button('New Event','primary')}</div>${top}<div class="cards" style="margin-top:${top?'18px':'0'}">${cards}</div></div></section>`;
+    return `<section class="screen">${header('Operator')}<div class="content"><div class="page-head"><div><div class="eyebrow">Operator</div><h1>Saved Events</h1></div><button class="primary" data-action="new-event">New Event</button></div>${top}<div class="cards" style="margin-top:${top?'18px':'0'}">${cards}</div></div></section>`;
   }
   function deletionBanner(s){ return s==='deletion-incomplete'?callout('danger','Deletion did not finish. Review the Event and try again.'):''; }
 
@@ -125,5 +130,17 @@
 
   const renderers = {'saved-events':savedEvents,'event-setup':setup,'guest-start':guestStart,'guest-start-unavailable':guestUnavailable,capture, 'operator-assistance':operatorAssistance,'photo-strip':photoStrip,confirmation};
   document.getElementById('app').innerHTML = (renderers[surface] || savedEvents)() + `<div class="sr-only">Target annotation: ${esc(surface)}.${esc(state)}, ${esc(viewport)}, design-v1.0.0 at 1a20bc6. Full accessibility annotation is registered in the same-name YAML sidecar.</div>`;
+  document.querySelectorAll('[data-action]').forEach(control => control.addEventListener('click', () => {
+    const destinations = {
+      'start-event': ['confirmation','start-idle'],
+      'edit-event': ['event-setup','edit-clean'],
+      'delete-event': ['confirmation','delete-idle'],
+      'new-event': ['event-setup','new-empty']
+    };
+    const destination = destinations[control.dataset.action];
+    if (!destination) return;
+    const next = new URLSearchParams({surface:destination[0],state:destination[1],viewport});
+    location.search = next.toString();
+  }));
   document.documentElement.dataset.ready = 'true';
 })();
