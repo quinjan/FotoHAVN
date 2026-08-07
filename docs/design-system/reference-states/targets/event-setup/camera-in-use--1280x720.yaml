@@ -9,10 +9,10 @@ viewport: "1280x720"
 effectiveMode: "standard"
 audience: "operator"
 heading:
-  text: "Set up Event"
+  text: "New Event"
   level: 1
 automation:
-  name: "Set up Event"
+  name: "New Event"
   role: "window"
   description: "Event setup, camera-in-use"
   state: "unavailable"

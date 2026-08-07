@@ -36,21 +36,28 @@
 
   function setup() {
     const edit = state.startsWith('edit');
-    const empty = state === 'new-empty' || state === 'actions-disabled';
-    let cam = edit || !empty ? 'Logitech BRIO' : 'Select a Camera';
-    let camStatus = '';
-    if (state === 'camera-checking' || state === 'camera-error-and-insufficient-storage') camStatus = `<div class="inline-status info">Checking Camera…</div>`;
+    const missingName = state === 'new-empty';
+    const missingCamera = state === 'new-empty' || state === 'actions-disabled';
+    const cameraSelected = !missingCamera;
+    let camStatus = missingCamera ? `<div class="inline-status warning">Select a Camera to continue.</div>` : '';
+    if (state === 'camera-checking') camStatus = `<div class="inline-status info">Checking Camera…</div>`;
+    if (state === 'camera-error-and-insufficient-storage') camStatus = `<div class="inline-status danger">Camera check failed. Choose another Camera or Retry.</div>`;
     if (state === 'camera-unavailable') camStatus = `<div class="inline-status danger">This Camera is no longer available. Choose another Camera.</div>`;
     if (state === 'camera-access-denied') camStatus = `<div class="inline-status danger">Windows blocked Camera access. Allow access, then Retry.</div>`;
     if (state === 'camera-in-use') camStatus = `<div class="inline-status danger">Another app is using this Camera. Close it, then Retry.</div>`;
     if (state === 'camera-disconnected') camStatus = `<div class="inline-status danger">The Camera disconnected. Reconnect it or choose another Camera.</div>`;
     const storageBad = state === 'storage-insufficient' || state === 'camera-error-and-insufficient-storage';
     const storageUnavailable = state === 'storage-unavailable';
-    const valid = !empty && !camStatus.includes('danger') && !storageBad && !storageUnavailable;
-    const status = state === 'save-error' ? callout('danger','The Event could not be saved. Your changes are still here; try again.') : state === 'save-success' ? callout('success','Event saved.') : '';
-    const combined = state === 'camera-error-and-insufficient-storage' ? callout('danger','The Camera is still being checked, and storage has less than 1 GB free. Resolve both items before saving.') : state === 'actions-disabled' ? callout('warning','Enter an Event name and select a Camera before saving.') : '';
+    const saveError = state === 'save-error';
+    const valid = !missingName && !missingCamera && !camStatus.includes('danger') && !storageBad && !storageUnavailable && !saveError;
+    const nameStatus = missingName ? '<div class="inline-status warning">Enter an Event name to continue.</div>' : '';
+    const storageStatus = storageBad ? '<div class="inline-status danger">Not enough space. Free up at least 1 GB to continue.</div>' : storageUnavailable ? '<div class="inline-status danger">Storage is unavailable. Restore access before saving.</div>' : saveError ? '<div class="inline-status danger">The Event could not be saved here. Check storage access and try again.</div>' : '';
     const dirtyMark = state === 'edit-dirty' ? '<div class="inline-status info">Unsaved changes</div>' : '';
-    return `<section class="screen setup"><div class="setup-title"><div class="eyebrow">${edit?'Edit Event':'New Event'}</div><h1>${edit?esc(eventName):'Set up Event'}</h1></div><div class="setup-main"><div class="setup-form">${edit?identity():''}${combined}${status}<div class="field"><label>Event name</label><div class="control">${empty?'Enter Event name':esc(eventName)}</div>${dirtyMark}</div><div class="field"><label>Camera</label><div class="control">${esc(cam)}</div>${camStatus}</div><div class="field"><label>Printer</label><div class="control disabled">No printer</div></div><div class="field"><label>Storage</label><div class="control disabled">C:\\Program Files\\FotoHAVN\\Events</div>${storageBad?'<div class="inline-status danger">At least 1 GB free is required. Free space before saving.</div>':storageUnavailable?'<div class="inline-status danger">Storage is unavailable. Restore access before saving.</div>':''}</div></div><div class="preview-panel"><div class="eyebrow" style="margin-bottom:8px">Camera preview</div><div class="preview"><img class="camera-source" src="${media}" alt=""><div class="guide"></div><div class="media-label">${state==='camera-ready'?'LIVE · MIRRORED':camStatus?'CHECKING':'PREVIEW'}</div></div></div></div><footer class="setup-footer">${button('Cancel')}${button(state==='saving'?'Saving Event…':'Save & Close','',!valid||state==='saving')}${button(state==='saving'?'Starting Event…':'Save & Start Event','primary',!valid||state==='saving')}</footer></section>`;
+    const previewUnavailable = missingCamera || camStatus.includes('danger') || state === 'camera-checking';
+    const previewMessage = missingCamera ? 'Select a Camera to start the preview.' : state === 'camera-checking' ? 'Checking Camera…' : 'Camera preview unavailable.';
+    const previewBody = previewUnavailable ? `<div class="preview-empty">${esc(previewMessage)}</div>` : `<img class="camera-source" src="${media}" alt=""><div class="guide"></div><div class="media-label">${state==='camera-ready'?'LIVE · MIRRORED':'PREVIEW'}</div>`;
+    const success = state === 'save-success';
+    return `<section class="screen setup"><div class="setup-shell"><div class="setup-title"><div class="eyebrow">EVENT SETUP</div><h1>${edit?'Edit Event':'New Event'}</h1><p class="setup-intro">${edit?'Review this Event and update its Camera or Printer.':'Name the Event and choose its Camera and Printer.'}</p></div><div class="setup-main"><div class="setup-form">${edit?identity():''}<div class="field"><label for="event-name">Event name</label><input id="event-name" class="control" value="${missingName?'':esc(eventName)}" placeholder="" readonly>${nameStatus}${dirtyMark}</div><div class="field"><label for="camera-select">Camera</label><select id="camera-select" class="control"><option>${cameraSelected?'Logitech BRIO':'Select Camera'}</option></select>${camStatus}</div><div class="field"><label for="printer-select">Printer <span class="optional">(optional)</span></label><select id="printer-select" class="control"><option>Not printing</option></select></div><div class="field"><label>Storage</label><div class="storage-path">C:\\Program Files\\FotoHAVN\\Events</div><div class="storage-free">${storageBad?'480 MB':'120 GB'} free</div>${storageStatus}</div></div><div class="preview-panel"><div class="preview">${previewBody}<div class="capture-area-label">3:2 Capture area</div></div></div></div><footer class="setup-footer">${button('Cancel','cancel')}${button(success?'Saved':'Save & Close','',!valid||state==='saving'||success)}${button(state==='saving'?'Saving & starting…':'Save & Start Event','primary',!valid||state==='saving'||success)}</footer></div></section>`;
   }
 
   function guestStart() {

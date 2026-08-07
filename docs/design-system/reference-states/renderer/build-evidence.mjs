@@ -42,6 +42,7 @@ for (const frame of frames) {
   const png = join(folder, `${basename}.png`);
   const annotation = join(folder, `${basename}.yaml`);
   const id = `${frame.surface.id}.${frame.state}.${frame.viewport.id}`;
+  const headingText = frame.surface.id === 'event-setup' ? (frame.state.startsWith('edit-') ? 'Edit Event' : 'New Event') : frame.surface.heading;
   const active = /(busy|saving|checking|retrying|countdown|returning|preparing|holding)/.test(frame.state);
   const blocking = /(failure|failed|unavailable|access-denied|in-use|disconnected|insufficient|exit-only|incomplete)/.test(frame.state);
   const lines = [
@@ -56,10 +57,10 @@ for (const frame of frames) {
     `effectiveMode: ${quote(frame.viewport.mode)}`,
     `audience: ${quote(frame.surface.audience)}`,
     `heading:`,
-    `  text: ${quote(frame.surface.heading)}`,
+    `  text: ${quote(headingText)}`,
     `  level: 1`,
     `automation:`,
-    `  name: ${quote(frame.surface.heading)}`,
+    `  name: ${quote(headingText)}`,
     `  role: ${quote(frame.surface.id === 'confirmation' ? 'dialog' : 'window')}`,
     `  description: ${quote(`${frame.surface.name}, ${frame.state}`)}`,
     `  state: ${quote(active ? 'busy' : blocking ? 'unavailable' : 'ready')}`,

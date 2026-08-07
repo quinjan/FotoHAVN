@@ -57,22 +57,34 @@ p { margin: 0; line-height: 1.48; }
 .callout.success { color: var(--success-fg); background: var(--success-bg); border-color: #91c79c; }
 .callout.warning { color: var(--warning-fg); background: var(--warning-bg); border-color: #d5b65a; }
 .callout.danger { color: var(--danger-fg); background: var(--danger-bg); border-color: #d58b82; }
-.setup { padding: 0; }
-.setup-title { height: 80px; padding: 22px 48px 16px; background: #fff; border-bottom: 1px solid var(--border); }
-.setup-main { flex: 1 1 auto; min-height: 0; overflow: hidden; display: grid; grid-template-columns: minmax(420px,.92fr) minmax(420px,1.08fr); gap: 32px; padding: 24px 48px; max-width: 1180px; width: 100%; margin: 0 auto; }
-.setup-form { display: grid; align-content: start; gap: 16px; }
-.field label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 650; }
-.control { height: 48px; border: 1px solid var(--border); border-radius: 4px; background: #fff; padding: 13px 14px; color: var(--text); }
-.control.disabled { color: var(--muted); background: #fafafb; }
-.inline-status { margin-top: 7px; font-size: 13px; line-height: 18px; }
+.setup { padding: 40px 64px 52px; background: #97999b; display: grid; place-items: center; }
+.setup-shell { width: min(1100px,100%); height: min(626px,100%); min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #fff; border-radius: 14px; box-shadow: 0 18px 44px rgba(23,24,26,.22); }
+.setup-title { flex: 0 0 auto; padding: 32px 34px 14px; background: #fff; }
+.setup-title h1 { margin-top: 7px; }
+.setup-intro { margin-top: 2px; color: var(--muted); font-size: 14px; }
+.setup-main { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: minmax(390px,1fr) minmax(390px,1fr); align-items: start; gap: 34px; padding: 4px 34px 20px; width: 100%; }
+.setup-form { display: grid; align-content: start; }
+.field { padding: 0 0 13px; margin-bottom: 13px; border-bottom: 1px solid var(--border); }
+.field:last-child { border-bottom: 0; margin-bottom: 0; }
+.field label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 700; }
+.field .optional { color: var(--muted); font-weight: 400; }
+.control { display: block; width: 100%; height: 42px; border: 1px solid #c7cbd0; border-radius: 4px; background: #fff; padding: 9px 14px; color: var(--text); }
+.control:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+.inline-status { margin-top: 6px; font-size: 12px; line-height: 17px; }
 .inline-status.info { color: var(--info-fg); }
+.inline-status.warning { color: var(--warning-fg); }
 .inline-status.danger { color: var(--danger-fg); }
+.storage-path { font-size: 13px; line-height: 19px; }
+.storage-free { margin-top: 1px; color: var(--muted); font-size: 12px; }
 .preview-panel { min-width: 0; }
-.preview { position: relative; aspect-ratio: 16/9; background: #17181a; border-radius: 8px; overflow: hidden; }
+.preview { position: relative; aspect-ratio: 3/2; background: #17181a; border-radius: 5px; overflow: hidden; }
 .camera-source { position: absolute; width: 132%; height: 132%; left: -16%; top: -19%; object-fit: cover; object-position: center 67%; filter: saturate(.72) contrast(.94); }
 .guide { position: absolute; inset: 13% 19%; border: 1px solid rgba(255,255,255,.75); }
 .media-label { position: absolute; right: 12px; top: 12px; padding: 7px 9px; border-radius: 4px; background: rgba(255,255,255,.9); color: #17181a; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
-.setup-footer { height: 80px; flex: 0 0 80px; background: #fff; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 0 48px; }
+.preview-empty { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 13px; }
+.capture-area-label { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: 11px; font-weight: 650; }
+.setup-footer { height: 80px; flex: 0 0 80px; background: #fff; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 0 34px; }
+.setup-footer .cancel { margin-right: auto; }
 .guest-stage { align-items: center; justify-content: center; text-align: center; padding: 32px; position: relative; }
 .guest-stage h1 { max-width: 850px; font-size: 48px; line-height: 56px; letter-spacing: -1.5px; }
 .guest-stage .lead { margin: 16px auto 26px; max-width: 650px; color: var(--muted); font-size: 17px; }
@@ -124,8 +136,10 @@ p { margin: 0; line-height: 1.48; }
 @media (max-width: 1179px), (max-height: 649px) {
   .content { padding: 26px 32px; }
   .cards { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .setup-title { padding-left: 32px; }
-  .setup-main { grid-template-columns: 1fr; overflow-y: auto; padding: 20px 32px; }
+  .setup { padding: 24px 32px; }
+  .setup-shell { width: 100%; height: 100%; }
+  .setup-title { padding: 24px 32px 12px; }
+  .setup-main { grid-template-columns: 1fr; overflow-y: auto; padding: 4px 32px 20px; }
   .preview-panel { order: 2; }
   .setup-footer { padding: 0 32px; }
   .guest-stage h1 { font-size: 40px; line-height: 46px; }
@@ -144,10 +158,15 @@ p { margin: 0; line-height: 1.48; }
   .card-name { font-size: 17px; margin-bottom: 6px; }
   .card-status { margin: 6px 0; min-height: auto; }
   .card-actions { grid-column: 2; grid-row: 1 / span 3; flex-direction: column; }
-  .setup-title { height: 58px; padding: 13px 16px; }
-  .setup-main { padding: 12px 16px; gap: 14px; }
+  .setup { padding: 0; }
+  .setup-shell { border-radius: 0; box-shadow: none; }
+  .setup-title { padding: 12px 16px 6px; }
+  .setup-title h1 { font-size: 25px; line-height: 30px; margin-top: 1px; }
+  .setup-intro { display: none; }
+  .setup-main { padding: 4px 16px 10px; gap: 14px; }
   .setup-footer { height: 72px; flex-basis: 72px; padding: 8px 16px; gap: 8px; }
   .setup-footer button { flex: 1; padding: 0 8px; font-size: 12px; }
+  .setup-footer .cancel { margin-right: 0; }
   .guest-stage { padding: 16px; }
   .guest-stage h1 { font-size: 30px; line-height: 35px; }
   .guest-stage .lead { margin: 8px auto 14px; font-size: 14px; }

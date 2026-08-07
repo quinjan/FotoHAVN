@@ -208,7 +208,7 @@
       "target": "targets/event-setup/new-empty--1280x720.png",
       "annotation": "targets/event-setup/new-empty--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=new-empty&viewport=1280x720",
-      "sha256": "218712ac7997c4dbafdab2fd2a1c860c44bbdcf442dced8dc38f06a5cfb44f5d"
+      "sha256": "6508d720a04552216fbdab0276236f5407ad95f3905eca7d2efabfdf05d7847f"
     },
     {
       "id": "event-setup.new-valid.standard",
@@ -221,7 +221,7 @@
       "target": "targets/event-setup/new-valid--1280x720.png",
       "annotation": "targets/event-setup/new-valid--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=new-valid&viewport=1280x720",
-      "sha256": "39d8d89657b378cf89bd1ae0ae438d48c6280e9f5bb616b72c6bbd6a2dffd87b"
+      "sha256": "c86aa06952b12fcb849ca4031ec076411ebe5af286653ff1e6e7e58a2d4a8d3c"
     },
     {
       "id": "event-setup.edit-clean.standard",
@@ -234,7 +234,7 @@
       "target": "targets/event-setup/edit-clean--1280x720.png",
       "annotation": "targets/event-setup/edit-clean--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=edit-clean&viewport=1280x720",
-      "sha256": "4751c51876f2ed64073bc06d315b49d260e6fd10da2fec1959850cf423905fac"
+      "sha256": "625e2d3049f4fcbf782f33a54d128f96b69dfdfbfe38abb1df4753d318708a0f"
     },
     {
       "id": "event-setup.edit-dirty.standard",
@@ -247,7 +247,7 @@
       "target": "targets/event-setup/edit-dirty--1280x720.png",
       "annotation": "targets/event-setup/edit-dirty--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=edit-dirty&viewport=1280x720",
-      "sha256": "4a9fea693dd7dbd8ed32582521e5c20a4f9902dd473ebac5457ab40dd64a950b"
+      "sha256": "6d59f83fe730a0fd4914cc0d3cb890ff082ed3d7a5cae5d014c27d715f1aecd3"
     },
     {
       "id": "event-setup.camera-checking.standard",
@@ -260,7 +260,7 @@
       "target": "targets/event-setup/camera-checking--1280x720.png",
       "annotation": "targets/event-setup/camera-checking--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-checking&viewport=1280x720",
-      "sha256": "2d836b82c466985827a8eecda01088d7256281b2caf2cb51494919766992be78"
+      "sha256": "0c751d6100131e61a4097c8b72b634ea302dbda07b34959326ce8f7c28819d04"
     },
     {
       "id": "event-setup.camera-ready.standard",
@@ -273,7 +273,7 @@
       "target": "targets/event-setup/camera-ready--1280x720.png",
       "annotation": "targets/event-setup/camera-ready--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-ready&viewport=1280x720",
-      "sha256": "ab65b0ef737f8515d07fa694fe9f62f2cb26f8a6e9e49726da6805349666485a"
+      "sha256": "a7b5e0cd81671d6f6d7ebfbd7d3ef37c6de488dbc07c7f88c8fd793567463bd4"
     },
     {
       "id": "event-setup.camera-unavailable.standard",
@@ -286,7 +286,7 @@
       "target": "targets/event-setup/camera-unavailable--1280x720.png",
       "annotation": "targets/event-setup/camera-unavailable--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-unavailable&viewport=1280x720",
-      "sha256": "19d34b3bd6c4a5a3f3303680b29e026ba2873cfffefb59f05c1fb537d7ff1934"
+      "sha256": "6486fb5f83354f151332a2af0f292ea2a693676cbd48f6fccbd1b81072d9c1a5"
     },
     {
       "id": "event-setup.camera-access-denied.standard",
@@ -299,7 +299,7 @@
       "target": "targets/event-setup/camera-access-denied--1280x720.png",
       "annotation": "targets/event-setup/camera-access-denied--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-access-denied&viewport=1280x720",
-      "sha256": "bd85afc7c7f9c26629f3fb20984d3c468cf09711b93722235092cc776eba71dd"
+      "sha256": "e52c742c3f6cd4eb338160802e3cff4ef441ad74e1e43683649af19553c43252"
     },
     {
       "id": "event-setup.camera-in-use.standard",
@@ -312,7 +312,7 @@
       "target": "targets/event-setup/camera-in-use--1280x720.png",
       "annotation": "targets/event-setup/camera-in-use--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-in-use&viewport=1280x720",
-      "sha256": "0c21e12b4d696c06fcfa1d4f997491817f16554b6ae9d0096a038b713637a54e"
+      "sha256": "5bebf6a4197c4512fcb6f6ed74f14bea15e68d9e0926d3ce22baa58e53ce6966"
     },
     {
       "id": "event-setup.camera-disconnected.standard",
@@ -325,7 +325,7 @@
       "target": "targets/event-setup/camera-disconnected--1280x720.png",
       "annotation": "targets/event-setup/camera-disconnected--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-disconnected&viewport=1280x720",
-      "sha256": "29a223719e1dc33afde1c5d930b75ade729a0f538d631ed67955430dde5e140b"
+      "sha256": "30d17d7dc827883340d19b773d08e5dca2ba5d159b615fffe5292a6af3528e8b"
     },
     {
       "id": "event-setup.storage-insufficient.standard",
@@ -338,7 +338,7 @@
       "target": "targets/event-setup/storage-insufficient--1280x720.png",
       "annotation": "targets/event-setup/storage-insufficient--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=storage-insufficient&viewport=1280x720",
-      "sha256": "86a8cc22677747c3e4302658270a8ecacca94569e81411d188f08ba66fb93f7f"
+      "sha256": "c2331cef71438ca0c2a8fd4f39fcd5a858bf06450b5bef5a18b96d2d60835b4c"
     },
     {
       "id": "event-setup.storage-unavailable.standard",
@@ -351,7 +351,7 @@
       "target": "targets/event-setup/storage-unavailable--1280x720.png",
       "annotation": "targets/event-setup/storage-unavailable--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=storage-unavailable&viewport=1280x720",
-      "sha256": "018d0c7d1cc6be3d03b135ec41f461ea4b2e1f272872f6c30843ed9ac93737c5"
+      "sha256": "bb2bdf47356d8e223b3353eee352b91f2e7ee4f892008defb7a7e8ea986219fc"
     },
     {
       "id": "event-setup.actions-disabled.standard",
@@ -364,7 +364,7 @@
       "target": "targets/event-setup/actions-disabled--1280x720.png",
       "annotation": "targets/event-setup/actions-disabled--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=actions-disabled&viewport=1280x720",
-      "sha256": "6c1b17f6879eb7389b186e9aa5ab2b165cf20ceeb83fd3b541aefe9ac1e645bd"
+      "sha256": "9bf66965075f1d18f02df34e532fb67183ffee1518f6b3544814f1f9d0ab481f"
     },
     {
       "id": "event-setup.saving.standard",
@@ -377,7 +377,7 @@
       "target": "targets/event-setup/saving--1280x720.png",
       "annotation": "targets/event-setup/saving--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=saving&viewport=1280x720",
-      "sha256": "37b6942ec294783ccd57d7d1bfdc79b5cf2d7c4286440c0cd32f505d1095a331"
+      "sha256": "3e234362ff7e65462ac53315b951a60a3816b7cd3f4f1be0173334f5b09162f2"
     },
     {
       "id": "event-setup.save-error.standard",
@@ -390,7 +390,7 @@
       "target": "targets/event-setup/save-error--1280x720.png",
       "annotation": "targets/event-setup/save-error--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=save-error&viewport=1280x720",
-      "sha256": "da0d22fc0d86eeb2316a17b6dd1035120692080c565557920e695be4bdd34003"
+      "sha256": "080c72de3b698fe01ccbda2c003de287820401edd2fda535368e71ab18f16f14"
     },
     {
       "id": "event-setup.save-success.standard",
@@ -403,7 +403,7 @@
       "target": "targets/event-setup/save-success--1280x720.png",
       "annotation": "targets/event-setup/save-success--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=save-success&viewport=1280x720",
-      "sha256": "88f687e4ea12e1d0d9397bf148980e67643a3949df9684538341c3d0d8fe75be"
+      "sha256": "a75315ea729c16bad9354a844f866b265eb93415bd9252d9c603ce9c1223a424"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.compact-aspect",
@@ -416,7 +416,7 @@
       "target": "targets/event-setup/camera-error-and-insufficient-storage--1024x768.png",
       "annotation": "targets/event-setup/camera-error-and-insufficient-storage--1024x768.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-error-and-insufficient-storage&viewport=1024x768",
-      "sha256": "a1701385e6305d6164ee59b79ddc99d48a1eff03f2a3950eec3d3080f7638398"
+      "sha256": "968836ed329f0dfbdab884cd56dda983edad6759f09dee4c7b2ec4750d8728b0"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
@@ -429,7 +429,7 @@
       "target": "targets/event-setup/camera-error-and-insufficient-storage--1024x576.png",
       "annotation": "targets/event-setup/camera-error-and-insufficient-storage--1024x576.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-error-and-insufficient-storage&viewport=1024x576",
-      "sha256": "c36045abd325214464fc6cae50eac668ed87a98150e45817b3df40720e522082"
+      "sha256": "bb005472bde7fbaf828565dbce8d561ce6331f59111e1e01c3c55583bb122879"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
@@ -442,7 +442,7 @@
       "target": "targets/event-setup/camera-error-and-insufficient-storage--853x480.png",
       "annotation": "targets/event-setup/camera-error-and-insufficient-storage--853x480.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-error-and-insufficient-storage&viewport=853x480",
-      "sha256": "e2f3ed02569b4743e29651ecd773246053948af720c3a2ca2b03f6da51bdda0c"
+      "sha256": "22ac35ed75eaa1483f546e0229a8ab31d480038d904c47303dd626e69f8ff11f"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent",
@@ -455,7 +455,7 @@
       "target": "targets/event-setup/camera-error-and-insufficient-storage--640x360.png",
       "annotation": "targets/event-setup/camera-error-and-insufficient-storage--640x360.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=camera-error-and-insufficient-storage&viewport=640x360",
-      "sha256": "2d621b101c18f387588029c27748f474b02f0ccb4121f923739270834d9a4537"
+      "sha256": "a59f5baf20ef8fb9e2473ee7e9b3ef86968500c5895a3ea6a6056ad20cbb1214"
     },
     {
       "id": "guest-start.ready.standard",

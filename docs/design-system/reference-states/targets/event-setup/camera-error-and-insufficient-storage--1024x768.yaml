@@ -9,10 +9,10 @@ viewport: "1024x768"
 effectiveMode: "compact"
 audience: "operator"
 heading:
-  text: "Set up Event"
+  text: "New Event"
   level: 1
 automation:
-  name: "Set up Event"
+  name: "New Event"
   role: "window"
   description: "Event setup, camera-error-and-insufficient-storage"
   state: "unavailable"
