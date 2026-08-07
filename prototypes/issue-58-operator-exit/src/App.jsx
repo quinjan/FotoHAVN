@@ -151,7 +151,7 @@ export function App() {
           ref={operatorButton}
           className={`operator-access ${holdState === "holding" ? "is-holding" : ""}`}
           type="button"
-          aria-label="Hold for operator access"
+          aria-label="Hold to exit Event"
           aria-describedby="operator-hold-instructions"
           onPointerDown={(event) => {
             if (event.button !== 0) return;
@@ -166,9 +166,9 @@ export function App() {
           onBlur={() => dialogState === "closed" && cancelHold()}
         >
           <Key20Regular aria-hidden="true" />
-          <span>{holdState === "holding" ? "Keep holding…" : "Operator"}</span>
+          <span>{holdState === "holding" ? "Keep holding…" : "Exit Event"}</span>
           {holdState === "holding" && <ArrowSync20Regular className="hold-spinner" aria-hidden="true" />}
-          <progress className="hold-progress" max="1" value={holdProgress} aria-label="Operator access hold progress" />
+          <progress className="hold-progress" max="1" value={holdProgress} aria-label="Exit Event hold progress" />
         </button>
         <span id="operator-hold-instructions" className="sr-only">
           Press and hold for one and a half seconds to open the Exit Event confirmation.

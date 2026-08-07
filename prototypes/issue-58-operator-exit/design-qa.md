@@ -21,8 +21,8 @@ No actionable P0, P1, or P2 differences remain.
 - Spacing and layout rhythm: header height, brand inset, centered guest group, action footprint, control placement, and footer baseline now align. The implementation has no viewport overflow at 1280 x 720, 1024 x 768, 853 x 480, or the 640 x 360 200%-equivalent stress case.
 - Colors and visual tokens: the near-white guest surface, black primary action, neutral header, restrained gray copy, blue keyboard focus, and dark accessible danger action preserve the selected light monochrome direction.
 - Image quality and asset fidelity: the visual target contains no photographic or decorative raster assets. UI icons use Fluent System Icons; the FotoHAVN lockup follows the existing WinUI component construction rather than substituting a generated asset.
-- Copy and content: all source copy is preserved. Before confirmation, the operator control never exposes the words `Exit Event`; it changes from `Operator` to `Keep holding…` and reports determinate progress.
-- Interaction and accessibility: early pointer click and quick Space release both cancel without opening a dialog. The confirmation gives initial focus to `Keep Event Active`, Escape dismisses it, focus returns to operator access, end-of-loop focus trapping is active, `Exiting Event…` stays button-local, and successful exit reaches Saved Events. Browser console errors and warnings: none.
+- Copy and content: all source copy is preserved. Following HITL review, the resting control is explicitly labeled `Exit Event` because exit is its only function; during the hold it changes to `Keep holding…` and reports determinate progress.
+- Interaction and accessibility: early pointer click and quick Space release both cancel without opening a dialog. The confirmation gives initial focus to `Keep Event Active`, Escape dismisses it, focus returns to the Exit Event hold control, end-of-loop focus trapping is active, `Exiting Event…` stays button-local, and successful exit reaches Saved Events. Browser console errors and warnings: none.
 
 The full-view comparison is sufficient for the hero hierarchy and overall composition. The focused header comparison was added because the brand scale, 48 px operator target, hold copy, icon treatment, and progress line are too small to judge reliably in the full frame.
 
@@ -46,6 +46,12 @@ The full-view comparison is sufficient for the hero hierarchy and overall compos
 - Post-fix evidence: `qa-comparison-final.png` and `qa-comparison-header-final.png`.
 - The previous P1 and P2 differences are resolved.
 - Responsive evidence: `implementation-holding-1024x768.png`, `implementation-holding-853x480.png`, and `implementation-holding-640x360-final.png`.
+
+### HITL annotation — passed
+
+- The resting label changed from `Operator` to `Exit Event` because exit is the control's only function.
+- Evidence: `implementation-exit-event-label-1280x720.png`.
+- The change is copy-only: layout and hold behavior remain stable, quick click still cancels before confirmation, the accessible name now matches the visible action, and the browser console remains clean.
 
 ## Primary interactions tested
 
