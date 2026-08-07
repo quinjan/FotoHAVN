@@ -1,10 +1,10 @@
 # Guest Cycle feedback
 
-Guest stages are zero-scroll and preserve Event name, current stage/status, Camera or Photo Strip media, progress/recovery, and primary/safety actions. Supporting and celebratory copy is the first content shortened or removed.
+Guest stages are zero-scroll and preserve current stage/status, Camera or Photo Strip media, progress/recovery, and primary/safety actions. The Event name appears in Guest Start content but never in a Guest Cycle header. Supporting and celebratory copy is the first content shortened or removed.
 
 ## Admission
 
-Guest Start has one dominant Start action. A pre-admission Camera/storage problem becomes Guest Start unavailable: replace Start with the reason and either Retry when recheck can recover or Exit event when setup must change. Never show disabled Start as the only explanation, and never show Start and Retry together.
+Guest Start has one dominant Start action. A pre-admission Camera/storage problem becomes Guest Start unavailable: replace Start with the Operator Assistance panel, omit preserved-Capture progress, and show either Retry when recheck can recover or Exit Event when setup must change. Never show disabled Start as the only explanation, and never show Start and Retry together.
 
 ## Capture
 
