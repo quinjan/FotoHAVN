@@ -2,6 +2,14 @@
 
 These assets raised fidelity and were approved in their linked decisions. They are evidence for this contract, not separate authorities.
 
+## Canonical target evidence
+
+The complete repository-native target package is indexed by [registry.json](registry.json). It contains 71 canonical 1280 × 720 PNGs and 32 responsive-risk PNGs across the approved effective sizes, each paired with an accessibility annotation and pinned to `design-v1.0.0` at `1a20bc6f46f8d724683f8c4b47c359379fc7371b`.
+
+The target renderer consolidates the normative contract and approved visual inputs below. Registry IDs are unique, paths are one-to-one, and SHA-256 hashes are populated only after capture; `complete: true` is the mechanical no-gap gate.
+
+For human review, the [representative contact sheet](review/contact-sheet.png) samples every surface and the highest-risk Standard/Stress compositions. The registry remains the complete index.
+
 ## Current visual baseline
 
 - [Saved Events](../../ux-audit/2026-08-06/screenshots/01-saved-events.png)

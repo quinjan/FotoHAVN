@@ -1,0 +1,53 @@
+id: "saved-events.maximum-cards.standard"
+contractVersion: "1.0.0"
+contractTag: "design-v1.0.0"
+contractCommit: "1a20bc6f46f8d724683f8c4b47c359379fc7371b"
+surface: "Saved Events"
+state: "maximum-cards"
+coverage: "canonical"
+viewport: "1280x720"
+effectiveMode: "standard"
+audience: "operator"
+heading:
+  text: "Saved Events"
+  level: 1
+automation:
+  name: "Saved Events"
+  role: "window"
+  description: "Saved Events, maximum-cards"
+  state: "ready"
+readingOrder:
+  - "heading"
+  - "New Event"
+  - "Event cards"
+  - "Start, Edit, and Delete actions"
+focus:
+  initial: "page heading"
+  order: "heading -> New Event -> Event cards -> Start, Edit, and Delete actions"
+  returnTarget: "not applicable"
+  reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
+keyboard:
+  - "Tab and Shift+Tab follow the visible task order."
+  - "Enter and Space activate native buttons on release."
+touch:
+  minimumTarget: "48x48"
+  activation: "release"
+  gesture: "none"
+announcements:
+  - text: "Saved Events ready."
+    trigger: "semantic state transition"
+    priority: "polite"
+    deduplicate: "semantic-transition"
+contrast:
+  - foreground: "color.text.primary"
+    background: "color.surface.panel"
+    ratio: "17.77:1"
+  - foreground: "color.focus.ring"
+    background: "color.surface.canvas"
+    ratio: "5.69:1"
+highContrast: "Use system colors; preserve boundaries, focus, text, shape, and state meaning."
+reducedMotion: "Resolve nonessential transitions instantly; never delay failure or completion."
+stress200: "Verify against the registered 640x360 responsive-risk target for this surface."
+winuiPattern: "Page; native WinUI controls; UI Automation patterns per component contract"
+verification: ["keyboard","narrator","touch","visual","high-contrast","reduced-motion"]
+evidence: "targets/saved-events/maximum-cards--1280x720.png"

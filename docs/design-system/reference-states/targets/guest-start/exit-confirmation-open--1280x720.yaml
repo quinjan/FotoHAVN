@@ -1,0 +1,55 @@
+id: "guest-start.exit-confirmation-open.standard"
+contractVersion: "1.0.0"
+contractTag: "design-v1.0.0"
+contractCommit: "1a20bc6f46f8d724683f8c4b47c359379fc7371b"
+surface: "Guest Start"
+state: "exit-confirmation-open"
+coverage: "canonical"
+viewport: "1280x720"
+effectiveMode: "standard"
+audience: "guest"
+heading:
+  text: "Let’s take some photos"
+  level: 1
+automation:
+  name: "Let’s take some photos"
+  role: "window"
+  description: "Guest Start, exit-confirmation-open"
+  state: "ready"
+readingOrder:
+  - "FotoHAVN header"
+  - "Event name"
+  - "heading"
+  - "instructions"
+  - "Touch to start"
+  - "Exit event"
+focus:
+  initial: "primary guest action when present"
+  order: "FotoHAVN header -> Event name -> heading -> instructions -> Touch to start -> Exit event"
+  returnTarget: "not applicable"
+  reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
+keyboard:
+  - "Tab and Shift+Tab follow the visible task order."
+  - "Enter and Space activate native buttons on release."
+touch:
+  minimumTarget: "64x64 prominent; 48x48 safety action"
+  activation: "release"
+  gesture: "none"
+announcements:
+  - text: "Guest Start ready."
+    trigger: "semantic state transition"
+    priority: "polite"
+    deduplicate: "semantic-transition"
+contrast:
+  - foreground: "color.text.primary"
+    background: "color.surface.panel"
+    ratio: "17.77:1"
+  - foreground: "color.focus.ring"
+    background: "color.surface.canvas"
+    ratio: "5.69:1"
+highContrast: "Use system colors; preserve boundaries, focus, text, shape, and state meaning."
+reducedMotion: "Resolve nonessential transitions instantly; never delay failure or completion."
+stress200: "Verify against the registered 640x360 responsive-risk target for this surface."
+winuiPattern: "Page; native WinUI controls; UI Automation patterns per component contract"
+verification: ["keyboard","narrator","touch","visual","high-contrast","reduced-motion"]
+evidence: "targets/guest-start/exit-confirmation-open--1280x720.png"

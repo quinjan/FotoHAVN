@@ -1,0 +1,57 @@
+id: "event-setup.storage-insufficient.standard"
+contractVersion: "1.0.0"
+contractTag: "design-v1.0.0"
+contractCommit: "1a20bc6f46f8d724683f8c4b47c359379fc7371b"
+surface: "Event setup"
+state: "storage-insufficient"
+coverage: "canonical"
+viewport: "1280x720"
+effectiveMode: "standard"
+audience: "operator"
+heading:
+  text: "Set up Event"
+  level: 1
+automation:
+  name: "Set up Event"
+  role: "window"
+  description: "Event setup, storage-insufficient"
+  state: "unavailable"
+readingOrder:
+  - "heading"
+  - "Event identity"
+  - "Event name"
+  - "Camera and status"
+  - "Camera preview"
+  - "Printer"
+  - "Storage"
+  - "footer actions"
+focus:
+  initial: "page heading"
+  order: "heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions"
+  returnTarget: "not applicable"
+  reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."
+keyboard:
+  - "Tab and Shift+Tab follow the visible task order."
+  - "Enter and Space activate native buttons on release."
+touch:
+  minimumTarget: "48x48"
+  activation: "release"
+  gesture: "none"
+announcements:
+  - text: "Event setup needs attention."
+    trigger: "semantic state transition"
+    priority: "assertive"
+    deduplicate: "semantic-transition"
+contrast:
+  - foreground: "color.text.primary"
+    background: "color.surface.panel"
+    ratio: "17.77:1"
+  - foreground: "color.focus.ring"
+    background: "color.surface.canvas"
+    ratio: "5.69:1"
+highContrast: "Use system colors; preserve boundaries, focus, text, shape, and state meaning."
+reducedMotion: "Resolve nonessential transitions instantly; never delay failure or completion."
+stress200: "Verify against the registered 640x360 responsive-risk target for this surface."
+winuiPattern: "Page; native WinUI controls; UI Automation patterns per component contract"
+verification: ["keyboard","narrator","touch","visual","high-contrast","reduced-motion"]
+evidence: "targets/event-setup/storage-insufficient--1280x720.png"
