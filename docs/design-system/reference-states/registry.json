@@ -234,7 +234,7 @@
       "target": "targets/event-setup/edit-clean--1280x720.png",
       "annotation": "targets/event-setup/edit-clean--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=edit-clean&viewport=1280x720",
-      "sha256": "625e2d3049f4fcbf782f33a54d128f96b69dfdfbfe38abb1df4753d318708a0f"
+      "sha256": "15f60353f746ab96004c38188a4ecfd7a87b30157957437c2d1044d0600a9678"
     },
     {
       "id": "event-setup.edit-dirty.standard",
@@ -247,7 +247,7 @@
       "target": "targets/event-setup/edit-dirty--1280x720.png",
       "annotation": "targets/event-setup/edit-dirty--1280x720.yaml",
       "renderer": "renderer/index.html?surface=event-setup&state=edit-dirty&viewport=1280x720",
-      "sha256": "6d59f83fe730a0fd4914cc0d3cb890ff082ed3d7a5cae5d014c27d715f1aecd3"
+      "sha256": "dff7a2421edf0d0409fa5830f1d35ed7789f75515373054f2fa361e11117cd8b"
     },
     {
       "id": "event-setup.camera-checking.standard",
