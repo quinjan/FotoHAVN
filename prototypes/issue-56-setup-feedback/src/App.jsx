@@ -14,11 +14,12 @@ import {
   Warning20Regular,
 } from "@fluentui/react-icons";
 
-const scenarios = ["open", "save", "start", "exit", "delete"];
+const scenarios = ["open", "save", "start", "storage", "exit", "delete"];
 const scenarioNames = {
   open: "Open",
   save: "Save",
   start: "Start",
+  storage: "Storage",
   exit: "Exit",
   delete: "Delete",
 };
@@ -125,10 +126,10 @@ function InlineFeedback({ state, action, message, onRetry, onChooseCamera, retry
   );
 }
 
-function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
+function SetupScreen({ initialAction = "save", initialCamera = "", insufficientStorage = false, onCancel, onSaved }) {
   const [eventName, setEventName] = useState("UX Audit Test Event");
-  const [camera, setCamera] = useState("");
-  const [cameraCheck, setCameraCheck] = useState("idle");
+  const [camera, setCamera] = useState(initialCamera);
+  const [cameraCheck, setCameraCheck] = useState(initialCamera ? "checking" : "idle");
   const [printer, setPrinter] = useState("none");
   const [state, setState] = useState("idle");
   const [action, setAction] = useState(initialAction);
@@ -159,7 +160,8 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
 
   const nameReady = eventName.trim().length > 0;
   const cameraReady = cameraCheck === "ready";
-  const ready = nameReady && cameraReady;
+  const storageReady = !insufficientStorage;
+  const ready = nameReady && cameraReady && storageReady;
 
   async function runAction(nextAction = action) {
     setAction(nextAction);
@@ -221,7 +223,8 @@ function SetupScreen({ initialAction = "save", onCancel, onSaved }) {
 
               <div className="field-row storage-row">
                 <span className="field-label">Storage</span>
-                <div className="storage-value">120 GB free</div>
+                <div className="storage-value">{insufficientStorage ? "480 MB free" : "120 GB free"}</div>
+                {insufficientStorage && <FieldMessage kind="error">Not enough space. Free up at least 2 GB to continue.</FieldMessage>}
               </div>
             </div>
 
@@ -405,7 +408,7 @@ export function App() {
 
   return (
     <>
-      {(scenario === "save" || scenario === "start") && <SetupScreen initialAction={scenario} onCancel={() => changeScenario("open")} onSaved={() => changeScenario("open", "Event saved.")} />}
+      {(scenario === "save" || scenario === "start" || scenario === "storage") && <SetupScreen key={scenario} initialAction={scenario === "start" ? "start" : "save"} initialCamera={scenario === "storage" ? "ready" : ""} insufficientStorage={scenario === "storage"} onCancel={() => changeScenario("open")} onSaved={() => changeScenario("open", "Event saved.")} />}
       {(scenario === "open" || scenario === "delete") && <SavedEventsScreen mode={scenario} notice={notice} onOpenSetup={() => changeScenario("save")} onStartEvent={() => changeScenario("start")} />}
       {scenario === "exit" && <ActiveEventScreen onReturn={() => changeScenario("open")} />}
       {import.meta.env.DEV && <PrototypeSwitcher scenario={scenario} onChange={changeScenario} />}
