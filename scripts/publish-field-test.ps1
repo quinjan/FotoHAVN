@@ -73,6 +73,31 @@ try {
         throw "Portable output unexpectedly contains an installer or app package."
     }
 
+    $forbiddenVerificationAssets = Get-ChildItem -LiteralPath $resolvedOutput -Recurse -Force |
+        Where-Object {
+            $_.FullName -like "*UiVerification*" -or
+            $_.Name -like "FotoHavn.UiVerificationHost*" -or
+            $_.Name -eq "ApprovedInjectionCatalog.json"
+        }
+    if ($forbiddenVerificationAssets) {
+        throw "Portable output unexpectedly contains UI verification seams or assets."
+    }
+
+    $applicationAssemblyPath = Join-Path $resolvedOutput "FotoHAVN.dll"
+    $applicationAssemblyText = [System.Text.Encoding]::UTF8.GetString(
+        [System.IO.File]::ReadAllBytes($applicationAssemblyPath))
+    $forbiddenAssemblyMarkers = @(
+        "FotoHavn.App.UiVerification",
+        "UiVerificationLaunch",
+        "ApprovedInjectionCatalog.json",
+        "--ui-verification-request"
+    )
+    foreach ($marker in $forbiddenAssemblyMarkers) {
+        if ($applicationAssemblyText.Contains($marker, [System.StringComparison]::Ordinal)) {
+            throw "Portable FotoHAVN.dll still contains UI verification seam marker '$marker'."
+        }
+    }
+
     $eventsRoot = Join-Path $resolvedOutput "Events"
     New-Item -ItemType Directory -Path $eventsRoot -Force | Out-Null
     $writeProbe = Join-Path $eventsRoot ".write-probe"
@@ -85,11 +110,15 @@ try {
     if ($null -eq $windowsAppSdkReference) {
         throw "Microsoft.WindowsAppSDK does not have an exact PackageReference."
     }
-    $windowsAppSdk = $windowsAppSdkReference.Version
+    $windowsAppSdk = $windowsAppSdkReference.GetAttribute("Version")
+    $applicationVersionNode = $appProject.SelectSingleNode("/Project/PropertyGroup/Version")
+    if ($null -eq $applicationVersionNode) {
+        throw "FotoHAVN does not declare an application Version."
+    }
     $gitCommit = (& git rev-parse HEAD).Trim()
     $manifest = [ordered]@{
         application = "FotoHAVN"
-        applicationVersion = [string]$appProject.Project.PropertyGroup.Version
+        applicationVersion = $applicationVersionNode.InnerText
         runtimeIdentifier = "win-x64"
         configuration = "Release"
         selfContained = $true
@@ -100,6 +129,8 @@ try {
         gitCommit = $gitCommit
         builtAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
         executableSha256 = (Get-FileHash -Algorithm SHA256 (Join-Path $resolvedOutput "FotoHAVN.exe")).Hash.ToLowerInvariant()
+        uiVerificationAssetsExcluded = $true
+        uiVerificationAssemblyMarkersExcluded = $true
     }
     $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $resolvedOutput "field-test-build.json") -Encoding utf8
 

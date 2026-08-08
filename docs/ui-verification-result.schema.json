@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/quinjan/FotoHAVN/docs/ui-verification-result.schema.json",
+  "title": "FotoHAVN UI verification scenario result",
+  "type": "object",
+  "required": [
+    "schemaVersion", "fixtureId", "injectionIdentity", "fixtureBatch",
+    "effectiveWidth", "effectiveHeight", "requiredUiAutomationChecks",
+    "status", "image", "evidenceFiles", "uiAutomation", "environment",
+    "executedAtUtc", "resultPath"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "fixtureId": { "type": "string", "minLength": 1 },
+    "injectionIdentity": { "type": "string", "pattern": "^injection\\." },
+    "fixtureBatch": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "effectiveWidth": { "type": "integer", "minimum": 1 },
+    "effectiveHeight": { "type": "integer", "minimum": 1 },
+    "requiredUiAutomationChecks": {
+      "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true
+    },
+    "status": {
+      "enum": ["match", "planned-migration-debt", "review-required", "environment-drift"]
+    },
+    "image": {
+      "type": "object",
+      "required": ["changedPixels", "totalPixels", "targetSha256", "actualSha256", "diffSha256"],
+      "properties": {
+        "changedPixels": { "type": "integer", "minimum": 0 },
+        "totalPixels": { "type": "integer", "minimum": 1 },
+        "targetSha256": { "$ref": "#/$defs/sha256" },
+        "actualSha256": { "$ref": "#/$defs/sha256" },
+        "diffSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "evidenceFiles": {
+      "type": "object",
+      "required": ["target", "actual", "diff"],
+      "properties": {
+        "target": { "type": "string" },
+        "actual": { "type": "string" },
+        "diff": { "type": "string" }
+      }
+    },
+    "uiAutomation": {
+      "type": "object",
+      "required": ["elements", "readingOrder", "liveRegionEvents", "checks", "violations"],
+      "properties": {
+        "elements": { "type": "array", "items": { "type": "object" } },
+        "readingOrder": { "type": "array", "items": { "type": "string" } },
+        "focusedElement": { "type": ["object", "null"] },
+        "liveRegionEvents": { "type": "array", "items": { "type": "object" } },
+        "checks": { "type": "array", "items": { "type": "object" } },
+        "violations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["pinned", "actual", "differences", "manifestSha256", "isPinned"],
+      "properties": {
+        "pinned": { "type": "object" },
+        "actual": { "type": "object" },
+        "differences": { "type": "array", "items": { "type": "string" } },
+        "manifestSha256": { "$ref": "#/$defs/sha256" },
+        "isPinned": { "type": "boolean" }
+      }
+    },
+    "executedAtUtc": { "type": "string", "format": "date-time" },
+    "resultPath": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

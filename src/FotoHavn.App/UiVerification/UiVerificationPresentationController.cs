@@ -99,7 +99,8 @@ internal sealed class UiVerificationPresentationController :
                 injection.ExpectedStatus,
                 injection.Identity,
                 transition?.FocusAutomationId,
-                transition?.Announcement));
+                transition?.Announcement,
+                transition?.AnnouncementPriority));
     }
 }
 
@@ -135,7 +136,8 @@ internal sealed record UiVerificationTransition(
     string OnCommand,
     string InjectionIdentity,
     string? FocusAutomationId = null,
-    string? Announcement = null);
+    string? Announcement = null,
+    AnnouncementPriority AnnouncementPriority = AnnouncementPriority.Polite);
 
 internal enum DeterministicCameraOutcome
 {

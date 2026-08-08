@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseAnnotation, parseMatrix, parseWinuiMappingSource, responsiveOwnerState } from "./design-traceability-source.mjs";
+import { sha256Bytes, sha256Text } from "./design-traceability-hash.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const handoffArgument = process.argv.indexOf("--handoff-root");
@@ -12,7 +12,6 @@ const referenceRoot = path.join(designRoot, "reference-states");
 const errors = [];
 const read = (file) => readFileSync(file, "utf8");
 const load = (file) => JSON.parse(read(file));
-const hash = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
 const report = (condition, message) => { if (!condition) errors.push(message); };
 
 function duplicateIds(records, key, label) {
@@ -213,7 +212,7 @@ try {
 
   report(Array.isArray(waivers.waivers) && waivers.waivers.length === 0, "design-v1.0.1 waiver register must be empty by default");
   report(manifest.baseline?.tag === "design-v1.0.0" && manifest.baseline?.commit === registry.contract.commit, "manifest baseline anchor does not match the approved registry");
-  report(manifest.baseline?.registrySha256 === hash(path.join(referenceRoot, "registry.json")), "registry hash does not match the anchored manifest");
+  report(manifest.baseline?.registrySha256 === sha256Bytes(path.join(referenceRoot, "registry.json")), "registry hash does not match the anchored manifest");
   const requiredArtifactPaths = [
     "mapping.json", "evidence-index.json", "manual-procedures.md", "waivers.json", "README.md",
     ...matrix.surfaces.map((surface) => `scenarios/${surface.id}.json`),
@@ -227,12 +226,12 @@ try {
     const frame = registry.frames.find((candidate) => candidate.id === target.id);
     const targetPath = canonicalReferencePath(target.path);
     report(frame?.sha256 === target.sha256, `inherited target hash differs from design-v1.0.0 registry: ${target.id}`);
-    report(existsSync(targetPath) && hash(targetPath) === target.sha256, `approved target bytes changed: ${target.id}`);
+    report(existsSync(targetPath) && sha256Bytes(targetPath) === target.sha256, `approved target bytes changed: ${target.id}`);
   }
   for (const artifact of manifest.artifacts) {
     const artifactPath = path.join(handoffRoot, artifact.path);
     report(existsSync(artifactPath), `manifest artifact is missing: ${artifact.path}`);
-    if (existsSync(artifactPath)) report(hash(artifactPath) === artifact.sha256, `manifest artifact hash mismatch: ${artifact.path}`);
+    if (existsSync(artifactPath)) report(sha256Text(artifactPath) === artifact.sha256, `manifest artifact hash mismatch: ${artifact.path}`);
   }
 } catch (error) {
   errors.push(error.stack ?? error.message);

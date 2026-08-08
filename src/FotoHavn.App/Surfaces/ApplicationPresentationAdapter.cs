@@ -10,7 +10,14 @@ public sealed record ApplicationSurfaceOverride(
     string ItemStatus,
     string InjectionIdentity,
     string? FocusAutomationId = null,
-    string? Announcement = null);
+    string? Announcement = null,
+    AnnouncementPriority? AnnouncementPriority = null);
+
+public enum AnnouncementPriority
+{
+    Polite,
+    Assertive,
+}
 
 public interface IApplicationSurfaceOverrideSource
 {
