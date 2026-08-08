@@ -1,0 +1,1666 @@
+{
+  "schemaVersion": 1,
+  "evidence": [
+    {
+      "id": "MANUAL-SEMANTIC-RESOURCE-AUDIT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+    },
+    {
+      "id": "MANUAL-VISUAL-EQUIVALENCE",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-VISUAL-EQUIVALENCE"
+    },
+    {
+      "id": "MANUAL-KEYBOARD-JOURNEY",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-KEYBOARD-JOURNEY"
+    },
+    {
+      "id": "MANUAL-NARRATOR-JOURNEY",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-NARRATOR-JOURNEY"
+    },
+    {
+      "id": "MANUAL-RESPONSIVE-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-RESPONSIVE-REFLOW"
+    },
+    {
+      "id": "MANUAL-TOUCH-TARGETS",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-TOUCH-TARGETS"
+    },
+    {
+      "id": "MANUAL-HIGH-CONTRAST",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-HIGH-CONTRAST"
+    },
+    {
+      "id": "MANUAL-REDUCED-MOTION",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-REDUCED-MOTION"
+    },
+    {
+      "id": "MANUAL-UIA-CONTRACT-REVIEW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-SAVED-EVENTS",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/EventPersistenceAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-SAVED-EVENTS-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-EVENT-SETUP",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/EventSetupAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-EVENT-SETUP-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-GUEST-START",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/GuestCycleAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-GUEST-START-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-GUEST-START-UNAVAILABLE",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/GuestStartReadinessAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-CAPTURE",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/GuestCycleAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-CAPTURE-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-OPERATOR-ASSISTANCE",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/GuestCycleAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-PHOTO-STRIP",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/GuestCycleAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-PHOTO-STRIP-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "ACCEPTANCE-CONFIRMATION",
+      "kind": "test-module",
+      "location": "tests/FotoHavn.AcceptanceTests/ActiveEventAcceptanceTests.cs"
+    },
+    {
+      "id": "UIA-CONFIRMATION-CONTRACT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "UIA-SURFACE-STRUCTURE",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "UIA-RESPONSIVE-GEOMETRY",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "UIA-KEYBOARD-COMPLETE",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "UIA-LIVE-REGION-EVENTS",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-BUTTON-KEYBOARD",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-BUTTON-TOUCH",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-BUTTON-BUSY",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-FOCUS",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-ICON-NAME",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-ICON-TOUCH",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-FIELD-KEYBOARD",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-FIELD-ERROR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-SELECT-KEYBOARD",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-SELECT-ERROR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-READONLY-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-STATUS-CONTRAST",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-STATUS-ANNOUNCE",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CALLOUT-CONTRAST",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CALLOUT-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-PROGRESS-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-REDUCED-MOTION",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-TOAST-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-TOAST-FOCUS",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-MODAL-FOCUS",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-MODAL-ESCAPE",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-MODAL-BUSY",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-MODAL-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-HEADER-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-HEADER-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-EVENTCARD-KEYBOARD",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-EVENTCARD-TOUCH",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-EVENTCARD-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-EVENTCARD-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-SETUP-VALIDATION",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-SETUP-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-SETUP-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CAMERA-ASPECT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CAMERA-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CAMERA-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CAPTURE-PROGRESS-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-CAPTURE-PROGRESS-CONTRAST",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-ASSISTANCE-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-ASSISTANCE-KEYBOARD",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-ASSISTANCE-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-STRIP-ASPECT",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-STRIP-NARRATOR",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "DS-STRIP-REFLOW",
+      "kind": "named-manual-procedure",
+      "location": "manual-procedures.md",
+      "procedure": "MANUAL-UIA-CONTRACT-REVIEW"
+    },
+    {
+      "id": "saved-events.new-event.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/new-event--1280x720.png"
+    },
+    {
+      "id": "saved-events.card-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/card-idle--1280x720.png"
+    },
+    {
+      "id": "saved-events.card-hover.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/card-hover--1280x720.png"
+    },
+    {
+      "id": "saved-events.card-focus.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/card-focus--1280x720.png"
+    },
+    {
+      "id": "saved-events.unavailable.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/unavailable--1280x720.png"
+    },
+    {
+      "id": "saved-events.busy.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/busy--1280x720.png"
+    },
+    {
+      "id": "saved-events.deletion-incomplete.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/deletion-incomplete--1280x720.png"
+    },
+    {
+      "id": "saved-events.maximum-cards.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/maximum-cards--1280x720.png"
+    },
+    {
+      "id": "saved-events.maximum-cards.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/maximum-cards--1024x768.png"
+    },
+    {
+      "id": "saved-events.maximum-cards.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/maximum-cards--1024x576.png"
+    },
+    {
+      "id": "saved-events.maximum-cards.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/maximum-cards--853x480.png"
+    },
+    {
+      "id": "saved-events.maximum-cards.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/saved-events/maximum-cards--640x360.png"
+    },
+    {
+      "id": "event-setup.new-empty.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/new-empty--1280x720.png"
+    },
+    {
+      "id": "event-setup.new-valid.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/new-valid--1280x720.png"
+    },
+    {
+      "id": "event-setup.edit-clean.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/edit-clean--1280x720.png"
+    },
+    {
+      "id": "event-setup.edit-dirty.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/edit-dirty--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-checking.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-checking--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-ready.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-ready--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-unavailable.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-unavailable--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-access-denied.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-access-denied--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-in-use.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-in-use--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-disconnected.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-disconnected--1280x720.png"
+    },
+    {
+      "id": "event-setup.storage-insufficient.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/storage-insufficient--1280x720.png"
+    },
+    {
+      "id": "event-setup.storage-unavailable.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/storage-unavailable--1280x720.png"
+    },
+    {
+      "id": "event-setup.actions-disabled.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/actions-disabled--1280x720.png"
+    },
+    {
+      "id": "event-setup.saving.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/saving--1280x720.png"
+    },
+    {
+      "id": "event-setup.save-error.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/save-error--1280x720.png"
+    },
+    {
+      "id": "event-setup.save-success.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/save-success--1280x720.png"
+    },
+    {
+      "id": "event-setup.camera-error-and-insufficient-storage.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--1024x768.png"
+    },
+    {
+      "id": "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--1024x576.png"
+    },
+    {
+      "id": "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--853x480.png"
+    },
+    {
+      "id": "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--640x360.png"
+    },
+    {
+      "id": "guest-start.ready.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/ready--1280x720.png"
+    },
+    {
+      "id": "guest-start.exit-hold-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/exit-hold-idle--1280x720.png"
+    },
+    {
+      "id": "guest-start.exit-holding.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/exit-holding--1280x720.png"
+    },
+    {
+      "id": "guest-start.exit-hold-cancelled.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/exit-hold-cancelled--1280x720.png"
+    },
+    {
+      "id": "guest-start.exit-confirmation-open.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/exit-confirmation-open--1280x720.png"
+    },
+    {
+      "id": "guest-start.long-event-name-and-exit-hold.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/long-event-name-and-exit-hold--1024x768.png"
+    },
+    {
+      "id": "guest-start.long-event-name-and-exit-hold.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/long-event-name-and-exit-hold--1024x576.png"
+    },
+    {
+      "id": "guest-start.long-event-name-and-exit-hold.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/long-event-name-and-exit-hold--853x480.png"
+    },
+    {
+      "id": "guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start/long-event-name-and-exit-hold--640x360.png"
+    },
+    {
+      "id": "guest-start-unavailable.camera-retry.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/camera-retry--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.camera-exit-only.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/camera-exit-only--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.storage-retry.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/storage-retry--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.storage-exit-only.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/storage-exit-only--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.retrying.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/retrying--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.retry-failed.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/retry-failed--1280x720.png"
+    },
+    {
+      "id": "guest-start-unavailable.longest-recovery-copy.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/longest-recovery-copy--1024x768.png"
+    },
+    {
+      "id": "guest-start-unavailable.longest-recovery-copy.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/longest-recovery-copy--1024x576.png"
+    },
+    {
+      "id": "guest-start-unavailable.longest-recovery-copy.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/longest-recovery-copy--853x480.png"
+    },
+    {
+      "id": "guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/guest-start-unavailable/longest-recovery-copy--640x360.png"
+    },
+    {
+      "id": "capture.capture-1.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-1--1280x720.png"
+    },
+    {
+      "id": "capture.capture-2.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-2--1280x720.png"
+    },
+    {
+      "id": "capture.capture-3.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-3--1280x720.png"
+    },
+    {
+      "id": "capture.capture-4.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-4--1280x720.png"
+    },
+    {
+      "id": "capture.countdown-3.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/countdown-3--1280x720.png"
+    },
+    {
+      "id": "capture.countdown-2.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/countdown-2--1280x720.png"
+    },
+    {
+      "id": "capture.countdown-1.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/countdown-1--1280x720.png"
+    },
+    {
+      "id": "capture.flash.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/flash--1280x720.png"
+    },
+    {
+      "id": "capture.photo-saved.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/photo-saved--1280x720.png"
+    },
+    {
+      "id": "capture.camera-failure.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/camera-failure--1280x720.png"
+    },
+    {
+      "id": "capture.storage-failure.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/storage-failure--1280x720.png"
+    },
+    {
+      "id": "capture.capture-4-countdown.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-4-countdown--1024x768.png"
+    },
+    {
+      "id": "capture.capture-4-countdown.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-4-countdown--1024x576.png"
+    },
+    {
+      "id": "capture.capture-4-countdown.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-4-countdown--853x480.png"
+    },
+    {
+      "id": "capture.capture-4-countdown.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/capture/capture-4-countdown--640x360.png"
+    },
+    {
+      "id": "operator-assistance.camera-0-preserved.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/camera-0-preserved--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.camera-3-preserved.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/camera-3-preserved--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.storage-3-preserved.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/storage-3-preserved--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.photo-strip-4-preserved.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/photo-strip-4-preserved--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.retrying.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retrying--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.recovered.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/recovered--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.retry-failed.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retry-failed--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.exit-only.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/exit-only--1280x720.png"
+    },
+    {
+      "id": "operator-assistance.retry-failed-with-3-preserved.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retry-failed-with-3-preserved--1024x768.png"
+    },
+    {
+      "id": "operator-assistance.retry-failed-with-3-preserved.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retry-failed-with-3-preserved--1024x576.png"
+    },
+    {
+      "id": "operator-assistance.retry-failed-with-3-preserved.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retry-failed-with-3-preserved--853x480.png"
+    },
+    {
+      "id": "operator-assistance.retry-failed-with-3-preserved.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/operator-assistance/retry-failed-with-3-preserved--640x360.png"
+    },
+    {
+      "id": "photo-strip.preparing.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/preparing--1280x720.png"
+    },
+    {
+      "id": "photo-strip.visible-10-seconds.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/visible-10-seconds--1280x720.png"
+    },
+    {
+      "id": "photo-strip.visible-5-seconds.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/visible-5-seconds--1280x720.png"
+    },
+    {
+      "id": "photo-strip.returning.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/returning--1280x720.png"
+    },
+    {
+      "id": "photo-strip.failed.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/failed--1280x720.png"
+    },
+    {
+      "id": "photo-strip.preparing-or-returning.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/preparing-or-returning--1024x768.png"
+    },
+    {
+      "id": "photo-strip.preparing-or-returning.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/preparing-or-returning--1024x576.png"
+    },
+    {
+      "id": "photo-strip.preparing-or-returning.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/preparing-or-returning--853x480.png"
+    },
+    {
+      "id": "photo-strip.preparing-or-returning.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/photo-strip/preparing-or-returning--640x360.png"
+    },
+    {
+      "id": "confirmation.start-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/start-idle--1280x720.png"
+    },
+    {
+      "id": "confirmation.start-busy.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/start-busy--1280x720.png"
+    },
+    {
+      "id": "confirmation.start-failed.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/start-failed--1280x720.png"
+    },
+    {
+      "id": "confirmation.save-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/save-idle--1280x720.png"
+    },
+    {
+      "id": "confirmation.discard-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/discard-idle--1280x720.png"
+    },
+    {
+      "id": "confirmation.exit-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/exit-idle--1280x720.png"
+    },
+    {
+      "id": "confirmation.exit-busy.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/exit-busy--1280x720.png"
+    },
+    {
+      "id": "confirmation.delete-idle.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/delete-idle--1280x720.png"
+    },
+    {
+      "id": "confirmation.delete-busy.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/delete-busy--1280x720.png"
+    },
+    {
+      "id": "confirmation.delete-failed.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/delete-failed--1280x720.png"
+    },
+    {
+      "id": "confirmation.retry.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/retry--1280x720.png"
+    },
+    {
+      "id": "confirmation.success-destination.standard",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/success-destination--1280x720.png"
+    },
+    {
+      "id": "confirmation.destructive-busy-with-long-event-id.compact-aspect",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--1024x768.png"
+    },
+    {
+      "id": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--1024x576.png"
+    },
+    {
+      "id": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--853x480.png"
+    },
+    {
+      "id": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
+      "kind": "visual-fixture",
+      "location": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--640x360.png"
+    },
+    {
+      "id": "scenario.saved-events.new-event",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.new-event",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.card-idle",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.card-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.card-hover",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.card-hover",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.card-focus",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.card-focus",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.unavailable",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.unavailable",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.busy",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.busy",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.deletion-incomplete",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.deletion-incomplete",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.saved-events.maximum-cards",
+      "kind": "scenario",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "injection.saved-events.maximum-cards",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/saved-events.json"
+    },
+    {
+      "id": "scenario.event-setup.new-empty",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.new-empty",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.new-valid",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.new-valid",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.edit-clean",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.edit-clean",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.edit-dirty",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.edit-dirty",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-checking",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-checking",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-ready",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-ready",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-unavailable",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-unavailable",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-access-denied",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-access-denied",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-in-use",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-in-use",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.camera-disconnected",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.camera-disconnected",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.storage-insufficient",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.storage-insufficient",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.storage-unavailable",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.storage-unavailable",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.actions-disabled",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.actions-disabled",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.saving",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.saving",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.save-error",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.save-error",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.event-setup.save-success",
+      "kind": "scenario",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "injection.event-setup.save-success",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/event-setup.json"
+    },
+    {
+      "id": "scenario.guest-start.ready",
+      "kind": "scenario",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "injection.guest-start.ready",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "scenario.guest-start.exit-hold-idle",
+      "kind": "scenario",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "injection.guest-start.exit-hold-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "scenario.guest-start.exit-holding",
+      "kind": "scenario",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "injection.guest-start.exit-holding",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "scenario.guest-start.exit-hold-cancelled",
+      "kind": "scenario",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "injection.guest-start.exit-hold-cancelled",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "scenario.guest-start.exit-confirmation-open",
+      "kind": "scenario",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "injection.guest-start.exit-confirmation-open",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.camera-retry",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.camera-retry",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.camera-exit-only",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.camera-exit-only",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.storage-retry",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.storage-retry",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.storage-exit-only",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.storage-exit-only",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.retrying",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.retrying",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.guest-start-unavailable.retry-failed",
+      "kind": "scenario",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "injection.guest-start-unavailable.retry-failed",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/guest-start-unavailable.json"
+    },
+    {
+      "id": "scenario.capture.capture-1",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.capture-1",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.capture-2",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.capture-2",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.capture-3",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.capture-3",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.capture-4",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.capture-4",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.countdown-3",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.countdown-3",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.countdown-2",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.countdown-2",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.countdown-1",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.countdown-1",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.flash",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.flash",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.photo-saved",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.photo-saved",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.camera-failure",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.camera-failure",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.capture.storage-failure",
+      "kind": "scenario",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "injection.capture.storage-failure",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/capture.json"
+    },
+    {
+      "id": "scenario.operator-assistance.camera-0-preserved",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.camera-0-preserved",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.camera-3-preserved",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.camera-3-preserved",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.storage-3-preserved",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.storage-3-preserved",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.photo-strip-4-preserved",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.photo-strip-4-preserved",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.retrying",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.retrying",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.recovered",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.recovered",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.retry-failed",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.retry-failed",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.operator-assistance.exit-only",
+      "kind": "scenario",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "injection.operator-assistance.exit-only",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/operator-assistance.json"
+    },
+    {
+      "id": "scenario.photo-strip.preparing",
+      "kind": "scenario",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "injection.photo-strip.preparing",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "scenario.photo-strip.visible-10-seconds",
+      "kind": "scenario",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "injection.photo-strip.visible-10-seconds",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "scenario.photo-strip.visible-5-seconds",
+      "kind": "scenario",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "injection.photo-strip.visible-5-seconds",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "scenario.photo-strip.returning",
+      "kind": "scenario",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "injection.photo-strip.returning",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "scenario.photo-strip.failed",
+      "kind": "scenario",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "injection.photo-strip.failed",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/photo-strip.json"
+    },
+    {
+      "id": "scenario.confirmation.start-idle",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.start-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.start-busy",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.start-busy",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.start-failed",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.start-failed",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.save-idle",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.save-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.discard-idle",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.discard-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.exit-idle",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.exit-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.exit-busy",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.exit-busy",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.delete-idle",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.delete-idle",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.delete-busy",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.delete-busy",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.delete-failed",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.delete-failed",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.retry",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.retry",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "scenario.confirmation.success-destination",
+      "kind": "scenario",
+      "location": "scenarios/confirmation.json"
+    },
+    {
+      "id": "injection.confirmation.success-destination",
+      "kind": "deterministic-injection-spec",
+      "location": "scenarios/confirmation.json"
+    }
+  ]
+}

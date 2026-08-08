@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "photo-strip",
+  "scenarioCount": 5,
+  "scenarios": [
+    {
+      "id": "scenario.photo-strip.preparing",
+      "surface": "photo-strip",
+      "state": "preparing",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to photo-strip.preparing with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.photo-strip.preparing and reports render settled",
+      "then": "the level-one heading is “Here’s your Photo Strip”; the window automation root is named “Here’s your Photo Strip” in state “busy”; reading order is FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; and the pixels match photo-strip.preparing.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.photo-strip-result"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/photo-strip/preparing--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.photo-strip.preparing",
+      "visualFixtures": [
+        "photo-strip.preparing.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-PHOTO-STRIP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-PHOTO-STRIP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; return target: not applicable",
+        "announcement": "Photo Strip in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.photo-strip.visible-10-seconds",
+      "surface": "photo-strip",
+      "state": "visible-10-seconds",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to photo-strip.visible-10-seconds with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.photo-strip.visible-10-seconds and reports render settled",
+      "then": "the level-one heading is “Here’s your Photo Strip”; the window automation root is named “Here’s your Photo Strip” in state “ready”; reading order is FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; and the pixels match photo-strip.visible-10-seconds.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.photo-strip-result"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/photo-strip/visible-10-seconds--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.photo-strip.visible-10-seconds",
+      "visualFixtures": [
+        "photo-strip.visible-10-seconds.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-PHOTO-STRIP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-PHOTO-STRIP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; return target: not applicable",
+        "announcement": "Photo Strip ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.photo-strip.visible-5-seconds",
+      "surface": "photo-strip",
+      "state": "visible-5-seconds",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to photo-strip.visible-5-seconds with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.photo-strip.visible-5-seconds and reports render settled",
+      "then": "the level-one heading is “Here’s your Photo Strip”; the window automation root is named “Here’s your Photo Strip” in state “ready”; reading order is FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; and the pixels match photo-strip.visible-5-seconds.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.photo-strip-result"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/photo-strip/visible-5-seconds--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.photo-strip.visible-5-seconds",
+      "visualFixtures": [
+        "photo-strip.visible-5-seconds.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-PHOTO-STRIP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-PHOTO-STRIP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; return target: not applicable",
+        "announcement": "Photo Strip ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.photo-strip.returning",
+      "surface": "photo-strip",
+      "state": "returning",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to photo-strip.returning with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.photo-strip.returning and reports render settled",
+      "then": "the level-one heading is “Here’s your Photo Strip”; the window automation root is named “Here’s your Photo Strip” in state “busy”; reading order is FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; and the pixels match photo-strip.returning.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.photo-strip-result"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/photo-strip/returning--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.photo-strip.returning",
+      "visualFixtures": [
+        "photo-strip.returning.standard"
+      ],
+      "responsiveViewportCases": [
+        "photo-strip.preparing-or-returning.compact-aspect",
+        "photo-strip.preparing-or-returning.scale-125-equivalent",
+        "photo-strip.preparing-or-returning.scale-150-equivalent",
+        "photo-strip.preparing-or-returning.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-PHOTO-STRIP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-PHOTO-STRIP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; return target: not applicable",
+        "announcement": "Photo Strip in progress. (polite)",
+        "destination": "the transition destination represented by photo-strip.returning is reached",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.photo-strip.failed",
+      "surface": "photo-strip",
+      "state": "failed",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to photo-strip.failed with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.photo-strip.failed and reports render settled",
+      "then": "the level-one heading is “Here’s your Photo Strip”; the window automation root is named “Here’s your Photo Strip” in state “unavailable”; reading order is FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; and the pixels match photo-strip.failed.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.photo-strip-result"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/photo-strip/failed--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.photo-strip.failed",
+      "visualFixtures": [
+        "photo-strip.failed.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-PHOTO-STRIP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-PHOTO-STRIP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress; return target: not applicable",
+        "announcement": "Photo Strip needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> heading -> Photo Strip preview -> return status and progress"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

@@ -1,0 +1,973 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "event-setup",
+  "scenarioCount": 16,
+  "scenarios": [
+    {
+      "id": "scenario.event-setup.new-empty",
+      "surface": "event-setup",
+      "state": "new-empty",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.new-empty with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.new-empty and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.new-empty.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/new-empty--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.new-empty",
+      "visualFixtures": [
+        "event-setup.new-empty.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.new-valid",
+      "surface": "event-setup",
+      "state": "new-valid",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.new-valid with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.new-valid and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.new-valid.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/new-valid--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.new-valid",
+      "visualFixtures": [
+        "event-setup.new-valid.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.edit-clean",
+      "surface": "event-setup",
+      "state": "edit-clean",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.edit-clean with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.edit-clean and reports render settled",
+      "then": "the level-one heading is “Edit Event”; the window automation root is named “Edit Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.edit-clean.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/edit-clean--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.edit-clean",
+      "visualFixtures": [
+        "event-setup.edit-clean.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.edit-dirty",
+      "surface": "event-setup",
+      "state": "edit-dirty",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.edit-dirty with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.edit-dirty and reports render settled",
+      "then": "the level-one heading is “Edit Event”; the window automation root is named “Edit Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.edit-dirty.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/edit-dirty--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.edit-dirty",
+      "visualFixtures": [
+        "event-setup.edit-dirty.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-checking",
+      "surface": "event-setup",
+      "state": "camera-checking",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-checking with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-checking and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “busy”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-checking.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-checking--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-checking",
+      "visualFixtures": [
+        "event-setup.camera-checking.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-ready",
+      "surface": "event-setup",
+      "state": "camera-ready",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-ready with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-ready and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-ready.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-ready--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-ready",
+      "visualFixtures": [
+        "event-setup.camera-ready.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-unavailable",
+      "surface": "event-setup",
+      "state": "camera-unavailable",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-unavailable with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-unavailable and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-unavailable.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-unavailable--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-unavailable",
+      "visualFixtures": [
+        "event-setup.camera-unavailable.standard"
+      ],
+      "responsiveViewportCases": [
+        "event-setup.camera-error-and-insufficient-storage.compact-aspect",
+        "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
+        "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
+        "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-access-denied",
+      "surface": "event-setup",
+      "state": "camera-access-denied",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-access-denied with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-access-denied and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-access-denied.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-access-denied--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-access-denied",
+      "visualFixtures": [
+        "event-setup.camera-access-denied.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-in-use",
+      "surface": "event-setup",
+      "state": "camera-in-use",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-in-use with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-in-use and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-in-use.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-in-use--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-in-use",
+      "visualFixtures": [
+        "event-setup.camera-in-use.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.camera-disconnected",
+      "surface": "event-setup",
+      "state": "camera-disconnected",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.camera-disconnected with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.camera-disconnected and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.camera-disconnected.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/camera-disconnected--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.camera-disconnected",
+      "visualFixtures": [
+        "event-setup.camera-disconnected.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.storage-insufficient",
+      "surface": "event-setup",
+      "state": "storage-insufficient",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.storage-insufficient with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.storage-insufficient and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.storage-insufficient.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/storage-insufficient--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.storage-insufficient",
+      "visualFixtures": [
+        "event-setup.storage-insufficient.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.storage-unavailable",
+      "surface": "event-setup",
+      "state": "storage-unavailable",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.storage-unavailable with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.storage-unavailable and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “unavailable”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.storage-unavailable.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/storage-unavailable--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.storage-unavailable",
+      "visualFixtures": [
+        "event-setup.storage-unavailable.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.actions-disabled",
+      "surface": "event-setup",
+      "state": "actions-disabled",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.actions-disabled with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.actions-disabled and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.actions-disabled.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/actions-disabled--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.actions-disabled",
+      "visualFixtures": [
+        "event-setup.actions-disabled.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.saving",
+      "surface": "event-setup",
+      "state": "saving",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.saving with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.saving and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “busy”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.saving.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/saving--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.saving",
+      "visualFixtures": [
+        "event-setup.saving.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.save-error",
+      "surface": "event-setup",
+      "state": "save-error",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.save-error with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.save-error and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.save-error.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/save-error--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.save-error",
+      "visualFixtures": [
+        "event-setup.save-error.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.event-setup.save-success",
+      "surface": "event-setup",
+      "state": "save-success",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to event-setup.save-success with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.event-setup.save-success and reports render settled",
+      "then": "the level-one heading is “New Event”; the window automation root is named “New Event” in state “ready”; reading order is heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; and the pixels match event-setup.save-success.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.setup-field-group",
+        "component.text-field",
+        "component.select-field",
+        "component.camera-viewport",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/setup-readiness.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/event-setup/save-success--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.event-setup.save-success",
+      "visualFixtures": [
+        "event-setup.save-success.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-EVENT-SETUP"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-EVENT-SETUP-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> Event identity -> Event name -> Camera and status -> Camera preview -> Printer -> Storage -> footer actions; return target: not applicable",
+        "announcement": "Event setup ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # FotoHAVN Design Contract
 
-Version: `1.0.0`
+Version: `1.0.1`
 
-Status: Approval candidate off the default branch; Approved only when this exact contract commit is merged to the default branch by `quinjan` and tagged `design-v1.0.0`
+Status: Nonvisual traceability patch candidate; Approved only when this exact contract commit is merged to the default branch by `quinjan` and tagged `design-v1.0.1`
 
 Canonical theme: Light
 
@@ -18,6 +18,7 @@ This package is the normative visual, interaction, responsive, language, and acc
 - [Patterns](patterns/README.md) — cross-component interaction contracts.
 - [Reference states](reference-states/README.md) — the risk-based operator and Guest Cycle review matrix.
 - [WinUI mapping](winui-mapping.yaml) — semantic IDs, intended WinUI seams, accessibility obligations, and verification seams.
+- [Traceability handoff](traceability/README.md) — schema v2 mappings, scenario catalogs, evidence resolution, manual procedures, waivers, inherited hashes, and validation instructions.
 - [Decision provenance](provenance.md) — the GitHub decisions consolidated into this package.
 - [Changelog](CHANGELOG.md) — design-contract SemVer history.
 

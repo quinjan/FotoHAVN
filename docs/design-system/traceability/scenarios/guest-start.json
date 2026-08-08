@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "guest-start",
+  "scenarioCount": 5,
+  "scenarios": [
+    {
+      "id": "scenario.guest-start.ready",
+      "surface": "guest-start",
+      "state": "ready",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start.ready with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start.ready and reports render settled",
+      "then": "the level-one heading is “Let’s take some photos.”; the window automation root is named “Let’s take some photos.” in state “ready”; reading order is FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; and the pixels match guest-start.ready.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/operator-exit.md",
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start/ready--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start.ready",
+      "visualFixtures": [
+        "guest-start.ready.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; return target: not applicable",
+        "announcement": "Guest Start ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start.exit-hold-idle",
+      "surface": "guest-start",
+      "state": "exit-hold-idle",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start.exit-hold-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start.exit-hold-idle and reports render settled",
+      "then": "the level-one heading is “Let’s take some photos.”; the window automation root is named “Let’s take some photos.” in state “ready”; reading order is FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; and the pixels match guest-start.exit-hold-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/operator-exit.md",
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start/exit-hold-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start.exit-hold-idle",
+      "visualFixtures": [
+        "guest-start.exit-hold-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; return target: not applicable",
+        "announcement": "Guest Start ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start.exit-holding",
+      "surface": "guest-start",
+      "state": "exit-holding",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start.exit-holding with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start.exit-holding and reports render settled",
+      "then": "the level-one heading is “Let’s take some photos.”; the window automation root is named “Let’s take some photos.” in state “busy”; reading order is FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; and the pixels match guest-start.exit-holding.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/operator-exit.md",
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start/exit-holding--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start.exit-holding",
+      "visualFixtures": [
+        "guest-start.exit-holding.standard"
+      ],
+      "responsiveViewportCases": [
+        "guest-start.long-event-name-and-exit-hold.compact-aspect",
+        "guest-start.long-event-name-and-exit-hold.scale-125-equivalent",
+        "guest-start.long-event-name-and-exit-hold.scale-150-equivalent",
+        "guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; return target: not applicable",
+        "announcement": "Guest Start in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start.exit-hold-cancelled",
+      "surface": "guest-start",
+      "state": "exit-hold-cancelled",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start.exit-hold-cancelled with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start.exit-hold-cancelled and reports render settled",
+      "then": "the level-one heading is “Let’s take some photos.”; the window automation root is named “Let’s take some photos.” in state “ready”; reading order is FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; and the pixels match guest-start.exit-hold-cancelled.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/operator-exit.md",
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start/exit-hold-cancelled--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start.exit-hold-cancelled",
+      "visualFixtures": [
+        "guest-start.exit-hold-cancelled.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; return target: not applicable",
+        "announcement": "Guest Start ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start.exit-confirmation-open",
+      "surface": "guest-start",
+      "state": "exit-confirmation-open",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start.exit-confirmation-open with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start.exit-confirmation-open and reports render settled",
+      "then": "the level-one heading is “Let’s take some photos.”; the window automation root is named “Let’s take some photos.” in state “ready”; reading order is FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; and the pixels match guest-start.exit-confirmation-open.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/operator-exit.md",
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start/exit-confirmation-open--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start.exit-confirmation-open",
+      "visualFixtures": [
+        "guest-start.exit-confirmation-open.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Event name -> heading -> instructions -> Touch to start -> Exit Event; return target: not applicable",
+        "announcement": "Guest Start ready. (polite)",
+        "destination": "the transition destination represented by guest-start.exit-confirmation-open is reached",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

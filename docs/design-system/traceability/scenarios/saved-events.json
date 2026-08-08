@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "saved-events",
+  "scenarioCount": 8,
+  "scenarios": [
+    {
+      "id": "scenario.saved-events.new-event",
+      "surface": "saved-events",
+      "state": "new-event",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.new-event with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.new-event and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “ready”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.new-event.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/new-event--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.new-event",
+      "visualFixtures": [
+        "saved-events.new-event.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.card-idle",
+      "surface": "saved-events",
+      "state": "card-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.card-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.card-idle and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “ready”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.card-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/card-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.card-idle",
+      "visualFixtures": [
+        "saved-events.card-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.card-hover",
+      "surface": "saved-events",
+      "state": "card-hover",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.card-hover with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.card-hover and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “ready”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.card-hover.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/card-hover--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.card-hover",
+      "visualFixtures": [
+        "saved-events.card-hover.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.card-focus",
+      "surface": "saved-events",
+      "state": "card-focus",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.card-focus with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.card-focus and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “ready”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.card-focus.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/card-focus--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.card-focus",
+      "visualFixtures": [
+        "saved-events.card-focus.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.unavailable",
+      "surface": "saved-events",
+      "state": "unavailable",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.unavailable with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.unavailable and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “unavailable”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.unavailable.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/unavailable--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.unavailable",
+      "visualFixtures": [
+        "saved-events.unavailable.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: heading -> New Event -> Event cards -> Start, Edit, and Delete actions"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.busy",
+      "surface": "saved-events",
+      "state": "busy",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.busy with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.busy and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “busy”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.busy.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/busy--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.busy",
+      "visualFixtures": [
+        "saved-events.busy.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.deletion-incomplete",
+      "surface": "saved-events",
+      "state": "deletion-incomplete",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.deletion-incomplete with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.deletion-incomplete and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “unavailable”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.deletion-incomplete.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/deletion-incomplete--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.deletion-incomplete",
+      "visualFixtures": [
+        "saved-events.deletion-incomplete.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.saved-events.maximum-cards",
+      "surface": "saved-events",
+      "state": "maximum-cards",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to saved-events.maximum-cards with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.saved-events.maximum-cards and reports render settled",
+      "then": "the level-one heading is “Saved Events”; the window automation root is named “Saved Events” in state “ready”; reading order is heading -> New Event -> Event cards -> Start, Edit, and Delete actions; and the pixels match saved-events.maximum-cards.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.event-card",
+        "component.icon-action",
+        "component.toast"
+      ],
+      "patternReferences": [
+        "patterns/event-identification.md",
+        "patterns/asynchronous-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/saved-events/maximum-cards--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.saved-events.maximum-cards",
+      "visualFixtures": [
+        "saved-events.maximum-cards.standard"
+      ],
+      "responsiveViewportCases": [
+        "saved-events.maximum-cards.compact-aspect",
+        "saved-events.maximum-cards.scale-125-equivalent",
+        "saved-events.maximum-cards.scale-150-equivalent",
+        "saved-events.maximum-cards.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-SAVED-EVENTS"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-SAVED-EVENTS-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: page heading; order: heading -> New Event -> Event cards -> Start, Edit, and Delete actions; return target: not applicable",
+        "announcement": "Saved Events ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}
