@@ -91,16 +91,37 @@ internal sealed class UiVerificationPresentationController :
     {
         var injection = catalog[identity];
         var presentation = InjectedPresentationFactory.Create(injection, request);
+        var itemStatus = request.ExpectedSurfaceStatus ?? injection.ExpectedStatus;
+        var surfaceName = injection.Surface switch
+        {
+            ApplicationSurface.GuestStart => "Guest Start",
+            ApplicationSurface.GuestStartUnavailable => "Guest Start unavailable",
+            ApplicationSurface.OperatorAssistance => "Operator Assistance",
+            _ => injection.ExpectedName,
+        };
+        var state = itemStatus switch
+        {
+            "busy" => "in progress.",
+            "unavailable" => "needs attention.",
+            _ => "ready.",
+        };
+        var focusAutomationId = transition?.FocusAutomationId ??
+            (injection.State == "exit-holding"
+                ? "FotoHavn.ActionButton.ExitEvent"
+                : presentation.ActiveEvent?.GuestStart.RequiresEventSetupCorrection == true
+                    ? "FotoHavn.ActionButton.AssistanceExitOnly"
+                    : null);
         return (
             presentation,
             new(
                 injection.Surface,
                 injection.ExpectedName,
-                injection.ExpectedStatus,
+                itemStatus,
                 injection.Identity,
-                transition?.FocusAutomationId,
-                transition?.Announcement,
-                transition?.AnnouncementPriority));
+                focusAutomationId,
+                transition?.Announcement ?? $"{surfaceName} {state}",
+                transition?.AnnouncementPriority ??
+                    (itemStatus == "unavailable" ? AnnouncementPriority.Assertive : AnnouncementPriority.Polite)));
     }
 }
 
@@ -113,6 +134,8 @@ internal sealed record ApprovedInjection(
 
 internal sealed record UiVerificationRequest(
     string Identity,
+    string? FixtureId = null,
+    string? ExpectedSurfaceStatus = null,
     UiVerificationPresentationData? Presentation = null,
     DateTimeOffset? ClockUtc = null,
     DeterministicCameraOutcome CameraOutcome = DeterministicCameraOutcome.Ready,
@@ -167,8 +190,17 @@ internal static class InjectedPresentationFactory
             ApplicationSurface.SavedEvents => SavedEvents(injection, request),
             ApplicationSurface.EventSetup => EventSetup(injection, request),
             ApplicationSurface.GuestStart => Active(request, GuestCyclePresentation.Start,
-                showsExitConfirmation: injection.State == "exit-confirmation-open"),
-            ApplicationSurface.GuestStartUnavailable => Active(request, GuestUnavailable(injection, request)),
+                showsExitConfirmation: injection.State == "exit-confirmation-open",
+                exitHoldState: injection.State switch
+                {
+                    "exit-holding" => ExitHoldState.Holding,
+                    "exit-hold-cancelled" => ExitHoldState.Cancelled,
+                    _ => ExitHoldState.Idle,
+                }),
+            ApplicationSurface.GuestStartUnavailable => Active(
+                request,
+                GuestUnavailable(injection, request),
+                guestStart: GuestUnavailableStart(injection, request)),
             ApplicationSurface.Capture => Active(request, Capture(injection, request)),
             ApplicationSurface.OperatorAssistance => Active(request, Assistance(injection, request)),
             ApplicationSurface.PhotoStrip => Active(request, PhotoStrip(injection, request)),
@@ -253,9 +285,32 @@ internal static class InjectedPresentationFactory
         UiVerificationRequest request) =>
         new(
             GuestCyclePhase.StartUnavailable,
-            Failure: injection.State.StartsWith("storage-", StringComparison.Ordinal)
+            Failure: request.FixtureId?.Contains("longest-recovery-copy", StringComparison.Ordinal) == true ||
+                injection.State.StartsWith("storage-", StringComparison.Ordinal)
                 ? GuestCycleFailure.StorageUnavailable
                 : GuestCycleFailure.CameraUnavailable);
+
+    private static GuestStartPresentation GuestUnavailableStart(
+        ApprovedInjection injection,
+        UiVerificationRequest request)
+    {
+        var responsiveExitOnly = request.FixtureId?.Contains("longest-recovery-copy", StringComparison.Ordinal) == true;
+        var cameraReady = responsiveExitOnly || injection.State.StartsWith("storage-", StringComparison.Ordinal);
+        var storageReady = !cameraReady;
+        var actionState = injection.State switch
+        {
+            "retrying" => GuestStartActionState.Retrying,
+            "retry-failed" => GuestStartActionState.RetryFailed,
+            _ => GuestStartActionState.Idle,
+        };
+        return GuestStartPresentation.FromReadiness(
+            cameraReady,
+            storageReady,
+            requiresEventSetupCorrection: responsiveExitOnly || injection.State.EndsWith("exit-only", StringComparison.Ordinal)) with
+        {
+            ActionState = actionState,
+        };
+    }
 
     private static GuestCyclePresentation Capture(
         ApprovedInjection injection,
@@ -295,7 +350,17 @@ internal static class InjectedPresentationFactory
         var failure = injection.State.StartsWith("storage-", StringComparison.Ordinal)
             ? GuestCycleFailure.StorageUnavailable
             : GuestCycleFailure.CameraUnavailable;
-        return new(GuestCyclePhase.OperatorAssistance, CompletedCaptures: completed, Failure: failure);
+        return new(
+            GuestCyclePhase.OperatorAssistance,
+            CompletedCaptures: completed,
+            Failure: failure,
+            Recovery: injection.State == "exit-only" ? GuestCycleRecovery.ExitOnly : GuestCycleRecovery.Retry,
+            ActionState: injection.State switch
+            {
+                "retrying" => GuestCycleActionState.Retrying,
+                "retry-failed" => GuestCycleActionState.RetryFailed,
+                _ => GuestCycleActionState.Idle,
+            });
     }
 
     private static GuestCyclePresentation PhotoStrip(
@@ -361,7 +426,9 @@ internal static class InjectedPresentationFactory
     private static ApplicationPresentation Active(
         UiVerificationRequest request,
         GuestCyclePresentation cycle,
-        bool showsExitConfirmation = false)
+        bool showsExitConfirmation = false,
+        GuestStartPresentation? guestStart = null,
+        ExitHoldState exitHoldState = ExitHoldState.Idle)
     {
         var data = request.PresentationData;
         return new(
@@ -375,7 +442,8 @@ internal static class InjectedPresentationFactory
                 new("verification-camera", "FotoHAVN verification Camera"),
                 "verification-stream",
                 showsExitConfirmation,
-                GuestStartPresentation.FromReadiness(true, true),
-                cycle));
+                guestStart ?? GuestStartPresentation.FromReadiness(true, true),
+                cycle,
+                exitHoldState));
     }
 }

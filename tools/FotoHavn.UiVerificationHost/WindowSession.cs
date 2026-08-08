@@ -30,7 +30,14 @@ public sealed class WindowSession : IDisposable
         }
 
         var processName = Path.GetFileNameWithoutExtension(applicationPath);
-        if (Process.GetProcessesByName(processName).Any(candidate => !candidate.HasExited))
+        var existingProcesses = Process.GetProcessesByName(processName);
+        var existingProcessIsRunning = existingProcesses.Any(IsRunning);
+        foreach (var existingProcess in existingProcesses)
+        {
+            existingProcess.Dispose();
+        }
+
+        if (existingProcessIsRunning)
         {
             throw new InvalidOperationException(
                 $"Close every existing {processName} process before producing verification evidence.");
@@ -76,13 +83,60 @@ public sealed class WindowSession : IDisposable
             throw new InvalidOperationException("Windows could not size the FotoHAVN verification window.");
         }
 
-        _ = SetForegroundWindow(Handle);
+        BringToForeground();
         _ = GetClientRect(Handle, out client);
         if (client.Width != physicalWidth || client.Height != physicalHeight)
         {
             throw new InvalidOperationException(
                 $"Requested a {width}x{height} effective client ({physicalWidth}x{physicalHeight} physical), " +
                 $"Windows produced {client.Width}x{client.Height}.");
+        }
+    }
+
+    private static bool IsRunning(Process candidate)
+    {
+        try
+        {
+            return !candidate.HasExited;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return true;
+        }
+    }
+
+    private void BringToForeground()
+    {
+        var foreground = GetForegroundWindow();
+        var currentThread = GetCurrentThreadId();
+        var foregroundThread = foreground == IntPtr.Zero
+            ? 0
+            : GetWindowThreadProcessId(foreground, IntPtr.Zero);
+        var targetThread = GetWindowThreadProcessId(Handle, IntPtr.Zero);
+        var attached = foregroundThread != 0 && foregroundThread != currentThread &&
+            AttachThreadInput(currentThread, foregroundThread, true);
+        var attachedToTarget = targetThread != 0 && targetThread != currentThread &&
+            AttachThreadInput(currentThread, targetThread, true);
+        try
+        {
+            for (var attempt = 0; attempt < 20 && GetForegroundWindow() != Handle; attempt++)
+            {
+                _ = BringWindowToTop(Handle);
+                _ = SetForegroundWindow(Handle);
+                Thread.Sleep(25);
+            }
+            _ = SetFocus(Handle);
+        }
+        finally
+        {
+            if (attached)
+            {
+                _ = AttachThreadInput(currentThread, foregroundThread, false);
+            }
+            if (attachedToTarget)
+            {
+                _ = AttachThreadInput(currentThread, targetThread, false);
+            }
         }
     }
 
@@ -99,7 +153,18 @@ public sealed class WindowSession : IDisposable
         using var physical = new Bitmap(client.Width, client.Height, PixelFormat.Format32bppArgb);
         using (var graphics = Graphics.FromImage(physical))
         {
-            graphics.CopyFromScreen(origin.X, origin.Y, 0, 0, physical.Size, CopyPixelOperation.SourceCopy);
+            var deviceContext = graphics.GetHdc();
+            try
+            {
+                if (!PrintWindow(Handle, deviceContext, PrintWindowClientOnly | PrintWindowRenderFullContent))
+                {
+                    throw new InvalidOperationException("Windows could not render the FotoHAVN client area.");
+                }
+            }
+            finally
+            {
+                graphics.ReleaseHdc(deviceContext);
+            }
         }
 
         if (physical.Width == effectiveWidth && physical.Height == effectiveHeight)
@@ -164,6 +229,8 @@ public sealed class WindowSession : IDisposable
 
     private const uint SwpNoZOrder = 0x0004;
     private const uint SwpShowWindow = 0x0040;
+    private const uint PrintWindowClientOnly = 0x00000001;
+    private const uint PrintWindowRenderFullContent = 0x00000002;
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -193,5 +260,29 @@ public sealed class WindowSession : IDisposable
     private static extern bool SetForegroundWindow(IntPtr window);
 
     [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool BringWindowToTop(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetFocus(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AttachThreadInput(uint attachThread, uint attachToThread, bool attach);
+
+    [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PrintWindow(IntPtr window, IntPtr deviceContext, uint flags);
 }

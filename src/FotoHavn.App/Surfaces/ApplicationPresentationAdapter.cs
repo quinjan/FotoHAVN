@@ -127,6 +127,15 @@ public sealed class GuestStartUnavailableSurface(FrameworkElement root)
     : ProductionSurfaceComposition("FotoHavn.Surface.GuestStartUnavailable", root)
 {
     protected override string AccessibleName(ApplicationPresentation presentation) => "Please call the operator";
+
+    protected override string ItemStatus(ApplicationPresentation presentation) =>
+        presentation.ActiveEvent?.GuestStart.ActionState switch
+        {
+            GuestStartActionState.Retrying => "busy",
+            GuestStartActionState.RetryFailed => "unavailable",
+            _ when presentation.ActiveEvent?.GuestStart.RequiresEventSetupCorrection == true => "unavailable",
+            _ => "ready",
+        };
 }
 
 public sealed class CaptureSurface(FrameworkElement root)
@@ -139,6 +148,15 @@ public sealed class OperatorAssistanceSurface(FrameworkElement root)
     : ProductionSurfaceComposition("FotoHavn.Surface.OperatorAssistance", root)
 {
     protected override string AccessibleName(ApplicationPresentation presentation) => "Please call the operator";
+
+    protected override string ItemStatus(ApplicationPresentation presentation) =>
+        presentation.ActiveEvent?.GuestCycle.ActionState switch
+        {
+            GuestCycleActionState.Retrying => "busy",
+            GuestCycleActionState.RetryFailed => "unavailable",
+            _ when presentation.ActiveEvent?.GuestCycle.Recovery == GuestCycleRecovery.ExitOnly => "unavailable",
+            _ => "ready",
+        };
 }
 
 public sealed class PhotoStripSurface(FrameworkElement root)
