@@ -1,0 +1,67 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.InlineStatus"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="SeverityStates">
+                <VisualState x:Name="Neutral">
+                    <VisualState.Setters>
+                        <Setter Target="StatusText.Foreground" Value="{ThemeResource ColorTextMutedBrush}" />
+                        <Setter Target="StatusIcon.Foreground" Value="{ThemeResource ColorTextMutedBrush}" />
+                        <Setter Target="StatusIcon.Glyph" Value="&#xE946;" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Info">
+                    <VisualState.Setters>
+                        <Setter Target="StatusText.Foreground" Value="{ThemeResource ColorStatusInfoForegroundBrush}" />
+                        <Setter Target="StatusIcon.Foreground" Value="{ThemeResource ColorStatusInfoForegroundBrush}" />
+                        <Setter Target="StatusIcon.Glyph" Value="&#xE946;" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Success">
+                    <VisualState.Setters>
+                        <Setter Target="StatusText.Foreground" Value="{ThemeResource ColorStatusSuccessForegroundBrush}" />
+                        <Setter Target="StatusIcon.Foreground" Value="{ThemeResource ColorStatusSuccessForegroundBrush}" />
+                        <Setter Target="StatusIcon.Glyph" Value="&#xE73E;" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Warning">
+                    <VisualState.Setters>
+                        <Setter Target="StatusText.Foreground" Value="{ThemeResource ColorStatusWarningForegroundBrush}" />
+                        <Setter Target="StatusIcon.Foreground" Value="{ThemeResource ColorStatusWarningForegroundBrush}" />
+                        <Setter Target="StatusIcon.Glyph" Value="&#xE7BA;" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Danger">
+                    <VisualState.Setters>
+                        <Setter Target="StatusText.Foreground" Value="{ThemeResource ColorStatusDangerForegroundBrush}" />
+                        <Setter Target="StatusIcon.Foreground" Value="{ThemeResource ColorStatusDangerForegroundBrush}" />
+                        <Setter Target="StatusIcon.Glyph" Value="&#xEA39;" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <Grid ColumnSpacing="{StaticResource SpaceInline}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <FontIcon
+                x:Name="StatusIcon"
+                Width="{StaticResource IconSmall}"
+                FontFamily="Segoe MDL2 Assets"
+                FontSize="{StaticResource IconSmall}"
+                AutomationProperties.AccessibilityView="Raw" />
+            <TextBlock
+                x:Name="StatusText"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                AutomationProperties.AccessibilityView="Raw"
+                Style="{StaticResource TypeCaptionStyle}"
+                Text="{x:Bind Message, Mode=OneWay}"
+                TextWrapping="Wrap" />
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,47 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.InAppToast"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="DisplayStates">
+                <VisualState x:Name="Closed">
+                    <VisualState.Setters>
+                        <Setter Target="ToastFrame.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Open">
+                    <VisualState.Setters>
+                        <Setter Target="ToastFrame.Visibility" Value="Visible" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <Border
+            x:Name="ToastFrame"
+            Padding="{StaticResource ToastContentPadding}"
+            Background="{ThemeResource ColorSurfaceRaisedBrush}"
+            BorderBrush="{ThemeResource ColorBorderStrongBrush}"
+            BorderThickness="{StaticResource StrokeDefault}"
+            CornerRadius="{StaticResource RadiusPanel}">
+            <Grid ColumnSpacing="{StaticResource SpaceInline}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource TypeBodyDefaultStyle}"
+                    Text="{x:Bind Message, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <Button
+                    Grid.Column="1"
+                    AutomationProperties.Name="Dismiss notification"
+                    Click="DismissClicked"
+                    Content="Dismiss"
+                    Style="{StaticResource FotoHavnActionButtonTertiaryStyle}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
