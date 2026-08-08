@@ -48,12 +48,9 @@
   </Target>
   <Target Name="IncludeWinUIResourcesInPublish" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <ResolvedFileToPublish Include="$(TargetDir)App.xbf">
-        <RelativePath>App.xbf</RelativePath>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </ResolvedFileToPublish>
-      <ResolvedFileToPublish Include="$(TargetDir)MainWindow.xbf">
-        <RelativePath>MainWindow.xbf</RelativePath>
+      <_WinUIXbf Include="$(TargetDir)**\*.xbf" />
+      <ResolvedFileToPublish Include="@(_WinUIXbf)">
+        <RelativePath>%(_WinUIXbf.RecursiveDir)%(_WinUIXbf.Filename)%(_WinUIXbf.Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
       <ResolvedFileToPublish Include="$(TargetDir)$(AssemblyName).pri">

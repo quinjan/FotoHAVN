@@ -6,30 +6,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="/DesignSystem/FotoHavnDesignResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <FontFamily x:Key="FotoHavnFontFamily">ms-appx:///Assets/Fonts/Inter-VariableFont_opsz,wght.ttf#Inter</FontFamily>
-
-            <Color x:Key="CanvasColor">#FFF5F6F7</Color>
-            <Color x:Key="SurfaceColor">#FFFFFFFF</Color>
-            <Color x:Key="TextPrimaryColor">#FF17181A</Color>
-            <Color x:Key="TextMutedColor">#FF686B70</Color>
-            <Color x:Key="HairlineColor">#FFD5D8DC</Color>
-            <Color x:Key="FocusColor">#FF2458D3</Color>
-
-            <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
-            <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
-            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
-            <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
-            <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}" />
-            <SolidColorBrush x:Key="FocusVisualPrimaryBrush" Color="{StaticResource FocusColor}" />
-            <SolidColorBrush x:Key="FocusVisualSecondaryBrush" Color="White" />
-            <SolidColorBrush x:Key="DangerBrush" Color="#FFFF4D4F" />
-            <SolidColorBrush x:Key="EventHoverBrush" Color="#FFFAFAFB" />
-
-            <!-- Motion is opt-in. Later views resolve preferred durations through MotionPolicy. -->
-            <Duration x:Key="FotoHavnStandardMotionDuration">0:0:0</Duration>
-            <Duration x:Key="FotoHavnPreviewFadeDuration">0:0:0</Duration>
 
             <Style TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource FotoHavnFontFamily}" />
