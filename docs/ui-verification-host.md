@@ -32,10 +32,13 @@ labels `fotohavn-ui-verification`, `windows-26200`, `dpi-120`, and
 `FotoHAVN Pinned UI Verification Runner` scheduled task; it is deliberately not
 a Windows service because WinUI screen capture requires an interactive session.
 
-This repository is public. The pinned runner workflow is therefore
-`workflow_dispatch` only and must never be changed to run automatically for a
-pull request, fork, or other untrusted revision. Dispatch the intended branch or
-commit manually from **Actions > UI verification - Batch 3**. Registration
+This repository is public. The pinned runner workflow therefore never runs for
+a pull request, fork, or other untrusted revision. While the workflow is first
+introduced by PR #83, an owner-only `push` trigger is restricted to
+`codex/issue-75-operator-event-management`; this lets that branch bootstrap the
+workflow because GitHub cannot dispatch a new workflow manually until it exists
+on the default branch. After merge, dispatch the intended branch or commit
+manually from **Actions > UI verification - Batch 3**. Registration
 tokens and runner credentials stay on the workstation and are never committed.
 
 ## Build and validate

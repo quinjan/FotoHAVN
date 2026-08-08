@@ -2,6 +2,11 @@ name: UI verification - Batch 3
 
 on:
   workflow_dispatch:
+  # Bootstrap this new workflow from its trusted PR branch. GitHub cannot
+  # dispatch a workflow manually until the file also exists on the default branch.
+  push:
+    branches:
+      - codex/issue-75-operator-event-management
 
 permissions:
   contents: read
@@ -13,6 +18,7 @@ concurrency:
 jobs:
   capture:
     name: Capture 48 pinned fixtures
+    if: github.event_name == 'workflow_dispatch' || github.actor == github.repository_owner
     runs-on:
       - self-hosted
       - Windows

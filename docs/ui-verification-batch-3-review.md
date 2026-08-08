@@ -4,8 +4,8 @@ Date: 2026-08-08
 
 PR: [#83](https://github.com/quinjan/FotoHAVN/pull/83)
 
-The authoritative source commit is recorded by the manually dispatched
-`Batch 3 UI verification` workflow and its uploaded `run.json`. This review was
+The authoritative source commit is recorded by the `Batch 3 UI verification`
+workflow and its uploaded `run.json`. This review was
 completed against the final local pre-commit evidence before that exact-commit
 workflow run.
 
@@ -22,9 +22,10 @@ The verification host accepted the environment without
 The repository runner is named `FotoHAVN-Pinned-UI-QUINJ3875` and has the
 labels `fotohavn-ui-verification`, `windows-26200`, `dpi-120`, and
 `dotnet-10.0.302`. It runs interactively because WinUI screenshot capture
-requires a signed-in desktop. The workflow is manual-only (`workflow_dispatch`)
-because the repository is public; untrusted pull-request code is never
-automatically scheduled on this machine.
+requires a signed-in desktop. The workflow never runs for pull-request or fork
+events. Its bootstrap push trigger is owner-only and restricted to this PR's
+branch; after the workflow reaches the default branch, ordinary evidence runs
+use `workflow_dispatch`.
 
 The host keeps FotoHAVN topmost during capture so screen-copy evidence cannot
 silently capture another application. UI-verification instances use a
@@ -92,7 +93,7 @@ differences are explained and accepted as follows:
 ## Acceptance decision
 
 The local Batch 3 visual and semantic review passes. PR #83 may be marked ready
-only after the manual `Batch 3 UI verification` workflow succeeds on the exact
+only after the `Batch 3 UI verification` workflow succeeds on the exact
 final branch commit and its uploaded artifact independently confirms all 48
 evidence sets, the pinned environment, and zero semantic findings. The stable
 workflow page is
