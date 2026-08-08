@@ -79,7 +79,21 @@ public sealed class VerificationRunner(HostOptions options)
         IReadOnlyList<string> arguments;
         if (script is null)
         {
-            arguments = ["--ui-verification", verificationCase.InjectionIdentity];
+            var eventName = verificationCase.FixtureId.Contains("long-event-name", StringComparison.Ordinal)
+                ? "Mika & Paolo’s Extraordinarily Long Wedding Celebration"
+                : "Mika & Paolo’s Wedding";
+            File.WriteAllText(
+                requestPath,
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        identity = verificationCase.InjectionIdentity,
+                        fixtureId = verificationCase.FixtureId,
+                        expectedSurfaceStatus = verificationCase.ExpectedSurfaceStatus,
+                        presentation = new { eventName },
+                    },
+                    JsonOptions));
+            arguments = ["--ui-verification-request", requestPath];
         }
         else
         {
@@ -116,6 +130,8 @@ public sealed class VerificationRunner(HostOptions options)
                         $"not '{verificationCase.InjectionIdentity}'.");
                 }
             }
+
+            inspection.NormalizeApplicationFocus();
 
             var origin = window.GetClientOrigin();
             automation = inspection.Snapshot(

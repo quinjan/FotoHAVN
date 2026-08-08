@@ -1,0 +1,63 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.GuardedExitAction"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Button
+            x:Name="HoldButton"
+        MinHeight="{StaticResource TargetOperatorMinimum}"
+        AutomationProperties.AutomationId="FotoHavn.ActionButton.ExitEvent"
+        AutomationProperties.HelpText="Keep holding for 1.5 seconds to open Exit Event confirmation."
+        AutomationProperties.Name="Hold to exit event"
+        PreviewKeyDown="HoldButtonKeyDown"
+        PreviewKeyUp="HoldButtonKeyUp"
+        PointerCaptureLost="HoldButtonPointerCaptureLost"
+        PointerExited="HoldButtonPointerExited"
+        PointerPressed="HoldButtonPointerPressed"
+        PointerReleased="HoldButtonPointerReleased"
+        TabIndex="10"
+        Style="{StaticResource FotoHavnActionButtonTertiaryStyle}">
+        <Grid>
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
+                <FontIcon
+                    x:Name="ExitGlyph"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="{StaticResource IconSmall}"
+                    Glyph="&#xE8D7;" />
+                <TextBlock
+                    x:Name="LabelText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource TypeLabelControlStyle}"
+                    Text="Exit Event" />
+                <FontIcon
+                    x:Name="HoldingIndicator"
+                    Width="{StaticResource IconSmall}"
+                    Height="{StaticResource IconSmall}"
+                    AutomationProperties.AccessibilityView="Raw"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="{StaticResource IconSmall}"
+                    Glyph="&#xE72C;"
+                    Visibility="Collapsed" />
+            </StackPanel>
+            <ProgressBar
+                x:Name="HoldProgress"
+                Margin="-16,0,-16,-12"
+                VerticalAlignment="Bottom"
+                AutomationProperties.AccessibilityView="Raw"
+                IsTabStop="False"
+                Maximum="1"
+                Minimum="0"
+                Style="{StaticResource FotoHavnProgressBarStyle}"
+                Value="0"
+                Visibility="Collapsed" />
+            </Grid>
+        </Button>
+        <TextBlock
+            x:Name="HoldAnnouncement"
+            Width="{StaticResource IconSmall}"
+            Height="{StaticResource IconSmall}"
+            AutomationProperties.AutomationId="FotoHavn.Announcement.ExitHold"
+            AutomationProperties.LiveSetting="Polite"
+            Opacity="0" />
+    </Grid>
+</UserControl>
