@@ -60,6 +60,9 @@ jobs:
         run: |
           $app = Resolve-Path "artifacts/dotnet-ui/bin/FotoHavn.App/debug_win-x64/FotoHAVN.exe"
           $hostExe = Resolve-Path "artifacts/dotnet-host/bin/FotoHavn.UiVerificationHost/debug_win-x64/FotoHavn.UiVerificationHost.exe"
+          # Exit 1 means the exact-pixel comparator needs human review. Keep
+          # PowerShell 7.6 from terminating before we can apply that contract.
+          $PSNativeCommandUseErrorActionPreference = $false
           & $hostExe --repository-root . --app $app --output artifacts/ui-verification/batch-3 --completed-through-batch 3
           $hostExit = $LASTEXITCODE
           "host_exit_code=$hostExit" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
