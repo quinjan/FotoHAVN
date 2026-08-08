@@ -7,12 +7,16 @@ namespace FotoHavn.App.Controls;
 
 public sealed partial class EventCard : UserControl
 {
+    private XamlRoot? observedXamlRoot;
+
     public event EventHandler<EventCardActionEventArgs>? ActionRequested;
 
     public EventCard()
     {
         InitializeComponent();
         AutomationProperties.SetAutomationId(this, SemanticAutomationIds.EventCard);
+        Loaded += EventCardLoaded;
+        Unloaded += EventCardUnloaded;
     }
 
     public string CompactEventId => Presentation?.EventId is { } eventId ? FormatCompactEventId(eventId.Value) : string.Empty;
@@ -22,6 +26,45 @@ public sealed partial class EventCard : UserControl
         : string.Empty;
 
     private EventTilePresentation? Presentation => DataContext as EventTilePresentation;
+
+    private void EventCardLoaded(object sender, RoutedEventArgs args)
+    {
+        if (XamlRoot is { } root && root != observedXamlRoot)
+        {
+            observedXamlRoot = root;
+            root.Changed += XamlRootChanged;
+        }
+
+        ApplyResponsiveLayout();
+    }
+
+    private void EventCardUnloaded(object sender, RoutedEventArgs args)
+    {
+        if (observedXamlRoot is { } root)
+        {
+            root.Changed -= XamlRootChanged;
+            observedXamlRoot = null;
+        }
+    }
+
+    private void XamlRootChanged(XamlRoot sender, XamlRootChangedEventArgs args) => ApplyResponsiveLayout();
+
+    private void ApplyResponsiveLayout()
+    {
+        if (XamlRoot is not { } root)
+        {
+            return;
+        }
+
+        var stress = ResponsiveLayout.Resolve(root.Size.Width, root.Size.Height) == ResponsiveLayoutMode.Stress;
+        Height = stress ? 168 : 256;
+        CardActionsColumn.Width = stress ? GridLength.Auto : new GridLength(0);
+        Grid.SetRow(CardActions, stress ? 0 : 4);
+        Grid.SetRowSpan(CardActions, stress ? 5 : 1);
+        Grid.SetColumn(CardActions, stress ? 1 : 0);
+        CardActions.Margin = stress ? new Thickness(24, 0, 0, 0) : new Thickness(0);
+        CardActions.VerticalAlignment = stress ? VerticalAlignment.Center : VerticalAlignment.Bottom;
+    }
 
     private void EventCardDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args) => ApplyPresentation();
 

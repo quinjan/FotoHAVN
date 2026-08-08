@@ -17,7 +17,7 @@
             x:Name="SavedEventCardRoot"
             Style="{StaticResource FotoHavnEventCardPanelStyle}"
             Visibility="Collapsed">
-            <Grid>
+            <Grid x:Name="CardLayout">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -25,6 +25,10 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="CardActionsColumn" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
                     x:Name="EventNameText"
                     AutomationProperties.HeadingLevel="Level2"
@@ -43,14 +47,19 @@
                     Grid.Row="3"
                     Foreground="{ThemeResource ColorTextMutedBrush}"
                     Style="{StaticResource TypeCaptionStyle}" />
-                <Grid Grid.Row="4">
+                <Grid x:Name="CardActions" Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <Button
                         x:Name="StartButton"
                         HorizontalAlignment="Left"
                         Click="StartClicked"
                         Content="Start Event"
                         Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
-                    <StackPanel AutomationProperties.Name="Start, Edit, and Delete actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
+                    <StackPanel Grid.Column="2" AutomationProperties.Name="Start, Edit, and Delete actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
                         <Button
                             x:Name="RetryButton"
                             Click="RetryClicked"

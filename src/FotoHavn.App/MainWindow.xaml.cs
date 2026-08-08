@@ -95,6 +95,18 @@ public sealed partial class MainWindow : Window
         SetupDialog.Margin = new(mode == ResponsiveLayoutMode.Standard ? 40 : 16);
         SetupContentGrid.Padding = new(mode == ResponsiveLayoutMode.Stress ? 16 : 34);
         var stacksSetup = mode != ResponsiveLayoutMode.Standard;
+        var stress = mode == ResponsiveLayoutMode.Stress;
+        foreach (var confirmation in new[]
+        {
+            ExitConfirmationFrame,
+            DeletionConfirmationFrame,
+            StartConfirmationFrame,
+            DiscardConfirmationFrame,
+            SaveConfirmationFrame,
+        })
+        {
+            confirmation.ApplyResponsiveLayout(stress);
+        }
         ReparentSetupPreview(stacksSetup);
         SetupFieldsColumn.Width = new(stacksSetup ? 1 : 410, stacksSetup ? GridUnitType.Star : GridUnitType.Pixel);
         SetupGapColumn.Width = new(stacksSetup ? 0 : 32);
@@ -106,15 +118,15 @@ public sealed partial class MainWindow : Window
         SetupCameraViewport.MaxWidth = stacksSetup ? 378 : 588;
         SetupCameraViewport.Height = stacksSetup ? 252 : 392;
         SetupCameraViewport.HorizontalAlignment = stacksSetup ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
-        SetupCommitActions.Orientation = mode == ResponsiveLayoutMode.Stress ? Orientation.Vertical : Orientation.Horizontal;
-        SetupCommitActions.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
+        SetupCommitActions.Orientation = Orientation.Horizontal;
+        SetupCommitActions.HorizontalAlignment = HorizontalAlignment.Right;
         foreach (var action in SetupCommitActions.Children.OfType<FrameworkElement>())
         {
-            action.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
+            action.HorizontalAlignment = HorizontalAlignment.Right;
         }
-        Grid.SetRow(SetupCommitActions, mode == ResponsiveLayoutMode.Stress ? 1 : 0);
-        SetupCommitActions.Margin = mode == ResponsiveLayoutMode.Stress ? new(0, 10, 0, 0) : new(0);
-        CancelSetupButton.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        Grid.SetRow(SetupCommitActions, 0);
+        SetupCommitActions.Margin = new(0);
+        CancelSetupButton.HorizontalAlignment = HorizontalAlignment.Left;
 
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -130,7 +142,7 @@ public sealed partial class MainWindow : Window
                 var availableWidth = Math.Max(280, width - (horizontalPadding * 2));
                 panel.MaximumRowsOrColumns = columns;
                 panel.ItemWidth = Math.Max(280, (availableWidth - ((columns - 1) * 18)) / columns);
-                panel.ItemHeight = 274;
+                panel.ItemHeight = mode == ResponsiveLayoutMode.Stress ? 186 : 274;
             }
         });
     }
@@ -139,13 +151,13 @@ public sealed partial class MainWindow : Window
     {
         if (stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is Grid)
         {
-            SetupContentGrid.Children.Remove(SetupPreviewPanel);
+            SetupBodyGrid.Children.Remove(SetupPreviewPanel);
             SetupFieldGroups.Children.Insert(2, SetupPreviewPanel);
         }
         else if (!stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is StackPanel)
         {
             SetupFieldGroups.Children.Remove(SetupPreviewPanel);
-            SetupContentGrid.Children.Add(SetupPreviewPanel);
+            SetupBodyGrid.Children.Add(SetupPreviewPanel);
         }
     }
 

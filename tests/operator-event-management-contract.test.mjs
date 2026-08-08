@@ -62,18 +62,52 @@ test("setup feedback is field-owned, successful fields stay quiet, and storage s
 test("operator surfaces reflow instead of preserving a fixed 1280 by 720 canvas", () => {
   const mainWindow = readFileSync(path.join(app, "MainWindow.xaml"), "utf8");
   const behavior = readFileSync(path.join(app, "MainWindow.xaml.cs"), "utf8");
+  const eventCard = readFileSync(path.join(controls, "EventCard.xaml.cs"), "utf8");
 
   assert.doesNotMatch(mainWindow, /x:Name="FixedCanvas"[\s\S]{0,160}Width="1280"/);
   assert.match(mainWindow, /SizeChanged="OperatorCanvasSizeChanged"/);
   assert.match(mainWindow, /x:Name="SetupScrollViewer"/);
   assert.match(behavior, /ResponsiveLayoutMode\.Stress/);
   assert.match(behavior, /MaximumRowsOrColumns/);
+  assert.match(eventCard, /Height\s*=\s*stress\s*\?\s*168\s*:\s*256/);
+  assert.match(eventCard, /CardActionsColumn/);
+  assert.match(
+    mainWindow,
+    /x:Name="SetupScrollViewer"[\s\S]*<\/ScrollViewer>[\s\S]*x:Name="SetupFooter"/,
+    "setup header and footer must remain outside the scrolling body",
+  );
 });
 
 test("all operator confirmations share the responsive modal shell", () => {
   const mainWindow = readFileSync(path.join(app, "MainWindow.xaml"), "utf8");
-  const matches = mainWindow.match(/<controls:ConfirmationDialogFrame\b/g) ?? [];
+  const modalFrame = readFileSync(path.join(controls, "ConfirmationDialogFrame.cs"), "utf8");
+  const matches = mainWindow.match(/<controls:ConfirmationDialogFrame(?:\s|>)/g) ?? [];
   assert.equal(matches.length, 5);
+  assert.match(modalFrame, /previousFocus/);
+  assert.match(modalFrame, /AccessibilityView\.Raw/);
+  assert.match(modalFrame, /VirtualKey\.Tab/);
+  assert.match(modalFrame, /VirtualKey\.Escape/);
+});
+
+test("the verification host pins this workstation as the canonical evidence environment", () => {
+  const pinned = JSON.parse(readFileSync(path.join(
+    root,
+    "tools",
+    "FotoHavn.UiVerificationHost",
+    "pinned-environment.json",
+  ), "utf8"));
+
+  assert.deepEqual(pinned, {
+    windowsBuild: 26200,
+    osArchitecture: "X64",
+    processArchitecture: "X64",
+    dotnetSdk: "10.0.302",
+    culture: "en-PH",
+    uiCulture: "en-US",
+    dpi: 120,
+    theme: "Light",
+    fontSmoothing: "ClearType",
+  });
 });
 
 test("batch 3 owns exactly 48 canonical and responsive fixtures", () => {

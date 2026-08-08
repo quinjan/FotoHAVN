@@ -200,6 +200,7 @@
     <Thickness x:Key="ToastContentPadding">16,12</Thickness>
     <Thickness x:Key="AppHeaderPadding">48,0</Thickness>
     <Thickness x:Key="EventCardPadding">22</Thickness>
+    <Thickness x:Key="ModalDialogPadding">32</Thickness>
     <Thickness x:Key="CaptureGuideMargin">12</Thickness>
     <Thickness x:Key="DirtyIndicatorMargin">1</Thickness>
     <!-- Approved Modal Dialog contract dimensions (500 px decision, 440 px acknowledgement). -->
@@ -354,32 +355,6 @@
         <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
         <Setter Property="Opacity" Value="0.82" />
     </Style>
-    <Style TargetType="controls:ConfirmationDialogFrame">
-        <Setter Property="MaxWidth" Value="{StaticResource ModalDialogMaximumWidth}" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="24" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="controls:ConfirmationDialogFrame">
-                    <ScrollViewer
-                        HorizontalScrollBarVisibility="Disabled"
-                        HorizontalScrollMode="Disabled"
-                        VerticalScrollBarVisibility="Auto"
-                        VerticalScrollMode="Enabled"
-                        ZoomMode="Disabled">
-                        <Border
-                            Padding="{StaticResource SpaceDialog}"
-                            Background="{ThemeResource ColorSurfaceRaisedBrush}"
-                            CornerRadius="{StaticResource RadiusDialog}">
-                            <ContentPresenter Content="{TemplateBinding Content}" />
-                        </Border>
-                    </ScrollViewer>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- Compatibility aliases for surfaces migrating in later rollout batches. -->
     <SolidColorBrush x:Key="CanvasBrush" Color="#FFF5F6F7" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFFFF" />
