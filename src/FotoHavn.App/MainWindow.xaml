@@ -41,10 +41,11 @@
                 </ScrollViewer.Resources>
                 <StackPanel x:Name="SavedEventsContent" MaxWidth="1280" Padding="48,32,48,36" HorizontalAlignment="Stretch">
                     <Grid>
-                        <TextBlock
+                        <controls:FocusableHeading
                             x:Name="HeadingText"
+                            AutomationProperties.AutomationId="HeadingText"
                             AutomationProperties.HeadingLevel="Level1"
-                            Style="{StaticResource TypeHeadingPageStyle}"
+                            TextStyle="{StaticResource TypeHeadingPageStyle}"
                             Text="Saved Events" />
                         <Button
                             x:Name="NewEventButton"
@@ -53,7 +54,14 @@
                             Content="New Event"
                             Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
                     </Grid>
-                    <ItemsControl x:Name="EventTiles" Margin="0,20,0,0" AutomationProperties.Name="Event cards">
+                    <controls:StatusCallout
+                        x:Name="SavedEventsDeletionStatus"
+                        Margin="0,20,0,0"
+                        Message="Deletion did not finish. Review the Event and try again."
+                        Severity="Danger"
+                        Title="Needs attention"
+                        Visibility="Collapsed" />
+                    <ItemsControl x:Name="EventTiles" Margin="0,20,0,0" HorizontalAlignment="Left" AutomationProperties.Name="Event cards">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
@@ -98,7 +106,7 @@
                             <Button
                                 x:Name="ExitEventButton"
                                 MinWidth="96"
-                                MinHeight="44"
+                                MinHeight="48"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 AutomationProperties.Name="Exit Event"
@@ -280,7 +288,7 @@
                     <Button
                         x:Name="AssistanceExitEventButton"
                         MinWidth="96"
-                        MinHeight="44"
+                        MinHeight="48"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         AutomationProperties.Name="Exit Event"
@@ -350,16 +358,19 @@
                     <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
                         <StackPanel Spacing="20">
-                            <FontIcon AutomationProperties.Name="Semantic icon" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7E8;" />
-                            <TextBlock AutomationProperties.HeadingLevel="Level1" FontSize="24" FontWeight="SemiBold" Text="Exit this Event?" />
+                            <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
+                            <controls:FocusableHeading x:Name="ExitEventTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="ExitEventTitleText" FontSize="32" FontWeight="Bold" Text="Exit this Event?" TextAlignment="Center" />
                             <TextBlock
+                                HorizontalAlignment="Center"
                                 AutomationProperties.Name="Consequence when present"
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Text="The Camera will be released and FotoHAVN will return to Saved Events."
+                                TextAlignment="Center"
                                 TextWrapping="Wrap" />
-                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                                <Button AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
+                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
+                                <Button x:Name="CancelExitEventButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
                                 <Button
+                                    x:Name="ConfirmExitEventButton"
                                     AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
                                     Click="ConfirmExitEventClicked"
                                     Content="Exit Event"
@@ -379,22 +390,29 @@
                 <controls:ConfirmationDialogFrame x:Name="DeletionConfirmationFrame">
                     <controls:ConfirmationDialogFrame.DialogContent>
                     <StackPanel Spacing="20">
-                        <FontIcon AutomationProperties.Name="Semantic icon" FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" />
-                        <TextBlock
+                        <controls:DialogSemanticIcon x:Name="EventDeletionSemanticIcon" HorizontalAlignment="Center" Glyph="&#xE74D;" Intent="Destructive" />
+                        <controls:FocusableHeading
                             x:Name="EventDeletionTitleText"
+                            HorizontalAlignment="Center"
+                            AutomationProperties.AutomationId="EventDeletionTitleText"
                             AutomationProperties.HeadingLevel="Level1"
-                            FontSize="24"
-                            FontWeight="SemiBold"
-                            TextWrapping="Wrap" />
+                            FontSize="32"
+                            FontWeight="Bold"
+                            TextAlignment="Center" />
                         <TextBlock
                             x:Name="EventDeletionMessageText"
+                            HorizontalAlignment="Center"
                             AutomationProperties.Name="Consequence when present"
                             Foreground="{StaticResource TextMutedBrush}"
+                            TextAlignment="Center"
                             TextWrapping="Wrap" />
-                        <StackPanel AutomationProperties.Name="Event identity when relevant" Spacing="4">
-                            <TextBlock x:Name="EventDeletionEventNameText" Style="{StaticResource TypeLabelControlStyle}" TextWrapping="Wrap" />
-                            <TextBlock x:Name="EventDeletionIdentityText" Style="{StaticResource TypeCaptionStyle}" TextWrapping="Wrap" />
-                        </StackPanel>
+                        <controls:DialogEventIdentity x:Name="EventDeletionIdentity" />
+                        <controls:StatusCallout
+                            x:Name="EventDeletionFailureStatus"
+                            Message="Deletion did not finish. Review the Event and try again."
+                            Severity="Danger"
+                            Title="Needs attention"
+                            Visibility="Collapsed" />
                         <ProgressRing
                             x:Name="EventDeletionProgressRing"
                             Width="36"
@@ -405,7 +423,7 @@
                         <StackPanel
                             x:Name="EventDeletionActions"
                             AutomationProperties.Name="Dialog actions"
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Stretch"
                             Orientation="Horizontal"
                             Spacing="10">
                             <Button
@@ -434,25 +452,32 @@
                 <controls:ConfirmationDialogFrame x:Name="StartConfirmationFrame">
                     <controls:ConfirmationDialogFrame.DialogContent>
                     <StackPanel Spacing="20">
-                        <FontIcon AutomationProperties.Name="Semantic icon" FontFamily="Segoe MDL2 Assets" Glyph="&#xF5B0;" />
-                        <TextBlock
+                        <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xF5B0;" />
+                        <controls:FocusableHeading
                             x:Name="StartEventConfirmationText"
+                            HorizontalAlignment="Center"
+                            AutomationProperties.AutomationId="StartEventConfirmationText"
                             AutomationProperties.HeadingLevel="Level1"
-                            FontSize="24"
-                            FontWeight="SemiBold"
-                            TextWrapping="Wrap" />
+                            FontSize="32"
+                            FontWeight="Bold"
+                            TextAlignment="Center" />
                         <TextBlock
                             AutomationProperties.Name="Consequence when present"
                             Foreground="{StaticResource TextMutedBrush}"
                             Text="FotoHAVN will confirm the Camera bound to this Event and storage before starting."
-                            TextWrapping="Wrap" />
-                        <StackPanel AutomationProperties.Name="Event identity when relevant" Spacing="4">
-                            <TextBlock x:Name="StartEventNameText" Style="{StaticResource TypeLabelControlStyle}" TextWrapping="Wrap" />
-                            <TextBlock x:Name="StartEventIdentityText" Style="{StaticResource TypeCaptionStyle}" TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                            <Button AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelStartEventClicked" Content="Cancel" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
+                            TextWrapping="Wrap"
+                            Visibility="Collapsed" />
+                        <controls:DialogEventIdentity x:Name="StartEventIdentity" />
+                        <controls:StatusCallout
+                            x:Name="StartEventFailureStatus"
+                            Message="The action did not finish. Review the Event and try again."
+                            Severity="Danger"
+                            Title="Needs attention"
+                            Visibility="Collapsed" />
+                        <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
+                            <Button x:Name="CancelStartEventButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelStartEventClicked" Content="Cancel" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
                             <Button
+                                x:Name="ConfirmStartEventButton"
                                 AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
                                 Click="ConfirmStartEventClicked"
                                 Content="Start Event"
@@ -482,7 +507,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="80" />
+                            <RowDefinition x:Name="SetupFooterRow" Height="80" />
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.ColumnSpan="3" Spacing="4">
@@ -491,12 +516,13 @@
                                 FontSize="9"
                                 FontWeight="Bold"
                                 Text="EVENT SETUP" />
-                            <TextBlock
+                            <controls:FocusableHeading
                                 x:Name="SetupTitleText"
+                                AutomationProperties.AutomationId="SetupTitleText"
                                 AutomationProperties.HeadingLevel="Level1"
                                 Margin="0,6,0,0"
-                                FontSize="28"
-                                FontWeight="SemiBold"
+                                FontSize="32"
+                                FontWeight="Bold"
                                 Text="New Event" />
                             <TextBlock
                                 x:Name="EventSetupIdentityText"
@@ -504,8 +530,9 @@
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Style="{StaticResource TypeCaptionStyle}" />
                             <TextBlock
+                                x:Name="SetupIntroductionText"
                                 Foreground="{StaticResource TextMutedBrush}"
-                                Text="Name the Event and choose its Camera." />
+                                Text="Name the Event and choose its Camera and Printer." />
                         </StackPanel>
 
                         <ScrollViewer
@@ -518,110 +545,133 @@
                             ZoomMode="Disabled">
                             <Grid x:Name="SetupBodyGrid" Margin="0,28,0,0">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition x:Name="SetupFieldsColumn" Width="410" />
-                                    <ColumnDefinition x:Name="SetupGapColumn" Width="32" />
+                                    <ColumnDefinition x:Name="SetupFieldsColumn" Width="*" />
+                                    <ColumnDefinition x:Name="SetupGapColumn" Width="34" />
                                     <ColumnDefinition x:Name="SetupPreviewColumn" Width="*" />
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                        <StackPanel x:Name="SetupFieldsPanel" Spacing="12">
-                            <Border
-                                MaxWidth="410"
-                                Padding="16"
-                                HorizontalAlignment="Stretch"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                                <StackPanel x:Name="SetupFieldGroups" Spacing="18">
-                                    <controls:SetupFieldGroup x:Name="EventNameFieldGroup" AutomationProperties.Name="Event name" Label="Event name">
-                                        <controls:SetupFieldGroup.FieldContent>
-                                            <TextBox
-                                                x:Name="EventNameTextBox"
-                                                HorizontalAlignment="Stretch"
-                                                AutomationProperties.Name="Event name"
-                                                PlaceholderText="Enter Event name"
-                                                Style="{StaticResource FotoHavnTextFieldStyle}"
-                                                TextChanged="EventNameTextChanged" />
-                                        </controls:SetupFieldGroup.FieldContent>
-                                        <controls:SetupFieldGroup.HelperContent>
-                                            <TextBlock
-                                                Foreground="{StaticResource TextMutedBrush}"
-                                                Style="{StaticResource TypeCaptionStyle}"
-                                                Text="Names do not need to be unique." />
-                                        </controls:SetupFieldGroup.HelperContent>
-                                    </controls:SetupFieldGroup>
+                                <controls:SetupFieldGroup
+                                    x:Name="EventIdentityFieldGroup"
+                                    Grid.Row="0"
+                                    Margin="0,0,0,18"
+                                    AutomationProperties.Name="Event identity"
+                                    Label="Event ID"
+                                    Visibility="Collapsed">
+                                    <controls:SetupFieldGroup.FieldContent>
+                                        <TextBlock
+                                            x:Name="EventIdentityValueText"
+                                            AutomationProperties.Name="Full Event ID"
+                                            Style="{StaticResource FotoHavnReadOnlyValueStyle}"
+                                            TextWrapping="Wrap" />
+                                    </controls:SetupFieldGroup.FieldContent>
+                                </controls:SetupFieldGroup>
 
-                                    <controls:SetupFieldGroup x:Name="CameraFieldGroup" AutomationProperties.Name="Camera and status" Label="Camera">
-                                        <controls:SetupFieldGroup.FieldContent>
-                                            <ComboBox
-                                                x:Name="CameraComboBox"
-                                                HorizontalAlignment="Stretch"
-                                                AutomationProperties.Name="Camera"
-                                                DisplayMemberPath="DisplayName"
-                                                MaxDropDownHeight="230"
-                                                PlaceholderText="Select Camera"
-                                                SelectionChanged="CameraSelectionChanged"
-                                                Style="{StaticResource FotoHavnSelectFieldStyle}" />
-                                        </controls:SetupFieldGroup.FieldContent>
-                                        <controls:SetupFieldGroup.HelperContent>
-                                            <TextBlock
-                                                Foreground="{StaticResource TextMutedBrush}"
-                                                Style="{StaticResource TypeCaptionStyle}"
-                                                Text="Only available Cameras are shown." />
-                                        </controls:SetupFieldGroup.HelperContent>
-                                    </controls:SetupFieldGroup>
+                                <controls:SetupFieldGroup x:Name="EventNameFieldGroup" Grid.Row="1" Margin="0,0,0,18" AutomationProperties.Name="Event name" Label="Event name">
+                                    <controls:SetupFieldGroup.FieldContent>
+                                        <TextBox
+                                            x:Name="EventNameTextBox"
+                                            HorizontalAlignment="Stretch"
+                                            AutomationProperties.Name="Event name"
+                                            PlaceholderText="Enter Event name"
+                                            Style="{StaticResource FotoHavnTextFieldStyle}"
+                                            TextChanged="EventNameTextChanged" />
+                                    </controls:SetupFieldGroup.FieldContent>
+                                    <controls:SetupFieldGroup.HelperContent>
+                                        <TextBlock
+                                            x:Name="EventNameHelperText"
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            Style="{StaticResource TypeCaptionStyle}"
+                                            Text="Names do not need to be unique."
+                                            Visibility="Collapsed" />
+                                    </controls:SetupFieldGroup.HelperContent>
+                                </controls:SetupFieldGroup>
 
-                                    <controls:SetupFieldGroup AutomationProperties.Name="Printer" Label="Printer (optional)">
-                                        <controls:SetupFieldGroup.FieldContent>
-                                            <TextBlock Style="{StaticResource FotoHavnReadOnlyValueStyle}" Text="Not printing" />
-                                        </controls:SetupFieldGroup.FieldContent>
-                                    </controls:SetupFieldGroup>
+                                <controls:SetupFieldGroup x:Name="CameraFieldGroup" Grid.Row="2" Margin="0,0,0,18" AutomationProperties.Name="Camera and status" Label="Camera">
+                                    <controls:SetupFieldGroup.FieldContent>
+                                        <ComboBox
+                                            x:Name="CameraComboBox"
+                                            HorizontalAlignment="Stretch"
+                                            AutomationProperties.Name="Camera"
+                                            DisplayMemberPath="DisplayName"
+                                            MaxDropDownHeight="230"
+                                            PlaceholderText="Select Camera"
+                                            SelectionChanged="CameraSelectionChanged"
+                                            Style="{StaticResource FotoHavnSelectFieldStyle}" />
+                                    </controls:SetupFieldGroup.FieldContent>
+                                    <controls:SetupFieldGroup.HelperContent>
+                                        <TextBlock
+                                            x:Name="CameraHelperText"
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            Style="{StaticResource TypeCaptionStyle}"
+                                            Text="Only available Cameras are shown."
+                                            Visibility="Collapsed" />
+                                    </controls:SetupFieldGroup.HelperContent>
+                                </controls:SetupFieldGroup>
 
-                                    <controls:SetupFieldGroup x:Name="StorageFieldGroup" AutomationProperties.Name="Storage" Label="Storage">
-                                        <controls:SetupFieldGroup.FieldContent>
-                                            <TextBlock Style="{StaticResource FotoHavnReadOnlyValueStyle}" Text="C:\Program Files\FotoHAVN\Events" />
-                                        </controls:SetupFieldGroup.FieldContent>
-                                        <controls:SetupFieldGroup.HelperContent>
-                                            <TextBlock
-                                                Foreground="{StaticResource TextMutedBrush}"
-                                                Style="{StaticResource TypeCaptionStyle}"
-                                                Text="Requires at least 1 GB free." />
-                                        </controls:SetupFieldGroup.HelperContent>
-                                    </controls:SetupFieldGroup>
+                                <StackPanel
+                                    x:Name="SetupPreviewPanel"
+                                    Grid.Row="0"
+                                    Grid.RowSpan="7"
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="Camera preview">
+                                    <controls:CameraViewport
+                                        x:Name="SetupCameraViewport"
+                                        HorizontalAlignment="Stretch"
+                                        IsMirrored="True"
+                                        Mode="SetupPreview"
+                                        SizeChanged="SetupCameraViewportSizeChanged"
+                                        Status="Unavailable" />
                                 </StackPanel>
-                            </Border>
 
-                            <Border
-                                x:Name="SetupFailureBorder"
-                                Padding="12"
-                                Background="#FFFFF4F2"
-                                BorderBrush="#FFD58B82"
-                                BorderThickness="1"
-                                CornerRadius="7"
-                                Visibility="Collapsed">
-                                <StackPanel Spacing="10">
-                                    <TextBlock
-                                        x:Name="SetupFailureText"
-                                        Foreground="#FF74342D"
-                                        TextWrapping="Wrap" />
-                                    <Button
-                                        x:Name="RetryStorageButton"
-                                        HorizontalAlignment="Left"
-                                        Click="RetryStorageClicked"
-                                        Content="Check storage again"
-                                        Visibility="Collapsed" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
+                                <controls:SetupFieldGroup x:Name="PrinterFieldGroup" Grid.Row="3" Margin="0,0,0,18" AutomationProperties.Name="Printer" Label="Printer (optional)">
+                                    <controls:SetupFieldGroup.FieldContent>
+                                        <TextBlock Style="{StaticResource FotoHavnReadOnlyValueStyle}" Text="Not printing" />
+                                    </controls:SetupFieldGroup.FieldContent>
+                                </controls:SetupFieldGroup>
 
-                        <StackPanel x:Name="SetupPreviewPanel" Grid.Column="2" Spacing="8">
-                            <TextBlock FontWeight="SemiBold" Text="Live preview" />
-                            <controls:CameraViewport
-                                x:Name="SetupCameraViewport"
-                                IsMirrored="True"
-                                Mode="SetupPreview"
-                                Status="Unavailable" />
-                        </StackPanel>
+                                <controls:SetupFieldGroup x:Name="StorageFieldGroup" Grid.Row="4" Margin="0,0,0,18" AutomationProperties.Name="Storage" Label="Storage">
+                                    <controls:SetupFieldGroup.FieldContent>
+                                        <TextBlock Style="{StaticResource FotoHavnReadOnlyValueStyle}" Text="C:\Program Files\FotoHAVN\Events" />
+                                    </controls:SetupFieldGroup.FieldContent>
+                                    <controls:SetupFieldGroup.HelperContent>
+                                        <TextBlock
+                                            Foreground="{StaticResource TextMutedBrush}"
+                                            Style="{StaticResource TypeCaptionStyle}"
+                                            Text="Requires at least 1 GB free." />
+                                    </controls:SetupFieldGroup.HelperContent>
+                                </controls:SetupFieldGroup>
+
+                                <Border
+                                    x:Name="SetupFailureBorder"
+                                    Grid.Row="5"
+                                    Padding="12"
+                                    Background="#FFFFF4F2"
+                                    BorderBrush="#FFD58B82"
+                                    BorderThickness="1"
+                                    CornerRadius="7"
+                                    Visibility="Collapsed">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock
+                                            x:Name="SetupFailureText"
+                                            Foreground="#FF74342D"
+                                            TextWrapping="Wrap" />
+                                        <Button
+                                            x:Name="RetryStorageButton"
+                                            HorizontalAlignment="Left"
+                                            Click="RetryStorageClicked"
+                                            Content="Check storage again"
+                                            Visibility="Collapsed" />
+                                    </StackPanel>
+                                </Border>
 
                             </Grid>
                         </ScrollViewer>
@@ -642,19 +692,21 @@
 
                 <Grid
                     x:Name="DiscardDraftLayer"
-                    Background="#B817181A"
+                    Background="#8A17181A"
                     Visibility="Collapsed">
                     <controls:ConfirmationDialogFrame x:Name="DiscardConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
                         <StackPanel Spacing="18">
-                            <FontIcon AutomationProperties.Name="Semantic icon" FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;" />
-                            <TextBlock x:Name="DiscardTitleText" AutomationProperties.HeadingLevel="Level1" FontSize="24" FontWeight="SemiBold" Text="Discard this draft?" />
+                            <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE711;" Intent="Destructive" />
+                            <controls:FocusableHeading x:Name="DiscardTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="DiscardTitleText" FontSize="32" FontWeight="Bold" Text="Discard this draft?" TextAlignment="Center" />
                             <TextBlock
+                                HorizontalAlignment="Center"
                                 AutomationProperties.Name="Consequence when present"
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Text="Your unsaved Event changes will be lost."
+                                TextAlignment="Center"
                                 TextWrapping="Wrap" />
-                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
                                 <Button AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Content="Keep Editing" Click="KeepEditingClicked" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
                                 <Button x:Name="DiscardActionButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction" Content="Discard Draft" Click="DiscardDraftClicked" Style="{StaticResource FotoHavnActionButtonDestructiveStyle}" />
                             </StackPanel>
@@ -665,23 +717,21 @@
 
                 <Grid
                     x:Name="SaveChangesLayer"
-                    Background="#B817181A"
+                    Background="#8A17181A"
                     Visibility="Collapsed">
                     <controls:ConfirmationDialogFrame x:Name="SaveConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
                         <StackPanel Spacing="18">
-                            <FontIcon AutomationProperties.Name="Semantic icon" FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" />
-                            <TextBlock AutomationProperties.HeadingLevel="Level1" FontSize="24" FontWeight="SemiBold" Text="Save Event changes?" />
+                            <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE74E;" />
+                            <controls:FocusableHeading x:Name="SaveChangesTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="SaveChangesTitleText" FontSize="32" FontWeight="Bold" Text="Save changes?" TextAlignment="Center" />
                             <TextBlock
                                 AutomationProperties.Name="Consequence when present"
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Text="The new Event name and Camera Binding affect only future Guest Cycles. Completed Guest Cycles and their artifacts will not change."
-                                TextWrapping="Wrap" />
-                            <StackPanel AutomationProperties.Name="Event identity when relevant" Spacing="4">
-                                <TextBlock x:Name="SaveEventNameText" Style="{StaticResource TypeLabelControlStyle}" TextWrapping="Wrap" />
-                                <TextBlock x:Name="SaveEventIdentityText" Style="{StaticResource TypeCaptionStyle}" TextWrapping="Wrap" />
-                            </StackPanel>
-                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                            <controls:DialogEventIdentity x:Name="SaveEventIdentity" />
+                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
                                 <Button AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Content="Keep Editing" Click="CancelSaveClicked" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
                                 <Button x:Name="ConfirmSaveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction" Content="Save Changes" Click="ConfirmSaveClicked" Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
                             </StackPanel>

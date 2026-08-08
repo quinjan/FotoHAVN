@@ -7,7 +7,7 @@
     "tag": "design-v1.0.0",
     "commit": "1a20bc6f46f8d724683f8c4b47c359379fc7371b",
     "registry": "../reference-states/registry.json",
-    "registrySha256": "e6bedfd232d705bd1ae8b5751dc4d966d905f36178da944ea69e4c7d75a23295"
+    "registrySha256": "aee475c729a53cb636c290aad5389607f35e8052d0797837dd5f95fd6130ef52"
   },
   "cardinalities": {
     "semanticTokens": 91,
@@ -68,169 +68,169 @@
     },
     {
       "path": "scenarios/confirmation.json",
-      "sha256": "77af1f0c9d432a706a3aa36a762ca0e0b2feb6e9c9e960fb7acf5602dca4766d"
+      "sha256": "821dec6c617085a61c444b99b1c55e497259bf745380398e2efc30a4760048e1"
     }
   ],
   "targetHashes": [
     {
       "id": "saved-events.new-event.standard",
       "path": "../reference-states/targets/saved-events/new-event--1280x720.png",
-      "sha256": "967564ca726835aaf5423ad5cbb0b2dfc5ea90a6b288fae691fec83881d1c8f9"
+      "sha256": "b86d4a3f9d35ca19b5ffc4d7cee4555a08215bc8094c67ce702b7d54b235f5bc"
     },
     {
       "id": "saved-events.card-idle.standard",
       "path": "../reference-states/targets/saved-events/card-idle--1280x720.png",
-      "sha256": "967564ca726835aaf5423ad5cbb0b2dfc5ea90a6b288fae691fec83881d1c8f9"
+      "sha256": "b86d4a3f9d35ca19b5ffc4d7cee4555a08215bc8094c67ce702b7d54b235f5bc"
     },
     {
       "id": "saved-events.card-hover.standard",
       "path": "../reference-states/targets/saved-events/card-hover--1280x720.png",
-      "sha256": "649b6986161009f83c3d4deb0b3e825478d8cd867e36d77d2b0279cd36413bd8"
+      "sha256": "51d2411f81870dd702449c0afedf7548e79ef299934dfd6d247bf18b9595a498"
     },
     {
       "id": "saved-events.card-focus.standard",
       "path": "../reference-states/targets/saved-events/card-focus--1280x720.png",
-      "sha256": "2d3efb7b5c3722f4ebd944da8f089eacfb8c960c838da5874d3e6588e60b0a00"
+      "sha256": "bc96174e50f84d80f16e0600258da5204105b1f2ed47febe80bc908e6066f0df"
     },
     {
       "id": "saved-events.unavailable.standard",
       "path": "../reference-states/targets/saved-events/unavailable--1280x720.png",
-      "sha256": "a9935eee2a96dc665135a71e56acce2a66f83247aeee1c8e821b9db0801a7121"
+      "sha256": "9039611e77d2c100195e603ce5c61b99f412a0d3429296e0292c41fe45980d55"
     },
     {
       "id": "saved-events.busy.standard",
       "path": "../reference-states/targets/saved-events/busy--1280x720.png",
-      "sha256": "563b2dcee72cb5ee22e2044b1aa4c9817cb3335e0df6af21f095fb877c288067"
+      "sha256": "30446a78ac054ca8dbf0732d9d23990348d929da6da79c11942f2b2b47f156ce"
     },
     {
       "id": "saved-events.deletion-incomplete.standard",
       "path": "../reference-states/targets/saved-events/deletion-incomplete--1280x720.png",
-      "sha256": "94b4aebbb217e4751924f0499130a931f2c5189d2d1af28c8a6a1e10d0c18655"
+      "sha256": "590ce362ce251ac06bdb0c270d4fbf182180e28d6286af36199fd1bbce207526"
     },
     {
       "id": "saved-events.maximum-cards.standard",
       "path": "../reference-states/targets/saved-events/maximum-cards--1280x720.png",
-      "sha256": "02b368d62e16a5735fe24b6669e2db9a44b164b7beef7794078aeb4ffebf51bc"
+      "sha256": "a6b335ca737d0643d229cc8eb8a8c4acbb704fe488f4e2821558fd021ec54209"
     },
     {
       "id": "saved-events.maximum-cards.compact-aspect",
       "path": "../reference-states/targets/saved-events/maximum-cards--1024x768.png",
-      "sha256": "34e861a57ce4a1ebb6a8ce0a5eab89245c891eb90ffc8796d02ccddd164ae06b"
+      "sha256": "d123b08bcbc298b4dc3c5f7fe4d0a36997f6492ae3a7bb99fe32f682d07db220"
     },
     {
       "id": "saved-events.maximum-cards.scale-125-equivalent",
       "path": "../reference-states/targets/saved-events/maximum-cards--1024x576.png",
-      "sha256": "08bf48f258700e3521105213fd350aa2e187b604bac85d64af6e11ef29d7f525"
+      "sha256": "ebb0f0fdcc4e5b2374a15de2b9933f2d1dd61ed551b3561e71c7fb51e2d3479a"
     },
     {
       "id": "saved-events.maximum-cards.scale-150-equivalent",
       "path": "../reference-states/targets/saved-events/maximum-cards--853x480.png",
-      "sha256": "f2c0b1e3d3728799c449c380d28d54183e99c519ef5ddf16b5ad0cce3b97c358"
+      "sha256": "9cb303e166d68028104565e3ce77aa04a1ec385bdfce5695c8f3910a79f135c3"
     },
     {
       "id": "saved-events.maximum-cards.scale-200-stress-equivalent",
       "path": "../reference-states/targets/saved-events/maximum-cards--640x360.png",
-      "sha256": "7b376c78add621211701ccbda6d6915ec6fb9b1998982ea7e1be26acd97a6265"
+      "sha256": "01309695a961bd3105955aa7a84a25ca780358b4644adaffee230ef780c1a1c4"
     },
     {
       "id": "event-setup.new-empty.standard",
       "path": "../reference-states/targets/event-setup/new-empty--1280x720.png",
-      "sha256": "02cb8e7ad3cda1f426d9610a7dedffd31027405f8572f6c36bbc1062f2e89372"
+      "sha256": "9f71a5aa0f3111b738e3561a8e56eab4132f415ca9e31667b21be46015c98dc1"
     },
     {
       "id": "event-setup.new-valid.standard",
       "path": "../reference-states/targets/event-setup/new-valid--1280x720.png",
-      "sha256": "b632a65f7b88375566eb33b875cf8dc72b21d818be568d9fcb7babcaa3c9da18"
+      "sha256": "1e7f3b34862c14eeee5413d4f5960bdfed08d5e28b8b5a045ba3249d511065ab"
     },
     {
       "id": "event-setup.edit-clean.standard",
       "path": "../reference-states/targets/event-setup/edit-clean--1280x720.png",
-      "sha256": "25cbf30c488c7796cee675138fb4926592641796dc3f27e02f3c76d53829a9b0"
+      "sha256": "b561363edfd632ec4f1e138f60842972325692c50b112ffb68c65b8e3ac5d947"
     },
     {
       "id": "event-setup.edit-dirty.standard",
       "path": "../reference-states/targets/event-setup/edit-dirty--1280x720.png",
-      "sha256": "e05b3359e3a630da95e1844b65ceadafd555f29b3dce2176e6c01aefcbc58409"
+      "sha256": "8b83d349e387bc6e3298fdc6e1375d3a54a83de23d6d27c2aed77105ee4db77e"
     },
     {
       "id": "event-setup.camera-checking.standard",
       "path": "../reference-states/targets/event-setup/camera-checking--1280x720.png",
-      "sha256": "a2b7c94db7c56fc16039b014463ad0ecae3d67dfb21ad6135a5a2bdfa72fe6aa"
+      "sha256": "ba1a41a426e146d2cd4489e9a573b7d86681c99f4b19032cc523d21c55def5ca"
     },
     {
       "id": "event-setup.camera-ready.standard",
       "path": "../reference-states/targets/event-setup/camera-ready--1280x720.png",
-      "sha256": "87387e28f0f710da22968780349b75f9abccbb54a21bdf624b7c9c9fccea6352"
+      "sha256": "cfdedc1dffbaadbb5d09113a9c83ccea5d3edc9c1c699b06674d9ea329116d88"
     },
     {
       "id": "event-setup.camera-unavailable.standard",
       "path": "../reference-states/targets/event-setup/camera-unavailable--1280x720.png",
-      "sha256": "7712a478ea9e73827528801a64b5d09a8a275584222030025ae5db69af1660f8"
+      "sha256": "075a8c95f3f03f7696ad58ec3f8c3d49b6c9883d52490417c0ffdc688386c3b5"
     },
     {
       "id": "event-setup.camera-access-denied.standard",
       "path": "../reference-states/targets/event-setup/camera-access-denied--1280x720.png",
-      "sha256": "59df691cb6d44621b8c44845fee33b816f47683f99186d39a4614349cb4d6420"
+      "sha256": "4aa69e1bb6546734d47c56bbf1df99dd81d9da6b15fa602c5893acbce6b1c101"
     },
     {
       "id": "event-setup.camera-in-use.standard",
       "path": "../reference-states/targets/event-setup/camera-in-use--1280x720.png",
-      "sha256": "014ec58badebfedc58be9603e7b355aad4157190f529f18693c48122a1f3a40a"
+      "sha256": "4bc8fcc99d01aeb5d209c3d681680c9686efc1bf76e161902a5a420526d0d148"
     },
     {
       "id": "event-setup.camera-disconnected.standard",
       "path": "../reference-states/targets/event-setup/camera-disconnected--1280x720.png",
-      "sha256": "0c857ac753b9e9b0c601e26963033d2f644ad0b853542ddb1a036c44ec6e42d0"
+      "sha256": "8d10163abccbee4d1164667f9a6730ff96b12640cbadf59ad7320233f8353a02"
     },
     {
       "id": "event-setup.storage-insufficient.standard",
       "path": "../reference-states/targets/event-setup/storage-insufficient--1280x720.png",
-      "sha256": "10e85a81e33edc42758ccd7edf944b04e069a88c01589a3299c34150a45cc40e"
+      "sha256": "dcebd422ecf70808c07f3c782447cf2d4ec1bffb88a1e41faaaf8a982859da7c"
     },
     {
       "id": "event-setup.storage-unavailable.standard",
       "path": "../reference-states/targets/event-setup/storage-unavailable--1280x720.png",
-      "sha256": "d04b90d093bd8989ca69a6e8ca6624e76c03ff01d81b166a61055685140965c3"
+      "sha256": "16d7c388138abdefa55070c4bbbdfd54c5351d3c791e66fbf311c30ce2244708"
     },
     {
       "id": "event-setup.actions-disabled.standard",
       "path": "../reference-states/targets/event-setup/actions-disabled--1280x720.png",
-      "sha256": "166e2a3cecb0aa0b1c78f1e27af07b0e985a9647e725bc71a2aa66c3d61eba59"
+      "sha256": "a09331a83c58f0b901e0583906a6d1c4b2f5f2dca233d5e60523fc55bfc1461e"
     },
     {
       "id": "event-setup.saving.standard",
       "path": "../reference-states/targets/event-setup/saving--1280x720.png",
-      "sha256": "21dc9e248bdf0778d018f607ffa87c5f76766a8da775c7ab79130dbe74a5a3ab"
+      "sha256": "c125017ce321e4add8a363fc639c495236944337702ed9ea6d0a63c5c9199728"
     },
     {
       "id": "event-setup.save-error.standard",
       "path": "../reference-states/targets/event-setup/save-error--1280x720.png",
-      "sha256": "19d6778c0dfba45abe8798d0ad4892be82a9b1294e15248852e5eb2d89e17f08"
+      "sha256": "63346331c0254441057048005d4dd3f708525b9463883be30003970423969b7e"
     },
     {
       "id": "event-setup.save-success.standard",
       "path": "../reference-states/targets/event-setup/save-success--1280x720.png",
-      "sha256": "2b6f513755266b1bbc81b179174e5fc7b0d7bc1e58e7d4b6ac787efb2cb99986"
+      "sha256": "707c1e1f507ba9133bb435282121c16f40b6da6a3de2bc150460f3a2873d8309"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.compact-aspect",
       "path": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--1024x768.png",
-      "sha256": "e977e5c100c4821a76eaabb9fc7e38aff67221472cb60d262bb7e91c8af54f7c"
+      "sha256": "aa0d10eb5d858cd37833d13c62bd51195d6a2a47b1731d4eefebf3cb4b2c4c33"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
       "path": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--1024x576.png",
-      "sha256": "61eefc9d7b1059fcf5fb2439d8afedd001027b86e5ad00769dd915831a689568"
+      "sha256": "bfb88396cb73a2aead701cd51f1117d2bcae2364e84ecbdd265a1a2589e3ef9c"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
       "path": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--853x480.png",
-      "sha256": "3cf98a7411cdfd411085566f6bb114c22aaaa78e6a3e95a1b5242eabc1e4021a"
+      "sha256": "d4ff785f0920f8116452402465a6e7e39cf842418882f09dab0dd0c1fb359805"
     },
     {
       "id": "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent",
       "path": "../reference-states/targets/event-setup/camera-error-and-insufficient-storage--640x360.png",
-      "sha256": "8a0d7f0ec4beabb3b1ad421554b3b37cf94cf36f3a9dce1f8e614019299b6275"
+      "sha256": "d96db9551e857e8b89f09a40ecfc12be6b271131a1f09ace953259c92bf4a8c7"
     },
     {
       "id": "guest-start.ready.standard",
@@ -510,82 +510,82 @@
     {
       "id": "confirmation.start-idle.standard",
       "path": "../reference-states/targets/confirmation/start-idle--1280x720.png",
-      "sha256": "dd41d24905209e506a4e85f3791c6abade6e6bdae6f46653d23c5d692b5b185a"
+      "sha256": "ccf352117c99ae39b58310b886d384f9ba26a7c25b284c2404efe6825ffee396"
     },
     {
       "id": "confirmation.start-busy.standard",
       "path": "../reference-states/targets/confirmation/start-busy--1280x720.png",
-      "sha256": "f8f88cdc0482c95b323ed095d2100fbefa0c410a0e4526937fca451d35f12789"
+      "sha256": "6c565215192f50072512ddb3029ff5547dbd40c758cfe9555712fb3fb074c998"
     },
     {
       "id": "confirmation.start-failed.standard",
       "path": "../reference-states/targets/confirmation/start-failed--1280x720.png",
-      "sha256": "1aa48da6e887cfc8678a6700104167c2484b41259d563c101531b5382544c1d5"
+      "sha256": "8b6b337d669e59f9dba428917e3fa0f3cdf45f10bcb5dcb312dd5d205a494c89"
     },
     {
       "id": "confirmation.save-idle.standard",
       "path": "../reference-states/targets/confirmation/save-idle--1280x720.png",
-      "sha256": "4126dd5b3f80d8e7cbc48fdb8a57eb08b9f6730a073a08c8b1f1c0f97ac43363"
+      "sha256": "c77f4bade1f28d13caf67dd3e553883fe49c782a491d8c18219d852b422f9b77"
     },
     {
       "id": "confirmation.discard-idle.standard",
       "path": "../reference-states/targets/confirmation/discard-idle--1280x720.png",
-      "sha256": "16a4a6d5b21f766d52adb5b59c4a1506b63006fbe06628e79031d689ab7061b5"
+      "sha256": "37e20638db93a03db3bfac6955f2101a9fc359e58b4479e419955b9e3b35b6c3"
     },
     {
       "id": "confirmation.exit-idle.standard",
       "path": "../reference-states/targets/confirmation/exit-idle--1280x720.png",
-      "sha256": "94bff3ee53dcb213a486e7de49c5e9f6cc721569e54597e5fb3f75a9ff878a10"
+      "sha256": "42c62d4c4419a0de20bd3b893fd33d1c9dde3481a4a80d42ae2d792af760dd2f"
     },
     {
       "id": "confirmation.exit-busy.standard",
       "path": "../reference-states/targets/confirmation/exit-busy--1280x720.png",
-      "sha256": "c19a3b31a7aebba8c6fcb421a55ea69ba2f381557d216230947b8c89755fcf84"
+      "sha256": "dce214d6cd6f01fadf639262cabfddcae47c10e993d7f6859c8edacd8e050dd6"
     },
     {
       "id": "confirmation.delete-idle.standard",
       "path": "../reference-states/targets/confirmation/delete-idle--1280x720.png",
-      "sha256": "76badbbdcba6214407dc5c33696f6a557479814b68892423a242a789a39077bd"
+      "sha256": "0ed9d421b7f0d1c50b5d64b8175b84e2dca5fae534bc572f8eb7cfd46cda3847"
     },
     {
       "id": "confirmation.delete-busy.standard",
       "path": "../reference-states/targets/confirmation/delete-busy--1280x720.png",
-      "sha256": "22c60ef7be594eab184f0067aa9aaef0fc11de97b620e9edb90d74a026fe44c0"
+      "sha256": "f5e3c4acccd82b41c5b8df8be69ac107b0b40cafdfc840fc4592114080cf0031"
     },
     {
       "id": "confirmation.delete-failed.standard",
       "path": "../reference-states/targets/confirmation/delete-failed--1280x720.png",
-      "sha256": "de11b23b2e0c8a2cfbd7e20cfd611af6ba8a0468cc3475ec446f1db1159913f1"
+      "sha256": "743fddc304bbb1f247232e16e112b6eb9f952e552de3ce88b45d5ed3d570a9dc"
     },
     {
       "id": "confirmation.retry.standard",
       "path": "../reference-states/targets/confirmation/retry--1280x720.png",
-      "sha256": "551b28d10950f743cf8d6a2127537446bc4ac4700cf97d386c3d7e0395aa8242"
+      "sha256": "9a094c152dfd132969012d623fdcce1bf35fcf96047dd23095c1a10eb86dffd1"
     },
     {
       "id": "confirmation.success-destination.standard",
       "path": "../reference-states/targets/confirmation/success-destination--1280x720.png",
-      "sha256": "3b65d958e38165bc3f690a97c0ecf52b219ca478e5c0a017db727bddd4685e17"
+      "sha256": "ba33c77c0204c184fa6d9c1bfa546861ba972922da5b6f55f63f86e134375e57"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.compact-aspect",
       "path": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--1024x768.png",
-      "sha256": "64ebb71eced00cbb3f7c1d5f9defdbf9f465eab3df1098d68dfbda7b2e444730"
+      "sha256": "03300aa73342dc5c94c9313e63f8299ecfdaa9561fd44099d76b3fc7c909eb0b"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
       "path": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--1024x576.png",
-      "sha256": "c5e1473ed9949b110bc6d9ba0aabb7f651efb5015707e4f7a87160e70373f027"
+      "sha256": "ca39ff3d8497a9645fff06ac93bff1c3f85c1f4884be72180fd0bf85e611198d"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
       "path": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--853x480.png",
-      "sha256": "592a6e3e48fae63365bb3b01763d71d3dfc9063a9bac2ae49da148d8eed889a4"
+      "sha256": "522408983ec26eee12c3767e8c1ad21ca67a742b7d6089c43697881305699ab4"
     },
     {
       "id": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
       "path": "../reference-states/targets/confirmation/destructive-busy-with-long-event-id--640x360.png",
-      "sha256": "21d9245a54cc1ed8f2dc77cb919a7e45cab73d0367f9c223a8efeafe520024a4"
+      "sha256": "a92fe22cc6521553d280450a34d95ab182208d474eb64648123c8cd77a22b3fb"
     }
   ]
 }

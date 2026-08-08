@@ -74,6 +74,15 @@ public enum EventTileKind
     SavedEvent,
 }
 
+public enum EventCardState
+{
+    Ready,
+    Hover,
+    Focus,
+    Unavailable,
+    Busy,
+}
+
 public sealed record EventTilePresentation(
     EventTileKind Kind,
     string Label,
@@ -81,7 +90,8 @@ public sealed record EventTilePresentation(
     string Glyph,
     EventId? EventId = null,
     DateTimeOffset? LastSavedAt = null,
-    bool DeletionIncomplete = false)
+    bool DeletionIncomplete = false,
+    EventCardState State = EventCardState.Ready)
 {
     public bool ShowsCreate => Kind == EventTileKind.NewEvent;
     public bool ShowsSavedEventCard => Kind == EventTileKind.SavedEvent;

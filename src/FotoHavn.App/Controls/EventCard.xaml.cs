@@ -2,6 +2,7 @@ using FotoHavn.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace FotoHavn.App.Controls;
 
@@ -57,7 +58,7 @@ public sealed partial class EventCard : UserControl
         }
 
         var stress = ResponsiveLayout.Resolve(root.Size.Width, root.Size.Height) == ResponsiveLayoutMode.Stress;
-        Height = stress ? 168 : 256;
+        Height = stress ? 142 : 256;
         CardActionsColumn.Width = stress ? GridLength.Auto : new GridLength(0);
         Grid.SetRow(CardActions, stress ? 0 : 4);
         Grid.SetRowSpan(CardActions, stress ? 5 : 1);
@@ -85,20 +86,67 @@ public sealed partial class EventCard : UserControl
         var semanticScope = item.EventId?.Value ?? "unknown";
         AutomationProperties.SetAutomationId(this, SemanticAutomationIds.Scoped(SemanticAutomationIds.EventCard, semanticScope));
         AutomationProperties.SetName(this, $"{item.Label}, {AccessibleEventId}");
-        AutomationProperties.SetItemStatus(this, item.DeletionIncomplete ? "deletion-incomplete" : "ready");
+        var itemStatus = item.DeletionIncomplete
+            ? "deletion-incomplete"
+            : item.State.ToString().ToLowerInvariant();
+        AutomationProperties.SetItemStatus(this, itemStatus);
         EventNameText.Text = item.Label;
         ToolTipService.SetToolTip(EventNameText, item.Label);
         CompactEventIdText.Text = CompactEventId;
         AutomationProperties.SetName(CompactEventIdText, AccessibleEventId);
         SavedMetadataText.Text = item.SupportingText;
         StartButton.Visibility = item.ShowsStart ? Visibility.Visible : Visibility.Collapsed;
+        StartButton.IsEnabled = item.State is not EventCardState.Unavailable and not EventCardState.Busy;
         EditButton.Visibility = item.ShowsEdit ? Visibility.Visible : Visibility.Collapsed;
         DeleteButton.Visibility = item.ShowsDelete ? Visibility.Visible : Visibility.Collapsed;
+        EditButton.IsEnabled = item.State != EventCardState.Busy;
+        DeleteButton.IsEnabled = item.State != EventCardState.Busy;
         RetryButton.Visibility = item.ShowsRetryDeletion ? Visibility.Visible : Visibility.Collapsed;
+        ApplyVisualState(item);
         SetActionSemantics(StartButton, "Start", item);
         SetActionSemantics(EditButton, "Edit", item);
         SetActionSemantics(DeleteButton, "Delete", item);
         SetActionSemantics(RetryButton, "Retry deletion for", item);
+    }
+
+    private void ApplyVisualState(EventTilePresentation item)
+    {
+        var resources = Application.Current.Resources;
+        SavedEventCardRoot.Background = (Brush)resources[
+            item.State == EventCardState.Hover
+                ? "ColorSurfaceHoverBrush"
+                : item.State is EventCardState.Unavailable or EventCardState.Busy || item.DeletionIncomplete
+                    ? "ColorBorderDisabledBrush"
+                    : "ColorSurfacePanelBrush"];
+        SavedEventCardRoot.BorderBrush = (Brush)resources[item.State switch
+        {
+            EventCardState.Focus => "ColorFocusRingBrush",
+            EventCardState.Hover => "ColorBorderStrongBrush",
+            EventCardState.Unavailable => "ColorStatusWarningBorderBrush",
+            _ => "ColorBorderDefaultBrush",
+        }];
+        SavedEventCardRoot.BorderThickness = item.State == EventCardState.Focus
+            ? new Thickness(2)
+            : new Thickness(1);
+
+        var status = item.DeletionIncomplete
+            ? "Deletion did not finish"
+            : item.State switch
+            {
+                EventCardState.Busy => "Opening Event…",
+                EventCardState.Unavailable => "Camera unavailable",
+                _ => string.Empty,
+            };
+        CardStatus.Visibility = string.IsNullOrEmpty(status) ? Visibility.Collapsed : Visibility.Visible;
+        CardStatusText.Text = status;
+        CardStatusText.Foreground = (Brush)resources[
+            item.DeletionIncomplete
+                ? "ColorStatusDangerForegroundBrush"
+                : item.State == EventCardState.Unavailable
+                    ? "ColorStatusWarningForegroundBrush"
+                    : "ColorTextMutedBrush"];
+        CardProgressRing.Visibility = item.State == EventCardState.Busy ? Visibility.Visible : Visibility.Collapsed;
+        CardProgressRing.IsActive = item.State == EventCardState.Busy;
     }
 
     private static string FormatCompactEventId(string value)

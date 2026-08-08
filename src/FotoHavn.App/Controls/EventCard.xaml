@@ -17,6 +17,29 @@
             x:Name="SavedEventCardRoot"
             Style="{StaticResource FotoHavnEventCardPanelStyle}"
             Visibility="Collapsed">
+            <Grid>
+                <Button
+                    x:Name="StartButton"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    AutomationProperties.HelpText="Start Event"
+                    Background="Transparent"
+                    BorderThickness="{StaticResource StrokeNone}"
+                    Click="StartClicked"
+                    Content=""
+                    CornerRadius="{StaticResource RadiusPanel}"
+                    FocusVisualMargin="-4">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FFFAFAFB" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FFF1F2F4" />
+                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
+                    </Button.Resources>
+                </Button>
             <Grid x:Name="CardLayout">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -32,34 +55,48 @@
                 <TextBlock
                     x:Name="EventNameText"
                     AutomationProperties.HeadingLevel="Level2"
-                    Style="{StaticResource TypeLabelControlStyle}"
+                    IsHitTestVisible="False"
+                    Margin="0,0,0,16"
+                    Style="{StaticResource TypeHeadingCardStyle}"
                     TextTrimming="CharacterEllipsis" />
                 <TextBlock
                     Grid.Row="1"
+                    IsHitTestVisible="False"
                     Style="{StaticResource TypeEyebrowStyle}"
                     Text="EVENT ID" />
                 <TextBlock
                     x:Name="CompactEventIdText"
                     Grid.Row="2"
+                    IsHitTestVisible="False"
                     Style="{StaticResource TypeBodyDefaultStyle}" />
                 <TextBlock
                     x:Name="SavedMetadataText"
                     Grid.Row="3"
+                    FontSize="{StaticResource EventCardMetadataFontSize}"
                     Foreground="{ThemeResource ColorTextMutedBrush}"
+                    IsHitTestVisible="False"
                     Style="{StaticResource TypeCaptionStyle}" />
                 <Grid x:Name="CardActions" Grid.Row="4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Button
-                        x:Name="StartButton"
+                    <StackPanel
+                        x:Name="CardStatus"
                         HorizontalAlignment="Left"
-                        Click="StartClicked"
-                        Content="Start Event"
-                        Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
-                    <StackPanel Grid.Column="2" AutomationProperties.Name="Start, Edit, and Delete actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="False"
+                        Orientation="Horizontal"
+                        Spacing="{StaticResource EventCardStatusSpacing}"
+                        Visibility="Collapsed">
+                        <ProgressRing
+                            x:Name="CardProgressRing"
+                            Width="{StaticResource EventCardStatusIconSize}"
+                            Height="{StaticResource EventCardStatusIconSize}"
+                            IsActive="False"
+                            Visibility="Collapsed" />
+                        <TextBlock
+                            x:Name="CardStatusText"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource EventCardStatusFontSize}" />
+                    </StackPanel>
+                    <StackPanel AutomationProperties.Name="Start, Edit, and Delete actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
                         <Button
                             x:Name="RetryButton"
                             Click="RetryClicked"
@@ -71,7 +108,7 @@
                             Click="EditClicked"
                             ToolTipService.ToolTip="Edit Event"
                             Style="{StaticResource FotoHavnIconActionStyle}">
-                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;" />
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE70F;" />
                         </Button>
                         <Button
                             x:Name="DeleteButton"
@@ -82,6 +119,7 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+            </Grid>
             </Grid>
         </Border>
     </Grid>

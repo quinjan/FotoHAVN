@@ -33,6 +33,8 @@ public sealed partial class MainWindow : Window
 #if UI_VERIFICATION
     private readonly UiVerificationRenderSettledSignal renderSettledSignal;
     private ApplicationSurfaceOverride? mediaPendingRenderSettlement;
+    private readonly BitmapImage verificationCameraPreview =
+        new(new Uri("ms-appx:///UiVerification/camera-preview.jpg"));
 #endif
 
     public MainWindow(IApplicationPresentationController presentationController, CameraBoundary? camera = null)
@@ -92,10 +94,26 @@ public sealed partial class MainWindow : Window
             _ => throw new ArgumentOutOfRangeException(),
         };
         SavedEventsContent.Padding = new(horizontalPadding, 32, horizontalPadding, 36);
-        SetupDialog.Margin = new(mode == ResponsiveLayoutMode.Standard ? 40 : 16);
-        SetupContentGrid.Padding = new(mode == ResponsiveLayoutMode.Stress ? 16 : 34);
+        var edgeToEdgeSetup = width < 900 || mode == ResponsiveLayoutMode.Stress;
+        SetupDialog.Margin = new(edgeToEdgeSetup ? 0 : mode == ResponsiveLayoutMode.Standard ? 40 : 24);
+        SetupDialog.CornerRadius = new(edgeToEdgeSetup ? 0 : 14);
+        SetupDialog.MaxWidth = edgeToEdgeSetup ? double.PositiveInfinity : 1100;
+        SetupDialog.MaxHeight = edgeToEdgeSetup ? double.PositiveInfinity : 640;
+        SetupContentGrid.Padding = mode switch
+        {
+            ResponsiveLayoutMode.Standard => new Thickness(34),
+            ResponsiveLayoutMode.Compact when edgeToEdgeSetup => new Thickness(16, 12, 16, 8),
+            ResponsiveLayoutMode.Compact => new Thickness(32, 24, 32, 20),
+            ResponsiveLayoutMode.Stress => new Thickness(16, 12, 16, 8),
+            _ => new Thickness(34),
+        };
+        SetupIntroductionText.Visibility = edgeToEdgeSetup ? Visibility.Collapsed : Visibility.Visible;
+        SetupBodyGrid.Margin = new(0, 4, 0, 0);
         var stacksSetup = mode != ResponsiveLayoutMode.Standard;
         var stress = mode == ResponsiveLayoutMode.Stress;
+        SetupTitleText.FontSize = stress ? 25 : 32;
+        SetupFooterRow.Height = new(stress ? 72 : 80);
+        var stacksConfirmationActions = width < 800;
         foreach (var confirmation in new[]
         {
             ExitConfirmationFrame,
@@ -105,28 +123,42 @@ public sealed partial class MainWindow : Window
             SaveConfirmationFrame,
         })
         {
-            confirmation.ApplyResponsiveLayout(stress);
+            confirmation.ApplyResponsiveLayout(stress, stacksConfirmationActions);
         }
-        ReparentSetupPreview(stacksSetup);
-        SetupFieldsColumn.Width = new(stacksSetup ? 1 : 410, stacksSetup ? GridUnitType.Star : GridUnitType.Pixel);
-        SetupGapColumn.Width = new(stacksSetup ? 0 : 32);
+        SetupFieldsColumn.Width = new(1, GridUnitType.Star);
+        SetupGapColumn.Width = new(stacksSetup ? 0 : 34);
         SetupPreviewColumn.Width = new(stacksSetup ? 0 : 1, stacksSetup ? GridUnitType.Pixel : GridUnitType.Star);
-        Grid.SetRow(SetupPreviewPanel, stacksSetup ? 2 : 1);
+        Grid.SetRow(SetupPreviewPanel, stacksSetup ? 3 : 0);
+        Grid.SetRowSpan(SetupPreviewPanel, stacksSetup ? 1 : 7);
         Grid.SetColumn(SetupPreviewPanel, stacksSetup ? 0 : 2);
         Grid.SetColumnSpan(SetupPreviewPanel, stacksSetup ? 3 : 1);
-        SetupCameraViewport.Width = stacksSetup ? double.NaN : Math.Max(240, Math.Min(588, width - 560));
-        SetupCameraViewport.MaxWidth = stacksSetup ? 378 : 588;
-        SetupCameraViewport.Height = stacksSetup ? 252 : 392;
-        SetupCameraViewport.HorizontalAlignment = stacksSetup ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        SetupPreviewPanel.Margin = new(0, 0, 0, stacksSetup ? 18 : 0);
+        Grid.SetRow(PrinterFieldGroup, stacksSetup ? 4 : 3);
+        Grid.SetRow(StorageFieldGroup, stacksSetup ? 5 : 4);
+        Grid.SetRow(SetupFailureBorder, stacksSetup ? 6 : 5);
+        SetupCameraViewport.Width = double.NaN;
+        SetupCameraViewport.MaxWidth = double.PositiveInfinity;
+        SetupCameraViewport.HorizontalAlignment = HorizontalAlignment.Stretch;
         SetupCommitActions.Orientation = Orientation.Horizontal;
         SetupCommitActions.HorizontalAlignment = HorizontalAlignment.Right;
         foreach (var action in SetupCommitActions.Children.OfType<FrameworkElement>())
         {
             action.HorizontalAlignment = HorizontalAlignment.Right;
+            action.Width = double.NaN;
         }
         Grid.SetRow(SetupCommitActions, 0);
         SetupCommitActions.Margin = new(0);
         CancelSetupButton.HorizontalAlignment = HorizontalAlignment.Left;
+        CancelSetupButton.Width = double.NaN;
+        if (stress)
+        {
+            var actionWidth = Math.Max(96, (width - 48) / 3);
+            CancelSetupButton.Width = actionWidth;
+            foreach (var action in SetupCommitActions.Children.OfType<FrameworkElement>())
+            {
+                action.Width = actionWidth;
+            }
+        }
 
         DispatcherQueue.TryEnqueue(() =>
         {
@@ -140,24 +172,31 @@ public sealed partial class MainWindow : Window
                     _ => 1,
                 };
                 var availableWidth = Math.Max(280, width - (horizontalPadding * 2));
+                EventTiles.Width = availableWidth + 18;
                 panel.MaximumRowsOrColumns = columns;
-                panel.ItemWidth = Math.Max(280, (availableWidth - ((columns - 1) * 18)) / columns);
-                panel.ItemHeight = mode == ResponsiveLayoutMode.Stress ? 186 : 274;
+                var cardWidth = Math.Max(280, (availableWidth - ((columns - 1) * 18)) / columns);
+                panel.ItemWidth = cardWidth + 18;
+                panel.ItemHeight = mode == ResponsiveLayoutMode.Stress ? 160 : 274;
             }
         });
+        HeadingText.TextStyle = stress
+            ? null
+            : (Style)Application.Current.Resources["TypeHeadingPageStyle"];
+        HeadingText.FontSize = stress ? 25 : 32;
+        HeadingText.FontWeight = Microsoft.UI.Text.FontWeights.Bold;
     }
 
-    private void ReparentSetupPreview(bool stacksSetup)
+    private void SetupCameraViewportSizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is Grid)
+        if (args.NewSize.Width <= 0)
         {
-            SetupBodyGrid.Children.Remove(SetupPreviewPanel);
-            SetupFieldGroups.Children.Insert(2, SetupPreviewPanel);
+            return;
         }
-        else if (!stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is StackPanel)
+
+        var targetHeight = args.NewSize.Width * 9d / 16d;
+        if (Math.Abs(SetupCameraViewport.Height - targetHeight) > 0.5)
         {
-            SetupFieldGroups.Children.Remove(SetupPreviewPanel);
-            SetupBodyGrid.Children.Add(SetupPreviewPanel);
+            SetupCameraViewport.Height = targetHeight;
         }
     }
 
@@ -306,6 +345,9 @@ public sealed partial class MainWindow : Window
         {
             HeadingText.Text = "Saved Events";
             EventTiles.ItemsSource = presentation.EventTiles.Where(tile => tile.Kind == EventTileKind.SavedEvent);
+            var hasIncompleteDeletion = presentation.EventTiles.Any(tile => tile.DeletionIncomplete);
+            SavedEventsDeletionStatus.Visibility = hasIncompleteDeletion ? Visibility.Visible : Visibility.Collapsed;
+            EventTiles.Margin = new(0, hasIncompleteDeletion ? 18 : 20, 0, 0);
             var activeEvent = presentation.ActiveEvent;
             EventScrollViewer.Visibility = activeEvent is null ? Visibility.Visible : Visibility.Collapsed;
             ActiveEventLayer.Visibility = activeEvent is null ? Visibility.Collapsed : Visibility.Visible;
@@ -318,34 +360,81 @@ public sealed partial class MainWindow : Window
             StartEventConfirmationText.Text = surfaceOverride?.Surface == ApplicationSurface.Confirmation
                 ? surfaceOverride.AccessibleName
                 : presentation.StartEventConfirmation?.Prompt ?? string.Empty;
-            StartEventNameText.Text = presentation.StartEventConfirmation?.EventName ?? string.Empty;
-            StartEventIdentityText.Text = presentation.StartEventConfirmation?.EventId.Value ?? string.Empty;
+            StartEventIdentity.EventName = presentation.StartEventConfirmation?.EventName ?? string.Empty;
+            StartEventIdentity.EventId = presentation.StartEventConfirmation?.EventId.Value ?? string.Empty;
             var deletion = presentation.EventDeletion;
             EventDeletionLayer.Visibility = deletion is null ? Visibility.Collapsed : Visibility.Visible;
             EventDeletionTitleText.Text = surfaceOverride?.Surface == ApplicationSurface.Confirmation
                 ? surfaceOverride.AccessibleName
                 : deletion?.Title ?? string.Empty;
-            EventDeletionMessageText.Text = deletion?.Message ?? string.Empty;
-            EventDeletionEventNameText.Text = deletion?.EventName ?? string.Empty;
-            EventDeletionIdentityText.Text = deletion?.EventId.Value ?? string.Empty;
-            EventDeletionProgressRing.Visibility = deletion?.IsBusy == true
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            EventDeletionProgressRing.IsActive = deletion?.IsBusy == true;
-            EventDeletionActions.Visibility = deletion?.IsBusy == true
+            var verificationIdentity = surfaceOverride?.InjectionIdentity ?? string.Empty;
+            var isConfirmationBusy = surfaceOverride?.Surface == ApplicationSurface.Confirmation &&
+                surfaceOverride.ItemStatus == "busy";
+            var isDeletionSuccess = verificationIdentity.EndsWith("success-destination", StringComparison.Ordinal);
+            var isDeletionFailure = verificationIdentity.EndsWith("delete-failed", StringComparison.Ordinal) ||
+                verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal) ||
+                deletion?.Stage is EventDeletionStage.CouldNotStart or EventDeletionStage.Incomplete;
+            var isDeletionBusy = deletion?.IsBusy == true || isConfirmationBusy && deletion is not null;
+            EventDeletionMessageText.Text = isDeletionSuccess
+                ? "Your changes have been saved."
+                : verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal)
+                    ? string.Empty
+                    : deletion?.Warning ?? string.Empty;
+            EventDeletionMessageText.Visibility = string.IsNullOrWhiteSpace(EventDeletionMessageText.Text)
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-            CancelEventDeletionButton.Visibility = deletion?.CancelActionLabel is null
-                ? Visibility.Collapsed
-                : Visibility.Visible;
-            CancelEventDeletionButton.Content = deletion?.CancelActionLabel ?? string.Empty;
-            ConfirmEventDeletionButton.Content = deletion?.PrimaryActionLabel ?? string.Empty;
-            ConfirmEventDeletionButton.Background = deletion?.Stage == EventDeletionStage.Confirmation
-                ? (Brush)Application.Current.Resources["DangerBrush"]
-                : (Brush)Application.Current.Resources["ButtonBackground"];
-            ConfirmEventDeletionButton.Foreground = deletion?.Stage == EventDeletionStage.Confirmation
-                ? new SolidColorBrush(Microsoft.UI.Colors.White)
-                : (Brush)Application.Current.Resources["TextPrimaryBrush"];
+            EventDeletionIdentity.EventName = deletion?.EventName ?? string.Empty;
+            EventDeletionIdentity.EventId = deletion?.EventId.Value ?? string.Empty;
+            EventDeletionIdentity.Visibility = isDeletionSuccess ? Visibility.Collapsed : Visibility.Visible;
+            EventDeletionFailureStatus.Visibility = isDeletionFailure ? Visibility.Visible : Visibility.Collapsed;
+            EventDeletionProgressRing.Visibility = Visibility.Collapsed;
+            EventDeletionProgressRing.IsActive = false;
+            EventDeletionActions.Visibility = Visibility.Visible;
+            CancelEventDeletionButton.Visibility = isDeletionSuccess ? Visibility.Collapsed : Visibility.Visible;
+            CancelEventDeletionButton.IsEnabled = !isDeletionBusy;
+            ConfirmEventDeletionButton.IsEnabled = !isDeletionBusy;
+            SetButtonContent(CancelEventDeletionButton, "Cancel");
+            SetButtonContent(
+                ConfirmEventDeletionButton,
+                isDeletionSuccess ? "Continue" : isDeletionFailure ? "Retry" : isDeletionBusy ? "Deleting Event…" : "Delete Event",
+                isDeletionBusy);
+            EventDeletionSemanticIcon.Intent = isDeletionSuccess
+                ? DialogSemanticIntent.Success
+                : verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal)
+                    ? DialogSemanticIntent.Neutral
+                    : DialogSemanticIntent.Destructive;
+            EventDeletionSemanticIcon.Glyph = isDeletionSuccess
+                ? "\uE73E"
+                : verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal)
+                    ? "\uE72A"
+                    : "\uE74D";
+            DeletionConfirmationFrame.SetStandardMaximumWidth(isDeletionSuccess ? 440 : 500);
+            ConfirmEventDeletionButton.Style = (Style)Application.Current.Resources[
+                isDeletionFailure && !verificationIdentity.EndsWith("delete-failed", StringComparison.Ordinal)
+                    ? "FotoHavnActionButtonPrimaryStyle"
+                    : isDeletionSuccess
+                        ? "FotoHavnActionButtonPrimaryStyle"
+                        : "FotoHavnActionButtonDestructiveStyle"];
+
+            var isStartBusy = isConfirmationBusy && presentation.StartEventConfirmation is not null;
+            var isStartFailure = verificationIdentity.EndsWith("start-failed", StringComparison.Ordinal);
+            StartEventFailureStatus.Visibility = isStartFailure ? Visibility.Visible : Visibility.Collapsed;
+            CancelStartEventButton.IsEnabled = !isStartBusy;
+            ConfirmStartEventButton.IsEnabled = !isStartBusy;
+            SetButtonContent(CancelStartEventButton, "Cancel");
+            SetButtonContent(
+                ConfirmStartEventButton,
+                isStartFailure ? "Retry" : isStartBusy ? "Starting Event…" : "Start Event",
+                isStartBusy);
+
+            var isExitBusy = isConfirmationBusy && activeEvent?.ShowsExitConfirmation == true;
+            CancelExitEventButton.IsEnabled = !isExitBusy;
+            ConfirmExitEventButton.IsEnabled = !isExitBusy;
+            SetButtonContent(CancelExitEventButton, "Keep Event Active");
+            SetButtonContent(ConfirmExitEventButton, isExitBusy ? "Exiting Event…" : "Exit Event", isExitBusy);
+            DeletionConfirmationFrame.RefreshInitialFocus();
+            StartConfirmationFrame.RefreshInitialFocus();
+            ExitConfirmationFrame.RefreshInitialFocus();
             if (activeEvent is not null)
             {
                 ActiveEventNameText.Text = activeEvent.Name.ToUpperInvariant();
@@ -364,6 +453,11 @@ public sealed partial class MainWindow : Window
             SaveChangesLayer.Visibility = setup?.ShowsSaveConfirmation == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+            var showsNestedSetupConfirmation = setup?.ShowsDiscardConfirmation == true ||
+                setup?.ShowsSaveConfirmation == true;
+            SetupLayer.Background = showsNestedSetupConfirmation
+                ? new SolidColorBrush(Colors.Transparent)
+                : (Brush)Application.Current.Resources["ColorOverlayScrimBrush"];
             presentationAdapter.Apply(presentation, surfaceOverride);
             SetupDialog.IsHitTestVisible = setup is null ||
                 (!setup.ShowsDiscardConfirmation && !setup.ShowsSaveConfirmation);
@@ -386,10 +480,16 @@ public sealed partial class MainWindow : Window
 
             SetupTitleText.Text = setup.Title;
             var editingSavedEvent = setup.EventId is not null;
+            SetupIntroductionText.Text = editingSavedEvent
+                ? "Review this Event and update its Camera or Printer."
+                : "Name the Event and choose its Camera and Printer.";
             var setupIdentity = setup.EventId?.Value ?? "New Event";
-            EventSetupIdentityText.Text = editingSavedEvent ? $"Event ID {setupIdentity}" : "New Event";
-            SaveEventNameText.Text = setup.EventName;
-            SaveEventIdentityText.Text = setupIdentity;
+            EventSetupIdentityText.Text = string.Empty;
+            EventSetupIdentityText.Visibility = Visibility.Collapsed;
+            EventIdentityFieldGroup.Visibility = editingSavedEvent ? Visibility.Visible : Visibility.Collapsed;
+            EventIdentityValueText.Text = editingSavedEvent ? setupIdentity : string.Empty;
+            SaveEventIdentity.EventName = setup.EventName;
+            SaveEventIdentity.EventId = setupIdentity;
             EventNameFieldGroup.Present(
                 string.IsNullOrWhiteSpace(setup.EventName)
                     ? SetupFieldState.Invalid
@@ -408,7 +508,21 @@ public sealed partial class MainWindow : Window
                 setup.IsStorageReady
                     ? string.Empty
                     : "Storage must be writable and have at least 1 GB free. Check C:\\Program Files\\FotoHAVN\\Events, then try again.");
-            SetupCameraViewport.Status = setup.CameraState == CameraConnectionState.Ready ? "Live" : "Unavailable";
+            SetupCameraViewport.Status = setup.CameraState switch
+            {
+                CameraConnectionState.Ready => "Live",
+                CameraConnectionState.Connecting => "Checking Camera…",
+                CameraConnectionState.Unavailable when setup.SelectedCamera is null =>
+                    "Select a Camera to start the preview.",
+                _ => "Camera preview unavailable.",
+            };
+#if UI_VERIFICATION
+            SetupCameraViewport.Source = setup.CameraState == CameraConnectionState.Ready
+                ? verificationCameraPreview
+                : null;
+            SetupCameraViewport.IsMirrored = false;
+            SetupCameraViewport.PreviewScale = 1.32;
+#endif
             DiscardTitleText.Text = editingSavedEvent ? "Discard changes?" : "Discard this draft?";
             DiscardActionButton.Content = editingSavedEvent ? "Discard Changes" : "Discard Draft";
             ConfirmSaveButton.Content = setup.SaveConfirmationStartsEvent
@@ -420,13 +534,23 @@ public sealed partial class MainWindow : Window
                 ? null
                 : setup.AvailableCameras.FirstOrDefault(camera =>
                     camera.DeviceId == setup.SelectedCamera.DeviceId);
-            SetupFailureText.Text = setup.ActionableFailureMessage ?? string.Empty;
-            SetupFailureBorder.Visibility = Visibility.Collapsed;
+            var isSetupSaving = verificationIdentity.EndsWith("event-setup.saving", StringComparison.Ordinal);
+            var isSetupSaveSuccess = verificationIdentity.EndsWith("event-setup.save-success", StringComparison.Ordinal);
+            var isSetupSaveError = verificationIdentity.EndsWith("event-setup.save-error", StringComparison.Ordinal);
+            SetupFailureText.Text = isSetupSaveError
+                ? "The Event could not be saved here. Check storage access and try again."
+                : setup.ActionableFailureMessage ?? string.Empty;
+            SetupFailureBorder.Visibility = isSetupSaveError ? Visibility.Visible : Visibility.Collapsed;
             RetryStorageButton.Visibility = setup.IsStorageReady
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-            SaveCloseButton.IsEnabled = setup.CanSave;
-            SaveStartButton.IsEnabled = setup.CanStart;
+            SaveCloseButton.IsEnabled = setup.CanSave && !isSetupSaving && !isSetupSaveSuccess && !isSetupSaveError;
+            SaveStartButton.IsEnabled = setup.CanStart && !isSetupSaving && !isSetupSaveSuccess && !isSetupSaveError;
+            SetButtonContent(SaveCloseButton, isSetupSaveSuccess ? "Saved" : "Save & Close");
+            SetButtonContent(
+                SaveStartButton,
+                isSetupSaving ? "Saving & starting…" : "Save & Start Event",
+                isSetupSaving);
 
         }
         finally
@@ -684,6 +808,35 @@ public sealed partial class MainWindow : Window
         catch (OperationCanceledException)
         {
         }
+    }
+
+    private static void SetButtonContent(Button button, string label, bool busy = false)
+    {
+        AutomationProperties.SetName(button, label);
+        if (!busy)
+        {
+            button.Content = label;
+            return;
+        }
+
+        var content = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
+        content.Children.Add(new ProgressRing
+        {
+            Width = 18,
+            Height = 18,
+            IsActive = true,
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = label,
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        button.Content = content;
     }
 
     public void ShowCentered()

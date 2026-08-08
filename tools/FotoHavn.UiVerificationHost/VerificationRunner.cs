@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -32,7 +33,7 @@ public sealed class VerificationRunner(HostOptions options)
         var scripts = options.TransitionIds.Select(approvedTransitions.Resolve)
             .ToDictionary(item => item.FixtureId, StringComparer.Ordinal);
         var selected = plan.Cases.Where(item =>
-            options.FixtureIds.Count == 0 && scripts.Count == 0 ||
+            options.FixtureIds.Count == 0 && scripts.Count == 0 && item.Batch <= options.CompletedThroughBatch ||
             options.FixtureIds.Contains(item.FixtureId, StringComparer.Ordinal) ||
             scripts.ContainsKey(item.FixtureId)).ToArray();
         if (selected.Length == 0)
@@ -53,7 +54,7 @@ public sealed class VerificationRunner(HostOptions options)
             1,
             DateTimeOffset.UtcNow,
             GitCommit(),
-            Hash(applicationPath),
+            HashApplication(applicationPath),
             options.CompletedThroughBatch,
             environment.IsPinned,
             results.Count,
@@ -94,12 +95,16 @@ public sealed class VerificationRunner(HostOptions options)
             inspection.WaitForSettlement(
                 script?.InitialInjectionIdentity ?? verificationCase.InjectionIdentity,
                 SettlementTimeout);
+            inspection.PrepareEvidence(
+                script?.InitialInjectionIdentity ?? verificationCase.InjectionIdentity,
+                SettlementTimeout);
             if (script is not null)
             {
                 foreach (var action in script.Actions)
                 {
                     inspection.Invoke(action.AutomationId);
                     inspection.WaitForSettlement(action.ExpectedInjectionIdentity, SettlementTimeout);
+                    inspection.PrepareEvidence(action.ExpectedInjectionIdentity, SettlementTimeout);
                 }
 
                 if (!script.FinalInjectionIdentity.Equals(
@@ -186,6 +191,39 @@ public sealed class VerificationRunner(HostOptions options)
 
     private static string Hash(string path) =>
         Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+
+    public static string HashApplication(string applicationPath)
+    {
+        var applicationRoot = Path.GetDirectoryName(applicationPath) ??
+            throw new InvalidOperationException("The application path has no parent directory.");
+        var files = new[]
+        {
+            Path.ChangeExtension(applicationPath, ".dll"),
+            Path.ChangeExtension(applicationPath, ".pri"),
+            Path.Combine(applicationRoot, "App.xbf"),
+            Path.Combine(applicationRoot, "MainWindow.xbf"),
+            Path.Combine(applicationRoot, "UiVerification", "ApprovedInjectionCatalog.json"),
+            Path.Combine(applicationRoot, "UiVerification", "camera-preview.jpg"),
+            Path.Combine(applicationRoot, "UiVerification", "canonical-presentation.json"),
+        };
+        var missing = files.Where(path => !File.Exists(path)).ToArray();
+        if (missing.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"The verification application fingerprint is incomplete: {string.Join(", ", missing)}.");
+        }
+
+        using var fingerprint = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach (var path in files.Order(StringComparer.OrdinalIgnoreCase))
+        {
+            var relativePath = Path.GetRelativePath(applicationRoot, path).Replace('\\', '/');
+            fingerprint.AppendData(Encoding.UTF8.GetBytes(relativePath));
+            fingerprint.AppendData([0]);
+            fingerprint.AppendData(File.ReadAllBytes(path));
+        }
+
+        return Convert.ToHexString(fingerprint.GetHashAndReset()).ToLowerInvariant();
+    }
 
     private static string SafeName(string value) => string.Concat(value.Select(character =>
         char.IsLetterOrDigit(character) || character is '-' or '_' ? character : '_'));

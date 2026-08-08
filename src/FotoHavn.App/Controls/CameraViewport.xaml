@@ -18,12 +18,37 @@
                 IsHitTestVisible="False"
                 Style="{StaticResource FotoHavnCaptureGuideStyle}" />
             <TextBlock
-                x:Name="StatusText"
+                x:Name="PreviewStatusText"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource ColorActionPrimaryForegroundBrush}"
+                Style="{StaticResource TypeCaptionStyle}"
+                Text="{x:Bind Status, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <Border
+                x:Name="MediaBadge"
+                Margin="12"
+                Padding="{StaticResource CameraMediaBadgePadding}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Background="#E6FFFFFF"
+                CornerRadius="{StaticResource RadiusControl}"
+                Visibility="Collapsed">
+                <TextBlock
+                    CharacterSpacing="{StaticResource CameraMediaBadgeCharacterSpacing}"
+                    FontSize="{StaticResource CameraMediaBadgeFontSize}"
+                    FontWeight="Bold"
+                    Text="LIVE · MIRRORED" />
+            </Border>
+            <TextBlock
+                x:Name="CaptureAreaText"
+                Margin="12,0,0,10"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Foreground="{ThemeResource ColorActionPrimaryForegroundBrush}"
                 Style="{StaticResource TypeCaptionStyle}"
-                Text="{x:Bind Status, Mode=OneWay}" />
+                Text="3:2 Capture area" />
             <ContentPresenter Content="{x:Bind OverlayContent, Mode=OneWay}" />
         </Grid>
     </Border>

@@ -11,7 +11,7 @@ Show, in order:
 3. uppercase final eight hexadecimal UUID characters grouped `XXXX · XXXX`;
 4. saved-recency metadata.
 
-The compact value is a recognition aid, not a uniqueness guarantee. V1 adds no collision handling or copy action. Narrator announces `Event ID ending in 7 A 2 F, 9 1 C 4`.
+The compact value is a recognition aid, not a uniqueness guarantee. V1 adds no collision handling or copy action. Narrator announces the canonical example as `Event ID ending in 2 F 9 1, C 4 E 8`.
 
 ## Consequential flows
 

@@ -121,6 +121,7 @@ public sealed record VerificationAnnotation(
     private static InitialFocusPolicy ParseInitialFocus(string value) => value switch
     {
         "page heading" => InitialFocusPolicy.PageHeading,
+        "dialog heading" => InitialFocusPolicy.DialogHeading,
         "primary action" => InitialFocusPolicy.PrimaryAction,
         "primary guest action when present" => InitialFocusPolicy.PrimaryGuestActionWhenPresent,
         "safe action" => InitialFocusPolicy.SafeAction,
@@ -147,7 +148,7 @@ public sealed record VerificationAnnotation(
 
 public enum AutomationRole { Window, Dialog }
 
-public enum InitialFocusPolicy { PageHeading, PrimaryAction, PrimaryGuestActionWhenPresent, SafeAction }
+public enum InitialFocusPolicy { PageHeading, DialogHeading, PrimaryAction, PrimaryGuestActionWhenPresent, SafeAction }
 
 public enum AnnouncementPriority { Polite, Assertive }
 

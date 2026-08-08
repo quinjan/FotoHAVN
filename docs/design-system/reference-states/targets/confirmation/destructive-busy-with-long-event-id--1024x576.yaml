@@ -25,7 +25,7 @@ readingOrder:
   - "safe action"
   - "confirming action"
 focus:
-  initial: "safe action"
+  initial: "dialog heading"
   order: "semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action"
   returnTarget: "invoking control"
   reflowBehavior: "Focus follows visible task order and remains revealed without horizontal scrolling."

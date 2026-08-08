@@ -119,6 +119,124 @@ public sealed class UiVerificationHostTests
         Assert.Equal("injection.capture.countdown-3", script.FinalInjectionIdentity);
     }
 
+    [Fact]
+    public void Application_fingerprint_changes_when_compiled_application_content_changes()
+    {
+        var applicationRoot = Path.Combine(Path.GetTempPath(), $"fotohavn-app-hash-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(applicationRoot, "UiVerification"));
+        try
+        {
+            var applicationPath = Path.Combine(applicationRoot, "FotoHAVN.exe");
+            File.WriteAllText(applicationPath, "generic launcher");
+            File.WriteAllText(Path.ChangeExtension(applicationPath, ".dll"), "application code v1");
+            File.WriteAllText(Path.ChangeExtension(applicationPath, ".pri"), "resources");
+            File.WriteAllText(Path.Combine(applicationRoot, "App.xbf"), "app xaml");
+            var mainWindowPath = Path.Combine(applicationRoot, "MainWindow.xbf");
+            File.WriteAllText(mainWindowPath, "window xaml v1");
+            File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "ApprovedInjectionCatalog.json"), "[]");
+            File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "camera-preview.jpg"), "camera frame");
+            File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "canonical-presentation.json"), "{}");
+
+            var first = VerificationRunner.HashApplication(applicationPath);
+            File.WriteAllText(mainWindowPath, "window xaml v2");
+            var second = VerificationRunner.HashApplication(applicationPath);
+
+            Assert.Equal(64, first.Length);
+            Assert.Equal(64, second.Length);
+            Assert.NotEqual(first, second);
+        }
+        finally
+        {
+            Directory.Delete(applicationRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Reading_order_uses_stable_semantic_landmarks_instead_of_visible_copy()
+    {
+        var annotation = new VerificationAnnotation(
+            "Start this Event?",
+            "Start this Event?",
+            AutomationRole.Dialog,
+            "ready",
+            ["semantic icon", "dialog heading", "Event identity when relevant", "safe action", "confirming action"],
+            InitialFocusPolicy.SafeAction,
+            [],
+            48,
+            48,
+            [WinUiElementRole.ContentDialog, WinUiElementRole.Button, WinUiElementRole.TextBlock]);
+        AutomationElementEvidence[] elements =
+        [
+            Evidence(null, "Semantic icon", "Group"),
+            Evidence("StartEventConfirmationText", "Start this Event?", "Text"),
+            Evidence("StartEventIdentityText", "0198a7d2-5bc1-7f45-8e90-3f7a2f91c4e8", "Text"),
+            Evidence("FotoHavn.Confirmation.SafeAction", "Cancel", "Button"),
+            Evidence("FotoHavn.Confirmation.ConfirmingAction", "Start Event", "Button"),
+        ];
+
+        var findings = AutomationInspection.CheckReadingOrder(annotation, elements);
+
+        Assert.Empty(findings);
+    }
+
+    [Fact]
+    public void Reading_order_omits_identity_when_the_dialog_action_has_no_relevant_event_identity()
+    {
+        var annotation = new VerificationAnnotation(
+            "Exit this Event?",
+            "Exit this Event?",
+            AutomationRole.Dialog,
+            "ready",
+            ["semantic icon", "dialog heading", "Event identity when relevant", "safe action", "confirming action"],
+            InitialFocusPolicy.SafeAction,
+            [],
+            48,
+            48,
+            [WinUiElementRole.ContentDialog, WinUiElementRole.Button, WinUiElementRole.TextBlock]);
+        AutomationElementEvidence[] elements =
+        [
+            Evidence(null, "Semantic icon", "Group"),
+            Evidence("ExitEventTitleText", "Exit this Event?", "Text"),
+            Evidence("FotoHavn.Confirmation.SafeAction", "Keep Event Active", "Button"),
+            Evidence("FotoHavn.Confirmation.ConfirmingAction", "Exit Event", "Button"),
+        ];
+
+        var findings = AutomationInspection.CheckReadingOrder(annotation, elements);
+
+        Assert.Empty(findings);
+    }
+
+    [Theory]
+    [InlineData("VerticalSmallDecrease")]
+    [InlineData("HorizontalLargeIncrease")]
+    [InlineData("FotoHavn.Verification.HostReady")]
+    public void Framework_chrome_and_verification_controls_are_not_product_touch_targets(string automationId)
+    {
+        Assert.True(AutomationInspection.IsFrameworkChromeOrVerificationElement(automationId));
+    }
+
+    [Fact]
+    public void Product_controls_remain_subject_to_touch_target_checks()
+    {
+        Assert.False(AutomationInspection.IsFrameworkChromeOrVerificationElement("ExitEventButton"));
+    }
+
+    private static AutomationElementEvidence Evidence(string? id, string? name, string controlType) => new(
+        id,
+        name,
+        controlType,
+        null,
+        null,
+        true,
+        false,
+        controlType == "Button",
+        false,
+        new(0, 0, 48, 48),
+        [],
+        null,
+        controlType == "Button",
+        true);
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

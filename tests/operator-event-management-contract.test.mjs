@@ -34,13 +34,16 @@ test("operator surfaces are composed from the four approved reusable families", 
 
 test("Event cards and consequential dialogs expose complete disambiguating Event identity", () => {
   const eventCard = readFileSync(path.join(controls, "EventCard.xaml.cs"), "utf8");
+  const dialogIdentity = readFileSync(path.join(controls, "DialogEventIdentity.xaml.cs"), "utf8");
   const mainWindow = readFileSync(path.join(app, "MainWindow.xaml"), "utf8");
   const behavior = readFileSync(path.join(app, "MainWindow.xaml.cs"), "utf8");
 
   assert.match(eventCard, /CompactEventId/);
   assert.match(eventCard, /AccessibleEventId/);
-  assert.match(mainWindow, /EventDeletionIdentityText/);
-  assert.match(mainWindow, /StartEventIdentityText/);
+  assert.match(dialogIdentity, /EventNameProperty/);
+  assert.match(dialogIdentity, /EventIdProperty/);
+  assert.match(mainWindow, /x:Name="EventDeletionIdentity"/);
+  assert.match(mainWindow, /x:Name="StartEventIdentity"/);
   assert.match(behavior, /deletion\?\.EventId\.Value/);
   assert.match(behavior, /StartEventConfirmation\?\.EventId\.Value/);
 });
@@ -69,7 +72,7 @@ test("operator surfaces reflow instead of preserving a fixed 1280 by 720 canvas"
   assert.match(mainWindow, /x:Name="SetupScrollViewer"/);
   assert.match(behavior, /ResponsiveLayoutMode\.Stress/);
   assert.match(behavior, /MaximumRowsOrColumns/);
-  assert.match(eventCard, /Height\s*=\s*stress\s*\?\s*168\s*:\s*256/);
+  assert.match(eventCard, /Height\s*=\s*stress\s*\?\s*142\s*:\s*256/);
   assert.match(eventCard, /CardActionsColumn/);
   assert.match(
     mainWindow,

@@ -14,6 +14,7 @@
         VerticalScrollMode="Enabled"
         ZoomMode="Disabled">
         <Border
+            x:Name="DialogBorder"
             Padding="{StaticResource ModalDialogPadding}"
             Background="{ThemeResource ColorSurfaceRaisedBrush}"
             CornerRadius="{StaticResource RadiusDialog}">

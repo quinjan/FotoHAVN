@@ -26,6 +26,18 @@ Use a dedicated desktop with no window covering FotoHAVN because capture reads
 the real on-screen WinUI client. Do not use Remote Desktop, HDR, a custom color
 profile, or display overrides for qualified evidence.
 
+The repository's qualified runner is `FotoHAVN-Pinned-UI-QUINJ3875`, with the
+labels `fotohavn-ui-verification`, `windows-26200`, `dpi-120`, and
+`dotnet-10.0.302`. It runs in the signed-in interactive desktop through the
+`FotoHAVN Pinned UI Verification Runner` scheduled task; it is deliberately not
+a Windows service because WinUI screen capture requires an interactive session.
+
+This repository is public. The pinned runner workflow is therefore
+`workflow_dispatch` only and must never be changed to run automatically for a
+pull request, fork, or other untrusted revision. Dispatch the intended branch or
+commit manually from **Actions > UI verification - Batch 3**. Registration
+tokens and runner credentials stay on the workstation and are never committed.
+
 ## Build and validate
 
 ```powershell
@@ -49,7 +61,15 @@ dotnet run --project tools/FotoHavn.UiVerificationHost/FotoHavn.UiVerificationHo
 ```
 
 Use `--fixture saved-events.new-event.standard` repeatedly to select fixtures.
-With no fixture selection, the host runs all 103.
+With no fixture selection, the host runs every fixture whose owning batch is at
+or below `--completed-through-batch`. Batch 3 therefore runs exactly its 48
+owned fixtures; the final Batch 5 boundary runs all 103.
+
+The Batch 3 workflow preserves the host's exact comparison result, uploads every
+target/actual/diff/result file, and separately gates the run on the pinned
+environment, exactly 48 results, complete evidence, and zero semantic
+violations. Pixel differences are never tolerated automatically: they remain
+`review-required` until the visual review record explains or rejects them.
 
 ## Deterministic transition scripts
 

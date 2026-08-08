@@ -11,10 +11,14 @@ namespace FotoHavn.App.Controls;
 public sealed partial class ConfirmationDialogFrame : UserControl
 {
     private readonly List<(UIElement Element, bool IsHitTestVisible, AccessibilityView AccessibilityView)> backgroundState = [];
+    private readonly Dictionary<UIElement, Visibility> compactCopyVisibility = [];
     private Grid? modalLayer;
     private long visibilityCallbackToken;
     private Control? previousFocus;
     private bool isActive;
+    private bool stackActions;
+    private bool useStressMargins;
+    private double standardMaximumWidth = 500;
 
     public static readonly DependencyProperty DialogContentProperty = DependencyProperty.Register(
         nameof(DialogContent), typeof(object), typeof(ConfirmationDialogFrame), new PropertyMetadata(null));
@@ -26,6 +30,7 @@ public sealed partial class ConfirmationDialogFrame : UserControl
         Loaded += ConfirmationDialogFrameLoaded;
         Unloaded += ConfirmationDialogFrameUnloaded;
         KeyDown += ConfirmationDialogFrameKeyDown;
+        SizeChanged += (_, _) => ApplyActionLayout();
     }
 
     public object? DialogContent
@@ -88,7 +93,7 @@ public sealed partial class ConfirmationDialogFrame : UserControl
             }
         }
 
-        DispatcherQueue.TryEnqueue(() => FindActionButtons().FirstOrDefault()?.Focus(FocusState.Programmatic));
+        QueueInitialFocus();
     }
 
     private void DeactivateModal()
@@ -133,33 +138,121 @@ public sealed partial class ConfirmationDialogFrame : UserControl
             return;
         }
 
+        var enabledButtons = buttons.Where(button => button.IsEnabled).ToList();
+        if (enabledButtons.Count == 0)
+        {
+            FindDialogHeading()?.Focus(FocusState.Keyboard);
+            args.Handled = true;
+            return;
+        }
+
         var focused = FocusManager.GetFocusedElement(XamlRoot) as Button;
         var shift = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift)
             .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
-        if ((!shift && focused == buttons[^1]) || (shift && focused == buttons[0]))
+        if ((!shift && focused == enabledButtons[^1]) || (shift && focused == enabledButtons[0]))
         {
-            buttons[shift ? ^1 : 0].Focus(FocusState.Keyboard);
+            enabledButtons[shift ? ^1 : 0].Focus(FocusState.Keyboard);
             args.Handled = true;
         }
     }
+
+    public void RefreshInitialFocus()
+    {
+        if (isActive)
+        {
+            QueueInitialFocus();
+        }
+    }
+
+    private void QueueInitialFocus() => DispatcherQueue.TryEnqueue(() =>
+    {
+        var enabledAction = FindActionButtons().FirstOrDefault(button => button.IsEnabled);
+        if (enabledAction is not null)
+        {
+            enabledAction.Focus(FocusState.Programmatic);
+            return;
+        }
+
+        FindDialogHeading()?.Focus(FocusState.Programmatic);
+    });
 
     private List<Button> FindActionButtons() => DialogContent is DependencyObject content && FindActions(content) is { } actions
         ? actions.Children.OfType<Button>().Where(button => button.Visibility == Visibility.Visible).ToList()
         : [];
 
-    public void ApplyResponsiveLayout(bool stress)
+    private Control? FindDialogHeading() => DialogContent is DependencyObject content
+        ? FindDialogHeading(content)
+        : null;
+
+    private static Control? FindDialogHeading(DependencyObject root)
+    {
+        if (root is Control control && AutomationProperties.GetHeadingLevel(control) != AutomationHeadingLevel.None)
+        {
+            return control;
+        }
+
+        for (var index = 0; index < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            if (FindDialogHeading(Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(root, index)) is { } match)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
+    public void SetStandardMaximumWidth(double width)
+    {
+        standardMaximumWidth = width;
+        MaxWidth = useStressMargins ? double.PositiveInfinity : standardMaximumWidth;
+    }
+
+    public void ApplyResponsiveLayout(bool stressMargins, bool shouldStackActions)
     {
         if (DialogContent is not DependencyObject content || FindActions(content) is not { } actions)
         {
             return;
         }
 
-        Margin = new(stress ? 16 : 24);
-        actions.Orientation = stress ? Orientation.Vertical : Orientation.Horizontal;
-        actions.HorizontalAlignment = stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
-        foreach (var child in actions.Children.OfType<FrameworkElement>())
+        useStressMargins = stressMargins;
+        stackActions = shouldStackActions;
+        Margin = new(stressMargins ? 16 : 24);
+        MaxWidth = stressMargins ? double.PositiveInfinity : standardMaximumWidth;
+        DialogBorder.Padding = stressMargins ? new Thickness(18, 14, 18, 16) : new Thickness(32);
+        if (FindDialogHeading() is { } heading)
         {
-            child.HorizontalAlignment = stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
+            heading.FontSize = stressMargins ? 21 : 32;
+        }
+        if (DialogContent is StackPanel rootPanel)
+        {
+            rootPanel.Spacing = stressMargins ? 6 : 20;
+        }
+        ApplySupportingCopyVisibility(DialogContent as DependencyObject, shouldStackActions);
+        ApplyResponsiveContent(DialogContent as DependencyObject, stressMargins);
+        ApplyActionLayout();
+    }
+
+    private void ApplyActionLayout()
+    {
+        if (DialogContent is not DependencyObject content || FindActions(content) is not { } actions)
+        {
+            return;
+        }
+
+        var buttons = actions.Children.OfType<Button>()
+            .Where(button => button.Visibility == Visibility.Visible)
+            .ToArray();
+        actions.Orientation = stackActions ? Orientation.Vertical : Orientation.Horizontal;
+        actions.HorizontalAlignment = HorizontalAlignment.Stretch;
+        var innerWidth = Math.Max(0, ActualWidth - 64);
+        var standardButtonWidth = buttons.Length == 0
+            ? double.NaN
+            : Math.Max(0, (innerWidth - (actions.Spacing * (buttons.Length - 1))) / buttons.Length);
+        foreach (var button in buttons)
+        {
+            button.HorizontalAlignment = HorizontalAlignment.Stretch;
+            button.Width = stackActions ? double.NaN : standardButtonWidth;
         }
     }
 
@@ -179,5 +272,56 @@ public sealed partial class ConfirmationDialogFrame : UserControl
         }
 
         return null;
+    }
+
+    private static void ApplyResponsiveContent(DependencyObject? root, bool stress)
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        if (root is DialogSemanticIcon icon)
+        {
+            icon.ApplyResponsiveLayout(stress);
+        }
+        if (root is DialogEventIdentity identity)
+        {
+            identity.ApplyResponsiveLayout(stress);
+        }
+
+        for (var index = 0; index < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            ApplyResponsiveContent(Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(root, index), stress);
+        }
+    }
+
+    private void ApplySupportingCopyVisibility(DependencyObject? root, bool hideSupportingCopy)
+    {
+        if (root is null)
+        {
+            return;
+        }
+
+        if (root is TextBlock text &&
+            AutomationProperties.GetName(text) == "Consequence when present")
+        {
+            if (hideSupportingCopy)
+            {
+                compactCopyVisibility.TryAdd(text, text.Visibility);
+                text.Visibility = Visibility.Collapsed;
+            }
+            else if (compactCopyVisibility.Remove(text, out var visibility))
+            {
+                text.Visibility = visibility;
+            }
+        }
+
+        for (var index = 0; index < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            ApplySupportingCopyVisibility(
+                Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(root, index),
+                hideSupportingCopy);
+        }
     }
 }

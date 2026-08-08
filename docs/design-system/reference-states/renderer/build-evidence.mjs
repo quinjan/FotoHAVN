@@ -49,6 +49,7 @@ for (const frame of frames) {
   const headingText = acknowledgement ? 'Event saved' : frame.surface.id === 'confirmation' ? (confirmationTitles[confirmationType] || frame.surface.heading) : frame.surface.id === 'event-setup' ? (frame.state.startsWith('edit-') ? 'Edit Event' : 'New Event') : frame.surface.heading;
   const readingOrder = acknowledgement ? ['success status','dialog heading','message','primary action'] : frame.surface.order;
   const active = /(busy|saving|checking|retrying|countdown|returning|preparing|holding)/.test(frame.state);
+  const busyConfirmation = frame.surface.id === 'confirmation' && active && !acknowledgement;
   const blocking = /(failure|failed|unavailable|access-denied|in-use|disconnected|insufficient|exit-only|incomplete)/.test(frame.state);
   const lines = [
     `id: ${quote(id)}`,
@@ -72,7 +73,7 @@ for (const frame of frames) {
     `readingOrder:`,
     ...readingOrder.map(value => `  - ${quote(value)}`),
     `focus:`,
-    `  initial: ${quote(acknowledgement ? 'primary action' : frame.surface.id === 'confirmation' ? 'safe action' : frame.surface.audience === 'guest' ? 'primary guest action when present' : 'page heading')}`,
+    `  initial: ${quote(acknowledgement ? 'primary action' : busyConfirmation ? 'dialog heading' : frame.surface.id === 'confirmation' ? 'safe action' : frame.surface.audience === 'guest' ? 'primary guest action when present' : 'page heading')}`,
     `  order: ${quote(readingOrder.join(' -> '))}`,
     `  returnTarget: ${quote(frame.surface.id === 'confirmation' ? 'invoking control' : 'not applicable')}`,
     `  reflowBehavior: ${quote('Focus follows visible task order and remains revealed without horizontal scrolling.')}`,
