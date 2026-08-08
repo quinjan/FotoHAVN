@@ -90,6 +90,9 @@ public sealed class GuestCycleAcceptanceTests
         var rejected = await orchestrator.ExecuteAsync(new RetryGuestCycle(), cancellationToken);
 
         Assert.Equal(GuestCyclePhase.OperatorAssistance, rejected.ActiveEvent?.GuestCycle.Phase);
+        Assert.Equal(GuestCycleRecovery.ExitOnly, rejected.ActiveEvent?.GuestCycle.Recovery);
+        Assert.Equal(GuestCycleActionState.RetryFailed, rejected.ActiveEvent?.GuestCycle.ActionState);
+        Assert.Equal(2, rejected.ActiveEvent?.GuestCycle.CompletedCaptures);
         Assert.Equal([1, 2], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
         Assert.Single(fileSystem.CreatedGuestCycles);
         Assert.Equal(1, camera.OpenCount);
