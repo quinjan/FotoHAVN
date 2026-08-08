@@ -98,10 +98,40 @@ internal sealed class UiVerificationPresentationController :
                 injection.ExpectedName,
                 injection.ExpectedStatus,
                 injection.Identity,
-                transition?.FocusAutomationId,
-                transition?.Announcement,
-                transition?.AnnouncementPriority));
+                transition?.FocusAutomationId ?? DefaultFocus(injection),
+                transition?.Announcement ?? DefaultAnnouncement(injection),
+                transition?.AnnouncementPriority ?? DefaultAnnouncementPriority(injection)));
     }
+
+    private static string DefaultFocus(ApprovedInjection injection) => injection.Surface switch
+    {
+        ApplicationSurface.SavedEvents => "HeadingText",
+        ApplicationSurface.EventSetup => "SetupTitleText",
+        ApplicationSurface.Confirmation when injection.State == "success-destination" =>
+            "FotoHavn.Confirmation.ConfirmingAction",
+        ApplicationSurface.Confirmation => "FotoHavn.Confirmation.SafeAction",
+        _ => string.Empty,
+    };
+
+    private static string DefaultAnnouncement(ApprovedInjection injection)
+    {
+        var surface = injection.Surface switch
+        {
+            ApplicationSurface.EventSetup => "Event setup",
+            ApplicationSurface.Confirmation => "Confirmation",
+            _ => injection.ExpectedName,
+        };
+        var state = injection.ExpectedStatus switch
+        {
+            "busy" => "in progress",
+            "unavailable" => "needs attention",
+            _ => "ready",
+        };
+        return $"{surface} {state}.";
+    }
+
+    private static AnnouncementPriority DefaultAnnouncementPriority(ApprovedInjection injection) =>
+        injection.ExpectedStatus == "unavailable" ? AnnouncementPriority.Assertive : AnnouncementPriority.Polite;
 }
 
 internal sealed record ApprovedInjection(
@@ -209,6 +239,7 @@ internal static class InjectedPresentationFactory
         var editing = injection.State.StartsWith("edit-", StringComparison.Ordinal);
         var cameraState = injection.State switch
         {
+            "new-empty" => CameraConnectionState.Unavailable,
             "camera-checking" => CameraConnectionState.Connecting,
             "camera-unavailable" => CameraConnectionState.Unavailable,
             "camera-access-denied" => CameraConnectionState.AccessDenied,
@@ -233,7 +264,7 @@ internal static class InjectedPresentationFactory
             false,
             injection.State == "new-empty" ? string.Empty : data.EventName,
             [camera],
-            camera,
+            injection.State == "new-empty" ? null : camera,
             cameraState,
             cameraState == CameraConnectionState.Ready,
             new(false, true, false),

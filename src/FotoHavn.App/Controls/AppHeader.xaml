@@ -1,0 +1,42 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.AppHeader"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.AutomationId="FotoHavn.AppHeader"
+    AutomationProperties.Name="FotoHAVN">
+    <Border Style="{StaticResource FotoHavnAppHeaderStyle}">
+        <Grid>
+            <StackPanel
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="{StaticResource SpaceInline}">
+                <Border Style="{StaticResource FotoHavnBrandMarkStyle}">
+                    <TextBlock
+                        AutomationProperties.AccessibilityView="Raw"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource ColorActionPrimaryForegroundBrush}"
+                        Style="{StaticResource TypeCaptionStyle}"
+                        Text="F" />
+                </Border>
+                <TextBlock
+                    AutomationProperties.AccessibilityView="Raw"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource TypeLabelControlStyle}"
+                    Text="FotoHAVN" />
+            </StackPanel>
+            <TextBlock
+                x:Name="ContextText"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Style="{StaticResource TypeEyebrowStyle}"
+                Text="{x:Bind Context, Mode=OneWay}" />
+            <ContentPresenter
+                x:Name="TrailingPresenter"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Content="{x:Bind TrailingContent, Mode=OneWay}" />
+        </Grid>
+    </Border>
+</UserControl>

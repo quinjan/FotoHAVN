@@ -1,4 +1,5 @@
 using FotoHavn.Core;
+using FotoHavn.App.Controls;
 using FotoHavn.App.Surfaces;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -23,7 +24,6 @@ public sealed partial class MainWindow : Window
     private readonly IApplicationPresentationController presentationController;
     private readonly CameraBoundary? camera;
     private readonly ApplicationPresentationAdapter presentationAdapter;
-    private readonly HashSet<Border> hoveredEventCards = [];
     private ApplicationCanvasPresentation? canvas;
     private bool applyingPresentation;
     private string? loadingPhotoStripPath;
@@ -56,15 +56,6 @@ public sealed partial class MainWindow : Window
 #if UI_VERIFICATION
         renderSettledSignal = new UiVerificationRenderSettledSignal(WindowRoot);
 #endif
-        PreviewViewport.Width = PreviewViewport.Height * CameraPreviewRenderPolicy.CropAspectRatio;
-        PreviewSurface.Width = PreviewViewport.Width;
-        PreviewSurface.Height = PreviewViewport.Height;
-        var mirror = CameraPreviewRenderPolicy.CreateMirror(PreviewSurface.Width);
-        PreviewSurface.RenderTransform = new ScaleTransform
-        {
-            ScaleX = mirror.ScaleX,
-            CenterX = mirror.CenterX,
-        };
         var guestMirror = CameraPreviewRenderPolicy.CreateMirror(GuestPreviewViewport.Width);
         GuestPreviewImage.RenderTransform = new ScaleTransform
         {
@@ -82,31 +73,106 @@ public sealed partial class MainWindow : Window
     {
         var presentation = await presentationController.ExecuteAsync(new LaunchApplication(), cancellationToken);
         HeadingText.Text = presentation.Heading;
-        EventTiles.ItemsSource = presentation.EventTiles;
-        FixedCanvas.Width = presentation.Canvas.Width;
-        FixedCanvas.Height = presentation.Canvas.Height;
+        EventTiles.ItemsSource = presentation.EventTiles.Where(tile => tile.Kind == EventTileKind.SavedEvent);
         canvas = presentation.Canvas;
         ApplyPresentation(presentation);
     }
 
-    private async void EventTileClicked(object sender, RoutedEventArgs args)
+    private void OperatorCanvasSizeChanged(object sender, SizeChangedEventArgs args) =>
+        ApplyOperatorResponsiveLayout(args.NewSize.Width, args.NewSize.Height);
+
+    private void ApplyOperatorResponsiveLayout(double width, double height)
     {
-        if (sender is Button { DataContext: EventTilePresentation { Kind: EventTileKind.NewEvent } })
+        var mode = ResponsiveLayout.Resolve(width, height);
+        var horizontalPadding = mode switch
         {
-            await ExecuteAsync(new OpenNewEvent());
+            ResponsiveLayoutMode.Standard => 48,
+            ResponsiveLayoutMode.Compact => 32,
+            ResponsiveLayoutMode.Stress => 16,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+        SavedEventsContent.Padding = new(horizontalPadding, 32, horizontalPadding, 36);
+        SetupDialog.Margin = new(mode == ResponsiveLayoutMode.Standard ? 40 : 16);
+        SetupContentGrid.Padding = new(mode == ResponsiveLayoutMode.Stress ? 16 : 34);
+        var stacksSetup = mode != ResponsiveLayoutMode.Standard;
+        ReparentSetupPreview(stacksSetup);
+        SetupFieldsColumn.Width = new(stacksSetup ? 1 : 410, stacksSetup ? GridUnitType.Star : GridUnitType.Pixel);
+        SetupGapColumn.Width = new(stacksSetup ? 0 : 32);
+        SetupPreviewColumn.Width = new(stacksSetup ? 0 : 1, stacksSetup ? GridUnitType.Pixel : GridUnitType.Star);
+        Grid.SetRow(SetupPreviewPanel, stacksSetup ? 2 : 1);
+        Grid.SetColumn(SetupPreviewPanel, stacksSetup ? 0 : 2);
+        Grid.SetColumnSpan(SetupPreviewPanel, stacksSetup ? 3 : 1);
+        SetupCameraViewport.Width = stacksSetup ? double.NaN : Math.Max(240, Math.Min(588, width - 560));
+        SetupCameraViewport.MaxWidth = stacksSetup ? 378 : 588;
+        SetupCameraViewport.Height = stacksSetup ? 252 : 392;
+        SetupCameraViewport.HorizontalAlignment = stacksSetup ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        SetupCommitActions.Orientation = mode == ResponsiveLayoutMode.Stress ? Orientation.Vertical : Orientation.Horizontal;
+        SetupCommitActions.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
+        foreach (var action in SetupCommitActions.Children.OfType<FrameworkElement>())
+        {
+            action.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Right;
         }
-        else if (sender is Button { DataContext: EventTilePresentation { Kind: EventTileKind.SavedEvent, EventId: { } eventId } })
+        Grid.SetRow(SetupCommitActions, mode == ResponsiveLayoutMode.Stress ? 1 : 0);
+        SetupCommitActions.Margin = mode == ResponsiveLayoutMode.Stress ? new(0, 10, 0, 0) : new(0);
+        CancelSetupButton.HorizontalAlignment = mode == ResponsiveLayoutMode.Stress ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+
+        DispatcherQueue.TryEnqueue(() =>
         {
-            await ExecuteAsync(new OpenSavedEvent(eventId));
+            if (EventTiles.ItemsPanelRoot is ItemsWrapGrid panel)
+            {
+                var columns = mode switch
+                {
+                    ResponsiveLayoutMode.Standard => 3,
+                    ResponsiveLayoutMode.Compact => 2,
+                    ResponsiveLayoutMode.Stress => 1,
+                    _ => 1,
+                };
+                var availableWidth = Math.Max(280, width - (horizontalPadding * 2));
+                panel.MaximumRowsOrColumns = columns;
+                panel.ItemWidth = Math.Max(280, (availableWidth - ((columns - 1) * 18)) / columns);
+                panel.ItemHeight = 274;
+            }
+        });
+    }
+
+    private void ReparentSetupPreview(bool stacksSetup)
+    {
+        if (stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is Grid)
+        {
+            SetupContentGrid.Children.Remove(SetupPreviewPanel);
+            SetupFieldGroups.Children.Insert(2, SetupPreviewPanel);
+        }
+        else if (!stacksSetup && VisualTreeHelper.GetParent(SetupPreviewPanel) is StackPanel)
+        {
+            SetupFieldGroups.Children.Remove(SetupPreviewPanel);
+            SetupContentGrid.Children.Add(SetupPreviewPanel);
         }
     }
 
-    private async void StartSavedEventClicked(object sender, RoutedEventArgs args)
+    private async void NewEventClicked(object sender, RoutedEventArgs args) =>
+        await ExecuteAsync(new OpenNewEvent());
+
+    private async void EventCardActionRequested(object sender, EventCardActionEventArgs args)
     {
-        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
+        if (args.Action == EventCardAction.New)
         {
-            await ExecuteAsync(new StartSavedEvent(eventId));
+            await ExecuteAsync(new OpenNewEvent());
+            return;
         }
+
+        if (args.EventId is not { } eventId)
+        {
+            return;
+        }
+
+        await ExecuteAsync(args.Action switch
+        {
+            EventCardAction.Start => new StartSavedEvent(eventId),
+            EventCardAction.Edit => new OpenSavedEvent(eventId),
+            EventCardAction.Delete => new DeleteSavedEvent(eventId),
+            EventCardAction.RetryDeletion => new RetryEventDeletion(eventId),
+            _ => throw new InvalidOperationException($"Unsupported Event Card action '{args.Action}'."),
+        });
     }
 
     private async void ConfirmStartEventClicked(object sender, RoutedEventArgs args) =>
@@ -130,30 +196,6 @@ public sealed partial class MainWindow : Window
     private async void RetryGuestCycleClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new RetryGuestCycle());
 
-    private async void EditSavedEventClicked(object sender, RoutedEventArgs args)
-    {
-        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
-        {
-            await ExecuteAsync(new OpenSavedEvent(eventId));
-        }
-    }
-
-    private async void DeleteSavedEventClicked(object sender, RoutedEventArgs args)
-    {
-        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
-        {
-            await ExecuteAsync(new DeleteSavedEvent(eventId));
-        }
-    }
-
-    private async void RetryEventDeletionClicked(object sender, RoutedEventArgs args)
-    {
-        if (sender is Button { DataContext: EventTilePresentation { EventId: { } eventId } })
-        {
-            await ExecuteAsync(new RetryEventDeletion(eventId));
-        }
-    }
-
     private async void ConfirmEventDeletionClicked(object sender, RoutedEventArgs args)
     {
         if (presentationController.CurrentPresentation.EventDeletion?.Stage == EventDeletionStage.Confirmation)
@@ -168,101 +210,6 @@ public sealed partial class MainWindow : Window
 
     private async void CancelEventDeletionClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelDeleteSavedEvent());
-
-    private void SavedEventCardPointerEntered(object sender, PointerRoutedEventArgs args)
-    {
-        if (sender is Border card)
-        {
-            hoveredEventCards.Add(card);
-            ApplySavedEventCardState(card, isActive: true);
-        }
-    }
-
-    private void SavedEventCardPointerExited(object sender, PointerRoutedEventArgs args)
-    {
-        if (sender is Border card)
-        {
-            hoveredEventCards.Remove(card);
-            if (FindNamedDescendant<Button>(card, "StartEventButton") is not { FocusState: not FocusState.Unfocused })
-            {
-                ApplySavedEventCardState(card, isActive: false);
-            }
-        }
-    }
-
-    private void StartEventButtonGotFocus(object sender, RoutedEventArgs args)
-    {
-        if (sender is Button button && FindAncestor<Border>(button, "SavedEventCard") is { } card)
-        {
-            ApplySavedEventCardState(card, isActive: true);
-        }
-    }
-
-    private void StartEventButtonLostFocus(object sender, RoutedEventArgs args)
-    {
-        if (sender is Button button &&
-            FindAncestor<Border>(button, "SavedEventCard") is { } card &&
-            !hoveredEventCards.Contains(card))
-        {
-            ApplySavedEventCardState(card, isActive: false);
-        }
-    }
-
-    private static void ApplySavedEventCardState(Border card, bool isActive)
-    {
-        if (card.DataContext is EventTilePresentation { DeletionIncomplete: true })
-        {
-            card.Background = (Brush)Application.Current.Resources["SurfaceBrush"];
-            return;
-        }
-
-        if (FindNamedDescendant<Button>(card, "StartEventButton") is { } startButton)
-        {
-            startButton.Opacity = isActive ? 1 : 0;
-        }
-
-        if (FindNamedDescendant<StackPanel>(card, "SavedEventMetadata") is { } metadata)
-        {
-            metadata.Opacity = isActive ? 0.16 : 1;
-        }
-
-        card.Background = (Brush)Application.Current.Resources[
-            isActive ? "EventHoverBrush" : "SurfaceBrush"];
-    }
-
-    private static T? FindNamedDescendant<T>(DependencyObject root, string name)
-        where T : FrameworkElement
-    {
-        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
-        {
-            var child = VisualTreeHelper.GetChild(root, index);
-            if (child is T { Name: var childName } match && childName == name)
-            {
-                return match;
-            }
-
-            if (FindNamedDescendant<T>(child, name) is { } descendant)
-            {
-                return descendant;
-            }
-        }
-
-        return null;
-    }
-
-    private static T? FindAncestor<T>(DependencyObject child, string name)
-        where T : FrameworkElement
-    {
-        for (var current = VisualTreeHelper.GetParent(child); current is not null; current = VisualTreeHelper.GetParent(current))
-        {
-            if (current is T { Name: var currentName } match && currentName == name)
-            {
-                return match;
-            }
-        }
-
-        return null;
-    }
 
     private async void EventNameTextChanged(object sender, TextChangedEventArgs args)
     {
@@ -345,8 +292,8 @@ public sealed partial class MainWindow : Window
         applyingPresentation = true;
         try
         {
-            HeadingText.Text = presentation.Heading;
-            EventTiles.ItemsSource = presentation.EventTiles;
+            HeadingText.Text = "Saved Events";
+            EventTiles.ItemsSource = presentation.EventTiles.Where(tile => tile.Kind == EventTileKind.SavedEvent);
             var activeEvent = presentation.ActiveEvent;
             EventScrollViewer.Visibility = activeEvent is null ? Visibility.Visible : Visibility.Collapsed;
             ActiveEventLayer.Visibility = activeEvent is null ? Visibility.Collapsed : Visibility.Visible;
@@ -356,11 +303,19 @@ public sealed partial class MainWindow : Window
             StartEventConfirmationLayer.Visibility = presentation.StartEventConfirmation is null
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-            StartEventConfirmationText.Text = presentation.StartEventConfirmation?.Prompt ?? string.Empty;
+            StartEventConfirmationText.Text = surfaceOverride?.Surface == ApplicationSurface.Confirmation
+                ? surfaceOverride.AccessibleName
+                : presentation.StartEventConfirmation?.Prompt ?? string.Empty;
+            StartEventNameText.Text = presentation.StartEventConfirmation?.EventName ?? string.Empty;
+            StartEventIdentityText.Text = presentation.StartEventConfirmation?.EventId.Value ?? string.Empty;
             var deletion = presentation.EventDeletion;
             EventDeletionLayer.Visibility = deletion is null ? Visibility.Collapsed : Visibility.Visible;
-            EventDeletionTitleText.Text = deletion?.Title ?? string.Empty;
+            EventDeletionTitleText.Text = surfaceOverride?.Surface == ApplicationSurface.Confirmation
+                ? surfaceOverride.AccessibleName
+                : deletion?.Title ?? string.Empty;
             EventDeletionMessageText.Text = deletion?.Message ?? string.Empty;
+            EventDeletionEventNameText.Text = deletion?.EventName ?? string.Empty;
+            EventDeletionIdentityText.Text = deletion?.EventId.Value ?? string.Empty;
             EventDeletionProgressRing.Visibility = deletion?.IsBusy == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
@@ -402,7 +357,7 @@ public sealed partial class MainWindow : Window
                 (!setup.ShowsDiscardConfirmation && !setup.ShowsSaveConfirmation);
             if (setup is null)
             {
-                PreviewImage.Source = null;
+                SetupCameraViewport.Source = null;
 #if UI_VERIFICATION
                 if (surfaceOverride is not null)
                 {
@@ -419,9 +374,29 @@ public sealed partial class MainWindow : Window
 
             SetupTitleText.Text = setup.Title;
             var editingSavedEvent = setup.EventId is not null;
-            ApplyDirtyFieldState(EventNameTextBox, NameDirtyIndicator, setup.IsNameDirty, editingSavedEvent);
-            ApplyDirtyFieldState(CameraComboBox, CameraDirtyIndicator, setup.IsCameraDirty, editingSavedEvent);
-            StorageStatusText.Visibility = setup.IsStorageReady ? Visibility.Collapsed : Visibility.Visible;
+            var setupIdentity = setup.EventId?.Value ?? "New Event";
+            EventSetupIdentityText.Text = editingSavedEvent ? $"Event ID {setupIdentity}" : "New Event";
+            SaveEventNameText.Text = setup.EventName;
+            SaveEventIdentityText.Text = setupIdentity;
+            EventNameFieldGroup.Present(
+                string.IsNullOrWhiteSpace(setup.EventName)
+                    ? SetupFieldState.Invalid
+                    : setup.IsNameDirty ? SetupFieldState.Dirty : SetupFieldState.Ready,
+                string.IsNullOrWhiteSpace(setup.EventName) ? "Enter an Event name." : string.Empty);
+            var cameraFailure = setup.ActionableFailureMessage ?? "Choose an Available Camera and try again.";
+            CameraFieldGroup.Present(setup.CameraState switch
+            {
+                CameraConnectionState.Connecting => SetupFieldState.Checking,
+                CameraConnectionState.Ready => setup.IsCameraDirty ? SetupFieldState.Dirty : SetupFieldState.Ready,
+                CameraConnectionState.Unavailable => SetupFieldState.Unavailable,
+                _ => SetupFieldState.Invalid,
+            }, setup.CameraState == CameraConnectionState.Connecting ? "Checking camera…" : cameraFailure);
+            StorageFieldGroup.Present(
+                setup.IsStorageReady ? SetupFieldState.Ready : SetupFieldState.Invalid,
+                setup.IsStorageReady
+                    ? string.Empty
+                    : "Storage must be writable and have at least 1 GB free. Check C:\\Program Files\\FotoHAVN\\Events, then try again.");
+            SetupCameraViewport.Status = setup.CameraState == CameraConnectionState.Ready ? "Live" : "Unavailable";
             DiscardTitleText.Text = editingSavedEvent ? "Discard changes?" : "Discard this draft?";
             DiscardActionButton.Content = editingSavedEvent ? "Discard Changes" : "Discard Draft";
             ConfirmSaveButton.Content = setup.SaveConfirmationStartsEvent
@@ -434,9 +409,7 @@ public sealed partial class MainWindow : Window
                 : setup.AvailableCameras.FirstOrDefault(camera =>
                     camera.DeviceId == setup.SelectedCamera.DeviceId);
             SetupFailureText.Text = setup.ActionableFailureMessage ?? string.Empty;
-            SetupFailureBorder.Visibility = setup.ActionableFailureMessage is null
-                ? Visibility.Collapsed
-                : Visibility.Visible;
+            SetupFailureBorder.Visibility = Visibility.Collapsed;
             RetryStorageButton.Visibility = setup.IsStorageReady
                 ? Visibility.Collapsed
                 : Visibility.Visible;
@@ -469,24 +442,6 @@ public sealed partial class MainWindow : Window
 #endif
     }
 
-    private static void ApplyDirtyFieldState(
-        Control control,
-        FrameworkElement indicator,
-        bool isDirty,
-        bool editingSavedEvent)
-    {
-        control.ClearValue(Control.BorderBrushProperty);
-        control.ClearValue(Control.BorderThicknessProperty);
-        indicator.Visibility = isDirty ? Visibility.Visible : Visibility.Collapsed;
-        AutomationProperties.SetHelpText(
-            control,
-            isDirty
-                ? editingSavedEvent
-                    ? "Changed from the saved Event."
-                    : "Changed from the initial value."
-                : string.Empty);
-    }
-
     private void PreviewFrameAvailable(object? sender, SoftwareBitmap bitmap)
     {
         var presentation = presentationController.CurrentPresentation;
@@ -513,7 +468,7 @@ public sealed partial class MainWindow : Window
                     await source.SetBitmapAsync(displayBitmap);
                     if (presentationController.CurrentPresentation.Setup is not null)
                     {
-                        PreviewImage.Source = source;
+                        SetupCameraViewport.Source = source;
                     }
                     else
                     {

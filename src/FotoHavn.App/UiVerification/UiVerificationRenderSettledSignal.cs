@@ -72,9 +72,9 @@ internal sealed class UiVerificationRenderSettledSignal
     {
         layoutRoot.UpdateLayout();
         if (surfaceOverride.FocusAutomationId is { Length: > 0 } focusId &&
-            FindByAutomationId(layoutRoot, focusId) is Control control)
+            FindByAutomationId(layoutRoot, focusId) is FrameworkElement element)
         {
-            control.Focus(FocusState.Programmatic);
+            element.Focus(FocusState.Programmatic);
         }
 
         if (surfaceOverride.Announcement is { Length: > 0 } announcement)

@@ -1,0 +1,79 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.EventCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.AutomationId="FotoHavn.EventCard"
+    DataContextChanged="EventCardDataContextChanged"
+    Style="{StaticResource FotoHavnEventCardStyle}">
+    <Grid>
+        <Button
+            x:Name="NewEventButton"
+            AutomationProperties.Name="New Event"
+            Click="NewEventClicked"
+            Content="New Event"
+            Style="{StaticResource FotoHavnActionButtonPrimaryStyle}"
+            Visibility="Collapsed" />
+        <Border
+            x:Name="SavedEventCardRoot"
+            Style="{StaticResource FotoHavnEventCardPanelStyle}"
+            Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    x:Name="EventNameText"
+                    AutomationProperties.HeadingLevel="Level2"
+                    Style="{StaticResource TypeLabelControlStyle}"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource TypeEyebrowStyle}"
+                    Text="EVENT ID" />
+                <TextBlock
+                    x:Name="CompactEventIdText"
+                    Grid.Row="2"
+                    Style="{StaticResource TypeBodyDefaultStyle}" />
+                <TextBlock
+                    x:Name="SavedMetadataText"
+                    Grid.Row="3"
+                    Foreground="{ThemeResource ColorTextMutedBrush}"
+                    Style="{StaticResource TypeCaptionStyle}" />
+                <Grid Grid.Row="4">
+                    <Button
+                        x:Name="StartButton"
+                        HorizontalAlignment="Left"
+                        Click="StartClicked"
+                        Content="Start Event"
+                        Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
+                    <StackPanel AutomationProperties.Name="Start, Edit, and Delete actions" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="{StaticResource SpaceInline}">
+                        <Button
+                            x:Name="RetryButton"
+                            Click="RetryClicked"
+                            Content="Retry Deletion"
+                            Style="{StaticResource FotoHavnActionButtonSecondaryStyle}"
+                            Visibility="Collapsed" />
+                        <Button
+                            x:Name="EditButton"
+                            Click="EditClicked"
+                            ToolTipService.ToolTip="Edit Event"
+                            Style="{StaticResource FotoHavnIconActionStyle}">
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;" />
+                        </Button>
+                        <Button
+                            x:Name="DeleteButton"
+                            Click="DeleteClicked"
+                            ToolTipService.ToolTip="Delete Event"
+                            Style="{StaticResource FotoHavnIconActionDestructiveStyle}">
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
