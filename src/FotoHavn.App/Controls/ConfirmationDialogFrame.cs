@@ -219,14 +219,18 @@ public sealed partial class ConfirmationDialogFrame : UserControl
         stackActions = shouldStackActions;
         Margin = new(stressMargins ? 16 : 24);
         MaxWidth = stressMargins ? double.PositiveInfinity : standardMaximumWidth;
-        DialogBorder.Padding = stressMargins ? new Thickness(18, 14, 18, 16) : new Thickness(32);
+        DialogBorder.Padding = stressMargins
+            ? new Thickness(18, 14, 18, 16)
+            : (Thickness)Application.Current.Resources["ModalDialogPadding"];
         if (FindDialogHeading() is { } heading)
         {
             heading.FontSize = stressMargins ? 21 : 32;
         }
         if (DialogContent is StackPanel rootPanel)
         {
-            rootPanel.Spacing = stressMargins ? 6 : 20;
+            rootPanel.Spacing = stressMargins
+                ? 6
+                : (double)Application.Current.Resources["DialogContentSpacing"];
         }
         ApplySupportingCopyVisibility(DialogContent as DependencyObject, shouldStackActions);
         ApplyResponsiveContent(DialogContent as DependencyObject, stressMargins);

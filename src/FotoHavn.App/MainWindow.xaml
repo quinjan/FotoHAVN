@@ -357,7 +357,7 @@
                     Visibility="Collapsed">
                     <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
-                        <StackPanel Spacing="20">
+                        <StackPanel Spacing="{StaticResource DialogContentSpacing}">
                             <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
                             <controls:FocusableHeading x:Name="ExitEventTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="ExitEventTitleText" FontSize="32" FontWeight="Bold" Text="Exit this Event?" TextAlignment="Center" />
                             <TextBlock
@@ -389,7 +389,7 @@
                 Visibility="Collapsed">
                 <controls:ConfirmationDialogFrame x:Name="DeletionConfirmationFrame">
                     <controls:ConfirmationDialogFrame.DialogContent>
-                    <StackPanel Spacing="20">
+                    <StackPanel Spacing="{StaticResource DialogContentSpacing}">
                         <controls:DialogSemanticIcon x:Name="EventDeletionSemanticIcon" HorizontalAlignment="Center" Glyph="&#xE74D;" Intent="Destructive" />
                         <controls:FocusableHeading
                             x:Name="EventDeletionTitleText"
@@ -412,13 +412,6 @@
                             Message="Deletion did not finish. Review the Event and try again."
                             Severity="Danger"
                             Title="Needs attention"
-                            Visibility="Collapsed" />
-                        <ProgressRing
-                            x:Name="EventDeletionProgressRing"
-                            Width="36"
-                            Height="36"
-                            HorizontalAlignment="Left"
-                            IsActive="False"
                             Visibility="Collapsed" />
                         <StackPanel
                             x:Name="EventDeletionActions"
@@ -451,7 +444,7 @@
                 Visibility="Collapsed">
                 <controls:ConfirmationDialogFrame x:Name="StartConfirmationFrame">
                     <controls:ConfirmationDialogFrame.DialogContent>
-                    <StackPanel Spacing="20">
+                    <StackPanel Spacing="{StaticResource DialogContentSpacing}">
                         <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xF5B0;" />
                         <controls:FocusableHeading
                             x:Name="StartEventConfirmationText"
@@ -538,6 +531,7 @@
                         <ScrollViewer
                             x:Name="SetupScrollViewer"
                             Grid.Row="1"
+                            Padding="{StaticResource SetupScrollContentPadding}"
                             HorizontalScrollBarVisibility="Disabled"
                             HorizontalScrollMode="Disabled"
                             VerticalScrollBarVisibility="Auto"
@@ -634,7 +628,15 @@
 
                                 <controls:SetupFieldGroup x:Name="PrinterFieldGroup" Grid.Row="3" Margin="0,0,0,18" AutomationProperties.Name="Printer" Label="Printer (optional)">
                                     <controls:SetupFieldGroup.FieldContent>
-                                        <TextBlock Style="{StaticResource FotoHavnReadOnlyValueStyle}" Text="Not printing" />
+                                        <ComboBox
+                                            x:Name="PrinterComboBox"
+                                            HorizontalAlignment="Stretch"
+                                            AutomationProperties.Name="Printer"
+                                            SelectedIndex="0"
+                                            SelectionChanged="PrinterSelectionChanged"
+                                            Style="{StaticResource FotoHavnSelectFieldStyle}">
+                                            <ComboBoxItem Content="Not printing" />
+                                        </ComboBox>
                                     </controls:SetupFieldGroup.FieldContent>
                                 </controls:SetupFieldGroup>
 
@@ -696,7 +698,7 @@
                     Visibility="Collapsed">
                     <controls:ConfirmationDialogFrame x:Name="DiscardConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
-                        <StackPanel Spacing="18">
+                        <StackPanel Spacing="{StaticResource DialogContentSpacing}">
                             <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE711;" Intent="Destructive" />
                             <controls:FocusableHeading x:Name="DiscardTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="DiscardTitleText" FontSize="32" FontWeight="Bold" Text="Discard this draft?" TextAlignment="Center" />
                             <TextBlock
@@ -721,7 +723,7 @@
                     Visibility="Collapsed">
                     <controls:ConfirmationDialogFrame x:Name="SaveConfirmationFrame">
                         <controls:ConfirmationDialogFrame.DialogContent>
-                        <StackPanel Spacing="18">
+                        <StackPanel Spacing="{StaticResource DialogContentSpacing}">
                             <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE74E;" />
                             <controls:FocusableHeading x:Name="SaveChangesTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="SaveChangesTitleText" FontSize="32" FontWeight="Bold" Text="Save changes?" TextAlignment="Center" />
                             <TextBlock
@@ -732,7 +734,7 @@
                                 Visibility="Collapsed" />
                             <controls:DialogEventIdentity x:Name="SaveEventIdentity" />
                             <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
-                                <Button AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Content="Keep Editing" Click="CancelSaveClicked" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
+                                <Button x:Name="CancelSaveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Content="Keep Editing" Click="CancelSaveClicked" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
                                 <Button x:Name="ConfirmSaveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction" Content="Save Changes" Click="ConfirmSaveClicked" Style="{StaticResource FotoHavnActionButtonPrimaryStyle}" />
                             </StackPanel>
                         </StackPanel>

@@ -206,20 +206,23 @@
     <Thickness x:Key="ToastContentPadding">16,12</Thickness>
     <Thickness x:Key="AppHeaderPadding">48,0</Thickness>
     <Thickness x:Key="EventCardPadding">22</Thickness>
-    <Thickness x:Key="ModalDialogPadding">32</Thickness>
+    <Thickness x:Key="ModalDialogPadding">24</Thickness>
     <Thickness x:Key="CaptureGuideMargin">12</Thickness>
     <Thickness x:Key="DirtyIndicatorMargin">1</Thickness>
+    <Thickness x:Key="SetupScrollContentPadding">0,0,20,0</Thickness>
     <Thickness x:Key="StrokeNone">0</Thickness>
     <Thickness x:Key="CameraMediaBadgePadding">9,7</Thickness>
-    <Thickness x:Key="DialogEventIdentityPadding">12,16</Thickness>
-    <Thickness x:Key="DialogSemanticIconStroke">3</Thickness>
+    <Thickness x:Key="DialogEventIdentityPadding">0,10</Thickness>
+    <Thickness x:Key="DialogEventIdentityStressPadding">0,6</Thickness>
+    <Thickness x:Key="DialogSemanticIconStroke">2</Thickness>
     <x:Double x:Key="HairlineHeight">1</x:Double>
     <x:Double x:Key="SpaceStackCompact">4</x:Double>
     <x:Double x:Key="CameraMediaBadgeFontSize">10</x:Double>
     <x:Int32 x:Key="CameraMediaBadgeCharacterSpacing">100</x:Int32>
-    <x:Double x:Key="DialogSemanticIconSize">60</x:Double>
-    <CornerRadius x:Key="DialogSemanticIconRadius">30</CornerRadius>
-    <x:Double x:Key="DialogSemanticIconGlyphSize">28</x:Double>
+    <x:Double x:Key="DialogContentSpacing">14</x:Double>
+    <x:Double x:Key="DialogSemanticIconSize">48</x:Double>
+    <CornerRadius x:Key="DialogSemanticIconRadius">24</CornerRadius>
+    <x:Double x:Key="DialogSemanticIconGlyphSize">22</x:Double>
     <x:Double x:Key="EventCardMetadataFontSize">12</x:Double>
     <x:Double x:Key="EventCardStatusSpacing">9</x:Double>
     <x:Double x:Key="EventCardStatusIconSize">18</x:Double>
@@ -283,6 +286,7 @@
     </Style>
     <Style x:Key="FotoHavnTextFieldStyle" TargetType="TextBox">
         <Setter Property="MinHeight" Value="{StaticResource TargetOperatorMinimum}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
         <Setter Property="UseSystemFocusVisuals" Value="True" />
@@ -346,7 +350,6 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
     <Style x:Key="FotoHavnEventCardPanelStyle" TargetType="Border">
-        <Setter Property="Padding" Value="{StaticResource EventCardPadding}" />
         <Setter Property="Background" Value="{ThemeResource ColorSurfacePanelBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
         <Setter Property="BorderThickness" Value="{StaticResource StrokeDefault}" />

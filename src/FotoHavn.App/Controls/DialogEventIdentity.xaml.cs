@@ -36,7 +36,8 @@ public sealed partial class DialogEventIdentity : UserControl
     }
 
     public void ApplyResponsiveLayout(bool stress) =>
-        IdentityGrid.Padding = stress ? new Thickness(10, 8, 10, 8) : new Thickness(12, 16, 12, 16);
+        IdentityGrid.Padding = (Thickness)Application.Current.Resources[
+            stress ? "DialogEventIdentityStressPadding" : "DialogEventIdentityPadding"];
 
     private static void OnIdentityChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)
     {

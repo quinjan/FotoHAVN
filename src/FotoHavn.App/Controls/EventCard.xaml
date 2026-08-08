@@ -40,7 +40,7 @@
                         <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
                     </Button.Resources>
                 </Button>
-            <Grid x:Name="CardLayout">
+            <Grid x:Name="CardLayout" Padding="{StaticResource EventCardPadding}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />

@@ -165,5 +165,10 @@ public sealed class ConfirmationSurface(params FrameworkElement[] roots)
         });
 
     protected override string ItemStatus(ApplicationPresentation presentation) =>
-        presentation.EventDeletion?.IsBusy == true ? "busy" : "ready";
+        presentation.EventDeletion?.IsBusy == true ||
+        presentation.StartEventConfirmation?.IsBusy == true ||
+        presentation.ActiveEvent?.IsExitBusy == true ||
+        presentation.Setup?.IsBusy == true
+            ? "busy"
+            : "ready";
 }

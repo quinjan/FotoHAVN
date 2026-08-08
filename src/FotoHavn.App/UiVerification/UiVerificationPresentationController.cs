@@ -304,7 +304,9 @@ internal static class InjectedPresentationFactory
             EventId: editing ? new(data.EventId) : null,
             IsDirty: injection.State == "edit-dirty",
             IsNameDirty: injection.State == "edit-dirty",
-            Title: editing ? "Edit Event" : "New Event");
+            Title: editing ? "Edit Event" : "New Event",
+            IsBusy: injection.State == "saving",
+            IsSavingAndStarting: injection.State == "saving");
         return new("Saved Events", [], null, Canvas, Setup: setup);
     }
 

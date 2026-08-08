@@ -44,6 +44,14 @@ public sealed class ActiveEventAcceptanceTests
             new AvailableCamera("camera-bound", "Booth Camera", "Port 4"));
         var wakeLock = new RecordingWakeLock();
         var orchestrator = CreateOrchestrator(fileSystem, camera, wakeLock);
+        var sawCardBusy = false;
+        var sawConfirmationBusy = false;
+        orchestrator.PresentationChanged += (_, state) =>
+        {
+            sawCardBusy |= state.EventTiles.Any(tile =>
+                tile.EventId == savedEvent.Id && tile.State == EventCardState.Busy);
+            sawConfirmationBusy |= state.StartEventConfirmation?.IsBusy == true;
+        };
         await orchestrator.ExecuteAsync(new LaunchApplication(), TestContext.Current.CancellationToken);
 
         var confirmation = await orchestrator.ExecuteAsync(
@@ -60,6 +68,8 @@ public sealed class ActiveEventAcceptanceTests
         Assert.Equal("camera-bound", Assert.Single(camera.OpenedDeviceIds).Value);
         Assert.Equal("Summer Party", active.ActiveEvent!.Name);
         Assert.Null(active.StartEventConfirmation);
+        Assert.True(sawCardBusy);
+        Assert.True(sawConfirmationBusy);
         Assert.Equal(1, fileSystem.StorageProbeCount);
         Assert.Equal(1, wakeLock.AcquireCount);
     }
@@ -148,6 +158,11 @@ public sealed class ActiveEventAcceptanceTests
         var camera = new RecordingCamera(new AvailableCamera("camera-1", "Booth Camera", "Port 4"));
         var wakeLock = new RecordingWakeLock();
         var orchestrator = CreateOrchestrator(fileSystem, camera, wakeLock);
+        var sawExitBusy = false;
+        orchestrator.PresentationChanged += (_, state) =>
+        {
+            sawExitBusy |= state.ActiveEvent?.IsExitBusy == true;
+        };
         await orchestrator.ExecuteAsync(new LaunchApplication(), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new StartSavedEvent(savedEvent.Id), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new ConfirmStartSavedEvent(), TestContext.Current.CancellationToken);
@@ -162,6 +177,7 @@ public sealed class ActiveEventAcceptanceTests
 
         Assert.Null(exited.ActiveEvent);
         Assert.Null(exited.Setup);
+        Assert.True(sawExitBusy);
         Assert.Contains(exited.EventTiles, tile => tile.EventId == savedEvent.Id);
         Assert.Single(fileSystem.SavedEvents);
         Assert.Equal(1, camera.ReleaseCount);

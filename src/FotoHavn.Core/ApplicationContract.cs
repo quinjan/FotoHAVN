@@ -214,7 +214,7 @@ public sealed record EventDeletionPresentation(
     public bool IsDismissible => Stage != EventDeletionStage.Deleting;
 }
 
-public sealed record StartEventConfirmationPresentation(EventId EventId, string EventName)
+public sealed record StartEventConfirmationPresentation(EventId EventId, string EventName, bool IsBusy = false)
 {
     public string Prompt => $"Start “{EventName}”?";
 }
@@ -351,12 +351,15 @@ public sealed record EventSetupPresentation(
     bool IsNameDirty = false,
     bool IsCameraDirty = false,
     EventSetupConfirmation Confirmation = EventSetupConfirmation.None,
-    string Title = "New Event")
+    string Title = "New Event",
+    bool IsBusy = false,
+    bool IsSavingAndStarting = false)
 {
     public bool ShowsDiscardConfirmation => Confirmation == EventSetupConfirmation.DiscardChanges;
     public bool ShowsSaveConfirmation => Confirmation is EventSetupConfirmation.SaveAndClose or EventSetupConfirmation.SaveAndStart;
     public bool SaveConfirmationStartsEvent => Confirmation == EventSetupConfirmation.SaveAndStart;
     public bool CanStart =>
+        !IsBusy &&
         !string.IsNullOrWhiteSpace(EventName) &&
         CameraState == CameraConnectionState.Ready &&
         IsNoPrinterSelected &&
@@ -381,7 +384,8 @@ public sealed record ActiveEventPresentation(
     string CameraStreamId,
     bool ShowsExitConfirmation = false,
     GuestStartPresentation? GuestStartState = null,
-    GuestCyclePresentation? Cycle = null)
+    GuestCyclePresentation? Cycle = null,
+    bool IsExitBusy = false)
 {
     public string Heading => "Let’s take some photos.";
     public string Explanation => "Four Captures. A quick countdown before each one.";
