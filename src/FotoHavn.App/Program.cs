@@ -7,7 +7,11 @@ namespace FotoHavn.App;
 
 public static class Program
 {
+#if UI_VERIFICATION
+    private const string InstanceKey = "quinjan.FotoHAVN.UiVerification";
+#else
     private const string InstanceKey = "quinjan.FotoHAVN.Primary";
+#endif
 
     [STAThread]
     private static int Main(string[] args)

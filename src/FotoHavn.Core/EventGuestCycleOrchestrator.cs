@@ -1,6 +1,6 @@
 namespace FotoHavn.Core;
 
-public sealed class EventGuestCycleOrchestrator
+public sealed class EventGuestCycleOrchestrator : IApplicationPresentationController
 {
     private readonly IEventFileSystem fileSystem;
     private readonly IEventIdentityGenerator identityGenerator;

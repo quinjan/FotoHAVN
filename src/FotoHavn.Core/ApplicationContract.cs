@@ -101,6 +101,62 @@ public sealed record ApplicationPresentation(
     StartEventConfirmationPresentation? StartEventConfirmation = null,
     EventDeletionPresentation? EventDeletion = null);
 
+public interface IApplicationPresentationController
+{
+    event EventHandler<ApplicationPresentation>? PresentationChanged;
+
+    ApplicationPresentation CurrentPresentation { get; }
+
+    Task<ApplicationPresentation> ExecuteAsync(
+        ApplicationCommand command,
+        CancellationToken cancellationToken = default);
+}
+
+public enum ApplicationSurface
+{
+    SavedEvents,
+    EventSetup,
+    GuestStart,
+    GuestStartUnavailable,
+    Capture,
+    OperatorAssistance,
+    PhotoStrip,
+    Confirmation,
+}
+
+public static class ApplicationSurfaceResolver
+{
+    public static ApplicationSurface Resolve(ApplicationPresentation presentation)
+    {
+        ArgumentNullException.ThrowIfNull(presentation);
+
+        if (presentation.StartEventConfirmation is not null ||
+            presentation.EventDeletion is not null ||
+            presentation.Setup is { Confirmation: not EventSetupConfirmation.None } ||
+            presentation.ActiveEvent?.ShowsExitConfirmation == true)
+        {
+            return ApplicationSurface.Confirmation;
+        }
+
+        if (presentation.Setup is not null)
+        {
+            return ApplicationSurface.EventSetup;
+        }
+
+        return presentation.ActiveEvent?.GuestCycle.Phase switch
+        {
+            null => ApplicationSurface.SavedEvents,
+            GuestCyclePhase.Start => ApplicationSurface.GuestStart,
+            GuestCyclePhase.StartUnavailable => ApplicationSurface.GuestStartUnavailable,
+            GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved =>
+                ApplicationSurface.Capture,
+            GuestCyclePhase.OperatorAssistance => ApplicationSurface.OperatorAssistance,
+            GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading => ApplicationSurface.PhotoStrip,
+            _ => throw new ArgumentOutOfRangeException(nameof(presentation)),
+        };
+    }
+}
+
 public enum EventDeletionStage
 {
     Confirmation,
