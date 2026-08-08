@@ -1,8 +1,20 @@
-schemaVersion: 1
-contractVersion: 1.0.0
-approvalStatus: candidate-until-default-branch-and-design-tag
+schemaVersion: 2
+contractVersion: 1.0.1
+approvalStatus: nonvisual-patch-candidate-until-default-branch-and-design-tag
 implementationStatus: planned
 authority: docs/design-system
+semanticChange: false
+inherits:
+  contractVersion: 1.0.0
+  tag: design-v1.0.0
+  commit: 1a20bc6f46f8d724683f8c4b47c359379fc7371b
+traceability:
+  mapping: docs/design-system/traceability/mapping.json
+  manifest: docs/design-system/traceability/manifest.json
+  scenarioCatalogs: docs/design-system/traceability/scenarios
+  evidenceIndex: docs/design-system/traceability/evidence-index.json
+  manualProcedures: docs/design-system/traceability/manual-procedures.md
+  waiverRegister: docs/design-system/traceability/waivers.json
 winui:
   project: src/FotoHavn.App/FotoHavn.App.csproj
   targetDictionary: src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml

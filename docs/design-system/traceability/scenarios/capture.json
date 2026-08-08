@@ -1,0 +1,629 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "capture",
+  "scenarioCount": 11,
+  "scenarios": [
+    {
+      "id": "scenario.capture.capture-1",
+      "surface": "capture",
+      "state": "capture-1",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.capture-1 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.capture-1 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.capture-1.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/capture-1--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.capture-1",
+      "visualFixtures": [
+        "capture.capture-1.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.capture-2",
+      "surface": "capture",
+      "state": "capture-2",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.capture-2 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.capture-2 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.capture-2.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/capture-2--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.capture-2",
+      "visualFixtures": [
+        "capture.capture-2.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.capture-3",
+      "surface": "capture",
+      "state": "capture-3",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.capture-3 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.capture-3 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.capture-3.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/capture-3--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.capture-3",
+      "visualFixtures": [
+        "capture.capture-3.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.capture-4",
+      "surface": "capture",
+      "state": "capture-4",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.capture-4 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.capture-4 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.capture-4.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/capture-4--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.capture-4",
+      "visualFixtures": [
+        "capture.capture-4.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.countdown-3",
+      "surface": "capture",
+      "state": "countdown-3",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.countdown-3 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.countdown-3 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “busy”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.countdown-3.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/countdown-3--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.countdown-3",
+      "visualFixtures": [
+        "capture.countdown-3.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.countdown-2",
+      "surface": "capture",
+      "state": "countdown-2",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.countdown-2 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.countdown-2 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “busy”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.countdown-2.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/countdown-2--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.countdown-2",
+      "visualFixtures": [
+        "capture.countdown-2.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.countdown-1",
+      "surface": "capture",
+      "state": "countdown-1",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.countdown-1 with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.countdown-1 and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “busy”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.countdown-1.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/countdown-1--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.countdown-1",
+      "visualFixtures": [
+        "capture.countdown-1.standard"
+      ],
+      "responsiveViewportCases": [
+        "capture.capture-4-countdown.compact-aspect",
+        "capture.capture-4-countdown.scale-125-equivalent",
+        "capture.capture-4-countdown.scale-150-equivalent",
+        "capture.capture-4-countdown.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.flash",
+      "surface": "capture",
+      "state": "flash",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.flash with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.flash and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.flash.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/flash--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.flash",
+      "visualFixtures": [
+        "capture.flash.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.photo-saved",
+      "surface": "capture",
+      "state": "photo-saved",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.photo-saved with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.photo-saved and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “ready”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.photo-saved.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/photo-saved--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.photo-saved",
+      "visualFixtures": [
+        "capture.photo-saved.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.camera-failure",
+      "surface": "capture",
+      "state": "camera-failure",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.camera-failure with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.camera-failure and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “unavailable”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.camera-failure.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/camera-failure--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.camera-failure",
+      "visualFixtures": [
+        "capture.camera-failure.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.capture.storage-failure",
+      "surface": "capture",
+      "state": "storage-failure",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to capture.storage-failure with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.capture.storage-failure and reports render settled",
+      "then": "the level-one heading is “Photo capture”; the window automation root is named “Photo capture” in state “unavailable”; reading order is FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; and the pixels match capture.storage-failure.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.camera-viewport",
+        "component.capture-progress"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md"
+      ],
+      "annotationReferences": [
+        "targets/capture/storage-failure--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.capture.storage-failure",
+      "visualFixtures": [
+        "capture.storage-failure.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CAPTURE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CAPTURE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status; return target: not applicable",
+        "announcement": "Capture needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Capture progress -> Camera preview -> countdown or saved status"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

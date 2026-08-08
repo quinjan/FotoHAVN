@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "guest-start-unavailable",
+  "scenarioCount": 6,
+  "scenarios": [
+    {
+      "id": "scenario.guest-start-unavailable.camera-retry",
+      "surface": "guest-start-unavailable",
+      "state": "camera-retry",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.camera-retry with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.camera-retry and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.camera-retry.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/camera-retry--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.camera-retry",
+      "visualFixtures": [
+        "guest-start-unavailable.camera-retry.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start-unavailable.camera-exit-only",
+      "surface": "guest-start-unavailable",
+      "state": "camera-exit-only",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.camera-exit-only with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.camera-exit-only and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “unavailable”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.camera-exit-only.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/camera-exit-only--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.camera-exit-only",
+      "visualFixtures": [
+        "guest-start-unavailable.camera-exit-only.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start-unavailable.storage-retry",
+      "surface": "guest-start-unavailable",
+      "state": "storage-retry",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.storage-retry with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.storage-retry and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.storage-retry.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/storage-retry--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.storage-retry",
+      "visualFixtures": [
+        "guest-start-unavailable.storage-retry.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start-unavailable.storage-exit-only",
+      "surface": "guest-start-unavailable",
+      "state": "storage-exit-only",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.storage-exit-only with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.storage-exit-only and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “unavailable”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.storage-exit-only.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/storage-exit-only--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.storage-exit-only",
+      "visualFixtures": [
+        "guest-start-unavailable.storage-exit-only.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start-unavailable.retrying",
+      "surface": "guest-start-unavailable",
+      "state": "retrying",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.retrying with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.retrying and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “busy”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.retrying.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/retrying--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.retrying",
+      "visualFixtures": [
+        "guest-start-unavailable.retrying.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.guest-start-unavailable.retry-failed",
+      "surface": "guest-start-unavailable",
+      "state": "retry-failed",
+      "batch": 4,
+      "given": "the authoritative presentation is fixed to guest-start-unavailable.retry-failed with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.guest-start-unavailable.retry-failed and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “unavailable”; reading order is FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; and the pixels match guest-start-unavailable.retry-failed.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.status-callout",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/guest-start-unavailable/retry-failed--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.retry-failed",
+      "visualFixtures": [
+        "guest-start-unavailable.retry-failed.standard"
+      ],
+      "responsiveViewportCases": [
+        "guest-start-unavailable.longest-recovery-copy.compact-aspect",
+        "guest-start-unavailable.longest-recovery-copy.scale-125-equivalent",
+        "guest-start-unavailable.longest-recovery-copy.scale-150-equivalent",
+        "guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-GUEST-START-UNAVAILABLE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-GUEST-START-UNAVAILABLE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event; return target: not applicable",
+        "announcement": "Guest Start unavailable needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance label -> heading -> reason -> Retry or Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

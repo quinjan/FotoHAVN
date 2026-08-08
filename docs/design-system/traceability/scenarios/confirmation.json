@@ -1,0 +1,697 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "confirmation",
+  "scenarioCount": 12,
+  "scenarios": [
+    {
+      "id": "scenario.confirmation.start-idle",
+      "surface": "confirmation",
+      "state": "start-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.start-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.start-idle and reports render settled",
+      "then": "the level-one heading is “Start this Event?”; the dialog automation root is named “Start this Event?” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.start-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/start-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.start-idle",
+      "visualFixtures": [
+        "confirmation.start-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.start-busy",
+      "surface": "confirmation",
+      "state": "start-busy",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.start-busy with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.start-busy and reports render settled",
+      "then": "the level-one heading is “Start this Event?”; the dialog automation root is named “Start this Event?” in state “busy”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.start-busy.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/start-busy--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.start-busy",
+      "visualFixtures": [
+        "confirmation.start-busy.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.start-failed",
+      "surface": "confirmation",
+      "state": "start-failed",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.start-failed with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.start-failed and reports render settled",
+      "then": "the level-one heading is “Start this Event?”; the dialog automation root is named “Start this Event?” in state “unavailable”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.start-failed.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/start-failed--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.start-failed",
+      "visualFixtures": [
+        "confirmation.start-failed.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.save-idle",
+      "surface": "confirmation",
+      "state": "save-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.save-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.save-idle and reports render settled",
+      "then": "the level-one heading is “Save changes?”; the dialog automation root is named “Save changes?” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.save-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/save-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.save-idle",
+      "visualFixtures": [
+        "confirmation.save-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.discard-idle",
+      "surface": "confirmation",
+      "state": "discard-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.discard-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.discard-idle and reports render settled",
+      "then": "the level-one heading is “Discard changes?”; the dialog automation root is named “Discard changes?” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.discard-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/discard-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.discard-idle",
+      "visualFixtures": [
+        "confirmation.discard-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.exit-idle",
+      "surface": "confirmation",
+      "state": "exit-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.exit-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.exit-idle and reports render settled",
+      "then": "the level-one heading is “Exit this Event?”; the dialog automation root is named “Exit this Event?” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.exit-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/exit-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.exit-idle",
+      "visualFixtures": [
+        "confirmation.exit-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.exit-busy",
+      "surface": "confirmation",
+      "state": "exit-busy",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.exit-busy with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.exit-busy and reports render settled",
+      "then": "the level-one heading is “Exit this Event?”; the dialog automation root is named “Exit this Event?” in state “busy”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.exit-busy.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/exit-busy--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.exit-busy",
+      "visualFixtures": [
+        "confirmation.exit-busy.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.delete-idle",
+      "surface": "confirmation",
+      "state": "delete-idle",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.delete-idle with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.delete-idle and reports render settled",
+      "then": "the level-one heading is “Delete this Event?”; the dialog automation root is named “Delete this Event?” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.delete-idle.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/delete-idle--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.delete-idle",
+      "visualFixtures": [
+        "confirmation.delete-idle.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.delete-busy",
+      "surface": "confirmation",
+      "state": "delete-busy",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.delete-busy with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.delete-busy and reports render settled",
+      "then": "the level-one heading is “Delete this Event?”; the dialog automation root is named “Delete this Event?” in state “busy”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.delete-busy.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/delete-busy--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.delete-busy",
+      "visualFixtures": [
+        "confirmation.delete-busy.standard"
+      ],
+      "responsiveViewportCases": [
+        "confirmation.destructive-busy-with-long-event-id.compact-aspect",
+        "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
+        "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
+        "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.delete-failed",
+      "surface": "confirmation",
+      "state": "delete-failed",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.delete-failed with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.delete-failed and reports render settled",
+      "then": "the level-one heading is “Delete this Event?”; the dialog automation root is named “Delete this Event?” in state “unavailable”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.delete-failed.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/delete-failed--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.delete-failed",
+      "visualFixtures": [
+        "confirmation.delete-failed.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.retry",
+      "surface": "confirmation",
+      "state": "retry",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.retry with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.retry and reports render settled",
+      "then": "the level-one heading is “Confirm this action”; the dialog automation root is named “Confirm this action” in state “ready”; reading order is semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; and the pixels match confirmation.retry.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/retry--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.retry",
+      "visualFixtures": [
+        "confirmation.retry.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "announcement": "Confirmation ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "not applicable to this surface",
+        "recovery": "only recovery actions in this reading order are exposed: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.confirmation.success-destination",
+      "surface": "confirmation",
+      "state": "success-destination",
+      "batch": 3,
+      "given": "the authoritative presentation is fixed to confirmation.success-destination with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.confirmation.success-destination and reports render settled",
+      "then": "the level-one heading is “Event saved”; the dialog automation root is named “Event saved” in state “ready”; reading order is success status -> dialog heading -> message -> primary action; and the pixels match confirmation.success-destination.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.modal-dialog",
+        "component.inline-status",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/modal-safety.md",
+        "patterns/event-identification.md"
+      ],
+      "annotationReferences": [
+        "targets/confirmation/success-destination--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.confirmation.success-destination",
+      "visualFixtures": [
+        "confirmation.success-destination.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-CONFIRMATION"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-CONFIRMATION-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary action; order: success status -> dialog heading -> message -> primary action; return target: invoking control",
+        "announcement": "Event saved. Your changes have been saved. (polite)",
+        "destination": "the transition destination represented by confirmation.success-destination is reached",
+        "preservation": "not applicable to this surface",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

@@ -1,0 +1,469 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0.1",
+  "surface": "operator-assistance",
+  "scenarioCount": 8,
+  "scenarios": [
+    {
+      "id": "scenario.operator-assistance.camera-0-preserved",
+      "surface": "operator-assistance",
+      "state": "camera-0-preserved",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.camera-0-preserved with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.camera-0-preserved and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.camera-0-preserved.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/camera-0-preserved--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.camera-0-preserved",
+      "visualFixtures": [
+        "operator-assistance.camera-0-preserved.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.camera-3-preserved",
+      "surface": "operator-assistance",
+      "state": "camera-3-preserved",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.camera-3-preserved with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.camera-3-preserved and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.camera-3-preserved.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/camera-3-preserved--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.camera-3-preserved",
+      "visualFixtures": [
+        "operator-assistance.camera-3-preserved.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.storage-3-preserved",
+      "surface": "operator-assistance",
+      "state": "storage-3-preserved",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.storage-3-preserved with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.storage-3-preserved and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.storage-3-preserved.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/storage-3-preserved--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.storage-3-preserved",
+      "visualFixtures": [
+        "operator-assistance.storage-3-preserved.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.photo-strip-4-preserved",
+      "surface": "operator-assistance",
+      "state": "photo-strip-4-preserved",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.photo-strip-4-preserved with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.photo-strip-4-preserved and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.photo-strip-4-preserved.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/photo-strip-4-preserved--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.photo-strip-4-preserved",
+      "visualFixtures": [
+        "operator-assistance.photo-strip-4-preserved.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "not applicable to this state"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.retrying",
+      "surface": "operator-assistance",
+      "state": "retrying",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.retrying with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.retrying and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “busy”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.retrying.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/retrying--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.retrying",
+      "visualFixtures": [
+        "operator-assistance.retrying.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance in progress. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.recovered",
+      "surface": "operator-assistance",
+      "state": "recovered",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.recovered with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.recovered and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “ready”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.recovered.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/recovered--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.recovered",
+      "visualFixtures": [
+        "operator-assistance.recovered.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance ready. (polite)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.retry-failed",
+      "surface": "operator-assistance",
+      "state": "retry-failed",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.retry-failed with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.retry-failed and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “unavailable”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.retry-failed.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/retry-failed--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.retry-failed",
+      "visualFixtures": [
+        "operator-assistance.retry-failed.standard"
+      ],
+      "responsiveViewportCases": [
+        "operator-assistance.retry-failed-with-3-preserved.compact-aspect",
+        "operator-assistance.retry-failed-with-3-preserved.scale-125-equivalent",
+        "operator-assistance.retry-failed-with-3-preserved.scale-150-equivalent",
+        "operator-assistance.retry-failed-with-3-preserved.scale-200-stress-equivalent"
+      ],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    },
+    {
+      "id": "scenario.operator-assistance.exit-only",
+      "surface": "operator-assistance",
+      "state": "exit-only",
+      "batch": 5,
+      "given": "the authoritative presentation is fixed to operator-assistance.exit-only with the approved 1280x720 viewport, deterministic media, time, Camera, storage, and persistence outcomes",
+      "when": "the production composition renders injection.operator-assistance.exit-only and reports render settled",
+      "then": "the level-one heading is “Please call the operator”; the window automation root is named “Please call the operator” in state “unavailable”; reading order is FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; and the pixels match operator-assistance.exit-only.standard",
+      "contractReferences": [
+        "foundations.md",
+        "reference-states/matrix.yaml"
+      ],
+      "componentReferences": [
+        "component.app-header",
+        "component.operator-assistance",
+        "component.action-button"
+      ],
+      "patternReferences": [
+        "patterns/guest-cycle-feedback.md",
+        "patterns/operator-exit.md"
+      ],
+      "annotationReferences": [
+        "targets/operator-assistance/exit-only--1280x720.yaml"
+      ],
+      "deterministicInjectionIdentity": "injection.operator-assistance.exit-only",
+      "visualFixtures": [
+        "operator-assistance.exit-only.standard"
+      ],
+      "responsiveViewportCases": [],
+      "applicationAcceptanceChecks": [
+        "ACCEPTANCE-OPERATOR-ASSISTANCE"
+      ],
+      "uiAutomationChecks": [
+        "UIA-SURFACE-STRUCTURE",
+        "UIA-OPERATOR-ASSISTANCE-CONTRACT"
+      ],
+      "sharedPatternChecks": [
+        "UIA-KEYBOARD-COMPLETE",
+        "UIA-LIVE-REGION-EVENTS"
+      ],
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY",
+        "MANUAL-HIGH-CONTRAST",
+        "MANUAL-REDUCED-MOTION"
+      ],
+      "expected": {
+        "focus": "initial focus: primary guest action when present; order: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event; return target: not applicable",
+        "announcement": "Operator Assistance needs attention. (assertive)",
+        "destination": "not applicable to this settled state",
+        "preservation": "the injected durable Capture count remains visible and unchanged",
+        "recovery": "only recovery actions in this reading order are exposed: FotoHAVN brand header -> Operator Assistance heading -> cause -> preserved progress -> recovery action -> Exit Event"
+      },
+      "resultEvidence": [],
+      "waiverReferences": []
+    }
+  ]
+}

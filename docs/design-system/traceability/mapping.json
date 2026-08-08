@@ -1,0 +1,2504 @@
+{
+  "schemaVersion": 2,
+  "contractVersion": "1.0.1",
+  "semanticChange": false,
+  "inherits": {
+    "contractVersion": "1.0.0",
+    "tag": "design-v1.0.0",
+    "commit": "1a20bc6f46f8d724683f8c4b47c359379fc7371b",
+    "targetHashes": "manifest.json#targetHashes"
+  },
+  "semanticTokens": [
+    {
+      "semanticId": "color.surface.canvas",
+      "xamlResourceKey": "ColorSurfaceCanvasBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.surface.panel",
+      "xamlResourceKey": "ColorSurfacePanelBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.surface.raised",
+      "xamlResourceKey": "ColorSurfaceRaisedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.surface.hover",
+      "xamlResourceKey": "ColorSurfaceHoverBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.surface.media",
+      "xamlResourceKey": "ColorSurfaceMediaBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.text.primary",
+      "xamlResourceKey": "ColorTextPrimaryBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.text.muted",
+      "xamlResourceKey": "ColorTextMutedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.text.inverse",
+      "xamlResourceKey": "ColorTextInverseBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.text.disabled",
+      "xamlResourceKey": "ColorTextDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.border.default",
+      "xamlResourceKey": "ColorBorderDefaultBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.border.strong",
+      "xamlResourceKey": "ColorBorderStrongBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.border.disabled",
+      "xamlResourceKey": "ColorBorderDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.primary.idle",
+      "xamlResourceKey": "ColorActionPrimaryIdleBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.primary.hover",
+      "xamlResourceKey": "ColorActionPrimaryHoverBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.primary.pressed",
+      "xamlResourceKey": "ColorActionPrimaryPressedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.primary.disabled",
+      "xamlResourceKey": "ColorActionPrimaryDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.primary.foreground",
+      "xamlResourceKey": "ColorActionPrimaryForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.idle",
+      "xamlResourceKey": "ColorActionSecondaryIdleBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.hover",
+      "xamlResourceKey": "ColorActionSecondaryHoverBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.pressed",
+      "xamlResourceKey": "ColorActionSecondaryPressedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.disabled",
+      "xamlResourceKey": "ColorActionSecondaryDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.foreground",
+      "xamlResourceKey": "ColorActionSecondaryForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.secondary.border",
+      "xamlResourceKey": "ColorActionSecondaryBorderBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.tertiary.idle",
+      "xamlResourceKey": "ColorActionTertiaryIdleBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.tertiary.hover",
+      "xamlResourceKey": "ColorActionTertiaryHoverBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.tertiary.pressed",
+      "xamlResourceKey": "ColorActionTertiaryPressedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.tertiary.disabled",
+      "xamlResourceKey": "ColorActionTertiaryDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.tertiary.foreground",
+      "xamlResourceKey": "ColorActionTertiaryForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.destructive.idle",
+      "xamlResourceKey": "ColorActionDestructiveIdleBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.destructive.hover",
+      "xamlResourceKey": "ColorActionDestructiveHoverBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.destructive.pressed",
+      "xamlResourceKey": "ColorActionDestructivePressedBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.destructive.disabled",
+      "xamlResourceKey": "ColorActionDestructiveDisabledBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.action.destructive.foreground",
+      "xamlResourceKey": "ColorActionDestructiveForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.info.foreground",
+      "xamlResourceKey": "ColorStatusInfoForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.info.surface",
+      "xamlResourceKey": "ColorStatusInfoSurfaceBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.info.border",
+      "xamlResourceKey": "ColorStatusInfoBorderBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.success.foreground",
+      "xamlResourceKey": "ColorStatusSuccessForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.success.surface",
+      "xamlResourceKey": "ColorStatusSuccessSurfaceBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.success.border",
+      "xamlResourceKey": "ColorStatusSuccessBorderBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.warning.foreground",
+      "xamlResourceKey": "ColorStatusWarningForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.warning.surface",
+      "xamlResourceKey": "ColorStatusWarningSurfaceBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.warning.border",
+      "xamlResourceKey": "ColorStatusWarningBorderBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.danger.foreground",
+      "xamlResourceKey": "ColorStatusDangerForegroundBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.danger.surface",
+      "xamlResourceKey": "ColorStatusDangerSurfaceBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.status.danger.border",
+      "xamlResourceKey": "ColorStatusDangerBorderBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.focus.ring",
+      "xamlResourceKey": "ColorFocusRingBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.focus.separator",
+      "xamlResourceKey": "ColorFocusSeparatorBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "color.overlay.scrim",
+      "xamlResourceKey": "ColorOverlayScrimBrush",
+      "winuiType": "SolidColorBrush",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.display.countdown",
+      "xamlResourceKey": "TypeDisplayCountdownStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.display.guest",
+      "xamlResourceKey": "TypeDisplayGuestStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.heading.page",
+      "xamlResourceKey": "TypeHeadingPageStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.heading.dialog",
+      "xamlResourceKey": "TypeHeadingDialogStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.body.default",
+      "xamlResourceKey": "TypeBodyDefaultStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.label.control",
+      "xamlResourceKey": "TypeLabelControlStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.caption",
+      "xamlResourceKey": "TypeCaptionStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "type.eyebrow",
+      "xamlResourceKey": "TypeEyebrowStyle",
+      "winuiType": "Style/TextBlock",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.inline",
+      "xamlResourceKey": "SpaceInline",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.stack.tight",
+      "xamlResourceKey": "SpaceStackTight",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.stack.default",
+      "xamlResourceKey": "SpaceStackDefault",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.section",
+      "xamlResourceKey": "SpaceSection",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.control.horizontal",
+      "xamlResourceKey": "SpaceControlHorizontal",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.panel",
+      "xamlResourceKey": "SpacePanel",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.dialog",
+      "xamlResourceKey": "SpaceDialog",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "space.page",
+      "xamlResourceKey": "SpacePage",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "radius.control",
+      "xamlResourceKey": "RadiusControl",
+      "winuiType": "CornerRadius",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "radius.panel",
+      "xamlResourceKey": "RadiusPanel",
+      "winuiType": "CornerRadius",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "radius.dialog",
+      "xamlResourceKey": "RadiusDialog",
+      "winuiType": "CornerRadius",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "radius.round",
+      "xamlResourceKey": "RadiusRound",
+      "winuiType": "CornerRadius",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "stroke.default",
+      "xamlResourceKey": "StrokeDefault",
+      "winuiType": "Thickness",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "stroke.emphasis",
+      "xamlResourceKey": "StrokeEmphasis",
+      "winuiType": "Thickness",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "icon.small",
+      "xamlResourceKey": "IconSmall",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "icon.default",
+      "xamlResourceKey": "IconDefault",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "icon.large",
+      "xamlResourceKey": "IconLarge",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "icon.display",
+      "xamlResourceKey": "IconDisplay",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "target.operator.minimum",
+      "xamlResourceKey": "TargetOperatorMinimum",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "target.guest.prominent",
+      "xamlResourceKey": "TargetGuestProminent",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "target.separation",
+      "xamlResourceKey": "TargetSeparation",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "focus.ring",
+      "xamlResourceKey": "FocusRingThickness",
+      "winuiType": "Thickness",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "focus.gap",
+      "xamlResourceKey": "FocusRingGap",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "elevation.dialog",
+      "xamlResourceKey": "ElevationDialogThemeShadow",
+      "winuiType": "ThemeShadow",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "motion.instant",
+      "xamlResourceKey": "MotionInstantDuration",
+      "winuiType": "Duration",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "motion.fast",
+      "xamlResourceKey": "MotionFastDuration",
+      "winuiType": "Duration",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "motion.standard",
+      "xamlResourceKey": "MotionStandardDuration",
+      "winuiType": "Duration",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "motion.slow",
+      "xamlResourceKey": "MotionSlowDuration",
+      "winuiType": "Duration",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "motion.easing",
+      "xamlResourceKey": "MotionStandardEasing",
+      "winuiType": "CubicEase",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.standard.minimumWidth",
+      "xamlResourceKey": "ResponsiveStandardMinimumWidth",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.standard.minimumHeight",
+      "xamlResourceKey": "ResponsiveStandardMinimumHeight",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.compact.minimumWidth",
+      "xamlResourceKey": "ResponsiveCompactMinimumWidth",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.compact.minimumHeight",
+      "xamlResourceKey": "ResponsiveCompactMinimumHeight",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.stress.minimumWidth",
+      "xamlResourceKey": "ResponsiveStressMinimumWidth",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    },
+    {
+      "semanticId": "responsive.stress.minimumHeight",
+      "xamlResourceKey": "ResponsiveStressMinimumHeight",
+      "winuiType": "Double",
+      "resourceDictionary": "src/FotoHavn.App/DesignSystem/FotoHavnDesignResources.xaml",
+      "verificationIdentifiers": [
+        "MANUAL-SEMANTIC-RESOURCE-AUDIT"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "semanticId": "component.action-button",
+      "controlType": "Microsoft.UI.Xaml.Controls.Button",
+      "sourceOwnership": "docs/design-system/components/action-button.md",
+      "styleOwnership": [
+        "FotoHavnActionButtonPrimaryStyle",
+        "FotoHavnActionButtonSecondaryStyle",
+        "FotoHavnActionButtonTertiaryStyle",
+        "FotoHavnActionButtonDestructiveStyle",
+        "FotoHavnActionButtonGuestProminentStyle"
+      ],
+      "properties": [
+        "Content",
+        "IsEnabled",
+        "IsTabStop",
+        "AutomationProperties.Name"
+      ],
+      "visualStateGroups": "{ CommonStates: [Normal, PointerOver, Pressed, Disabled], FocusStates: [Focused, PointerFocused, Unfocused], ActionStates: [Idle, Busy] }",
+      "automationIdPrefix": "FotoHavn.ActionButton",
+      "accessibilityObligations": [
+        "native-button-pattern",
+        "label-in-accessible-name",
+        "busy-announcement",
+        "48px-minimum",
+        "64px-guest-prominent"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-BUTTON-KEYBOARD",
+        "DS-BUTTON-TOUCH",
+        "DS-BUTTON-BUSY",
+        "DS-FOCUS"
+      ]
+    },
+    {
+      "semanticId": "component.icon-action",
+      "controlType": "Microsoft.UI.Xaml.Controls.Button",
+      "sourceOwnership": "docs/design-system/components/icon-action.md",
+      "styleOwnership": [
+        "FotoHavnIconActionStyle",
+        "FotoHavnIconActionDestructiveStyle"
+      ],
+      "properties": [
+        "Content",
+        "IsEnabled",
+        "AutomationProperties.Name",
+        "ToolTipService.ToolTip"
+      ],
+      "visualStateGroups": "{ CommonStates: [Normal, PointerOver, Pressed, Disabled], FocusStates: [Focused, PointerFocused, Unfocused] }",
+      "automationIdPrefix": "FotoHavn.IconAction",
+      "accessibilityObligations": [
+        "mandatory-name",
+        "matching-tooltip",
+        "48x48-target"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-ICON-NAME",
+        "DS-ICON-TOUCH",
+        "DS-FOCUS"
+      ]
+    },
+    {
+      "semanticId": "component.text-field",
+      "controlType": "Microsoft.UI.Xaml.Controls.TextBox",
+      "sourceOwnership": "docs/design-system/components/text-field.md",
+      "styleOwnership": [
+        "FotoHavnTextFieldStyle"
+      ],
+      "properties": [
+        "Header",
+        "Text",
+        "PlaceholderText",
+        "IsEnabled",
+        "AutomationProperties.Name",
+        "AutomationProperties.HelpText"
+      ],
+      "visualStateGroups": "{ CommonStates: [Normal, PointerOver, Focused, Disabled], ValidationStates: [Valid, Invalid, Unavailable] }",
+      "automationIdPrefix": "FotoHavn.TextField",
+      "accessibilityObligations": [
+        "label-association",
+        "invalid-status",
+        "first-invalid-focus"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-FIELD-KEYBOARD",
+        "DS-FIELD-ERROR",
+        "DS-NARRATOR"
+      ]
+    },
+    {
+      "semanticId": "component.select-field",
+      "controlType": "Microsoft.UI.Xaml.Controls.ComboBox",
+      "sourceOwnership": "docs/design-system/components/select-field.md",
+      "styleOwnership": [
+        "FotoHavnSelectFieldStyle"
+      ],
+      "properties": [
+        "Header",
+        "ItemsSource",
+        "SelectedItem",
+        "PlaceholderText",
+        "IsEnabled",
+        "AutomationProperties.Name",
+        "AutomationProperties.HelpText"
+      ],
+      "visualStateGroups": "{ CommonStates: [Normal, PointerOver, Focused, Disabled], ValidationStates: [Valid, Invalid, Unavailable] }",
+      "automationIdPrefix": "FotoHavn.SelectField",
+      "accessibilityObligations": [
+        "selection-pattern",
+        "label-association",
+        "invalid-status"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-SELECT-KEYBOARD",
+        "DS-SELECT-ERROR",
+        "DS-NARRATOR"
+      ]
+    },
+    {
+      "semanticId": "component.read-only-value",
+      "controlType": "Microsoft.UI.Xaml.Controls.TextBlock",
+      "sourceOwnership": "docs/design-system/components/read-only-value.md",
+      "styleOwnership": [
+        "FotoHavnReadOnlyValueStyle"
+      ],
+      "properties": [
+        "Text",
+        "AutomationProperties.Name"
+      ],
+      "visualStateGroups": "{}",
+      "automationIdPrefix": "FotoHavn.ReadOnlyValue",
+      "accessibilityObligations": [
+        "label-value-relationship",
+        "no-false-editability"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-READONLY-NARRATOR",
+        "DS-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.inline-status",
+      "controlType": "FotoHavn.App.Controls.InlineStatus",
+      "sourceOwnership": "docs/design-system/components/inline-status.md",
+      "styleOwnership": [
+        "FotoHavnInlineStatusStyle"
+      ],
+      "properties": [
+        "Severity",
+        "Message",
+        "AnnouncementPriority"
+      ],
+      "visualStateGroups": "{ SeverityStates: [Neutral, Info, Success, Warning, Danger] }",
+      "automationIdPrefix": "FotoHavn.InlineStatus",
+      "accessibilityObligations": [
+        "text-plus-noncolor",
+        "deduplicated-live-region"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-STATUS-CONTRAST",
+        "DS-STATUS-ANNOUNCE"
+      ]
+    },
+    {
+      "semanticId": "component.status-callout",
+      "controlType": "FotoHavn.App.Controls.StatusCallout",
+      "sourceOwnership": "docs/design-system/components/status-callout.md",
+      "styleOwnership": [
+        "FotoHavnStatusCalloutStyle"
+      ],
+      "properties": [
+        "Severity",
+        "Title",
+        "Message",
+        "Action"
+      ],
+      "visualStateGroups": "{ SeverityStates: [Neutral, Info, Success, Warning, Danger] }",
+      "automationIdPrefix": "FotoHavn.StatusCallout",
+      "accessibilityObligations": [
+        "region-association",
+        "actionable-error-copy"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-CALLOUT-CONTRAST",
+        "DS-CALLOUT-NARRATOR",
+        "DS-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.progress-indicator",
+      "controlType": "Microsoft.UI.Xaml.Controls.ProgressRing | Microsoft.UI.Xaml.Controls.ProgressBar",
+      "sourceOwnership": "docs/design-system/components/progress-indicator.md",
+      "styleOwnership": [
+        "FotoHavnProgressRingStyle",
+        "FotoHavnProgressBarStyle"
+      ],
+      "properties": [
+        "IsIndeterminate",
+        "IsActive",
+        "Minimum",
+        "Maximum",
+        "Value",
+        "AutomationProperties.Name"
+      ],
+      "visualStateGroups": "{}",
+      "automationIdPrefix": "FotoHavn.ProgressIndicator",
+      "accessibilityObligations": [
+        "range-value-when-determinate",
+        "no-frame-announcements"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-PROGRESS-NARRATOR",
+        "DS-REDUCED-MOTION"
+      ]
+    },
+    {
+      "semanticId": "component.toast",
+      "controlType": "FotoHavn.App.Controls.InAppToast",
+      "sourceOwnership": "docs/design-system/components/toast.md",
+      "styleOwnership": [
+        "FotoHavnToastStyle"
+      ],
+      "properties": [
+        "Message",
+        "IsOpen",
+        "DismissCommand"
+      ],
+      "visualStateGroups": "{ DisplayStates: [Closed, Open] }",
+      "automationIdPrefix": "FotoHavn.Toast",
+      "accessibilityObligations": [
+        "polite-announcement",
+        "no-focus-steal",
+        "dismissible"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-TOAST-NARRATOR",
+        "DS-TOAST-FOCUS",
+        "DS-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.modal-dialog",
+      "controlType": "Microsoft.UI.Xaml.Controls.ContentDialog",
+      "sourceOwnership": "docs/design-system/components/modal-dialog.md",
+      "styleOwnership": [
+        "FotoHavnModalDialogStyle"
+      ],
+      "properties": [
+        "Title",
+        "Content",
+        "PrimaryButtonText",
+        "SecondaryButtonText",
+        "IsPrimaryButtonEnabled",
+        "IsSecondaryButtonEnabled",
+        "XamlRoot"
+      ],
+      "visualStateGroups": "{ DialogStates: [Idle, Busy, Failed], LayoutStates: [Standard, Stress] }",
+      "automationIdPrefix": "FotoHavn.ModalDialog",
+      "accessibilityObligations": [
+        "dialog-pattern",
+        "level1-heading",
+        "initial-safe-focus",
+        "focus-containment",
+        "inert-background",
+        "escape-idle-only",
+        "focus-restoration"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-MODAL-FOCUS",
+        "DS-MODAL-ESCAPE",
+        "DS-MODAL-BUSY",
+        "DS-MODAL-NARRATOR",
+        "DS-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.app-header",
+      "controlType": "FotoHavn.App.Controls.AppHeader",
+      "sourceOwnership": "docs/design-system/components/app-header.md",
+      "styleOwnership": [
+        "FotoHavnAppHeaderStyle"
+      ],
+      "properties": [
+        "Context",
+        "EventName",
+        "TrailingContent"
+      ],
+      "visualStateGroups": "{ ContextStates: [Operator, GuestCycle], LayoutStates: [Standard, Compact, Stress] }",
+      "automationIdPrefix": "FotoHavn.AppHeader",
+      "accessibilityObligations": [
+        "single-product-name",
+        "decorative-mark-hidden"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-HEADER-NARRATOR",
+        "DS-HEADER-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.event-card",
+      "controlType": "FotoHavn.App.Controls.EventCard",
+      "sourceOwnership": "docs/design-system/components/event-card.md",
+      "styleOwnership": [
+        "FotoHavnEventCardStyle"
+      ],
+      "properties": [
+        "EventName",
+        "CompactEventId",
+        "SavedMetadata",
+        "Readiness",
+        "StartCommand",
+        "EditCommand",
+        "DeleteCommand"
+      ],
+      "visualStateGroups": "{ CommonStates: [Ready, PointerOver, Focused, Unavailable, Busy, DeletionIncomplete], LayoutStates: [Standard, Stress] }",
+      "automationIdPrefix": "FotoHavn.EventCard",
+      "accessibilityObligations": [
+        "group-semantics",
+        "disambiguated-actions",
+        "complete-name",
+        "compact-id-announcement"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-EVENTCARD-KEYBOARD",
+        "DS-EVENTCARD-TOUCH",
+        "DS-EVENTCARD-NARRATOR",
+        "DS-EVENTCARD-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.setup-field-group",
+      "controlType": "FotoHavn.App.Controls.SetupFieldGroup",
+      "sourceOwnership": "docs/design-system/components/setup-field-group.md",
+      "styleOwnership": [
+        "FotoHavnSetupFieldGroupStyle"
+      ],
+      "properties": [
+        "Label",
+        "FieldContent",
+        "HelperContent",
+        "Status",
+        "IsDirty"
+      ],
+      "visualStateGroups": "{ FieldStates: [Clean, Dirty, Checking, Ready, Invalid, Unavailable] }",
+      "automationIdPrefix": "FotoHavn.SetupFieldGroup",
+      "accessibilityObligations": [
+        "label-field-status-association",
+        "asynchronous-no-focus-steal"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-SETUP-VALIDATION",
+        "DS-SETUP-NARRATOR",
+        "DS-SETUP-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.camera-viewport",
+      "controlType": "FotoHavn.App.Controls.CameraViewport",
+      "sourceOwnership": "docs/design-system/components/camera-viewport.md",
+      "styleOwnership": [
+        "FotoHavnCameraViewportStyle"
+      ],
+      "properties": [
+        "Mode",
+        "Source",
+        "IsMirrored",
+        "Status",
+        "ShowCaptureGuide",
+        "OverlayContent"
+      ],
+      "visualStateGroups": "{ CameraStates: [Connecting, Live, Countdown, Flash, CaptureSaved, Unavailable], LayoutStates: [Standard, Compact, Stress] }",
+      "automationIdPrefix": "FotoHavn.CameraViewport",
+      "accessibilityObligations": [
+        "functional-image-name",
+        "state-separate",
+        "decorative-overlays-hidden"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-CAMERA-ASPECT",
+        "DS-CAMERA-NARRATOR",
+        "DS-CAMERA-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.capture-progress",
+      "controlType": "FotoHavn.App.Controls.CaptureProgress",
+      "sourceOwnership": "docs/design-system/components/capture-progress.md",
+      "styleOwnership": [
+        "FotoHavnCaptureProgressStyle"
+      ],
+      "properties": [
+        "ActiveCapture",
+        "Phase"
+      ],
+      "visualStateGroups": "{ CaptureStates: [NotStarted, Capture1, Capture2, Capture3, Capture4, Complete] }",
+      "automationIdPrefix": "FotoHavn.CaptureProgress",
+      "accessibilityObligations": [
+        "single-progress-concept",
+        "shape-and-stroke-meaning"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-CAPTURE-PROGRESS-NARRATOR",
+        "DS-CAPTURE-PROGRESS-CONTRAST"
+      ]
+    },
+    {
+      "semanticId": "component.operator-assistance",
+      "controlType": "FotoHavn.App.Controls.OperatorAssistance",
+      "sourceOwnership": "docs/design-system/components/operator-assistance.md",
+      "styleOwnership": [
+        "FotoHavnOperatorAssistanceStyle"
+      ],
+      "properties": [
+        "Cause",
+        "Stage",
+        "DurableCaptureCount",
+        "Recovery",
+        "ActionState"
+      ],
+      "visualStateGroups": "{ ActionStates: [Idle, Retrying, Recovered, RetryFailed], LayoutStates: [Standard, Compact, Stress] }",
+      "automationIdPrefix": "FotoHavn.OperatorAssistance",
+      "accessibilityObligations": [
+        "assertive-activation",
+        "preserved-progress",
+        "bounded-actionable-copy"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-ASSISTANCE-NARRATOR",
+        "DS-ASSISTANCE-KEYBOARD",
+        "DS-ASSISTANCE-REFLOW"
+      ]
+    },
+    {
+      "semanticId": "component.photo-strip-result",
+      "controlType": "FotoHavn.App.Controls.PhotoStripResult",
+      "sourceOwnership": "docs/design-system/components/photo-strip-result.md",
+      "styleOwnership": [
+        "FotoHavnPhotoStripResultStyle"
+      ],
+      "properties": [
+        "ImageSource",
+        "RemainingSeconds",
+        "ReturnProgress",
+        "Title",
+        "Message"
+      ],
+      "visualStateGroups": "{ ResultStates: [Preparing, Visible, Returning, Failed], LayoutStates: [Standard, Compact, Stress] }",
+      "automationIdPrefix": "FotoHavn.PhotoStripResult",
+      "accessibilityObligations": [
+        "photo-strip-preview-name",
+        "milestone-announcements",
+        "automatic-return"
+      ],
+      "sharedVerificationIdentifiers": [
+        "DS-STRIP-ASPECT",
+        "DS-STRIP-NARRATOR",
+        "DS-STRIP-REFLOW",
+        "DS-REDUCED-MOTION"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "semanticId": "surface.saved-events",
+      "productionComposition": "FotoHavn.App.Surfaces.SavedEventsSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.SavedEvents",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.event-setup",
+      "productionComposition": "FotoHavn.App.Surfaces.EventSetupSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.EventSetup",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.guest-start",
+      "productionComposition": "FotoHavn.App.Surfaces.GuestStartSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.GuestStart",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.guest-start-unavailable",
+      "productionComposition": "FotoHavn.App.Surfaces.GuestStartUnavailableSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.GuestStartUnavailable",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.capture",
+      "productionComposition": "FotoHavn.App.Surfaces.CaptureSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.Capture",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.operator-assistance",
+      "productionComposition": "FotoHavn.App.Surfaces.OperatorAssistanceSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.OperatorAssistance",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.photo-strip",
+      "productionComposition": "FotoHavn.App.Surfaces.PhotoStripSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.PhotoStrip",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "semanticId": "surface.confirmation",
+      "productionComposition": "FotoHavn.App.Surfaces.ConfirmationSurface",
+      "presentationSource": "FotoHavn.Core.ApplicationPresentation",
+      "semanticRootAutomationId": "FotoHavn.Surface.Confirmation",
+      "verificationIdentifiers": [
+        "UIA-SURFACE-STRUCTURE"
+      ],
+      "manualChecks": [
+        "MANUAL-KEYBOARD-JOURNEY",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    }
+  ],
+  "canonicalStates": [
+    {
+      "identity": "saved-events.new-event",
+      "deterministicInjectionIdentity": "injection.saved-events.new-event",
+      "acceptanceScenario": "scenario.saved-events.new-event",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.new-event.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.card-idle",
+      "deterministicInjectionIdentity": "injection.saved-events.card-idle",
+      "acceptanceScenario": "scenario.saved-events.card-idle",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.card-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.card-hover",
+      "deterministicInjectionIdentity": "injection.saved-events.card-hover",
+      "acceptanceScenario": "scenario.saved-events.card-hover",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.card-hover.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.card-focus",
+      "deterministicInjectionIdentity": "injection.saved-events.card-focus",
+      "acceptanceScenario": "scenario.saved-events.card-focus",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.card-focus.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.unavailable",
+      "deterministicInjectionIdentity": "injection.saved-events.unavailable",
+      "acceptanceScenario": "scenario.saved-events.unavailable",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.unavailable.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.busy",
+      "deterministicInjectionIdentity": "injection.saved-events.busy",
+      "acceptanceScenario": "scenario.saved-events.busy",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.busy.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.deletion-incomplete",
+      "deterministicInjectionIdentity": "injection.saved-events.deletion-incomplete",
+      "acceptanceScenario": "scenario.saved-events.deletion-incomplete",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.deletion-incomplete.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "saved-events.maximum-cards",
+      "deterministicInjectionIdentity": "injection.saved-events.maximum-cards",
+      "acceptanceScenario": "scenario.saved-events.maximum-cards",
+      "uiAutomationContract": "UIA-SAVED-EVENTS-CONTRACT",
+      "canonicalVisualFixture": "saved-events.maximum-cards.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.new-empty",
+      "deterministicInjectionIdentity": "injection.event-setup.new-empty",
+      "acceptanceScenario": "scenario.event-setup.new-empty",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.new-empty.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.new-valid",
+      "deterministicInjectionIdentity": "injection.event-setup.new-valid",
+      "acceptanceScenario": "scenario.event-setup.new-valid",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.new-valid.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.edit-clean",
+      "deterministicInjectionIdentity": "injection.event-setup.edit-clean",
+      "acceptanceScenario": "scenario.event-setup.edit-clean",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.edit-clean.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.edit-dirty",
+      "deterministicInjectionIdentity": "injection.event-setup.edit-dirty",
+      "acceptanceScenario": "scenario.event-setup.edit-dirty",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.edit-dirty.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-checking",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-checking",
+      "acceptanceScenario": "scenario.event-setup.camera-checking",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-checking.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-ready",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-ready",
+      "acceptanceScenario": "scenario.event-setup.camera-ready",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-ready.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-unavailable",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-unavailable",
+      "acceptanceScenario": "scenario.event-setup.camera-unavailable",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-unavailable.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-access-denied",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-access-denied",
+      "acceptanceScenario": "scenario.event-setup.camera-access-denied",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-access-denied.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-in-use",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-in-use",
+      "acceptanceScenario": "scenario.event-setup.camera-in-use",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-in-use.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.camera-disconnected",
+      "deterministicInjectionIdentity": "injection.event-setup.camera-disconnected",
+      "acceptanceScenario": "scenario.event-setup.camera-disconnected",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.camera-disconnected.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.storage-insufficient",
+      "deterministicInjectionIdentity": "injection.event-setup.storage-insufficient",
+      "acceptanceScenario": "scenario.event-setup.storage-insufficient",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.storage-insufficient.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.storage-unavailable",
+      "deterministicInjectionIdentity": "injection.event-setup.storage-unavailable",
+      "acceptanceScenario": "scenario.event-setup.storage-unavailable",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.storage-unavailable.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.actions-disabled",
+      "deterministicInjectionIdentity": "injection.event-setup.actions-disabled",
+      "acceptanceScenario": "scenario.event-setup.actions-disabled",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.actions-disabled.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.saving",
+      "deterministicInjectionIdentity": "injection.event-setup.saving",
+      "acceptanceScenario": "scenario.event-setup.saving",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.saving.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.save-error",
+      "deterministicInjectionIdentity": "injection.event-setup.save-error",
+      "acceptanceScenario": "scenario.event-setup.save-error",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.save-error.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "event-setup.save-success",
+      "deterministicInjectionIdentity": "injection.event-setup.save-success",
+      "acceptanceScenario": "scenario.event-setup.save-success",
+      "uiAutomationContract": "UIA-EVENT-SETUP-CONTRACT",
+      "canonicalVisualFixture": "event-setup.save-success.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start.ready",
+      "deterministicInjectionIdentity": "injection.guest-start.ready",
+      "acceptanceScenario": "scenario.guest-start.ready",
+      "uiAutomationContract": "UIA-GUEST-START-CONTRACT",
+      "canonicalVisualFixture": "guest-start.ready.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start.exit-hold-idle",
+      "deterministicInjectionIdentity": "injection.guest-start.exit-hold-idle",
+      "acceptanceScenario": "scenario.guest-start.exit-hold-idle",
+      "uiAutomationContract": "UIA-GUEST-START-CONTRACT",
+      "canonicalVisualFixture": "guest-start.exit-hold-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start.exit-holding",
+      "deterministicInjectionIdentity": "injection.guest-start.exit-holding",
+      "acceptanceScenario": "scenario.guest-start.exit-holding",
+      "uiAutomationContract": "UIA-GUEST-START-CONTRACT",
+      "canonicalVisualFixture": "guest-start.exit-holding.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start.exit-hold-cancelled",
+      "deterministicInjectionIdentity": "injection.guest-start.exit-hold-cancelled",
+      "acceptanceScenario": "scenario.guest-start.exit-hold-cancelled",
+      "uiAutomationContract": "UIA-GUEST-START-CONTRACT",
+      "canonicalVisualFixture": "guest-start.exit-hold-cancelled.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start.exit-confirmation-open",
+      "deterministicInjectionIdentity": "injection.guest-start.exit-confirmation-open",
+      "acceptanceScenario": "scenario.guest-start.exit-confirmation-open",
+      "uiAutomationContract": "UIA-GUEST-START-CONTRACT",
+      "canonicalVisualFixture": "guest-start.exit-confirmation-open.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.camera-retry",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.camera-retry",
+      "acceptanceScenario": "scenario.guest-start-unavailable.camera-retry",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.camera-retry.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.camera-exit-only",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.camera-exit-only",
+      "acceptanceScenario": "scenario.guest-start-unavailable.camera-exit-only",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.camera-exit-only.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.storage-retry",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.storage-retry",
+      "acceptanceScenario": "scenario.guest-start-unavailable.storage-retry",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.storage-retry.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.storage-exit-only",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.storage-exit-only",
+      "acceptanceScenario": "scenario.guest-start-unavailable.storage-exit-only",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.storage-exit-only.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.retrying",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.retrying",
+      "acceptanceScenario": "scenario.guest-start-unavailable.retrying",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.retrying.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "guest-start-unavailable.retry-failed",
+      "deterministicInjectionIdentity": "injection.guest-start-unavailable.retry-failed",
+      "acceptanceScenario": "scenario.guest-start-unavailable.retry-failed",
+      "uiAutomationContract": "UIA-GUEST-START-UNAVAILABLE-CONTRACT",
+      "canonicalVisualFixture": "guest-start-unavailable.retry-failed.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.capture-1",
+      "deterministicInjectionIdentity": "injection.capture.capture-1",
+      "acceptanceScenario": "scenario.capture.capture-1",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.capture-1.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.capture-2",
+      "deterministicInjectionIdentity": "injection.capture.capture-2",
+      "acceptanceScenario": "scenario.capture.capture-2",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.capture-2.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.capture-3",
+      "deterministicInjectionIdentity": "injection.capture.capture-3",
+      "acceptanceScenario": "scenario.capture.capture-3",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.capture-3.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.capture-4",
+      "deterministicInjectionIdentity": "injection.capture.capture-4",
+      "acceptanceScenario": "scenario.capture.capture-4",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.capture-4.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.countdown-3",
+      "deterministicInjectionIdentity": "injection.capture.countdown-3",
+      "acceptanceScenario": "scenario.capture.countdown-3",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.countdown-3.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.countdown-2",
+      "deterministicInjectionIdentity": "injection.capture.countdown-2",
+      "acceptanceScenario": "scenario.capture.countdown-2",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.countdown-2.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.countdown-1",
+      "deterministicInjectionIdentity": "injection.capture.countdown-1",
+      "acceptanceScenario": "scenario.capture.countdown-1",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.countdown-1.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.flash",
+      "deterministicInjectionIdentity": "injection.capture.flash",
+      "acceptanceScenario": "scenario.capture.flash",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.flash.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.photo-saved",
+      "deterministicInjectionIdentity": "injection.capture.photo-saved",
+      "acceptanceScenario": "scenario.capture.photo-saved",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.photo-saved.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.camera-failure",
+      "deterministicInjectionIdentity": "injection.capture.camera-failure",
+      "acceptanceScenario": "scenario.capture.camera-failure",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.camera-failure.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "capture.storage-failure",
+      "deterministicInjectionIdentity": "injection.capture.storage-failure",
+      "acceptanceScenario": "scenario.capture.storage-failure",
+      "uiAutomationContract": "UIA-CAPTURE-CONTRACT",
+      "canonicalVisualFixture": "capture.storage-failure.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.camera-0-preserved",
+      "deterministicInjectionIdentity": "injection.operator-assistance.camera-0-preserved",
+      "acceptanceScenario": "scenario.operator-assistance.camera-0-preserved",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.camera-0-preserved.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.camera-3-preserved",
+      "deterministicInjectionIdentity": "injection.operator-assistance.camera-3-preserved",
+      "acceptanceScenario": "scenario.operator-assistance.camera-3-preserved",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.camera-3-preserved.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.storage-3-preserved",
+      "deterministicInjectionIdentity": "injection.operator-assistance.storage-3-preserved",
+      "acceptanceScenario": "scenario.operator-assistance.storage-3-preserved",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.storage-3-preserved.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.photo-strip-4-preserved",
+      "deterministicInjectionIdentity": "injection.operator-assistance.photo-strip-4-preserved",
+      "acceptanceScenario": "scenario.operator-assistance.photo-strip-4-preserved",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.photo-strip-4-preserved.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.retrying",
+      "deterministicInjectionIdentity": "injection.operator-assistance.retrying",
+      "acceptanceScenario": "scenario.operator-assistance.retrying",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.retrying.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.recovered",
+      "deterministicInjectionIdentity": "injection.operator-assistance.recovered",
+      "acceptanceScenario": "scenario.operator-assistance.recovered",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.recovered.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.retry-failed",
+      "deterministicInjectionIdentity": "injection.operator-assistance.retry-failed",
+      "acceptanceScenario": "scenario.operator-assistance.retry-failed",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.retry-failed.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "operator-assistance.exit-only",
+      "deterministicInjectionIdentity": "injection.operator-assistance.exit-only",
+      "acceptanceScenario": "scenario.operator-assistance.exit-only",
+      "uiAutomationContract": "UIA-OPERATOR-ASSISTANCE-CONTRACT",
+      "canonicalVisualFixture": "operator-assistance.exit-only.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "photo-strip.preparing",
+      "deterministicInjectionIdentity": "injection.photo-strip.preparing",
+      "acceptanceScenario": "scenario.photo-strip.preparing",
+      "uiAutomationContract": "UIA-PHOTO-STRIP-CONTRACT",
+      "canonicalVisualFixture": "photo-strip.preparing.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "photo-strip.visible-10-seconds",
+      "deterministicInjectionIdentity": "injection.photo-strip.visible-10-seconds",
+      "acceptanceScenario": "scenario.photo-strip.visible-10-seconds",
+      "uiAutomationContract": "UIA-PHOTO-STRIP-CONTRACT",
+      "canonicalVisualFixture": "photo-strip.visible-10-seconds.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "photo-strip.visible-5-seconds",
+      "deterministicInjectionIdentity": "injection.photo-strip.visible-5-seconds",
+      "acceptanceScenario": "scenario.photo-strip.visible-5-seconds",
+      "uiAutomationContract": "UIA-PHOTO-STRIP-CONTRACT",
+      "canonicalVisualFixture": "photo-strip.visible-5-seconds.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "photo-strip.returning",
+      "deterministicInjectionIdentity": "injection.photo-strip.returning",
+      "acceptanceScenario": "scenario.photo-strip.returning",
+      "uiAutomationContract": "UIA-PHOTO-STRIP-CONTRACT",
+      "canonicalVisualFixture": "photo-strip.returning.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "photo-strip.failed",
+      "deterministicInjectionIdentity": "injection.photo-strip.failed",
+      "acceptanceScenario": "scenario.photo-strip.failed",
+      "uiAutomationContract": "UIA-PHOTO-STRIP-CONTRACT",
+      "canonicalVisualFixture": "photo-strip.failed.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.start-idle",
+      "deterministicInjectionIdentity": "injection.confirmation.start-idle",
+      "acceptanceScenario": "scenario.confirmation.start-idle",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.start-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.start-busy",
+      "deterministicInjectionIdentity": "injection.confirmation.start-busy",
+      "acceptanceScenario": "scenario.confirmation.start-busy",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.start-busy.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.start-failed",
+      "deterministicInjectionIdentity": "injection.confirmation.start-failed",
+      "acceptanceScenario": "scenario.confirmation.start-failed",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.start-failed.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.save-idle",
+      "deterministicInjectionIdentity": "injection.confirmation.save-idle",
+      "acceptanceScenario": "scenario.confirmation.save-idle",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.save-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.discard-idle",
+      "deterministicInjectionIdentity": "injection.confirmation.discard-idle",
+      "acceptanceScenario": "scenario.confirmation.discard-idle",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.discard-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.exit-idle",
+      "deterministicInjectionIdentity": "injection.confirmation.exit-idle",
+      "acceptanceScenario": "scenario.confirmation.exit-idle",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.exit-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.exit-busy",
+      "deterministicInjectionIdentity": "injection.confirmation.exit-busy",
+      "acceptanceScenario": "scenario.confirmation.exit-busy",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.exit-busy.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.delete-idle",
+      "deterministicInjectionIdentity": "injection.confirmation.delete-idle",
+      "acceptanceScenario": "scenario.confirmation.delete-idle",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.delete-idle.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.delete-busy",
+      "deterministicInjectionIdentity": "injection.confirmation.delete-busy",
+      "acceptanceScenario": "scenario.confirmation.delete-busy",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.delete-busy.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.delete-failed",
+      "deterministicInjectionIdentity": "injection.confirmation.delete-failed",
+      "acceptanceScenario": "scenario.confirmation.delete-failed",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.delete-failed.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.retry",
+      "deterministicInjectionIdentity": "injection.confirmation.retry",
+      "acceptanceScenario": "scenario.confirmation.retry",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.retry.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    },
+    {
+      "identity": "confirmation.success-destination",
+      "deterministicInjectionIdentity": "injection.confirmation.success-destination",
+      "acceptanceScenario": "scenario.confirmation.success-destination",
+      "uiAutomationContract": "UIA-CONFIRMATION-CONTRACT",
+      "canonicalVisualFixture": "confirmation.success-destination.standard",
+      "manualChecks": [
+        "MANUAL-VISUAL-EQUIVALENCE",
+        "MANUAL-NARRATOR-JOURNEY"
+      ]
+    }
+  ],
+  "responsiveRiskFrames": [
+    {
+      "registryFrame": "saved-events.maximum-cards.compact-aspect",
+      "owningResponsiveCase": "scenario.saved-events.maximum-cards",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "saved-events.maximum-cards.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "saved-events.maximum-cards.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.saved-events.maximum-cards",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "saved-events.maximum-cards.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "saved-events.maximum-cards.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.saved-events.maximum-cards",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "saved-events.maximum-cards.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "saved-events.maximum-cards.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.saved-events.maximum-cards",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "saved-events.maximum-cards.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "event-setup.camera-error-and-insufficient-storage.compact-aspect",
+      "owningResponsiveCase": "scenario.event-setup.camera-unavailable",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "event-setup.camera-error-and-insufficient-storage.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.event-setup.camera-unavailable",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "event-setup.camera-error-and-insufficient-storage.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.event-setup.camera-unavailable",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "event-setup.camera-error-and-insufficient-storage.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.event-setup.camera-unavailable",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "event-setup.camera-error-and-insufficient-storage.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start.long-event-name-and-exit-hold.compact-aspect",
+      "owningResponsiveCase": "scenario.guest-start.exit-holding",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start.long-event-name-and-exit-hold.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start.long-event-name-and-exit-hold.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.guest-start.exit-holding",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start.long-event-name-and-exit-hold.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start.long-event-name-and-exit-hold.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.guest-start.exit-holding",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start.long-event-name-and-exit-hold.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.guest-start.exit-holding",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start-unavailable.longest-recovery-copy.compact-aspect",
+      "owningResponsiveCase": "scenario.guest-start-unavailable.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start-unavailable.longest-recovery-copy.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start-unavailable.longest-recovery-copy.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.guest-start-unavailable.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start-unavailable.longest-recovery-copy.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start-unavailable.longest-recovery-copy.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.guest-start-unavailable.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start-unavailable.longest-recovery-copy.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.guest-start-unavailable.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "capture.capture-4-countdown.compact-aspect",
+      "owningResponsiveCase": "scenario.capture.countdown-1",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "capture.capture-4-countdown.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "capture.capture-4-countdown.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.capture.countdown-1",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "capture.capture-4-countdown.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "capture.capture-4-countdown.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.capture.countdown-1",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "capture.capture-4-countdown.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "capture.capture-4-countdown.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.capture.countdown-1",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "capture.capture-4-countdown.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "operator-assistance.retry-failed-with-3-preserved.compact-aspect",
+      "owningResponsiveCase": "scenario.operator-assistance.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "operator-assistance.retry-failed-with-3-preserved.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "operator-assistance.retry-failed-with-3-preserved.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.operator-assistance.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "operator-assistance.retry-failed-with-3-preserved.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "operator-assistance.retry-failed-with-3-preserved.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.operator-assistance.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "operator-assistance.retry-failed-with-3-preserved.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "operator-assistance.retry-failed-with-3-preserved.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.operator-assistance.retry-failed",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "operator-assistance.retry-failed-with-3-preserved.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "photo-strip.preparing-or-returning.compact-aspect",
+      "owningResponsiveCase": "scenario.photo-strip.returning",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "photo-strip.preparing-or-returning.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "photo-strip.preparing-or-returning.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.photo-strip.returning",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "photo-strip.preparing-or-returning.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "photo-strip.preparing-or-returning.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.photo-strip.returning",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "photo-strip.preparing-or-returning.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "photo-strip.preparing-or-returning.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.photo-strip.returning",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "photo-strip.preparing-or-returning.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "confirmation.destructive-busy-with-long-event-id.compact-aspect",
+      "owningResponsiveCase": "scenario.confirmation.delete-busy",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "confirmation.destructive-busy-with-long-event-id.compact-aspect",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
+      "owningResponsiveCase": "scenario.confirmation.delete-busy",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "confirmation.destructive-busy-with-long-event-id.scale-125-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
+      "owningResponsiveCase": "scenario.confirmation.delete-busy",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "confirmation.destructive-busy-with-long-event-id.scale-150-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    },
+    {
+      "registryFrame": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
+      "owningResponsiveCase": "scenario.confirmation.delete-busy",
+      "uiAutomationGeometryCheck": "UIA-RESPONSIVE-GEOMETRY",
+      "visualFixture": "confirmation.destructive-busy-with-long-event-id.scale-200-stress-equivalent",
+      "manualChecks": [
+        "MANUAL-RESPONSIVE-REFLOW",
+        "MANUAL-TOUCH-TARGETS"
+      ]
+    }
+  ]
+}
