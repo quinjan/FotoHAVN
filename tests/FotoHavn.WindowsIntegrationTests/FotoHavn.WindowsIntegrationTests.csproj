@@ -14,5 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/FotoHavn.App/FotoHavn.App.csproj" />
+    <ProjectReference Include="../../tools/FotoHavn.UiVerificationHost/FotoHavn.UiVerificationHost.csproj" />
   </ItemGroup>
 </Project>

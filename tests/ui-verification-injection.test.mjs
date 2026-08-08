@@ -47,6 +47,12 @@ test("verification code and assets compile only in an explicit verification buil
   );
   assert.match(fieldProfile, /<UiVerificationBuild>false<\/UiVerificationBuild>/);
   assert.match(project, /RejectUiVerificationFieldTestPublish/);
+
+  const publish = await readFile(new URL("scripts/publish-field-test.ps1", root), "utf8");
+  assert.match(publish, /forbiddenVerificationAssets/);
+  assert.match(publish, /forbiddenAssemblyMarkers/);
+  assert.match(publish, /uiVerificationAssetsExcluded = \$true/);
+  assert.match(publish, /uiVerificationAssemblyMarkersExcluded = \$true/);
 });
 
 test("all mapped production compositions and semantic roots are implemented", async () => {
@@ -64,4 +70,15 @@ test("all mapped production compositions and semantic roots are implemented", as
     assert.match(adapter, new RegExp(`class ${typeName}\\b`));
     assert.ok(adapter.includes(surface.semanticRootAutomationId));
   }
+});
+
+test("the render-settled signal exposes the exact injection identity to UI Automation", async () => {
+  const signal = await readFile(
+    new URL("src/FotoHavn.App/UiVerification/UiVerificationRenderSettledSignal.cs", root),
+    "utf8",
+  );
+  assert.match(
+    signal,
+    /AutomationProperties\.SetHelpText\(status, surfaceOverride\.InjectionIdentity\)/,
+  );
 });

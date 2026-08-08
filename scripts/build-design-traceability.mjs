@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseAnnotation, parseMatrix, parseWinuiMappingSource, responsiveOwnerState } from "./design-traceability-source.mjs";
+import { sha256Bytes, sha256Text } from "./design-traceability-hash.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const designRoot = path.join(repositoryRoot, "docs", "design-system");
@@ -15,7 +15,6 @@ const registryPath = path.join(referenceRoot, "registry.json");
 
 const read = (file) => readFileSync(file, "utf8");
 const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
-const sha256 = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
 const acceptanceModules = {
   "saved-events": "tests/FotoHavn.AcceptanceTests/EventPersistenceAcceptanceTests.cs",
   "event-setup": "tests/FotoHavn.AcceptanceTests/EventSetupAcceptanceTests.cs",
@@ -199,10 +198,10 @@ const manifest = {
     tag: registry.contract.tag,
     commit: registry.contract.commit,
     registry: "../reference-states/registry.json",
-    registrySha256: sha256(registryPath),
+    registrySha256: sha256Bytes(registryPath),
   },
   cardinalities: { semanticTokens: 91, components: 17, surfaces: 8, canonicalStates: 71, responsiveRiskFrames: 32, targetFrames: 103 },
-  artifacts: artifactPaths.map((relativePath) => ({ path: relativePath, sha256: sha256(path.join(handoffRoot, relativePath)) })),
+  artifacts: artifactPaths.map((relativePath) => ({ path: relativePath, sha256: sha256Text(path.join(handoffRoot, relativePath)) })),
   targetHashes: registry.frames.map((frame) => ({ id: frame.id, path: `../reference-states/${frame.target}`, sha256: frame.sha256 })),
 };
 writeFileSync(path.join(handoffRoot, "manifest.json"), json(manifest));

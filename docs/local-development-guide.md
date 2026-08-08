@@ -87,6 +87,12 @@ Use the repository's qualified publish entry point when producing a folder for b
 
 The first command requires the exact SDK in `global.json`, restores the checked-in NuGet lock files in locked mode, publishes with `FieldTest-win-x64.pubxml`, verifies the portable-folder shape, probes the adjacent location for write access, and emits `field-test-build.json`. The second proves that the app creates its executable-relative `Events` root, foregrounds the existing window on a second launch, and leaves one process owner. Complete [`field-test/qualification-record.md`](field-test/qualification-record.md) on the actual booth laptop before calling that candidate qualified.
 
+## Produce visual and UI Automation evidence
+
+Use the shared [Windows UI verification host](ui-verification-host.md) to run
+approved fixed-size fixtures against production WinUI compositions. The host is
+test-only and is never part of a field-test package.
+
 ## Common Camera problems
 
 - **Access denied**: enable Windows Camera privacy access for desktop applications.

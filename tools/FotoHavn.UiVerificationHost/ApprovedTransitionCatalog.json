@@ -1,0 +1,23 @@
+[
+  {
+    "id": "transition.guest-start.capture-countdown",
+    "fixtureId": "capture.countdown-3.standard",
+    "request": {
+      "identity": "injection.guest-start.ready",
+      "script": [
+        {
+          "onCommand": "StartGuestCycle",
+          "injectionIdentity": "injection.capture.countdown-3",
+          "announcement": "Capture in progress.",
+          "announcementPriority": "polite"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "automationId": "StartGuestCycleButton",
+        "expectedInjectionIdentity": "injection.capture.countdown-3"
+      }
+    ]
+  }
+]

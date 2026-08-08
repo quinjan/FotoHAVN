@@ -7,4 +7,7 @@
     <Project Path="tests/FotoHavn.AcceptanceTests/FotoHavn.AcceptanceTests.csproj" />
     <Project Path="tests/FotoHavn.WindowsIntegrationTests/FotoHavn.WindowsIntegrationTests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/FotoHavn.UiVerificationHost/FotoHavn.UiVerificationHost.csproj" />
+  </Folder>
 </Solution>

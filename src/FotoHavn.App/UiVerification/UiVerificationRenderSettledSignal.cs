@@ -41,6 +41,7 @@ internal sealed class UiVerificationRenderSettledSignal
     public void Begin(ApplicationSurfaceOverride surfaceOverride)
     {
         status.Text = surfaceOverride.InjectionIdentity;
+        AutomationProperties.SetHelpText(status, surfaceOverride.InjectionIdentity);
         AutomationProperties.SetItemStatus(status, "rendering");
     }
 
@@ -78,6 +79,14 @@ internal sealed class UiVerificationRenderSettledSignal
 
         if (surfaceOverride.Announcement is { Length: > 0 } announcement)
         {
+            AutomationProperties.SetLiveSetting(
+                announcer,
+                surfaceOverride.AnnouncementPriority == AnnouncementPriority.Assertive
+                    ? AutomationLiveSetting.Assertive
+                    : AutomationLiveSetting.Polite);
+            AutomationProperties.SetItemStatus(
+                announcer,
+                (surfaceOverride.AnnouncementPriority ?? AnnouncementPriority.Polite).ToString());
             announcer.Text = announcement;
             FrameworkElementAutomationPeer.FromElement(announcer)?.RaiseAutomationEvent(
                 AutomationEvents.LiveRegionChanged);
