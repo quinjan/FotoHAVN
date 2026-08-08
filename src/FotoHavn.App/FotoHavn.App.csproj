@@ -17,6 +17,9 @@
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <Version>0.1.0-fieldtest.1</Version>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(UiVerificationBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);UI_VERIFICATION</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
@@ -27,6 +30,22 @@
   <ItemGroup>
     <Content Update="Assets\Fonts\**\*" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="UiVerification\**\*.cs" />
+    <None Include="UiVerification\ApprovedInjectionCatalog.json" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UiVerificationBuild)' == 'true'">
+    <Compile Include="UiVerification\**\*.cs" />
+    <Content Include="UiVerification\ApprovedInjectionCatalog.json"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <None Remove="UiVerification\ApprovedInjectionCatalog.json" />
+  </ItemGroup>
+  <Target Name="RejectUiVerificationFieldTestPublish"
+          BeforeTargets="PrepareForPublish"
+          Condition="'$(UiVerificationBuild)' == 'true' and '$(PublishProfile)' == 'FieldTest-win-x64'">
+    <Error Text="The field-test profile cannot publish a UI verification build." />
+  </Target>
   <Target Name="IncludeWinUIResourcesInPublish" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <ResolvedFileToPublish Include="$(TargetDir)App.xbf">

@@ -4,6 +4,9 @@ using FotoHavn.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+#if UI_VERIFICATION
+using FotoHavn.App.UiVerification;
+#endif
 
 namespace FotoHavn.App;
 
@@ -34,6 +37,21 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+#if UI_VERIFICATION
+        var verificationController = await UiVerificationLaunch.TryCreateControllerAsync(
+            Environment.GetCommandLineArgs());
+        if (verificationController is not null)
+        {
+            window = new MainWindow(verificationController);
+            window.Closed += WindowClosed;
+            await window.LoadPresentationAsync();
+            window.ShowCentered();
+            RefreshMotionResources();
+            Volatile.Write(ref windowReady, 1);
+            DrainPendingActivations();
+            return;
+        }
+#endif
         camera = new CameraBoundary();
         orchestrator = new EventGuestCycleOrchestrator(
             new ExecutableRelativeEventFileSystem(),

@@ -1,4 +1,5 @@
 using FotoHavn.Core;
+using FotoHavn.App.Surfaces;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
@@ -11,13 +12,17 @@ using Microsoft.UI;
 using Windows.Storage;
 using Windows.Graphics.Imaging;
 using Windows.Graphics;
+#if UI_VERIFICATION
+using FotoHavn.App.UiVerification;
+#endif
 
 namespace FotoHavn.App;
 
 public sealed partial class MainWindow : Window
 {
-    private readonly EventGuestCycleOrchestrator orchestrator;
-    private readonly CameraBoundary camera;
+    private readonly IApplicationPresentationController presentationController;
+    private readonly CameraBoundary? camera;
+    private readonly ApplicationPresentationAdapter presentationAdapter;
     private readonly HashSet<Border> hoveredEventCards = [];
     private ApplicationCanvasPresentation? canvas;
     private bool applyingPresentation;
@@ -25,12 +30,32 @@ public sealed partial class MainWindow : Window
     private bool photoStripVisibleSignaled;
     private bool photoStripFadeStarted;
     private bool setupWasOpen;
+#if UI_VERIFICATION
+    private readonly UiVerificationRenderSettledSignal renderSettledSignal;
+    private ApplicationSurfaceOverride? mediaPendingRenderSettlement;
+#endif
 
-    public MainWindow(EventGuestCycleOrchestrator orchestrator, CameraBoundary camera)
+    public MainWindow(IApplicationPresentationController presentationController, CameraBoundary? camera = null)
     {
-        this.orchestrator = orchestrator;
+        this.presentationController = presentationController;
         this.camera = camera;
         InitializeComponent();
+        presentationAdapter = new ApplicationPresentationAdapter(
+            EventScrollViewer,
+            SetupLayer,
+            StartGuestLayer,
+            GuestAssistanceLayer,
+            GuestCaptureLayer,
+            GuestAssistanceLayer,
+            PhotoStripLayer,
+            ExitEventConfirmationLayer,
+            EventDeletionLayer,
+            StartEventConfirmationLayer,
+            DiscardDraftLayer,
+            SaveChangesLayer);
+#if UI_VERIFICATION
+        renderSettledSignal = new UiVerificationRenderSettledSignal(WindowRoot);
+#endif
         PreviewViewport.Width = PreviewViewport.Height * CameraPreviewRenderPolicy.CropAspectRatio;
         PreviewSurface.Width = PreviewViewport.Width;
         PreviewSurface.Height = PreviewViewport.Height;
@@ -46,13 +71,16 @@ public sealed partial class MainWindow : Window
             ScaleX = guestMirror.ScaleX,
             CenterX = guestMirror.CenterX,
         };
-        orchestrator.PresentationChanged += PresentationChanged;
-        camera.PreviewFrameAvailable += PreviewFrameAvailable;
+        presentationController.PresentationChanged += PresentationChanged;
+        if (camera is not null)
+        {
+            camera.PreviewFrameAvailable += PreviewFrameAvailable;
+        }
     }
 
     public async Task LoadPresentationAsync(CancellationToken cancellationToken = default)
     {
-        var presentation = await orchestrator.ExecuteAsync(new LaunchApplication(), cancellationToken);
+        var presentation = await presentationController.ExecuteAsync(new LaunchApplication(), cancellationToken);
         HeadingText.Text = presentation.Heading;
         EventTiles.ItemsSource = presentation.EventTiles;
         FixedCanvas.Width = presentation.Canvas.Width;
@@ -128,7 +156,7 @@ public sealed partial class MainWindow : Window
 
     private async void ConfirmEventDeletionClicked(object sender, RoutedEventArgs args)
     {
-        if (orchestrator.CurrentPresentation.EventDeletion?.Stage == EventDeletionStage.Confirmation)
+        if (presentationController.CurrentPresentation.EventDeletion?.Stage == EventDeletionStage.Confirmation)
         {
             await ExecuteAsync(new ConfirmDeleteSavedEvent());
         }
@@ -278,7 +306,7 @@ public sealed partial class MainWindow : Window
 
     private async void SetupLayerKeyDown(object sender, KeyRoutedEventArgs args)
     {
-        if (orchestrator.CurrentPresentation.Setup is { } setup &&
+        if (presentationController.CurrentPresentation.Setup is { } setup &&
             (setup.ShowsDiscardConfirmation || setup.ShowsSaveConfirmation))
         {
             args.Handled = true;
@@ -306,6 +334,14 @@ public sealed partial class MainWindow : Window
     private void ApplyPresentation(ApplicationPresentation presentation)
     {
         var shouldFocusEventName = false;
+        var surfaceOverride = (presentationController as IApplicationSurfaceOverrideSource)?.CurrentSurfaceOverride;
+#if UI_VERIFICATION
+        if (surfaceOverride is not null)
+        {
+            mediaPendingRenderSettlement = null;
+            renderSettledSignal.Begin(surfaceOverride);
+        }
+#endif
         applyingPresentation = true;
         try
         {
@@ -361,11 +397,18 @@ public sealed partial class MainWindow : Window
             SaveChangesLayer.Visibility = setup?.ShowsSaveConfirmation == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+            presentationAdapter.Apply(presentation, surfaceOverride);
             SetupDialog.IsHitTestVisible = setup is null ||
                 (!setup.ShowsDiscardConfirmation && !setup.ShowsSaveConfirmation);
             if (setup is null)
             {
                 PreviewImage.Source = null;
+#if UI_VERIFICATION
+                if (surfaceOverride is not null)
+                {
+                    CompleteVerificationRenderAfterLayout(presentation, surfaceOverride);
+                }
+#endif
                 return;
             }
 
@@ -411,13 +454,19 @@ public sealed partial class MainWindow : Window
             CameraComboBox.IsDropDownOpen = false;
             DispatcherQueue.TryEnqueue(() =>
             {
-                if (orchestrator.CurrentPresentation.Setup is not null)
+                if (presentationController.CurrentPresentation.Setup is not null)
                 {
                     CameraComboBox.IsDropDownOpen = false;
                     EventNameTextBox.Focus(FocusState.Programmatic);
                 }
             });
         }
+#if UI_VERIFICATION
+        if (surfaceOverride is not null)
+        {
+            CompleteVerificationRenderAfterLayout(presentation, surfaceOverride);
+        }
+#endif
     }
 
     private static void ApplyDirtyFieldState(
@@ -440,7 +489,7 @@ public sealed partial class MainWindow : Window
 
     private void PreviewFrameAvailable(object? sender, SoftwareBitmap bitmap)
     {
-        var presentation = orchestrator.CurrentPresentation;
+        var presentation = presentationController.CurrentPresentation;
         var showsSetupPreview = presentation.Setup is not null;
         var showsGuestPreview = presentation.ActiveEvent?.GuestCycle.Phase is
             GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved;
@@ -462,7 +511,7 @@ public sealed partial class MainWindow : Window
                 {
                     var source = new SoftwareBitmapSource();
                     await source.SetBitmapAsync(displayBitmap);
-                    if (orchestrator.CurrentPresentation.Setup is not null)
+                    if (presentationController.CurrentPresentation.Setup is not null)
                     {
                         PreviewImage.Source = source;
                     }
@@ -592,6 +641,9 @@ public sealed partial class MainWindow : Window
             await source.SetSourceAsync(stream);
             PhotoStripImage.Source = source;
             photoStripVisibleSignaled = true;
+#if UI_VERIFICATION
+            CompleteMediaPendingRenderSettlement();
+#endif
             await ExecuteAsync(new ConfirmPhotoStripVisible());
         }
         catch (Exception exception) when (
@@ -600,9 +652,40 @@ public sealed partial class MainWindow : Window
             System.Runtime.InteropServices.COMException)
         {
             photoStripVisibleSignaled = false;
+#if UI_VERIFICATION
+            CompleteMediaPendingRenderSettlement();
+#endif
             await ExecuteAsync(new ReportPhotoStripDecodeFailure());
         }
     }
+
+#if UI_VERIFICATION
+    private void CompleteVerificationRenderAfterLayout(
+        ApplicationPresentation presentation,
+        ApplicationSurfaceOverride surfaceOverride)
+    {
+        if (surfaceOverride.Surface == ApplicationSurface.PhotoStrip &&
+            presentation.ActiveEvent?.GuestCycle.PhotoStripPath is not null &&
+            !photoStripVisibleSignaled)
+        {
+            mediaPendingRenderSettlement = surfaceOverride;
+            return;
+        }
+
+        renderSettledSignal.CompleteAfterLayout(surfaceOverride);
+    }
+
+    private void CompleteMediaPendingRenderSettlement()
+    {
+        if (mediaPendingRenderSettlement is not { } surfaceOverride)
+        {
+            return;
+        }
+
+        mediaPendingRenderSettlement = null;
+        renderSettledSignal.CompleteAfterLayout(surfaceOverride);
+    }
+#endif
 
     private void StartPhotoStripFade()
     {
@@ -629,7 +712,7 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            await orchestrator.ExecuteAsync(command);
+            await presentationController.ExecuteAsync(command);
         }
         catch (OperationCanceledException)
         {
