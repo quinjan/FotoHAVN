@@ -98,3 +98,51 @@ final branch commit and its uploaded artifact independently confirms all 48
 evidence sets, the pinned environment, and zero semantic findings. The stable
 workflow page is
 [Batch 3 UI verification](https://github.com/quinjan/FotoHAVN/actions/workflows/ui-verification-batch-3.yml).
+
+## Manual visual-review follow-up — 2026-08-09
+
+After PR #83 merged, an operator review of the native app identified seven
+follow-up defects: missing production busy feedback, excessive confirmation
+spacing, a hover surface inset from the Event Card edge, Event-name text that
+was not vertically centered, an overlaid Setup scrollbar, a read-only Printer
+value, and a two-action `Event deleted` result.
+
+The follow-up branch `codex/issue-75-manual-visual-review` resolves those
+findings as follows:
+
+- production save, start, and exit operations publish busy presentation state;
+  the affected action is disabled and contains the progress indicator;
+- confirmation dialogs use the shared compact padding, spacing, semantic icon,
+  Event identity, and responsive-action anatomy;
+- the visually hidden Start action and hover state cover the complete Event
+  Card while Edit and Delete remain independently actionable;
+- the Event-name field vertically centers its value and Setup reserves a
+  20-pixel scrollbar gutter;
+- Printer is an enabled selector whose default option is `Not printing`;
+- a completed deletion uses the production `EventDeletionStage.Deleted`
+  contract, hides the safe action and Event identity, and exposes one
+  `Continue` acknowledgement action.
+
+The existing `confirmation.success-destination.standard` fixture remains the
+approved `Event saved` acknowledgement; it was not silently repurposed as a
+deletion-specific fixture. The production `Event deleted` branch is covered by
+the manual-review regression contract and the Event deletion acceptance tests.
+
+The local follow-up run is under
+`artifacts/ui-verification/issue-75-manual-review-final-v2`. It matched the
+pinned environment and produced all 48 target/actual/diff/result sets with no
+missing evidence. The changed-pixel ratios were 6.06% to 67.92% (33.42%
+average). Eight generated contact sheets were reviewed; the affected Standard,
+Compact, and Stress frames show no remaining overlap, clipping, action-count,
+or busy-state defect from the operator report.
+
+The final local semantic summary reports zero findings across all 48 fixtures.
+The authoritative acceptance gate remains an exact-commit run on the
+interactive pinned GitHub runner. The follow-up PR is not merge-ready until
+that uploaded run independently confirms 48 complete evidence sets, the pinned
+environment, and zero semantic findings.
+
+When desktop screen-copy APIs are unavailable, the shared host now falls back
+to direct `PrintWindow` client capture of the already sized, settled, and UIA-
+verified FotoHAVN window. It still prefers topmost screen copy, rejects real
+pre-existing FotoHAVN windows, and never relaxes the environment pin.

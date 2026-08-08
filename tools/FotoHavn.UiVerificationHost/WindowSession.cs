@@ -66,7 +66,7 @@ public sealed class WindowSession : IDisposable
         {
             return !candidate.HasExited && candidate.MainWindowHandle != IntPtr.Zero;
         }
-        catch (Win32Exception)
+        catch (Exception exception) when (exception is Win32Exception or InvalidOperationException)
         {
             // A terminated App SDK process can remain briefly discoverable while its
             // protected process record is being reclaimed. It cannot own a usable
@@ -118,9 +118,14 @@ public sealed class WindowSession : IDisposable
 
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outputPath))!);
         using var physical = new Bitmap(client.Width, client.Height, PixelFormat.Format32bppArgb);
-        using (var graphics = Graphics.FromImage(physical))
+        try
         {
+            using var graphics = Graphics.FromImage(physical);
             graphics.CopyFromScreen(origin.X, origin.Y, 0, 0, physical.Size, CopyPixelOperation.SourceCopy);
+        }
+        catch (Win32Exception)
+        {
+            CopyClientWithPrintWindow(physical);
         }
 
         if (physical.Width == effectiveWidth && physical.Height == effectiveHeight)
@@ -137,6 +142,25 @@ public sealed class WindowSession : IDisposable
         }
 
         effective.Save(outputPath, ImageFormat.Png);
+    }
+
+    private void CopyClientWithPrintWindow(Bitmap target)
+    {
+        using var graphics = Graphics.FromImage(target);
+        var deviceContext = graphics.GetHdc();
+        try
+        {
+            if (!PrintWindow(Handle, deviceContext, PwClientOnly | PwRenderFullContent))
+            {
+                throw new Win32Exception(
+                    Marshal.GetLastWin32Error(),
+                    "Windows could not capture the FotoHAVN client window.");
+            }
+        }
+        finally
+        {
+            graphics.ReleaseHdc(deviceContext);
+        }
     }
 
     public (int X, int Y) GetClientOrigin()
@@ -184,6 +208,8 @@ public sealed class WindowSession : IDisposable
     }
 
     private const uint SwpShowWindow = 0x0040;
+    private const uint PwClientOnly = 0x00000001;
+    private const uint PwRenderFullContent = 0x00000002;
     private static readonly IntPtr HwndTopmost = new(-1);
 
     [DllImport("user32.dll")]
@@ -212,6 +238,10 @@ public sealed class WindowSession : IDisposable
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool SetForegroundWindow(IntPtr window);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PrintWindow(IntPtr window, IntPtr deviceContext, uint flags);
 
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr window);

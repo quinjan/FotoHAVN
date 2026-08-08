@@ -278,6 +278,14 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void PrinterSelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (!applyingPresentation && PrinterComboBox.SelectedIndex == 0)
+        {
+            await ExecuteAsync(new SelectNoPrinter());
+        }
+    }
+
     private async void RetryStorageClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new RetryEventStorage());
 
@@ -370,16 +378,17 @@ public sealed partial class MainWindow : Window
             var verificationIdentity = surfaceOverride?.InjectionIdentity ?? string.Empty;
             var isConfirmationBusy = surfaceOverride?.Surface == ApplicationSurface.Confirmation &&
                 surfaceOverride.ItemStatus == "busy";
-            var isDeletionSuccess = verificationIdentity.EndsWith("success-destination", StringComparison.Ordinal);
+            var isVerificationSuccess = verificationIdentity.EndsWith("success-destination", StringComparison.Ordinal);
+            var isDeletionSuccess = isVerificationSuccess || deletion?.Stage == EventDeletionStage.Deleted;
             var isDeletionFailure = verificationIdentity.EndsWith("delete-failed", StringComparison.Ordinal) ||
                 verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal) ||
                 deletion?.Stage is EventDeletionStage.CouldNotStart or EventDeletionStage.Incomplete;
             var isDeletionBusy = deletion?.IsBusy == true || isConfirmationBusy && deletion is not null;
-            EventDeletionMessageText.Text = isDeletionSuccess
+            EventDeletionMessageText.Text = isVerificationSuccess
                 ? "Your changes have been saved."
                 : verificationIdentity.EndsWith("confirmation.retry", StringComparison.Ordinal)
                     ? string.Empty
-                    : deletion?.Warning ?? string.Empty;
+                    : deletion?.Message ?? string.Empty;
             EventDeletionMessageText.Visibility = string.IsNullOrWhiteSpace(EventDeletionMessageText.Text)
                 ? Visibility.Collapsed
                 : Visibility.Visible;
@@ -387,8 +396,6 @@ public sealed partial class MainWindow : Window
             EventDeletionIdentity.EventId = deletion?.EventId.Value ?? string.Empty;
             EventDeletionIdentity.Visibility = isDeletionSuccess ? Visibility.Collapsed : Visibility.Visible;
             EventDeletionFailureStatus.Visibility = isDeletionFailure ? Visibility.Visible : Visibility.Collapsed;
-            EventDeletionProgressRing.Visibility = Visibility.Collapsed;
-            EventDeletionProgressRing.IsActive = false;
             EventDeletionActions.Visibility = Visibility.Visible;
             CancelEventDeletionButton.Visibility = isDeletionSuccess ? Visibility.Collapsed : Visibility.Visible;
             CancelEventDeletionButton.IsEnabled = !isDeletionBusy;
@@ -416,7 +423,8 @@ public sealed partial class MainWindow : Window
                         ? "FotoHavnActionButtonPrimaryStyle"
                         : "FotoHavnActionButtonDestructiveStyle"];
 
-            var isStartBusy = isConfirmationBusy && presentation.StartEventConfirmation is not null;
+            var isStartBusy = presentation.StartEventConfirmation?.IsBusy == true ||
+                isConfirmationBusy && presentation.StartEventConfirmation is not null;
             var isStartFailure = verificationIdentity.EndsWith("start-failed", StringComparison.Ordinal);
             StartEventFailureStatus.Visibility = isStartFailure ? Visibility.Visible : Visibility.Collapsed;
             CancelStartEventButton.IsEnabled = !isStartBusy;
@@ -427,7 +435,8 @@ public sealed partial class MainWindow : Window
                 isStartFailure ? "Retry" : isStartBusy ? "Starting Event…" : "Start Event",
                 isStartBusy);
 
-            var isExitBusy = isConfirmationBusy && activeEvent?.ShowsExitConfirmation == true;
+            var isExitBusy = activeEvent?.IsExitBusy == true ||
+                isConfirmationBusy && activeEvent?.ShowsExitConfirmation == true;
             CancelExitEventButton.IsEnabled = !isExitBusy;
             ConfirmExitEventButton.IsEnabled = !isExitBusy;
             SetButtonContent(CancelExitEventButton, "Keep Event Active");
@@ -534,7 +543,9 @@ public sealed partial class MainWindow : Window
                 ? null
                 : setup.AvailableCameras.FirstOrDefault(camera =>
                     camera.DeviceId == setup.SelectedCamera.DeviceId);
-            var isSetupSaving = verificationIdentity.EndsWith("event-setup.saving", StringComparison.Ordinal);
+            PrinterComboBox.SelectedIndex = setup.IsNoPrinterSelected ? 0 : -1;
+            var isSetupSaving = setup.IsBusy ||
+                verificationIdentity.EndsWith("event-setup.saving", StringComparison.Ordinal);
             var isSetupSaveSuccess = verificationIdentity.EndsWith("event-setup.save-success", StringComparison.Ordinal);
             var isSetupSaveError = verificationIdentity.EndsWith("event-setup.save-error", StringComparison.Ordinal);
             SetupFailureText.Text = isSetupSaveError
@@ -546,11 +557,24 @@ public sealed partial class MainWindow : Window
                 : Visibility.Visible;
             SaveCloseButton.IsEnabled = setup.CanSave && !isSetupSaving && !isSetupSaveSuccess && !isSetupSaveError;
             SaveStartButton.IsEnabled = setup.CanStart && !isSetupSaving && !isSetupSaveSuccess && !isSetupSaveError;
-            SetButtonContent(SaveCloseButton, isSetupSaveSuccess ? "Saved" : "Save & Close");
+            var isSetupFooterSaving = isSetupSaving && !setup.ShowsSaveConfirmation;
+            var isSaveCloseBusy = isSetupFooterSaving && !setup.IsSavingAndStarting;
+            var isSaveStartBusy = isSetupFooterSaving && setup.IsSavingAndStarting;
+            SetButtonContent(
+                SaveCloseButton,
+                isSaveCloseBusy ? "Saving Event…" : isSetupSaveSuccess ? "Saved" : "Save & Close",
+                isSaveCloseBusy);
             SetButtonContent(
                 SaveStartButton,
-                isSetupSaving ? "Saving & starting…" : "Save & Start Event",
+                isSaveStartBusy ? "Saving & starting…" : "Save & Start Event",
+                isSaveStartBusy);
+            CancelSaveButton.IsEnabled = !isSetupSaving;
+            ConfirmSaveButton.IsEnabled = !isSetupSaving;
+            SetButtonContent(
+                ConfirmSaveButton,
+                isSetupSaving ? "Saving Event…" : setup.SaveConfirmationStartsEvent ? "Save & Start Event" : "Save Changes",
                 isSetupSaving);
+            SaveConfirmationFrame.RefreshInitialFocus();
 
         }
         finally

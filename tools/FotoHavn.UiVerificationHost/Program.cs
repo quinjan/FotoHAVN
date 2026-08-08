@@ -12,7 +12,7 @@ public static class Program
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine(exception.Message);
+            Console.Error.WriteLine(exception);
             return 2;
         }
     }
