@@ -69,6 +69,7 @@ jobs:
           if ($hostExit -notin @(0, 1)) {
             throw "Verification host failed with exit code $hostExit."
           }
+          exit 0
 
       - name: Gate pinned and semantic evidence
         shell: pwsh
