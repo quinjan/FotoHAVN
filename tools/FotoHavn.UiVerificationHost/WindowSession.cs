@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -30,7 +31,7 @@ public sealed class WindowSession : IDisposable
         }
 
         var processName = Path.GetFileNameWithoutExtension(applicationPath);
-        if (Process.GetProcessesByName(processName).Any(candidate => !candidate.HasExited))
+        if (Process.GetProcessesByName(processName).Any(IsBlockingInstance))
         {
             throw new InvalidOperationException(
                 $"Close every existing {processName} process before producing verification evidence.");
@@ -59,6 +60,25 @@ public sealed class WindowSession : IDisposable
         throw new TimeoutException("FotoHAVN did not expose a main window before the launch timeout.");
     }
 
+    private static bool IsBlockingInstance(Process candidate)
+    {
+        try
+        {
+            return !candidate.HasExited && candidate.MainWindowHandle != IntPtr.Zero;
+        }
+        catch (Win32Exception)
+        {
+            // A terminated App SDK process can remain briefly discoverable while its
+            // protected process record is being reclaimed. It cannot own a usable
+            // verification window and must not poison subsequent fixture runs.
+            return false;
+        }
+        finally
+        {
+            candidate.Dispose();
+        }
+    }
+
     public void SetEffectiveClientSize(int width, int height)
     {
         EffectiveScale = GetDpiForWindow(Handle) / 96d;
@@ -71,9 +91,10 @@ public sealed class WindowSession : IDisposable
         _ = GetWindowRect(Handle, out var window);
         var outerWidth = physicalWidth + (window.Width - client.Width);
         var outerHeight = physicalHeight + (window.Height - client.Height);
-        if (!SetWindowPos(Handle, IntPtr.Zero, 0, 0, outerWidth, outerHeight, SwpNoZOrder | SwpShowWindow))
+        if (!SetWindowPos(Handle, HwndTopmost, 0, 0, outerWidth, outerHeight, SwpShowWindow))
         {
-            throw new InvalidOperationException("Windows could not size the FotoHAVN verification window.");
+            throw new InvalidOperationException(
+                $"Windows could not size the FotoHAVN verification window (Win32 error {Marshal.GetLastWin32Error()}).");
         }
 
         _ = SetForegroundWindow(Handle);
@@ -162,8 +183,8 @@ public sealed class WindowSession : IDisposable
         public int Y;
     }
 
-    private const uint SwpNoZOrder = 0x0004;
     private const uint SwpShowWindow = 0x0040;
+    private static readonly IntPtr HwndTopmost = new(-1);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -177,7 +198,7 @@ public sealed class WindowSession : IDisposable
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool ClientToScreen(IntPtr window, ref Point point);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool SetWindowPos(
         IntPtr window,

@@ -1,0 +1,43 @@
+{
+  "eventId": "0198a7d2-5bc1-7f45-8e90-3f7a2f91c4e8",
+  "eventName": "Mika & Paolo’s wedding",
+  "longEventName": "Mika & Paolo’s extraordinarily long wedding celebration",
+  "savedEvents": [
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-3f7a2f91c4e8",
+      "eventName": "Mika & Paolo’s wedding",
+      "compactEventId": "2F91 · C4E8",
+      "savedMetadata": "Saved 1 day ago"
+    },
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-000003b17711",
+      "eventName": "Summer reunion",
+      "compactEventId": "03B1 · 7711",
+      "savedMetadata": "Saved 2 days ago"
+    },
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-000003b17712",
+      "eventName": "Graduation portraits",
+      "compactEventId": "03B1 · 7712",
+      "savedMetadata": "Saved 3 days ago"
+    },
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-000003b17713",
+      "eventName": "Studio open day",
+      "compactEventId": "03B1 · 7713",
+      "savedMetadata": "Saved 4 days ago"
+    },
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-000003b17714",
+      "eventName": "Town fiesta",
+      "compactEventId": "03B1 · 7714",
+      "savedMetadata": "Saved 5 days ago"
+    },
+    {
+      "eventId": "0198a7d2-5bc1-7f45-8e90-000003b17715",
+      "eventName": "Family weekend",
+      "compactEventId": "03B1 · 7715",
+      "savedMetadata": "Saved 6 days ago"
+    }
+  ]
+}

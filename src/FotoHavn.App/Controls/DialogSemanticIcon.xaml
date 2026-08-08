@@ -1,0 +1,20 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.DialogSemanticIcon"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.Name="Semantic icon">
+    <Border
+        x:Name="IconFrame"
+        Width="{StaticResource DialogSemanticIconSize}"
+        Height="{StaticResource DialogSemanticIconSize}"
+        BorderThickness="{StaticResource DialogSemanticIconStroke}"
+        CornerRadius="{StaticResource DialogSemanticIconRadius}">
+        <FontIcon
+            x:Name="Icon"
+            AutomationProperties.AccessibilityView="Raw"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="{StaticResource DialogSemanticIconGlyphSize}"
+            Glyph="{x:Bind Glyph, Mode=OneWay}" />
+    </Border>
+</UserControl>

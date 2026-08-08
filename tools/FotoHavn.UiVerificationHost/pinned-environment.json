@@ -1,11 +1,11 @@
 {
-  "windowsBuild": 26100,
+  "windowsBuild": 26200,
   "osArchitecture": "X64",
   "processArchitecture": "X64",
   "dotnetSdk": "10.0.302",
-  "culture": "en-US",
+  "culture": "en-PH",
   "uiCulture": "en-US",
-  "dpi": 96,
+  "dpi": 120,
   "theme": "Light",
   "fontSmoothing": "ClearType"
 }

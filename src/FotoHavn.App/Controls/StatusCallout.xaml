@@ -54,11 +54,12 @@
         </VisualStateManager.VisualStateGroups>
         <Grid ColumnSpacing="{StaticResource SpaceInline}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{StaticResource IconDefault}" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <FontIcon
                 x:Name="CalloutIcon"
+                Width="{StaticResource IconDefault}"
                 FontFamily="Segoe MDL2 Assets"
                 FontSize="{StaticResource IconSmall}"
                 AutomationProperties.AccessibilityView="Raw" />

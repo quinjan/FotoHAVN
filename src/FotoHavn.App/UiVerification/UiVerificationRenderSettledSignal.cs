@@ -10,6 +10,8 @@ namespace FotoHavn.App.UiVerification;
 
 internal sealed class UiVerificationRenderSettledSignal
 {
+    private const string SettledStatus = "settled";
+    private const string HostReadySettledStatus = "host-ready-settled";
     private readonly FrameworkElement layoutRoot;
     private readonly TextBlock status = new()
     {
@@ -25,6 +27,17 @@ internal sealed class UiVerificationRenderSettledSignal
         Opacity = 0.01,
         IsHitTestVisible = false,
     };
+    private readonly Button hostReady = new()
+    {
+        Width = 1,
+        Height = 1,
+        Opacity = 0.01,
+        IsHitTestVisible = false,
+        IsTabStop = false,
+        HorizontalAlignment = HorizontalAlignment.Left,
+        VerticalAlignment = VerticalAlignment.Top,
+    };
+    private ApplicationSurfaceOverride? currentSurfaceOverride;
 
     public UiVerificationRenderSettledSignal(Grid windowRoot)
     {
@@ -34,12 +47,18 @@ internal sealed class UiVerificationRenderSettledSignal
         AutomationProperties.SetLiveSetting(status, AutomationLiveSetting.Polite);
         AutomationProperties.SetAutomationId(announcer, "FotoHavn.Verification.Announcement");
         AutomationProperties.SetLiveSetting(announcer, AutomationLiveSetting.Assertive);
+        AutomationProperties.SetAutomationId(hostReady, "FotoHavn.Verification.HostReady");
+        AutomationProperties.SetName(hostReady, "FotoHAVN verification host ready handshake");
+        AutomationProperties.SetAccessibilityView(hostReady, AccessibilityView.Control);
+        hostReady.Click += HostReadyClicked;
         windowRoot.Children.Add(status);
         windowRoot.Children.Add(announcer);
+        windowRoot.Children.Add(hostReady);
     }
 
     public void Begin(ApplicationSurfaceOverride surfaceOverride)
     {
+        currentSurfaceOverride = surfaceOverride;
         status.Text = surfaceOverride.InjectionIdentity;
         AutomationProperties.SetHelpText(status, surfaceOverride.InjectionIdentity);
         AutomationProperties.SetItemStatus(status, "rendering");
@@ -53,14 +72,14 @@ internal sealed class UiVerificationRenderSettledSignal
             layoutRoot.Loaded -= loaded;
             _ = layoutRoot.DispatcherQueue.TryEnqueue(
                 DispatcherQueuePriority.Low,
-                () => Complete(surfaceOverride));
+                () => Complete(surfaceOverride, SettledStatus));
         };
 
         if (layoutRoot.IsLoaded)
         {
             _ = layoutRoot.DispatcherQueue.TryEnqueue(
                 DispatcherQueuePriority.Low,
-                () => Complete(surfaceOverride));
+                () => Complete(surfaceOverride, SettledStatus));
         }
         else
         {
@@ -68,13 +87,26 @@ internal sealed class UiVerificationRenderSettledSignal
         }
     }
 
-    private void Complete(ApplicationSurfaceOverride surfaceOverride)
+    private void HostReadyClicked(object sender, RoutedEventArgs args)
+    {
+        if (currentSurfaceOverride is not { } surfaceOverride)
+        {
+            return;
+        }
+
+        AutomationProperties.SetItemStatus(status, "host-ready-rendering");
+        _ = layoutRoot.DispatcherQueue.TryEnqueue(
+            DispatcherQueuePriority.Low,
+            () => Complete(surfaceOverride, HostReadySettledStatus));
+    }
+
+    private void Complete(ApplicationSurfaceOverride surfaceOverride, string settledStatus)
     {
         layoutRoot.UpdateLayout();
         if (surfaceOverride.FocusAutomationId is { Length: > 0 } focusId &&
-            FindByAutomationId(layoutRoot, focusId) is Control control)
+            FindByAutomationId(layoutRoot, focusId) is FrameworkElement element)
         {
-            control.Focus(FocusState.Programmatic);
+            element.Focus(FocusState.Programmatic);
         }
 
         if (surfaceOverride.Announcement is { Length: > 0 } announcement)
@@ -88,13 +120,15 @@ internal sealed class UiVerificationRenderSettledSignal
                 announcer,
                 (surfaceOverride.AnnouncementPriority ?? AnnouncementPriority.Polite).ToString());
             announcer.Text = announcement;
-            FrameworkElementAutomationPeer.FromElement(announcer)?.RaiseAutomationEvent(
-                AutomationEvents.LiveRegionChanged);
+            var announcementPeer = FrameworkElementAutomationPeer.FromElement(announcer) ??
+                FrameworkElementAutomationPeer.CreatePeerForElement(announcer);
+            announcementPeer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
         }
 
-        AutomationProperties.SetItemStatus(status, "settled");
-        FrameworkElementAutomationPeer.FromElement(status)?.RaiseAutomationEvent(
-            AutomationEvents.LiveRegionChanged);
+        AutomationProperties.SetItemStatus(status, settledStatus);
+        var statusPeer = FrameworkElementAutomationPeer.FromElement(status) ??
+            FrameworkElementAutomationPeer.CreatePeerForElement(status);
+        statusPeer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
     }
 
     private static FrameworkElement? FindByAutomationId(DependencyObject root, string automationId)

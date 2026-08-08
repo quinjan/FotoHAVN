@@ -16,7 +16,7 @@ Semantic ID: `component.modal-dialog`
 
 ## Accessibility and behavior
 
-Use WinUI `ContentDialog` or an equivalent truly modal surface. The visible title is the level-1 heading and dialog name. Initial focus enters on the safest action; for a one-action acknowledgement, it enters on the Primary action. Tab and Shift+Tab remain contained; background content is inert; close and Escape work only while idle; focus returns to the invoker. During busy work only the initiating label changes, both actions and close are disabled, and context remains visible. Announce success or information once, politely, when the acknowledgement opens; the icon is redundant and hidden from accessibility.
+Use WinUI `ContentDialog` or an equivalent truly modal surface. The visible title is the level-1 heading and dialog name. While idle, initial focus enters on the safest action; for a one-action acknowledgement, it enters on the Primary action. During non-cancellable busy work, both actions and close are disabled and focus moves to the dialog heading (or its status when that status is the more useful announcement target). Tab and Shift+Tab remain contained; background content is inert; close and Escape work only while idle; focus returns to the invoker. During busy work only the initiating label changes and context remains visible. Announce success or information once, politely, when the acknowledgement opens; the icon is redundant and hidden from accessibility.
 
 ## Responsive
 

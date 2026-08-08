@@ -1,0 +1,92 @@
+name: UI verification - Batch 3
+
+on:
+  workflow_dispatch:
+  # Bootstrap this new workflow from its trusted PR branch. GitHub cannot
+  # dispatch a workflow manually until the file also exists on the default branch.
+  push:
+    branches:
+      - codex/issue-75-operator-event-management
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-verification-batch-3
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Capture 48 pinned fixtures
+    if: github.event_name == 'workflow_dispatch' || github.actor == github.repository_owner
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - fotohavn-ui-verification
+      - windows-26200
+      - dpi-120
+      - dotnet-10.0.302
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out the dispatched revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Verify pinned runner identity
+        shell: pwsh
+        run: |
+          if ($env:RUNNER_NAME -ne "FotoHAVN-Pinned-UI-QUINJ3875") {
+            throw "Unexpected runner '$env:RUNNER_NAME'."
+          }
+          $sdk = dotnet --version
+          if ($sdk -ne "10.0.302") {
+            throw "Expected .NET SDK 10.0.302, found $sdk."
+          }
+
+      - name: Validate contracts and build verification binaries
+        shell: pwsh
+        run: |
+          node scripts/build-design-traceability.mjs
+          node scripts/validate-design-traceability.mjs
+          node --test tests/operator-event-management-contract.test.mjs tests/ui-verification-host.test.mjs tests/design-traceability-validator.test.mjs
+          dotnet test tests/FotoHavn.WindowsIntegrationTests/FotoHavn.WindowsIntegrationTests.csproj --filter UiVerificationHostTests --artifacts-path artifacts/dotnet-host-tests
+          dotnet build src/FotoHavn.App/FotoHavn.App.csproj -p:UiVerificationBuild=true -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --artifacts-path artifacts/dotnet-ui
+          dotnet build tools/FotoHavn.UiVerificationHost/FotoHavn.UiVerificationHost.csproj -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --artifacts-path artifacts/dotnet-host
+
+      - name: Capture Batch 3 evidence
+        id: capture
+        shell: pwsh
+        run: |
+          $app = Resolve-Path "artifacts/dotnet-ui/bin/FotoHavn.App/debug_win-x64/FotoHAVN.exe"
+          $hostExe = Resolve-Path "artifacts/dotnet-host/bin/FotoHavn.UiVerificationHost/debug_win-x64/FotoHavn.UiVerificationHost.exe"
+          # Exit 1 means the exact-pixel comparator needs human review. Keep
+          # PowerShell 7.6 from terminating before we can apply that contract.
+          $PSNativeCommandUseErrorActionPreference = $false
+          & $hostExe --repository-root . --app $app --output artifacts/ui-verification/batch-3 --completed-through-batch 3
+          $hostExit = $LASTEXITCODE
+          "host_exit_code=$hostExit" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          if ($hostExit -notin @(0, 1)) {
+            throw "Verification host failed with exit code $hostExit."
+          }
+          exit 0
+
+      - name: Gate pinned and semantic evidence
+        shell: pwsh
+        run: |
+          ./scripts/summarize-ui-verification.ps1 -RunRoot artifacts/ui-verification/batch-3 -ExpectedResults 48
+          Get-Content artifacts/ui-verification/batch-3/summary.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Upload targets, actuals, diffs, and semantic evidence
+        if: always() && hashFiles('artifacts/ui-verification/batch-3/run.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-verification-batch-3-${{ github.sha }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            artifacts/ui-verification/batch-3
+            docs/design-system/reference-states/targets/saved-events
+            docs/design-system/reference-states/targets/event-setup
+            docs/design-system/reference-states/targets/confirmation
+            tools/FotoHavn.UiVerificationHost/pinned-environment.json

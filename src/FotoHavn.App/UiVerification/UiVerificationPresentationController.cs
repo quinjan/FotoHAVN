@@ -15,15 +15,18 @@ internal sealed class UiVerificationPresentationController :
     };
 
     private readonly IReadOnlyDictionary<string, ApprovedInjection> catalog;
+    private readonly UiVerificationCanonicalPresentation canonicalPresentation;
     private readonly UiVerificationRequest request;
     private readonly IReadOnlyDictionary<string, UiVerificationTransition> transitions;
 
     private UiVerificationPresentationController(
         IReadOnlyDictionary<string, ApprovedInjection> catalog,
-        UiVerificationRequest request)
+        UiVerificationRequest request,
+        UiVerificationCanonicalPresentation canonicalPresentation)
     {
         this.catalog = catalog;
         this.request = request;
+        this.canonicalPresentation = canonicalPresentation;
         transitions = request.Transitions.ToDictionary(step => step.OnCommand, StringComparer.Ordinal);
         (CurrentPresentation, CurrentSurfaceOverride) = CreateState(request.Identity, null);
     }
@@ -63,7 +66,11 @@ internal sealed class UiVerificationPresentationController :
             }
         }
 
-        return new(catalog, request);
+        var canonicalPresentation = await UiVerificationCanonicalPresentation.LoadAsync(
+            JsonOptions,
+            cancellationToken);
+        request = request with { Presentation = request.Presentation ?? canonicalPresentation.Primary };
+        return new(catalog, request, canonicalPresentation);
     }
 
     public Task<ApplicationPresentation> ExecuteAsync(
@@ -90,7 +97,7 @@ internal sealed class UiVerificationPresentationController :
         UiVerificationTransition? transition)
     {
         var injection = catalog[identity];
-        var presentation = InjectedPresentationFactory.Create(injection, request);
+        var presentation = InjectedPresentationFactory.Create(injection, request, canonicalPresentation);
         return (
             presentation,
             new(
@@ -98,10 +105,46 @@ internal sealed class UiVerificationPresentationController :
                 injection.ExpectedName,
                 injection.ExpectedStatus,
                 injection.Identity,
-                transition?.FocusAutomationId,
-                transition?.Announcement,
-                transition?.AnnouncementPriority));
+                transition?.FocusAutomationId ?? DefaultFocus(injection),
+                transition?.Announcement ?? DefaultAnnouncement(injection),
+                transition?.AnnouncementPriority ?? DefaultAnnouncementPriority(injection)));
     }
+
+    private static string DefaultFocus(ApprovedInjection injection) => injection.Surface switch
+    {
+        ApplicationSurface.SavedEvents => "HeadingText",
+        ApplicationSurface.EventSetup => "SetupTitleText",
+        ApplicationSurface.Confirmation when injection.State == "success-destination" =>
+            "FotoHavn.Confirmation.ConfirmingAction",
+        ApplicationSurface.Confirmation => "FotoHavn.Confirmation.SafeAction",
+        _ => string.Empty,
+    };
+
+    private static string DefaultAnnouncement(ApprovedInjection injection)
+    {
+        if (injection.Surface == ApplicationSurface.Confirmation &&
+            injection.State == "success-destination")
+        {
+            return "Event saved. Your changes have been saved.";
+        }
+
+        var surface = injection.Surface switch
+        {
+            ApplicationSurface.EventSetup => "Event setup",
+            ApplicationSurface.Confirmation => "Confirmation",
+            _ => injection.ExpectedName,
+        };
+        var state = injection.ExpectedStatus switch
+        {
+            "busy" => "in progress",
+            "unavailable" => "needs attention",
+            _ => "ready",
+        };
+        return $"{surface} {state}.";
+    }
+
+    private static AnnouncementPriority DefaultAnnouncementPriority(ApprovedInjection injection) =>
+        injection.ExpectedStatus == "unavailable" ? AnnouncementPriority.Assertive : AnnouncementPriority.Polite;
 }
 
 internal sealed record ApprovedInjection(
@@ -120,14 +163,15 @@ internal sealed record UiVerificationRequest(
     string? MediaPath = null,
     IReadOnlyList<UiVerificationTransition>? Script = null)
 {
-    public UiVerificationPresentationData PresentationData { get; } = Presentation ?? new();
+    public UiVerificationPresentationData PresentationData => Presentation ??
+        throw new InvalidOperationException("Canonical presentation defaults were not applied.");
     public IReadOnlyList<UiVerificationTransition> Transitions { get; } = Script ?? [];
     public DateTimeOffset Now { get; } = ClockUtc ?? new(2026, 1, 15, 10, 30, 0, TimeSpan.Zero);
 }
 
 internal sealed record UiVerificationPresentationData(
-    string EventId = "0198f5d1-72aa-7000-8000-fotohavn0001",
-    string EventName = "Community Night",
+    string EventId,
+    string EventName,
     int CaptureNumber = 1,
     int CompletedCaptures = 0,
     int CountdownSeconds = 3);
@@ -161,10 +205,11 @@ internal static class InjectedPresentationFactory
 
     public static ApplicationPresentation Create(
         ApprovedInjection injection,
-        UiVerificationRequest request) =>
+        UiVerificationRequest request,
+        UiVerificationCanonicalPresentation canonicalPresentation) =>
         injection.Surface switch
         {
-            ApplicationSurface.SavedEvents => SavedEvents(injection, request),
+            ApplicationSurface.SavedEvents => SavedEvents(injection, request, canonicalPresentation),
             ApplicationSurface.EventSetup => EventSetup(injection, request),
             ApplicationSurface.GuestStart => Active(request, GuestCyclePresentation.Start,
                 showsExitConfirmation: injection.State == "exit-confirmation-open"),
@@ -178,24 +223,35 @@ internal static class InjectedPresentationFactory
 
     private static ApplicationPresentation SavedEvents(
         ApprovedInjection injection,
-        UiVerificationRequest request)
+        UiVerificationRequest request,
+        UiVerificationCanonicalPresentation canonicalPresentation)
     {
         var data = request.PresentationData;
-        var savedCount = injection.State == "maximum-cards" ? 6 : 1;
+        var savedCount = injection.State == "maximum-cards" ? 6 : 3;
         var tiles = new List<EventTilePresentation>
         {
             new(EventTileKind.NewEvent, "New Event", "Create a new Event", "+"),
         };
         for (var index = 0; index < savedCount; index++)
         {
+            var fixture = canonicalPresentation.SavedEvents[index];
+            var cardState = index == 0 ? injection.State switch
+            {
+                "card-hover" => EventCardState.Hover,
+                "card-focus" => EventCardState.Focus,
+                "unavailable" => EventCardState.Unavailable,
+                "busy" => EventCardState.Busy,
+                _ => EventCardState.Ready,
+            } : EventCardState.Ready;
             tiles.Add(new(
                 EventTileKind.SavedEvent,
-                index == 0 ? data.EventName : $"{data.EventName} {index + 1}",
-                "Last saved at deterministic verification time",
+                index == 0 ? data.EventName : fixture.EventName,
+                fixture.SavedMetadata,
                 string.Empty,
-                new EventId(index == 0 ? data.EventId : $"{data.EventId}-{index + 1}"),
+                new EventId(index == 0 ? data.EventId : fixture.EventId),
                 request.Now,
-                DeletionIncomplete: injection.State == "deletion-incomplete" && index == 0));
+                DeletionIncomplete: injection.State == "deletion-incomplete" && index == 0,
+                State: cardState));
         }
 
         return new("Saved Events", tiles, null, Canvas);
@@ -206,9 +262,13 @@ internal static class InjectedPresentationFactory
         UiVerificationRequest request)
     {
         var data = request.PresentationData;
-        var editing = injection.State.StartsWith("edit-", StringComparison.Ordinal);
+        var editing = injection.State.StartsWith("edit-", StringComparison.Ordinal) ||
+            injection.Surface == ApplicationSurface.Confirmation &&
+            (injection.State.StartsWith("save-", StringComparison.Ordinal) ||
+             injection.State.StartsWith("discard-", StringComparison.Ordinal));
         var cameraState = injection.State switch
         {
+            "new-empty" => CameraConnectionState.Unavailable,
             "camera-checking" => CameraConnectionState.Connecting,
             "camera-unavailable" => CameraConnectionState.Unavailable,
             "camera-access-denied" => CameraConnectionState.AccessDenied,
@@ -226,14 +286,14 @@ internal static class InjectedPresentationFactory
         };
         var storageReady = request.StorageOutcome == DeterministicStorageOutcome.Ready &&
             injection.State is not "storage-insufficient" and not "storage-unavailable";
-        var camera = new AvailableCamera("verification-camera", "FotoHAVN verification Camera", "deterministic");
+        var camera = new AvailableCamera("verification-camera", "Logitech BRIO", "deterministic");
         var setup = new EventSetupPresentation(
             true,
             true,
             false,
             injection.State == "new-empty" ? string.Empty : data.EventName,
             [camera],
-            camera,
+            injection.State == "new-empty" ? null : camera,
             cameraState,
             cameraState == CameraConnectionState.Ready,
             new(false, true, false),

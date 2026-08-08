@@ -133,6 +133,12 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="LineHeight" Value="32" />
     </Style>
+    <Style x:Key="TypeHeadingCardStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FotoHavnFontFamily}" />
+        <Setter Property="FontSize" Value="21" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LineHeight" Value="26" />
+    </Style>
     <Style x:Key="TypeBodyDefaultStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FotoHavnFontFamily}" />
         <Setter Property="FontSize" Value="15" />
@@ -198,13 +204,33 @@
     <Thickness x:Key="ActionButtonPadding">16,0</Thickness>
     <Thickness x:Key="StatusContentPadding">16</Thickness>
     <Thickness x:Key="ToastContentPadding">16,12</Thickness>
+    <Thickness x:Key="AppHeaderPadding">48,0</Thickness>
+    <Thickness x:Key="EventCardPadding">22</Thickness>
+    <Thickness x:Key="ModalDialogPadding">32</Thickness>
+    <Thickness x:Key="CaptureGuideMargin">12</Thickness>
+    <Thickness x:Key="DirtyIndicatorMargin">1</Thickness>
+    <Thickness x:Key="StrokeNone">0</Thickness>
+    <Thickness x:Key="CameraMediaBadgePadding">9,7</Thickness>
+    <Thickness x:Key="DialogEventIdentityPadding">12,16</Thickness>
+    <Thickness x:Key="DialogSemanticIconStroke">3</Thickness>
+    <x:Double x:Key="HairlineHeight">1</x:Double>
+    <x:Double x:Key="SpaceStackCompact">4</x:Double>
+    <x:Double x:Key="CameraMediaBadgeFontSize">10</x:Double>
+    <x:Int32 x:Key="CameraMediaBadgeCharacterSpacing">100</x:Int32>
+    <x:Double x:Key="DialogSemanticIconSize">60</x:Double>
+    <CornerRadius x:Key="DialogSemanticIconRadius">30</CornerRadius>
+    <x:Double x:Key="DialogSemanticIconGlyphSize">28</x:Double>
+    <x:Double x:Key="EventCardMetadataFontSize">12</x:Double>
+    <x:Double x:Key="EventCardStatusSpacing">9</x:Double>
+    <x:Double x:Key="EventCardStatusIconSize">18</x:Double>
+    <x:Double x:Key="EventCardStatusFontSize">13</x:Double>
     <!-- Approved Modal Dialog contract dimensions (500 px decision, 440 px acknowledgement). -->
     <x:Double x:Key="ModalDialogMaximumWidth">500</x:Double>
     <x:Double x:Key="ModalAcknowledgementMaximumWidth">440</x:Double>
 
     <!-- Native families keep the platform's CommonStates and FocusStates templates. -->
     <Style x:Key="FotoHavnActionButtonPrimaryStyle" TargetType="Button">
-        <Setter Property="MinHeight" Value="{StaticResource TargetOperatorMinimum}" />
+        <Setter Property="MinHeight" Value="49" />
         <Setter Property="Padding" Value="{StaticResource ActionButtonPadding}" />
         <Setter Property="Background" Value="{ThemeResource ColorActionPrimaryIdleBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource ColorActionPrimaryIdleBrush}" />
@@ -217,7 +243,7 @@
         <Setter Property="controls:ActionButtonVisuals.Emphasis" Value="Primary" />
     </Style>
     <Style x:Key="FotoHavnActionButtonSecondaryStyle" TargetType="Button">
-        <Setter Property="MinHeight" Value="{StaticResource TargetOperatorMinimum}" />
+        <Setter Property="MinHeight" Value="49" />
         <Setter Property="Padding" Value="{StaticResource ActionButtonPadding}" />
         <Setter Property="Background" Value="{ThemeResource ColorActionSecondaryIdleBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource ColorActionSecondaryBorderBrush}" />
@@ -248,12 +274,12 @@
         <Setter Property="MinHeight" Value="{StaticResource TargetGuestProminent}" />
     </Style>
     <Style x:Key="FotoHavnIconActionStyle" TargetType="Button" BasedOn="{StaticResource FotoHavnActionButtonSecondaryStyle}">
-        <Setter Property="MinWidth" Value="{StaticResource TargetOperatorMinimum}" />
-        <Setter Property="Width" Value="{StaticResource TargetOperatorMinimum}" />
+        <Setter Property="MinWidth" Value="49" />
+        <Setter Property="Width" Value="49" />
         <Setter Property="Padding" Value="0" />
     </Style>
     <Style x:Key="FotoHavnIconActionDestructiveStyle" TargetType="Button" BasedOn="{StaticResource FotoHavnIconActionStyle}">
-        <Setter Property="Foreground" Value="{ThemeResource ColorStatusDangerForegroundBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource ColorActionDestructiveIdleBrush}" />
     </Style>
     <Style x:Key="FotoHavnTextFieldStyle" TargetType="TextBox">
         <Setter Property="MinHeight" Value="{StaticResource TargetOperatorMinimum}" />
@@ -300,6 +326,56 @@
         <Setter Property="SecondaryButtonStyle" Value="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
     </Style>
 
+    <!-- Operator component families introduced by rollout batch 3. -->
+    <Style x:Key="FotoHavnAppHeaderStyle" TargetType="Border">
+        <Setter Property="Height" Value="54" />
+        <Setter Property="Padding" Value="{StaticResource AppHeaderPadding}" />
+        <Setter Property="Background" Value="{ThemeResource ColorSurfacePanelBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style x:Key="FotoHavnBrandMarkStyle" TargetType="Border">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Background" Value="{ThemeResource ColorActionPrimaryIdleBrush}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
+    </Style>
+    <Style x:Key="FotoHavnEventCardStyle" TargetType="controls:EventCard">
+        <Setter Property="MinWidth" Value="280" />
+        <Setter Property="Height" Value="256" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnEventCardPanelStyle" TargetType="Border">
+        <Setter Property="Padding" Value="{StaticResource EventCardPadding}" />
+        <Setter Property="Background" Value="{ThemeResource ColorSurfacePanelBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="{StaticResource StrokeDefault}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusPanel}" />
+    </Style>
+    <Style x:Key="FotoHavnSetupFieldGroupStyle" TargetType="controls:SetupFieldGroup">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnDirtyIndicatorStyle" TargetType="Border">
+        <Setter Property="Width" Value="3" />
+        <Setter Property="Margin" Value="{StaticResource DirtyIndicatorMargin}" />
+        <Setter Property="CornerRadius" Value="3,0,0,3" />
+    </Style>
+    <Style x:Key="FotoHavnCameraViewportStyle" TargetType="controls:CameraViewport">
+        <Setter Property="Width" Value="588" />
+        <Setter Property="Height" Value="330.75" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style x:Key="FotoHavnCameraViewportPanelStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource ColorTextPrimaryBrush}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusPanel}" />
+    </Style>
+    <Style x:Key="FotoHavnCaptureGuideStyle" TargetType="Border">
+        <Setter Property="Margin" Value="{StaticResource CaptureGuideMargin}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ColorActionPrimaryForegroundBrush}" />
+        <Setter Property="BorderThickness" Value="{StaticResource StrokeEmphasis}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
+        <Setter Property="Opacity" Value="0.82" />
+    </Style>
     <!-- Compatibility aliases for surfaces migrating in later rollout batches. -->
     <SolidColorBrush x:Key="CanvasBrush" Color="#FFF5F6F7" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFFFF" />

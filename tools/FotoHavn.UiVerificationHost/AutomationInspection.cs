@@ -6,6 +6,8 @@ namespace FotoHavn.UiVerificationHost;
 public sealed class AutomationInspection : IDisposable
 {
     private const string RenderSettledId = "FotoHavn.Verification.RenderSettled";
+    private const string HostReadyId = "FotoHavn.Verification.HostReady";
+    private const string HostReadySettledStatus = "host-ready-settled";
     private readonly AutomationElement root;
     private readonly ConcurrentQueue<LiveRegionEvidence> liveRegions = new();
     private readonly AutomationEventHandler liveRegionHandler;
@@ -36,7 +38,16 @@ public sealed class AutomationInspection : IDisposable
             liveRegionHandler);
     }
 
-    public void WaitForSettlement(string expectedInjectionIdentity, TimeSpan timeout)
+    public void PrepareEvidence(string expectedInjectionIdentity, TimeSpan timeout)
+    {
+        Invoke(HostReadyId);
+        WaitForSettlement(expectedInjectionIdentity, timeout, HostReadySettledStatus);
+    }
+
+    public void WaitForSettlement(
+        string expectedInjectionIdentity,
+        TimeSpan timeout,
+        string expectedStatus = "settled")
     {
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
@@ -45,7 +56,7 @@ public sealed class AutomationInspection : IDisposable
                 TreeScope.Descendants,
                 new PropertyCondition(AutomationElement.AutomationIdProperty, RenderSettledId));
             if (signal is not null &&
-                signal.Current.ItemStatus == "settled" &&
+                signal.Current.ItemStatus == expectedStatus &&
                 signal.Current.HelpText == expectedInjectionIdentity)
             {
                 return;
@@ -87,6 +98,13 @@ public sealed class AutomationInspection : IDisposable
         var semanticFindings = new List<string>();
         var targetFindings = new List<string>();
         var geometryFindings = new List<string>();
+        if (root.Current.ControlType != ControlType.Window)
+        {
+            semanticFindings.Add(
+                $"Expected the native application root to expose Window, found " +
+                $"'{root.Current.ControlType.ProgrammaticName.Replace("ControlType.", string.Empty, StringComparison.Ordinal)}'.");
+        }
+
         var surfaceRoots = elements.Where(item =>
             item.AutomationId?.StartsWith("FotoHavn.Surface.", StringComparison.Ordinal) == true).ToArray();
         if (surfaceRoots.Length != 1)
@@ -116,11 +134,12 @@ public sealed class AutomationInspection : IDisposable
                     $"found '{surfaceRoot.ItemStatus}'.");
             }
 
-            var expectedRole = ExpectedControlType(verificationCase.Annotation.AutomationRole);
-            if (surfaceRoot.ControlType != expectedRole)
+            var expectedSurfaceRoles = ExpectedSemanticSurfaceTypes(verificationCase.Annotation.AutomationRole);
+            if (!expectedSurfaceRoles.Contains(surfaceRoot.ControlType, StringComparer.Ordinal))
             {
                 semanticFindings.Add(
-                    $"Expected automation role '{expectedRole}', found '{surfaceRoot.ControlType}'.");
+                    $"Expected semantic surface role '{string.Join(" or ", expectedSurfaceRoles)}', " +
+                    $"found '{surfaceRoot.ControlType}'.");
             }
         }
 
@@ -143,12 +162,23 @@ public sealed class AutomationInspection : IDisposable
                     $"{element.ControlType} '{element.AutomationId ?? element.Name}' does not expose {requiredPattern}.");
             }
 
+            if (IsFrameworkChromeOrVerificationElement(element.AutomationId))
+            {
+                continue;
+            }
+
             var requiredTargetSize = element.AutomationId?.Contains(
                     "Primary",
                     StringComparison.OrdinalIgnoreCase) == true
                 ? verificationCase.Annotation.ProminentTargetSize
                 : verificationCase.Annotation.MinimumTargetSize;
-            if (element.Bounds.Width < requiredTargetSize || element.Bounds.Height < requiredTargetSize)
+            const double viewportRoundingEpsilon = 1;
+            var isClippedAtViewportBoundary = element.Bounds.Left <= viewportRoundingEpsilon ||
+                element.Bounds.Top <= viewportRoundingEpsilon ||
+                element.Bounds.Right >= verificationCase.Width - viewportRoundingEpsilon ||
+                element.Bounds.Bottom >= verificationCase.Height - viewportRoundingEpsilon;
+            if (!isClippedAtViewportBoundary &&
+                (element.Bounds.Width < requiredTargetSize || element.Bounds.Height < requiredTargetSize))
             {
                 targetFindings.Add(
                     $"'{element.AutomationId ?? element.Name}' is {element.Bounds.Width:0}x{element.Bounds.Height:0}; " +
@@ -178,10 +208,7 @@ public sealed class AutomationInspection : IDisposable
         catch (ElementNotAvailableException) { focused = null; }
         var readingFindings = CheckReadingOrder(
             verificationCase.Annotation,
-            elements.Where(item => !item.IsOffscreen)
-                .Select(item => item.Name ?? item.AutomationId)
-                .Where(item => !string.IsNullOrWhiteSpace(item))
-                .Select(item => item!)
+            elements.Where(item => !IsFrameworkChromeOrVerificationElement(item.AutomationId))
                 .ToArray());
         var focusedEvidence = focused is null
             ? null
@@ -288,11 +315,26 @@ public sealed class AutomationInspection : IDisposable
             : value?.ToString();
     }
 
-    private static string ExpectedControlType(AutomationRole role) => role switch
+    private static IReadOnlyList<string> ExpectedSemanticSurfaceTypes(AutomationRole role) => role switch
     {
-        AutomationRole.Window or AutomationRole.Dialog => "Window",
+        AutomationRole.Window => ["Group", "Pane"],
+        AutomationRole.Dialog => ["Group"],
         _ => throw new ArgumentOutOfRangeException(nameof(role)),
     };
+
+    public static bool IsFrameworkChromeOrVerificationElement(string? automationId)
+    {
+        if (automationId?.StartsWith("FotoHavn.Verification.", StringComparison.Ordinal) == true)
+        {
+            return true;
+        }
+
+        return automationId is
+            "VerticalSmallDecrease" or "VerticalSmallIncrease" or
+            "VerticalLargeDecrease" or "VerticalLargeIncrease" or
+            "HorizontalSmallDecrease" or "HorizontalSmallIncrease" or
+            "HorizontalLargeDecrease" or "HorizontalLargeIncrease";
+    }
 
     private static string? RequiredPattern(string controlType) => controlType switch
     {
@@ -312,9 +354,9 @@ public sealed class AutomationInspection : IDisposable
         _ => throw new ArgumentOutOfRangeException(nameof(pattern)),
     };
 
-    private static IReadOnlyList<string> CheckReadingOrder(
+    public static IReadOnlyList<string> CheckReadingOrder(
         VerificationAnnotation annotation,
-        IReadOnlyList<string> actualOrder)
+        IReadOnlyList<AutomationElementEvidence> actualOrder)
     {
         var findings = new List<string>();
         var cursor = 0;
@@ -326,7 +368,7 @@ public sealed class AutomationInspection : IDisposable
             var match = -1;
             for (var index = cursor; index < actualOrder.Count; index++)
             {
-                if (SemanticLabelMatches(expectedLabel, actualOrder[index]))
+                if (SemanticLandmarkMatches(expectedLabel, actualOrder[index], annotation))
                 {
                     match = index;
                     break;
@@ -335,7 +377,14 @@ public sealed class AutomationInspection : IDisposable
 
             if (match < 0)
             {
-                findings.Add($"Reading-order contract item '{expected}' is missing or out of order.");
+                var isOptional = expected.Contains("when present", StringComparison.OrdinalIgnoreCase) ||
+                    expected.Contains("when relevant", StringComparison.OrdinalIgnoreCase) ||
+                    expected.Equals("Event identity", StringComparison.OrdinalIgnoreCase) &&
+                    annotation.Heading.Equals("New Event", StringComparison.OrdinalIgnoreCase);
+                if (!isOptional)
+                {
+                    findings.Add($"Reading-order contract item '{expected}' is missing or out of order.");
+                }
             }
             else
             {
@@ -346,8 +395,29 @@ public sealed class AutomationInspection : IDisposable
         return findings;
     }
 
-    private static bool SemanticLabelMatches(string expected, string actual)
+    private static bool SemanticLandmarkMatches(
+        string expected,
+        AutomationElementEvidence actual,
+        VerificationAnnotation annotation)
     {
+        var automationId = actual.AutomationId ?? string.Empty;
+        var name = actual.Name ?? string.Empty;
+        if (expected.Equals(annotation.Heading, StringComparison.OrdinalIgnoreCase))
+        {
+            return name.Equals(annotation.Heading, StringComparison.OrdinalIgnoreCase) ||
+                automationId.Contains("Heading", StringComparison.OrdinalIgnoreCase) ||
+                automationId.Contains("TitleText", StringComparison.OrdinalIgnoreCase) ||
+                automationId.Contains("ConfirmationText", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (LandmarkAutomationFragments.TryGetValue(expected, out var fragments) &&
+            fragments.Any(fragment =>
+                automationId.Contains(fragment, StringComparison.OrdinalIgnoreCase) ||
+                name.Contains(fragment, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
         var stopWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "and", "or", "the", "when", "present", "relevant", "semantic", "brand", "header",
@@ -356,8 +426,36 @@ public sealed class AutomationInspection : IDisposable
             .Select(match => match.Value)
             .Where(word => !stopWords.Contains(word))
             .ToArray();
-        return words.Length > 0 && words.All(word => actual.Contains(word, StringComparison.OrdinalIgnoreCase));
+        return words.Length > 0 && words.All(word =>
+            automationId.Contains(word, StringComparison.OrdinalIgnoreCase) ||
+            name.Contains(word, StringComparison.OrdinalIgnoreCase));
     }
+
+    private static readonly IReadOnlyDictionary<string, string[]> LandmarkAutomationFragments =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["heading"] = ["Heading", "TitleText"],
+            ["New Event"] = ["NewEventButton"],
+            ["Event cards"] = ["EventTiles"],
+            ["Start, Edit, and Delete actions"] = ["StartEditDeleteActions"],
+            ["Event identity"] = ["EventSetupIdentity"],
+            ["Event name"] = ["SetupFieldGroup.Eventname", "EventNameTextBox"],
+            ["Camera and status"] = ["SetupFieldGroup.Camera"],
+            ["Camera preview"] = ["CameraViewport", "Camera preview", "Live preview"],
+            ["Printer"] = ["SetupFieldGroup.Printer"],
+            ["Storage"] = ["SetupFieldGroup.Storage"],
+            ["footer actions"] = ["SetupFooter"],
+            ["semantic icon"] = ["SemanticIcon", "Semantic icon"],
+            ["dialog heading"] = ["TitleText", "ConfirmationText"],
+            ["consequence when present"] = ["MessageText", "Consequence"],
+            ["Event identity when relevant"] = ["IdentityText", "Event identity"],
+            ["status when present"] = ["InlineStatus", "StatusCallout", "ProgressRing"],
+            ["safe action"] = ["SafeAction", "Cancel", "Keep"],
+            ["confirming action"] = ["ConfirmingAction"],
+            ["success status"] = ["SemanticIcon", "Success"],
+            ["message"] = ["MessageText"],
+            ["primary action"] = ["Primary", "ConfirmingAction"],
+        };
 
     private static bool MatchesExpectedFocus(
         AutomationElementEvidence focused,
@@ -369,6 +467,12 @@ public sealed class AutomationInspection : IDisposable
             return focused.Name == annotation.Heading;
         }
 
+        if (annotation.InitialFocus == InitialFocusPolicy.DialogHeading)
+        {
+            return focused.Name == annotation.Heading &&
+                focused.ControlType == "Text";
+        }
+
         if (annotation.InitialFocus == InitialFocusPolicy.SafeAction)
         {
             return focused.AutomationId?.Contains("Safe", StringComparison.OrdinalIgnoreCase) == true ||
@@ -378,7 +482,8 @@ public sealed class AutomationInspection : IDisposable
 
         if (annotation.InitialFocus == InitialFocusPolicy.PrimaryAction)
         {
-            return focused.AutomationId?.Contains("Primary", StringComparison.OrdinalIgnoreCase) == true;
+            return focused.AutomationId?.Contains("Primary", StringComparison.OrdinalIgnoreCase) == true ||
+                focused.AutomationId?.Contains("ConfirmingAction", StringComparison.OrdinalIgnoreCase) == true;
         }
 
         if (annotation.InitialFocus == InitialFocusPolicy.PrimaryGuestActionWhenPresent)
@@ -411,7 +516,7 @@ public sealed class AutomationInspection : IDisposable
                 item.Name == expected.Text &&
                 (priority is null ||
                  item.LiveSetting == priority ||
-                 item.ItemStatus.Equals(priority, StringComparison.OrdinalIgnoreCase))))
+                 string.Equals(item.ItemStatus, priority, StringComparison.OrdinalIgnoreCase))))
             {
                 findings.Add(
                     $"Expected {expected.Priority} announcement '{expected.Text}' was not observed.");

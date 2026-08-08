@@ -1,0 +1,55 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.CameraViewport"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.AutomationId="FotoHavn.CameraViewport"
+    AutomationProperties.Name="Camera preview"
+    Style="{StaticResource FotoHavnCameraViewportStyle}">
+    <Border Style="{StaticResource FotoHavnCameraViewportPanelStyle}">
+        <Grid>
+            <Image
+                x:Name="PreviewImage"
+                AutomationProperties.AccessibilityView="Raw"
+                Source="{x:Bind Source, Mode=OneWay}"
+                Stretch="UniformToFill" />
+            <Border
+                x:Name="CaptureGuide"
+                AutomationProperties.Name="Photo capture area"
+                IsHitTestVisible="False"
+                Style="{StaticResource FotoHavnCaptureGuideStyle}" />
+            <TextBlock
+                x:Name="PreviewStatusText"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource ColorActionPrimaryForegroundBrush}"
+                Style="{StaticResource TypeCaptionStyle}"
+                Text="{x:Bind Status, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <Border
+                x:Name="MediaBadge"
+                Margin="12"
+                Padding="{StaticResource CameraMediaBadgePadding}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Background="#E6FFFFFF"
+                CornerRadius="{StaticResource RadiusControl}"
+                Visibility="Collapsed">
+                <TextBlock
+                    CharacterSpacing="{StaticResource CameraMediaBadgeCharacterSpacing}"
+                    FontSize="{StaticResource CameraMediaBadgeFontSize}"
+                    FontWeight="Bold"
+                    Text="LIVE · MIRRORED" />
+            </Border>
+            <TextBlock
+                x:Name="CaptureAreaText"
+                Margin="12,0,0,10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Foreground="{ThemeResource ColorActionPrimaryForegroundBrush}"
+                Style="{StaticResource TypeCaptionStyle}"
+                Text="3:2 Capture area" />
+            <ContentPresenter Content="{x:Bind OverlayContent, Mode=OneWay}" />
+        </Grid>
+    </Border>
+</UserControl>

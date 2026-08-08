@@ -1,0 +1,24 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.ConfirmationDialogFrame"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    MaxWidth="{StaticResource ModalDialogMaximumWidth}"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Center"
+    AutomationProperties.AutomationId="FotoHavn.ModalDialog">
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto"
+        VerticalScrollMode="Enabled"
+        ZoomMode="Disabled">
+        <Border
+            x:Name="DialogBorder"
+            Padding="{StaticResource ModalDialogPadding}"
+            Background="{ThemeResource ColorSurfaceRaisedBrush}"
+            CornerRadius="{StaticResource RadiusDialog}">
+            <ContentPresenter Content="{x:Bind DialogContent, Mode=OneWay}" />
+        </Border>
+    </ScrollViewer>
+</UserControl>

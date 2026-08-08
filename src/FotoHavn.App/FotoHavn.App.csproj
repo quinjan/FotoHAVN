@@ -40,6 +40,14 @@
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
     <None Remove="UiVerification\ApprovedInjectionCatalog.json" />
+    <Content Include="..\..\docs\design-system\reference-states\canonical-presentation.json"
+             Link="UiVerification\canonical-presentation.json"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\design-qa\issue-28-countdown-implementation.jpg"
+             Link="UiVerification\camera-preview.jpg"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="RejectUiVerificationFieldTestPublish"
           BeforeTargets="PrepareForPublish"

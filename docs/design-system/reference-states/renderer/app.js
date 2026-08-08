@@ -1,11 +1,15 @@
-(() => {
+(async () => {
+  const canonical = await fetch('/docs/design-system/reference-states/canonical-presentation.json').then(response => {
+    if (!response.ok) throw new Error(`Could not load canonical presentation data: ${response.status}`);
+    return response.json();
+  });
   const q = new URLSearchParams(location.search);
   const surface = q.get('surface') || 'saved-events';
   const state = q.get('state') || 'maximum-cards';
   const viewport = q.get('viewport') || `${innerWidth}x${innerHeight}`;
-  const longName = 'Mika & Paolo’s extraordinarily long wedding celebration';
-  const eventName = state.includes('long') ? longName : 'Mika & Paolo’s wedding';
-  const fullId = '0198a7d2-5bc1-7f45-8e90-3f7a2f91c4e8';
+  const longName = canonical.longEventName;
+  const eventName = state.includes('long') ? longName : canonical.eventName;
+  const fullId = canonical.eventId;
   const media = '/design-qa/issue-28-countdown-implementation.jpg';
   const strip = '/design-qa/issue-20-photo-strip-reference.png';
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -28,13 +32,14 @@
       const busy = target && state === 'busy';
       const unavailable = target && state === 'unavailable';
       const deletion = target && state === 'deletion-incomplete';
-      const name = i ? ['Summer reunion','Graduation portraits','Studio open day','Town fiesta','Family weekend'][i-1] : eventName;
-      const eventId = i ? '03B1 · '+String(7710+i).padStart(4,'0') : '7A2F · 91C4';
+      const fixture = canonical.savedEvents[i];
+      const name = state.includes('long') && i === 0 ? longName : fixture.eventName;
+      const eventId = fixture.compactEventId;
       const cardStatus = busy ? '<div class="card-progress"><span class="button-loader" aria-hidden="true"></span><span>Opening Event…</span></div>' : unavailable ? '<div class="card-message warning">Camera unavailable</div>' : deletion ? '<div class="card-message danger">Deletion did not finish</div>' : '';
       const startBlocked = busy || unavailable || deletion;
       return `<article class="event-card ${cls}">
         <button class="card-start-hit" aria-label="Start ${esc(name)}" data-action="start-event" ${startBlocked?'disabled':''}></button>
-        <div class="card-body"><div class="card-name">${esc(name)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">${eventId}</div><div class="card-saved">Saved ${i+1} day${i?'s':''} ago</div></div>
+        <div class="card-body"><div class="card-name">${esc(name)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">${eventId}</div><div class="card-saved">${esc(fixture.savedMetadata)}</div></div>
         <div class="card-bottom">${cardStatus}<div class="card-actions">${iconButton('Edit Event','E70F','edit-event','',busy)}${iconButton('Delete Event','E74D','delete-event','delete',busy)}</div></div>
       </article>`;
     }).join('');
@@ -67,7 +72,9 @@
     const previewBody = previewUnavailable ? `<div class="preview-empty">${esc(previewMessage)}</div>` : `<img class="camera-source" src="${media}" alt=""><div class="guide"></div><div class="media-label">${state==='camera-ready'?'LIVE · MIRRORED':'PREVIEW'}</div>`;
     const success = state === 'save-success';
     const eventIdField = edit ? `<div class="field"><label>Event ID</label><div class="control event-id-control">${fullId}</div></div>` : '';
-    return `<section class="screen setup"><div class="setup-shell"><div class="setup-title"><div class="eyebrow">EVENT SETUP</div><h1>${edit?'Edit Event':'New Event'}</h1><p class="setup-intro">${edit?'Review this Event and update its Camera or Printer.':'Name the Event and choose its Camera and Printer.'}</p></div><div class="setup-main"><div class="setup-form">${eventIdField}<div class="field"><label for="event-name">Event name</label><input id="event-name" class="control" value="${missingName?'':esc(eventName)}" placeholder="" readonly>${nameStatus}${dirtyMark}</div><div class="field"><label for="camera-select">Camera</label><select id="camera-select" class="control"><option>${cameraSelected?'Logitech BRIO':'Select Camera'}</option></select>${camStatus}</div><div class="field"><label for="printer-select">Printer <span class="optional">(optional)</span></label><select id="printer-select" class="control"><option>Not printing</option></select></div><div class="field"><label>Storage</label><div class="storage-path">C:\\Program Files\\FotoHAVN\\Events</div><div class="storage-free">${storageBad?'480 MB':'120 GB'} free</div>${storageStatus}</div></div><div class="preview-panel"><div class="preview">${previewBody}<div class="capture-area-label">3:2 Capture area</div></div></div></div><footer class="setup-footer">${button('Cancel','cancel')}${button(success?'Saved':'Save & Close','',!valid||state==='saving'||success)}${button(state==='saving'?'Saving & starting…':'Save & Start Event','primary',!valid||state==='saving'||success,state==='saving')}</footer></div></section>`;
+    const identityNameCamera = `${eventIdField}<div class="field"><label for="event-name">Event name</label><input id="event-name" class="control" value="${missingName?'':esc(eventName)}" placeholder="" readonly>${nameStatus}${dirtyMark}</div><div class="field"><label for="camera-select">Camera</label><select id="camera-select" class="control"><option>${cameraSelected?'Logitech BRIO':'Select Camera'}</option></select>${camStatus}</div>`;
+    const printerStorage = `<div class="field"><label for="printer-select">Printer <span class="optional">(optional)</span></label><select id="printer-select" class="control"><option>Not printing</option></select></div><div class="field"><label>Storage</label><div class="storage-path">C:\\Program Files\\FotoHAVN\\Events</div><div class="storage-free">${storageBad?'480 MB':'120 GB'} free</div>${storageStatus}</div>`;
+    return `<section class="screen setup"><div class="setup-shell"><div class="setup-title"><div class="eyebrow">EVENT SETUP</div><h1>${edit?'Edit Event':'New Event'}</h1><p class="setup-intro">${edit?'Review this Event and update its Camera or Printer.':'Name the Event and choose its Camera and Printer.'}</p></div><div class="setup-main"><div class="setup-form setup-form-top">${identityNameCamera}</div><div class="preview-panel"><div class="preview">${previewBody}<div class="capture-area-label">3:2 Capture area</div></div></div><div class="setup-form setup-form-bottom">${printerStorage}</div></div><footer class="setup-footer">${button('Cancel','cancel')}${button(success?'Saved':'Save & Close','',!valid||state==='saving'||success)}${button(state==='saving'?'Saving & starting…':'Save & Start Event','primary',!valid||state==='saving'||success,state==='saving')}</footer></div></section>`;
   }
 
   function guestStart() {
@@ -147,7 +154,7 @@
     const confirmAction = failed && ['start','delete'].includes(type) ? `retry-${type}` : failed ? '' : `confirm-${type}`;
     return `<div class="scrim"><section class="dialog decision ${destructive?'danger':''}" role="dialog" aria-modal="true" aria-labelledby="decision-title" ${consequence?'aria-describedby="decision-consequence"':''}><div class="dialog-body">${decisionIcon(glyphs[type]||'E8AD',destructive)}<h1 id="decision-title">${esc(title)}</h1>${consequence?`<p id="decision-consequence" class="muted">${esc(consequence)}</p>`:''}${showEventIdentity?decisionIdentity():''}${status}</div><div class="dialog-actions">${button(type==='exit'?'Keep event active':'Cancel',busy?'':'focus',busy,false,cancelAction)}${button(failed?'Retry':(busy?busyVerbs[type]||'Working…':verbs[type]||'Continue'),destructive?'destructive':'primary',busy,busy,confirmAction)}</div></section></div>`;
   }
-  function confirmation() { return `<section class="screen">${operatorHeader()}<div class="content"><div class="page-head"><h1>Saved Events</h1>${button('New Event','primary')}</div><div class="cards"><article class="event-card"><div class="card-name">${esc(eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">7A2F · 91C4</div></article></div></div>${dialog()}</section>`; }
+  function confirmation() { return `<section class="screen">${operatorHeader()}<div class="content"><div class="page-head"><h1>Saved Events</h1>${button('New Event','primary')}</div><div class="cards"><article class="event-card"><div class="card-name">${esc(eventName)}</div><div class="event-id-label">EVENT ID</div><div class="event-id">${esc(canonical.savedEvents[0].compactEventId)}</div></article></div></div>${dialog()}</section>`; }
 
   const renderers = {'saved-events':savedEvents,'event-setup':setup,'guest-start':guestStart,'guest-start-unavailable':guestUnavailable,capture, 'operator-assistance':operatorAssistance,'photo-strip':photoStrip,confirmation};
   document.getElementById('app').innerHTML = (renderers[surface] || savedEvents)() + `<div class="sr-only">Target annotation: ${esc(surface)}.${esc(state)}, ${esc(viewport)}, design-v1.0.0 at 1a20bc6. Full accessibility annotation is registered in the same-name YAML sidecar.</div>`;

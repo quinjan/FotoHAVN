@@ -12,6 +12,10 @@ public static class SemanticAutomationIds
     public const string ProgressIndicator = "FotoHavn.ProgressIndicator";
     public const string Toast = "FotoHavn.Toast";
     public const string ModalDialog = "FotoHavn.ModalDialog";
+    public const string AppHeader = "FotoHavn.AppHeader";
+    public const string EventCard = "FotoHavn.EventCard";
+    public const string SetupFieldGroup = "FotoHavn.SetupFieldGroup";
+    public const string CameraViewport = "FotoHavn.CameraViewport";
 
     public static string Scoped(string prefix, string semanticScope)
     {

@@ -8,7 +8,10 @@ namespace FotoHavn.App;
 public static class Program
 {
 #if UI_VERIFICATION
-    private const string InstanceKey = "quinjan.FotoHAVN.UiVerification";
+    // Verification sessions are host-owned and intentionally isolated. A process-scoped
+    // key prevents a terminated App SDK registration from redirecting the next fixture
+    // to an invalid, already-closed window handle.
+    private static readonly string InstanceKey = $"quinjan.FotoHAVN.UiVerification.{Environment.ProcessId}";
 #else
     private const string InstanceKey = "quinjan.FotoHAVN.Primary";
 #endif

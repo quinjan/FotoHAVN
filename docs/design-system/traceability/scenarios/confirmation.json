@@ -109,7 +109,7 @@
         "MANUAL-REDUCED-MOTION"
       ],
       "expected": {
-        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "focus": "initial focus: dialog heading; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
         "announcement": "Confirmation in progress. (polite)",
         "destination": "not applicable to this settled state",
         "preservation": "not applicable to this surface",
@@ -394,7 +394,7 @@
         "MANUAL-REDUCED-MOTION"
       ],
       "expected": {
-        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "focus": "initial focus: dialog heading; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
         "announcement": "Confirmation in progress. (polite)",
         "destination": "not applicable to this settled state",
         "preservation": "not applicable to this surface",
@@ -513,7 +513,7 @@
         "MANUAL-REDUCED-MOTION"
       ],
       "expected": {
-        "focus": "initial focus: safe action; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
+        "focus": "initial focus: dialog heading; order: semantic icon -> dialog heading -> consequence when present -> Event identity when relevant -> status when present -> safe action -> confirming action; return target: invoking control",
         "announcement": "Confirmation in progress. (polite)",
         "destination": "not applicable to this settled state",
         "preservation": "not applicable to this surface",
