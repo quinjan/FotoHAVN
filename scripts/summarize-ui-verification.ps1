@@ -65,7 +65,7 @@ $summary = [ordered]@{
 $summary | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $JsonPath -Encoding utf8
 
 $markdown = @(
-    "# Batch 3 UI verification summary"
+    "# Batch $($summary.completedThroughBatch) UI verification summary"
     ""
     "- Commit: ``$($summary.gitCommit)``"
     "- Application SHA-256: ``$($summary.applicationSha256)``"

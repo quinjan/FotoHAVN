@@ -385,7 +385,8 @@ public sealed record ActiveEventPresentation(
     bool ShowsExitConfirmation = false,
     GuestStartPresentation? GuestStartState = null,
     GuestCyclePresentation? Cycle = null,
-    bool IsExitBusy = false)
+    bool IsExitBusy = false,
+    ExitHoldState ExitHoldState = ExitHoldState.Idle)
 {
     public string Heading => "Let’s take some photos.";
     public string Explanation => "Four Captures. A quick countdown before each one.";
@@ -403,11 +404,26 @@ public enum GuestStartFailure
     StorageUnavailable,
 }
 
+public enum ExitHoldState
+{
+    Idle,
+    Holding,
+    Cancelled,
+}
+
+public enum GuestStartActionState
+{
+    Idle,
+    Retrying,
+    RetryFailed,
+}
+
 public sealed record GuestStartPresentation(
     bool IsCameraReady,
     bool IsStorageReady,
     GuestStartFailure Failure = GuestStartFailure.None,
-    bool RequiresEventSetupCorrection = false)
+    bool RequiresEventSetupCorrection = false,
+    GuestStartActionState ActionState = GuestStartActionState.Idle)
 {
     public static GuestStartPresentation Unavailable { get; } =
         new(false, false, GuestStartFailure.CameraUnavailable);
@@ -416,6 +432,7 @@ public sealed record GuestStartPresentation(
     public bool IsStartEnabled => IsCameraReady && IsStorageReady && Failure == GuestStartFailure.None;
     public string? StatusMessage => IsStartEnabled ? null : "Please call the operator";
     public bool ShowsRetry => !IsStartEnabled && !RequiresEventSetupCorrection;
+    public bool IsRetrying => ActionState == GuestStartActionState.Retrying;
     public string RetryActionLabel => "Retry";
 
     public static GuestStartPresentation FromReadiness(
@@ -450,6 +467,19 @@ public enum GuestCycleFailure
     StorageUnavailable,
 }
 
+public enum GuestCycleRecovery
+{
+    Retry,
+    ExitOnly,
+}
+
+public enum GuestCycleActionState
+{
+    Idle,
+    Retrying,
+    RetryFailed,
+}
+
 public sealed record GuestCyclePresentation(
     GuestCyclePhase Phase,
     int CaptureNumber = 0,
@@ -457,7 +487,9 @@ public sealed record GuestCyclePresentation(
     int CountdownSeconds = 0,
     GuestCycleFailure Failure = GuestCycleFailure.None,
     string? PhotoStripPath = null,
-    int PreviewSecondsRemaining = 0)
+    int PreviewSecondsRemaining = 0,
+    GuestCycleRecovery Recovery = GuestCycleRecovery.Retry,
+    GuestCycleActionState ActionState = GuestCycleActionState.Idle)
 {
     public static GuestCyclePresentation Start { get; } = new(GuestCyclePhase.Start);
 
@@ -471,6 +503,10 @@ public sealed record GuestCyclePresentation(
         GuestCycleFailure.StorageUnavailable => "Event storage isn’t available right now.",
         _ => string.Empty,
     };
+
+    public bool ShowsRetry => Recovery == GuestCycleRecovery.Retry;
+
+    public bool IsRetrying => ActionState == GuestCycleActionState.Retrying;
 }
 
 public interface IActiveEventWakeLock

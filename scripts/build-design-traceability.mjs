@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseAnnotation, parseMatrix, parseWinuiMappingSource, responsiveOwnerState } from "./design-traceability-source.mjs";
-import { sha256Bytes, sha256Text } from "./design-traceability-hash.mjs";
+import { sha256Text } from "./design-traceability-hash.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const designRoot = path.join(repositoryRoot, "docs", "design-system");
@@ -198,7 +198,7 @@ const manifest = {
     tag: registry.contract.tag,
     commit: registry.contract.commit,
     registry: "../reference-states/registry.json",
-    registrySha256: sha256Bytes(registryPath),
+    registrySha256: sha256Text(registryPath),
   },
   cardinalities: { semanticTokens: 91, components: 17, surfaces: 8, canonicalStates: 71, responsiveRiskFrames: 32, targetFrames: 103 },
   artifacts: artifactPaths.map((relativePath) => ({ path: relativePath, sha256: sha256Text(path.join(handoffRoot, relativePath)) })),

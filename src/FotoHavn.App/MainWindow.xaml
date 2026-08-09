@@ -80,17 +80,27 @@
                 x:Name="ActiveEventLayer"
                 Grid.RowSpan="2"
                 Background="{StaticResource CanvasBrush}"
+                SizeChanged="ActiveEventLayerSizeChanged"
                 Visibility="Collapsed">
+                <TextBlock
+                    x:Name="SurfaceAnnouncement"
+                    Width="1"
+                    Height="1"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    AutomationProperties.AutomationId="FotoHavn.Announcement.Surface"
+                    AutomationProperties.LiveSetting="Polite"
+                    Opacity="0" />
                 <Grid x:Name="StartGuestLayer">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="58" />
+                        <RowDefinition Height="62" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Border
-                        Background="#D1FFFFFF"
-                        BorderBrush="{StaticResource HairlineBrush}"
+                        Background="{ThemeResource ColorSurfacePanelBrush}"
+                        BorderBrush="{ThemeResource ColorBorderDefaultBrush}"
                         BorderThickness="0,0,0,1">
-                        <Grid Margin="28,0,19,0">
+                        <Grid Margin="32,0,19,0">
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
                                 <Border Width="22" Height="22" Background="#FF202124" CornerRadius="5">
                                     <TextBlock
@@ -103,24 +113,15 @@
                                 </Border>
                                 <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
                             </StackPanel>
-                            <Button
-                                x:Name="ExitEventButton"
-                                MinWidth="96"
-                                MinHeight="48"
+                            <controls:GuardedExitAction
+                                x:Name="ExitEventAction"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                AutomationProperties.Name="Exit Event"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Click="ExitEventClicked">
-                                <StackPanel Orientation="Horizontal" Spacing="7">
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="14" Glyph="&#xE7E8;" />
-                                    <TextBlock VerticalAlignment="Center" FontSize="12" Text="Exit Event" />
-                                </StackPanel>
-                            </Button>
+                                HoldCompleted="ExitEventHoldCompleted" />
                         </Grid>
                     </Border>
                     <StackPanel
+                        x:Name="GuestStartContent"
                         Grid.Row="1"
                         Width="780"
                         Padding="0,0,0,28"
@@ -153,37 +154,30 @@
                             TextAlignment="Center" />
                         <Button
                             x:Name="StartGuestCycleButton"
-                            MinWidth="204"
-                            MinHeight="68"
+                            Width="218"
+                            Height="64"
                             Margin="0,33,0,0"
                             HorizontalAlignment="Center"
                             HorizontalContentAlignment="Center"
                             AutomationProperties.Name="Touch to start"
-                            Background="Black"
-                            BorderBrush="Black"
-                            BorderThickness="1"
+                            AutomationProperties.AutomationId="FotoHavn.ActionButton.Primary.GuestStart"
                             Click="StartGuestCycleClicked"
-                            CornerRadius="9"
-                            FocusVisualPrimaryThickness="3"
-                            FocusVisualSecondaryThickness="0"
-                            FontSize="17"
-                            FontWeight="SemiBold"
-                            Foreground="White">
-                            <Button.Resources>
-                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF000000" />
-                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FF1C1D1F" />
-                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFFFF" />
-                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFFFF" />
-                                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FF000000" />
-                                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#FF1C1D1F" />
-                            </Button.Resources>
+                            TabIndex="0"
+                            Style="{StaticResource FotoHavnActionButtonGuestProminentStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="11">
                                 <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="19" Glyph="&#xE768;" />
                                 <TextBlock VerticalAlignment="Center" Foreground="White" Text="Touch to start" />
                             </StackPanel>
                         </Button>
+                        <TextBlock
+                            Width="1"
+                            Height="1"
+                            HorizontalAlignment="Center"
+                            AutomationProperties.Name="Exit Event"
+                            Opacity="0" />
                     </StackPanel>
                     <TextBlock
+                        x:Name="GuestRetentionText"
                         Grid.Row="1"
                         Margin="0,0,0,66"
                         HorizontalAlignment="Center"
@@ -278,61 +272,73 @@
 
                 <Grid
                     x:Name="GuestAssistanceLayer"
-                    Padding="28"
                     AutomationProperties.LiveSetting="Assertive"
                     Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Border Width="22" Height="22" Background="#FF202124" CornerRadius="5"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="13" FontWeight="Bold" Text="F" /></Border>
-                        <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
-                    </StackPanel>
-                    <Button
-                        x:Name="AssistanceExitEventButton"
-                        MinWidth="96"
-                        MinHeight="48"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        AutomationProperties.Name="Exit Event"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Click="ExitEventClicked"
-                        Content="Exit Event" />
-                    <StackPanel Width="600" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="52" Height="52" HorizontalAlignment="Center" Background="#FFFFF0EE" CornerRadius="26">
-                            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="25" Foreground="#FFC7362F" Glyph="&#xEA39;" />
-                        </Border>
-                        <TextBlock x:Name="AssistanceEyebrowText" Margin="0,24,0,0" HorizontalAlignment="Center" CharacterSpacing="150" FontSize="10" FontWeight="Bold" Text="WE PAUSED YOUR PHOTOS" />
-                        <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="Level1" CharacterSpacing="-40" FontSize="48" FontWeight="Bold" Text="Please call the operator." />
-                        <TextBlock x:Name="AssistanceMessageText" Margin="0,12,0,0" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}" FontSize="15" TextAlignment="Center" TextWrapping="Wrap" />
-                        <Border Width="365" Margin="0,28,0,0" Padding="14" HorizontalAlignment="Center" Background="White" BorderBrush="#FFE0AAA5" BorderThickness="1" CornerRadius="8">
-                            <StackPanel Orientation="Horizontal" Spacing="13">
-                                <Border Width="36" Height="36" Background="#FFFFF0EE" CornerRadius="7"><FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#FFC7362F" Glyph="&#xE722;" /></Border>
-                                <StackPanel><TextBlock x:Name="AssistanceDetailTitle" FontSize="12" FontWeight="SemiBold" /><TextBlock x:Name="AssistanceProgressText" Margin="0,4,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="10" /></StackPanel>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="62" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border
+                        Background="{ThemeResource ColorSurfacePanelBrush}"
+                        BorderBrush="{ThemeResource ColorBorderDefaultBrush}"
+                        BorderThickness="0,0,0,1">
+                        <Grid Margin="32,0">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
+                                <Border Width="22" Height="22" Background="{ThemeResource ColorTextPrimaryBrush}" CornerRadius="5"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource ColorTextInverseBrush}" FontSize="13" FontWeight="Bold" Text="F" /></Border>
+                                <TextBlock VerticalAlignment="Center" FontFamily="{StaticResource FotoHavnFontFamily}" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
                             </StackPanel>
-                        </Border>
-                        <Button
-                            MinWidth="160"
-                            MinHeight="68"
-                            Margin="0,24,0,0"
-                            HorizontalAlignment="Center"
-                            AutomationProperties.Name="Retry"
-                            Background="Black"
-                            BorderBrush="Black"
-                            Click="RetryGuestCycleClicked"
-                            CornerRadius="9"
-                            FocusVisualPrimaryThickness="3"
-                            FocusVisualSecondaryThickness="0"
-                            Foreground="White">
-                            <Button.Resources>
-                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF000000" />
-                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FF1C1D1F" />
-                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFFFF" />
-                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFFFF" />
-                                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FF000000" />
-                                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#FF1C1D1F" />
-                            </Button.Resources>
-                            <StackPanel Orientation="Horizontal" Spacing="11"><FontIcon FontFamily="Segoe MDL2 Assets" FontSize="19" Glyph="&#xE72C;" /><TextBlock VerticalAlignment="Center" Foreground="White" FontSize="17" FontWeight="SemiBold" Text="Retry" /></StackPanel>
-                        </Button>
-                    </StackPanel>
+                            <controls:GuardedExitAction
+                                x:Name="AssistanceExitEventAction"
+                                ActionAutomationId="FotoHavn.ActionButton.AssistanceExitEvent"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                HoldCompleted="ExitEventHoldCompleted" />
+                        </Grid>
+                    </Border>
+                    <Border
+                        x:Name="AssistancePanel"
+                        Grid.Row="1"
+                        Padding="40,30"
+                        Background="{ThemeResource ColorSurfacePanelBrush}"
+                        BorderBrush="{ThemeResource ColorBorderDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource RadiusPanel}">
+                        <StackPanel x:Name="AssistanceContent" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock x:Name="AssistanceEyebrowText" HorizontalAlignment="Center" AutomationProperties.Name="Operator Assistance label" Style="{StaticResource TypeEyebrowStyle}" Text="OPERATOR ASSISTANCE" />
+                            <TextBlock x:Name="AssistanceHeadingText" Margin="0,8,0,0" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="Level1" FontFamily="{StaticResource FotoHavnFontFamily}" FontSize="38" FontWeight="Bold" Text="Please call the operator" />
+                            <TextBlock x:Name="AssistanceMessageText" Margin="0,10,0,0" HorizontalAlignment="Center" Style="{StaticResource TypeBodyDefaultStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock x:Name="AssistanceProgressText" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource ColorTextMutedBrush}" Style="{StaticResource TypeBodyDefaultStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock
+                                Width="1"
+                                Height="1"
+                                AutomationProperties.Name="Retry or Exit Event"
+                                Opacity="0" />
+                            <Button
+                                x:Name="AssistanceRetryButton"
+                                Width="190"
+                                MinHeight="48"
+                                Margin="0,20,0,0"
+                                HorizontalAlignment="Center"
+                                AutomationProperties.AutomationId="FotoHavn.ActionButton.AssistanceRetry"
+                                AutomationProperties.Name="Retry"
+                                Click="RetryGuestCycleClicked"
+                                TabIndex="0"
+                                Style="{StaticResource FotoHavnActionButtonPrimaryStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ProgressRing x:Name="AssistanceRetryProgress" Width="18" Height="18" IsActive="False" Visibility="Collapsed" />
+                                    <TextBlock x:Name="AssistanceRetryLabel" VerticalAlignment="Center" Style="{StaticResource TypeLabelControlStyle}" Text="Retry" />
+                                </StackPanel>
+                            </Button>
+                            <controls:GuardedExitAction
+                                x:Name="AssistanceExitOnlyAction"
+                                ActionAutomationId="FotoHavn.ActionButton.AssistanceExitOnly"
+                                Margin="0,20,0,0"
+                                HorizontalAlignment="Center"
+                                IsDestructive="True"
+                                HoldCompleted="ExitEventHoldCompleted"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
                 </Grid>
 
                 <Grid x:Name="PhotoStripLayer" Padding="120,46" Visibility="Collapsed">
@@ -351,35 +357,50 @@
                     </Border>
                 </Grid>
 
-                <Grid
+                <controls:ModalDialogSurface
                     x:Name="ExitEventConfirmationLayer"
-                    Background="#8A17181A"
+                    AutomationProperties.Name="Exit Event confirmation"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    KeyDown="ExitEventConfirmationKeyDown"
+                    VerticalAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
                     Visibility="Collapsed">
-                    <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
-                        <controls:ConfirmationDialogFrame.DialogContent>
-                        <StackPanel Spacing="{StaticResource DialogContentSpacing}">
-                            <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
-                            <controls:FocusableHeading x:Name="ExitEventTitleText" HorizontalAlignment="Center" AutomationProperties.AutomationId="ExitEventTitleText" FontSize="32" FontWeight="Bold" Text="Exit this Event?" TextAlignment="Center" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                AutomationProperties.Name="Consequence when present"
-                                Foreground="{StaticResource TextMutedBrush}"
-                                Text="The Camera will be released and FotoHAVN will return to Saved Events."
-                                TextAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
-                                <Button x:Name="CancelExitEventButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
-                                <Button
-                                    x:Name="ConfirmExitEventButton"
-                                    AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
-                                    Click="ConfirmExitEventClicked"
-                                    Content="Exit Event"
-                                    Style="{StaticResource FotoHavnActionButtonDestructiveStyle}" />
+                    <Grid Background="{ThemeResource ColorOverlayScrimBrush}">
+                        <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
+                            <controls:ConfirmationDialogFrame.DialogContent>
+                            <StackPanel Spacing="{StaticResource DialogContentSpacing}">
+                                <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
+                                <controls:FocusableHeading
+                                    x:Name="ExitEventTitleText"
+                                    HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="ExitEventTitleText"
+                                    AutomationProperties.HeadingLevel="Level1"
+                                    FontSize="32"
+                                    FontWeight="Bold"
+                                    Text="Exit this Event?"
+                                    TextAlignment="Center" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    AutomationProperties.Name="Consequence when present"
+                                    Foreground="{StaticResource TextMutedBrush}"
+                                    Text="The Camera will be released and FotoHAVN will return to Saved Events."
+                                    TextAlignment="Center"
+                                    TextWrapping="Wrap" />
+                                <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
+                                    <Button x:Name="KeepEventActiveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
+                                    <Button
+                                        x:Name="ConfirmExitEventButton"
+                                        AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
+                                        Click="ConfirmExitEventClicked"
+                                        Content="Exit Event"
+                                        Style="{StaticResource FotoHavnActionButtonDestructiveStyle}" />
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                        </controls:ConfirmationDialogFrame.DialogContent>
-                    </controls:ConfirmationDialogFrame>
-                </Grid>
+                            </controls:ConfirmationDialogFrame.DialogContent>
+                        </controls:ConfirmationDialogFrame>
+                    </Grid>
+                </controls:ModalDialogSurface>
             </Grid>
 
             <Grid

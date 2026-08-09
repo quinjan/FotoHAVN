@@ -4,6 +4,7 @@ using FotoHavn.App.Surfaces;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -30,6 +31,14 @@ public sealed partial class MainWindow : Window
     private bool photoStripVisibleSignaled;
     private bool photoStripFadeStarted;
     private bool setupWasOpen;
+    private bool exitConfirmationWasOpen;
+    private bool exitConfirmationBusy;
+    private ApplicationSurface? lastSurface;
+    private GuardedExitAction? exitEventInvoker;
+    private string? lastAnnouncement;
+    private ApplicationPresentation? currentPresentation;
+    private ApplicationSurfaceOverride? currentSurfaceOverride;
+    private ResponsiveLayoutMode responsiveMode = ResponsiveLayoutMode.Standard;
 #if UI_VERIFICATION
     private readonly UiVerificationRenderSettledSignal renderSettledSignal;
     private ApplicationSurfaceOverride? mediaPendingRenderSettlement;
@@ -65,6 +74,7 @@ public sealed partial class MainWindow : Window
             CenterX = guestMirror.CenterX,
         };
         presentationController.PresentationChanged += PresentationChanged;
+        Activated += MainWindowActivated;
         if (camera is not null)
         {
             camera.PreviewFrameAvailable += PreviewFrameAvailable;
@@ -232,14 +242,186 @@ public sealed partial class MainWindow : Window
     private async void CancelStartEventClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new CancelStartSavedEvent());
 
-    private async void ExitEventClicked(object sender, RoutedEventArgs args) =>
+    private async void ExitEventHoldCompleted(object? sender, EventArgs args)
+    {
+        exitEventInvoker = sender as GuardedExitAction;
         await ExecuteAsync(new ExitActiveEvent());
+    }
 
-    private async void ConfirmExitEventClicked(object sender, RoutedEventArgs args) =>
+    private async void ConfirmExitEventClicked(object sender, RoutedEventArgs args)
+    {
+        exitConfirmationBusy = true;
+        SetExitActionsEnabled(false);
+        exitEventInvoker?.ShowBusy("Exiting event…");
         await ExecuteAsync(new ConfirmExitActiveEvent());
+    }
 
-    private async void CancelExitEventClicked(object sender, RoutedEventArgs args) =>
+    private async void CancelExitEventClicked(object sender, RoutedEventArgs args)
+    {
+        await CancelExitConfirmationAsync();
+    }
+
+    private void MainWindowActivated(object sender, WindowActivatedEventArgs args)
+    {
+        if (args.WindowActivationState == WindowActivationState.Deactivated)
+        {
+            return;
+        }
+
+        if (ExitEventConfirmationLayer.Visibility == Visibility.Visible)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                KeepEventActiveButton.Focus(FocusState.Programmatic);
+                if (currentPresentation is not null && lastSurface is { } modalSurface)
+                {
+                    ApplySurfaceAnnouncement(currentPresentation, modalSurface, currentSurfaceOverride);
+                }
+            });
+            _ = FocusExitConfirmationAsync();
+        }
+        else if (lastSurface is { } surface)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                FocusInitialGuestAction(surface);
+                if (currentPresentation is not null)
+                {
+                    ApplySurfaceAnnouncement(currentPresentation, surface, currentSurfaceOverride);
+                }
+            });
+            _ = FocusInitialGuestActionAsync(surface);
+        }
+    }
+
+    private async void ExitEventConfirmationKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Escape)
+        {
+            args.Handled = true;
+            if (!exitConfirmationBusy)
+            {
+                await CancelExitConfirmationAsync();
+            }
+            return;
+        }
+
+        if (args.Key != Windows.System.VirtualKey.Tab)
+        {
+            return;
+        }
+
+        var shiftPressed = Microsoft.UI.Input.InputKeyboardSource
+            .GetKeyStateForCurrentThread(Windows.System.VirtualKey.Shift)
+            .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+        var focused = FocusManager.GetFocusedElement(WindowRoot.XamlRoot);
+        if ((shiftPressed && ReferenceEquals(focused, KeepEventActiveButton)) ||
+            (!shiftPressed && ReferenceEquals(focused, ConfirmExitEventButton)))
+        {
+            args.Handled = true;
+            (shiftPressed ? ConfirmExitEventButton : KeepEventActiveButton).Focus(FocusState.Keyboard);
+        }
+    }
+
+    private async Task CancelExitConfirmationAsync()
+    {
         await ExecuteAsync(new CancelExitActiveEvent());
+        exitConfirmationBusy = false;
+        ExitEventAction.ShowIdle();
+        AssistanceExitEventAction.ShowIdle();
+        AssistanceExitOnlyAction.ShowIdle();
+        SetExitActionsEnabled(true);
+        var invoker = exitEventInvoker;
+        exitEventInvoker = null;
+        invoker?.FocusAction();
+    }
+
+    private async Task FocusExitConfirmationAsync()
+    {
+        var dispatcherQueue = DispatcherQueue;
+        await Task.Delay(150);
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            if (ExitEventConfirmationLayer.Visibility == Visibility.Visible)
+            {
+                KeepEventActiveButton.Focus(FocusState.Programmatic);
+            }
+        });
+    }
+
+    private async Task FocusInitialGuestActionAsync(ApplicationSurface surface)
+    {
+        var dispatcherQueue = DispatcherQueue;
+        foreach (var delay in new[] { 100, 150, 250 })
+        {
+            await Task.Delay(delay);
+            dispatcherQueue.TryEnqueue(() =>
+            {
+                if (ExitEventConfirmationLayer.Visibility != Visibility.Visible)
+                {
+                    FocusInitialGuestAction(surface);
+                }
+            });
+        }
+    }
+
+    private void SetExitActionsEnabled(bool enabled)
+    {
+        ExitEventAction.IsEnabled = enabled;
+        AssistanceExitEventAction.IsEnabled = enabled;
+        AssistanceExitOnlyAction.IsEnabled = enabled;
+        KeepEventActiveButton.IsEnabled = enabled;
+        ConfirmExitEventButton.IsEnabled = enabled;
+    }
+
+    private void ActiveEventLayerSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        var mode = ResponsiveLayout.Resolve(args.NewSize.Width, args.NewSize.Height);
+        responsiveMode = mode;
+        switch (mode)
+        {
+            case ResponsiveLayoutMode.Standard:
+                GuestStartContent.Width = 780;
+                GuestStartContent.Margin = new Thickness(0, 29, 0, 0);
+                ActiveEventHeadingText.FontSize = 60;
+                AssistancePanel.Margin = new Thickness(260, 193, 260, 191);
+                AssistancePanel.Padding = new Thickness(40, 30, 40, 30);
+                AssistanceContent.Width = 700;
+                AssistanceHeadingText.FontSize = 38;
+                GuestRetentionText.Visibility = Visibility.Visible;
+                break;
+            case ResponsiveLayoutMode.Compact:
+                GuestStartContent.Width = Math.Min(720, args.NewSize.Width - 96);
+                GuestStartContent.Margin = new Thickness(0, 12, 0, 0);
+                ActiveEventHeadingText.FontSize = 52;
+                AssistancePanel.Margin = new Thickness(80, 80, 80, 50);
+                AssistancePanel.Padding = new Thickness(32, 24, 32, 24);
+                AssistanceContent.Width = Math.Min(650, args.NewSize.Width - 200);
+                AssistanceHeadingText.FontSize = 36;
+                GuestRetentionText.Visibility = Visibility.Visible;
+                break;
+            default:
+                GuestStartContent.Width = Math.Max(320, args.NewSize.Width - 50);
+                GuestStartContent.Margin = new Thickness(0, 40, 0, 0);
+                ActiveEventHeadingText.FontSize = 32;
+                AssistancePanel.Margin = new Thickness(24, 33, 24, 43);
+                AssistancePanel.Padding = new Thickness(20, 16, 20, 16);
+                AssistanceContent.Width = Math.Max(300, args.NewSize.Width - 80);
+                AssistanceHeadingText.FontSize = 30;
+                GuestRetentionText.Visibility = Visibility.Collapsed;
+                AssistanceEyebrowText.Visibility = Visibility.Collapsed;
+                AssistanceProgressText.Visibility = currentPresentation?.ActiveEvent?.GuestCycle.Phase ==
+                    GuestCyclePhase.OperatorAssistance
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+                break;
+        }
+        if (mode is not ResponsiveLayoutMode.Stress)
+        {
+            AssistanceEyebrowText.Visibility = Visibility.Visible;
+            AssistanceProgressText.Visibility = Visibility.Visible;
+        }
+    }
 
     private async void StartGuestCycleClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new StartGuestCycle());
@@ -341,6 +523,8 @@ public sealed partial class MainWindow : Window
     {
         var shouldFocusEventName = false;
         var surfaceOverride = (presentationController as IApplicationSurfaceOverrideSource)?.CurrentSurfaceOverride;
+        currentPresentation = presentation;
+        currentSurfaceOverride = surfaceOverride;
 #if UI_VERIFICATION
         if (surfaceOverride is not null)
         {
@@ -362,6 +546,17 @@ public sealed partial class MainWindow : Window
             ExitEventConfirmationLayer.Visibility = activeEvent?.ShowsExitConfirmation == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+            var exitConfirmationOpen = activeEvent?.ShowsExitConfirmation == true;
+            if (!exitConfirmationOpen)
+            {
+                exitConfirmationBusy = false;
+            }
+            StartGuestLayer.IsHitTestVisible = !exitConfirmationOpen;
+            GuestAssistanceLayer.IsHitTestVisible = !exitConfirmationOpen;
+            GuestCaptureLayer.IsHitTestVisible = !exitConfirmationOpen;
+            PhotoStripLayer.IsHitTestVisible = !exitConfirmationOpen;
+            var shouldFocusExitConfirmation = activeEvent?.ShowsExitConfirmation == true && !exitConfirmationWasOpen;
+            exitConfirmationWasOpen = activeEvent?.ShowsExitConfirmation == true;
             StartEventConfirmationLayer.Visibility = presentation.StartEventConfirmation is null
                 ? Visibility.Collapsed
                 : Visibility.Visible;
@@ -437,9 +632,9 @@ public sealed partial class MainWindow : Window
 
             var isExitBusy = activeEvent?.IsExitBusy == true ||
                 isConfirmationBusy && activeEvent?.ShowsExitConfirmation == true;
-            CancelExitEventButton.IsEnabled = !isExitBusy;
+            KeepEventActiveButton.IsEnabled = !isExitBusy;
             ConfirmExitEventButton.IsEnabled = !isExitBusy;
-            SetButtonContent(CancelExitEventButton, "Keep Event Active");
+            SetButtonContent(KeepEventActiveButton, "Keep Event Active");
             SetButtonContent(ConfirmExitEventButton, isExitBusy ? "Exiting Event…" : "Exit Event", isExitBusy);
             DeletionConfirmationFrame.RefreshInitialFocus();
             StartConfirmationFrame.RefreshInitialFocus();
@@ -447,9 +642,11 @@ public sealed partial class MainWindow : Window
             if (activeEvent is not null)
             {
                 ActiveEventNameText.Text = activeEvent.Name.ToUpperInvariant();
+                AutomationProperties.SetName(ActiveEventNameText, $"Event name: {activeEvent.Name}");
                 ActiveEventHeadingText.Text = activeEvent.Heading;
                 ActiveEventExplanationText.Text = activeEvent.Explanation;
-                ApplyGuestCyclePresentation(activeEvent.GuestCycle);
+                AutomationProperties.SetName(ActiveEventExplanationText, $"Instructions: {activeEvent.Explanation}");
+                ApplyGuestCyclePresentation(activeEvent, surfaceOverride);
             }
 
             var setup = presentation.Setup;
@@ -467,7 +664,19 @@ public sealed partial class MainWindow : Window
             SetupLayer.Background = showsNestedSetupConfirmation
                 ? new SolidColorBrush(Colors.Transparent)
                 : (Brush)Application.Current.Resources["ColorOverlayScrimBrush"];
-            presentationAdapter.Apply(presentation, surfaceOverride);
+            var activeSurface = presentationAdapter.Apply(presentation, surfaceOverride);
+            ApplySurfaceAnnouncement(presentation, activeSurface, surfaceOverride);
+            var surfaceChanged = activeSurface != lastSurface;
+            lastSurface = activeSurface;
+            if (shouldFocusExitConfirmation)
+            {
+                _ = FocusExitConfirmationAsync();
+            }
+            else if (surfaceChanged)
+            {
+                FocusInitialGuestAction(activeSurface);
+                _ = FocusInitialGuestActionAsync(activeSurface);
+            }
             SetupDialog.IsHitTestVisible = setup is null ||
                 (!setup.ShowsDiscardConfirmation && !setup.ShowsSaveConfirmation);
             if (setup is null)
@@ -642,8 +851,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void ApplyGuestCyclePresentation(GuestCyclePresentation guestCycle)
+    private void ApplyGuestCyclePresentation(
+        ActiveEventPresentation activeEvent,
+        ApplicationSurfaceOverride? surfaceOverride)
     {
+        var guestCycle = activeEvent.GuestCycle;
         var isStart = guestCycle.Phase == GuestCyclePhase.Start;
         var isAssistance = guestCycle.Phase is GuestCyclePhase.StartUnavailable or GuestCyclePhase.OperatorAssistance;
         var isCapture = guestCycle.Phase is GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved;
@@ -652,10 +864,18 @@ public sealed partial class MainWindow : Window
         GuestAssistanceLayer.Visibility = isAssistance ? Visibility.Visible : Visibility.Collapsed;
         GuestCaptureLayer.Visibility = isCapture ? Visibility.Visible : Visibility.Collapsed;
         PhotoStripLayer.Visibility = isStrip ? Visibility.Visible : Visibility.Collapsed;
-        ExitEventButton.Visibility = isStart ? Visibility.Visible : Visibility.Collapsed;
-        AssistanceExitEventButton.Visibility = guestCycle.Phase == GuestCyclePhase.StartUnavailable
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        ExitEventAction.Visibility = isStart ? Visibility.Visible : Visibility.Collapsed;
+        AssistanceExitEventAction.Visibility = isAssistance ? Visibility.Visible : Visibility.Collapsed;
+        StartGuestCycleButton.IsEnabled = activeEvent.GuestStart.IsStartEnabled;
+
+        if (activeEvent.ExitHoldState == ExitHoldState.Holding)
+        {
+            ExitEventAction.ShowHolding();
+        }
+        else
+        {
+            ExitEventAction.ShowIdle();
+        }
 
         if (isCapture)
         {
@@ -676,16 +896,55 @@ public sealed partial class MainWindow : Window
         if (isAssistance)
         {
             var beforeAdmission = guestCycle.Phase == GuestCyclePhase.StartUnavailable;
-            AssistanceEyebrowText.Text = beforeAdmission ? "THE BOOTH ISN’T READY" : "WE PAUSED YOUR PHOTOS";
-            AssistanceMessageText.Text = beforeAdmission
-                ? $"{guestCycle.AssistanceDetail} Please call the operator."
-                : $"{guestCycle.AssistanceDetail} Your {guestCycle.CompletedCaptures} completed Captures are safe.";
-            AssistanceDetailTitle.Text = guestCycle.Failure == GuestCycleFailure.CameraUnavailable
-                ? "Camera unavailable"
-                : "Storage unavailable";
+            var failure = beforeAdmission
+                ? activeEvent.GuestStart.Failure
+                : guestCycle.Failure == GuestCycleFailure.StorageUnavailable
+                    ? GuestStartFailure.StorageUnavailable
+                    : GuestStartFailure.CameraUnavailable;
+            var retrying = beforeAdmission
+                ? activeEvent.GuestStart.IsRetrying
+                : guestCycle.IsRetrying;
+            var retryFailed = beforeAdmission
+                ? activeEvent.GuestStart.ActionState == GuestStartActionState.RetryFailed
+                : guestCycle.ActionState == GuestCycleActionState.RetryFailed;
+            var exitOnly = beforeAdmission
+                ? activeEvent.GuestStart.RequiresEventSetupCorrection
+                : guestCycle.Recovery == GuestCycleRecovery.ExitOnly;
+
+            AssistanceEyebrowText.Text = "OPERATOR ASSISTANCE";
+            AssistanceMessageText.Text = failure == GuestStartFailure.CameraUnavailable
+                ? retryFailed ? "The Camera is still unavailable." : "The Camera is not ready."
+                : "Photos cannot be saved right now.";
+            AutomationProperties.SetName(AssistanceMessageText, $"Reason: {AssistanceMessageText.Text}");
             AssistanceProgressText.Text = beforeAdmission
-                ? "No Guest Cycle has begun"
-                : $"Guest Cycle paused · {guestCycle.CompletedCaptures} of 4 Captures retained";
+                ? exitOnly
+                    ? "The operator must exit the Event and update setup."
+                    : retryFailed
+                        ? "Check the Camera connection before trying again."
+                        : "The operator can check the setup and Retry."
+                : exitOnly
+                    ? $"{guestCycle.CompletedCaptures} of 4 Captures are safe. Exit the Event to update setup."
+                    : $"{guestCycle.CompletedCaptures} of 4 Captures are safe. Retry to continue.";
+            if (responsiveMode == ResponsiveLayoutMode.Stress)
+            {
+                AssistanceProgressText.Visibility = beforeAdmission ? Visibility.Collapsed : Visibility.Visible;
+                if (!beforeAdmission)
+                {
+                    AssistanceProgressText.Text = exitOnly
+                        ? $"{guestCycle.CompletedCaptures} of 4 Captures safe. Exit Event to update setup."
+                        : $"{guestCycle.CompletedCaptures} of 4 Captures safe. Retry to continue.";
+                }
+            }
+
+            AssistanceRetryButton.Visibility = exitOnly ? Visibility.Collapsed : Visibility.Visible;
+            AssistanceExitOnlyAction.Visibility = exitOnly ? Visibility.Visible : Visibility.Collapsed;
+            AssistanceRetryButton.IsEnabled = !retrying;
+            AssistanceRetryProgress.IsActive = retrying;
+            AssistanceRetryProgress.Visibility = retrying ? Visibility.Visible : Visibility.Collapsed;
+            AssistanceRetryLabel.Text = retrying
+                ? failure == GuestStartFailure.CameraUnavailable ? "Checking Camera…" : "Checking storage…"
+                : "Retry";
+            AssistanceRetryButton.SetValue(AutomationProperties.NameProperty, AssistanceRetryLabel.Text);
         }
 
         if (isStrip)
@@ -717,6 +976,95 @@ public sealed partial class MainWindow : Window
             photoStripFadeStarted = false;
             PhotoStripLayer.Opacity = 1;
         }
+    }
+
+    private void FocusInitialGuestAction(ApplicationSurface surface)
+    {
+        switch (surface)
+        {
+            case ApplicationSurface.GuestStart:
+                StartGuestCycleButton.Focus(FocusState.Programmatic);
+                break;
+            case ApplicationSurface.GuestStartUnavailable when AssistanceRetryButton.Visibility == Visibility.Visible:
+            case ApplicationSurface.OperatorAssistance when AssistanceRetryButton.Visibility == Visibility.Visible:
+                AssistanceRetryButton.Focus(FocusState.Programmatic);
+                break;
+            case ApplicationSurface.GuestStartUnavailable when AssistanceExitOnlyAction.Visibility == Visibility.Visible:
+            case ApplicationSurface.OperatorAssistance when AssistanceExitOnlyAction.Visibility == Visibility.Visible:
+                AssistanceExitOnlyAction.FocusAction();
+                break;
+        }
+    }
+
+    private void ApplySurfaceAnnouncement(
+        ApplicationPresentation presentation,
+        ApplicationSurface surface,
+        ApplicationSurfaceOverride? surfaceOverride)
+    {
+        var activeEvent = presentation.ActiveEvent;
+        var retrying = activeEvent is not null &&
+            (activeEvent.GuestStart.IsRetrying || activeEvent.GuestCycle.IsRetrying);
+        var unavailable = surface is ApplicationSurface.GuestStartUnavailable or ApplicationSurface.OperatorAssistance;
+        var surfaceName = surface switch
+        {
+            ApplicationSurface.GuestStart => "Guest Start",
+            ApplicationSurface.GuestStartUnavailable => "Guest Start unavailable",
+            ApplicationSurface.OperatorAssistance => "Operator Assistance",
+            _ => string.Empty,
+        };
+        if (surfaceName.Length == 0)
+        {
+            return;
+        }
+
+        var itemStatus = surfaceOverride?.ItemStatus ??
+            (retrying ? "busy" : unavailable ? "unavailable" : "ready");
+        var priority = surfaceOverride?.AnnouncementPriority ??
+            (itemStatus == "unavailable" ||
+             (surfaceOverride is null && surface == ApplicationSurface.OperatorAssistance)
+                ? AnnouncementPriority.Assertive
+                : AnnouncementPriority.Polite);
+        var state = itemStatus switch
+        {
+            "busy" => "in progress.",
+            "unavailable" => "needs attention.",
+            _ => "ready.",
+        };
+        var exitOnly = activeEvent is not null &&
+            (activeEvent.GuestStart.RequiresEventSetupCorrection ||
+             activeEvent.GuestCycle.Recovery == GuestCycleRecovery.ExitOnly);
+        var announcement = surfaceOverride?.Announcement ??
+            (surfaceOverride is not null
+                ? $"{surfaceName} {state}"
+                : unavailable && !retrying
+                ? $"{surfaceName} needs attention. {AssistanceMessageText.Text} " +
+                  (exitOnly ? "Exit Event to update setup." : "Retry or Exit Event.")
+                : $"{surfaceName} {state}");
+        if (surfaceOverride is null && string.Equals(announcement, lastAnnouncement, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        lastAnnouncement = announcement;
+        SurfaceAnnouncement.Text = announcement;
+        AutomationProperties.SetName(SurfaceAnnouncement, SurfaceAnnouncement.Text);
+        AutomationProperties.SetLiveSetting(
+            SurfaceAnnouncement,
+            priority == AnnouncementPriority.Assertive ? AutomationLiveSetting.Assertive : AutomationLiveSetting.Polite);
+        AutomationProperties.SetItemStatus(SurfaceAnnouncement, priority.ToString());
+        _ = RaiseSurfaceAnnouncementAsync();
+    }
+
+    private async Task RaiseSurfaceAnnouncementAsync()
+    {
+        var dispatcherQueue = DispatcherQueue;
+        await Task.Delay(250);
+        dispatcherQueue.TryEnqueue(() =>
+        {
+            var peer = FrameworkElementAutomationPeer.FromElement(SurfaceAnnouncement) ??
+                FrameworkElementAutomationPeer.CreatePeerForElement(SurfaceAnnouncement);
+            peer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+        });
     }
 
     private void UpdateCaptureProgress(int activeCapture, int completedCaptures)
@@ -866,6 +1214,10 @@ public sealed partial class MainWindow : Window
     public void ShowCentered()
     {
         Activate();
+        if (lastSurface is { } surface)
+        {
+            FocusInitialGuestAction(surface);
+        }
         ConfigureWindow(canvas ?? throw new InvalidOperationException("Presentation must load before the window is shown."));
     }
 

@@ -390,6 +390,8 @@
     <SolidColorBrush x:Key="FocusVisualSecondaryBrush" Color="#FFFFFFFF" />
     <SolidColorBrush x:Key="DangerBrush" Color="#FFD4382E" />
     <SolidColorBrush x:Key="EventHoverBrush" Color="#FFFAFAFB" />
+    <Duration x:Key="FotoHavnFastMotionDuration">0:0:0</Duration>
     <Duration x:Key="FotoHavnStandardMotionDuration">0:0:0</Duration>
+    <Duration x:Key="FotoHavnSlowMotionDuration">0:0:0</Duration>
     <Duration x:Key="FotoHavnPreviewFadeDuration">0:0:0</Duration>
 </ResourceDictionary>

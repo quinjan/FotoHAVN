@@ -188,6 +188,9 @@ public sealed class GuestStartReadinessAcceptanceTests
         var orchestrator = CreateOrchestrator(new RecordingFileSystem(savedEvent), camera, now);
         await ActivateAsync(orchestrator, savedEvent.Id);
         camera.FailActiveStream(CameraStreamFailure.StreamFailure);
+        var actionStates = new List<GuestStartActionState>();
+        orchestrator.PresentationChanged += (_, presentation) =>
+            actionStates.Add(presentation.ActiveEvent?.GuestStart.ActionState ?? GuestStartActionState.Idle);
 
         var retried = await orchestrator.ExecuteAsync(
             new RetryGuestStartReadiness(),
@@ -195,6 +198,8 @@ public sealed class GuestStartReadinessAcceptanceTests
 
         Assert.False(retried.ActiveEvent!.GuestStart.IsStartEnabled);
         Assert.Equal(GuestStartFailure.CameraUnavailable, retried.ActiveEvent.GuestStart.Failure);
+        Assert.Contains(GuestStartActionState.Retrying, actionStates);
+        Assert.Equal(GuestStartActionState.RetryFailed, retried.ActiveEvent.GuestStart.ActionState);
         Assert.Equal(["camera-bound", "camera-bound"], camera.OpenedDeviceIds.Select(id => id.Value));
     }
 

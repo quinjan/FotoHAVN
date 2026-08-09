@@ -212,7 +212,7 @@ try {
 
   report(Array.isArray(waivers.waivers) && waivers.waivers.length === 0, "design-v1.0.1 waiver register must be empty by default");
   report(manifest.baseline?.tag === "design-v1.0.0" && manifest.baseline?.commit === registry.contract.commit, "manifest baseline anchor does not match the approved registry");
-  report(manifest.baseline?.registrySha256 === sha256Bytes(path.join(referenceRoot, "registry.json")), "registry hash does not match the anchored manifest");
+  report(manifest.baseline?.registrySha256 === sha256Text(path.join(referenceRoot, "registry.json")), "registry hash does not match the anchored manifest");
   const requiredArtifactPaths = [
     "mapping.json", "evidence-index.json", "manual-procedures.md", "waivers.json", "README.md",
     ...matrix.surfaces.map((surface) => `scenarios/${surface.id}.json`),

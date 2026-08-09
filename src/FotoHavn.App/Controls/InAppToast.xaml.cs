@@ -63,7 +63,7 @@ public sealed partial class InAppToast : UserControl
             {
                 From = 0,
                 To = 1,
-                Duration = MotionPolicy.Resolve("MotionFastDuration"),
+                Duration = MotionPolicy.Fast(),
             };
             Storyboard.SetTarget(fade, ToastFrame);
             Storyboard.SetTargetProperty(fade, "Opacity");

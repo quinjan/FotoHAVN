@@ -1,0 +1,86 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.GuardedExitAction"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Button
+            x:Name="HoldButton"
+        MinHeight="{StaticResource TargetOperatorMinimum}"
+        AutomationProperties.AutomationId="FotoHavn.ActionButton.ExitEvent"
+        AutomationProperties.HelpText="Keep holding for 1.5 seconds to open Exit Event confirmation."
+        AutomationProperties.Name="Hold to exit event"
+        HorizontalContentAlignment="Stretch"
+        Padding="{StaticResource StrokeNone}"
+        PreviewKeyDown="HoldButtonKeyDown"
+        PreviewKeyUp="HoldButtonKeyUp"
+        PointerCaptureLost="HoldButtonPointerCaptureLost"
+        PointerExited="HoldButtonPointerExited"
+        TabIndex="10"
+        Style="{StaticResource FotoHavnActionButtonTertiaryStyle}"
+        VerticalContentAlignment="Stretch">
+            <Grid>
+                <StackPanel
+                    Margin="{StaticResource ActionButtonPadding}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="{StaticResource SpaceInline}">
+                    <FontIcon
+                        x:Name="ExitGlyph"
+                        Width="{StaticResource IconDefault}"
+                        Height="{StaticResource IconDefault}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="{StaticResource IconSmall}"
+                        Glyph="&#xE8D7;" />
+                    <TextBlock
+                        x:Name="LabelText"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource TypeLabelControlStyle}"
+                        TextAlignment="Center"
+                        Text="Exit Event" />
+                    <Grid
+                        x:Name="HoldingIndicatorHost"
+                        Width="{StaticResource IconDefault}"
+                        Height="{StaticResource IconDefault}"
+                        AutomationProperties.AccessibilityView="Raw"
+                        Visibility="Collapsed">
+                        <FontIcon
+                            x:Name="HoldingIndicator"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="{StaticResource IconSmall}"
+                            Glyph="&#xE72C;"
+                            RenderTransformOrigin="0.5,0.5">
+                            <FontIcon.RenderTransform>
+                                <RotateTransform x:Name="HoldingIndicatorRotation" />
+                            </FontIcon.RenderTransform>
+                        </FontIcon>
+                    </Grid>
+                </StackPanel>
+                <ProgressBar
+                    x:Name="HoldProgress"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    AutomationProperties.AccessibilityView="Raw"
+                    Foreground="{ThemeResource ColorTextPrimaryBrush}"
+                    IsTabStop="False"
+                    Maximum="1"
+                    Minimum="0"
+                    Style="{StaticResource FotoHavnProgressBarStyle}"
+                    Value="0"
+                    Visibility="Collapsed" />
+            </Grid>
+        </Button>
+        <TextBlock
+            x:Name="HoldAnnouncement"
+            Width="{StaticResource IconSmall}"
+            Height="{StaticResource IconSmall}"
+            AutomationProperties.AutomationId="FotoHavn.Announcement.ExitHold"
+            AutomationProperties.LiveSetting="Polite"
+            Opacity="0" />
+    </Grid>
+</UserControl>

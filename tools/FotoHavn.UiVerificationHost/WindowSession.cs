@@ -97,13 +97,48 @@ public sealed class WindowSession : IDisposable
                 $"Windows could not size the FotoHAVN verification window (Win32 error {Marshal.GetLastWin32Error()}).");
         }
 
-        _ = SetForegroundWindow(Handle);
+        BringToForeground();
         _ = GetClientRect(Handle, out client);
         if (client.Width != physicalWidth || client.Height != physicalHeight)
         {
             throw new InvalidOperationException(
                 $"Requested a {width}x{height} effective client ({physicalWidth}x{physicalHeight} physical), " +
                 $"Windows produced {client.Width}x{client.Height}.");
+        }
+    }
+
+    private void BringToForeground()
+    {
+        var foreground = GetForegroundWindow();
+        var currentThread = GetCurrentThreadId();
+        var foregroundThread = foreground == IntPtr.Zero
+            ? 0
+            : GetWindowThreadProcessId(foreground, IntPtr.Zero);
+        var targetThread = GetWindowThreadProcessId(Handle, IntPtr.Zero);
+        var attached = foregroundThread != 0 && foregroundThread != currentThread &&
+            AttachThreadInput(currentThread, foregroundThread, true);
+        var attachedToTarget = targetThread != 0 && targetThread != currentThread &&
+            AttachThreadInput(currentThread, targetThread, true);
+        try
+        {
+            for (var attempt = 0; attempt < 20 && GetForegroundWindow() != Handle; attempt++)
+            {
+                _ = BringWindowToTop(Handle);
+                _ = SetForegroundWindow(Handle);
+                Thread.Sleep(25);
+            }
+            _ = SetFocus(Handle);
+        }
+        finally
+        {
+            if (attached)
+            {
+                _ = AttachThreadInput(currentThread, foregroundThread, false);
+            }
+            if (attachedToTarget)
+            {
+                _ = AttachThreadInput(currentThread, targetThread, false);
+            }
         }
     }
 
@@ -244,5 +279,26 @@ public sealed class WindowSession : IDisposable
     private static extern bool PrintWindow(IntPtr window, IntPtr deviceContext, uint flags);
 
     [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool BringWindowToTop(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetFocus(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AttachThreadInput(uint attachThread, uint attachToThread, bool attach);
+
+    [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr window);
+
 }
