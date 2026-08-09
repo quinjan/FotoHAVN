@@ -8,6 +8,23 @@ namespace FotoHavn.WindowsIntegrationTests;
 public sealed class UiVerificationHostTests
 {
     [Fact]
+    public void Holding_fixture_requires_focus_on_the_exit_action()
+    {
+        var plan = VerificationPlan.Load(FindRepositoryRoot());
+        var holding = Assert.Single(
+            plan.Cases,
+            item => item.FixtureId == "guest-start.exit-holding.standard");
+        var ready = Assert.Single(
+            plan.Cases,
+            item => item.FixtureId == "guest-start.ready.standard");
+
+        Assert.Equal(
+            "FotoHavn.ActionButton.ExitEvent",
+            AutomationInspection.RequiredFocusAutomationId(holding));
+        Assert.Null(AutomationInspection.RequiredFocusAutomationId(ready));
+    }
+
+    [Fact]
     public void Plan_resolves_every_approved_fixture_to_the_production_verification_contract()
     {
         var repositoryRoot = FindRepositoryRoot();

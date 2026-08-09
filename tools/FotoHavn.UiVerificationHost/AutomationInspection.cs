@@ -84,8 +84,22 @@ public sealed class AutomationInspection : IDisposable
         ((InvokePattern)pattern).Invoke();
     }
 
-    public void NormalizeApplicationFocus()
+    public void NormalizeApplicationFocus(VerificationCase verificationCase)
     {
+        if (RequiredFocusAutomationId(verificationCase) is { } requiredAutomationId)
+        {
+            var requiredElement = root.FindFirst(
+                TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.AutomationIdProperty, requiredAutomationId));
+            if (requiredElement is not null && !requiredElement.Current.IsOffscreen &&
+                requiredElement.Current.IsEnabled && requiredElement.Current.IsKeyboardFocusable)
+            {
+                requiredElement.SetFocus();
+                Thread.Sleep(100);
+                return;
+            }
+        }
+
         try
         {
             var focused = AutomationElement.FocusedElement;
@@ -124,6 +138,11 @@ public sealed class AutomationInspection : IDisposable
             return;
         }
     }
+
+    public static string? RequiredFocusAutomationId(VerificationCase verificationCase) =>
+        verificationCase.FixtureId.StartsWith("guest-start.exit-hold", StringComparison.Ordinal)
+            ? "FotoHavn.ActionButton.ExitEvent"
+            : null;
 
     public AutomationEvidence Snapshot(
         VerificationCase verificationCase,

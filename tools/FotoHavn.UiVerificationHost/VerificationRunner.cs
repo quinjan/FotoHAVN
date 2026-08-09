@@ -131,7 +131,7 @@ public sealed class VerificationRunner(HostOptions options)
                 }
             }
 
-            inspection.NormalizeApplicationFocus();
+            inspection.NormalizeApplicationFocus(verificationCase);
 
             var origin = window.GetClientOrigin();
             automation = inspection.Snapshot(
