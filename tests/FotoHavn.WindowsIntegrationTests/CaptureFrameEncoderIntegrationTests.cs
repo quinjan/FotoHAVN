@@ -23,14 +23,16 @@ public sealed class CaptureFrameEncoderIntegrationTests
             preview.SourceCrop);
 
         Assert.Equal(7, result.Sequence);
-        Assert.Equal(60, result.Width);
-        Assert.Equal(40, result.Height);
+        Assert.Equal(68, result.Width);
+        Assert.Equal(45, result.Height);
         var decoded = await DecodeAsync(result.JpegBytes);
         Assert.Equal(BitmapDecoder.JpegDecoderId, decoded.CodecId);
-        Assert.Equal(60u, decoded.Width);
-        Assert.Equal(40u, decoded.Height);
+        Assert.Equal(68u, decoded.Width);
+        Assert.Equal(45u, decoded.Height);
         AssertCenterPixel(decoded.Pixels, decoded.Width, x: 5, y: 20);
-        AssertCenterPixel(decoded.Pixels, decoded.Width, x: 54, y: 20);
+        AssertCenterPixel(decoded.Pixels, decoded.Width, x: 62, y: 20);
+        AssertVerticalBandPixel(decoded.Pixels, decoded.Width, x: 34, y: 2);
+        AssertVerticalBandPixel(decoded.Pixels, decoded.Width, x: 34, y: 42);
     }
 
     private static SoftwareBitmap CreateWideFrame()
@@ -48,10 +50,11 @@ public sealed class CaptureFrameEncoderIntegrationTests
             for (var x = 0; x < width; x++)
             {
                 var offset = ((y * width) + x) * 4;
-                var isOuterBand = x < 10 || x >= 70 || y < 2 || y >= 42;
-                pixels[offset] = 32;
-                pixels[offset + 1] = isOuterBand ? (byte)32 : (byte)188;
-                pixels[offset + 2] = isOuterBand ? (byte)220 : (byte)32;
+                var isSideBand = x < 6 || x >= 74;
+                var isVerticalBand = y < 5 || y >= 40;
+                pixels[offset] = isVerticalBand && !isSideBand ? (byte)220 : (byte)32;
+                pixels[offset + 1] = isSideBand || isVerticalBand ? (byte)32 : (byte)188;
+                pixels[offset + 2] = isSideBand ? (byte)220 : (byte)32;
                 pixels[offset + 3] = 255;
             }
         }
@@ -86,6 +89,14 @@ public sealed class CaptureFrameEncoderIntegrationTests
     {
         var offset = checked(((y * (int)width) + x) * 4);
         Assert.InRange(pixels[offset + 1], 130, 230);
+        Assert.InRange(pixels[offset + 2], 0, 90);
+    }
+
+    private static void AssertVerticalBandPixel(byte[] pixels, uint width, int x, int y)
+    {
+        var offset = checked(((y * (int)width) + x) * 4);
+        Assert.InRange(pixels[offset], 130, 230);
+        Assert.InRange(pixels[offset + 1], 0, 90);
         Assert.InRange(pixels[offset + 2], 0, 90);
     }
 }

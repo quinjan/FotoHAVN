@@ -34,7 +34,7 @@ public sealed class CameraPolicyIntegrationTests
     }
 
     [Fact]
-    public void Guest_preview_guide_and_saved_Capture_use_the_same_source_rectangle()
+    public void Guest_preview_and_saved_Capture_preserve_the_full_camera_height()
     {
         var preview = CameraPreviewRenderPolicy.CalculateLayout(
             availableWidth: 1232,
@@ -53,12 +53,12 @@ public sealed class CameraPolicyIntegrationTests
         Assert.Equal(0, preview.GuideTop);
         Assert.Equal(894, preview.GuideWidth);
         Assert.Equal(596, preview.GuideHeight);
-        Assert.Equal(264u, saved.X);
-        Assert.Equal(76u, saved.Y);
-        Assert.Equal(1393u, saved.Width);
-        Assert.Equal(929u, saved.Height);
-        Assert.True(preview.SourceCrop.Y > 0);
-        Assert.True(preview.SourceCrop.Y + preview.SourceCrop.Height < 1);
+        Assert.Equal(150u, saved.X);
+        Assert.Equal(0u, saved.Y);
+        Assert.Equal(1620u, saved.Width);
+        Assert.Equal(1080u, saved.Height);
+        Assert.Equal(0, preview.SourceCrop.Y);
+        Assert.Equal(1, preview.SourceCrop.Height);
         Assert.InRange(Math.Abs(preview.SourceCrop.X - ((double)saved.X / 1920)), 0, 1d / 1920);
         Assert.InRange(Math.Abs(preview.SourceCrop.Y - ((double)saved.Y / 1080)), 0, 1d / 1080);
         Assert.InRange(Math.Abs(preview.SourceCrop.Width - ((double)saved.Width / 1920)), 0, 1d / 1920);

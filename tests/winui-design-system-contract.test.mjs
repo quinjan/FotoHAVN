@@ -70,6 +70,7 @@ test("Camera preview, durable Captures, and Photo Strips share the three-by-two 
   const boundary = readFileSync(path.join(applicationRoot, "CameraBoundary.cs"), "utf8");
   const encoder = readFileSync(path.join(applicationRoot, "CaptureFrameEncoder.cs"), "utf8");
   const compositor = readFileSync(path.join(applicationRoot, "PhotoStripCompositor.cs"), "utf8");
+  const mainWindow = readFileSync(path.join(applicationRoot, "MainWindow.xaml"), "utf8");
 
   assert.match(contract, /class CaptureCropPolicy[\s\S]*WidthRatio = 3[\s\S]*HeightRatio = 2/);
   assert.match(boundary, /UpdateCaptureCrop/);
@@ -77,6 +78,7 @@ test("Camera preview, durable Captures, and Photo Strips share the three-by-two 
   assert.match(encoder, /CameraSourceCrop crop/);
   assert.match(encoder, /encoder\.BitmapTransform\.Bounds = bounds/);
   assert.match(compositor, /request\.CaptureCropAspectRatio/);
+  assert.match(mainWindow, /x:Name="GuestPreviewImage"[^>]*Stretch="Uniform"/);
 });
 
 test("Capture Progress resolves to its mapped production control contract", () => {

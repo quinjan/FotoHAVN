@@ -13,27 +13,22 @@ internal static class CameraPreviewRenderPolicy
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(availableHeight);
 
         var viewportAspectRatio = availableWidth / availableHeight;
-        var visibleSource = viewportAspectRatio > StreamAspectRatio
-            ? new CameraSourceCrop(
-                X: 0,
-                Y: (1 - (StreamAspectRatio / viewportAspectRatio)) / 2,
-                Width: 1,
-                Height: StreamAspectRatio / viewportAspectRatio)
-            : new CameraSourceCrop(
-                X: (1 - (viewportAspectRatio / StreamAspectRatio)) / 2,
-                Y: 0,
-                Width: viewportAspectRatio / StreamAspectRatio,
-                Height: 1);
+        var sourceWidth = viewportAspectRatio > StreamAspectRatio
+            ? availableHeight * StreamAspectRatio
+            : availableWidth;
+        var sourceHeight = sourceWidth / StreamAspectRatio;
+        var sourceLeft = (availableWidth - sourceWidth) / 2;
+        var sourceTop = (availableHeight - sourceHeight) / 2;
 
-        var guideWidth = Math.Min(availableWidth, availableHeight * CropAspectRatio);
+        var guideWidth = Math.Min(sourceWidth, sourceHeight * CropAspectRatio);
         var guideHeight = guideWidth / CropAspectRatio;
-        var guideLeft = (availableWidth - guideWidth) / 2;
-        var guideTop = (availableHeight - guideHeight) / 2;
+        var guideLeft = sourceLeft + ((sourceWidth - guideWidth) / 2);
+        var guideTop = sourceTop + ((sourceHeight - guideHeight) / 2);
         var sourceCrop = new CameraSourceCrop(
-            visibleSource.X + ((guideLeft / availableWidth) * visibleSource.Width),
-            visibleSource.Y + ((guideTop / availableHeight) * visibleSource.Height),
-            (guideWidth / availableWidth) * visibleSource.Width,
-            (guideHeight / availableHeight) * visibleSource.Height);
+            (guideLeft - sourceLeft) / sourceWidth,
+            (guideTop - sourceTop) / sourceHeight,
+            guideWidth / sourceWidth,
+            guideHeight / sourceHeight);
         return new CameraPreviewLayout(
             guideLeft,
             guideTop,

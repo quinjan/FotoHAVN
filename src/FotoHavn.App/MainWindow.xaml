@@ -211,7 +211,7 @@
                         CornerRadius="10"
                         SizeChanged="GuestPreviewViewportSizeChanged">
                         <Grid>
-                            <Image x:Name="GuestPreviewImage" AutomationProperties.Name="Camera preview" Stretch="UniformToFill" />
+                            <Image x:Name="GuestPreviewImage" AutomationProperties.Name="Camera preview" Stretch="Uniform" />
                             <Grid AutomationProperties.AccessibilityView="Raw">
                                 <Grid.RowDefinitions>
                                     <RowDefinition x:Name="GuestCaptureGuideTopRow" Height="0" />
