@@ -163,6 +163,8 @@ public sealed partial class GuardedExitAction : UserControl
 
         completionRaised = true;
         timer.Stop();
+        keyboardHolding = false;
+        HoldButton.ReleasePointerCaptures();
         Announce("Exit Event hold complete. Confirmation opened.", AutomationLiveSetting.Assertive);
         HoldCompleted?.Invoke(this, EventArgs.Empty);
     }
