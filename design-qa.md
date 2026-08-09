@@ -267,3 +267,39 @@ final result: passed
 - P3 intentional difference: the ImageGen source presents the modal at a larger relative canvas scale. The renderer uses the approved 440 px acknowledgement maximum so it remains consistent with FotoHAVN’s desktop dialog system.
 
 final result: passed
+
+---
+
+# Design QA: Guarded Exit hold alignment and motion
+
+## Comparison target
+
+- Source visual truth: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-41ff377b-3b1f-4a6e-8242-7bba6cef68d1.png`, the operator-supplied field capture.
+- Implementation evidence: `artifacts/ui-verification/issue-76-hold-layout-final/guest-start_exit-holding_standard/actual.png`.
+- Focused comparison: `artifacts/ui-verification/issue-76-hold-layout-final/design-qa/hold-focused-comparison.png`.
+- Source dimensions: 336 × 112 physical pixels at 125% Windows scaling. Implementation dimensions and native viewport: 1280 × 720 at 1× capture density.
+- Normalization: the implementation control crop was scaled to 125% and stacked with the source control crop without changing either crop's aspect ratio.
+- State: `guest-start.exit-holding.standard` with keyboard focus on the guarded Exit action.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatches remain.
+- Fonts and typography: pass — `Keep holding…` retains the approved Inter control label, weight, line height, and copy without clipping.
+- Spacing and layout rhythm: pass — the key, label, and repeat indicator occupy one centered horizontal row with approved inline spacing. The progress track is contained along the button's bottom edge instead of relying on negative margins.
+- Colors and visual tokens: pass — the white holding surface, black foreground/progress, neutral track, border, and visible focus treatment use the approved component resources.
+- Image quality and asset fidelity: pass — both icons use the installed Segoe MDL2 icon font. The 20 px icon slots preserve the full key and repeat glyph bounds without raster substitution or clipping.
+- Copy and content: pass — the holding label remains exactly `Keep holding…`.
+- Motion and accessibility: pass — the repeat indicator angle advances from the same determinate hold progress that fills the line, completes one rotation over the 1.5-second hold, and remains static when system animations are disabled. The Windows integration test covers both motion modes.
+- UI Automation: pass — the final pinned capture reports the Exit action in `Holding` state, focused, enabled, on-screen, and free of semantic violations.
+
+## Comparison history
+
+1. The operator capture exposed a P1 interaction presentation defect: the key and label did not share a clean visual center, the repeat glyph was clipped in a 16 px box, and the repeat glyph did not move.
+2. The control now gives both icons 20 px slots, centers all three objects in one row, contains the determinate line inside the button, and derives repeat rotation from hold progress.
+3. The post-fix full-view and focused comparison show aligned glyphs/text, an unclipped repeat indicator, and a contained progress track. The full automated suite passes: 36 design-contract, 82 acceptance, and 48 Windows integration tests.
+
+## Follow-up polish
+
+- The final capture includes the required keyboard focus ring; the pointer-state source crop does not. This is an intentional accessibility difference.
+
+final result: passed

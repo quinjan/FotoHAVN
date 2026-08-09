@@ -42,4 +42,16 @@ public sealed class GuardedHoldInteractionTests
         Assert.Equal(GuardedHoldState.Holding, restarted.State);
         Assert.InRange(restarted.Progress, 0.333, 0.334);
     }
+
+    [Fact]
+    public void Holding_indicator_tracks_progress_and_stays_still_when_motion_is_reduced()
+    {
+        var holding = new GuardedHoldUpdate(GuardedHoldState.Holding, 0.25);
+
+        Assert.Equal(90, GuardedHoldInteraction.ResolveIndicatorAngle(holding, animationsEnabled: true));
+        Assert.Equal(0, GuardedHoldInteraction.ResolveIndicatorAngle(holding, animationsEnabled: false));
+        Assert.Equal(0, GuardedHoldInteraction.ResolveIndicatorAngle(
+            new GuardedHoldUpdate(GuardedHoldState.Idle, 0),
+            animationsEnabled: true));
+    }
 }

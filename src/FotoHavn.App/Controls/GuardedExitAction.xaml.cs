@@ -16,10 +16,19 @@ public sealed partial class GuardedExitAction : UserControl
     private bool keyboardHolding;
     private bool completionRaised;
     private bool destructive;
+    private bool animateHoldingIndicator;
 
     public GuardedExitAction()
     {
         InitializeComponent();
+        HoldButton.AddHandler(
+            PointerPressedEvent,
+            new PointerEventHandler(HoldButtonPointerPressed),
+            handledEventsToo: true);
+        HoldButton.AddHandler(
+            PointerReleasedEvent,
+            new PointerEventHandler(HoldButtonPointerReleased),
+            handledEventsToo: true);
         timer.Tick += HoldTimerTick;
     }
 
@@ -136,6 +145,8 @@ public sealed partial class GuardedExitAction : UserControl
         }
 
         interaction.Begin(DateTimeOffset.UtcNow);
+        var motionDuration = MotionPolicy.Slow();
+        animateHoldingIndicator = motionDuration.HasTimeSpan && motionDuration.TimeSpan > TimeSpan.Zero;
         timer.Start();
         Apply(interaction.Update(DateTimeOffset.UtcNow));
         Announce("Exit Event hold started. Keep holding for 1.5 seconds.", AutomationLiveSetting.Polite);
@@ -177,7 +188,10 @@ public sealed partial class GuardedExitAction : UserControl
         var holding = update.State is GuardedHoldState.Holding or GuardedHoldState.Completed;
         HoldButton.MinWidth = holding ? 218 : destructive ? 115 : 96;
         LabelText.Text = holding ? "Keep holding…" : "Exit Event";
-        HoldingIndicator.Visibility = holding ? Visibility.Visible : Visibility.Collapsed;
+        HoldingIndicatorHost.Visibility = holding ? Visibility.Visible : Visibility.Collapsed;
+        HoldingIndicatorRotation.Angle = GuardedHoldInteraction.ResolveIndicatorAngle(
+            update,
+            animateHoldingIndicator);
         HoldProgress.Value = update.Progress;
         HoldProgress.Visibility = holding ? Visibility.Visible : Visibility.Collapsed;
         HoldButton.BorderBrush = holding

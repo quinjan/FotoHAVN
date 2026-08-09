@@ -62,4 +62,11 @@ public sealed class GuardedHoldInteraction
         completed = false;
         return new(GuardedHoldState.Cancelled, 0);
     }
+
+    public static double ResolveIndicatorAngle(
+        GuardedHoldUpdate update,
+        bool animationsEnabled) =>
+        animationsEnabled && update.State is GuardedHoldState.Holding or GuardedHoldState.Completed
+            ? update.Progress * 360
+            : 0;
 }
