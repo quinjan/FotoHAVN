@@ -85,9 +85,20 @@ test("Capture Progress resolves to its mapped production control contract", () =
 
 test("Photo Strip Result resolves to its mapped production control contract", () => {
   const component = mapping.components.find(({ semanticId }) => semanticId === "component.photo-strip-result");
+  const geometry = readFileSync(
+    path.join(repositoryRoot, "src", "FotoHavn.Core", "PhotoStripGeometry.cs"),
+    "utf8",
+  );
   const photoStripXaml = readFileSync(
     path.join(applicationRoot, "Controls", "PhotoStripResult.xaml"),
     "utf8",
+  );
+  const photoStripCode = readFileSync(
+    path.join(applicationRoot, "Controls", "PhotoStripResult.xaml.cs"),
+    "utf8",
+  );
+  const verificationAsset = readFileSync(
+    path.join(repositoryRoot, "design-qa", "issue-77-photo-strip-reference.png"),
   );
   const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
   const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
@@ -97,6 +108,13 @@ test("Photo Strip Result resolves to its mapped production control contract", ()
   assert.match(xaml, /x:Key=["']FotoHavnPhotoStripResultStyle["']/);
   assert.match(`${xaml}\n${csharp}`, /FotoHavn\.PhotoStripResult/);
   assert.match(photoStripXaml, /x:Name="PreviewImage"[\s\S]*?Stretch="Uniform"/);
+  assert.match(geometry, /const int Width = 600/);
+  assert.match(geometry, /const int Height = 1800/);
+  assert.match(geometry, /const double AspectRatio = \(double\)Width \/ Height/);
+  assert.match(photoStripCode, /PhotoStripGeometry\.WidthForHeight\(previewHeight\)/);
+  assert.doesNotMatch(photoStripCode, /frameWidth = stress \? 135d : compact \? 190d : 226d/);
+  assert.equal(verificationAsset.readUInt32BE(16), 600, "verification Photo Strip width");
+  assert.equal(verificationAsset.readUInt32BE(20), 1800, "verification Photo Strip height");
 });
 
 test("production Guest Cycle announcements follow the approved semantic cadence", () => {

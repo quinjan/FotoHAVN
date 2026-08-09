@@ -9,8 +9,6 @@ namespace FotoHavn.App;
 
 internal sealed class PhotoStripCompositor : IPhotoStripCompositor
 {
-    private const int StripWidth = 600;
-    private const int StripHeight = 1800;
     private const float CaptureLeft = 30;
     private const float CaptureWidth = 540;
     private const float CaptureHeight = 360;
@@ -29,7 +27,11 @@ internal sealed class PhotoStripCompositor : IPhotoStripCompositor
 
         cancellationToken.ThrowIfCancellationRequested();
         var device = CanvasDevice.GetSharedDevice();
-        using var target = new CanvasRenderTarget(device, StripWidth, StripHeight, 96);
+        using var target = new CanvasRenderTarget(
+            device,
+            PhotoStripGeometry.Width,
+            PhotoStripGeometry.Height,
+            96);
         var bitmaps = new List<CanvasBitmap>(4);
         try
         {
@@ -76,7 +78,11 @@ internal sealed class PhotoStripCompositor : IPhotoStripCompositor
             using var reader = new DataReader(stream.GetInputStreamAt(0));
             await reader.LoadAsync((uint)bytes.Length);
             reader.ReadBytes(bytes);
-            return new PhotoStripCompositionResult(true, bytes, StripWidth, StripHeight);
+            return new PhotoStripCompositionResult(
+                true,
+                bytes,
+                PhotoStripGeometry.Width,
+                PhotoStripGeometry.Height);
         }
         catch (Exception exception) when (
             exception is FileNotFoundException or

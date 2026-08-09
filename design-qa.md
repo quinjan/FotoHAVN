@@ -86,8 +86,6 @@ Previous report result: passed
 
 final result: passed
 
----
-
 # Design QA: Guest Cycle, Capture, Operator Assistance, and Photo Strip
 
 ## Comparison target
@@ -329,3 +327,46 @@ final result: passed
 - The final capture includes the required keyboard focus ring; the pointer-state source crop does not. This is an intentional accessibility difference.
 
 final result: passed
+
+---
+
+# Design QA: Photo Strip preview fidelity
+
+## Comparison target
+
+- Source visual truth: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-9906216a-e4ac-47c0-96f2-ec1961eaf7ff.png`, the operator-supplied 600 × 1800 generated Photo Strip.
+- Supporting source: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-03a0c692-a057-448e-b0c9-92b500d69e93.png`, the field capture showing the extra preview whitespace.
+- Implementation screenshot: `artifacts/ui-verification/photo-strip-fidelity-retry/photo-strip_visible-10-seconds_standard/actual.png`.
+- Viewport: 1280 × 720 native WinUI client at 1× capture density; source strip is 600 × 1800 pixels.
+- State: Photo Strip visible with ten seconds remaining. Preparing, five-second, returning, failed, and four responsive-risk states were also exercised.
+
+## Findings
+
+- [P0] Native visual comparison is blocked by the current desktop capture context.
+  - Evidence: both the revised build and the unchanged prior build produce an all-white capture through the verification host. A direct desktop capture fails with `The handle is invalid`, confirming this is not a Photo Strip rendering regression.
+  - Impact: the source and implementation cannot be placed into a valid same-state visual comparison input during this run.
+  - Fix: inspect the running native build on the interactive desktop or rerun the nine fixtures from the pinned interactive runner before changing this result to passed.
+- Fonts and typography: no contract or UI Automation regression detected; visual comparison remains blocked.
+- Spacing and layout rhythm: the shared geometry contract computes preview width from height at exactly `600 / 1800`; all nine responsive-geometry checks pass with zero violations. Visual comparison remains blocked.
+- Colors and visual tokens: unchanged; visual comparison remains blocked.
+- Image quality and asset fidelity: the verification asset is now generated through the production compositor at 600 × 1800 and retains the compositor's white margins, capture gutters, and Event label. Visual comparison remains blocked.
+- Copy and content: unchanged and present in the UI Automation evidence.
+
+## Primary interaction and state checks
+
+- Photo Strip preparing, visible at ten seconds, visible at five seconds, returning, failed, Compact, and Stress states all settled successfully.
+- All nine fixtures report zero UI Automation violations and pass surface structure, reading order, focus, live-region, target-size, and responsive-geometry checks.
+- The full automated suite passes: 44 design-contract, 82 acceptance, and 51 Windows integration tests.
+
+## Comparison history
+
+1. The supplied field capture showed the complete generated strip letterboxed inside a wider preview frame.
+2. The compositor and preview now consume one canonical 600 × 1800 geometry contract; responsive preview widths are derived from height instead of independent magic numbers.
+3. The old 295 × 540 QA image was replaced by a production-composited 600 × 1800 privacy-safe strip, and a regression test pins both dimensions.
+4. Native screenshot capture was attempted for all nine Photo Strip fixtures and again against the unchanged prior build. Both attempts returned blank white frames because the desktop capture handle is unavailable, so no visual pass is claimed.
+
+## Follow-up polish
+
+- None identified until a valid native implementation capture can be compared with the supplied generated strip.
+
+final result: blocked

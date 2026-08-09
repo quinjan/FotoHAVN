@@ -1346,12 +1346,13 @@ public sealed partial class MainWindow : Window
             presenter.IsMinimizable = true;
         }
 
-        var rasterizationScale = FixedCanvas.XamlRoot?.RasterizationScale ?? 1;
-        var physicalWidth = checked((int)Math.Round(canvas.Width * rasterizationScale));
-        var physicalHeight = checked((int)Math.Round(canvas.Height * rasterizationScale));
-        var workArea = DisplayArea.Primary.WorkArea;
-        var x = workArea.X + ((workArea.Width - physicalWidth) / 2);
-        var y = workArea.Y + ((workArea.Height - physicalHeight) / 2);
-        AppWindow.MoveAndResize(new RectInt32(x, y, physicalWidth, physicalHeight));
+        var displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
+        var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var placement = WindowPlacement.ForWindowClientArea(
+            windowHandle,
+            canvas.Width,
+            canvas.Height,
+            displayArea.WorkArea);
+        AppWindow.MoveAndResize(placement);
     }
 }

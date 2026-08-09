@@ -1,3 +1,4 @@
+using FotoHavn.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -100,13 +101,9 @@ public sealed partial class PhotoStripResult : UserControl
         MessageColumn.Width = new GridLength(1, GridUnitType.Star);
         EyebrowText.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
         TitleText.FontSize = stress ? 27 : compact ? 36 : 42;
-        var frameHeight = stress ? 284d : compact ? 440d : 520d;
-        var frameWidth = stress ? 135d : compact ? 190d : 226d;
-        PreviewFrame.Height = frameHeight;
-        PreviewFrame.Width = frameWidth;
-
-        PreviewImage.Height = frameHeight;
-        PreviewImage.Width = frameWidth;
+        var previewHeight = stress ? 284d : compact ? 440d : 520d;
+        PreviewImage.Height = previewHeight;
+        PreviewImage.Width = PhotoStripGeometry.WidthForHeight(previewHeight);
     }
 
     private static void OnPresentationChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args) =>

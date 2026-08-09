@@ -81,6 +81,20 @@ test("operator surfaces reflow instead of preserving a fixed 1280 by 720 canvas"
   );
 });
 
+test("startup sizes the effective client canvas with the window DPI and keeps it centered", () => {
+  const behavior = readFileSync(path.join(app, "MainWindow.xaml.cs"), "utf8");
+  const placement = readFileSync(path.join(app, "WindowPlacement.cs"), "utf8");
+
+  assert.match(behavior, /WindowPlacement\.ForWindowClientArea/);
+  assert.match(behavior, /DisplayArea\.GetFromWindowId\(AppWindow\.Id, DisplayAreaFallback\.Primary\)/);
+  assert.doesNotMatch(behavior, /XamlRoot\?\.RasterizationScale/);
+  assert.match(placement, /GetDpiForWindow/);
+  assert.match(placement, /GetWindowRect/);
+  assert.match(placement, /GetClientRect/);
+  assert.match(placement, /workArea\.X \+ \(\(workArea\.Width - physicalWindowWidth\) \/ 2\)/);
+  assert.match(placement, /workArea\.Y \+ \(\(workArea\.Height - physicalWindowHeight\) \/ 2\)/);
+});
+
 test("all operator confirmations share the responsive modal shell", () => {
   const mainWindow = readFileSync(path.join(app, "MainWindow.xaml"), "utf8");
   const modalFrame = readFileSync(path.join(controls, "ConfirmationDialogFrame.cs"), "utf8");
