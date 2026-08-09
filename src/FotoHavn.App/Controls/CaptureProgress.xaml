@@ -6,14 +6,20 @@
     AutomationProperties.Name="Capture progress"
     HorizontalAlignment="Stretch"
     Style="{StaticResource FotoHavnCaptureProgressStyle}">
-    <Grid>
+    <Grid ColumnSpacing="{StaticResource CaptureProgressGroupSpacing}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
         <TextBlock
             x:Name="ProgressLabel"
+            Grid.Column="0"
             AutomationProperties.AccessibilityView="Raw"
             VerticalAlignment="Center"
             Style="{StaticResource FotoHavnCaptureProgressLabelStyle}" />
         <StackPanel
             x:Name="Steps"
+            Grid.Column="1"
             AutomationProperties.AccessibilityView="Raw"
             HorizontalAlignment="Right"
             Orientation="Horizontal"

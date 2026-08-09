@@ -538,7 +538,10 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
     private async Task<ApplicationPresentation> ExitActiveEventAsync(CancellationToken cancellationToken)
     {
         var activeEvent = CurrentPresentation.ActiveEvent;
-        if (activeEvent?.GuestCycle.Phase is not (GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable))
+        if (activeEvent?.GuestCycle.Phase is not (
+            GuestCyclePhase.Start or
+            GuestCyclePhase.StartUnavailable or
+            GuestCyclePhase.OperatorAssistance))
         {
             return CurrentPresentation;
         }

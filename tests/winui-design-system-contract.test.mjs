@@ -64,6 +64,10 @@ test("all ten shared component families resolve their styles, controls, and Auto
 
 test("Capture Progress resolves to its mapped production control contract", () => {
   const component = mapping.components.find(({ semanticId }) => semanticId === "component.capture-progress");
+  const captureProgressXaml = readFileSync(
+    path.join(applicationRoot, "Controls", "CaptureProgress.xaml"),
+    "utf8",
+  );
   const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
   const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
 
@@ -71,6 +75,12 @@ test("Capture Progress resolves to its mapped production control contract", () =
   assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.CaptureProgress["']/);
   assert.match(xaml, /x:Key=["']FotoHavnCaptureProgressStyle["']/);
   assert.match(`${xaml}\n${csharp}`, /FotoHavn\.CaptureProgress/);
+  assert.match(
+    captureProgressXaml,
+    /<Grid ColumnSpacing="\{StaticResource CaptureProgressGroupSpacing\}">[\s\S]*?<ColumnDefinition Width="\*" \/>[\s\S]*?<ColumnDefinition Width="Auto" \/>/,
+  );
+  assert.match(captureProgressXaml, /x:Name="ProgressLabel"[\s\S]*?Grid\.Column="0"/);
+  assert.match(captureProgressXaml, /x:Name="Steps"[\s\S]*?Grid\.Column="1"/);
 });
 
 test("Photo Strip Result resolves to its mapped production control contract", () => {
