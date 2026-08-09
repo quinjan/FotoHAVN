@@ -47,6 +47,8 @@ jobs:
       - name: Validate contracts, tests, and field package
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
           node scripts/build-design-traceability.mjs
           node scripts/validate-design-traceability.mjs
           node --test tests/*.test.mjs
