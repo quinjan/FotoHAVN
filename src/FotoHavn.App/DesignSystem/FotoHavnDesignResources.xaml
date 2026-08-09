@@ -212,8 +212,8 @@
     <Thickness x:Key="SetupScrollContentPadding">0,0,20,0</Thickness>
     <Thickness x:Key="StrokeNone">0</Thickness>
     <Thickness x:Key="CameraMediaBadgePadding">9,7</Thickness>
-    <Thickness x:Key="DialogEventIdentityPadding">0,10</Thickness>
-    <Thickness x:Key="DialogEventIdentityStressPadding">0,6</Thickness>
+    <Thickness x:Key="DialogEventIdentityPadding">0,16</Thickness>
+    <Thickness x:Key="DialogEventIdentityStressPadding">0,12</Thickness>
     <Thickness x:Key="DialogSemanticIconStroke">2</Thickness>
     <x:Double x:Key="HairlineHeight">1</x:Double>
     <x:Double x:Key="SpaceStackCompact">4</x:Double>

@@ -47,7 +47,8 @@ test("Printer defaults to an enabled Not printing selector", () => {
 test("event confirmation spacing uses the compact shared anatomy", () => {
   assert.match(resources, /x:Key="ModalDialogPadding">24</);
   assert.match(resources, /x:Key="DialogContentSpacing">14</);
-  assert.match(resources, /x:Key="DialogEventIdentityPadding">0,10</);
+  assert.match(resources, /x:Key="DialogEventIdentityPadding">0,16</);
+  assert.match(resources, /x:Key="DialogEventIdentityStressPadding">0,12</);
   assert.match(resources, /x:Key="DialogSemanticIconSize">48</);
   const sharedStacks = mainWindow.match(/<StackPanel Spacing="\{StaticResource DialogContentSpacing\}"/g) ?? [];
   assert.ok(sharedStacks.length >= 5, `expected shared dialog spacing on at least five confirmations, found ${sharedStacks.length}`);
