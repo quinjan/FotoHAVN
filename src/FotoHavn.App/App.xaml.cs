@@ -116,12 +116,18 @@ public partial class App : Application
     private void RefreshMotionResources()
     {
         uiSettings ??= new Windows.UI.ViewManagement.UISettings();
-        var duration = MotionPolicy.ResolveDuration(
-            uiSettings.AnimationsEnabled,
-            TimeSpan.FromMilliseconds(180));
-        Resources["FotoHavnStandardMotionDuration"] = new Duration(duration);
+        var animationsEnabled = uiSettings.AnimationsEnabled;
+        Resources["FotoHavnFastMotionDuration"] = new Duration(MotionPolicy.ResolveDuration(
+            animationsEnabled,
+            TimeSpan.FromMilliseconds(120)));
+        Resources["FotoHavnStandardMotionDuration"] = new Duration(MotionPolicy.ResolveDuration(
+            animationsEnabled,
+            TimeSpan.FromMilliseconds(180)));
+        Resources["FotoHavnSlowMotionDuration"] = new Duration(MotionPolicy.ResolveDuration(
+            animationsEnabled,
+            TimeSpan.FromMilliseconds(300)));
         Resources["FotoHavnPreviewFadeDuration"] = new Duration(MotionPolicy.ResolveDuration(
-            uiSettings.AnimationsEnabled,
+            animationsEnabled,
             TimeSpan.FromMilliseconds(450)));
     }
 

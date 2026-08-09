@@ -74,7 +74,7 @@ public sealed partial class GuardedExitAction : UserControl
         completionRaised = true;
         timer.Stop();
         LabelText.Text = label;
-        HoldingIndicator.Visibility = Visibility.Collapsed;
+        HoldingIndicatorHost.Visibility = Visibility.Collapsed;
         HoldProgress.Visibility = Visibility.Collapsed;
         AutomationProperties.SetItemStatus(HoldButton, "Busy");
         IsEnabled = false;

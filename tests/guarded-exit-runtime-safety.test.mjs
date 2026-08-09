@@ -9,6 +9,10 @@ const guardedExitSource = readFileSync(
   path.join(repositoryRoot, "src", "FotoHavn.App", "Controls", "GuardedExitAction.xaml.cs"),
   "utf8",
 );
+const motionPolicySource = readFileSync(
+  path.join(repositoryRoot, "src", "FotoHavn.App", "Controls", "MotionPolicy.cs"),
+  "utf8",
+);
 
 test("completed pointer holds release capture before replacing the active surface", () => {
   const tickStart = guardedExitSource.indexOf("private void HoldTimerTick");
@@ -20,5 +24,29 @@ test("completed pointer holds release capture before replacing the active surfac
   assert.ok(
     releaseStart > tickStart && releaseStart < completionStart,
     "pointer capture must be released before HoldCompleted can collapse the captured control",
+  );
+});
+
+test("input-time motion lookup uses app-resolved resources without constructing UISettings", () => {
+  assert.doesNotMatch(motionPolicySource, /new\s+UISettings\s*\(/);
+  assert.doesNotMatch(motionPolicySource, /Windows\.UI\.ViewManagement/);
+  assert.match(motionPolicySource, /FotoHavnSlowMotionDuration/);
+});
+
+test("the holding indicator remains reusable after an Event exit cycle", () => {
+  const showBusyStart = guardedExitSource.indexOf("public void ShowBusy");
+  const pointerPressedStart = guardedExitSource.indexOf(
+    "private void HoldButtonPointerPressed",
+    showBusyStart,
+  );
+  const showBusySource = guardedExitSource.slice(showBusyStart, pointerPressedStart);
+
+  assert.notEqual(showBusyStart, -1, "guarded exit busy state is missing");
+  assert.notEqual(pointerPressedStart, -1, "guarded exit pointer handler is missing");
+  assert.match(showBusySource, /HoldingIndicatorHost\.Visibility = Visibility\.Collapsed/);
+  assert.doesNotMatch(
+    showBusySource,
+    /HoldingIndicator\.Visibility = Visibility\.Collapsed/,
+    "exiting an Event must not permanently collapse the reusable spinner glyph",
   );
 });
