@@ -9,18 +9,20 @@ internal static class CaptureFrameEncoder
     public static async Task<CapturedFrame> EncodeJpegAsync(
         SoftwareBitmap bitmap,
         long sequence,
-        DateTimeOffset receivedAt)
+        DateTimeOffset receivedAt,
+        CameraSourceCrop crop)
     {
         ArgumentNullException.ThrowIfNull(bitmap);
-        var crop = CenterCrop(
+        ArgumentNullException.ThrowIfNull(crop);
+        var bounds = CalculateCenterCrop(
             checked((uint)bitmap.PixelWidth),
             checked((uint)bitmap.PixelHeight),
-            CaptureCropPolicy.AspectRatio);
+            crop);
 
         using var stream = new InMemoryRandomAccessStream();
         var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
         encoder.SetSoftwareBitmap(bitmap);
-        encoder.BitmapTransform.Bounds = crop;
+        encoder.BitmapTransform.Bounds = bounds;
         await encoder.FlushAsync();
 
         var bytes = new byte[checked((int)stream.Size)];
@@ -30,36 +32,43 @@ internal static class CaptureFrameEncoder
         return new CapturedFrame(
             sequence,
             receivedAt,
-            checked((int)crop.Width),
-            checked((int)crop.Height),
+            checked((int)bounds.Width),
+            checked((int)bounds.Height),
             bytes);
     }
 
-    private static BitmapBounds CenterCrop(uint width, uint height, double targetAspectRatio)
+    internal static BitmapBounds CalculateCenterCrop(uint width, uint height, CameraSourceCrop crop)
     {
         ArgumentOutOfRangeException.ThrowIfZero(width);
         ArgumentOutOfRangeException.ThrowIfZero(height);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(targetAspectRatio);
-
-        var sourceAspectRatio = (double)width / height;
-        if (sourceAspectRatio > targetAspectRatio)
+        ArgumentNullException.ThrowIfNull(crop);
+        if (crop.X < 0 || crop.Y < 0 || crop.Width <= 0 || crop.Height <= 0 ||
+            crop.X + crop.Width > 1 || crop.Y + crop.Height > 1)
         {
-            var cropWidth = Math.Min(width, checked((uint)Math.Round(height * targetAspectRatio)));
-            return new BitmapBounds
-            {
-                X = (width - cropWidth) / 2,
-                Y = 0,
-                Width = cropWidth,
-                Height = height,
-            };
+            throw new ArgumentOutOfRangeException(nameof(crop));
         }
 
-        var cropHeight = Math.Min(height, checked((uint)Math.Round(width / targetAspectRatio)));
+        var cropWidth = Math.Clamp(
+            checked((uint)Math.Round(crop.Width * width, MidpointRounding.AwayFromZero)),
+            1,
+            width);
+        var cropHeight = Math.Clamp(
+            checked((uint)Math.Round(crop.Height * height, MidpointRounding.AwayFromZero)),
+            1,
+            height);
+        var centerX = (crop.X + (crop.Width / 2)) * width;
+        var centerY = (crop.Y + (crop.Height / 2)) * height;
+        var left = Math.Min(
+            width - cropWidth,
+            checked((uint)Math.Max(0, Math.Round(centerX - (cropWidth / 2d), MidpointRounding.AwayFromZero))));
+        var top = Math.Min(
+            height - cropHeight,
+            checked((uint)Math.Max(0, Math.Round(centerY - (cropHeight / 2d), MidpointRounding.AwayFromZero))));
         return new BitmapBounds
         {
-            X = 0,
-            Y = (height - cropHeight) / 2,
-            Width = width,
+            X = left,
+            Y = top,
+            Width = cropWidth,
             Height = cropHeight,
         };
     }

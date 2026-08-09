@@ -213,13 +213,20 @@
                         <Grid>
                             <Image x:Name="GuestPreviewImage" AutomationProperties.Name="Camera preview" Stretch="UniformToFill" />
                             <Grid AutomationProperties.AccessibilityView="Raw">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition x:Name="GuestCaptureGuideTopRow" Height="0" />
+                                    <RowDefinition x:Name="GuestCaptureGuideRow" Height="*" />
+                                    <RowDefinition x:Name="GuestCaptureGuideBottomRow" Height="0" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="23*" />
-                                    <ColumnDefinition Width="63*" />
-                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition x:Name="GuestCaptureGuideLeftColumn" Width="5*" />
+                                    <ColumnDefinition x:Name="GuestCaptureGuideColumn" Width="54*" />
+                                    <ColumnDefinition x:Name="GuestCaptureGuideRightColumn" Width="5*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Background="#FF17181A" />
-                                <Border Grid.Column="2" Background="#FF17181A" />
+                                <Border Grid.Row="1" Background="#FF17181A" />
+                                <Border Grid.Row="1" Grid.Column="2" Background="#FF17181A" />
+                                <Border Grid.ColumnSpan="3" Background="#FF17181A" />
+                                <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#FF17181A" />
                             </Grid>
                             <Border
                                 Margin="0,17,17,0"

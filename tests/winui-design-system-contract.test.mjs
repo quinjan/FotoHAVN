@@ -72,9 +72,10 @@ test("Camera preview, durable Captures, and Photo Strips share the three-by-two 
   const compositor = readFileSync(path.join(applicationRoot, "PhotoStripCompositor.cs"), "utf8");
 
   assert.match(contract, /class CaptureCropPolicy[\s\S]*WidthRatio = 3[\s\S]*HeightRatio = 2/);
+  assert.match(boundary, /UpdateCaptureCrop/);
   assert.match(boundary, /CaptureFrameEncoder\.EncodeJpegAsync/);
-  assert.match(encoder, /CaptureCropPolicy\.AspectRatio/);
-  assert.match(encoder, /encoder\.BitmapTransform\.Bounds = crop/);
+  assert.match(encoder, /CameraSourceCrop crop/);
+  assert.match(encoder, /encoder\.BitmapTransform\.Bounds = bounds/);
   assert.match(compositor, /request\.CaptureCropAspectRatio/);
 });
 

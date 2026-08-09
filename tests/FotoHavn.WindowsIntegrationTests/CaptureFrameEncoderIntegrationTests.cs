@@ -9,14 +9,18 @@ namespace FotoHavn.WindowsIntegrationTests;
 public sealed class CaptureFrameEncoderIntegrationTests
 {
     [Fact]
-    public async Task Saved_Capture_is_the_shared_three_by_two_center_crop_seen_in_the_preview()
+    public async Task Saved_Capture_is_the_shared_three_by_two_crop_seen_in_the_preview()
     {
         using var source = CreateWideFrame();
+        var preview = CameraPreviewRenderPolicy.CalculateLayout(
+            availableWidth: 80,
+            availableHeight: 40);
 
         var result = await CaptureFrameEncoder.EncodeJpegAsync(
             source,
             sequence: 7,
-            receivedAt: DateTimeOffset.UnixEpoch);
+            receivedAt: DateTimeOffset.UnixEpoch,
+            preview.SourceCrop);
 
         Assert.Equal(7, result.Sequence);
         Assert.Equal(60, result.Width);
@@ -32,7 +36,7 @@ public sealed class CaptureFrameEncoderIntegrationTests
     private static SoftwareBitmap CreateWideFrame()
     {
         const int width = 80;
-        const int height = 40;
+        const int height = 45;
         var bitmap = new SoftwareBitmap(
             BitmapPixelFormat.Bgra8,
             width,
@@ -44,7 +48,7 @@ public sealed class CaptureFrameEncoderIntegrationTests
             for (var x = 0; x < width; x++)
             {
                 var offset = ((y * width) + x) * 4;
-                var isOuterBand = x < 10 || x >= 70;
+                var isOuterBand = x < 10 || x >= 70 || y < 2 || y >= 42;
                 pixels[offset] = 32;
                 pixels[offset + 1] = isOuterBand ? (byte)32 : (byte)188;
                 pixels[offset + 2] = isOuterBand ? (byte)220 : (byte)32;

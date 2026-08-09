@@ -24,6 +24,9 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
     private readonly object frameSync = new();
+    private CameraSourceCrop captureCrop = CameraPreviewRenderPolicy
+        .CalculateLayout(availableWidth: 1232, availableHeight: 596)
+        .SourceCrop;
     private PendingCapture? pendingCapture;
     private long latestFrameSequence;
     private long latestFrameAtUtcTicks;
@@ -272,6 +275,12 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         }
     }
 
+    internal void UpdateCaptureCrop(CameraSourceCrop crop)
+    {
+        ArgumentNullException.ThrowIfNull(crop);
+        Volatile.Write(ref captureCrop, crop);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (watcher is not null)
@@ -410,6 +419,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                 capturedBitmap,
                 sequence,
                 receivedAt,
+                Volatile.Read(ref captureCrop),
                 request.Completion);
         }
 
@@ -420,6 +430,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         SoftwareBitmap bitmap,
         long sequence,
         DateTimeOffset receivedAt,
+        CameraSourceCrop crop,
         TaskCompletionSource<CoreCapturedFrame> completion)
     {
         using (bitmap)
@@ -429,7 +440,8 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                 completion.TrySetResult(await CaptureFrameEncoder.EncodeJpegAsync(
                     bitmap,
                     sequence,
-                    receivedAt));
+                    receivedAt,
+                    crop));
             }
             catch (Exception exception)
             {

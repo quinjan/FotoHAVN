@@ -34,6 +34,38 @@ public sealed class CameraPolicyIntegrationTests
     }
 
     [Fact]
+    public void Guest_preview_guide_and_saved_Capture_use_the_same_source_rectangle()
+    {
+        var preview = CameraPreviewRenderPolicy.CalculateLayout(
+            availableWidth: 1232,
+            availableHeight: 596);
+        var saved = CaptureFrameEncoder.CalculateCenterCrop(
+            width: 1920,
+            height: 1080,
+            preview.SourceCrop);
+
+        Assert.Equal(CaptureCropPolicy.AspectRatio, preview.GuideWidth / preview.GuideHeight, precision: 10);
+        Assert.Equal(
+            CaptureCropPolicy.AspectRatio,
+            (preview.SourceCrop.Width * 1920) / (preview.SourceCrop.Height * 1080),
+            precision: 10);
+        Assert.Equal(169, preview.GuideLeft);
+        Assert.Equal(0, preview.GuideTop);
+        Assert.Equal(894, preview.GuideWidth);
+        Assert.Equal(596, preview.GuideHeight);
+        Assert.Equal(264u, saved.X);
+        Assert.Equal(76u, saved.Y);
+        Assert.Equal(1393u, saved.Width);
+        Assert.Equal(929u, saved.Height);
+        Assert.True(preview.SourceCrop.Y > 0);
+        Assert.True(preview.SourceCrop.Y + preview.SourceCrop.Height < 1);
+        Assert.InRange(Math.Abs(preview.SourceCrop.X - ((double)saved.X / 1920)), 0, 1d / 1920);
+        Assert.InRange(Math.Abs(preview.SourceCrop.Y - ((double)saved.Y / 1080)), 0, 1d / 1080);
+        Assert.InRange(Math.Abs(preview.SourceCrop.Width - ((double)saved.Width / 1920)), 0, 1d / 1920);
+        Assert.InRange(Math.Abs(preview.SourceCrop.Height - ((double)saved.Height / 1080)), 0, 1d / 1080);
+    }
+
+    [Fact]
     public async Task Release_and_selected_device_removal_dispose_the_owned_stream()
     {
         var firstStream = new FakeOwnedStream();

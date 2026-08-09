@@ -455,6 +455,23 @@ public sealed partial class MainWindow : Window
 
     private void GuestPreviewViewportSizeChanged(object sender, SizeChangedEventArgs args)
     {
+        if (args.NewSize.Width <= 0 || args.NewSize.Height <= 0)
+        {
+            return;
+        }
+
+        var layout = CameraPreviewRenderPolicy.CalculateLayout(
+            args.NewSize.Width,
+            args.NewSize.Height);
+        GuestCaptureGuideLeftColumn.Width = new GridLength(layout.GuideLeft);
+        GuestCaptureGuideColumn.Width = new GridLength(layout.GuideWidth);
+        GuestCaptureGuideRightColumn.Width = new GridLength(
+            args.NewSize.Width - layout.GuideLeft - layout.GuideWidth);
+        GuestCaptureGuideTopRow.Height = new GridLength(layout.GuideTop);
+        GuestCaptureGuideRow.Height = new GridLength(layout.GuideHeight);
+        GuestCaptureGuideBottomRow.Height = new GridLength(
+            args.NewSize.Height - layout.GuideTop - layout.GuideHeight);
+        camera?.UpdateCaptureCrop(layout.SourceCrop);
 #if UI_VERIFICATION
         GuestPreviewImage.RenderTransform = new CompositeTransform
         {
