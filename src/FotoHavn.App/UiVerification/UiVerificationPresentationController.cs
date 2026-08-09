@@ -9,6 +9,8 @@ internal sealed class UiVerificationPresentationController :
     IApplicationPresentationController,
     IApplicationSurfaceOverrideSource
 {
+    internal const string PhotoStripReferencePath = "verification-photo-strip-reference";
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower) },
@@ -467,7 +469,7 @@ internal static class InjectedPresentationFactory
                 PhotoStripPath: injection.State.StartsWith("preparing", StringComparison.Ordinal) ||
                     injection.State.StartsWith("visible-", StringComparison.Ordinal) ||
                     injection.State == "returning"
-                        ? request.MediaPath ?? "verification-photo-strip-reference"
+                        ? request.MediaPath ?? UiVerificationPresentationController.PhotoStripReferencePath
                         : null,
                 PreviewSecondsRemaining: injection.State.Contains("5-seconds", StringComparison.Ordinal) ? 5 : 10);
 

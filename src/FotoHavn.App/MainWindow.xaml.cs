@@ -393,6 +393,12 @@ public sealed partial class MainWindow : Window
             ResponsiveLayoutMode.Compact => new Thickness(60, 32, 60, 32),
             _ => new Thickness(16),
         };
+        AssistanceHeadingText.Margin = new Thickness(0, 8, 0, 0);
+        AssistanceMessageText.Margin = new Thickness(0, 10, 0, 0);
+        AssistanceCaptureProgress.Margin = new Thickness(0, 16, 0, 0);
+        AssistanceProgressText.Margin = new Thickness(0, 10, 0, 0);
+        AssistanceRetryButton.Height = 64;
+        AssistanceRetryButton.Margin = new Thickness(0, 20, 0, 0);
         switch (mode)
         {
             case ResponsiveLayoutMode.Standard:
@@ -403,12 +409,6 @@ public sealed partial class MainWindow : Window
                 AssistancePanel.Padding = new Thickness(40, 30, 40, 30);
                 AssistanceContent.Width = 700;
                 AssistanceHeadingText.FontSize = 38;
-                AssistanceHeadingText.Margin = new Thickness(0, 8, 0, 0);
-                AssistanceMessageText.Margin = new Thickness(0, 10, 0, 0);
-                AssistanceCaptureProgress.Margin = new Thickness(0, 16, 0, 0);
-                AssistanceProgressText.Margin = new Thickness(0, 10, 0, 0);
-                AssistanceRetryButton.Height = 64;
-                AssistanceRetryButton.Margin = new Thickness(0, 20, 0, 0);
                 GuestRetentionText.Visibility = Visibility.Visible;
                 break;
             case ResponsiveLayoutMode.Compact:
@@ -419,12 +419,6 @@ public sealed partial class MainWindow : Window
                 AssistancePanel.Padding = new Thickness(32, 24, 32, 24);
                 AssistanceContent.Width = Math.Min(650, args.NewSize.Width - 200);
                 AssistanceHeadingText.FontSize = 36;
-                AssistanceHeadingText.Margin = new Thickness(0, 8, 0, 0);
-                AssistanceMessageText.Margin = new Thickness(0, 10, 0, 0);
-                AssistanceCaptureProgress.Margin = new Thickness(0, 16, 0, 0);
-                AssistanceProgressText.Margin = new Thickness(0, 10, 0, 0);
-                AssistanceRetryButton.Height = 64;
-                AssistanceRetryButton.Margin = new Thickness(0, 20, 0, 0);
                 GuestRetentionText.Visibility = Visibility.Visible;
                 break;
             default:
@@ -1056,7 +1050,7 @@ public sealed partial class MainWindow : Window
                 (!string.Equals(loadingPhotoStripPath, path, StringComparison.Ordinal) || !photoStripVisibleSignaled))
             {
 #if UI_VERIFICATION
-                if (string.Equals(path, "verification-photo-strip-reference", StringComparison.Ordinal))
+                if (string.Equals(path, UiVerificationPresentationController.PhotoStripReferencePath, StringComparison.Ordinal))
                 {
                     loadingPhotoStripPath = path;
                     GuestPhotoStripResult.ImageSource = verificationPhotoStripPreview;
@@ -1121,7 +1115,9 @@ public sealed partial class MainWindow : Window
         {
             ApplicationSurface.GuestStart => "Guest Start",
             ApplicationSurface.GuestStartUnavailable => "Guest Start unavailable",
+            ApplicationSurface.Capture => "Capture",
             ApplicationSurface.OperatorAssistance => "Operator Assistance",
+            ApplicationSurface.PhotoStrip => "Photo Strip",
             _ => string.Empty,
         };
         if (surfaceName.Length == 0)
@@ -1148,11 +1144,16 @@ public sealed partial class MainWindow : Window
         var announcement = surfaceOverride?.Announcement ??
             (surfaceOverride is not null
                 ? $"{surfaceName} {state}"
-                : unavailable && !retrying
-                ? $"{surfaceName} needs attention. {AssistanceMessageText.Text} " +
-                  (exitOnly ? "Exit Event to update setup." : "Retry or Exit Event.")
-                : $"{surfaceName} {state}");
-        if (surfaceOverride is null && string.Equals(announcement, lastAnnouncement, StringComparison.Ordinal))
+                : ProductionSurfaceAnnouncement(
+                    activeEvent,
+                    surface,
+                    surfaceName,
+                    state,
+                    unavailable,
+                    retrying,
+                    exitOnly));
+        if (announcement.Length == 0 ||
+            (surfaceOverride is null && string.Equals(announcement, lastAnnouncement, StringComparison.Ordinal)))
         {
             return;
         }
@@ -1166,6 +1167,36 @@ public sealed partial class MainWindow : Window
         AutomationProperties.SetItemStatus(SurfaceAnnouncement, priority.ToString());
         _ = RaiseSurfaceAnnouncementAsync();
     }
+
+    private string ProductionSurfaceAnnouncement(
+        ActiveEventPresentation? activeEvent,
+        ApplicationSurface surface,
+        string surfaceName,
+        string state,
+        bool unavailable,
+        bool retrying,
+        bool exitOnly) =>
+        (surface, activeEvent?.GuestCycle) switch
+        {
+            (ApplicationSurface.Capture,
+                { Phase: GuestCyclePhase.Countdown, CountdownSeconds: 3 } cycle) =>
+                $"Photo {cycle.CaptureNumber} of 4. Taking photo in three seconds.",
+            (ApplicationSurface.Capture, { Phase: GuestCyclePhase.CaptureSaved } cycle) =>
+                $"Photo {cycle.CompletedCaptures} saved.",
+            (ApplicationSurface.PhotoStrip,
+                { Phase: GuestCyclePhase.PhotoStripPreview, PreviewSecondsRemaining: 10 }) =>
+                "Your photo strip is ready. Returning to start in 10 seconds.",
+            (ApplicationSurface.PhotoStrip,
+                { Phase: GuestCyclePhase.PhotoStripPreview, PreviewSecondsRemaining: 5 }) =>
+                "Returning to start in five seconds.",
+            (ApplicationSurface.PhotoStrip, { Phase: GuestCyclePhase.Fading }) =>
+                "Ready for the next guest.",
+            (ApplicationSurface.Capture or ApplicationSurface.PhotoStrip, _) => string.Empty,
+            _ when unavailable && !retrying =>
+                $"{surfaceName} needs attention. {AssistanceMessageText.Text} " +
+                (exitOnly ? "Exit Event to update setup." : "Retry or Exit Event."),
+            _ => $"{surfaceName} {state}",
+        };
 
     private async Task RaiseSurfaceAnnouncementAsync()
     {

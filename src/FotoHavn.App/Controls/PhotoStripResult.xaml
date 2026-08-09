@@ -47,7 +47,7 @@
                     x:Name="PreviewImage"
                     AutomationProperties.AccessibilityView="Raw"
                     Source="{x:Bind ImageSource, Mode=OneWay}"
-                    Stretch="UniformToFill" />
+                    Stretch="Uniform" />
                 <ProgressRing
                     x:Name="PreparingProgress"
                     AutomationProperties.AutomationId="FotoHavn.PhotoStripResult.Preparing"

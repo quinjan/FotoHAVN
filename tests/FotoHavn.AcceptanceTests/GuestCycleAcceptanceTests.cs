@@ -281,9 +281,11 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(savedEvent.Name, compositor.LastRequest?.EventName);
         Assert.Equal(guestCycleId, Assert.Single(fileSystem.CompletedGuestCycles));
         Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
-        Assert.True(
-            observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreparing) <
-            observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreview));
+        var preparingIndex = observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreparing);
+        var previewIndex = observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreview);
+        Assert.True(preparingIndex >= 0);
+        Assert.True(previewIndex >= 0);
+        Assert.True(preparingIndex < previewIndex);
         Assert.Equal(1, camera.OpenCount);
         Assert.Equal(30, clock.Delays.Count(delay => delay == TimeSpan.FromSeconds(1)));
         Assert.Equal(4, clock.Delays.Count(delay => delay == TimeSpan.FromMilliseconds(600)));

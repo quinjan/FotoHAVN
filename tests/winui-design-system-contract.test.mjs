@@ -75,6 +75,10 @@ test("Capture Progress resolves to its mapped production control contract", () =
 
 test("Photo Strip Result resolves to its mapped production control contract", () => {
   const component = mapping.components.find(({ semanticId }) => semanticId === "component.photo-strip-result");
+  const photoStripXaml = readFileSync(
+    path.join(applicationRoot, "Controls", "PhotoStripResult.xaml"),
+    "utf8",
+  );
   const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
   const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
 
@@ -82,6 +86,21 @@ test("Photo Strip Result resolves to its mapped production control contract", ()
   assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.PhotoStripResult["']/);
   assert.match(xaml, /x:Key=["']FotoHavnPhotoStripResultStyle["']/);
   assert.match(`${xaml}\n${csharp}`, /FotoHavn\.PhotoStripResult/);
+  assert.match(photoStripXaml, /x:Name="PreviewImage"[\s\S]*?Stretch="Uniform"/);
+});
+
+test("production Guest Cycle announcements follow the approved semantic cadence", () => {
+  const mainWindow = readFileSync(path.join(applicationRoot, "MainWindow.xaml.cs"), "utf8");
+
+  for (const announcement of [
+    "Taking photo in three seconds.",
+    "saved.",
+    "Your photo strip is ready. Returning to start in 10 seconds.",
+    "Returning to start in five seconds.",
+    "Ready for the next guest.",
+  ]) {
+    assert.match(mainWindow, new RegExp(announcement.replaceAll(".", "\\.")));
+  }
 });
 
 test("the application loads the governed design resources and retires the prohibited danger color", () => {
