@@ -266,7 +266,8 @@ public sealed class AutomationInspection : IDisposable
             (focusedEvidence is not null && MatchesExpectedFocus(
                 focusedEvidence,
                 verificationCase.Annotation,
-                elements));
+                elements,
+                verificationCase.FixtureId));
         var focusValid = primaryGuestActionAbsent ||
             (focused is not null && focusedEvidence is { HasKeyboardFocus: true } &&
              IsDescendantOf(root, focused) && focusMatches);
@@ -521,14 +522,16 @@ public sealed class AutomationInspection : IDisposable
     private static bool MatchesExpectedFocus(
         AutomationElementEvidence focused,
         VerificationAnnotation annotation,
-        IReadOnlyList<AutomationElementEvidence> elements)
+        IReadOnlyList<AutomationElementEvidence> elements,
+        string fixtureId)
     {
         if (elements.Any(item => item.AutomationId == "ExitEventConfirmationLayer"))
         {
             return focused.AutomationId == "FotoHavn.Confirmation.SafeAction";
         }
 
-        if (elements.Any(item =>
+        if (fixtureId.StartsWith("guest-start.exit-hold", StringComparison.Ordinal) ||
+            elements.Any(item =>
                 item.AutomationId == "FotoHavn.ActionButton.ExitEvent" && item.ItemStatus == "Holding"))
         {
             return focused.AutomationId == "FotoHavn.ActionButton.ExitEvent";

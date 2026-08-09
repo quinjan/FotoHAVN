@@ -44,6 +44,7 @@
                 Margin="-16,0,-16,-12"
                 VerticalAlignment="Bottom"
                 AutomationProperties.AccessibilityView="Raw"
+                Foreground="{ThemeResource ColorTextPrimaryBrush}"
                 IsTabStop="False"
                 Maximum="1"
                 Minimum="0"

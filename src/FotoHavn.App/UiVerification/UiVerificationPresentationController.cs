@@ -128,7 +128,8 @@ internal sealed class UiVerificationPresentationController :
         };
         var focusAutomationId = transition?.FocusAutomationId ?? injection.State switch
         {
-            "exit-holding" => "FotoHavn.ActionButton.ExitEvent",
+            "exit-hold-idle" or "exit-holding" or "exit-hold-cancelled" =>
+                "FotoHavn.ActionButton.ExitEvent",
             "exit-confirmation-open" => "FotoHavn.Confirmation.SafeAction",
             _ when presentation.ActiveEvent?.GuestStart.RequiresEventSetupCorrection == true =>
                 "FotoHavn.ActionButton.AssistanceExitOnly",

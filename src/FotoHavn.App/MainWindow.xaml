@@ -360,41 +360,46 @@
                 <controls:ModalDialogSurface
                     x:Name="ExitEventConfirmationLayer"
                     AutomationProperties.Name="Exit Event confirmation"
-                    Background="#8A17181A"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
                     KeyDown="ExitEventConfirmationKeyDown"
+                    VerticalAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
                     Visibility="Collapsed">
-                    <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
-                        <controls:ConfirmationDialogFrame.DialogContent>
-                        <StackPanel Spacing="{StaticResource DialogContentSpacing}">
-                            <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
-                            <controls:FocusableHeading
-                                x:Name="ExitEventTitleText"
-                                HorizontalAlignment="Center"
-                                AutomationProperties.AutomationId="ExitEventTitleText"
-                                AutomationProperties.HeadingLevel="Level1"
-                                FontSize="32"
-                                FontWeight="Bold"
-                                Text="Exit this Event?"
-                                TextAlignment="Center" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                AutomationProperties.Name="Consequence when present"
-                                Foreground="{StaticResource TextMutedBrush}"
-                                Text="The Camera will be released and FotoHAVN will return to Saved Events."
-                                TextAlignment="Center"
-                                TextWrapping="Wrap" />
-                            <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
-                                <Button x:Name="KeepEventActiveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
-                                <Button
-                                    x:Name="ConfirmExitEventButton"
-                                    AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
-                                    Click="ConfirmExitEventClicked"
-                                    Content="Exit Event"
-                                    Style="{StaticResource FotoHavnActionButtonDestructiveStyle}" />
+                    <Grid Background="{ThemeResource ColorOverlayScrimBrush}">
+                        <controls:ConfirmationDialogFrame x:Name="ExitConfirmationFrame">
+                            <controls:ConfirmationDialogFrame.DialogContent>
+                            <StackPanel Spacing="{StaticResource DialogContentSpacing}">
+                                <controls:DialogSemanticIcon HorizontalAlignment="Center" Glyph="&#xE7E8;" Intent="Destructive" />
+                                <controls:FocusableHeading
+                                    x:Name="ExitEventTitleText"
+                                    HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="ExitEventTitleText"
+                                    AutomationProperties.HeadingLevel="Level1"
+                                    FontSize="32"
+                                    FontWeight="Bold"
+                                    Text="Exit this Event?"
+                                    TextAlignment="Center" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    AutomationProperties.Name="Consequence when present"
+                                    Foreground="{StaticResource TextMutedBrush}"
+                                    Text="The Camera will be released and FotoHAVN will return to Saved Events."
+                                    TextAlignment="Center"
+                                    TextWrapping="Wrap" />
+                                <StackPanel AutomationProperties.Name="Dialog actions" HorizontalAlignment="Stretch" Orientation="Horizontal" Spacing="10">
+                                    <Button x:Name="KeepEventActiveButton" AutomationProperties.AutomationId="FotoHavn.Confirmation.SafeAction" Click="CancelExitEventClicked" Content="Keep Event Active" Style="{StaticResource FotoHavnActionButtonSecondaryStyle}" />
+                                    <Button
+                                        x:Name="ConfirmExitEventButton"
+                                        AutomationProperties.AutomationId="FotoHavn.Confirmation.ConfirmingAction"
+                                        Click="ConfirmExitEventClicked"
+                                        Content="Exit Event"
+                                        Style="{StaticResource FotoHavnActionButtonDestructiveStyle}" />
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                        </controls:ConfirmationDialogFrame.DialogContent>
-                    </controls:ConfirmationDialogFrame>
+                            </controls:ConfirmationDialogFrame.DialogContent>
+                        </controls:ConfirmationDialogFrame>
+                    </Grid>
                 </controls:ModalDialogSurface>
             </Grid>
 
