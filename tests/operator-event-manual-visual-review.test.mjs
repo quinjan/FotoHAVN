@@ -9,6 +9,8 @@ const read = (...parts) => readFileSync(path.join(repositoryRoot, ...parts), "ut
 
 const resources = read("src", "FotoHavn.App", "DesignSystem", "FotoHavnDesignResources.xaml");
 const eventCard = read("src", "FotoHavn.App", "Controls", "EventCard.xaml");
+const dialogEventIdentity = read("src", "FotoHavn.App", "Controls", "DialogEventIdentity.xaml");
+const dialogEventIdentityCode = read("src", "FotoHavn.App", "Controls", "DialogEventIdentity.xaml.cs");
 const mainWindow = read("src", "FotoHavn.App", "MainWindow.xaml");
 const mainWindowCode = read("src", "FotoHavn.App", "MainWindow.xaml.cs");
 const applicationContract = read("src", "FotoHavn.Core", "ApplicationContract.cs");
@@ -49,6 +51,11 @@ test("event confirmation spacing uses the compact shared anatomy", () => {
   assert.match(resources, /x:Key="DialogContentSpacing">14</);
   assert.match(resources, /x:Key="DialogEventIdentityPadding">0,16</);
   assert.match(resources, /x:Key="DialogEventIdentityStressPadding">0,12</);
+  assert.match(dialogEventIdentity, /<Border[\s\S]*?Grid\.Row="0"[\s\S]*?VerticalAlignment="Top"/);
+  assert.match(dialogEventIdentity, /<StackPanel[\s\S]*?Grid\.Row="1"[\s\S]*?Margin="\{StaticResource DialogEventIdentityPadding\}"/);
+  assert.match(dialogEventIdentity, /<Border[\s\S]*?Grid\.Row="2"[\s\S]*?VerticalAlignment="Bottom"/);
+  assert.match(dialogEventIdentityCode, /IdentityContent\.Margin/);
+  assert.doesNotMatch(dialogEventIdentityCode, /IdentityGrid\.Padding/);
   assert.match(resources, /x:Key="DialogSemanticIconSize">48</);
   const sharedStacks = mainWindow.match(/<StackPanel Spacing="\{StaticResource DialogContentSpacing\}"/g) ?? [];
   assert.ok(sharedStacks.length >= 5, `expected shared dialog spacing on at least five confirmations, found ${sharedStacks.length}`);
