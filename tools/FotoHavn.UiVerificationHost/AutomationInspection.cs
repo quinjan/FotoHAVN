@@ -86,13 +86,27 @@ public sealed class AutomationInspection : IDisposable
 
     public void NormalizeApplicationFocus()
     {
+        try
+        {
+            var focused = AutomationElement.FocusedElement;
+            if (focused is not null && IsDescendantOf(root, focused) &&
+                focused.Current.IsEnabled && !focused.Current.IsOffscreen &&
+                focused.Current.IsKeyboardFocusable)
+            {
+                return;
+            }
+        }
+        catch (ElementNotAvailableException)
+        {
+        }
+
         string[] preferredIds =
         [
-            "FotoHavn.ActionButton.Safe.KeepEventActive",
-            "FotoHavn.ActionButton.ExitEvent",
+            "FotoHavn.Confirmation.SafeAction",
             "FotoHavn.ActionButton.Primary.GuestStart",
             "FotoHavn.ActionButton.AssistanceRetry",
             "FotoHavn.ActionButton.AssistanceExitOnly",
+            "FotoHavn.ActionButton.ExitEvent",
         ];
         foreach (var automationId in preferredIds)
         {
@@ -511,8 +525,7 @@ public sealed class AutomationInspection : IDisposable
     {
         if (elements.Any(item => item.AutomationId == "ExitEventConfirmationLayer"))
         {
-            return focused.AutomationId is "FotoHavn.ActionButton.Safe.KeepEventActive" or
-                "FotoHavn.ActionButton.ExitEventConfirm";
+            return focused.AutomationId == "FotoHavn.Confirmation.SafeAction";
         }
 
         if (elements.Any(item =>

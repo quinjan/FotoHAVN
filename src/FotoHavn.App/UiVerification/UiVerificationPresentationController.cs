@@ -69,7 +69,21 @@ internal sealed class UiVerificationPresentationController :
         var canonicalPresentation = await UiVerificationCanonicalPresentation.LoadAsync(
             JsonOptions,
             cancellationToken);
-        request = request with { Presentation = request.Presentation ?? canonicalPresentation.Primary };
+        var presentation = request.Presentation;
+        request = request with
+        {
+            Presentation = presentation is null
+                ? canonicalPresentation.Primary
+                : presentation with
+                {
+                    EventId = string.IsNullOrWhiteSpace(presentation.EventId)
+                        ? canonicalPresentation.EventId
+                        : presentation.EventId,
+                    EventName = string.IsNullOrWhiteSpace(presentation.EventName)
+                        ? canonicalPresentation.EventName
+                        : presentation.EventName,
+                },
+        };
         return new(catalog, request, canonicalPresentation);
     }
 
@@ -112,12 +126,14 @@ internal sealed class UiVerificationPresentationController :
             "unavailable" => "needs attention.",
             _ => "ready.",
         };
-        var focusAutomationId = transition?.FocusAutomationId ??
-            (injection.State == "exit-holding"
-                ? "FotoHavn.ActionButton.ExitEvent"
-                : presentation.ActiveEvent?.GuestStart.RequiresEventSetupCorrection == true
-                    ? "FotoHavn.ActionButton.AssistanceExitOnly"
-                    : DefaultFocus(injection));
+        var focusAutomationId = transition?.FocusAutomationId ?? injection.State switch
+        {
+            "exit-holding" => "FotoHavn.ActionButton.ExitEvent",
+            "exit-confirmation-open" => "FotoHavn.Confirmation.SafeAction",
+            _ when presentation.ActiveEvent?.GuestStart.RequiresEventSetupCorrection == true =>
+                "FotoHavn.ActionButton.AssistanceExitOnly",
+            _ => DefaultFocus(injection),
+        };
         return (
             presentation,
             new(
@@ -139,6 +155,7 @@ internal sealed class UiVerificationPresentationController :
     {
         ApplicationSurface.SavedEvents => "HeadingText",
         ApplicationSurface.EventSetup => "SetupTitleText",
+        ApplicationSurface.GuestStart => "FotoHavn.ActionButton.Primary.GuestStart",
         ApplicationSurface.Confirmation when injection.State == "success-destination" =>
             "FotoHavn.Confirmation.ConfirmingAction",
         ApplicationSurface.Confirmation => "FotoHavn.Confirmation.SafeAction",
@@ -510,6 +527,6 @@ internal static class InjectedPresentationFactory
                 showsExitConfirmation,
                 guestStart ?? GuestStartPresentation.FromReadiness(true, true),
                 cycle,
-                exitHoldState));
+                ExitHoldState: exitHoldState));
     }
 }
