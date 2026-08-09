@@ -17,9 +17,14 @@ const applicationContract = read("src", "FotoHavn.Core", "ApplicationContract.cs
 const orchestrator = read("src", "FotoHavn.Core", "EventGuestCycleOrchestrator.cs");
 const verificationWindowSession = read("tools", "FotoHavn.UiVerificationHost", "WindowSession.cs");
 
-test("Event name input vertically centers its text", () => {
+test("Event fields use matching chrome with vertically centered text", () => {
   const textFieldStyle = resources.match(/<Style x:Key="FotoHavnTextFieldStyle"[\s\S]*?<\/Style>/)?.[0] ?? "";
-  assert.match(textFieldStyle, /VerticalContentAlignment" Value="Center"/);
+  assert.match(resources, /x:Key="TextFieldContentPadding">10,13,6,13</);
+  assert.match(textFieldStyle, /Property="Padding" Value="\{StaticResource TextFieldContentPadding\}"/);
+
+  const eventIdentityField = mainWindow.match(/<TextBox[\s\S]*?x:Name="EventIdentityValueText"[\s\S]*?\/>/)?.[0] ?? "";
+  assert.match(eventIdentityField, /IsReadOnly="True"/);
+  assert.match(eventIdentityField, /Style="\{StaticResource FotoHavnTextFieldStyle\}"/);
 });
 
 test("Event Card hover surface covers the full card", () => {

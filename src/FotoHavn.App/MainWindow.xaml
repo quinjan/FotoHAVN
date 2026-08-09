@@ -561,11 +561,12 @@
                                     Label="Event ID"
                                     Visibility="Collapsed">
                                     <controls:SetupFieldGroup.FieldContent>
-                                        <TextBlock
+                                        <TextBox
                                             x:Name="EventIdentityValueText"
+                                            HorizontalAlignment="Stretch"
                                             AutomationProperties.Name="Full Event ID"
-                                            Style="{StaticResource FotoHavnReadOnlyValueStyle}"
-                                            TextWrapping="Wrap" />
+                                            IsReadOnly="True"
+                                            Style="{StaticResource FotoHavnTextFieldStyle}" />
                                     </controls:SetupFieldGroup.FieldContent>
                                 </controls:SetupFieldGroup>
 

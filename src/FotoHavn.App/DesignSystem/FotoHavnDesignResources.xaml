@@ -202,6 +202,7 @@
 
     <!-- Component geometry composes approved primitives into property-specific values. -->
     <Thickness x:Key="ActionButtonPadding">16,0</Thickness>
+    <Thickness x:Key="TextFieldContentPadding">10,13,6,13</Thickness>
     <Thickness x:Key="StatusContentPadding">16</Thickness>
     <Thickness x:Key="ToastContentPadding">16,12</Thickness>
     <Thickness x:Key="AppHeaderPadding">48,0</Thickness>
@@ -286,7 +287,7 @@
     </Style>
     <Style x:Key="FotoHavnTextFieldStyle" TargetType="TextBox">
         <Setter Property="MinHeight" Value="{StaticResource TargetOperatorMinimum}" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="{StaticResource TextFieldContentPadding}" />
         <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
         <Setter Property="UseSystemFocusVisuals" Value="True" />
