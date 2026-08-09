@@ -720,6 +720,10 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
 
         if (run.PhotoStripPath is null)
         {
+            PublishGuestCycle(new GuestCyclePresentation(
+                GuestCyclePhase.PhotoStripPreparing,
+                CaptureNumber: 4,
+                CompletedCaptures: 4));
             PhotoStripCompositionResult composition;
             try
             {

@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="FotoHavn.App.Controls.CaptureProgress"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.AutomationId="FotoHavn.CaptureProgress"
+    AutomationProperties.Name="Capture progress"
+    HorizontalAlignment="Stretch"
+    Style="{StaticResource FotoHavnCaptureProgressStyle}">
+    <Grid>
+        <TextBlock
+            x:Name="ProgressLabel"
+            AutomationProperties.AccessibilityView="Raw"
+            VerticalAlignment="Center"
+            Style="{StaticResource FotoHavnCaptureProgressLabelStyle}" />
+        <StackPanel
+            x:Name="Steps"
+            AutomationProperties.AccessibilityView="Raw"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="{StaticResource CaptureProgressStepSpacing}">
+            <Border x:Name="Step1" Style="{StaticResource FotoHavnCaptureProgressStepStyle}">
+                <Grid><TextBlock x:Name="Number1" Style="{StaticResource FotoHavnCaptureProgressNumberStyle}" Text="1" /><FontIcon x:Name="Check1" Style="{StaticResource FotoHavnCaptureProgressCheckStyle}" /></Grid>
+            </Border>
+            <Border x:Name="Step2" Style="{StaticResource FotoHavnCaptureProgressStepStyle}">
+                <Grid><TextBlock x:Name="Number2" Style="{StaticResource FotoHavnCaptureProgressNumberStyle}" Text="2" /><FontIcon x:Name="Check2" Style="{StaticResource FotoHavnCaptureProgressCheckStyle}" /></Grid>
+            </Border>
+            <Border x:Name="Step3" Style="{StaticResource FotoHavnCaptureProgressStepStyle}">
+                <Grid><TextBlock x:Name="Number3" Style="{StaticResource FotoHavnCaptureProgressNumberStyle}" Text="3" /><FontIcon x:Name="Check3" Style="{StaticResource FotoHavnCaptureProgressCheckStyle}" /></Grid>
+            </Border>
+            <Border x:Name="Step4" Style="{StaticResource FotoHavnCaptureProgressStepStyle}">
+                <Grid><TextBlock x:Name="Number4" Style="{StaticResource FotoHavnCaptureProgressNumberStyle}" Text="4" /><FontIcon x:Name="Check4" Style="{StaticResource FotoHavnCaptureProgressCheckStyle}" /></Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>

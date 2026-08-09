@@ -161,7 +161,8 @@ public static class ApplicationSurfaceResolver
             GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved =>
                 ApplicationSurface.Capture,
             GuestCyclePhase.OperatorAssistance => ApplicationSurface.OperatorAssistance,
-            GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading => ApplicationSurface.PhotoStrip,
+            GuestCyclePhase.PhotoStripPreparing or GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading =>
+                ApplicationSurface.PhotoStrip,
             _ => throw new ArgumentOutOfRangeException(nameof(presentation)),
         };
     }
@@ -456,6 +457,7 @@ public enum GuestCyclePhase
     Flash,
     CaptureSaved,
     OperatorAssistance,
+    PhotoStripPreparing,
     PhotoStripPreview,
     Fading,
 }

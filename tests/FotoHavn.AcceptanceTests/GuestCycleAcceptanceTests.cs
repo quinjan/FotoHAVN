@@ -255,10 +255,15 @@ public sealed class GuestCycleAcceptanceTests
         };
         var orchestrator = new EventGuestCycleOrchestrator(fileSystem, camera, compositor, clock);
         var cancellationToken = TestContext.Current.CancellationToken;
+        var observedPhases = new List<GuestCyclePhase>();
 
         await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
         orchestrator.PresentationChanged += (_, presentation) =>
         {
+            if (presentation.ActiveEvent is { } activeEvent)
+            {
+                observedPhases.Add(activeEvent.GuestCycle.Phase);
+            }
             if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
             {
                 _ = orchestrator.ExecuteAsync(new ConfirmPhotoStripVisible(), cancellationToken);
@@ -276,6 +281,9 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(savedEvent.Name, compositor.LastRequest?.EventName);
         Assert.Equal(guestCycleId, Assert.Single(fileSystem.CompletedGuestCycles));
         Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
+        Assert.True(
+            observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreparing) <
+            observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreview));
         Assert.Equal(1, camera.OpenCount);
         Assert.Equal(30, clock.Delays.Count(delay => delay == TimeSpan.FromSeconds(1)));
         Assert.Equal(4, clock.Delays.Count(delay => delay == TimeSpan.FromMilliseconds(600)));

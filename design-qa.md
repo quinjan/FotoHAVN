@@ -88,6 +88,32 @@ final result: passed
 
 ---
 
+# Design QA: Guest Cycle, Capture, Operator Assistance, and Photo Strip
+
+## Comparison target
+
+- Source visual truth: the approved Batch 5 targets under `docs/design-system/reference-states/targets/capture`, `operator-assistance`, and `photo-strip`.
+- Native evidence: the 36 Batch 5 fixture folders under `artifacts/ui-verification/batch-5-owned`, followed by focused recaptures under `artifacts/ui-verification/batch-5-assistance-fixed`, `photo-strip-asset`, and `issue-77-final-samples`.
+- Responsive coverage: 1280 × 720, 1024 × 768, 1024 × 576, 853 × 480, and 640 × 360 effective viewports.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatch remains after the correction loop.
+- Capture: the native surface keeps one four-step Capture progress concept, a large mirrored camera viewport, a single state-owned countdown or saved overlay, and stable geometry from countdown through flash and saved states. The deterministic camera frame is deliberately abstract and contains no embedded countdown, cursor, or production guest image.
+- Operator Assistance: cause, preserved Capture progress, recovery action, and guarded Exit remain visible and programmatically ordered. The 640 × 360 layout keeps the Retry target at 48 px and removes only the redundant eyebrow.
+- Photo Strip: the preview now uses a deterministic crop of the approved four-Capture strip instead of embedding the full concept screenshot. Preparing, visible, returning, and failure states retain the approved content hierarchy and responsive portrait preview.
+- Accessibility: the final focused recapture reports zero reading-order, focus, live-region, target-size, or responsive-geometry violations for all 12 assistance fixtures. Capture and Photo Strip representative fixtures also report zero semantic violations.
+
+## Explained pixel differences
+
+- P3 intentional difference: WinUI text metrics, native focus visuals, progress controls, and the guarded hold action differ at the pixel level from the browser-rendered reference while preserving the approved tokens and hierarchy.
+- P3 intentional difference: the verification camera is an abstract privacy-safe frame; the approved reference uses an illustrative couple. The state overlay and camera composition contract, rather than depicted people, are the acceptance seam.
+- P3 intentional difference: the native Photo Strip is upright inside a bordered viewport instead of applying the reference renderer's slight rotation and CSS shadow. The complete four-Capture asset, label, countdown, and responsive bounds are preserved.
+
+final result: passed
+
+---
+
 # Design QA: Guest Cycle assistance alignment
 
 ## Comparison target

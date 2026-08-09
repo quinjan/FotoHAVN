@@ -44,8 +44,12 @@
              Link="UiVerification\canonical-presentation.json"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\design-qa\issue-28-countdown-implementation.jpg"
+    <Content Include="..\..\design-qa\issue-77-camera-preview-reference.png"
              Link="UiVerification\camera-preview.jpg"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\design-qa\issue-77-photo-strip-reference.png"
+             Link="UiVerification\guest-cycle-photo-strip.png"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

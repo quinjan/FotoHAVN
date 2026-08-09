@@ -62,6 +62,28 @@ test("all ten shared component families resolve their styles, controls, and Auto
   }
 });
 
+test("Capture Progress resolves to its mapped production control contract", () => {
+  const component = mapping.components.find(({ semanticId }) => semanticId === "component.capture-progress");
+  const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
+  const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
+
+  assert.ok(component);
+  assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.CaptureProgress["']/);
+  assert.match(xaml, /x:Key=["']FotoHavnCaptureProgressStyle["']/);
+  assert.match(`${xaml}\n${csharp}`, /FotoHavn\.CaptureProgress/);
+});
+
+test("Photo Strip Result resolves to its mapped production control contract", () => {
+  const component = mapping.components.find(({ semanticId }) => semanticId === "component.photo-strip-result");
+  const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
+  const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
+
+  assert.ok(component);
+  assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.PhotoStripResult["']/);
+  assert.match(xaml, /x:Key=["']FotoHavnPhotoStripResultStyle["']/);
+  assert.match(`${xaml}\n${csharp}`, /FotoHavn\.PhotoStripResult/);
+});
+
 test("the application loads the governed design resources and retires the prohibited danger color", () => {
   const app = readFileSync(path.join(applicationRoot, "App.xaml"), "utf8");
   const productionXaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");

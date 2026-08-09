@@ -175,6 +175,8 @@ internal sealed class UiVerificationPresentationController :
         {
             ApplicationSurface.EventSetup => "Event setup",
             ApplicationSurface.Confirmation => "Confirmation",
+            ApplicationSurface.Capture => "Capture",
+            ApplicationSurface.PhotoStrip => "Photo Strip",
             _ => injection.ExpectedName,
         };
         var state = injection.ExpectedStatus switch
@@ -405,18 +407,18 @@ internal static class InjectedPresentationFactory
         {
             return new(
                 GuestCyclePhase.Countdown,
-                data.CaptureNumber,
-                data.CompletedCaptures,
+                4,
+                3,
                 int.Parse(injection.State[^1..], System.Globalization.CultureInfo.InvariantCulture));
         }
 
         return injection.State switch
         {
-            "flash" => new(GuestCyclePhase.Flash, data.CaptureNumber, data.CompletedCaptures),
+            "flash" => new(GuestCyclePhase.Flash, 2, 1),
             "photo-saved" => new(GuestCyclePhase.CaptureSaved, data.CaptureNumber, data.CompletedCaptures + 1),
-            "camera-failure" => new(GuestCyclePhase.Countdown, data.CaptureNumber, data.CompletedCaptures,
+            "camera-failure" => new(GuestCyclePhase.OperatorAssistance, 4, 3,
                 Failure: GuestCycleFailure.CameraUnavailable),
-            "storage-failure" => new(GuestCyclePhase.Countdown, data.CaptureNumber, data.CompletedCaptures,
+            "storage-failure" => new(GuestCyclePhase.OperatorAssistance, 4, 3,
                 Failure: GuestCycleFailure.StorageUnavailable),
             _ => new(GuestCyclePhase.Countdown,
                 int.Parse(injection.State[^1..], System.Globalization.CultureInfo.InvariantCulture),
@@ -450,11 +452,24 @@ internal static class InjectedPresentationFactory
     private static GuestCyclePresentation PhotoStrip(
         ApprovedInjection injection,
         UiVerificationRequest request) =>
-        new(
-            injection.State == "returning" ? GuestCyclePhase.Fading : GuestCyclePhase.PhotoStripPreview,
-            CompletedCaptures: 4,
-            PhotoStripPath: injection.State.StartsWith("visible-", StringComparison.Ordinal) ? request.MediaPath : null,
-            PreviewSecondsRemaining: injection.State.Contains("5-seconds", StringComparison.Ordinal) ? 5 : 10);
+        injection.State == "failed"
+            ? new(
+                GuestCyclePhase.OperatorAssistance,
+                CompletedCaptures: 4,
+                Failure: GuestCycleFailure.StorageUnavailable)
+            : new(
+                injection.State.StartsWith("preparing", StringComparison.Ordinal)
+                    ? GuestCyclePhase.PhotoStripPreparing
+                    : injection.State == "returning"
+                        ? GuestCyclePhase.Fading
+                        : GuestCyclePhase.PhotoStripPreview,
+                CompletedCaptures: 4,
+                PhotoStripPath: injection.State.StartsWith("preparing", StringComparison.Ordinal) ||
+                    injection.State.StartsWith("visible-", StringComparison.Ordinal) ||
+                    injection.State == "returning"
+                        ? request.MediaPath ?? "verification-photo-strip-reference"
+                        : null,
+                PreviewSecondsRemaining: injection.State.Contains("5-seconds", StringComparison.Ordinal) ? 5 : 10);
 
     private static ApplicationPresentation Confirmation(
         ApprovedInjection injection,
