@@ -5,12 +5,22 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     AutomationProperties.AutomationId="FotoHavn.DialogEventIdentity"
     AutomationProperties.Name="Event identity when relevant">
-    <Grid x:Name="IdentityGrid" Padding="{StaticResource DialogEventIdentityPadding}">
+    <Grid x:Name="IdentityGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <Border
+            Grid.Row="0"
             Height="{StaticResource HairlineHeight}"
             VerticalAlignment="Top"
             Background="{ThemeResource ColorBorderDefaultBrush}" />
-        <StackPanel Spacing="{StaticResource SpaceStackCompact}">
+        <StackPanel
+            x:Name="IdentityContent"
+            Grid.Row="1"
+            Margin="{StaticResource DialogEventIdentityPadding}"
+            Spacing="{StaticResource SpaceStackCompact}">
             <TextBlock Style="{StaticResource TypeEyebrowStyle}" Text="EVENT" />
             <TextBlock
                 Style="{StaticResource TypeLabelControlStyle}"
@@ -23,6 +33,7 @@
                 TextWrapping="Wrap" />
         </StackPanel>
         <Border
+            Grid.Row="2"
             Height="{StaticResource HairlineHeight}"
             VerticalAlignment="Bottom"
             Background="{ThemeResource ColorBorderDefaultBrush}" />

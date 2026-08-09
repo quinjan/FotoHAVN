@@ -144,7 +144,8 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
                 DismissCameraMenu when setup is not null => PublishSetup(setup.WithCameraMenuOpen(false)),
                 ChangeEventName or ToggleCameraMenu or DismissCameraMenu => CurrentPresentation,
                 SelectCamera select => await SelectCameraAsync(select.DeviceId, cancellationToken).ConfigureAwait(false),
-                SelectNoPrinter => PublishSetup(setup!.WithNoPrinterSelected()),
+                SelectNoPrinter when setup is not null => PublishSetup(setup.WithNoPrinterSelected()),
+                SelectNoPrinter => CurrentPresentation,
                 RetryEventStorage when setup is not null => await RetryEventStorageAsync(cancellationToken).ConfigureAwait(false),
                 RetryEventStorage => CurrentPresentation,
                 CancelEventSetup => await CloseSetupAsync(releaseCamera: true, cancellationToken).ConfigureAwait(false),
@@ -336,12 +337,17 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
             throw new InvalidOperationException($"Event setup is not ready to {(startEvent ? "start" : "save")}.");
         }
 
+        draft = draft with { IsBusy = true, IsSavingAndStarting = startEvent };
+        PublishSetup(draft);
+
         if (startEvent && !await fileSystem.ProbeStorageAsync(cancellationToken).ConfigureAwait(false))
         {
             return PublishSetup(draft with
             {
                 StorageReady = false,
                 Confirmation = EventSetupConfirmation.None,
+                IsBusy = false,
+                IsSavingAndStarting = false,
             });
         }
 
@@ -351,6 +357,8 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
             return PublishSetup(draft.WithCameraState(CameraConnectionState.Disconnected) with
             {
                 Confirmation = EventSetupConfirmation.None,
+                IsBusy = false,
+                IsSavingAndStarting = false,
             });
         }
 
@@ -502,9 +510,26 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
         EventId eventId,
         CancellationToken cancellationToken)
     {
-        var configuration = await fileSystem.LoadEventAsync(eventId, cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"Event '{eventId}' was not found.");
-        return Publish(CurrentPresentation with
+        var baseline = CurrentPresentation;
+        Publish(baseline with
+        {
+            EventTiles = baseline.EventTiles
+                .Select(tile => tile.EventId == eventId ? tile with { State = EventCardState.Busy } : tile)
+                .ToArray(),
+        });
+        EventConfiguration configuration;
+        try
+        {
+            configuration = await fileSystem.LoadEventAsync(eventId, cancellationToken).ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Event '{eventId}' was not found.");
+        }
+        catch
+        {
+            Publish(baseline);
+            throw;
+        }
+
+        return Publish(baseline with
         {
             StartEventConfirmation = new StartEventConfirmationPresentation(configuration.Id, configuration.Name),
         });
@@ -512,10 +537,16 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
 
     private async Task<ApplicationPresentation> ExitActiveEventAsync(CancellationToken cancellationToken)
     {
-        if (CurrentPresentation.ActiveEvent?.GuestCycle.Phase is not (GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable))
+        var activeEvent = CurrentPresentation.ActiveEvent;
+        if (activeEvent?.GuestCycle.Phase is not (GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable))
         {
             return CurrentPresentation;
         }
+
+        Publish(CurrentPresentation with
+        {
+            ActiveEvent = activeEvent with { IsExitBusy = true },
+        });
 
         await ReleaseActiveEventResourcesAsync(cancellationToken).ConfigureAwait(false);
         Publish(CurrentPresentation with { ActiveEvent = null });
@@ -998,8 +1029,13 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
 
     private async Task<ApplicationPresentation> ConfirmStartSavedEventAsync(CancellationToken cancellationToken)
     {
-        var eventId = CurrentPresentation.StartEventConfirmation?.EventId
+        var confirmation = CurrentPresentation.StartEventConfirmation
             ?? throw new InvalidOperationException("No saved Event is awaiting confirmation.");
+        Publish(CurrentPresentation with
+        {
+            StartEventConfirmation = confirmation with { IsBusy = true },
+        });
+        var eventId = confirmation.EventId;
         var savedEvent = await DiscoverSavedEventAsync(eventId, cancellationToken).ConfigureAwait(false);
         if (savedEvent.AvailableCamera is null)
         {
@@ -1309,7 +1345,9 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
             IsNameDirty: draft.IsNameDirty,
             IsCameraDirty: draft.IsCameraDirty,
             Confirmation: draft.Confirmation,
-            Title: draft.EventId is null ? "New Event" : "Edit Event");
+            Title: draft.EventId is null ? "New Event" : "Edit Event",
+            IsBusy: draft.IsBusy,
+            IsSavingAndStarting: draft.IsSavingAndStarting);
         return Publish(CurrentPresentation with { Setup = presentation });
     }
 
@@ -1372,7 +1410,9 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
         bool StorageReady,
         DateTimeOffset? CreatedAt,
         EventDraftBaseline Baseline,
-        EventSetupConfirmation Confirmation)
+        EventSetupConfirmation Confirmation,
+        bool IsBusy = false,
+        bool IsSavingAndStarting = false)
     {
         public bool IsNameDirty => !string.Equals(EventName, Baseline.Name, StringComparison.Ordinal);
 
@@ -1380,10 +1420,12 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
             SelectedCamera?.DeviceId != Baseline.Camera?.DeviceId;
 
         public bool CanSave =>
+            !IsBusy &&
             CanStart &&
             (EventId is null || IsDirty);
 
         public bool CanStart =>
+            !IsBusy &&
             !string.IsNullOrWhiteSpace(EventName) &&
             CameraState == CameraConnectionState.Ready &&
             NoPrinterSelected &&

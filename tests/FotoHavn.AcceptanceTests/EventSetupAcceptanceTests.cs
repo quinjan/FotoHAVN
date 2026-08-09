@@ -250,6 +250,13 @@ public sealed class EventSetupAcceptanceTests
         var camera = new FakeCameraBoundary(new AvailableCamera("camera-1", "USB Camera", "Port 4"));
         var fileSystem = new FakeFileSystem();
         var orchestrator = CreateOrchestrator(camera, fileSystem);
+        var sawSaveBusy = false;
+        var saveBusyStartedEvent = false;
+        orchestrator.PresentationChanged += (_, state) =>
+        {
+            sawSaveBusy |= state.Setup?.IsBusy == true;
+            saveBusyStartedEvent |= state.Setup is { IsBusy: true, IsSavingAndStarting: true };
+        };
         var opened = await orchestrator.ExecuteAsync(new OpenNewEvent(), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new ChangeEventName("Summer Party"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
@@ -260,6 +267,8 @@ public sealed class EventSetupAcceptanceTests
         var state = await orchestrator.ExecuteAsync(new SaveAndCloseEventSetup(), TestContext.Current.CancellationToken);
 
         Assert.Null(state.Setup);
+        Assert.True(sawSaveBusy);
+        Assert.False(saveBusyStartedEvent);
         Assert.Equal(1, camera.ReleaseCount);
         Assert.Equal(0, fileSystem.PrinterQueryCount);
         var saved = Assert.Single(fileSystem.SavedEvents);
@@ -273,6 +282,11 @@ public sealed class EventSetupAcceptanceTests
     {
         var camera = new FakeCameraBoundary(new AvailableCamera("camera-1", "USB Camera", "Port 4"));
         var orchestrator = CreateOrchestrator(camera);
+        var sawSaveAndStartBusy = false;
+        orchestrator.PresentationChanged += (_, state) =>
+        {
+            sawSaveAndStartBusy |= state.Setup is { IsBusy: true, IsSavingAndStarting: true };
+        };
         await orchestrator.ExecuteAsync(new OpenNewEvent(), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new ChangeEventName("Summer Party"), TestContext.Current.CancellationToken);
         await orchestrator.ExecuteAsync(new SelectCamera("camera-1"), TestContext.Current.CancellationToken);
@@ -281,6 +295,7 @@ public sealed class EventSetupAcceptanceTests
         var state = await orchestrator.ExecuteAsync(new SaveAndStartEvent(), TestContext.Current.CancellationToken);
 
         Assert.Null(state.Setup);
+        Assert.True(sawSaveAndStartBusy);
         Assert.Equal("Summer Party", state.ActiveEvent?.Name);
         Assert.Equal(camera.StreamId, state.ActiveEvent?.CameraStreamId);
         Assert.Equal(1, camera.OpenCount);

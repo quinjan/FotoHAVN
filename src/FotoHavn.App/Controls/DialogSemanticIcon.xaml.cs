@@ -59,11 +59,11 @@ public sealed partial class DialogSemanticIcon : UserControl
 
     public void ApplyResponsiveLayout(bool stress)
     {
-        var size = stress ? 46 : 60;
+        var size = stress ? 42 : (double)Application.Current.Resources["DialogSemanticIconSize"];
         IconFrame.Width = size;
         IconFrame.Height = size;
         IconFrame.CornerRadius = new(size / 2);
-        Icon.FontSize = stress ? 18 : 28;
+        Icon.FontSize = stress ? 18 : (double)Application.Current.Resources["DialogSemanticIconGlyphSize"];
     }
 }
 

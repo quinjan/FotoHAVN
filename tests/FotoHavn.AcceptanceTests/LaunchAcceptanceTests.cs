@@ -36,6 +36,22 @@ public sealed class LaunchAcceptanceTests
     }
 
     [Fact]
+    public async Task Printer_default_selection_before_Setup_opens_is_ignored()
+    {
+        var orchestrator = CreateOrchestrator();
+        await orchestrator.ExecuteAsync(
+            new LaunchApplication(),
+            TestContext.Current.CancellationToken);
+
+        var state = await orchestrator.ExecuteAsync(
+            new SelectNoPrinter(),
+            TestContext.Current.CancellationToken);
+
+        Assert.Null(state.Setup);
+        Assert.Equal("Choose an Event", state.Heading);
+    }
+
+    [Fact]
     public async Task Application_commands_are_serialized()
     {
         var fileSystem = new BlockingFileSystem();
