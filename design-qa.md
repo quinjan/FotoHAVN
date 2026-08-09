@@ -356,7 +356,7 @@ final result: passed
 
 - Photo Strip preparing, visible at ten seconds, visible at five seconds, returning, failed, Compact, and Stress states all settled successfully.
 - All nine fixtures report zero UI Automation violations and pass surface structure, reading order, focus, live-region, target-size, and responsive-geometry checks.
-- The full automated suite passes: 44 design-contract, 82 acceptance, and 51 Windows integration tests.
+- The full automated suite passes: 45 design-contract, 82 acceptance, and 52 Windows integration tests.
 
 ## Comparison history
 

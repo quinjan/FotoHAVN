@@ -6,7 +6,6 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Media.MediaProperties;
-using Windows.Storage.Streams;
 using CoreCapturedFrame = FotoHavn.Core.CapturedFrame;
 
 namespace FotoHavn.App;
@@ -424,23 +423,13 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         TaskCompletionSource<CoreCapturedFrame> completion)
     {
         using (bitmap)
-        using (var stream = new InMemoryRandomAccessStream())
         {
             try
             {
-                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-                encoder.SetSoftwareBitmap(bitmap);
-                await encoder.FlushAsync();
-                var bytes = new byte[checked((int)stream.Size)];
-                using var reader = new DataReader(stream.GetInputStreamAt(0));
-                await reader.LoadAsync((uint)bytes.Length);
-                reader.ReadBytes(bytes);
-                completion.TrySetResult(new CoreCapturedFrame(
+                completion.TrySetResult(await CaptureFrameEncoder.EncodeJpegAsync(
+                    bitmap,
                     sequence,
-                    receivedAt,
-                    bitmap.PixelWidth,
-                    bitmap.PixelHeight,
-                    bytes));
+                    receivedAt));
             }
             catch (Exception exception)
             {
