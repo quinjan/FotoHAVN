@@ -97,7 +97,7 @@ public sealed class WindowSession : IDisposable
                 $"Windows could not size the FotoHAVN verification window (Win32 error {Marshal.GetLastWin32Error()}).");
         }
 
-        BringToForeground();
+        Activate();
         _ = GetClientRect(Handle, out client);
         if (client.Width != physicalWidth || client.Height != physicalHeight)
         {
@@ -107,7 +107,7 @@ public sealed class WindowSession : IDisposable
         }
     }
 
-    private void BringToForeground()
+    public void Activate()
     {
         var foreground = GetForegroundWindow();
         var currentThread = GetCurrentThreadId();

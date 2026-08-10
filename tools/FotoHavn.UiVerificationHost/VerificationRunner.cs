@@ -11,6 +11,7 @@ public sealed class VerificationRunner(HostOptions options)
 {
     private static readonly TimeSpan LaunchTimeout = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan SettlementTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan ActivationFocusStabilization = TimeSpan.FromMilliseconds(600);
 
     public int Run()
     {
@@ -131,7 +132,11 @@ public sealed class VerificationRunner(HostOptions options)
                 }
             }
 
-            inspection.NormalizeApplicationFocus(verificationCase);
+            PrepareFocusedEvidence(
+                window,
+                inspection,
+                script?.FinalInjectionIdentity ?? verificationCase.InjectionIdentity,
+                SettlementTimeout);
 
             var origin = window.GetClientOrigin();
             automation = inspection.Snapshot(
@@ -166,6 +171,31 @@ public sealed class VerificationRunner(HostOptions options)
             relativeResultPath);
         WriteJson(Path.Combine(caseRoot, "result.json"), result);
         return result;
+    }
+
+    private static void PrepareFocusedEvidence(
+        WindowSession window,
+        AutomationInspection inspection,
+        string injectionIdentity,
+        TimeSpan timeout)
+    {
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            if (!inspection.HasApplicationFocus())
+            {
+                window.Activate();
+                Thread.Sleep(ActivationFocusStabilization);
+            }
+
+            inspection.PrepareEvidence(injectionIdentity, timeout);
+            if (inspection.HasApplicationFocus())
+            {
+                return;
+            }
+        }
+
+        throw new InvalidOperationException(
+            "FotoHAVN could not retain focus while preparing UI Automation evidence.");
     }
 
     private ScenarioStatus Classify(
