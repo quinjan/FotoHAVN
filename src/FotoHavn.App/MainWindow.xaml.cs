@@ -1077,7 +1077,7 @@ public sealed partial class MainWindow : Window
                 else
 #endif
                 {
-                _ = LoadPhotoStripAsync(path);
+                    _ = LoadPhotoStripAsync(path);
                 }
             }
 

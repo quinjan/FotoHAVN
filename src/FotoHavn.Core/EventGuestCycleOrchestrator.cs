@@ -1316,7 +1316,7 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
         var activeEvent = CurrentPresentation.ActiveEvent;
         var streamFailure = Camera.StreamHealth.Failure;
         if (activeEvent?.GuestCycle is
-                { Phase: GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved, CompletedCaptures: < 4 } &&
+            { Phase: GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved, CompletedCaptures: < 4 } &&
             guestCycleCameraSensitive &&
             streamFailure != CameraStreamFailure.None)
         {
