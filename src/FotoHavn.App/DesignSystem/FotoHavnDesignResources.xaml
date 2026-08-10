@@ -380,6 +380,82 @@
         <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
         <Setter Property="Opacity" Value="0.82" />
     </Style>
+    <!-- Guest Cycle component families introduced by rollout batch 5. -->
+    <x:Double x:Key="CaptureProgressGroupSpacing">12</x:Double>
+    <x:Double x:Key="CaptureProgressStepSpacing">8</x:Double>
+    <Style x:Key="FotoHavnCaptureProgressStyle" TargetType="controls:CaptureProgress">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnCaptureProgressLabelStyle" TargetType="TextBlock">
+        <Setter Property="CharacterSpacing" Value="100" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style x:Key="FotoHavnCaptureProgressStepStyle" TargetType="Border">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="{StaticResource StrokeDefault}" />
+        <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style x:Key="FotoHavnCaptureProgressNumberStyle" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style x:Key="FotoHavnCaptureProgressCheckStyle" TargetType="FontIcon">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{ThemeResource ColorTextInverseBrush}" />
+        <Setter Property="Glyph" Value="&#xE73E;" />
+        <Setter Property="Visibility" Value="Collapsed" />
+    </Style>
+    <x:Double x:Key="PhotoStripResultColumnSpacing">48</x:Double>
+    <Style x:Key="FotoHavnPhotoStripResultStyle" TargetType="controls:PhotoStripResult">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripMessagePanelStyle" TargetType="StackPanel">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripTitleStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,17,0,0" />
+        <Setter Property="CharacterSpacing" Value="-40" />
+        <Setter Property="FontSize" Value="42" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripMessageStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,14,0,0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripReturnProgressStyle" TargetType="ProgressBar">
+        <Setter Property="Height" Value="4" />
+        <Setter Property="Margin" Value="0,30,0,0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripFailureStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,16,0,0" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="FotoHavnPhotoStripPreviewFrameStyle" TargetType="Border">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{ThemeResource ColorSurfacePanelBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ColorBorderDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="{StaticResource StrokeDefault}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusControl}" />
+    </Style>
+    <Style x:Key="FotoHavnSemanticAnchorStyle" TargetType="TextBlock">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Opacity" Value="0" />
+    </Style>
     <!-- Compatibility aliases for surfaces migrating in later rollout batches. -->
     <SolidColorBrush x:Key="CanvasBrush" Color="#FFF5F6F7" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFFFF" />

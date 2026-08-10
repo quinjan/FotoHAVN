@@ -6,7 +6,6 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Media.MediaProperties;
-using Windows.Storage.Streams;
 using CoreCapturedFrame = FotoHavn.Core.CapturedFrame;
 
 namespace FotoHavn.App;
@@ -25,6 +24,9 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
     private readonly SemaphoreSlim ownershipGate = new(1, 1);
     private readonly CameraSessionOwner<CameraOwnedStream> sessionOwner = new();
     private readonly object frameSync = new();
+    private CameraSourceCrop captureCrop = CameraPreviewRenderPolicy
+        .CalculateLayout(availableWidth: 1232, availableHeight: 596)
+        .SourceCrop;
     private PendingCapture? pendingCapture;
     private long latestFrameSequence;
     private long latestFrameAtUtcTicks;
@@ -273,6 +275,12 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         }
     }
 
+    internal void UpdateCaptureCrop(CameraSourceCrop crop)
+    {
+        ArgumentNullException.ThrowIfNull(crop);
+        Volatile.Write(ref captureCrop, crop);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (watcher is not null)
@@ -411,6 +419,7 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
                 capturedBitmap,
                 sequence,
                 receivedAt,
+                Volatile.Read(ref captureCrop),
                 request.Completion);
         }
 
@@ -421,26 +430,18 @@ public sealed class CameraBoundary : ICameraBoundary, IAsyncDisposable
         SoftwareBitmap bitmap,
         long sequence,
         DateTimeOffset receivedAt,
+        CameraSourceCrop crop,
         TaskCompletionSource<CoreCapturedFrame> completion)
     {
         using (bitmap)
-        using (var stream = new InMemoryRandomAccessStream())
         {
             try
             {
-                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-                encoder.SetSoftwareBitmap(bitmap);
-                await encoder.FlushAsync();
-                var bytes = new byte[checked((int)stream.Size)];
-                using var reader = new DataReader(stream.GetInputStreamAt(0));
-                await reader.LoadAsync((uint)bytes.Length);
-                reader.ReadBytes(bytes);
-                completion.TrySetResult(new CoreCapturedFrame(
+                completion.TrySetResult(await CaptureFrameEncoder.EncodeJpegAsync(
+                    bitmap,
                     sequence,
                     receivedAt,
-                    bitmap.PixelWidth,
-                    bitmap.PixelHeight,
-                    bytes));
+                    crop));
             }
             catch (Exception exception)
             {

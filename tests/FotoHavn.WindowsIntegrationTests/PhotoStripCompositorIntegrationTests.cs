@@ -32,8 +32,9 @@ public sealed class PhotoStripCompositorIntegrationTests
                 TestContext.Current.CancellationToken);
 
             Assert.True(result.IsAvailable);
-            Assert.Equal(600, result.Width);
-            Assert.Equal(1800, result.Height);
+            Assert.Equal(PhotoStripGeometry.Width, result.Width);
+            Assert.Equal(PhotoStripGeometry.Height, result.Height);
+            Assert.Equal(520d / 3d, PhotoStripGeometry.WidthForHeight(520), precision: 10);
             var decoded = await DecodeAsync(result.PngBytes);
             Assert.Equal(BitmapDecoder.PngDecoderId, decoded.CodecId);
             AssertPixel(decoded.Pixels, result.Width, 0, 0, blue: 255, green: 255, red: 255);

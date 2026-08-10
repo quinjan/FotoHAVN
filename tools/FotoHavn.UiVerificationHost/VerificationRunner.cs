@@ -221,6 +221,7 @@ public sealed class VerificationRunner(HostOptions options)
             Path.Combine(applicationRoot, "UiVerification", "ApprovedInjectionCatalog.json"),
             Path.Combine(applicationRoot, "UiVerification", "camera-preview.jpg"),
             Path.Combine(applicationRoot, "UiVerification", "canonical-presentation.json"),
+            Path.Combine(applicationRoot, "UiVerification", "guest-cycle-photo-strip.png"),
         };
         var missing = files.Where(path => !File.Exists(path)).ToArray();
         if (missing.Length > 0)

@@ -50,3 +50,19 @@ test("the holding indicator remains reusable after an Event exit cycle", () => {
     "exiting an Event must not permanently collapse the reusable spinner glyph",
   );
 });
+
+test("the destructive Exit Event action keeps its visible idle surface", () => {
+  const applyStart = guardedExitSource.indexOf("private void Apply");
+  const announceStart = guardedExitSource.indexOf("private void Announce", applyStart);
+  const applySource = guardedExitSource.slice(applyStart, announceStart);
+
+  assert.notEqual(applyStart, -1, "guarded exit visual-state application is missing");
+  assert.notEqual(announceStart, -1, "guarded exit announcement boundary is missing");
+  assert.doesNotMatch(
+    applySource,
+    /HoldButton\.Background\s*=\s*holding\s*\?[\s\S]*?Colors\.Transparent/,
+    "idle state must not replace the destructive style background with a transparent local value",
+  );
+  assert.match(applySource, /HoldButton\.ClearValue\(Control\.BorderBrushProperty\)/);
+  assert.match(applySource, /HoldButton\.ClearValue\(Control\.BackgroundProperty\)/);
+});

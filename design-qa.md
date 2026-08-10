@@ -86,6 +86,30 @@ Previous report result: passed
 
 final result: passed
 
+# Design QA: Guest Cycle, Capture, Operator Assistance, and Photo Strip
+
+## Comparison target
+
+- Source visual truth: the approved Batch 5 targets under `docs/design-system/reference-states/targets/capture`, `operator-assistance`, and `photo-strip`.
+- Native evidence: the 36 Batch 5 fixture folders under `artifacts/ui-verification/batch-5-owned`, followed by focused recaptures under `artifacts/ui-verification/batch-5-assistance-fixed`, `photo-strip-asset`, and `issue-77-final-samples`.
+- Responsive coverage: 1280 × 720, 1024 × 768, 1024 × 576, 853 × 480, and 640 × 360 effective viewports.
+
+## Findings
+
+- No actionable P0/P1/P2 visual mismatch remains after the correction loop.
+- Capture: the native surface keeps one four-step Capture progress concept, a large mirrored camera viewport, a single state-owned countdown or saved overlay, and stable geometry from countdown through flash and saved states. The deterministic camera frame is deliberately abstract and contains no embedded countdown, cursor, or production guest image.
+- Operator Assistance: cause, preserved Capture progress, recovery action, and guarded Exit remain visible and programmatically ordered. The 640 × 360 layout keeps the Retry target at 48 px and removes only the redundant eyebrow.
+- Photo Strip: the preview now uses a deterministic crop of the approved four-Capture strip instead of embedding the full concept screenshot. Preparing, visible, returning, and failure states retain the approved content hierarchy and responsive portrait preview.
+- Accessibility: the final focused recapture reports zero reading-order, focus, live-region, target-size, or responsive-geometry violations for all 12 assistance fixtures. Capture and Photo Strip representative fixtures also report zero semantic violations.
+
+## Explained pixel differences
+
+- P3 intentional difference: WinUI text metrics, native focus visuals, progress controls, and the guarded hold action differ at the pixel level from the browser-rendered reference while preserving the approved tokens and hierarchy.
+- P3 intentional difference: the verification camera is an abstract privacy-safe frame; the approved reference uses an illustrative couple. The state overlay and camera composition contract, rather than depicted people, are the acceptance seam.
+- P3 intentional difference: the native Photo Strip is upright inside a bordered viewport instead of applying the reference renderer's slight rotation and CSS shadow. The complete four-Capture asset, label, countdown, and responsive bounds are preserved.
+
+final result: passed
+
 ---
 
 # Design QA: Guest Cycle assistance alignment
@@ -301,5 +325,50 @@ final result: passed
 ## Follow-up polish
 
 - The final capture includes the required keyboard focus ring; the pointer-state source crop does not. This is an intentional accessibility difference.
+
+final result: passed
+
+---
+
+# Design QA: Photo Strip preview fidelity
+
+## Comparison target
+
+- Source visual truth: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-9906216a-e4ac-47c0-96f2-ec1961eaf7ff.png`, the operator-supplied 600 × 1800 generated Photo Strip.
+- Supporting source: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-03a0c692-a057-448e-b0c9-92b500d69e93.png`, the field capture showing the extra preview whitespace.
+- Implementation screenshot: `artifacts/ui-verification/merge-readiness-smoke-fb9d8c6/photo-strip_visible-10-seconds_standard/actual.png`.
+- Viewport: 1280 × 720 native WinUI client at 1× capture density; source strip is 600 × 1800 pixels.
+- State: Photo Strip visible with ten seconds remaining. Preparing, five-second, returning, failed, and four responsive-risk states were also exercised.
+
+## Findings
+
+- [P0 resolved] The pinned interactive host now produces a valid native screenshot instead of the former all-white frame.
+  - Evidence: `artifacts/ui-verification/merge-readiness-full-fb9d8c6` contains all 103 current fixture results, matches the pinned environment, and has no missing evidence files.
+  - Review: the operator inspected the running branch through the complete manual flow and approved it on 2026-08-10. The native visible Photo Strip also received a focused side-by-side review against the supplied 600 × 1800 generated strip.
+  - Result: no unexplained or actionable visual difference remains for the Photo Strip fidelity change.
+- Fonts and typography: pass — hierarchy, weights, wrapping, and countdown copy remain aligned with the approved experience.
+- Spacing and layout rhythm: pass — the shared geometry contract computes preview width from height at exactly `600 / 1800`; all nine responsive-geometry checks pass with zero violations.
+- Colors and visual tokens: pass — the production surface continues to use the governed neutral canvas, border, text, and progress resources.
+- Image quality and asset fidelity: pass — the production-composited 600 × 1800 strip retains its white margins, capture gutters, and Event label without adding horizontal whitespace in the preview.
+- Copy and content: unchanged and present in the UI Automation evidence.
+
+## Primary interaction and state checks
+
+- Photo Strip preparing, visible at ten seconds, visible at five seconds, returning, failed, Compact, and Stress states all settled successfully.
+- All nine fixtures report zero UI Automation violations and pass surface structure, reading order, focus, live-region, target-size, and responsive-geometry checks.
+- The current pinned full-boundary run produced 103 of 103 results with zero missing evidence files. Eight global-focus mismatches were traced to MongoDB Compass and Windows Find stealing focus; focused host recaptures under `merge-readiness-focus-rerun-fb9d8c6`, `merge-readiness-focus-single-fb9d8c6`, and `focus-stress-rerun` settled all eight with zero UI Automation violations.
+- The full automated suite passes: 45 design-contract, 82 acceptance, and 53 Windows integration tests.
+
+## Comparison history
+
+1. The supplied field capture showed the complete generated strip letterboxed inside a wider preview frame.
+2. The compositor and preview now consume one canonical 600 × 1800 geometry contract; responsive preview widths are derived from height instead of independent magic numbers.
+3. The old 295 × 540 QA image was replaced by a production-composited 600 × 1800 privacy-safe strip, and a regression test pins both dimensions.
+4. Earlier native capture attempts returned blank white frames because the desktop capture handle was unavailable.
+5. The merge-readiness pinned run restored valid native captures for all 103 fixtures; the focused Photo Strip comparison and operator manual review close the previous blocked result.
+
+## Follow-up polish
+
+- None identified.
 
 final result: passed

@@ -189,7 +189,8 @@
 
                 <Grid x:Name="GuestCaptureLayer" Padding="24,20,24,42" Visibility="Collapsed">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="43" />
+                        <RowDefinition x:Name="CaptureHeaderRow" Height="62" />
+                        <RowDefinition x:Name="CaptureMetaRow" Height="38" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -198,39 +199,35 @@
                         </Border>
                         <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="FotoHAVN" />
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="12">
-                        <TextBlock
-                            x:Name="CaptureProgressText"
-                            VerticalAlignment="Center"
-                            CharacterSpacing="100"
-                            FontSize="10"
-                            FontWeight="Bold" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border x:Name="CaptureStep1Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
-                                <Grid><TextBlock x:Name="CaptureStep1Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="1" /><FontIcon x:Name="CaptureStep1Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
-                            </Border>
-                            <Border x:Name="CaptureStep2Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
-                                <Grid><TextBlock x:Name="CaptureStep2Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="2" /><FontIcon x:Name="CaptureStep2Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
-                            </Border>
-                            <Border x:Name="CaptureStep3Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
-                                <Grid><TextBlock x:Name="CaptureStep3Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="3" /><FontIcon x:Name="CaptureStep3Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
-                            </Border>
-                            <Border x:Name="CaptureStep4Border" Width="32" Height="32" Background="White" BorderBrush="#FFC7CACE" BorderThickness="1" CornerRadius="16">
-                                <Grid><TextBlock x:Name="CaptureStep4Number" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Text="4" /><FontIcon x:Name="CaptureStep4Check" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Glyph="&#xE73E;" Visibility="Collapsed" /></Grid>
-                            </Border>
-                        </StackPanel>
-                    </StackPanel>
+                    <controls:CaptureProgress x:Name="GuestCaptureProgress" Grid.Row="1" HorizontalAlignment="Stretch" />
                     <Border
                         x:Name="GuestPreviewViewport"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         Width="922.5"
                         HorizontalAlignment="Center"
                         Background="#FF17181A"
                         BorderBrush="#FFBFC3C7"
                         BorderThickness="1"
-                        CornerRadius="10">
+                        CornerRadius="10"
+                        SizeChanged="GuestPreviewViewportSizeChanged">
                         <Grid>
-                            <Image x:Name="GuestPreviewImage" Stretch="UniformToFill" />
+                            <Image x:Name="GuestPreviewImage" AutomationProperties.Name="Camera preview" Stretch="Uniform" />
+                            <Grid AutomationProperties.AccessibilityView="Raw">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition x:Name="GuestCaptureGuideTopRow" Height="0" />
+                                    <RowDefinition x:Name="GuestCaptureGuideRow" Height="*" />
+                                    <RowDefinition x:Name="GuestCaptureGuideBottomRow" Height="0" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="GuestCaptureGuideLeftColumn" Width="5*" />
+                                    <ColumnDefinition x:Name="GuestCaptureGuideColumn" Width="54*" />
+                                    <ColumnDefinition x:Name="GuestCaptureGuideRightColumn" Width="5*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Row="1" Background="#FF17181A" />
+                                <Border Grid.Row="1" Grid.Column="2" Background="#FF17181A" />
+                                <Border Grid.ColumnSpan="3" Background="#FF17181A" />
+                                <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#FF17181A" />
+                            </Grid>
                             <Border
                                 Margin="0,17,17,0"
                                 Padding="9,7"
@@ -268,6 +265,10 @@
                             </Border>
                         </Grid>
                     </Border>
+                    <TextBlock
+                        Grid.Row="2"
+                        AutomationProperties.Name="countdown or saved status"
+                        Style="{StaticResource FotoHavnSemanticAnchorStyle}" />
                 </Grid>
 
                 <Grid
@@ -307,16 +308,25 @@
                             <TextBlock x:Name="AssistanceEyebrowText" HorizontalAlignment="Center" AutomationProperties.Name="Operator Assistance label" Style="{StaticResource TypeEyebrowStyle}" Text="OPERATOR ASSISTANCE" />
                             <TextBlock x:Name="AssistanceHeadingText" Margin="0,8,0,0" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="Level1" FontFamily="{StaticResource FotoHavnFontFamily}" FontSize="38" FontWeight="Bold" Text="Please call the operator" />
                             <TextBlock x:Name="AssistanceMessageText" Margin="0,10,0,0" HorizontalAlignment="Center" Style="{StaticResource TypeBodyDefaultStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <controls:CaptureProgress x:Name="AssistanceCaptureProgress" Margin="0,16,0,0" HorizontalAlignment="Center" Visibility="Collapsed" />
                             <TextBlock x:Name="AssistanceProgressText" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource ColorTextMutedBrush}" Style="{StaticResource TypeBodyDefaultStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock x:Name="FailureOriginPreviewSemantic" Width="1" Height="1" Opacity="0" />
+                            <TextBlock x:Name="FailureOriginStatusSemantic" Width="1" Height="1" Opacity="0" />
+                            <TextBlock
+                                x:Name="AssistanceRecoveryActionSemantic"
+                                Width="1"
+                                Height="1"
+                                AutomationProperties.Name="recovery action"
+                                Opacity="0" />
                             <TextBlock
                                 Width="1"
                                 Height="1"
-                                AutomationProperties.Name="Retry or Exit Event"
+                                AutomationProperties.Name="Exit Event"
                                 Opacity="0" />
                             <Button
                                 x:Name="AssistanceRetryButton"
                                 Width="190"
-                                MinHeight="48"
+                                Height="64"
                                 Margin="0,20,0,0"
                                 HorizontalAlignment="Center"
                                 AutomationProperties.AutomationId="FotoHavn.ActionButton.AssistanceRetry"
@@ -342,24 +352,12 @@
                 </Grid>
 
                 <Grid x:Name="PhotoStripLayer" Padding="120,46" Visibility="Collapsed">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="420" /></Grid.ColumnDefinitions>
-                    <StackPanel Width="520" HorizontalAlignment="Left" VerticalAlignment="Center">
-                        <TextBlock CharacterSpacing="150" FontSize="10" FontWeight="Bold" Text="ALL FOUR CAPTURES SAVED" />
-                        <TextBlock Margin="0,17,0,0" AutomationProperties.HeadingLevel="Level1" CharacterSpacing="-40" FontSize="50" FontWeight="Bold" Text="Here’s your Photo Strip." />
-                        <TextBlock x:Name="PhotoStripReturnText" Margin="0,14,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="15" TextWrapping="Wrap" />
-                        <Grid Width="310" Height="3" Margin="0,30,0,0" HorizontalAlignment="Left" Background="#FFD8DADE">
-                            <Border x:Name="ReturnProgressFill" Width="310" HorizontalAlignment="Left" Background="#FF1C1D1F" />
-                        </Grid>
-                    </StackPanel>
-                    <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Background="White">
-                        <Border.RenderTransform><RotateTransform Angle="1.5" /></Border.RenderTransform>
-                        <Image x:Name="PhotoStripImage" Width="190" Height="570" Stretch="Uniform" />
-                    </Border>
+                    <controls:PhotoStripResult x:Name="GuestPhotoStripResult" />
                 </Grid>
 
                 <controls:ModalDialogSurface
                     x:Name="ExitEventConfirmationLayer"
-                    AutomationProperties.Name="Exit Event confirmation"
+                    AutomationProperties.Name="Exit this Event?"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     KeyDown="ExitEventConfirmationKeyDown"

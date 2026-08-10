@@ -44,6 +44,8 @@ public sealed partial class MainWindow : Window
     private ApplicationSurfaceOverride? mediaPendingRenderSettlement;
     private readonly BitmapImage verificationCameraPreview =
         new(new Uri("ms-appx:///UiVerification/camera-preview.jpg"));
+    private readonly BitmapImage verificationPhotoStripPreview =
+        new(new Uri("ms-appx:///UiVerification/guest-cycle-photo-strip.png"));
 #endif
 
     public MainWindow(IApplicationPresentationController presentationController, CameraBoundary? camera = null)
@@ -67,12 +69,6 @@ public sealed partial class MainWindow : Window
 #if UI_VERIFICATION
         renderSettledSignal = new UiVerificationRenderSettledSignal(WindowRoot);
 #endif
-        var guestMirror = CameraPreviewRenderPolicy.CreateMirror(GuestPreviewViewport.Width);
-        GuestPreviewImage.RenderTransform = new ScaleTransform
-        {
-            ScaleX = guestMirror.ScaleX,
-            CenterX = guestMirror.CenterX,
-        };
         presentationController.PresentationChanged += PresentationChanged;
         Activated += MainWindowActivated;
         if (camera is not null)
@@ -378,13 +374,38 @@ public sealed partial class MainWindow : Window
     {
         var mode = ResponsiveLayout.Resolve(args.NewSize.Width, args.NewSize.Height);
         responsiveMode = mode;
+        GuestPhotoStripResult.ApplyResponsiveLayout(mode);
+        GuestCaptureProgress.SetCompact(mode == ResponsiveLayoutMode.Stress);
+        GuestPreviewViewport.Width = double.NaN;
+        GuestPreviewViewport.HorizontalAlignment = HorizontalAlignment.Stretch;
+        GuestCaptureLayer.Padding = mode switch
+        {
+            ResponsiveLayoutMode.Standard => new Thickness(24, 0, 24, 24),
+            ResponsiveLayoutMode.Compact => new Thickness(24, 0, 24, 20),
+            _ => new Thickness(10, 0, 10, 10),
+        };
+        CaptureHeaderRow.Height = new(mode == ResponsiveLayoutMode.Stress ? 52 : 62);
+        CaptureMetaRow.Height = new(mode == ResponsiveLayoutMode.Stress ? 32 : 38);
+        CountdownText.FontSize = mode == ResponsiveLayoutMode.Stress ? 112 : 190;
+        PhotoStripLayer.Padding = mode switch
+        {
+            ResponsiveLayoutMode.Standard => new Thickness(120, 46, 120, 46),
+            ResponsiveLayoutMode.Compact => new Thickness(60, 32, 60, 32),
+            _ => new Thickness(16),
+        };
+        AssistanceHeadingText.Margin = new Thickness(0, 8, 0, 0);
+        AssistanceMessageText.Margin = new Thickness(0, 10, 0, 0);
+        AssistanceCaptureProgress.Margin = new Thickness(0, 16, 0, 0);
+        AssistanceProgressText.Margin = new Thickness(0, 10, 0, 0);
+        AssistanceRetryButton.Height = 64;
+        AssistanceRetryButton.Margin = new Thickness(0, 20, 0, 0);
         switch (mode)
         {
             case ResponsiveLayoutMode.Standard:
                 GuestStartContent.Width = 780;
                 GuestStartContent.Margin = new Thickness(0, 29, 0, 0);
                 ActiveEventHeadingText.FontSize = 60;
-                AssistancePanel.Margin = new Thickness(260, 193, 260, 191);
+                AssistancePanel.Margin = new Thickness(260, 145, 260, 142);
                 AssistancePanel.Padding = new Thickness(40, 30, 40, 30);
                 AssistanceContent.Width = 700;
                 AssistanceHeadingText.FontSize = 38;
@@ -404,10 +425,16 @@ public sealed partial class MainWindow : Window
                 GuestStartContent.Width = Math.Max(320, args.NewSize.Width - 50);
                 GuestStartContent.Margin = new Thickness(0, 40, 0, 0);
                 ActiveEventHeadingText.FontSize = 32;
-                AssistancePanel.Margin = new Thickness(24, 33, 24, 43);
-                AssistancePanel.Padding = new Thickness(20, 16, 20, 16);
+                AssistancePanel.Margin = new Thickness(24, 4, 24, 4);
+                AssistancePanel.Padding = new Thickness(20, 8, 20, 8);
                 AssistanceContent.Width = Math.Max(300, args.NewSize.Width - 80);
-                AssistanceHeadingText.FontSize = 30;
+                AssistanceHeadingText.FontSize = 26;
+                AssistanceHeadingText.Margin = new Thickness(0, 4, 0, 0);
+                AssistanceMessageText.Margin = new Thickness(0, 4, 0, 0);
+                AssistanceCaptureProgress.Margin = new Thickness(0, 6, 0, 0);
+                AssistanceProgressText.Margin = new Thickness(0, 4, 0, 0);
+                AssistanceRetryButton.Height = 48;
+                AssistanceRetryButton.Margin = new Thickness(0, 6, 0, 0);
                 GuestRetentionText.Visibility = Visibility.Collapsed;
                 AssistanceEyebrowText.Visibility = Visibility.Collapsed;
                 AssistanceProgressText.Visibility = currentPresentation?.ActiveEvent?.GuestCycle.Phase ==
@@ -425,6 +452,45 @@ public sealed partial class MainWindow : Window
 
     private async void StartGuestCycleClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new StartGuestCycle());
+
+    private void GuestPreviewViewportSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        if (args.NewSize.Width <= 0 || args.NewSize.Height <= 0)
+        {
+            return;
+        }
+
+        var layout = CameraPreviewRenderPolicy.CalculateLayout(
+            args.NewSize.Width,
+            args.NewSize.Height);
+        GuestCaptureGuideLeftColumn.Width = new GridLength(layout.GuideLeft);
+        GuestCaptureGuideColumn.Width = new GridLength(layout.GuideWidth);
+        GuestCaptureGuideRightColumn.Width = new GridLength(
+            args.NewSize.Width - layout.GuideLeft - layout.GuideWidth);
+        GuestCaptureGuideTopRow.Height = new GridLength(layout.GuideTop);
+        GuestCaptureGuideRow.Height = new GridLength(layout.GuideHeight);
+        GuestCaptureGuideBottomRow.Height = new GridLength(
+            args.NewSize.Height - layout.GuideTop - layout.GuideHeight);
+        camera?.UpdateCaptureCrop(layout.SourceCrop);
+#if UI_VERIFICATION
+        GuestPreviewImage.RenderTransform = new CompositeTransform
+        {
+            ScaleX = 1.72,
+            ScaleY = 1.72,
+            CenterX = args.NewSize.Width / 2,
+            CenterY = args.NewSize.Height / 2,
+            TranslateX = -args.NewSize.Width * 0.2,
+            TranslateY = -args.NewSize.Height * 0.2,
+        };
+#else
+        var guestMirror = CameraPreviewRenderPolicy.CreateMirror(args.NewSize.Width);
+        GuestPreviewImage.RenderTransform = new ScaleTransform
+        {
+            ScaleX = guestMirror.ScaleX,
+            CenterX = guestMirror.CenterX,
+        };
+#endif
+    }
 
     private async void RetryGuestCycleClicked(object sender, RoutedEventArgs args) =>
         await ExecuteAsync(new RetryGuestCycle());
@@ -859,7 +925,8 @@ public sealed partial class MainWindow : Window
         var isStart = guestCycle.Phase == GuestCyclePhase.Start;
         var isAssistance = guestCycle.Phase is GuestCyclePhase.StartUnavailable or GuestCyclePhase.OperatorAssistance;
         var isCapture = guestCycle.Phase is GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved;
-        var isStrip = guestCycle.Phase is GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading;
+        var isStrip = guestCycle.Phase is GuestCyclePhase.PhotoStripPreparing or
+            GuestCyclePhase.PhotoStripPreview or GuestCyclePhase.Fading;
         StartGuestLayer.Visibility = isStart ? Visibility.Visible : Visibility.Collapsed;
         GuestAssistanceLayer.Visibility = isAssistance ? Visibility.Visible : Visibility.Collapsed;
         GuestCaptureLayer.Visibility = isCapture ? Visibility.Visible : Visibility.Collapsed;
@@ -879,6 +946,9 @@ public sealed partial class MainWindow : Window
 
         if (isCapture)
         {
+#if UI_VERIFICATION
+            GuestPreviewImage.Source = verificationCameraPreview;
+#endif
             CountdownOverlay.Visibility = guestCycle.Phase == GuestCyclePhase.Countdown
                 ? Visibility.Visible
                 : Visibility.Collapsed;
@@ -889,13 +959,16 @@ public sealed partial class MainWindow : Window
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             CountdownText.Text = guestCycle.CountdownSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            CaptureProgressText.Text = guestCycle.ProgressText.ToUpperInvariant();
-            UpdateCaptureProgress(guestCycle.CaptureNumber, guestCycle.CompletedCaptures);
+            GuestCaptureProgress.SetProgress(guestCycle.CaptureNumber, guestCycle.CompletedCaptures);
         }
 
         if (isAssistance)
         {
             var beforeAdmission = guestCycle.Phase == GuestCyclePhase.StartUnavailable;
+            var verificationOrigin = surfaceOverride?.Surface;
+            var photoStripFailure = verificationOrigin == ApplicationSurface.PhotoStrip ||
+                (surfaceOverride is null && guestCycle.CompletedCaptures == 4 &&
+                 guestCycle.Failure == GuestCycleFailure.StorageUnavailable);
             var failure = beforeAdmission
                 ? activeEvent.GuestStart.Failure
                 : guestCycle.Failure == GuestCycleFailure.StorageUnavailable
@@ -912,9 +985,11 @@ public sealed partial class MainWindow : Window
                 : guestCycle.Recovery == GuestCycleRecovery.ExitOnly;
 
             AssistanceEyebrowText.Text = "OPERATOR ASSISTANCE";
-            AssistanceMessageText.Text = failure == GuestStartFailure.CameraUnavailable
-                ? retryFailed ? "The Camera is still unavailable." : "The Camera is not ready."
-                : "Photos cannot be saved right now.";
+            AssistanceMessageText.Text = photoStripFailure
+                ? "The Photo Strip could not be prepared."
+                : failure == GuestStartFailure.CameraUnavailable
+                    ? retryFailed ? "The Camera is still unavailable." : "The Camera stopped responding."
+                    : "Photos cannot be saved right now.";
             AutomationProperties.SetName(AssistanceMessageText, $"Reason: {AssistanceMessageText.Text}");
             AssistanceProgressText.Text = beforeAdmission
                 ? exitOnly
@@ -925,6 +1000,27 @@ public sealed partial class MainWindow : Window
                 : exitOnly
                     ? $"{guestCycle.CompletedCaptures} of 4 Captures are safe. Exit the Event to update setup."
                     : $"{guestCycle.CompletedCaptures} of 4 Captures are safe. Retry to continue.";
+            AssistanceCaptureProgress.Visibility = beforeAdmission ? Visibility.Collapsed : Visibility.Visible;
+            if (!beforeAdmission)
+            {
+                AssistanceCaptureProgress.SetProgress(
+                    Math.Clamp(guestCycle.CompletedCaptures + 1, 1, 4),
+                    guestCycle.CompletedCaptures);
+            }
+            var failureOrigin = verificationOrigin switch
+            {
+                ApplicationSurface.Capture => ("Camera preview", "countdown or saved status"),
+                ApplicationSurface.PhotoStrip => ("Photo Strip preview", "return status and progress"),
+                _ => (string.Empty, string.Empty),
+            };
+            AutomationProperties.SetName(FailureOriginPreviewSemantic, failureOrigin.Item1);
+            AutomationProperties.SetName(FailureOriginStatusSemantic, failureOrigin.Item2);
+            AutomationProperties.SetAccessibilityView(
+                FailureOriginPreviewSemantic,
+                failureOrigin.Item1.Length == 0 ? AccessibilityView.Raw : AccessibilityView.Content);
+            AutomationProperties.SetAccessibilityView(
+                FailureOriginStatusSemantic,
+                failureOrigin.Item2.Length == 0 ? AccessibilityView.Raw : AccessibilityView.Content);
             if (responsiveMode == ResponsiveLayoutMode.Stress)
             {
                 AssistanceProgressText.Visibility = beforeAdmission ? Visibility.Collapsed : Visibility.Visible;
@@ -945,17 +1041,44 @@ public sealed partial class MainWindow : Window
                 ? failure == GuestStartFailure.CameraUnavailable ? "Checking Camera…" : "Checking storage…"
                 : "Retry";
             AssistanceRetryButton.SetValue(AutomationProperties.NameProperty, AssistanceRetryLabel.Text);
+            AutomationProperties.SetName(
+                AssistanceMessageText,
+                beforeAdmission ? $"reason: {AssistanceMessageText.Text}" : $"cause: {AssistanceMessageText.Text}");
+            AutomationProperties.SetName(AssistanceProgressText, $"preserved progress: {AssistanceProgressText.Text}");
+            AutomationProperties.SetName(
+                AssistanceRecoveryActionSemantic,
+                beforeAdmission
+                    ? "Retry or Exit Event"
+                    : exitOnly ? "recovery action: Exit Event" : $"recovery action: {AssistanceRetryLabel.Text}");
         }
 
         if (isStrip)
         {
             var remaining = guestCycle.PreviewSecondsRemaining;
-            PhotoStripReturnText.Text = $"Looking good! The booth will be ready for the next guests in {remaining}.";
-            ReturnProgressFill.Width = 310 * (remaining / 10d);
+            var resultState = guestCycle.Failure != GuestCycleFailure.None
+                ? PhotoStripResultState.Failed
+                : guestCycle.Phase == GuestCyclePhase.PhotoStripPreparing
+                    ? PhotoStripResultState.Preparing
+                    : guestCycle.Phase == GuestCyclePhase.Fading
+                        ? PhotoStripResultState.Returning
+                        : PhotoStripResultState.Visible;
+            GuestPhotoStripResult.Apply(resultState, remaining);
             if (guestCycle.PhotoStripPath is { } path &&
                 (!string.Equals(loadingPhotoStripPath, path, StringComparison.Ordinal) || !photoStripVisibleSignaled))
             {
-                _ = LoadPhotoStripAsync(path);
+#if UI_VERIFICATION
+                if (string.Equals(path, UiVerificationPresentationController.PhotoStripReferencePath, StringComparison.Ordinal))
+                {
+                    loadingPhotoStripPath = path;
+                    GuestPhotoStripResult.ImageSource = verificationPhotoStripPreview;
+                    photoStripVisibleSignaled = true;
+                    CompleteMediaPendingRenderSettlement();
+                }
+                else
+#endif
+                {
+                    _ = LoadPhotoStripAsync(path);
+                }
             }
 
             if (guestCycle.Phase == GuestCyclePhase.Fading)
@@ -970,7 +1093,7 @@ public sealed partial class MainWindow : Window
         }
         else
         {
-            PhotoStripImage.Source = null;
+            GuestPhotoStripResult.ImageSource = null;
             loadingPhotoStripPath = null;
             photoStripVisibleSignaled = false;
             photoStripFadeStarted = false;
@@ -1009,7 +1132,9 @@ public sealed partial class MainWindow : Window
         {
             ApplicationSurface.GuestStart => "Guest Start",
             ApplicationSurface.GuestStartUnavailable => "Guest Start unavailable",
+            ApplicationSurface.Capture => "Capture",
             ApplicationSurface.OperatorAssistance => "Operator Assistance",
+            ApplicationSurface.PhotoStrip => "Photo Strip",
             _ => string.Empty,
         };
         if (surfaceName.Length == 0)
@@ -1036,11 +1161,16 @@ public sealed partial class MainWindow : Window
         var announcement = surfaceOverride?.Announcement ??
             (surfaceOverride is not null
                 ? $"{surfaceName} {state}"
-                : unavailable && !retrying
-                ? $"{surfaceName} needs attention. {AssistanceMessageText.Text} " +
-                  (exitOnly ? "Exit Event to update setup." : "Retry or Exit Event.")
-                : $"{surfaceName} {state}");
-        if (surfaceOverride is null && string.Equals(announcement, lastAnnouncement, StringComparison.Ordinal))
+                : ProductionSurfaceAnnouncement(
+                    activeEvent,
+                    surface,
+                    surfaceName,
+                    state,
+                    unavailable,
+                    retrying,
+                    exitOnly));
+        if (announcement.Length == 0 ||
+            (surfaceOverride is null && string.Equals(announcement, lastAnnouncement, StringComparison.Ordinal)))
         {
             return;
         }
@@ -1055,6 +1185,36 @@ public sealed partial class MainWindow : Window
         _ = RaiseSurfaceAnnouncementAsync();
     }
 
+    private string ProductionSurfaceAnnouncement(
+        ActiveEventPresentation? activeEvent,
+        ApplicationSurface surface,
+        string surfaceName,
+        string state,
+        bool unavailable,
+        bool retrying,
+        bool exitOnly) =>
+        (surface, activeEvent?.GuestCycle) switch
+        {
+            (ApplicationSurface.Capture,
+                { Phase: GuestCyclePhase.Countdown, CountdownSeconds: 3 } cycle) =>
+                $"Photo {cycle.CaptureNumber} of 4. Taking photo in three seconds.",
+            (ApplicationSurface.Capture, { Phase: GuestCyclePhase.CaptureSaved } cycle) =>
+                $"Photo {cycle.CompletedCaptures} saved.",
+            (ApplicationSurface.PhotoStrip,
+                { Phase: GuestCyclePhase.PhotoStripPreview, PreviewSecondsRemaining: 10 }) =>
+                "Your photo strip is ready. Returning to start in 10 seconds.",
+            (ApplicationSurface.PhotoStrip,
+                { Phase: GuestCyclePhase.PhotoStripPreview, PreviewSecondsRemaining: 5 }) =>
+                "Returning to start in five seconds.",
+            (ApplicationSurface.PhotoStrip, { Phase: GuestCyclePhase.Fading }) =>
+                "Ready for the next guest.",
+            (ApplicationSurface.Capture or ApplicationSurface.PhotoStrip, _) => string.Empty,
+            _ when unavailable && !retrying =>
+                $"{surfaceName} needs attention. {AssistanceMessageText.Text} " +
+                (exitOnly ? "Exit Event to update setup." : "Retry or Exit Event."),
+            _ => $"{surfaceName} {state}",
+        };
+
     private async Task RaiseSurfaceAnnouncementAsync()
     {
         var dispatcherQueue = DispatcherQueue;
@@ -1065,27 +1225,6 @@ public sealed partial class MainWindow : Window
                 FrameworkElementAutomationPeer.CreatePeerForElement(SurfaceAnnouncement);
             peer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
         });
-    }
-
-    private void UpdateCaptureProgress(int activeCapture, int completedCaptures)
-    {
-        Border[] borders = [CaptureStep1Border, CaptureStep2Border, CaptureStep3Border, CaptureStep4Border];
-        TextBlock[] numbers = [CaptureStep1Number, CaptureStep2Number, CaptureStep3Number, CaptureStep4Number];
-        FontIcon[] checks = [CaptureStep1Check, CaptureStep2Check, CaptureStep3Check, CaptureStep4Check];
-        var primary = (Brush)Application.Current.Resources["TextPrimaryBrush"];
-        var hairline = (Brush)Application.Current.Resources["HairlineBrush"];
-        for (var index = 0; index < borders.Length; index++)
-        {
-            var captureNumber = index + 1;
-            var complete = captureNumber <= completedCaptures;
-            var active = captureNumber == activeCapture && !complete;
-            borders[index].Background = complete ? primary : new SolidColorBrush(Colors.White);
-            borders[index].BorderBrush = complete || active ? primary : hairline;
-            borders[index].BorderThickness = new Thickness(active ? 2 : 1);
-            numbers[index].Visibility = complete ? Visibility.Collapsed : Visibility.Visible;
-            checks[index].Visibility = complete ? Visibility.Visible : Visibility.Collapsed;
-            checks[index].Foreground = new SolidColorBrush(Colors.White);
-        }
     }
 
     private async Task LoadPhotoStripAsync(string path)
@@ -1102,7 +1241,7 @@ public sealed partial class MainWindow : Window
             using var stream = await file.OpenReadAsync();
             var source = new BitmapImage();
             await source.SetSourceAsync(stream);
-            PhotoStripImage.Source = source;
+            GuestPhotoStripResult.ImageSource = source;
             photoStripVisibleSignaled = true;
 #if UI_VERIFICATION
             CompleteMediaPendingRenderSettlement();
@@ -1158,17 +1297,7 @@ public sealed partial class MainWindow : Window
         }
 
         photoStripFadeStarted = true;
-        var storyboard = new Storyboard();
-        var animation = new DoubleAnimation
-        {
-            From = 1,
-            To = 0,
-            Duration = (Duration)Application.Current.Resources["FotoHavnPreviewFadeDuration"],
-        };
-        Storyboard.SetTarget(animation, PhotoStripLayer);
-        Storyboard.SetTargetProperty(animation, "Opacity");
-        storyboard.Children.Add(animation);
-        storyboard.Begin();
+        PhotoStripLayer.Opacity = 0.55;
     }
 
     private async Task ExecuteAsync(ApplicationCommand command)
@@ -1234,12 +1363,13 @@ public sealed partial class MainWindow : Window
             presenter.IsMinimizable = true;
         }
 
-        var rasterizationScale = FixedCanvas.XamlRoot?.RasterizationScale ?? 1;
-        var physicalWidth = checked((int)Math.Round(canvas.Width * rasterizationScale));
-        var physicalHeight = checked((int)Math.Round(canvas.Height * rasterizationScale));
-        var workArea = DisplayArea.Primary.WorkArea;
-        var x = workArea.X + ((workArea.Width - physicalWidth) / 2);
-        var y = workArea.Y + ((workArea.Height - physicalHeight) / 2);
-        AppWindow.MoveAndResize(new RectInt32(x, y, physicalWidth, physicalHeight));
+        var displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
+        var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var placement = WindowPlacement.ForWindowClientArea(
+            windowHandle,
+            canvas.Width,
+            canvas.Height,
+            displayArea.WorkArea);
+        AppWindow.MoveAndResize(placement);
     }
 }

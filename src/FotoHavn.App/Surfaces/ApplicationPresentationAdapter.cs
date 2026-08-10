@@ -44,9 +44,9 @@ public sealed class ApplicationPresentationAdapter
             [ApplicationSurface.EventSetup] = new EventSetupSurface(eventSetupRoot),
             [ApplicationSurface.GuestStart] = new GuestStartSurface(guestStartRoot),
             [ApplicationSurface.GuestStartUnavailable] = new GuestStartUnavailableSurface(guestStartUnavailableRoot),
-            [ApplicationSurface.Capture] = new CaptureSurface(captureRoot),
+            [ApplicationSurface.Capture] = new CaptureSurface(captureRoot, operatorAssistanceRoot),
             [ApplicationSurface.OperatorAssistance] = new OperatorAssistanceSurface(operatorAssistanceRoot),
-            [ApplicationSurface.PhotoStrip] = new PhotoStripSurface(photoStripRoot),
+            [ApplicationSurface.PhotoStrip] = new PhotoStripSurface(photoStripRoot, operatorAssistanceRoot),
             [ApplicationSurface.Confirmation] = new ConfirmationSurface(confirmationRoots),
         };
     }
@@ -138,8 +138,8 @@ public sealed class GuestStartUnavailableSurface(FrameworkElement root)
         };
 }
 
-public sealed class CaptureSurface(FrameworkElement root)
-    : ProductionSurfaceComposition("FotoHavn.Surface.Capture", root)
+public sealed class CaptureSurface(params FrameworkElement[] roots)
+    : ProductionSurfaceComposition("FotoHavn.Surface.Capture", roots)
 {
     protected override string AccessibleName(ApplicationPresentation presentation) => "Photo capture";
 }
@@ -159,8 +159,8 @@ public sealed class OperatorAssistanceSurface(FrameworkElement root)
         };
 }
 
-public sealed class PhotoStripSurface(FrameworkElement root)
-    : ProductionSurfaceComposition("FotoHavn.Surface.PhotoStrip", root)
+public sealed class PhotoStripSurface(params FrameworkElement[] roots)
+    : ProductionSurfaceComposition("FotoHavn.Surface.PhotoStrip", roots)
 {
     protected override string AccessibleName(ApplicationPresentation presentation) => "Here’s your Photo Strip";
 

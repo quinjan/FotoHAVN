@@ -196,12 +196,18 @@ public sealed partial class GuardedExitAction : UserControl
             animateHoldingIndicator);
         HoldProgress.Value = update.Progress;
         HoldProgress.Visibility = holding ? Visibility.Visible : Visibility.Collapsed;
-        HoldButton.BorderBrush = holding
-            ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["ColorBorderDefaultBrush"]
-            : new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
-        HoldButton.Background = holding
-            ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["ColorSurfacePanelBrush"]
-            : new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        if (holding)
+        {
+            HoldButton.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources[
+                "ColorBorderDefaultBrush"];
+            HoldButton.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources[
+                "ColorSurfacePanelBrush"];
+        }
+        else
+        {
+            HoldButton.ClearValue(Control.BorderBrushProperty);
+            HoldButton.ClearValue(Control.BackgroundProperty);
+        }
         AutomationProperties.SetItemStatus(HoldButton, update.State.ToString());
     }
 

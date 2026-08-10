@@ -17,10 +17,16 @@ public sealed class UiVerificationHostTests
         var ready = Assert.Single(
             plan.Cases,
             item => item.FixtureId == "guest-start.ready.standard");
+        var responsiveHolding = Assert.Single(
+            plan.Cases,
+            item => item.FixtureId == "guest-start.long-event-name-and-exit-hold.compact-aspect");
 
         Assert.Equal(
             "FotoHavn.ActionButton.ExitEvent",
             AutomationInspection.RequiredFocusAutomationId(holding));
+        Assert.Equal(
+            "FotoHavn.ActionButton.ExitEvent",
+            AutomationInspection.RequiredFocusAutomationId(responsiveHolding));
         Assert.Null(AutomationInspection.RequiredFocusAutomationId(ready));
     }
 
@@ -152,6 +158,7 @@ public sealed class UiVerificationHostTests
             File.WriteAllText(mainWindowPath, "window xaml v1");
             File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "ApprovedInjectionCatalog.json"), "[]");
             File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "camera-preview.jpg"), "camera frame");
+            File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "guest-cycle-photo-strip.png"), "photo strip");
             File.WriteAllText(Path.Combine(applicationRoot, "UiVerification", "canonical-presentation.json"), "{}");
 
             var first = VerificationRunner.HashApplication(applicationPath);

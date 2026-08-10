@@ -62,6 +62,94 @@ test("all ten shared component families resolve their styles, controls, and Auto
   }
 });
 
+test("Camera preview, durable Captures, and Photo Strips share the three-by-two crop", () => {
+  const contract = readFileSync(
+    path.join(repositoryRoot, "src", "FotoHavn.Core", "ApplicationContract.cs"),
+    "utf8",
+  );
+  const boundary = readFileSync(path.join(applicationRoot, "CameraBoundary.cs"), "utf8");
+  const encoder = readFileSync(path.join(applicationRoot, "CaptureFrameEncoder.cs"), "utf8");
+  const compositor = readFileSync(path.join(applicationRoot, "PhotoStripCompositor.cs"), "utf8");
+  const mainWindow = readFileSync(path.join(applicationRoot, "MainWindow.xaml"), "utf8");
+
+  assert.match(contract, /class CaptureCropPolicy[\s\S]*WidthRatio = 3[\s\S]*HeightRatio = 2/);
+  assert.match(boundary, /UpdateCaptureCrop/);
+  assert.match(boundary, /CaptureFrameEncoder\.EncodeJpegAsync/);
+  assert.match(encoder, /CameraSourceCrop crop/);
+  assert.match(encoder, /encoder\.BitmapTransform\.Bounds = bounds/);
+  assert.match(compositor, /request\.CaptureCropAspectRatio/);
+  assert.match(mainWindow, /x:Name="GuestPreviewImage"[^>]*Stretch="Uniform"/);
+});
+
+test("Capture Progress resolves to its mapped production control contract", () => {
+  const component = mapping.components.find(({ semanticId }) => semanticId === "component.capture-progress");
+  const captureProgressXaml = readFileSync(
+    path.join(applicationRoot, "Controls", "CaptureProgress.xaml"),
+    "utf8",
+  );
+  const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
+  const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
+
+  assert.ok(component);
+  assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.CaptureProgress["']/);
+  assert.match(xaml, /x:Key=["']FotoHavnCaptureProgressStyle["']/);
+  assert.match(`${xaml}\n${csharp}`, /FotoHavn\.CaptureProgress/);
+  assert.match(
+    captureProgressXaml,
+    /<Grid ColumnSpacing="\{StaticResource CaptureProgressGroupSpacing\}">[\s\S]*?<ColumnDefinition Width="\*" \/>[\s\S]*?<ColumnDefinition Width="Auto" \/>/,
+  );
+  assert.match(captureProgressXaml, /x:Name="ProgressLabel"[\s\S]*?Grid\.Column="0"/);
+  assert.match(captureProgressXaml, /x:Name="Steps"[\s\S]*?Grid\.Column="1"/);
+});
+
+test("Photo Strip Result resolves to its mapped production control contract", () => {
+  const component = mapping.components.find(({ semanticId }) => semanticId === "component.photo-strip-result");
+  const geometry = readFileSync(
+    path.join(repositoryRoot, "src", "FotoHavn.Core", "PhotoStripGeometry.cs"),
+    "utf8",
+  );
+  const photoStripXaml = readFileSync(
+    path.join(applicationRoot, "Controls", "PhotoStripResult.xaml"),
+    "utf8",
+  );
+  const photoStripCode = readFileSync(
+    path.join(applicationRoot, "Controls", "PhotoStripResult.xaml.cs"),
+    "utf8",
+  );
+  const verificationAsset = readFileSync(
+    path.join(repositoryRoot, "design-qa", "issue-77-photo-strip-reference.png"),
+  );
+  const xaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");
+  const csharp = applicationFiles(".cs").map((file) => readFileSync(file, "utf8")).join("\n");
+
+  assert.ok(component);
+  assert.match(xaml, /x:Class=["']FotoHavn\.App\.Controls\.PhotoStripResult["']/);
+  assert.match(xaml, /x:Key=["']FotoHavnPhotoStripResultStyle["']/);
+  assert.match(`${xaml}\n${csharp}`, /FotoHavn\.PhotoStripResult/);
+  assert.match(photoStripXaml, /x:Name="PreviewImage"[\s\S]*?Stretch="Uniform"/);
+  assert.match(geometry, /const int Width = 600/);
+  assert.match(geometry, /const int Height = 1800/);
+  assert.match(geometry, /const double AspectRatio = \(double\)Width \/ Height/);
+  assert.match(photoStripCode, /PhotoStripGeometry\.WidthForHeight\(previewHeight\)/);
+  assert.doesNotMatch(photoStripCode, /frameWidth = stress \? 135d : compact \? 190d : 226d/);
+  assert.equal(verificationAsset.readUInt32BE(16), 600, "verification Photo Strip width");
+  assert.equal(verificationAsset.readUInt32BE(20), 1800, "verification Photo Strip height");
+});
+
+test("production Guest Cycle announcements follow the approved semantic cadence", () => {
+  const mainWindow = readFileSync(path.join(applicationRoot, "MainWindow.xaml.cs"), "utf8");
+
+  for (const announcement of [
+    "Taking photo in three seconds.",
+    "saved.",
+    "Your photo strip is ready. Returning to start in 10 seconds.",
+    "Returning to start in five seconds.",
+    "Ready for the next guest.",
+  ]) {
+    assert.match(mainWindow, new RegExp(announcement.replaceAll(".", "\\.")));
+  }
+});
+
 test("the application loads the governed design resources and retires the prohibited danger color", () => {
   const app = readFileSync(path.join(applicationRoot, "App.xaml"), "utf8");
   const productionXaml = applicationFiles(".xaml").map((file) => readFileSync(file, "utf8")).join("\n");

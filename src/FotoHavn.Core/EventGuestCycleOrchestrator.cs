@@ -538,7 +538,10 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
     private async Task<ApplicationPresentation> ExitActiveEventAsync(CancellationToken cancellationToken)
     {
         var activeEvent = CurrentPresentation.ActiveEvent;
-        if (activeEvent?.GuestCycle.Phase is not (GuestCyclePhase.Start or GuestCyclePhase.StartUnavailable))
+        if (activeEvent?.GuestCycle.Phase is not (
+            GuestCyclePhase.Start or
+            GuestCyclePhase.StartUnavailable or
+            GuestCyclePhase.OperatorAssistance))
         {
             return CurrentPresentation;
         }
@@ -720,6 +723,10 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
 
         if (run.PhotoStripPath is null)
         {
+            PublishGuestCycle(new GuestCyclePresentation(
+                GuestCyclePhase.PhotoStripPreparing,
+                CaptureNumber: 4,
+                CompletedCaptures: 4));
             PhotoStripCompositionResult composition;
             try
             {
@@ -1309,7 +1316,7 @@ public sealed class EventGuestCycleOrchestrator : IApplicationPresentationContro
         var activeEvent = CurrentPresentation.ActiveEvent;
         var streamFailure = Camera.StreamHealth.Failure;
         if (activeEvent?.GuestCycle is
-                { Phase: GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved, CompletedCaptures: < 4 } &&
+            { Phase: GuestCyclePhase.Countdown or GuestCyclePhase.Flash or GuestCyclePhase.CaptureSaved, CompletedCaptures: < 4 } &&
             guestCycleCameraSensitive &&
             streamFailure != CameraStreamFailure.None)
         {

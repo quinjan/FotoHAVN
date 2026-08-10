@@ -100,6 +100,24 @@ public sealed class AutomationInspection : IDisposable
             }
         }
 
+        if (verificationCase.Annotation.InitialFocus == InitialFocusPolicy.DialogHeading)
+        {
+            var headings = root.FindAll(
+                TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.NameProperty, verificationCase.Annotation.Heading));
+            foreach (AutomationElement heading in headings)
+            {
+                if (!heading.Current.IsOffscreen && heading.Current.IsEnabled &&
+                    heading.Current.IsKeyboardFocusable &&
+                    heading.Current.ControlType == ControlType.Text)
+                {
+                    heading.SetFocus();
+                    Thread.Sleep(100);
+                    return;
+                }
+            }
+        }
+
         try
         {
             var focused = AutomationElement.FocusedElement;
@@ -140,7 +158,7 @@ public sealed class AutomationInspection : IDisposable
     }
 
     public static string? RequiredFocusAutomationId(VerificationCase verificationCase) =>
-        verificationCase.FixtureId.StartsWith("guest-start.exit-hold", StringComparison.Ordinal)
+        verificationCase.FixtureId.Contains("exit-hold", StringComparison.Ordinal)
             ? "FotoHavn.ActionButton.ExitEvent"
             : null;
 
@@ -270,7 +288,7 @@ public sealed class AutomationInspection : IDisposable
         var readingFindings = CheckReadingOrder(
             verificationCase.Annotation,
             verificationCase.Width < 800 || verificationCase.Height < 500,
-            elements.Where(item => !item.IsOffscreen &&
+            elements.Where(item =>
                 !IsFrameworkChromeOrVerificationElement(item.AutomationId))
                 .ToArray());
         var focusedEvidence = focused is null

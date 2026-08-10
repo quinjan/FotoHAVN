@@ -14,6 +14,5 @@ public sealed class ModalDialogSurface : ContentControl
 
         protected override string GetClassNameCore() => "Dialog";
 
-        protected override string GetNameCore() => "Exit Event confirmation";
     }
 }

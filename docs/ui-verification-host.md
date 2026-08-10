@@ -38,7 +38,7 @@ introduced by PR #83, an owner-only `push` trigger is restricted to
 `codex/issue-75-operator-event-management`; this lets that branch bootstrap the
 workflow because GitHub cannot dispatch a new workflow manually until it exists
 on the default branch. After merge, dispatch the intended branch or commit
-manually from **Actions > UI verification - Batch 3**. Registration
+manually from **Actions > UI verification - Batch 5**. Registration
 tokens and runner credentials stay on the workstation and are never committed.
 
 ## Build and validate
@@ -68,9 +68,9 @@ With no fixture selection, the host runs every fixture whose owning batch is at
 or below `--completed-through-batch`. Batch 3 therefore runs exactly its 48
 owned fixtures; the final Batch 5 boundary runs all 103.
 
-The Batch 3 workflow preserves the host's exact comparison result, uploads every
-target/actual/diff/result file, and separately gates the run on the pinned
-environment, exactly 48 results, complete evidence, and zero semantic
+The Batch 5 workflow preserves the host's exact comparison result, uploads every
+target/actual/diff/result file, and separately gates the final release run on the
+pinned environment, exactly 103 results, complete evidence, and zero semantic
 violations. Pixel differences are never tolerated automatically: they remain
 `review-required` until the visual review record explains or rejects them.
 

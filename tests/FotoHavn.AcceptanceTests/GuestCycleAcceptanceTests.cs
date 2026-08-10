@@ -71,16 +71,17 @@ public sealed class GuestCycleAcceptanceTests
     }
 
     [Fact]
-    public async Task Retry_rejects_changed_durable_history_without_reopening_or_overwriting_anything()
+    public async Task Retry_after_a_Capture_is_deleted_during_Photo_Strip_composition_allows_Exit_from_assistance()
     {
         var savedEvent = SavedEvent();
-        var camera = new GuestCycleCamera(savedEvent.Camera) { FailOnceOnCaptureAttempt = 3 };
+        var camera = new GuestCycleCamera(savedEvent.Camera);
         var fileSystem = new GuestCycleFileSystem(savedEvent);
+        var compositor = new RecordingCompositor { FailOnce = true };
         var clock = new RecordingClock(new DateTimeOffset(2026, 8, 5, 1, 0, 0, TimeSpan.Zero));
         var orchestrator = new EventGuestCycleOrchestrator(
             fileSystem,
             camera,
-            new RecordingCompositor(),
+            compositor,
             clock);
         var cancellationToken = TestContext.Current.CancellationToken;
         await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
@@ -92,11 +93,20 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(GuestCyclePhase.OperatorAssistance, rejected.ActiveEvent?.GuestCycle.Phase);
         Assert.Equal(GuestCycleRecovery.ExitOnly, rejected.ActiveEvent?.GuestCycle.Recovery);
         Assert.Equal(GuestCycleActionState.RetryFailed, rejected.ActiveEvent?.GuestCycle.ActionState);
-        Assert.Equal(2, rejected.ActiveEvent?.GuestCycle.CompletedCaptures);
-        Assert.Equal([1, 2], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Equal(4, rejected.ActiveEvent?.GuestCycle.CompletedCaptures);
+        Assert.Equal([1, 2, 3, 4], fileSystem.CommittedCaptures.Select(capture => capture.CaptureNumber));
+        Assert.Equal(1, compositor.ComposeCount);
         Assert.Single(fileSystem.CreatedGuestCycles);
         Assert.Equal(1, camera.OpenCount);
         Assert.Equal(0, camera.ReleaseCount);
+
+        var confirmation = await orchestrator.ExecuteAsync(new ExitActiveEvent(), cancellationToken);
+        Assert.True(confirmation.ActiveEvent?.ShowsExitConfirmation);
+
+        var exited = await orchestrator.ExecuteAsync(new ConfirmExitActiveEvent(), cancellationToken);
+
+        Assert.Null(exited.ActiveEvent);
+        Assert.Equal(1, camera.ReleaseCount);
     }
 
     [Theory]
@@ -255,10 +265,15 @@ public sealed class GuestCycleAcceptanceTests
         };
         var orchestrator = new EventGuestCycleOrchestrator(fileSystem, camera, compositor, clock);
         var cancellationToken = TestContext.Current.CancellationToken;
+        var observedPhases = new List<GuestCyclePhase>();
 
         await ActivateAsync(orchestrator, savedEvent.Id, cancellationToken);
         orchestrator.PresentationChanged += (_, presentation) =>
         {
+            if (presentation.ActiveEvent is { } activeEvent)
+            {
+                observedPhases.Add(activeEvent.GuestCycle.Phase);
+            }
             if (presentation.ActiveEvent?.GuestCycle.Phase == GuestCyclePhase.PhotoStripPreview)
             {
                 _ = orchestrator.ExecuteAsync(new ConfirmPhotoStripVisible(), cancellationToken);
@@ -276,6 +291,11 @@ public sealed class GuestCycleAcceptanceTests
         Assert.Equal(savedEvent.Name, compositor.LastRequest?.EventName);
         Assert.Equal(guestCycleId, Assert.Single(fileSystem.CompletedGuestCycles));
         Assert.Equal(GuestCyclePhase.Start, completed.ActiveEvent?.GuestCycle.Phase);
+        var preparingIndex = observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreparing);
+        var previewIndex = observedPhases.IndexOf(GuestCyclePhase.PhotoStripPreview);
+        Assert.True(preparingIndex >= 0);
+        Assert.True(previewIndex >= 0);
+        Assert.True(preparingIndex < previewIndex);
         Assert.Equal(1, camera.OpenCount);
         Assert.Equal(30, clock.Delays.Count(delay => delay == TimeSpan.FromSeconds(1)));
         Assert.Equal(4, clock.Delays.Count(delay => delay == TimeSpan.FromMilliseconds(600)));
