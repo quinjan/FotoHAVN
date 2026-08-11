@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Windows.Automation;
 
 namespace FotoHavn.UiVerificationHost;
@@ -91,6 +92,10 @@ public sealed class AutomationInspection : IDisposable
             return AutomationElement.FocusedElement is { } focused && IsDescendantOf(root, focused);
         }
         catch (ElementNotAvailableException)
+        {
+            return false;
+        }
+        catch (COMException exception) when (exception.HResult == unchecked((int)0x8000FFFF))
         {
             return false;
         }
