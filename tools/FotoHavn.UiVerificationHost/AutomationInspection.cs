@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Windows.Automation;
 
 namespace FotoHavn.UiVerificationHost;
@@ -84,76 +85,19 @@ public sealed class AutomationInspection : IDisposable
         ((InvokePattern)pattern).Invoke();
     }
 
-    public void NormalizeApplicationFocus(VerificationCase verificationCase)
+    public bool HasApplicationFocus()
     {
-        if (RequiredFocusAutomationId(verificationCase) is { } requiredAutomationId)
-        {
-            var requiredElement = root.FindFirst(
-                TreeScope.Descendants,
-                new PropertyCondition(AutomationElement.AutomationIdProperty, requiredAutomationId));
-            if (requiredElement is not null && !requiredElement.Current.IsOffscreen &&
-                requiredElement.Current.IsEnabled && requiredElement.Current.IsKeyboardFocusable)
-            {
-                requiredElement.SetFocus();
-                Thread.Sleep(100);
-                return;
-            }
-        }
-
-        if (verificationCase.Annotation.InitialFocus == InitialFocusPolicy.DialogHeading)
-        {
-            var headings = root.FindAll(
-                TreeScope.Descendants,
-                new PropertyCondition(AutomationElement.NameProperty, verificationCase.Annotation.Heading));
-            foreach (AutomationElement heading in headings)
-            {
-                if (!heading.Current.IsOffscreen && heading.Current.IsEnabled &&
-                    heading.Current.IsKeyboardFocusable &&
-                    heading.Current.ControlType == ControlType.Text)
-                {
-                    heading.SetFocus();
-                    Thread.Sleep(100);
-                    return;
-                }
-            }
-        }
-
         try
         {
-            var focused = AutomationElement.FocusedElement;
-            if (focused is not null && IsDescendantOf(root, focused) &&
-                focused.Current.IsEnabled && !focused.Current.IsOffscreen &&
-                focused.Current.IsKeyboardFocusable)
-            {
-                return;
-            }
+            return AutomationElement.FocusedElement is { } focused && IsDescendantOf(root, focused);
         }
         catch (ElementNotAvailableException)
         {
+            return false;
         }
-
-        string[] preferredIds =
-        [
-            "FotoHavn.Confirmation.SafeAction",
-            "FotoHavn.ActionButton.Primary.GuestStart",
-            "FotoHavn.ActionButton.AssistanceRetry",
-            "FotoHavn.ActionButton.AssistanceExitOnly",
-            "FotoHavn.ActionButton.ExitEvent",
-        ];
-        foreach (var automationId in preferredIds)
+        catch (COMException exception) when (exception.HResult == unchecked((int)0x8000FFFF))
         {
-            var element = root.FindFirst(
-                TreeScope.Descendants,
-                new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
-            if (element is null || element.Current.IsOffscreen || !element.Current.IsEnabled ||
-                !element.Current.IsKeyboardFocusable)
-            {
-                continue;
-            }
-
-            element.SetFocus();
-            Thread.Sleep(100);
-            return;
+            return false;
         }
     }
 
