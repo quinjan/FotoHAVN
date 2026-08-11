@@ -66,6 +66,26 @@ public sealed class CameraPolicyIntegrationTests
     }
 
     [Fact]
+    public void Guest_preview_grid_tracks_are_non_negative_at_the_runtime_viewport_size()
+    {
+        const double viewportWidth = 1232;
+        const double viewportHeight = 595;
+        var preview = CameraPreviewRenderPolicy.CalculateLayout(viewportWidth, viewportHeight);
+
+        var tracks = new[]
+        {
+            preview.GuideLeft,
+            preview.GuideWidth,
+            viewportWidth - preview.GuideLeft - preview.GuideWidth,
+            preview.GuideTop,
+            preview.GuideHeight,
+            viewportHeight - preview.GuideTop - preview.GuideHeight,
+        };
+
+        Assert.All(tracks, track => Assert.True(track >= 0, $"Grid track was {track:R}."));
+    }
+
+    [Fact]
     public async Task Release_and_selected_device_removal_dispose_the_owned_stream()
     {
         var firstStream = new FakeOwnedStream();

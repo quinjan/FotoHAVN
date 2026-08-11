@@ -140,6 +140,9 @@ public sealed class UiVerificationHostTests
 
         Assert.Equal("injection.guest-start.ready", script.InitialInjectionIdentity);
         Assert.Equal("injection.capture.countdown-3", script.FinalInjectionIdentity);
+        Assert.Equal(
+            "FotoHavn.ActionButton.Primary.GuestStart",
+            Assert.Single(script.Actions).AutomationId);
     }
 
     [Fact]

@@ -15,7 +15,7 @@
     },
     "actions": [
       {
-        "automationId": "StartGuestCycleButton",
+        "automationId": "FotoHavn.ActionButton.Primary.GuestStart",
         "expectedInjectionIdentity": "injection.capture.countdown-3"
       }
     ]

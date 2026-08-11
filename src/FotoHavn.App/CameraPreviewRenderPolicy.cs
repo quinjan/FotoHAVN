@@ -12,16 +12,13 @@ internal static class CameraPreviewRenderPolicy
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(availableWidth);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(availableHeight);
 
-        var viewportAspectRatio = availableWidth / availableHeight;
-        var sourceWidth = viewportAspectRatio > StreamAspectRatio
-            ? availableHeight * StreamAspectRatio
-            : availableWidth;
-        var sourceHeight = sourceWidth / StreamAspectRatio;
+        var sourceWidth = Math.Min(availableWidth, availableHeight * StreamAspectRatio);
+        var sourceHeight = Math.Min(availableHeight, sourceWidth / StreamAspectRatio);
         var sourceLeft = (availableWidth - sourceWidth) / 2;
         var sourceTop = (availableHeight - sourceHeight) / 2;
 
         var guideWidth = Math.Min(sourceWidth, sourceHeight * CropAspectRatio);
-        var guideHeight = guideWidth / CropAspectRatio;
+        var guideHeight = Math.Min(sourceHeight, guideWidth / CropAspectRatio);
         var guideLeft = sourceLeft + ((sourceWidth - guideWidth) / 2);
         var guideTop = sourceTop + ((sourceHeight - guideHeight) / 2);
         var sourceCrop = new CameraSourceCrop(
