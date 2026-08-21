@@ -1,0 +1,142 @@
+:root {
+  /* FOTOHVN primitive colors */
+  --color-warm-ivory: #F3EBDD;
+  --color-cream-paper: #E8DDCE;
+  --color-off-white: #FBF8F2;
+  --color-ebony: #1E1A17;
+  --color-dark-walnut: #2D211B;
+  --color-soft-brown: #756457;
+  --color-muted-brass: #9A7A4F;
+  --color-antique-metal: #B39A78;
+  --color-hairline: #D1C4B4;
+
+  /* Semantic colors */
+  --color-text-primary: var(--color-ebony);
+  --color-text-secondary: var(--color-soft-brown);
+  --color-text-inverse: var(--color-off-white);
+  --color-text-inverse-muted: var(--color-antique-metal);
+  --color-action-primary: var(--color-ebony);
+  --color-action-primary-hover: var(--color-dark-walnut);
+  --color-action-accent: var(--color-muted-brass);
+  --color-focus-ring: var(--color-ebony);
+  --color-selection: rgba(154, 122, 79, 0.24);
+  --color-border-light: rgba(45, 33, 27, 0.18);
+  --color-border-dark: rgba(251, 248, 242, 0.28);
+
+  /* Surfaces */
+  --surface-canvas: var(--color-off-white);
+  --surface-editorial: var(--color-warm-ivory);
+  --surface-paper: var(--color-cream-paper);
+  --surface-dark: var(--color-dark-walnut);
+  --surface-deep: var(--color-ebony);
+
+  /* Typography — families */
+  --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --font-sans: Manrope, Inter, "Segoe UI", Arial, sans-serif;
+
+  /* Typography — sizes */
+  --text-label: 12px;
+  --text-body-sm: 14px;
+  --text-body: 16px;
+  --text-body-lg: 20px;
+  --text-subheading: 28px;
+  --text-heading-sm: 36px;
+  --text-heading: 52px;
+  --text-heading-lg: 72px;
+  --text-display: 96px;
+  --text-price: 80px;
+
+  /* Typography — line heights */
+  --leading-label: 1.2;
+  --leading-body-sm: 1.55;
+  --leading-body: 1.65;
+  --leading-body-lg: 1.5;
+  --leading-subheading: 1.2;
+  --leading-heading-sm: 1.08;
+  --leading-heading: 1;
+  --leading-heading-lg: 0.94;
+  --leading-display: 0.88;
+  --leading-price: 0.9;
+
+  /* Typography — letter spacing */
+  --tracking-label: 0.18em;
+  --tracking-body: 0;
+  --tracking-body-lg: -0.01em;
+  --tracking-subheading: -0.015em;
+  --tracking-heading-sm: -0.02em;
+  --tracking-heading: -0.025em;
+  --tracking-heading-lg: -0.03em;
+  --tracking-display: -0.035em;
+  --tracking-price: -0.03em;
+
+  /* Typography — weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Spacing */
+  --spacing-unit: 4px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-96: 96px;
+  --spacing-120: 120px;
+  --spacing-144: 144px;
+
+  /* Layout */
+  --page-max-width: 1280px;
+  --reading-measure: 65ch;
+  --page-gutter-mobile: 24px;
+  --page-gutter-tablet: 48px;
+  --page-gutter-desktop: 64px;
+  --section-space-mobile: 80px;
+  --section-space-desktop: 120px;
+  --section-space-wide: 144px;
+
+  /* Shape */
+  --radius-hairline: 2px;
+  --radius-control: 4px;
+  --radius-panel: 8px;
+  --radius-round: 9999px;
+  --radius-image: var(--radius-hairline);
+  --radius-button: var(--radius-control);
+  --radius-input: var(--radius-control);
+  --radius-card: var(--radius-panel);
+
+  /* Borders and elevation */
+  --border-hairline: 1px;
+  --border-focus: 2px;
+  --focus-offset: 3px;
+  --shadow-photo: 0 24px 60px rgba(45, 33, 27, 0.14);
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-standard: 240ms;
+  --duration-reveal: 600ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Component dimensions */
+  --navigation-height: 72px;
+  --control-min-height: 48px;
+  --gallery-overlap-max: 24px;
+}
+
+::selection {
+  color: var(--color-text-primary);
+  background: var(--color-selection);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 1ms;
+    --duration-standard: 1ms;
+    --duration-reveal: 1ms;
+  }
+}

@@ -1,0 +1,108 @@
+@theme {
+  /* FOTOHVN primitive colors */
+  --color-warm-ivory: #F3EBDD;
+  --color-cream-paper: #E8DDCE;
+  --color-off-white: #FBF8F2;
+  --color-ebony: #1E1A17;
+  --color-dark-walnut: #2D211B;
+  --color-soft-brown: #756457;
+  --color-muted-brass: #9A7A4F;
+  --color-antique-metal: #B39A78;
+  --color-hairline: #D1C4B4;
+
+  /* Semantic color utilities */
+  --color-canvas: #FBF8F2;
+  --color-editorial: #F3EBDD;
+  --color-paper: #E8DDCE;
+  --color-surface-dark: #2D211B;
+  --color-surface-deep: #1E1A17;
+  --color-copy: #1E1A17;
+  --color-copy-muted: #756457;
+  --color-copy-inverse: #FBF8F2;
+  --color-copy-inverse-muted: #B39A78;
+  --color-action: #1E1A17;
+  --color-action-hover: #2D211B;
+  --color-accent: #9A7A4F;
+
+  /* Typography — families */
+  --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --font-sans: Manrope, Inter, "Segoe UI", Arial, sans-serif;
+
+  /* Typography — sizes */
+  --text-label: 12px;
+  --text-body-sm: 14px;
+  --text-body: 16px;
+  --text-body-lg: 20px;
+  --text-subheading: 28px;
+  --text-heading-sm: 36px;
+  --text-heading: 52px;
+  --text-heading-lg: 72px;
+  --text-display: 96px;
+  --text-price: 80px;
+
+  /* Typography — line heights */
+  --leading-label: 1.2;
+  --leading-body-sm: 1.55;
+  --leading-body: 1.65;
+  --leading-body-lg: 1.5;
+  --leading-subheading: 1.2;
+  --leading-heading-sm: 1.08;
+  --leading-heading: 1;
+  --leading-heading-lg: 0.94;
+  --leading-display: 0.88;
+  --leading-price: 0.9;
+
+  /* Typography — letter spacing */
+  --tracking-label: 0.18em;
+  --tracking-body: 0;
+  --tracking-body-lg: -0.01em;
+  --tracking-subheading: -0.015em;
+  --tracking-heading-sm: -0.02em;
+  --tracking-heading: -0.025em;
+  --tracking-heading-lg: -0.03em;
+  --tracking-display: -0.035em;
+  --tracking-price: -0.03em;
+
+  /* Typography — weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Spacing */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-96: 96px;
+  --spacing-120: 120px;
+  --spacing-144: 144px;
+  --spacing-section-mobile: 80px;
+  --spacing-section: 120px;
+  --spacing-section-wide: 144px;
+
+  /* Containers and breakpoints */
+  --container-page: 1280px;
+  --container-copy: 65ch;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* Shape */
+  --radius-hairline: 2px;
+  --radius-control: 4px;
+  --radius-panel: 8px;
+  --radius-round: 9999px;
+
+  /* Elevation */
+  --shadow-photo: 0 24px 60px rgba(45, 33, 27, 0.14);
+
+  /* Motion */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
