@@ -67,6 +67,10 @@ jobs:
         working-directory: website
         run: npm run lint
 
+      - name: Generate framework types
+        working-directory: website
+        run: npx next typegen
+
       - name: Type-check website
         working-directory: website
         run: npx tsc --noEmit --pretty false
