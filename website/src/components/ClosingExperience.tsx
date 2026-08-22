@@ -1,85 +1,48 @@
-import Image from 'next/image'
+import styles from "./ClosingExperience.module.css";
 
-import styles from './ClosingExperience.module.css'
-
-export function ClosingExperience() {
+export default function ClosingExperience() {
   return (
     <>
-      <section id="story" className={styles.story} aria-labelledby="story-title">
+      <section
+        className={styles.actionSection}
+        aria-labelledby="action-heading"
+      >
         <div className={styles.container}>
-          <div className={styles.storyGrid}>
-            <div className={styles.storyCopy}>
-              <p className={styles.eyebrow}>Our story</p>
-              <h2 id="story-title" className={styles.storyTitle}>
-                MORE THAN A PHOTOBOOTH.
-              </h2>
-              <p className={styles.storyBody}>
-                FOTOHVN was created for people who want more than a quick snapshot. Step
-                inside, draw the curtain, and take a little time to laugh, experiment, and
-                make something together. Our vintage-inspired booth pairs an intimate
-                experience with distinctive photographic looks and physical prints—keepsakes
-                made to be held, shared, and kept long after the celebration.
+          <header className={styles.actionHeader}>
+            <p className={styles.sectionLabel}>BEGIN HERE</p>
+            <h2 id="action-heading">CHOOSE HOW YOU WANT TO BEGIN.</h2>
+          </header>
+
+          <div className={styles.pathSplit}>
+            <article id="find-a-booth" className={styles.mallPath}>
+              <p className={styles.pathLabel}>MALL BOOTH</p>
+              <h3>FIND A BOOTH</h3>
+              <p>
+                Current mall location, hours, price, payment methods, and session
+                details must be confirmed.
               </p>
-            </div>
-
-            <figure className={styles.storyFigure}>
-              <div className={styles.storyImageFrame}>
-                <Image
-                  className={styles.image}
-                  src="/images/booth-detail.png"
-                  alt="The curtain and tactile details inside the FOTOHVN booth"
-                  fill
-                  sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1100px) calc(100vw - 96px), 54vw"
-                />
-              </div>
-              <figcaption className={styles.caption}>
-                A little room for unguarded photographs.
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.finalCallout} aria-labelledby="final-callout-title">
-        <div className={styles.calloutFrame}>
-          <div className={styles.calloutImageFrame}>
-            <Image
-              className={styles.image}
-              src="/images/candid-guests.png"
-              alt="Guests sharing a candid moment with FOTOHVN"
-              fill
-              sizes="(max-width: 767px) 100vw, 57vw"
-            />
-          </div>
-          <div className={styles.calloutCopy}>
-            <p className={styles.eyebrow}>Bring the booth</p>
-            <h2 id="final-callout-title" className={styles.calloutTitle}>
-              LET&apos;S MAKE SOMETHING WORTH KEEPING.
-            </h2>
-            <p className={styles.calloutBody}>
-              Bring FOTOHVN to your next celebration.
-            </p>
-            <a className={styles.primaryAction} href="#inquire">
-              INQUIRE NOW
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section id="inquire" className={styles.inquiry} aria-labelledby="inquiry-title">
-        <div className={styles.container}>
-          <div className={styles.inquiryGrid}>
-            <div className={styles.inquiryIntro}>
-              <p className={styles.eyebrow}>Inquire</p>
-              <h2 id="inquiry-title" className={styles.inquiryTitle}>
-                Tell us about your celebration.
-              </h2>
-              <p className={styles.inquiryBody}>
-                Share a few details and we&apos;ll continue the conversation by email.
-              </p>
-              <a className={styles.emailLink} href="mailto:hello@fotohavn.ph">
-                hello@fotohavn.ph
+              <a href="mailto:hello@fotohavn.ph?subject=Current%20FOTOHVN%20booth">
+                ASK FOR CURRENT DETAILS
               </a>
+            </article>
+
+            <article id="rent-fotohavn" className={styles.eventPath}>
+              <p className={styles.pathLabel}>EVENT RENTAL</p>
+              <h3>RENT FOTOHVN</h3>
+              <p>Event rental is offered by the hour with unlimited prints.</p>
+              <p>Share your event date and city or venue to begin.</p>
+              <a href="#inquiry">ASK ABOUT YOUR DATE</a>
+            </article>
+          </div>
+
+          <div id="inquiry" className={styles.inquiryGrid}>
+            <div className={styles.inquiryIntro}>
+              <p className={styles.sectionLabel}>INQUIRY</p>
+              <h3>START WITH WHAT YOU KNOW.</h3>
+              <p>
+                Choose the path that fits, then share only the details you have.
+              </p>
+              <a href="mailto:hello@fotohavn.ph">hello@fotohavn.ph</a>
             </div>
 
             <form
@@ -89,6 +52,28 @@ export function ClosingExperience() {
               encType="text/plain"
               aria-describedby="inquiry-note"
             >
+              <fieldset className={styles.intentField}>
+                <legend>What would you like to ask about?</legend>
+                <label>
+                  <input
+                    name="Intent"
+                    type="radio"
+                    value="Mall booth"
+                    required
+                  />
+                  <span>Mall booth</span>
+                </label>
+                <label>
+                  <input
+                    name="Intent"
+                    type="radio"
+                    value="Event rental"
+                    required
+                  />
+                  <span>Event rental</span>
+                </label>
+              </fieldset>
+
               <div className={styles.field}>
                 <label htmlFor="inquiry-name">Name</label>
                 <input
@@ -99,6 +84,7 @@ export function ClosingExperience() {
                   required
                 />
               </div>
+
               <div className={styles.field}>
                 <label htmlFor="inquiry-email">Email</label>
                 <input
@@ -109,44 +95,33 @@ export function ClosingExperience() {
                   required
                 />
               </div>
+
               <div className={styles.field}>
-                <label htmlFor="inquiry-date">Event date</label>
-                <input id="inquiry-date" name="Event date" type="date" required />
+                <label htmlFor="inquiry-date">Event date (optional)</label>
+                <input id="inquiry-date" name="Event date" type="date" />
               </div>
+
               <div className={styles.field}>
-                <label htmlFor="inquiry-event">Event</label>
-                <select id="inquiry-event" name="Event" defaultValue="" required>
-                  <option value="" disabled>
-                    Select an event
-                  </option>
-                  <option>Wedding</option>
-                  <option>Debut</option>
-                  <option>Birthday</option>
-                  <option>Corporate event</option>
-                  <option>Private celebration</option>
-                </select>
-              </div>
-              <div className={`${styles.field} ${styles.fullField}`}>
-                <label htmlFor="inquiry-location">Location</label>
+                <label htmlFor="inquiry-place">City or venue (optional)</label>
                 <input
-                  id="inquiry-location"
-                  name="Location"
+                  id="inquiry-place"
+                  name="City or venue"
                   type="text"
-                  autoComplete="street-address"
-                  required
+                  autoComplete="address-level2"
                 />
               </div>
-              <div className={`${styles.field} ${styles.fullField}`}>
-                <label htmlFor="inquiry-notes">A little more about the day</label>
-                <textarea id="inquiry-notes" name="Details" rows={4} />
+
+              <div className={styles.fullField}>
+                <label htmlFor="inquiry-notes">Notes (optional)</label>
+                <textarea id="inquiry-notes" name="Notes" rows={5} />
               </div>
+
               <div className={styles.formFooter}>
-                <p id="inquiry-note" className={styles.formNote}>
-                  Submitting opens your email app with these details ready to send.
+                <p id="inquiry-note">
+                  Submitting opens your email app with these details ready to
+                  send.
                 </p>
-                <button className={styles.submitButton} type="submit">
-                  Inquire now
-                </button>
+                <button type="submit">START THE CONVERSATION</button>
               </div>
             </form>
           </div>
@@ -157,13 +132,26 @@ export function ClosingExperience() {
         <div className={styles.footerInner}>
           <div>
             <p className={styles.footerBrand}>FOTOHVN</p>
-            <p className={styles.footerLine}>PHOTOGRAPHS, DEVELOPED DIFFERENTLY.</p>
+            <p className={styles.footerLine}>
+              PHOTOGRAPHS, DEVELOPED DIFFERENTLY.
+            </p>
           </div>
-          <nav className={styles.footerNavigation} aria-label="Social and contact links">
-            <a href="https://www.instagram.com/fotohavn" target="_blank" rel="noreferrer">
+          <nav
+            className={styles.footerNavigation}
+            aria-label="Social and contact links"
+          >
+            <a
+              href="https://www.instagram.com/fotohavn"
+              target="_blank"
+              rel="noreferrer"
+            >
               Instagram
             </a>
-            <a href="https://www.facebook.com/fotohavn" target="_blank" rel="noreferrer">
+            <a
+              href="https://www.facebook.com/fotohavn"
+              target="_blank"
+              rel="noreferrer"
+            >
               Facebook
             </a>
             <a href="mailto:hello@fotohavn.ph">Email</a>
@@ -172,7 +160,5 @@ export function ClosingExperience() {
         </div>
       </footer>
     </>
-  )
+  );
 }
-
-export default ClosingExperience

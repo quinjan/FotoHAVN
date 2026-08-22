@@ -1,0 +1,12 @@
+http://159.223.47.227 {
+	@fotohvn path /fotohvn /fotohvn/*
+
+	handle @fotohvn {
+		encode zstd gzip
+		reverse_proxy fotohavn-web:3000
+	}
+
+	handle {
+		respond 404
+	}
+}

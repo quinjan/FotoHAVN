@@ -1,138 +1,93 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
+import { withSiteBasePath } from "../../site.config";
 import styles from "./UpperExperience.module.css";
+import heroBoothImage from "../../public/images/hero-booth.png";
 
-const experienceFeatures = [
+const accordionItems = [
   {
     id: "enclosed",
     title: "ENCLOSED",
-    description: "A private little space made for candid moments.",
-    image: "/images/experience-enclosed.png",
-    alt: "Guests sharing a candid moment inside the enclosed FOTOHVN booth.",
-    mediaClass: styles.featureMediaPortrait,
+    description:
+      "Draw the curtain and share a private moment in a little room of your own.",
+    image: withSiteBasePath("/images/experience-enclosed.png"),
+    alt: "An editorial view inside the enclosed FOTOHVN booth.",
+  },
+  {
+    id: "together",
+    title: "TOGETHER",
+    description:
+      "Take a little time to laugh, experiment, and make a photograph together.",
+    image: withSiteBasePath("/images/candid-guests.png"),
+    alt: "Two people sharing a playful moment inside the booth.",
   },
   {
     id: "printed",
     title: "PRINTED",
-    description: "Take home photographs, not just digital files.",
-    image: "/images/experience-printed.png",
-    alt: "Fresh FOTOHVN photo strips held against a warm paper surface.",
-    mediaClass: styles.featureMediaLandscape,
-  },
-  {
-    id: "distinctive",
-    title: "DISTINCTIVE",
-    description: "Choose from FOTOHVN's specialized photographic looks.",
-    image: "/images/experience-distinctive.png",
-    alt: "A tactile detail of the FOTOHVN booth and its photographic finish.",
-    mediaClass: styles.featureMediaNarrow,
-  },
-] as const;
-
-const photographicLooks = [
-  {
-    id: "classic",
-    name: "CLASSIC",
-    description: "Clean, timeless tones with subtle analog character.",
-    image: "/images/look-classic.png",
-    alt: "A FOTOHVN portrait rendered in clean, timeless Classic tones.",
-  },
-  {
-    id: "vintage",
-    name: "VINTAGE",
-    description: "Warm, faded tones inspired by old photographs.",
-    image: "/images/look-vintage.png",
-    alt: "A FOTOHVN portrait rendered in warm, softly faded Vintage tones.",
-  },
-  {
-    id: "monochrome",
-    name: "MONOCHROME",
-    description: "Rich black-and-white with a classic studio feel.",
-    image: "/images/look-monochrome.png",
-    alt: "A FOTOHVN portrait rendered in rich studio black-and-white.",
-  },
-  {
-    id: "signature",
-    name: "FOTOHVN SIGNATURE",
     description:
-      "A distinctive FOTOHVN house look developed specifically for the brand.",
-    image: "/images/look-signature.png",
-    alt: "A portrait rendered in the distinctive FOTOHVN Signature house look.",
+      "Leave with a physical keepsake: a Photo Strip or print made to be held.",
+    image: withSiteBasePath("/images/printed-strips.png"),
+    alt: "Printed FOTOHVN Photo Strips resting on a warm paper surface.",
   },
 ] as const;
 
-type LookId = (typeof photographicLooks)[number]["id"];
+const marqueeTerms = [
+  "ENCLOSED",
+  "PRINTED",
+  "PRIVATE MOMENT",
+  "PHYSICAL KEEPSAKE",
+  "MALL BOOTH",
+  "EVENT RENTAL",
+  "PHOTO STRIP",
+  "FOTOHVN",
+] as const;
+
+type AccordionId = (typeof accordionItems)[number]["id"];
 
 export default function UpperExperience() {
-  const [activeLookId, setActiveLookId] = useState<LookId>("classic");
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [activeAccordion, setActiveAccordion] =
+    useState<AccordionId>("enclosed");
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
+  const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const activeLook =
-    photographicLooks.find((look) => look.id === activeLookId) ??
-    photographicLooks[0];
-
-  useEffect(() => {
-    const syncLookFromHash = () => {
-      const hash = window.location.hash.slice(1);
-      const matchingLook = photographicLooks.find(
-        (look) => hash === `look-${look.id}`,
-      );
-
-      if (matchingLook) {
-        setActiveLookId(matchingLook.id);
-      }
-    };
-
-    syncLookFromHash();
-    window.addEventListener("hashchange", syncLookFromHash);
-
-    return () => window.removeEventListener("hashchange", syncLookFromHash);
-  }, []);
-
-  const activateLook = (index: number, moveFocus = false) => {
-    const nextLook = photographicLooks[index];
-
-    setActiveLookId(nextLook.id);
-    window.history.replaceState(null, "", `#look-${nextLook.id}`);
-
-    if (moveFocus) {
-      tabRefs.current[index]?.focus();
-    }
-  };
-
-  const handleTabKeyDown = (
+  const handleAccordionKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
     currentIndex: number,
   ) => {
     let nextIndex: number | undefined;
 
     switch (event.key) {
+      case "Enter":
+      case " ":
+      case "Spacebar":
+        event.preventDefault();
+        setActiveAccordion(accordionItems[currentIndex].id);
+        return;
       case "ArrowRight":
       case "ArrowDown":
-        nextIndex = (currentIndex + 1) % photographicLooks.length;
+        nextIndex = (currentIndex + 1) % accordionItems.length;
         break;
       case "ArrowLeft":
       case "ArrowUp":
         nextIndex =
-          (currentIndex - 1 + photographicLooks.length) %
-          photographicLooks.length;
+          (currentIndex - 1 + accordionItems.length) % accordionItems.length;
         break;
       case "Home":
         nextIndex = 0;
         break;
       case "End":
-        nextIndex = photographicLooks.length - 1;
+        nextIndex = accordionItems.length - 1;
         break;
       default:
         return;
     }
 
     event.preventDefault();
-    activateLook(nextIndex, true);
+    triggerRefs.current[nextIndex]?.focus();
   };
 
   return (
@@ -140,17 +95,15 @@ export default function UpperExperience() {
       <section className={styles.hero} aria-labelledby="hero-heading">
         <Image
           className={styles.heroImage}
-          src="/images/hero-booth.png"
-          alt="The enclosed FOTOHVN booth arranged in an intimate celebration setting."
+          src={heroBoothImage}
+          alt="The vintage-style enclosed FOTOHVN booth in a warm, tactile setting."
           fill
-          preload
           loading="eager"
           sizes="100vw"
         />
         <div className={styles.heroVeil} aria-hidden="true" />
 
-        <div className={`${styles.container} ${styles.heroContent}`}>
-          <p className={styles.heroBrand}>FOTOHVN</p>
+        <div className={styles.container + " " + styles.heroContent}>
           <h1 id="hero-heading" className={styles.heroHeading}>
             <span>PHOTOGRAPHS,</span>
             <span>DEVELOPED DIFFERENTLY.</span>
@@ -160,155 +113,211 @@ export default function UpperExperience() {
             remembering.
           </p>
           <div className={styles.heroActions}>
-            <a className={styles.primaryButton} href="#inquire">
-              BOOK FOTOHVN
+            <a className={styles.primaryButton} href="#find-a-booth">
+              FIND A BOOTH
             </a>
-            <a className={styles.editorialLink} href="#experience">
-              EXPLORE THE EXPERIENCE
+            <a className={styles.secondaryButton} href="#rent-fotohavn">
+              RENT FOTOHVN
             </a>
           </div>
         </div>
+
+        <figure className={styles.heroPrint}>
+          <Image
+            className={styles.heroPrintImage}
+            src={withSiteBasePath("/images/printed-strips.png")}
+            alt="A set of printed FOTOHVN Photo Strips."
+            fill
+            sizes="(max-width: 767px) 120px, 180px"
+          />
+        </figure>
       </section>
 
       <section
         id="experience"
-        className={styles.experience}
-        aria-labelledby="experience-heading"
+        className={styles.bentoSection}
+        aria-label="The FOTOHVN experience"
       >
         <div className={styles.container}>
-          <header className={styles.experienceHeader}>
-            <h2 id="experience-heading" className={styles.sectionHeading}>
-              THE FOTOHVN EXPERIENCE
-            </h2>
-            <p className={styles.sectionIntro}>
-              A little room for photographs, laughter, and moments you&apos;ll
-              want to keep.
-            </p>
-          </header>
+          <div className={styles.bentoGrid}>
+            <article className={styles.bentoCard + " " + styles.bentoPrimary}>
+              <Image
+                className={styles.cardImage}
+                src={withSiteBasePath("/images/experience-enclosed.png")}
+                alt="An editorial view of the enclosed booth interior."
+                fill
+                sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc(100vw - 96px), 58vw"
+              />
+              <div className={styles.cardVeil} aria-hidden="true" />
+              <div className={styles.cardCopy}>
+                <h2>A LITTLE ROOM FOR REAL MOMENTS</h2>
+                <p>
+                  Draw the curtain and share a little room away from the crowd.
+                </p>
+              </div>
+            </article>
 
-          <div className={styles.featureGrid}>
-            {experienceFeatures.map((feature, index) => (
-              <article className={styles.feature} key={feature.id}>
-                <div className={styles.featureMediaStage}>
-                  <div
-                    className={`${styles.featureMedia} ${feature.mediaClass}`}
-                  >
-                    <Image
-                      className={styles.coverImage}
-                      src={feature.image}
-                      alt={feature.alt}
-                      fill
-                      sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1199px) 29vw, 384px"
-                    />
-                  </div>
-                </div>
-                <div className={styles.featureCopy}>
-                  <p className={styles.featureNumber} aria-hidden="true">
-                    0{index + 1}
-                  </p>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </div>
-              </article>
-            ))}
+            <a
+              className={
+                styles.bentoCard +
+                " " +
+                styles.bentoSecondary +
+                " " +
+                styles.clickableCard
+              }
+              href="#find-a-booth"
+            >
+              <Image
+                className={styles.cardImage}
+                src={withSiteBasePath("/images/hero-booth.png")}
+                alt="The FOTOHVN enclosed booth."
+                fill
+                sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) 45vw, 42vw"
+              />
+              <div className={styles.cardVeil} aria-hidden="true" />
+              <div className={styles.cardCopy}>
+                <h3>FIND A BOOTH</h3>
+                <p>
+                  Mall use is pay-per-use. Ask for the current location and visit
+                  details.
+                </p>
+              </div>
+            </a>
+
+            <a
+              className={
+                styles.bentoCard +
+                " " +
+                styles.bentoTertiary +
+                " " +
+                styles.clickableCard
+              }
+              href="#rent-fotohavn"
+            >
+              <Image
+                className={styles.cardImage}
+                src={withSiteBasePath("/images/printed-strips.png")}
+                alt="Printed FOTOHVN Photo Strips."
+                fill
+                sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) 45vw, 42vw"
+              />
+              <div className={styles.cardVeil} aria-hidden="true" />
+              <div className={styles.cardCopy}>
+                <h3>RENT FOTOHVN</h3>
+                <p>
+                  Event rental is billed by the hour with unlimited prints. Ask
+                  about your date.
+                </p>
+              </div>
+            </a>
           </div>
         </div>
       </section>
 
       <section
-        id="photographic-looks"
-        className={styles.looks}
-        aria-labelledby="looks-heading"
+        id="the-booth"
+        className={styles.accordionSection}
+        aria-labelledby="accordion-heading"
       >
         <div className={styles.container}>
-          <header className={styles.looksHeader}>
-            <p className={styles.eyebrow}>FOTOHVN PHOTOGRAPHIC LOOKS</p>
-            <h2 id="looks-heading" className={styles.sectionHeading}>
-              CHOOSE YOUR LOOK
-            </h2>
-            <p className={styles.looksSubheading}>
-              One booth. Four ways to remember it.
-            </p>
+          <header className={styles.sectionHeader}>
+            <p className={styles.sectionLabel}>THE BOOTH</p>
+            <h2 id="accordion-heading">ENCLOSED, TOGETHER, PRINTED.</h2>
           </header>
 
-          <div className={styles.looksGrid}>
-            <div
-              id="look-panel"
-              className={styles.lookPanel}
-              role="tabpanel"
-              aria-labelledby={`look-${activeLook.id}`}
-              tabIndex={0}
-            >
-              <div className={styles.lookMedia}>
-                {photographicLooks.map((look) => {
-                  const isActive = look.id === activeLook.id;
+          <div className={styles.accordion}>
+            {accordionItems.map((item, index) => {
+              const isActive = activeAccordion === item.id;
 
-                  return (
-                    <div
-                      className={`${styles.lookImageLayer} ${
-                        isActive ? styles.lookImageLayerActive : ""
-                      }`}
-                      aria-hidden={!isActive}
-                      key={look.id}
-                    >
-                      <Image
-                        className={styles.coverImage}
-                        src={look.image}
-                        alt={isActive ? look.alt : ""}
-                        fill
-                        sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1199px) 52vw, 720px"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <p className={styles.lookCaption} aria-live="polite">
-                <span>{activeLook.name}</span>
-                {activeLook.description}
-              </p>
-            </div>
-
-            <div
-              className={styles.lookTabs}
-              role="tablist"
-              aria-label="FOTOHVN photographic looks"
-              aria-orientation="vertical"
-            >
-              {photographicLooks.map((look, index) => {
-                const isActive = look.id === activeLook.id;
-
-                return (
+              return (
+                <article
+                  className={styles.accordionItem}
+                  data-active={isActive}
+                  key={item.id}
+                >
+                  <div className={styles.accordionMedia}>
+                    <Image
+                      className={styles.cardImage}
+                      src={item.image}
+                      alt={item.alt}
+                      fill
+                      sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc(100vw - 96px), 55vw"
+                    />
+                    <div className={styles.accordionVeil} aria-hidden="true" />
+                  </div>
                   <button
-                    id={`look-${look.id}`}
-                    className={`${styles.lookTab} ${
-                      isActive ? styles.lookTabActive : ""
-                    }`}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls="look-panel"
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => activateLook(index)}
-                    onKeyDown={(event) => handleTabKeyDown(event, index)}
                     ref={(node) => {
-                      tabRefs.current[index] = node;
+                      triggerRefs.current[index] = node;
                     }}
-                    key={look.id}
+                    className={styles.accordionTrigger}
+                    type="button"
+                    aria-expanded={isActive}
+                    aria-controls={"accordion-panel-" + item.id}
+                    onClick={() => setActiveAccordion(item.id)}
+                    onKeyDown={(event) =>
+                      handleAccordionKeyDown(event, index)
+                    }
                   >
-                    <span className={styles.lookTabNumber} aria-hidden="true">
-                      0{index + 1}
-                    </span>
-                    <span className={styles.lookTabCopy}>
-                      <span className={styles.lookTabName}>{look.name}</span>
-                      <span className={styles.lookTabDescription}>
-                        {look.description}
-                      </span>
-                    </span>
+                    <span>{item.title}</span>
                   </button>
-                );
-              })}
-            </div>
+                  <div
+                    id={"accordion-panel-" + item.id}
+                    className={styles.accordionPanel}
+                    hidden={!isActive}
+                  >
+                    <p>{item.description}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
+        </div>
+      </section>
+
+      <section
+        className={styles.marqueeSection}
+        aria-label="FOTOHVN experience words"
+        data-paused={isMarqueePaused}
+      >
+        <p className={styles.screenReaderText}>
+          FOTOHVN is an enclosed mall booth and event rental experience centered
+          on private moments, physical keepsakes, and printed Photo Strips.
+        </p>
+        <div className={styles.marqueeViewport}>
+          <div
+            className={styles.marqueeTrack + " " + styles.marqueeTrackForward}
+            aria-hidden="true"
+          >
+            {[...marqueeTerms, ...marqueeTerms].map((term, index) => (
+              <span key={"forward-" + term + "-" + index}>{term}</span>
+            ))}
+          </div>
+          <div
+            className={styles.marqueeTrack + " " + styles.marqueeTrackReverse}
+            aria-hidden="true"
+          >
+            {[...marqueeTerms]
+              .reverse()
+              .concat([...marqueeTerms].reverse())
+              .map((term, index) => (
+                <span key={"reverse-" + term + "-" + index}>{term}</span>
+              ))}
+          </div>
+          <div className={styles.reducedMotionTerms} aria-hidden="true">
+            {marqueeTerms.map((term) => (
+              <span key={term}>{term}</span>
+            ))}
+          </div>
+        </div>
+        <div className={styles.container + " " + styles.marqueeControlRow}>
+          <button
+            className={styles.motionControl}
+            type="button"
+            aria-pressed={isMarqueePaused}
+            onClick={() => setIsMarqueePaused((isPaused) => !isPaused)}
+          >
+            {isMarqueePaused ? "PLAY MOTION" : "PAUSE MOTION"}
+          </button>
         </div>
       </section>
     </div>

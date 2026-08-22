@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -eu
+
+exec /usr/bin/sudo -n /usr/local/sbin/fotohavn-deploy "${SSH_ORIGINAL_COMMAND:-}"

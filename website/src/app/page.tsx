@@ -10,7 +10,10 @@ export default function Home() {
         Skip to main content
       </a>
       <SiteChrome />
-      <main id="main-content">
+      <main
+        id="main-content"
+        className="overflow-x-hidden w-full max-w-full"
+      >
         <UpperExperience />
         <MiddleExperience />
         <ClosingExperience />

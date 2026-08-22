@@ -1,65 +1,61 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react";
 
-import styles from './SiteChrome.module.css'
+import styles from "./SiteChrome.module.css";
 
 const navigation = [
-  { href: '#experience', label: 'Experience' },
-  { href: '#photographic-looks', label: 'Looks' },
-  { href: '#signature-experience', label: 'Package' },
-  { href: '#gallery', label: 'Gallery' },
-  { href: '#events', label: 'Events' },
-  { href: '#story', label: 'Story' },
-]
+  { href: "#experience", label: "EXPERIENCE" },
+  { href: "#the-booth", label: "THE BOOTH" },
+  { href: "#prints", label: "PRINTS" },
+] as const;
 
-export function SiteChrome() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const headerRef = useRef<HTMLElement>(null)
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
+export default function SiteChrome() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 24)
+    const updateNavigation = () => setIsScrolled(window.scrollY > 24);
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    updateNavigation();
+    window.addEventListener("scroll", updateNavigation, { passive: true });
+    return () => window.removeEventListener("scroll", updateNavigation);
+  }, []);
 
   useEffect(() => {
-    if (!isMenuOpen) return
+    if (!isMenuOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
+      if (event.key !== "Escape") return;
 
-      event.preventDefault()
-      setIsMenuOpen(false)
-      requestAnimationFrame(() => menuButtonRef.current?.focus())
-    }
+      event.preventDefault();
+      setIsMenuOpen(false);
+      requestAnimationFrame(() => menuButtonRef.current?.focus());
+    };
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (headerRef.current?.contains(event.target as Node)) return
-      setIsMenuOpen(false)
-    }
+      if (headerRef.current?.contains(event.target as Node)) return;
+      setIsMenuOpen(false);
+    };
 
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('pointerdown', handlePointerDown)
-
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('pointerdown', handlePointerDown)
-    }
-  }, [isMenuOpen])
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isMenuOpen]);
 
-  const closeMenu = () => setIsMenuOpen(false)
-
+  const closeMenu = () => setIsMenuOpen(false);
   const headerClassName = [
     styles.header,
-    isScrolled ? styles.scrolled : '',
-    isMenuOpen ? styles.menuOpen : '',
+    isScrolled ? styles.scrolled : "",
+    isMenuOpen ? styles.menuOpen : "",
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 
   return (
     <header ref={headerRef} className={headerClassName}>
@@ -85,9 +81,14 @@ export function SiteChrome() {
           </ul>
         </nav>
 
-        <a className={styles.bookingLink} href="#inquire">
-          BOOK FOTOHVN
-        </a>
+        <div className={styles.desktopActions}>
+          <a className={styles.findAction} href="#find-a-booth">
+            FIND A BOOTH
+          </a>
+          <a className={styles.rentAction} href="#rent-fotohavn">
+            RENT FOTOHVN
+          </a>
+        </div>
 
         <button
           ref={menuButtonRef}
@@ -97,7 +98,7 @@ export function SiteChrome() {
           aria-controls="mobile-navigation"
           onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
         >
-          {isMenuOpen ? 'CLOSE' : 'MENU'}
+          {isMenuOpen ? "CLOSE" : "MENU"}
         </button>
       </div>
 
@@ -120,12 +121,23 @@ export function SiteChrome() {
             </li>
           ))}
         </ul>
-        <a className={styles.mobileBookingLink} href="#inquire" onClick={closeMenu}>
-          BOOK FOTOHVN
-        </a>
+        <div className={styles.mobileActions}>
+          <a
+            className={styles.mobileFindAction}
+            href="#find-a-booth"
+            onClick={closeMenu}
+          >
+            FIND A BOOTH
+          </a>
+          <a
+            className={styles.mobileRentAction}
+            href="#rent-fotohavn"
+            onClick={closeMenu}
+          >
+            RENT FOTOHVN
+          </a>
+        </div>
       </nav>
     </header>
-  )
+  );
 }
-
-export default SiteChrome

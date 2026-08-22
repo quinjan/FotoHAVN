@@ -1,58 +1,60 @@
 .header {
-  position: fixed;
-  inset: 0 0 auto;
+  position: sticky;
   z-index: 100;
-  color: var(--color-text-primary);
-  background: rgba(251, 248, 242, 0.88);
+  top: 0;
+  height: 72px;
+  margin-bottom: -72px;
+  color: var(--color-ebony);
+  background: transparent;
   transition:
-    color var(--duration-standard) var(--ease-standard),
-    background-color var(--duration-standard) var(--ease-standard),
-    border-color var(--duration-standard) var(--ease-standard);
+    background-color 240ms ease,
+    border-color 240ms ease;
 }
 
 .header::after {
   position: absolute;
   inset: auto 0 0;
-  height: var(--border-hairline);
+  height: 1px;
   background: transparent;
-  content: '';
-  transition: background-color var(--duration-standard) var(--ease-standard);
+  content: "";
+  transition: background-color 240ms ease;
 }
 
 .scrolled,
 .menuOpen {
-  color: var(--color-text-primary);
-  background: var(--surface-canvas);
+  background: rgba(251, 248, 242, 0.97);
 }
 
 .scrolled::after,
 .menuOpen::after {
-  background: var(--color-border-light);
+  background: var(--color-hairline);
 }
 
 .bar {
-  width: min(100%, calc(var(--page-max-width) + (2 * var(--page-gutter-desktop))));
-  height: var(--navigation-height);
+  width: min(calc(100% - 128px), 1280px);
+  height: 72px;
   margin-inline: auto;
-  padding-inline: var(--page-gutter-desktop);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--spacing-32);
+  gap: 32px;
 }
 
 .brand {
-  color: inherit;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-display);
   font-size: 26px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;
   text-decoration: none;
 }
 
 .desktopNavigation {
-  justify-self: end;
+  justify-self: center;
 }
 
 .navigationList,
@@ -62,77 +64,73 @@
   list-style: none;
 }
 
-.navigationList {
+.navigationList,
+.desktopActions,
+.mobileActions {
   display: flex;
   align-items: center;
-  gap: clamp(var(--spacing-16), 2vw, var(--spacing-32));
+}
+
+.navigationList {
+  gap: clamp(16px, 2vw, 32px);
+}
+
+.desktopActions {
+  gap: 20px;
 }
 
 .navigationLink,
-.bookingLink,
+.findAction,
+.rentAction,
 .menuButton,
-.mobileBookingLink {
-  font-family: var(--font-sans);
-  font-size: var(--text-label);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.12em;
-  line-height: var(--leading-label);
+.mobileFindAction,
+.mobileRentAction {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
   text-transform: uppercase;
 }
 
+.navigationLink,
+.findAction {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-underline-offset: 6px;
+}
+
 .navigationLink {
-  position: relative;
-  padding-block: var(--spacing-12);
-  color: inherit;
   text-decoration: none;
 }
 
-.navigationLink::after {
-  position: absolute;
-  right: 0;
-  bottom: 6px;
-  left: 0;
-  height: var(--border-hairline);
-  background: currentColor;
-  content: '';
-  opacity: 0;
-  transform: scaleX(0.5);
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    transform var(--duration-fast) var(--ease-standard);
+.navigationLink:hover,
+.findAction:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
 }
 
-.navigationLink:hover::after {
-  opacity: 0.7;
-  transform: scaleX(1);
-}
-
-.bookingLink,
-.mobileBookingLink {
-  min-height: var(--control-min-height);
-  border: var(--border-hairline) solid var(--color-action-primary);
-  border-radius: var(--radius-button);
+.rentAction,
+.mobileRentAction {
+  min-height: 48px;
+  padding-inline: 20px;
+  border: 1px solid var(--color-ebony);
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-inverse);
-  background: var(--color-action-primary);
+  color: var(--color-off-white);
+  background: var(--color-ebony);
   text-decoration: none;
   transition:
-    color var(--duration-fast) var(--ease-standard),
-    background-color var(--duration-fast) var(--ease-standard),
-    border-color var(--duration-fast) var(--ease-standard);
+    color 180ms ease,
+    background-color 180ms ease;
 }
 
-.bookingLink {
-  padding: var(--spacing-16) var(--spacing-24);
-}
-
-.bookingLink:hover,
-.mobileBookingLink:hover {
-  border-color: var(--color-action-primary-hover);
-  color: var(--color-text-inverse);
-  background: var(--color-action-primary-hover);
+.rentAction:hover,
+.mobileRentAction:hover {
+  border-color: var(--color-dark-walnut);
+  background: var(--color-dark-walnut);
 }
 
 .menuButton {
@@ -141,17 +139,18 @@
   padding: 0;
   border: 0;
   display: none;
+  justify-self: end;
   color: inherit;
   background: transparent;
   cursor: pointer;
 }
 
 .mobileNavigation {
-  max-height: calc(100dvh - var(--navigation-height));
-  padding: var(--spacing-16) var(--page-gutter-mobile) var(--spacing-32);
-  border-bottom: var(--border-hairline) solid var(--color-border-light);
-  color: var(--color-text-primary);
-  background: var(--surface-canvas);
+  max-height: calc(100dvh - 72px);
+  padding: 16px 48px 32px;
+  border-bottom: 1px solid var(--color-hairline);
+  color: var(--color-ebony);
+  background: var(--color-off-white);
   overflow-y: auto;
 }
 
@@ -160,55 +159,80 @@
 }
 
 .mobileNavigationList {
-  border-top: var(--border-hairline) solid var(--color-border-light);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .mobileNavigationList li {
-  border-bottom: var(--border-hairline) solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .mobileNavigationLink {
-  min-height: 58px;
+  min-height: 60px;
   display: flex;
   align-items: center;
-  color: var(--color-text-primary);
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--tracking-subheading);
-  line-height: var(--leading-subheading);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
   text-decoration: none;
 }
 
-.mobileBookingLink {
-  width: 100%;
-  margin-top: var(--spacing-24);
-  padding-inline: var(--spacing-24);
+.mobileActions {
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.mobileFindAction,
+.mobileRentAction {
+  width: 50%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileFindAction {
+  border: 1px solid var(--color-ebony);
+  border-radius: 4px;
+  text-decoration: none;
 }
 
 .brand:focus-visible,
 .navigationLink:focus-visible,
-.bookingLink:focus-visible,
+.findAction:focus-visible,
+.rentAction:focus-visible,
 .menuButton:focus-visible,
 .mobileNavigationLink:focus-visible,
-.mobileBookingLink:focus-visible {
-  outline: var(--border-focus) solid currentColor;
-  outline-offset: var(--focus-offset);
+.mobileFindAction:focus-visible,
+.mobileRentAction:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
-.bookingLink:focus-visible,
-.mobileBookingLink:focus-visible {
-  outline-color: var(--color-focus-ring);
+.rentAction:focus-visible,
+.mobileRentAction:focus-visible {
+  outline-color: var(--color-ebony);
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 768px) {
+  .header {
+    background: rgba(251, 248, 242, 0.97);
+  }
+
+  .header::after {
+    background: var(--color-hairline);
+  }
+}
+
+@media (max-width: 1199px) {
   .bar {
-    padding-inline: var(--page-gutter-tablet);
-    grid-template-columns: auto 1fr auto;
+    width: calc(100% - 96px);
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .desktopNavigation,
-  .bookingLink {
+  .desktopActions {
     display: none;
   }
 
@@ -221,20 +245,29 @@
 
 @media (max-width: 767px) {
   .bar {
-    padding-inline: var(--page-gutter-mobile);
+    width: calc(100% - 48px);
   }
 
-  .brand {
-    font-size: 24px;
+  .mobileNavigation {
+    padding-inline: 24px;
+  }
+
+  .mobileActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mobileFindAction,
+  .mobileRentAction {
+    width: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .header,
   .header::after,
-  .navigationLink::after,
-  .bookingLink,
-  .mobileBookingLink {
+  .rentAction,
+  .mobileRentAction {
     transition: none;
   }
 }

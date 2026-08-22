@@ -1,0 +1,267 @@
+name: Deploy FotoHAVN staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Publish, deploy, or restore the previously deployed digest
+        required: true
+        default: deploy
+        type: choice
+        options:
+          - deploy
+          - publish-only
+          - rollback
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fotohavn-staging
+  cancel-in-progress: false
+
+jobs:
+  validate-request:
+    name: Validate deployment request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require the main branch
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "FotoHAVN staging can only operate from main; received $GITHUB_REF." >&2
+            exit 1
+          fi
+
+  publish:
+    name: Build, verify, and publish image
+    if: inputs.operation != 'rollback'
+    needs: validate-request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_ref: ${{ steps.publish.outputs.image_ref }}
+    steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Lint website
+        working-directory: website
+        run: npm run lint
+
+      - name: Type-check website
+        working-directory: website
+        run: npx tsc --noEmit --pretty false
+
+      - name: Build website
+        working-directory: website
+        run: npm run build
+
+      - name: Build immutable container candidate
+        id: image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image_tag="ghcr.io/quinjan/fotohavn-website:sha-${GITHUB_SHA}"
+          docker build \
+            --file website/Dockerfile \
+            --tag "$image_tag" \
+            website
+          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke-test container candidate
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.image_tag }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          container_name="fotohavn-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cleanup() {
+            docker rm --force "$container_name" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          docker run --detach --name "$container_name" \
+            --publish 127.0.0.1:3000:3000 \
+            "$IMAGE_TAG"
+
+          for attempt in $(seq 1 18); do
+            health="$(docker inspect --format '{{.State.Health.Status}}' "$container_name")"
+            if [[ "$health" == "healthy" ]]; then
+              break
+            fi
+            if [[ "$health" == "unhealthy" || "$attempt" -eq 18 ]]; then
+              docker logs "$container_name"
+              exit 1
+            fi
+            sleep 5
+          done
+
+          curl --fail --silent --show-error --max-time 10 \
+            --output /tmp/fotohavn-smoke.html \
+            http://127.0.0.1:3000/fotohvn
+          grep --fixed-strings --quiet 'FOTOHVN' /tmp/fotohavn-smoke.html
+
+          root_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --max-time 10 http://127.0.0.1:3000/)"
+          if [[ "$root_status" != "404" ]]; then
+            echo "Expected the container root to return 404; received $root_status." >&2
+            exit 1
+          fi
+
+      - name: Publish image and capture digest
+        id: publish
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.image_tag }}
+          GHCR_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+          printf '%s' "$GHCR_TOKEN" \
+            | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          push_output="$(docker push "$IMAGE_TAG" 2>&1)"
+          printf '%s\n' "$push_output"
+
+          image_digest="$(printf '%s\n' "$push_output" \
+            | sed -n 's/^.*digest: \(sha256:[0-9a-f]\{64\}\).*$/\1/p' \
+            | tail -n 1)"
+          image_ref="${IMAGE_TAG%:*}@${image_digest}"
+          if [[ ! "$image_ref" =~ ^ghcr\.io/quinjan/fotohavn-website@sha256:[0-9a-f]{64}$ ]]; then
+            echo "The pushed image did not resolve to an approved digest: $image_ref" >&2
+            exit 1
+          fi
+
+          echo "image_ref=$image_ref" >> "$GITHUB_OUTPUT"
+          echo "Published $image_ref" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy published digest
+    if: inputs.operation == 'deploy'
+    needs:
+      - validate-request
+      - publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    env:
+      DEPLOY_USER: ${{ vars.FOTOHAVN_DEPLOY_USER }}
+      IMAGE_REF: ${{ needs.publish.outputs.image_ref }}
+      VPS_HOST: ${{ vars.FOTOHAVN_VPS_HOST }}
+    steps:
+      - name: Deploy through the restricted SSH command
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.FOTOHAVN_SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.FOTOHAVN_SSH_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$VPS_HOST" && -n "$DEPLOY_USER" && -n "$IMAGE_REF" ]]
+          [[ -n "$SSH_KNOWN_HOSTS" && -n "$SSH_PRIVATE_KEY" ]]
+
+          ssh_dir="$(mktemp -d)"
+          cleanup() {
+            rm -rf -- "$ssh_dir"
+          }
+          trap cleanup EXIT
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$ssh_dir/deploy_key"
+          chmod 0600 "$ssh_dir/known_hosts" "$ssh_dir/deploy_key"
+
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+            -i "$ssh_dir/deploy_key" \
+            "${DEPLOY_USER}@${VPS_HOST}" \
+            "deploy ${IMAGE_REF}"
+
+      - name: Verify the public staging boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          response_file="$(mktemp)"
+          trap 'rm -f -- "$response_file"' EXIT
+          curl --fail --silent --show-error --max-time 10 \
+            --output "$response_file" \
+            "http://${VPS_HOST}/fotohvn"
+          grep --fixed-strings --quiet 'FOTOHVN' "$response_file"
+
+          root_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --max-time 10 "http://${VPS_HOST}/")"
+          if [[ "$root_status" != "404" ]]; then
+            echo "Expected the raw-IP root to return 404; received $root_status." >&2
+            exit 1
+          fi
+
+          echo "Deployed ${IMAGE_REF} to http://${VPS_HOST}/fotohvn" >> "$GITHUB_STEP_SUMMARY"
+
+  rollback:
+    name: Restore previous digest
+    if: inputs.operation == 'rollback'
+    needs: validate-request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    env:
+      DEPLOY_USER: ${{ vars.FOTOHAVN_DEPLOY_USER }}
+      VPS_HOST: ${{ vars.FOTOHAVN_VPS_HOST }}
+    steps:
+      - name: Roll back through the restricted SSH command
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.FOTOHAVN_SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.FOTOHAVN_SSH_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$VPS_HOST" && -n "$DEPLOY_USER" ]]
+          [[ -n "$SSH_KNOWN_HOSTS" && -n "$SSH_PRIVATE_KEY" ]]
+
+          ssh_dir="$(mktemp -d)"
+          cleanup() {
+            rm -rf -- "$ssh_dir"
+          }
+          trap cleanup EXIT
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$ssh_dir/deploy_key"
+          chmod 0600 "$ssh_dir/known_hosts" "$ssh_dir/deploy_key"
+
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+            -i "$ssh_dir/deploy_key" \
+            "${DEPLOY_USER}@${VPS_HOST}" \
+            rollback
+
+          response_file="$(mktemp)"
+          trap 'rm -f -- "$response_file"' EXIT
+          curl --fail --silent --show-error --max-time 10 \
+            --output "$response_file" \
+            "http://${VPS_HOST}/fotohvn"
+          grep --fixed-strings --quiet 'FOTOHVN' "$response_file"
+          echo "Restored the previous FotoHAVN digest." >> "$GITHUB_STEP_SUMMARY"

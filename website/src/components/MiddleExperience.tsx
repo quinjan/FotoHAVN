@@ -1,153 +1,242 @@
-import Image from "next/image";
+"use client";
 
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
+import { useRef, useState } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
+
+import { withSiteBasePath } from "../../site.config";
 import styles from "./MiddleExperience.module.css";
 
-const inclusions = [
-  "3 hours of unlimited booth sessions",
-  "Printed photo strips",
-  "Digital copies",
-  "Event attendant",
-  "Custom event photo template",
-  "Specialized FOTOHVN photographic looks",
-  "Setup & teardown",
-];
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const galleryImages = [
+const galleryStories = [
   {
-    src: "/images/hero-booth.png",
-    alt: "The enclosed FOTOHVN booth set within a warmly lit celebration",
-    caption: "A little room, ready for the evening.",
-    className: styles.galleryAnchor,
-    sizes: "(max-width: 767px) 100vw, 66vw",
+    label: "THE ENCLOSURE",
+    src: withSiteBasePath("/images/hero-booth.png"),
+    alt: "The vintage-style enclosed FOTOHVN booth.",
   },
   {
-    src: "/images/candid-guests.png",
-    alt: "Guests sharing a candid moment inside the FOTOHVN booth",
-    caption: "Inside the curtain.",
-    className: styles.galleryPortrait,
-    sizes: "(max-width: 767px) 100vw, 32vw",
+    label: "A MOMENT TOGETHER",
+    src: withSiteBasePath("/images/candid-guests.png"),
+    alt: "Two people sharing a playful moment inside the booth.",
   },
   {
-    src: "/images/printed-strips.png",
-    alt: "Printed FOTOHVN photo strips resting on a tactile surface",
-    caption: "Photographs made to be held.",
-    className: styles.galleryStrip,
-    sizes: "(max-width: 767px) 100vw, 24vw",
+    label: "THE PHYSICAL PRINT",
+    src: withSiteBasePath("/images/printed-strips.png"),
+    alt: "Printed FOTOHVN Photo Strips on a tactile surface.",
   },
   {
-    src: "/images/booth-detail.png",
-    alt: "Close view of the FOTOHVN booth curtain and crafted details",
-    caption: "Every detail, considered.",
-    className: styles.galleryDetail,
-    sizes: "(max-width: 767px) 100vw, 40vw",
+    label: "THE BOOTH DETAIL",
+    src: withSiteBasePath("/images/booth-detail.png"),
+    alt: "A close view of the booth curtain and crafted details.",
   },
-  {
-    src: "/images/look-signature.png",
-    alt: "A guest portrait developed in the FOTOHVN Signature look",
-    caption: "The FOTOHVN Signature look.",
-    className: styles.gallerySignature,
-    sizes: "(max-width: 767px) 100vw, 24vw",
-  },
-];
+] as const;
 
-const events = [
+const stackCards = [
   {
-    title: "WEDDINGS",
-    src: "/images/candid-guests.png",
-    alt: "Wedding guests making a photograph together inside FOTOHVN",
+    title: "STEP INSIDE",
+    copy: "A private enclosure makes a little space away from the room around you.",
+    src: withSiteBasePath("/images/experience-enclosed.png"),
+    alt: "An editorial view inside the enclosed booth.",
   },
   {
-    title: "DEBUTS",
-    src: "/images/look-vintage.png",
-    alt: "A debut portrait developed with FOTOHVN's warm vintage look",
+    title: "BE YOURSELVES",
+    copy: "Share a moment, laugh, experiment, and make a photograph together.",
+    src: withSiteBasePath("/images/candid-guests.png"),
+    alt: "Two people making a photograph together inside the booth.",
   },
   {
-    title: "BIRTHDAYS",
-    src: "/images/printed-strips.png",
-    alt: "FOTOHVN photo strips made during a birthday celebration",
+    title: "KEEP THE PHOTOGRAPH",
+    copy: "Leave with a physical Photo Strip or print made to be held.",
+    src: withSiteBasePath("/images/experience-printed.png"),
+    alt: "A physical FOTOHVN print arranged on warm paper.",
+  },
+] as const;
+
+const notes = [
+  {
+    quote:
+      "A little room for photographs, laughter, and moments you'll want to keep.",
+    primary: withSiteBasePath("/images/candid-guests.png"),
+    secondary: withSiteBasePath("/images/booth-detail.png"),
+    primaryAlt: "Two people sharing a moment inside the booth.",
+    secondaryAlt: "A close crop of the FOTOHVN booth curtain.",
   },
   {
-    title: "CORPORATE EVENTS",
-    src: "/images/hero-booth.png",
-    alt: "The FOTOHVN booth installed for an elegant corporate event",
+    quote:
+      "Step inside, draw the curtain, and take a little time to laugh, experiment, and make something together.",
+    primary: withSiteBasePath("/images/experience-enclosed.png"),
+    secondary: withSiteBasePath("/images/candid-guests.png"),
+    primaryAlt: "An editorial view inside the enclosed booth.",
+    secondaryAlt: "Two people making a photograph together.",
   },
   {
-    title: "PRIVATE CELEBRATIONS",
-    src: "/images/look-monochrome.png",
-    alt: "An intimate private celebration portrait in monochrome",
+    quote:
+      "A private, tactile photography experience with something physical to keep.",
+    primary: withSiteBasePath("/images/printed-strips.png"),
+    secondary: withSiteBasePath("/images/experience-printed.png"),
+    primaryAlt: "Printed FOTOHVN Photo Strips.",
+    secondaryAlt: "A physical FOTOHVN print on a paper surface.",
   },
-];
+] as const;
 
 export default function MiddleExperience() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const gallerySectionRef = useRef<HTMLElement>(null);
+  const galleryHeadingRef = useRef<HTMLDivElement>(null);
+  const [activeNote, setActiveNote] = useState(0);
+
+  useGSAP(
+    () => {
+      let mediaQueries: gsap.MatchMedia | undefined;
+      const animationContext = gsap.context(() => {
+        mediaQueries = gsap.matchMedia();
+        mediaQueries.add(
+          "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+          () => {
+            if (gallerySectionRef.current && galleryHeadingRef.current) {
+              ScrollTrigger.create({
+                trigger: gallerySectionRef.current,
+                pin: galleryHeadingRef.current,
+                start: "top top+=96",
+                end: "bottom bottom-=96",
+                pinSpacing: false,
+              });
+            }
+
+            gsap.utils
+              .toArray<HTMLElement>("[data-gallery-story]", rootRef.current)
+              .forEach((story) => {
+                const media = story.querySelector<HTMLElement>(
+                  "[data-gallery-media]",
+                );
+                const overlay = story.querySelector<HTMLElement>(
+                  "[data-gallery-overlay]",
+                );
+
+                if (!media || !overlay) return;
+
+                gsap
+                  .timeline({
+                    scrollTrigger: {
+                      trigger: story,
+                      start: "top bottom-=96",
+                      end: "bottom top+=96",
+                      scrub: true,
+                    },
+                  })
+                  .fromTo(
+                    media,
+                    { scale: 0.8, opacity: 0.2 },
+                    {
+                      scale: 1,
+                      opacity: 1,
+                      duration: 0.5,
+                      ease: "none",
+                    },
+                  )
+                  .to(media, {
+                    opacity: 0.2,
+                    duration: 0.5,
+                    ease: "none",
+                  })
+                  .to(
+                    overlay,
+                    { opacity: 0.32, duration: 0.5, ease: "none" },
+                    "<",
+                  );
+              });
+
+            gsap.utils
+              .toArray<HTMLElement>("[data-stack-card]", rootRef.current)
+              .forEach((card) => {
+                gsap.fromTo(
+                  card,
+                  { scale: 0.94, yPercent: 18 },
+                  {
+                    scale: 1,
+                    yPercent: 0,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: card,
+                      start: "top bottom",
+                      end: "top top+=240",
+                      scrub: true,
+                    },
+                  },
+                );
+              });
+          },
+        );
+      }, rootRef);
+
+      return () => {
+        mediaQueries?.revert();
+        animationContext.revert();
+      };
+    },
+    { scope: rootRef },
+  );
+
+  const cycleNote = (direction: number) => {
+    setActiveNote(
+      (current) => (current + direction + notes.length) % notes.length,
+    );
+  };
+
+  const handleCarouselKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      cycleNote(-1);
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      cycleNote(1);
+    }
+  };
+
+  const currentNote = notes[activeNote];
+
   return (
-    <div className={styles.middle}>
+    <div ref={rootRef} className={styles.middleExperience}>
       <section
-        className={styles.package}
-        id="signature-experience"
-        aria-labelledby="signature-experience-title"
-      >
-        <div className={styles.packageInner}>
-          <header className={styles.packageHeader}>
-            <p className={styles.eyebrowDark}>SIGNATURE EXPERIENCE</p>
-            <h2 id="signature-experience-title">THE FOTOHVN EXPERIENCE</h2>
-          </header>
-
-          <div className={styles.packageStatement}>
-            <p className={styles.price} aria-label="Eight thousand five hundred Philippine pesos">
-              ₱8,500
-            </p>
-            <div className={styles.duration} aria-label="3 HOURS">
-              <span className={styles.durationValue} aria-hidden="true">
-                3
-              </span>
-              <span className={styles.durationUnit} aria-hidden="true">
-                HOURS
-              </span>
-            </div>
-          </div>
-
-          <div className={styles.packageDetails}>
-            <p className={styles.inclusionLabel}>Your experience includes</p>
-            <ul className={styles.inclusions}>
-              {inclusions.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-
-            <div className={styles.packageAction}>
-              <a className={styles.primaryButton} href="#inquire">
-                BOOK FOTOHVN
-              </a>
-              <p>ONE BOOTH. ONE EXPERIENCE. YOUR LOOK.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
+        ref={gallerySectionRef}
         className={styles.gallerySection}
-        id="gallery"
-        aria-labelledby="gallery-title"
+        aria-labelledby="gallery-heading"
       >
-        <div className={styles.sectionInner}>
-          <header className={styles.galleryHeader}>
-            <p className={styles.eyebrow}>THE PHOTOGRAPHS</p>
-            <h2 id="gallery-title">SEE IT IN ACTION</h2>
-          </header>
+        <div className={styles.container + " " + styles.galleryGrid}>
+          <div ref={galleryHeadingRef} className={styles.galleryHeading}>
+            <p className={styles.sectionLabel}>THE BOOTH</p>
+            <h2 id="gallery-heading">THE FOTOHVN EXPERIENCE</h2>
+            <p>Step inside together. Leave with something real.</p>
+          </div>
 
-          <div className={styles.gallery}>
-            {galleryImages.map((image) => (
-              <figure className={image.className} key={image.src}>
-                <div className={styles.imageFrame}>
+          <div className={styles.galleryStories}>
+            {galleryStories.map((story) => (
+              <figure
+                className={styles.galleryStory}
+                data-gallery-story
+                key={story.label}
+              >
+                <div className={styles.galleryMedia} data-gallery-media>
                   <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    sizes={image.sizes}
                     className={styles.image}
+                    src={story.src}
+                    alt={story.alt}
+                    fill
+                    sizes="(max-width: 1023px) calc(100vw - 96px), 65vw"
+                  />
+                  <div
+                    className={styles.galleryOverlay}
+                    data-gallery-overlay
+                    aria-hidden="true"
                   />
                 </div>
-                <figcaption>{image.caption}</figcaption>
+                <figcaption>{story.label}</figcaption>
               </figure>
             ))}
           </div>
@@ -155,37 +244,104 @@ export default function MiddleExperience() {
       </section>
 
       <section
-        className={styles.eventsSection}
-        id="events"
-        aria-labelledby="events-title"
+        id="prints"
+        className={styles.stackSection}
+        aria-labelledby="stack-heading"
       >
-        <div className={styles.sectionInner}>
-          <header className={styles.eventsHeader}>
-            <p className={styles.eyebrow}>CELEBRATIONS</p>
-            <h2 id="events-title">MADE FOR MOMENTS LIKE THESE</h2>
+        <div className={styles.container}>
+          <header className={styles.stackHeader}>
+            <p className={styles.sectionLabel}>PHYSICAL PRINTS</p>
+            <h2 id="stack-heading">
+              STEP INSIDE. BE YOURSELVES. KEEP THE PHOTOGRAPH.
+            </h2>
           </header>
 
-          <ol className={styles.eventsList}>
-            {events.map((event, index) => (
-              <li className={styles.event} key={event.title}>
-                <div className={styles.eventMedia}>
+          <div className={styles.stackCards}>
+            {stackCards.map((card, index) => (
+              <article
+                className={styles.stackCard}
+                data-stack-card
+                key={card.title}
+                style={{ "--stack-index": index } as CSSProperties}
+              >
+                <div className={styles.stackCopy}>
+                  <h3>{card.title}</h3>
+                  <p>{card.copy}</p>
+                </div>
+                <div className={styles.stackMedia}>
                   <Image
-                    src={event.src}
-                    alt={event.alt}
-                    fill
-                    sizes="(max-width: 767px) 100vw, 58vw"
                     className={styles.image}
+                    src={card.src}
+                    alt={card.alt}
+                    fill
+                    loading={
+                      index === stackCards.length - 1 ? "eager" : undefined
+                    }
+                    sizes="(max-width: 1023px) calc(100vw - 96px), 58vw"
                   />
                 </div>
-                <div className={styles.eventTitleBlock}>
-                  <span className={styles.eventNumber} aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <h3>{event.title}</h3>
-                </div>
-              </li>
+              </article>
             ))}
-          </ol>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={styles.notesSection}
+        aria-labelledby="notes-heading"
+      >
+        <div className={styles.container}>
+          <header className={styles.notesHeader}>
+            <p className={styles.sectionLabel}>FOTOHVN</p>
+            <h2 id="notes-heading">NOTES FROM INSIDE THE BOOTH</h2>
+          </header>
+
+          <div
+            className={styles.carousel}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="FOTOHVN editorial notes"
+            tabIndex={0}
+            onKeyDown={handleCarouselKeyDown}
+          >
+            <div className={styles.portraitComposition}>
+              <div className={styles.portraitPrimary}>
+                <Image
+                  className={styles.image}
+                  src={currentNote.primary}
+                  alt={currentNote.primaryAlt}
+                  fill
+                  sizes="(max-width: 767px) 64vw, 34vw"
+                />
+              </div>
+              <div className={styles.portraitSecondary}>
+                <Image
+                  className={styles.image}
+                  src={currentNote.secondary}
+                  alt={currentNote.secondaryAlt}
+                  fill
+                  sizes="(max-width: 767px) 42vw, 20vw"
+                />
+              </div>
+            </div>
+
+            <div className={styles.noteCopy}>
+              <p className={styles.noteAttribution}>FOTOHVN</p>
+              <blockquote>&ldquo;{currentNote.quote}&rdquo;</blockquote>
+              <p className={styles.screenReaderStatus} aria-live="polite">
+                Note {activeNote + 1} of {notes.length}: {currentNote.quote},
+                attributed to FOTOHVN.
+              </p>
+              <div className={styles.carouselControls}>
+                <button type="button" onClick={() => cycleNote(-1)}>
+                  <span aria-hidden="true">←</span> PREVIOUS
+                </button>
+                <button type="button" onClick={() => cycleNote(1)}>
+                  NEXT <span aria-hidden="true">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

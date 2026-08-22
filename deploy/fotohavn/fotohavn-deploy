@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly APP_DIR="/opt/fotohavn"
+readonly COMPOSE_FILE="${APP_DIR}/compose.yml"
+readonly ENV_FILE="${APP_DIR}/.env"
+readonly STATE_DIR="/var/lib/fotohavn"
+readonly CURRENT_FILE="${STATE_DIR}/current-image"
+readonly PREVIOUS_FILE="${STATE_DIR}/previous-image"
+readonly LOCK_FILE="/run/lock/fotohavn-deploy.lock"
+readonly PUBLIC_URL="http://159.223.47.227/fotohvn"
+readonly PAGE_MARKER="FOTOHVN"
+readonly IMAGE_PATTERN='^ghcr\.io/quinjan/fotohavn-website@sha256:[0-9a-f]{64}$'
+
+log() {
+  printf '[fotohavn-deploy] %s\n' "$*"
+}
+
+fail() {
+  log "ERROR: $*" >&2
+  exit 1
+}
+
+is_valid_image() {
+  [[ "${1:-}" =~ $IMAGE_PATTERN ]]
+}
+
+read_state() {
+  local path="$1"
+  if [[ -s "$path" ]]; then
+    tr -d '\r\n' < "$path"
+  fi
+}
+
+write_state() {
+  local path="$1"
+  local value="$2"
+  local temporary
+  temporary="$(mktemp "${path}.XXXXXX")"
+  printf '%s\n' "$value" > "$temporary"
+  chmod 0600 "$temporary"
+  mv -f "$temporary" "$path"
+}
+
+write_compose_environment() {
+  local image="$1"
+  local temporary
+  temporary="$(mktemp "${APP_DIR}/.env.XXXXXX")"
+  printf 'FOTOHAVN_IMAGE=%s\n' "$image" > "$temporary"
+  chmod 0600 "$temporary"
+  mv -f "$temporary" "$ENV_FILE"
+}
+
+compose() {
+  docker compose \
+    --project-name fotohavn \
+    --env-file "$ENV_FILE" \
+    --file "$COMPOSE_FILE" \
+    "$@"
+}
+
+wait_for_container_health() {
+  local status
+  for _ in {1..18}; do
+    status="$(docker inspect --format '{{.State.Health.Status}}' fotohavn-web 2>/dev/null || true)"
+    if [[ "$status" == "healthy" ]]; then
+      return 0
+    fi
+    if [[ "$status" == "unhealthy" ]]; then
+      return 1
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+public_smoke_test() {
+  local response_file
+  response_file="$(mktemp)"
+  if curl --fail --silent --show-error --max-time 10 \
+    --output "$response_file" "$PUBLIC_URL" \
+    && grep -Fq "$PAGE_MARKER" "$response_file"; then
+    rm -f "$response_file"
+    return 0
+  fi
+  rm -f "$response_file"
+  return 1
+}
+
+activate_image() {
+  local image="$1"
+  log "Pulling ${image}."
+  docker pull "$image"
+  write_compose_environment "$image"
+  compose up --detach --no-deps web
+
+  log "Waiting for the container health check."
+  wait_for_container_health || return 1
+
+  log "Checking ${PUBLIC_URL}."
+  public_smoke_test || return 1
+}
+
+restore_image() {
+  local image="$1"
+  log "Restoring ${image}."
+  if activate_image "$image"; then
+    write_state "$CURRENT_FILE" "$image"
+    return 0
+  fi
+  return 1
+}
+
+deploy_image() {
+  local requested_image="$1"
+  local current_image previous_image
+  current_image="$(read_state "$CURRENT_FILE")"
+  previous_image="$(read_state "$PREVIOUS_FILE")"
+
+  if [[ "$requested_image" == "$current_image" ]]; then
+    log "${requested_image} is already current; re-verifying it."
+  fi
+
+  if ! activate_image "$requested_image"; then
+    log "Activation failed."
+    if is_valid_image "$current_image" && restore_image "$current_image"; then
+      log "Rollback to the prior current image succeeded."
+    else
+      compose rm --stop --force web >/dev/null 2>&1 || true
+      fail "Activation failed and no healthy prior image could be restored."
+    fi
+    fail "Deployment rolled back because verification failed."
+  fi
+
+  if is_valid_image "$current_image" && [[ "$current_image" != "$requested_image" ]]; then
+    write_state "$PREVIOUS_FILE" "$current_image"
+  fi
+  write_state "$CURRENT_FILE" "$requested_image"
+
+  if is_valid_image "$previous_image" \
+    && [[ "$previous_image" != "$current_image" ]] \
+    && [[ "$previous_image" != "$requested_image" ]]; then
+    docker image rm "$previous_image" >/dev/null 2>&1 || true
+  fi
+
+  log "Deployment succeeded: ${requested_image}."
+}
+
+rollback_image() {
+  local current_image previous_image
+  current_image="$(read_state "$CURRENT_FILE")"
+  previous_image="$(read_state "$PREVIOUS_FILE")"
+
+  is_valid_image "$current_image" || fail "No valid current image is recorded."
+  is_valid_image "$previous_image" || fail "No valid previous image is recorded."
+
+  if ! activate_image "$previous_image"; then
+    restore_image "$current_image" || true
+    fail "Rollback target failed verification; the original image was requested again."
+  fi
+
+  write_state "$CURRENT_FILE" "$previous_image"
+  write_state "$PREVIOUS_FILE" "$current_image"
+  log "Rollback succeeded: ${previous_image}."
+}
+
+main() {
+  local original_command="${1:-}"
+  local operation argument extra
+
+  umask 077
+  mkdir -p "$STATE_DIR"
+  exec 9>"$LOCK_FILE"
+  flock --nonblock 9 || fail "Another FotoHAVN deployment is active."
+
+  read -r operation argument extra <<< "$original_command"
+  [[ -z "${extra:-}" ]] || fail "Unexpected command arguments."
+
+  case "$operation" in
+    deploy)
+      is_valid_image "$argument" || fail "The image must be an approved immutable GHCR digest."
+      deploy_image "$argument"
+      ;;
+    rollback)
+      [[ -z "${argument:-}" ]] || fail "Rollback does not accept an image argument."
+      rollback_image
+      ;;
+    *)
+      fail "Allowed commands: deploy <approved-image-digest> or rollback."
+      ;;
+  esac
+}
+
+main "$@"

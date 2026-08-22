@@ -1,0 +1,10 @@
+
+> photohavn-website@0.1.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.3.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.18:3000
+✓ Ready in 529ms
+✓ Running next.config.ts took 42ms
+[?25h

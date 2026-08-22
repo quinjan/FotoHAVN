@@ -1,0 +1,14 @@
+.dockerignore
+.git
+.gitignore
+.handoffs
+.next
+AGENTS.md
+CLAUDE.md
+DESIGN.md
+README.md
+design-qa
+design-qa.md
+node_modules
+npm-debug.log*
+tokens.json
