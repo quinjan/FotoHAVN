@@ -90,7 +90,7 @@ In `quinjan/FotoHAVN`:
 4. Add environment variable `FOTOHAVN_VPS_HOST` with `159.223.47.227`.
 5. Add environment variable `FOTOHAVN_DEPLOY_USER` with `fotohavn-deploy`.
 
-The observed VPS ED25519 host-key fingerprint was `SHA256:qWJ3i6xyF04ofG+dMtmRCYAIpD9B4zGc4wi999i3AbbA`. Verify a freshly collected host key against that independently observed fingerprint before storing it; do not trust an `ssh-keyscan` result merely because the workflow collected it.
+The verified VPS ED25519 host-key fingerprint is `SHA256:qWJ3i6xyF04ofG+dMtmRCYAIpD9B4zGc4wi99i3AbbA`. Verify a freshly collected host key against that independently observed fingerprint before storing it; do not trust an `ssh-keyscan` result merely because the workflow collected it.
 
 ## Make the first GHCR package public
 
