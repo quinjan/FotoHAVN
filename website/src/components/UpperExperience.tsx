@@ -104,7 +104,7 @@ export default function UpperExperience() {
         <div className={styles.heroVeil} aria-hidden="true" />
 
         <div className={styles.container + " " + styles.heroContent}>
-          <h1 id="hero-heading" className={styles.heroHeading}>
+          <h1 id="hero-heading" className={styles.heroHeading} tabIndex={-1}>
             <span>PHOTOGRAPHS,</span>
             <span>DEVELOPED DIFFERENTLY.</span>
           </h1>

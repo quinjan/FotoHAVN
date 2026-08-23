@@ -1,0 +1,325 @@
+.intro {
+  --curtain-seam: 59%;
+  --zoom-scale: 2.08;
+  --zoom-shift: -19vw;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  min-height: 100svh;
+  color: var(--color-off-white);
+  background: var(--color-dark-walnut);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.intro:focus {
+  outline: none;
+}
+
+.curtainStage,
+.curtainHalf,
+.curtainHalf img,
+.vignette {
+  position: absolute;
+  inset: 0;
+}
+
+.curtainStage {
+  z-index: -2;
+}
+
+.curtainHalf {
+  display: block;
+  transform-origin: 50% 50%;
+  will-change: scale, translate, opacity;
+}
+
+.curtainHalf img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.curtainLeft {
+  clip-path: polygon(
+    0 0,
+    var(--curtain-seam) 0,
+    var(--curtain-seam) 100%,
+    0 100%
+  );
+}
+
+.curtainRight {
+  clip-path: polygon(
+    var(--curtain-seam) 0,
+    100% 0,
+    100% 100%,
+    var(--curtain-seam) 100%
+  );
+}
+
+.vignette {
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(30, 26, 23, 0.14) 0%,
+    rgba(30, 26, 23, 0.02) 38%,
+    rgba(30, 26, 23, 0.48) 100%
+  );
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.wordmark,
+.skipButton,
+.enterButton {
+  position: absolute;
+  z-index: 2;
+}
+
+.wordmark {
+  top: 48px;
+  left: max(64px, calc((100vw - 1280px) / 2));
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.skipButton {
+  top: 40px;
+  right: max(64px, calc((100vw - 1280px) / 2));
+  min-width: 96px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: inherit;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.skipButton:hover {
+  border-bottom-color: currentColor;
+}
+
+.enterButton {
+  right: 50%;
+  bottom: clamp(32px, 6vh, 64px);
+  min-width: min(360px, calc(100vw - 48px));
+  min-height: 56px;
+  padding: 16px 28px;
+  border: 1px solid rgba(251, 248, 242, 0.36);
+  border-radius: 4px;
+  color: var(--color-off-white);
+  background: rgba(30, 26, 23, 0.94);
+  box-shadow: 0 20px 56px rgba(30, 26, 23, 0.18);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  cursor: pointer;
+  transform: translateX(50%);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.enterButton:hover {
+  color: var(--color-ebony);
+  border-color: var(--color-off-white);
+  background: var(--color-off-white);
+}
+
+.enterButton:disabled {
+  cursor: default;
+}
+
+.skipButton:focus-visible,
+.enterButton:focus-visible {
+  outline: 2px solid var(--color-off-white);
+  outline-offset: 4px;
+}
+
+.entering .curtainLeft {
+  animation: open-left 820ms cubic-bezier(0.72, 0, 0.22, 1) forwards;
+}
+
+.entering .curtainRight {
+  animation: open-right 820ms cubic-bezier(0.72, 0, 0.22, 1) forwards;
+}
+
+.entering {
+  animation: reveal-homepage 820ms linear forwards;
+}
+
+.entering .wordmark,
+.entering .skipButton,
+.entering .enterButton,
+.entering .vignette {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.skipping {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+@keyframes open-left {
+  0% {
+    scale: 1;
+    translate: 0 0;
+  }
+
+  56% {
+    scale: var(--zoom-scale);
+    translate: var(--zoom-shift) 0;
+  }
+
+  100% {
+    scale: var(--zoom-scale);
+    translate: calc(var(--zoom-shift) - 68vw) 0;
+  }
+}
+
+@keyframes open-right {
+  0% {
+    scale: 1;
+    translate: 0 0;
+  }
+
+  56% {
+    scale: var(--zoom-scale);
+    translate: var(--zoom-shift) 0;
+  }
+
+  100% {
+    scale: var(--zoom-scale);
+    translate: calc(var(--zoom-shift) + 68vw) 0;
+  }
+}
+
+@keyframes reveal-homepage {
+  0%,
+  55% {
+    background-color: var(--color-dark-walnut);
+  }
+
+  56%,
+  100% {
+    background-color: transparent;
+  }
+}
+
+.screenReaderText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@media (max-width: 1199px) {
+  .wordmark {
+    left: 48px;
+  }
+
+  .skipButton {
+    right: 48px;
+  }
+}
+
+@media (max-width: 767px) {
+  .intro {
+    --curtain-seam: 60%;
+    --zoom-scale: 1.72;
+    --zoom-shift: -17vw;
+  }
+
+  .curtainHalf img {
+    object-position: center center;
+  }
+
+  .wordmark {
+    top: 32px;
+    left: 24px;
+    font-size: 26px;
+  }
+
+  .skipButton {
+    top: 24px;
+    right: 24px;
+  }
+
+  .enterButton {
+    bottom: max(32px, env(safe-area-inset-bottom));
+    width: calc(100% - 48px);
+    min-width: 0;
+    min-height: 56px;
+  }
+
+  @keyframes open-left {
+    0% {
+      scale: 1;
+      translate: 0 0;
+    }
+
+    56% {
+      scale: var(--zoom-scale);
+      translate: var(--zoom-shift) 0;
+    }
+
+    100% {
+      scale: var(--zoom-scale);
+      translate: calc(var(--zoom-shift) - 76vw) 0;
+    }
+  }
+
+  @keyframes open-right {
+    0% {
+      scale: 1;
+      translate: 0 0;
+    }
+
+    56% {
+      scale: var(--zoom-scale);
+      translate: var(--zoom-shift) 0;
+    }
+
+    100% {
+      scale: var(--zoom-scale);
+      translate: calc(var(--zoom-shift) + 76vw) 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entering,
+  .entering .curtainLeft,
+  .entering .curtainRight {
+    animation-duration: 1ms;
+  }
+
+  .entering .wordmark,
+  .entering .skipButton,
+  .entering .enterButton,
+  .entering .vignette,
+  .skipping {
+    transition-duration: 1ms;
+  }
+}

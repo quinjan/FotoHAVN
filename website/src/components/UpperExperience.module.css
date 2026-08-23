@@ -61,6 +61,10 @@
   display: block;
 }
 
+.heroHeading:focus {
+  outline: none;
+}
+
 .heroSupportingText {
   max-width: 54ch;
   margin: 32px 0 0;
