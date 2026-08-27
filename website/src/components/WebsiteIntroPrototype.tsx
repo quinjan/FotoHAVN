@@ -53,8 +53,17 @@ const prototypeAssets: Record<VariantKey, VariantAssets> = {
   },
 };
 
+const realisticCurtainAssets = {
+  desktop: withSiteBasePath(
+    "/prototype/issue-98/variant-a-curtain-closeup-desktop.png",
+  ),
+  mobile: withSiteBasePath(
+    "/prototype/issue-98/variant-a-curtain-closeup-mobile.png",
+  ),
+};
+
 const variantMotionDuration: Record<VariantKey, number> = {
-  A: 1750,
+  A: 2800,
   B: 2200,
 };
 
@@ -84,18 +93,28 @@ function BoothPicture({
 
 function VariantARealistic({ assets }: { assets: VariantAssets }) {
   return (
-    <div className={`${styles.scene} ${styles.realisticScene}`} aria-hidden="true">
+    <>
+      <div
+        className={`${styles.scene} ${styles.realisticScene}`}
+        aria-hidden="true"
+      >
+        <BoothPicture
+          className={`${styles.boothFrame} ${styles.realisticZoomFrame}`}
+          desktop={assets.closed}
+          mobile={assets.closedMobile}
+        />
+      </div>
       <BoothPicture
-        className={`${styles.boothFrame} ${styles.openFrame}`}
-        desktop={assets.open}
-        mobile={assets.openMobile}
+        className={styles.curtainFoldFrame}
+        desktop={realisticCurtainAssets.desktop}
+        mobile={realisticCurtainAssets.mobile}
       />
       <BoothPicture
-        className={`${styles.boothFrame} ${styles.closedFrame}`}
-        desktop={assets.closed}
-        mobile={assets.closedMobile}
+        className={styles.curtainRailFrame}
+        desktop={realisticCurtainAssets.desktop}
+        mobile={realisticCurtainAssets.mobile}
       />
-    </div>
+    </>
   );
 }
 
@@ -341,8 +360,8 @@ export default function WebsiteIntroPrototype({
         Enter FOTOHVN
       </h1>
       <p id="intro-description" className={styles.screenReaderText}>
-        Variant {variant}. Open the photobooth curtain from left to right to
-        enter the FOTOHVN website, or skip the intro.
+        Variant {variant}. Zoom into the photobooth curtain, then open it from
+        left to right to reveal the FOTOHVN website, or skip the intro.
       </p>
 
       {variant === "A" ? (
