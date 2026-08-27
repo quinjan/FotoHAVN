@@ -1,43 +1,191 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 
 import { withSiteBasePath } from "../../site.config";
 import styles from "./WebsiteIntroPrototype.module.css";
 
 type IntroPhase = "idle" | "entering" | "skipping" | "complete";
+type VariantKey = "A" | "B";
 
-const desktopBooth = withSiteBasePath(
-  "/prototype/issue-98/intro-booth-closed-desktop.png",
-);
-const mobileBooth = withSiteBasePath(
-  "/prototype/issue-98/intro-booth-closed-mobile.png",
-);
+type VariantAssets = {
+  closed: string;
+  closedMobile: string;
+  open: string;
+  openMobile: string;
+};
 
-function BoothPicture({ className }: { className: string }) {
+const prototypeAssets: Record<VariantKey, VariantAssets> = {
+  A: {
+    closed: withSiteBasePath(
+      "/prototype/issue-98/variant-a-real-booth-closed.png",
+    ),
+    closedMobile: withSiteBasePath(
+      "/prototype/issue-98/variant-a-real-booth-closed-mobile.png",
+    ),
+    open: withSiteBasePath(
+      "/prototype/issue-98/variant-a-real-booth-open.png",
+    ),
+    openMobile: withSiteBasePath(
+      "/prototype/issue-98/variant-a-real-booth-open-mobile.png",
+    ),
+  },
+  B: {
+    closed: withSiteBasePath(
+      "/prototype/issue-98/variant-b-drawn-booth-closed.png",
+    ),
+    closedMobile: withSiteBasePath(
+      "/prototype/issue-98/variant-b-drawn-booth-closed-mobile.png",
+    ),
+    open: withSiteBasePath(
+      "/prototype/issue-98/variant-b-drawn-booth-open.png",
+    ),
+    openMobile: withSiteBasePath(
+      "/prototype/issue-98/variant-b-drawn-booth-open-mobile.png",
+    ),
+  },
+};
+
+const variantMotionDuration: Record<VariantKey, number> = {
+  A: 1750,
+  B: 2200,
+};
+
+const variantLabels: Record<VariantKey, string> = {
+  A: "REALISTIC",
+  B: "CANVAS",
+};
+
+const showPrototypeSwitcher = process.env.NODE_ENV !== "production";
+
+function BoothPicture({
+  className,
+  desktop,
+  mobile,
+}: {
+  className: string;
+  desktop: string;
+  mobile: string;
+}) {
   return (
     <picture className={className}>
-      <source media="(max-width: 767px)" srcSet={mobileBooth} />
-      <img src={desktopBooth} alt="" />
+      <source media="(max-width: 767px)" srcSet={mobile} />
+      <img src={desktop} alt="" />
     </picture>
   );
 }
 
+function VariantARealistic({ assets }: { assets: VariantAssets }) {
+  return (
+    <div className={`${styles.scene} ${styles.realisticScene}`} aria-hidden="true">
+      <BoothPicture
+        className={`${styles.boothFrame} ${styles.openFrame}`}
+        desktop={assets.open}
+        mobile={assets.openMobile}
+      />
+      <BoothPicture
+        className={`${styles.boothFrame} ${styles.closedFrame}`}
+        desktop={assets.closed}
+        mobile={assets.closedMobile}
+      />
+    </div>
+  );
+}
+
+function VariantBCanvas({ assets }: { assets: VariantAssets }) {
+  return (
+    <div className={`${styles.scene} ${styles.canvasScene}`} aria-hidden="true">
+      <BoothPicture
+        className={`${styles.boothFrame} ${styles.openFrame}`}
+        desktop={assets.open}
+        mobile={assets.openMobile}
+      />
+      <BoothPicture
+        className={`${styles.boothFrame} ${styles.closedFrame}`}
+        desktop={assets.closed}
+        mobile={assets.closedMobile}
+      />
+      <BoothPicture
+        className={`${styles.boothFrame} ${styles.inkTrace}`}
+        desktop={assets.closed}
+        mobile={assets.closedMobile}
+      />
+    </div>
+  );
+}
+
+function PrototypeSwitcher({
+  current,
+  onSelect,
+}: {
+  current: VariantKey;
+  onSelect: (variant: VariantKey) => void;
+}) {
+  if (!showPrototypeSwitcher) return null;
+
+  const alternate: VariantKey = current === "A" ? "B" : "A";
+
+  return (
+    <div className={styles.prototypeSwitcher} aria-label="Prototype variant">
+      <button
+        type="button"
+        data-intro-control
+        aria-label={`Show Variant ${alternate}`}
+        onClick={() => onSelect(alternate)}
+      >
+        PREV
+      </button>
+      <p aria-live="polite">
+        {current} — {variantLabels[current]}
+      </p>
+      <button
+        type="button"
+        data-intro-control
+        aria-label={`Show Variant ${alternate}`}
+        onClick={() => onSelect(alternate)}
+      >
+        NEXT
+      </button>
+    </div>
+  );
+}
+
 /**
- * One selected Website Intro Experience prototype on the existing homepage.
- * Reload the route to replay it; the component intentionally stores no state.
+ * Two Website Intro Experience variants, switchable via `?variant=A|B`, on the
+ * existing homepage. Reload the route to replay; no prototype state persists.
  */
-export default function WebsiteIntroPrototype() {
+export default function WebsiteIntroPrototype({
+  initialVariant,
+}: {
+  initialVariant: VariantKey;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [phase, setPhase] = useState<IntroPhase>("idle");
+  const [variant, setVariant] = useState<VariantKey>(initialVariant);
   const introRef = useRef<HTMLElement>(null);
   const completionTimerRef = useRef<number | null>(null);
 
   const finishIntro = useCallback(() => {
     setPhase("complete");
-    requestAnimationFrame(() => {
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "complete") return;
+
+    const focusFrame = window.requestAnimationFrame(() => {
       document.getElementById("hero-heading")?.focus({ preventScroll: true });
     });
-  }, []);
+
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [phase]);
 
   const startIntro = useCallback(() => {
     if (phase !== "idle") return;
@@ -49,9 +197,9 @@ export default function WebsiteIntroPrototype() {
     setPhase("entering");
     completionTimerRef.current = window.setTimeout(
       finishIntro,
-      prefersReducedMotion ? 40 : 820,
+      prefersReducedMotion ? 40 : variantMotionDuration[variant],
     );
-  }, [finishIntro, phase]);
+  }, [finishIntro, phase, variant]);
 
   const skipIntro = useCallback(() => {
     if (completionTimerRef.current !== null) {
@@ -61,6 +209,41 @@ export default function WebsiteIntroPrototype() {
     setPhase("skipping");
     completionTimerRef.current = window.setTimeout(finishIntro, 180);
   }, [finishIntro]);
+
+  const selectVariant = useCallback(
+    (nextVariant: VariantKey) => {
+      if (completionTimerRef.current !== null) {
+        window.clearTimeout(completionTimerRef.current);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      params.set("variant", nextVariant);
+
+      setVariant(nextVariant);
+      setPhase("idle");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router],
+  );
+
+  useEffect(() => {
+    const handleVariantKeys = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.matches("input, textarea, select, [contenteditable='true']")
+      ) {
+        return;
+      }
+
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
+      event.preventDefault();
+      selectVariant(variant === "A" ? "B" : "A");
+    };
+
+    document.addEventListener("keydown", handleVariantKeys);
+    return () => document.removeEventListener("keydown", handleVariantKeys);
+  }, [selectVariant, variant]);
 
   useEffect(() => {
     if (phase === "complete") return;
@@ -119,15 +302,29 @@ export default function WebsiteIntroPrototype() {
     [],
   );
 
-  if (phase === "complete") return null;
+  const handleControlKeyDown = (
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+    action: () => void,
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    action();
+  };
+
+  if (phase === "complete") {
+    return <PrototypeSwitcher current={variant} onSelect={selectVariant} />;
+  }
 
   const className = [
     styles.intro,
+    variant === "A" ? styles.variantA : styles.variantB,
     phase === "entering" ? styles.entering : "",
     phase === "skipping" ? styles.skipping : "",
   ]
     .filter(Boolean)
     .join(" ");
+
+  const assets = prototypeAssets[variant];
 
   return (
     <section
@@ -137,21 +334,23 @@ export default function WebsiteIntroPrototype() {
       aria-modal="true"
       aria-labelledby="intro-title"
       aria-describedby="intro-description"
+      data-variant={variant}
       tabIndex={-1}
     >
       <h1 id="intro-title" className={styles.screenReaderText}>
         Enter FOTOHVN
       </h1>
       <p id="intro-description" className={styles.screenReaderText}>
-        Open the photobooth curtain to enter the FOTOHVN website, or skip the
-        intro.
+        Variant {variant}. Open the photobooth curtain from left to right to
+        enter the FOTOHVN website, or skip the intro.
       </p>
 
-      <div className={styles.curtainStage} aria-hidden="true">
-        <BoothPicture className={`${styles.curtainHalf} ${styles.curtainLeft}`} />
-        <BoothPicture className={`${styles.curtainHalf} ${styles.curtainRight}`} />
-      </div>
-      <div className={styles.vignette} aria-hidden="true" />
+      {variant === "A" ? (
+        <VariantARealistic assets={assets} />
+      ) : (
+        <VariantBCanvas assets={assets} />
+      )}
+      <div className={styles.veil} aria-hidden="true" />
 
       <p className={styles.wordmark} aria-hidden="true">
         FOTOHVN
@@ -162,11 +361,9 @@ export default function WebsiteIntroPrototype() {
         type="button"
         data-intro-control
         onClick={skipIntro}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          skipIntro();
-        }}
+        onKeyDown={(event) =>
+          handleControlKeyDown(event, skipIntro)
+        }
       >
         SKIP INTRO
       </button>
@@ -177,17 +374,19 @@ export default function WebsiteIntroPrototype() {
         data-intro-control
         disabled={phase !== "idle"}
         onClick={startIntro}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          startIntro();
-        }}
+        onKeyDown={(event) =>
+          handleControlKeyDown(event, startIntro)
+        }
       >
         PRESS TO ENTER FOTOHVN
       </button>
 
+      <PrototypeSwitcher current={variant} onSelect={selectVariant} />
+
       <p className={styles.screenReaderText} aria-live="polite">
-        {phase === "entering" ? "Entering FOTOHVN." : ""}
+        {phase === "entering"
+          ? `Entering FOTOHVN with Variant ${variant}.`
+          : ""}
       </p>
     </section>
   );

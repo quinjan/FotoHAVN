@@ -4,10 +4,17 @@ import SiteChrome from "@/components/SiteChrome";
 import UpperExperience from "@/components/UpperExperience";
 import WebsiteIntroPrototype from "@/components/WebsiteIntroPrototype";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const requestedVariant = (await searchParams).variant;
+  const initialVariant = requestedVariant === "B" ? "B" : "A";
+
   return (
     <>
-      <WebsiteIntroPrototype />
+      <WebsiteIntroPrototype initialVariant={initialVariant} />
       <div id="site-content">
         <div id="top">
           <a className="skipLink" href="#main-content">

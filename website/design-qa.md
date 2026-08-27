@@ -1,87 +1,78 @@
-# FOTOHVN Website Intro Experience prototype design QA
+# FOTOHVN Website Intro Experience two-variant design QA
 
-Date: 2026-08-24
-Scope: Wayfinder prototype for `Prototype the Website Intro Experience composition and motion`
+Date: 2026-08-27
+Scope: Wayfinder throwaway prototype for GitHub issue 98
 Prototype branch: `codex/prototype-website-intro-98`
-Implementation URL: `http://localhost:4173/fotohvn`
+Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://localhost:4173/fotohvn?variant=B`
 
 ## Comparison target
 
-- Source visual truth: `C:\Users\QUINJ3875\.codex\generated_images\01a02f32-d41c-7b22-af89-7241abf5291c\exec-5a5edb18-4463-4318-a583-b98737b06289.png`
-- Source pixels: 1536 x 1024.
-- Desktop implementation evidence: `prototype-qa/issue-98/desktop-idle-pass3-1440x900.png`, `desktop-motion-080ms-1440x900.png`, `desktop-motion-260ms-1440x900.png`, `desktop-motion-510ms-1440x900.png`, and `desktop-final-pass3-1440x900.png`.
-- Mobile implementation evidence: `prototype-qa/issue-98/mobile-idle-390x844.png`, `mobile-reveal-390x844.png`, `mobile-final-390x844.png`, and `mobile-idle-320x720.png`.
-- CSS viewports: 1440 x 900, 390 x 844, and 320 x 720.
-- Implementation pixels matched CSS pixels at `devicePixelRatio: 1`.
-- Density normalization: none required for implementation captures. Source crops were resized only inside comparison boards and are labelled as such.
-- State: idle, zoom, curtain reveal, completed handoff, Skip, Escape, pointer activation, and keyboard activation.
+- Variant A source visual truth: `prototype-qa/issue-98/references/real-photobooth-reference.png` (1276 x 1574 px), plus the user's correction that only the upper framed half of the right-hand column is a mirror and the lower half remains walnut cabinetry.
+- Variant B source visual truth: `prototype-qa/issue-98/references/drawn-photobooth-reference.png` (1440 x 1440 px), interpreted through the corrected real-booth anatomy.
+- Desktop implementation evidence: `prototype-qa/issue-98/variant-a-idle-1440x900.png` and `prototype-qa/issue-98/variant-b-idle-1440x900.png` (1440 x 900 CSS px and image px).
+- Tablet implementation evidence: `prototype-qa/issue-98/variant-a-idle-768x1024.png` and `prototype-qa/issue-98/variant-b-idle-768x1024.png` (768 x 1024 CSS px and image px).
+- Small-mobile implementation evidence: `prototype-qa/issue-98/variant-a-idle-320x720.png`, `variant-b-idle-320x720.png`, `variant-a-mid-320x720.png`, and `variant-b-mid-320x720.png` (320 x 720 CSS px and image px).
+- Additional interaction viewport: 390 x 844 CSS px.
+- Density normalization: browser captures used device pixel ratio 1. Comparison boards fit each source and implementation proportionally into labelled equal-width cells without cropping; detail boards use labelled booth crops.
+- States: idle closed curtain, controlled mid-transition, completed live-homepage handoff, Skip, Escape, pointer activation, keyboard activation, URL-selected variants, arrow-key switching, and switcher-button switching.
 
 ## Combined visual evidence
 
-- Full design-board comparison: `prototype-qa/issue-98/comparison-full-source-vs-prototype-pass3.png`.
-- Focused desktop idle comparison: `prototype-qa/issue-98/comparison-desktop-idle-pass3-focused.png`.
-- Focused mobile idle comparison: `prototype-qa/issue-98/comparison-mobile-idle-focused.png`.
-- Focused motion comparison: `prototype-qa/issue-98/comparison-motion-source-vs-prototype-pass3.png`.
+- Variant A full comparison: `prototype-qa/issue-98/variant-a-full-comparison.png` (1600 x 980 px).
+- Variant A focused booth comparison: `prototype-qa/issue-98/variant-a-detail-comparison.png` (1600 x 980 px).
+- Variant B full comparison: `prototype-qa/issue-98/variant-b-full-comparison.png` (1600 x 980 px).
+- Variant B focused booth comparison: `prototype-qa/issue-98/variant-b-detail-comparison.png` (1600 x 980 px).
 
-The focused comparisons were required because the source is a multi-state board. They make the desktop/mobile initial composition, control placement, booth scale, and transition frames readable at the same time. The full comparison verifies that the live homepage reached by the prototype is the intended handoff target.
+Focused comparisons were required because the mirror/cabinet divider, curtain rail, left utility panel, and material treatment were too small to judge reliably in the full boards. The mid-transition mobile captures verify that the open asset is revealed from left to right and ends with the curtain gathered at the right edge.
 
 ## Findings
 
 - P0: none.
 - P1: none.
-- P2: none.
-- [P3] Prototype asset details differ subtly from the ImageGen design board.
+- P2: none after repair.
+- [P3] Generated booth details are not documentary reproductions.
   - Surface: image quality and asset fidelity.
-  - Evidence: the purpose-made closed-booth desktop and mobile assets preserve the selected architecture, palette, material character, and closed curtain but re-render minor room and booth details.
-  - Impact: no effect on the composition or interaction decision this prototype answers.
-  - Follow-up: ticket `Approve the Website Intro Experience asset and hero contract` owns production asset authorship, rights, and exact matched-state exports.
+  - Evidence: Variant A retains the real booth's illuminated sign, dark walnut structure, cream ring-hung curtain, left display/delivery area, and corrected upper-right mirror/lower-right wood split, but its mall reflections and small printed details are generated approximations. Variant B intentionally remixes those cues in pencil, ink, warm paper, and restrained walnut color.
+  - Impact: acceptable for a throwaway composition and motion decision; these assets are not production-authority exports.
+  - Follow-up: issue 99 owns the production asset and hero contract.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: passed. The prototype reuses FOTOHVN's canonical Cormorant display face and sans system. Wordmark and uppercase controls match the selected hierarchy, weight, spacing, and casing.
-- Spacing and layout rhythm: passed. Desktop uses the selected center-weighted, zoomed-out booth with generous room; mobile preserves 24 px gutters. The primary control is 56 px high at 390 and 320 widths.
-- Colors and visual tokens: passed. The implementation reuses the canonical off-white, warm ivory, dark walnut, soft brown, and low-elevation treatment with no new palette or decorative effects.
-- Image quality and asset fidelity: passed for prototype scope. Desktop and mobile use purpose-made raster assets rather than CSS or vector stand-ins. Both show the complete booth and a fully closed curtain.
-- Copy and content: passed. The visible intro copy is limited to `FOTOHVN`, `PRESS TO ENTER FOTOHVN`, and `SKIP INTRO`; no Brand Strip, welcome hold, Photo Strip, or development metaphor remains.
-- Icons: not applicable; the selected intro contains no icons.
-- Responsiveness: passed. At 390 x 844 and 320 x 720, `scrollWidth === clientWidth`; the booth remains recognizable and controls remain visible and usable.
-- Accessibility and interaction: passed. The underlying page is inert while the dialog is active; body scroll is restored on exit; focus begins inside the dialog and transfers to `hero-heading`; Tab cycles through Skip and Enter; Enter activates the primary action; Skip and Escape dismiss; reduced-motion CSS collapses the transition.
+- Fonts and typography: passed. Existing FOTOHVN display and sans typography are reused. Wordmark and controls retain the site's uppercase hierarchy, optical weight, tracking, and readable contrast at all checked widths.
+- Spacing and layout rhythm: passed. Both variants begin zoomed out, keep the booth centered as the dominant object, and preserve the fixed wordmark, skip action, primary entry action, and development-only variant switcher without collisions at 1440, 768, 390, or 320 CSS px.
+- Colors and visual tokens: passed. Variant A uses warm mall light, cream, and walnut. Variant B uses warm ivory paper, dark ink, and restrained walnut tint. Controls reuse existing off-white, ebony, and walnut tokens; no gradients or decorative code-drawn assets were introduced.
+- Image quality and asset fidelity: passed for prototype scope. Both variants use purpose-generated desktop and mobile closed/open raster pairs. The realistic pair preserves the corrected half-mirror anatomy in both states. The drawing pair preserves the same right-side divider and adds paper/ink motion without CSS-drawn illustration.
+- Copy and content: passed. Visible intro copy is limited to `FOTOHVN`, `SKIP INTRO`, `PRESS TO ENTER FOTOHVN`, and the development-only A/B switcher. The source image's `developing...` caption and carousel arrows were correctly excluded.
+- Icons: not applicable. No icon is needed for the selected entry flow.
+- Responsiveness: passed. No horizontal overflow was present at 768, 390, or 320 CSS px. Controls remain visible and usable, with the main action at least 56 px high.
+- Accessibility and interaction: passed. The homepage remains inert and body scrolling is locked while the modal is active. Tab reaches Skip then Enter; actual browser keyboard Enter activates the sequence; Escape and Skip dismiss it; completed focus moves to `hero-heading`; scrolling is restored; reduced-motion CSS collapses the animation duration.
 
-## Primary interaction and browser checks
+## Motion and browser checks
 
-- Pointer press: passed; closed booth zooms in, curtain halves reveal the live homepage, and the intro unmounts after 820 ms.
-- Keyboard: passed; Tab reaches `SKIP INTRO` then `PRESS TO ENTER FOTOHVN`; Enter runs the complete sequence.
-- Skip button: passed; overlay and scroll lock are removed.
-- Escape: passed; overlay is dismissed and focus moves to the hero heading.
-- Final handoff: passed; the actual server-rendered homepage is exposed, not a screenshot substitute.
-- Desktop overflow: passed.
-- Mobile overflow: passed at 390 and 320 CSS px.
+- Variant A: passed. The realistic scene uses a 1750 ms zoom-and-reveal sequence; the curtain wipe begins after 560 ms and exposes the open booth from left to right over 880 ms.
+- Variant B: passed. The canvas scene uses a slower 2200 ms zoom-and-reveal sequence; the curtain wipe begins after 760 ms, runs for 1040 ms, and is paired with a restrained stepped ink-trace animation.
+- Final handoff: passed. Both variants uncover and then unmount over the live server-rendered homepage; no Photo Strip remains in the intro.
+- Direct URLs: passed. `?variant=A` and `?variant=B` server-render their requested variant without an initial wrong-variant flash.
+- Variant controls: passed. PREV/NEXT buttons and ArrowLeft/ArrowRight update the query parameter and reset the selected intro for replay.
 - Browser console warnings/errors: `[]`.
 
 ## Comparison history
 
-### Pass 1 — blocked
+### Pass 1 - blocked
 
-- [P1] The moving curtain exposed an opaque dark fallback instead of the live homepage.
-- [P1] Programmatic focus left a visible browser outline around the final hero heading.
+- [P2] The generated realistic right-hand column used the mirror across the entire column instead of only its upper framed section.
+- [P2] Completion focus was attempted before the homepage's `inert` state had been removed, leaving focus on `body` instead of the hero heading.
 
-Fixes: animated the intro background to transparency at the reveal boundary and removed the non-interactive heading outline while retaining focus transfer.
+Fixes: regenerated all four realistic desktop/mobile closed/open frames with an upper mirror and lower walnut panel; moved focus transfer to a post-completion effect that runs after the modal cleanup.
 
-### Pass 2 — blocked
+### Pass 2 - passed
 
-- [P2] The desktop booth was too large and too far right compared with the selected center-weighted frame.
-- [P2] The default initial state displayed a button focus ring that was not present in the selected visual.
-
-Fixes: regenerated the desktop closed-booth asset with more room and a central composition, recalibrated the curtain seam and zoom origin, and moved initial focus to the dialog container so keyboard users retain a valid entry point without changing the default visual state.
-
-### Pass 3 — passed
-
-- The full and focused comparison boards show no actionable P0, P1, or P2 mismatch.
-- Browser evidence confirms the zoom, curtain reveal, live hero handoff, responsive frames, focus behavior, input paths, scroll restoration, and clean console.
-- The desktop booth is intentionally slightly more distant than the original board because the user's later revision explicitly requested a zoomed-out initial photobooth; this is expected product direction, not design drift.
+- Combined full and focused boards confirm the corrected booth anatomy and both selected art directions.
+- Fresh browser evidence confirms desktop, tablet, 390 px, and 320 px layouts; controlled transition frames; actual keyboard activation; pointer activation; Skip; Escape; focus handoff; scroll restoration; URL switching; and a clean console.
+- No actionable P0, P1, or P2 findings remain.
 
 ## Follow-up polish
 
-- Production asset continuity and exact matched exports remain for `Approve the Website Intro Experience asset and hero contract`; they are not accepted as production-ready on the strength of this throwaway prototype.
+- Production-ready photographic continuity, exact print/fixture details, rights, compression, and final hero matching remain issue 99 work and are not approved by this prototype pass.
 
 final result: passed
