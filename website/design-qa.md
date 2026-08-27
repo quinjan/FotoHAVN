@@ -11,9 +11,9 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Selected visual target: `prototype-qa/issue-98/references/approved-left-wall-welcome-screen-storyboard.png` (3072 x 2048 px).
 - Physical-anatomy authority: `prototype-qa/issue-98/references/real-booth-open-doorway-reference.png` and `prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`.
 - Retained idle exterior: `public/prototype/issue-98/variant-a-real-booth-closed.png`.
-- New desktop assets: `public/prototype/issue-98/variant-a-threshold-left-wall-desktop.png` and `public/prototype/issue-98/variant-a-left-wall-screen-desktop.png` (1586 x 992 px each).
+- New desktop assets: `public/prototype/issue-98/variant-a-threshold-left-wall-desktop.png` and the user-corrected `public/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png` (1586 x 992 px each).
 - Faithful physical-screen content: `public/prototype/issue-98/variant-a-homepage-live-desktop.png`, captured from the real server-rendered homepage at 1440 x 900 CSS/image px.
-- Browser implementation evidence: `prototype-qa/issue-98/approved-flow-implementation-idle-1440x900.png`, `approved-flow-repair1-threshold-1440x900.png`, `approved-flow-repair1-interior-1440x900.png`, `approved-flow-screen-push-1440x900.png`, and `approved-flow-final-live-1440x900.png`.
+- Browser implementation evidence: `prototype-qa/issue-98/approved-flow-implementation-idle-1440x900.png`, `approved-flow-repair1-threshold-1440x900.png`, `approved-flow-paired-lights-screen-hold-1440x900.png`, `approved-flow-paired-lights-screen-push-1440x900.png`, and `approved-flow-paired-lights-final-live-1440x900.png`.
 - Viewport and density: 1440 x 900 CSS px at DPR 1; browser captures are 1440 x 900 image px. No density normalization was required.
 - States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
 - Mobile adaptation and responsive tuning are explicitly deferred. No mobile viewport was reviewed or reported as passed in this checkpoint.
@@ -24,7 +24,7 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Focused anatomy comparison: `prototype-qa/issue-98/approved-flow-left-wall-detail-comparison.png` (2400 x 1500 px). This board combines the real interior authority, generated assembly, and browser-rendered homepage-inside-screen state.
 - gpt-taste conformance: `prototype-qa/issue-98/approved-flow-gpt-taste-conformance.md`.
 
-Focused comparison was required because the camera label, physical screen bounds, vertical light ownership, control placement, curtain edges, and absence of the rear guest background are too small to judge from the full sequence alone.
+Focused comparison was required because the camera label, physical screen bounds, paired-light ownership, control placement, curtain edges, and absence of the rear guest background are too small to judge from the full sequence alone.
 
 ## Findings
 
@@ -33,7 +33,7 @@ Focused comparison was required because the camera label, physical screen bounds
 - P2: none after repair.
 - [P3] Generated intermediate photography is prototype evidence rather than documentary asset authority.
   - Surface: image quality and production continuity.
-  - Evidence: the two purpose-made desktop stages preserve the approved warm walnut/cream material language and physical anatomy, but fine joinery and lighting continuity are generated approximations rather than exact matched photographs of the production booth.
+  - Evidence: the purpose-made desktop stages preserve the approved warm walnut/cream material language and physical anatomy, including the user's paired-light correction, but fine joinery and lighting continuity are generated approximations rather than exact matched photographs of the production booth.
   - Impact: acceptable for the issue-98 composition/motion decision; it does not authorize production asset use.
   - Follow-up: issue 99 owns production asset continuity, rights, compression, and exact exports.
 
@@ -49,7 +49,7 @@ Focused comparison was required because the camera label, physical screen bounds
 ## Motion and browser checks
 
 - Variant A sequence: passed. The 5600 ms desktop journey moves from the retained closed exterior into a right-gathered curtain/left-biased threshold, crossfades into the left-wall assembly, holds the real homepage inside its physical screen, then expands that same capture until it matches the live page.
-- Spatial continuity: passed. The right/rear standing or sitting background never appears. The physical order remains `LOOK HERE` lens, landscape screen, vertical light immediately right, and metal control below.
+- Spatial continuity: passed. The right/rear standing or sitting background never appears. The physical order remains `LOOK HERE` lens, landscape screen, matching vertical lights immediately left and right, and metal control below.
 - Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow restores, scroll remains at 0, and focus moves to `#hero-heading` with no visible page jump.
 - Pointer activation: passed in the in-app browser.
 - Actual browser CUA keyboard activation: passed. Tab reached Skip and then Enter; CUA Enter ran the full sequence and completed with focus on `hero-heading`.
@@ -79,9 +79,15 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 ### Pass 2 - passed
 
 - Fresh same-viewport browser captures show full-bleed threshold and interior states with no matte edges.
-- The focused comparison confirms the homepage stays inside the bounded landscape touchscreen, the lens/light/control retain their physical ownership, and the rear guest background is absent.
+- The focused comparison confirms the homepage stays inside the bounded landscape touchscreen, the lens/paired lights/control retain their physical ownership, and the rear guest background is absent.
 - Pointer, actual CUA keyboard entry, Escape, Skip, focus handoff, scroll restoration, inert cleanup, URL-selected variants, A/B switching, Variant B completion, overflow, and console checks all passed.
 - No actionable P0, P1, or P2 findings remain.
+
+### Pass 3 - passed after paired-light correction
+
+- Added a purpose-edited end-frame master with a matching vertical light immediately to the screen's left while preserving the screen, lens, right light, control, curtain edges, crop, and 1586 x 992 geometry.
+- Fresh 1440 x 900 browser evidence confirms the real homepage remains registered inside the physical bezel, both lights flank the display cleanly, the final live-page match completes, normal focus/scroll/inert cleanup remains intact, horizontal overflow is absent, and the console is clean.
+- Rebuilt the full-sequence and focused anatomy comparison boards with the paired-light end frame. No actionable P0, P1, or P2 findings were introduced.
 
 ## Follow-up polish
 

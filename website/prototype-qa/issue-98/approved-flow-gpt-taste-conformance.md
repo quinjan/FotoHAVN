@@ -15,7 +15,7 @@ Label sweep and button check: passed. Visible intro copy remains `FOTOHVN`, `SKI
 ## Conformance findings
 
 - Motion is purposeful and spatially legible: the existing exterior advances into a left-biased threshold, settles on the physical left-wall assembly, holds the homepage inside that touchscreen, then expands the same captured page into the live homepage.
-- The user-selected physical model remains dominant. The right/rear guest background never appears, the curtain gathers at the right, and the camera/screen/light/control order matches the real interior reference.
+- The user-selected physical model remains dominant. The right/rear guest background never appears, the curtain gathers at the right, and the camera/screen/paired-lights/control order preserves the real interior reference plus the user's paired-light correction.
 - No booth, curtain, camera, light, screen, or control is reconstructed as CSS, SVG, canvas, or placeholder art. The two new photographic stages are raster assets and the screen content is a browser capture of the real homepage.
 - The transition is full-bleed after repair. The earlier scaled-stage matte edges were removed before this review.
 - The interface avoids cheap meta labels, decorative badges, invisible button text, and horizontal overflow.

@@ -67,7 +67,7 @@ const realisticJourneyAssets = {
     "/prototype/issue-98/variant-a-threshold-left-wall-desktop.png",
   ),
   interior: withSiteBasePath(
-    "/prototype/issue-98/variant-a-left-wall-screen-desktop.png",
+    "/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png",
   ),
   homepage: withSiteBasePath(
     "/prototype/issue-98/variant-a-homepage-live-desktop.png",

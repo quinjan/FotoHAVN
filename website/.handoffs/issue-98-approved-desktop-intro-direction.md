@@ -36,6 +36,7 @@ These repository files are durable and must be opened visually, not inferred fro
 - Existing realistic closed artifact to retain: `website/public/prototype/issue-98/variant-a-real-booth-closed.png`
 - Real open-doorway and interior orientation: `website/prototype-qa/issue-98/references/real-booth-open-doorway-reference.png`
 - Real left-wall screen/camera/light assembly: `website/prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`
+- User-corrected paired-light end-frame master: `website/public/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png`
 - Human-approved desktop storyboard: `website/prototype-qa/issue-98/references/approved-left-wall-welcome-screen-storyboard.png`
 - Live homepage end state: the actual server-rendered homepage under the intro. Existing browser evidence may help with matching, but do not replace the final page with a screenshot.
 
@@ -59,7 +60,7 @@ The approved storyboard is the selected visual target. The two real interior pho
    - Physical order and ownership:
      - `LOOK HERE` camera lens above;
      - physical landscape welcome touchscreen below the lens;
-     - tall vertical white light immediately to the screen's right;
+     - matching tall vertical white lights immediately to the screen's left and right;
      - metal control below the screen;
      - dark wood wall and real curtain edges around the assembly.
    - The booth's right/rear photo background belongs off-screen and must remain unrevealed.
@@ -77,7 +78,7 @@ Exact milliseconds are not locked. Tune a slow, continuous, cinematic desktop se
 
 From the entrance looking inward:
 
-- **Left-hand interior** = screen, `LOOK HERE` camera, vertical light, and control.
+- **Left-hand interior** = screen, `LOOK HERE` camera, paired vertical lights, and control.
 - **Right-hand/rear interior** = background where guests stand or sit.
 
 The approved camera moves left and excludes the right/rear background. The user's last correction specifically rejected a second-frame angle that looked into the background side.
