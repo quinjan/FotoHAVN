@@ -1,6 +1,6 @@
 # Issue 98 approved desktop intro direction handoff
 
-Date: 2026-08-27  
+Date: 2026-08-28
 Status: ready for a fresh implementation agent  
 Ticket: [Prototype the Website Intro Experience composition and motion](https://github.com/quinjan/FotoHAVN/issues/98)  
 Branch: `codex/prototype-website-intro-98`  
@@ -38,12 +38,16 @@ These repository files are durable and must be opened visually, not inferred fro
 - Real left-wall screen/camera/light assembly: `website/prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`
 - User-corrected paired-light end-frame master: `website/public/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png`
 - External animation-generator pack (three consistently framed `1920 x 1080` keyframes): `website/public/prototype/issue-98/video-generator-pack-16x9/`
+- User-supplied selected desktop journey video (`1920 x 1080`, 5.125 seconds): `website/public/prototype/issue-98/variant-a-generated-journey-desktop.mp4`
+- Human-selected post-video workflow storyboard: `website/prototype-qa/issue-98/selected-black-development-focus-storyboard.png`
 - Human-approved desktop storyboard: `website/prototype-qa/issue-98/references/approved-left-wall-welcome-screen-storyboard.png`
 - Live homepage end state: the actual server-rendered homepage under the intro. Existing browser evidence may help with matching, but do not replace the final page with a screenshot.
 
 The approved storyboard is the selected visual target. The two real interior photos control physical anatomy and camera orientation wherever the generated storyboard is ambiguous.
 
 The `video-generator-pack-16x9` files are dedicated inputs for an external image-to-video model. They do not replace the browser prototype's `16:10` raster masters, and they intentionally leave the final physical screen black so the browser can composite the real homepage itself.
+
+The selected video and post-video storyboard supersede the earlier miniature-page-in-screen handoff. The video's own final frame controls the browser zoom origin; do not crossfade to a differently proportioned still before the camera push.
 
 ## Approved desktop sequence
 
@@ -67,12 +71,13 @@ The `video-generator-pack-16x9` files are dedicated inputs for an external image
      - metal control below the screen;
      - dark wood wall and real curtain edges around the assembly.
    - The booth's right/rear photo background belongs off-screen and must remain unrevealed.
-   - The FOTOHVN homepage first appears **only inside the physical welcome touchscreen**, replacing its normal welcome content. It is not a doorway-sized portal or invented monitor.
-   - Hold this composition long enough for the physical-screen idea to register.
+   - The physical welcome touchscreen remains pure black while the full wall composition is visible.
+   - Hold this composition long enough for the physical-screen destination to register. Do not place a miniature homepage inside the screen.
 
 4. **Enter the welcome screen**
-   - Dolly directly into the physical touchscreen.
-   - Match its homepage image into the actual live, server-rendered homepage until the page fills the desktop viewport.
+   - Continue the camera dolly directly into the black physical touchscreen until the black glass fills the entire viewport and all bezel/equipment edges have moved off-screen.
+   - Only after full black takes over, develop the full-viewport homepage capture from near-black at low exposure and heavy blur, then complete a gentle focus pull into the crisp page.
+   - Match that crisp capture into the actual live, server-rendered homepage. Never show a floating, bordered, or miniature webpage overlay.
    - Complete by unmounting the intro, restoring body scroll, and focusing `#hero-heading` without scrolling.
 
 Exact milliseconds are not locked. Tune a slow, continuous, cinematic desktop sequence. Spatial continuity matters more than a specific duration.
@@ -96,7 +101,7 @@ The approved camera moves left and excludes the right/rear background. The user'
   - a close left-wall screen assembly view with a clearly bounded physical display.
 - Do not enlarge a low-resolution crop until it pixelates.
 - Avoid a visibly swapped curtain texture, giant curtain close-up, disconnected rail layer, CSS fold simulation, or abrupt cut between unrelated perspectives.
-- For the physical screen, use a faithful capture/composition of the real homepage inside the bounded display, then match into the live page. Do not insert generic placeholder UI.
+- For the post-video handoff, reuse the faithful real-homepage capture full-viewport only after black takeover, then match it into the live page. Do not place it inside the bounded physical display or insert generic placeholder UI.
 - Keep the homepage server-rendered underneath and preserve progressive-enhancement behavior.
 - Keep Variant B (`?variant=B`) unchanged. It remains an alternate prototype, not the selected implementation direction.
 
@@ -140,6 +145,7 @@ Do not revive these without new user approval:
 - CSS clipping/compression that made the curtain look pixelated, cut off the top, or folded as a flat screen wipe.
 - Showing the right/rear standing/sitting background as the camera enters.
 - Placing the interior screen on the wrong wall or approaching it from the wrong angle.
+- Showing the webpage as a miniature overlay inside the physical screen before the camera reaches full black.
 - Building or tuning mobile before the desktop flow is approved.
 - Selecting Variant B's drawing/canvas treatment as the primary direction.
 
@@ -151,8 +157,9 @@ The next agent must not hand off from code/build confidence alone.
 2. Capture and inspect at minimum:
    - idle exterior;
    - curtain opening with left-biased threshold entry;
-   - inside left-wall screen composition;
-   - push into the physical screen;
+   - inside left-wall black-screen composition;
+   - continued push until the black screen fills the viewport;
+   - low-exposure development and focus-pull states;
    - final live homepage.
 3. Test pointer activation and actual browser CUA keyboard activation, not only source inspection or locator `.press()`.
 4. Re-test Skip, Escape, focus handoff, scroll restoration, A/B switching, horizontal overflow, and browser console warnings/errors.

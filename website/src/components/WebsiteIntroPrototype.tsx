@@ -7,12 +7,18 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
 } from "react";
 
 import { withSiteBasePath } from "../../site.config";
 import styles from "./WebsiteIntroPrototype.module.css";
 
-type IntroPhase = "idle" | "entering" | "skipping" | "complete";
+type IntroPhase =
+  | "idle"
+  | "entering"
+  | "landing"
+  | "skipping"
+  | "complete";
 type VariantKey = "A" | "B";
 
 type VariantAssets = {
@@ -25,7 +31,7 @@ type VariantAssets = {
 const prototypeAssets: Record<VariantKey, VariantAssets> = {
   A: {
     closed: withSiteBasePath(
-      "/prototype/issue-98/variant-a-real-booth-closed.png",
+      "/prototype/issue-98/video-generator-pack-16x9/01-exterior-closed-1920x1080.png",
     ),
     closedMobile: withSiteBasePath(
       "/prototype/issue-98/variant-a-real-booth-closed-mobile.png",
@@ -62,19 +68,16 @@ const realisticCurtainAssets = {
   ),
 };
 
-const realisticJourneyAssets = {
-  threshold: withSiteBasePath(
-    "/prototype/issue-98/variant-a-threshold-left-wall-desktop.png",
-  ),
-  interior: withSiteBasePath(
-    "/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png",
-  ),
-  homepage: withSiteBasePath(
-    "/prototype/issue-98/variant-a-homepage-live-desktop.png",
-  ),
-};
+const realisticHomepageAsset = withSiteBasePath(
+  "/prototype/issue-98/variant-a-homepage-live-desktop.png",
+);
 
-const realisticDesktopMotionDuration = 5600;
+const realisticJourneyVideo = withSiteBasePath(
+  "/prototype/issue-98/variant-a-generated-journey-desktop.mp4",
+);
+
+const realisticDesktopVideoFallbackDuration = 5600;
+const realisticDesktopLandingDuration = 1900;
 const realisticMobileMotionDuration = 2800;
 
 const variantMotionDuration: Record<VariantKey, number> = {
@@ -106,7 +109,15 @@ function BoothPicture({
   );
 }
 
-function VariantARealistic({ assets }: { assets: VariantAssets }) {
+function VariantARealistic({
+  assets,
+  videoRef,
+  onVideoEnded,
+}: {
+  assets: VariantAssets;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  onVideoEnded: () => void;
+}) {
   return (
     <>
       <div
@@ -119,20 +130,22 @@ function VariantARealistic({ assets }: { assets: VariantAssets }) {
           mobile={assets.closedMobile}
         />
       </div>
-      <picture
-        className={`${styles.desktopJourneyFrame} ${styles.thresholdFrame}`}
+      <video
+        ref={videoRef}
+        className={styles.journeyVideo}
+        poster={assets.closed}
+        preload="auto"
+        muted
+        playsInline
+        aria-hidden="true"
+        onEnded={onVideoEnded}
       >
-        <img src={realisticJourneyAssets.threshold} alt="" />
-      </picture>
-      <picture
-        className={`${styles.desktopJourneyFrame} ${styles.interiorFrame}`}
-      >
-        <img src={realisticJourneyAssets.interior} alt="" />
-      </picture>
+        <source src={realisticJourneyVideo} type="video/mp4" />
+      </video>
       <BoothPicture
         className={styles.screenPortal}
-        desktop={realisticJourneyAssets.homepage}
-        mobile={realisticJourneyAssets.homepage}
+        desktop={realisticHomepageAsset}
+        mobile={realisticHomepageAsset}
       />
       <BoothPicture
         className={styles.curtainFoldFrame}
@@ -220,11 +233,28 @@ export default function WebsiteIntroPrototype({
   const [phase, setPhase] = useState<IntroPhase>("idle");
   const [variant, setVariant] = useState<VariantKey>(initialVariant);
   const introRef = useRef<HTMLElement>(null);
+  const journeyVideoRef = useRef<HTMLVideoElement>(null);
+  const handoffStartedRef = useRef(false);
   const completionTimerRef = useRef<number | null>(null);
 
   const finishIntro = useCallback(() => {
     setPhase("complete");
   }, []);
+
+  const beginScreenHandoff = useCallback(() => {
+    if (handoffStartedRef.current) return;
+    handoffStartedRef.current = true;
+
+    if (completionTimerRef.current !== null) {
+      window.clearTimeout(completionTimerRef.current);
+    }
+
+    setPhase("landing");
+    completionTimerRef.current = window.setTimeout(
+      finishIntro,
+      realisticDesktopLandingDuration,
+    );
+  }, [finishIntro]);
 
   useEffect(() => {
     if (phase !== "complete") return;
@@ -243,24 +273,45 @@ export default function WebsiteIntroPrototype({
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
+    handoffStartedRef.current = false;
     setPhase("entering");
     const isRealisticDesktop =
       variant === "A" && window.matchMedia("(min-width: 768px)").matches;
+
+    if (prefersReducedMotion) {
+      completionTimerRef.current = window.setTimeout(finishIntro, 40);
+      return;
+    }
+
+    if (isRealisticDesktop) {
+      const video = journeyVideoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        completionTimerRef.current = window.setTimeout(
+          beginScreenHandoff,
+          realisticDesktopVideoFallbackDuration,
+        );
+        void video.play().catch(beginScreenHandoff);
+        return;
+      }
+
+      beginScreenHandoff();
+      return;
+    }
+
     completionTimerRef.current = window.setTimeout(
       finishIntro,
-      prefersReducedMotion
-        ? 40
-        : isRealisticDesktop
-          ? realisticDesktopMotionDuration
-          : variantMotionDuration[variant],
+      variantMotionDuration[variant],
     );
-  }, [finishIntro, phase, variant]);
+  }, [beginScreenHandoff, finishIntro, phase, variant]);
 
   const skipIntro = useCallback(() => {
     if (completionTimerRef.current !== null) {
       window.clearTimeout(completionTimerRef.current);
     }
 
+    handoffStartedRef.current = true;
+    journeyVideoRef.current?.pause();
     setPhase("skipping");
     completionTimerRef.current = window.setTimeout(finishIntro, 180);
   }, [finishIntro]);
@@ -269,6 +320,12 @@ export default function WebsiteIntroPrototype({
     (nextVariant: VariantKey) => {
       if (completionTimerRef.current !== null) {
         window.clearTimeout(completionTimerRef.current);
+      }
+
+      handoffStartedRef.current = true;
+      if (journeyVideoRef.current) {
+        journeyVideoRef.current.pause();
+        journeyVideoRef.current.currentTime = 0;
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -353,6 +410,7 @@ export default function WebsiteIntroPrototype({
       if (completionTimerRef.current !== null) {
         window.clearTimeout(completionTimerRef.current);
       }
+      journeyVideoRef.current?.pause();
     },
     [],
   );
@@ -373,7 +431,8 @@ export default function WebsiteIntroPrototype({
   const className = [
     styles.intro,
     variant === "A" ? styles.variantA : styles.variantB,
-    phase === "entering" ? styles.entering : "",
+    phase === "entering" || phase === "landing" ? styles.entering : "",
+    phase === "landing" ? styles.landing : "",
     phase === "skipping" ? styles.skipping : "",
   ]
     .filter(Boolean)
@@ -403,7 +462,11 @@ export default function WebsiteIntroPrototype({
       </p>
 
       {variant === "A" ? (
-        <VariantARealistic assets={assets} />
+        <VariantARealistic
+          assets={assets}
+          videoRef={journeyVideoRef}
+          onVideoEnded={beginScreenHandoff}
+        />
       ) : (
         <VariantBCanvas assets={assets} />
       )}
@@ -441,7 +504,7 @@ export default function WebsiteIntroPrototype({
       <PrototypeSwitcher current={variant} onSelect={selectVariant} />
 
       <p className={styles.screenReaderText} aria-live="polite">
-        {phase === "entering"
+        {phase === "entering" || phase === "landing"
           ? `Entering FOTOHVN with Variant ${variant}.`
           : ""}
       </p>
