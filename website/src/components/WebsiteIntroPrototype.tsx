@@ -68,10 +68,6 @@ const realisticCurtainAssets = {
   ),
 };
 
-const realisticHomepageAsset = withSiteBasePath(
-  "/prototype/issue-98/variant-a-homepage-live-exact-1440x900.png",
-);
-
 const realisticJourneyVideo = withSiteBasePath(
   "/prototype/issue-98/variant-a-generated-journey-desktop.mp4",
 );
@@ -142,11 +138,6 @@ function VariantARealistic({
       >
         <source src={realisticJourneyVideo} type="video/mp4" />
       </video>
-      <BoothPicture
-        className={styles.screenPortal}
-        desktop={realisticHomepageAsset}
-        mobile={realisticHomepageAsset}
-      />
       <BoothPicture
         className={styles.curtainFoldFrame}
         desktop={realisticCurtainAssets.desktop}
@@ -266,6 +257,18 @@ export default function WebsiteIntroPrototype({
     return () => window.cancelAnimationFrame(focusFrame);
   }, [phase]);
 
+  useEffect(() => {
+    const siteContent = document.getElementById("site-content");
+
+    if (phase === "landing") {
+      siteContent?.classList.add(styles.siteDeveloping);
+    } else {
+      siteContent?.classList.remove(styles.siteDeveloping);
+    }
+
+    return () => siteContent?.classList.remove(styles.siteDeveloping);
+  }, [phase]);
+
   const startIntro = useCallback(() => {
     if (phase !== "idle") return;
 
@@ -361,9 +364,12 @@ export default function WebsiteIntroPrototype({
     if (phase === "complete") return;
 
     const siteContent = document.getElementById("site-content");
+    const root = document.documentElement;
     const previousOverflow = document.body.style.overflow;
+    const previousScrollbarGutter = root.style.scrollbarGutter;
 
     siteContent?.setAttribute("inert", "");
+    root.style.scrollbarGutter = "stable";
     document.body.style.overflow = "hidden";
     introRef.current?.focus({ preventScroll: true });
 
@@ -401,6 +407,7 @@ export default function WebsiteIntroPrototype({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       siteContent?.removeAttribute("inert");
+      root.style.scrollbarGutter = previousScrollbarGutter;
       document.body.style.overflow = previousOverflow;
     };
   }, [phase, skipIntro]);

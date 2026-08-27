@@ -1,7 +1,7 @@
 # FOTOHVN Website Intro Experience approved desktop-flow design QA
 
 Date: 2026-08-28
-Scope: Wayfinder throwaway prototype for GitHub issue 98; Variant A desktop at 1440 x 900 only  
+Scope: Wayfinder throwaway prototype for GitHub issue 98; Variant A desktop/tablet reveal at 1440 x 900, 1280 x 720, and 1024 x 768
 Prototype branch: `codex/prototype-website-intro-98`  
 Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://localhost:4173/fotohvn?variant=B`
 
@@ -12,11 +12,11 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Physical-anatomy authority: `prototype-qa/issue-98/references/real-booth-open-doorway-reference.png` and `prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`.
 - Retained idle exterior: `public/prototype/issue-98/variant-a-real-booth-closed.png`.
 - Selected desktop journey asset: `public/prototype/issue-98/variant-a-generated-journey-desktop.mp4` (1920 x 1080, 5.125 seconds), with `public/prototype/issue-98/video-generator-pack-16x9/01-exterior-closed-1920x1080.png` as the matching desktop poster.
-- Faithful post-video content: `public/prototype/issue-98/variant-a-homepage-live-exact-1440x900.png`, normalized from the real server-rendered homepage to exactly 1440 x 900 image px for a 1:1 DPR-1 reveal.
+- Faithful post-video content: the actual server-rendered `#site-content`, already mounted beneath the intro at the current responsive viewport size. There is no raster screenshot bridge.
 - Browser implementation evidence: `prototype-qa/issue-98/video-flow-video-end-1440x900.png`, `video-flow-black-takeover-1440x900.png`, `video-flow-develop-dark-1440x900.png`, `video-flow-focus-pull-1440x900.png`, `video-flow-sharp-capture-1440x900.png`, and `video-flow-final-live-1440x900.png`.
 - Viewport and density: 1440 x 900 CSS px at DPR 1; browser captures are 1440 x 900 image px. No density normalization was required.
 - States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
-- Mobile adaptation and responsive tuning are explicitly deferred. No mobile viewport was reviewed or reported as passed in this checkpoint.
+- Mobile choreography remains explicitly deferred. The live-page reveal was reviewed at the three agreed desktop/tablet resolutions above; no mobile viewport is reported as passed in this checkpoint.
 
 ## Combined visual evidence
 
@@ -40,23 +40,23 @@ Focused comparison was required because the camera label, physical screen bounds
 
 ## Required fidelity surfaces
 
-- Fonts and typography: passed. Intro wordmark, Skip, entry action, and development switcher retain the existing FOTOHVN type hierarchy. The physical screen uses a real homepage capture, so its typography matches the live page rather than a generated imitation.
+- Fonts and typography: passed. Intro wordmark, Skip, entry action, and development switcher retain the existing FOTOHVN type hierarchy. The post-black reveal is the real homepage DOM, so its typography is already the final live typography rather than a generated or rasterized imitation.
 - Spacing and layout rhythm: passed after repair. Every stage is full-bleed at 1440 x 900, the exterior remains the dominant idle object, the threshold turns left without exposing the guest background, and the interior holds enough surrounding wall for the physical assembly to register before the push.
 - Colors and visual tokens: passed. The flow stays within warm mall light, cream linen, dark walnut, ebony, and off-white. Existing token-backed controls remain unchanged.
-- Image quality and asset fidelity: passed for throwaway-prototype scope. The selected 1920 x 1080 video exceeds the decision viewport's useful density and the browser uses its own final frame as the physical zoom source, avoiding a geometry-changing still swap. The page-development layer is a browser capture of the actual site. No booth, curtain, camera, light, screen, or control is reconstructed as CSS, SVG, canvas, icon, or placeholder art.
+- Image quality and asset fidelity: passed for throwaway-prototype scope. The selected 1920 x 1080 video exceeds the decision viewport's useful density and the browser uses its own final frame as the physical zoom source, avoiding a geometry-changing still swap. The page-development layer is the live server-rendered page itself. No booth, curtain, camera, light, screen, or control is reconstructed as CSS, SVG, canvas, icon, or placeholder art.
 - Copy and content: passed. Visible intro copy remains `FOTOHVN`, `SKIP INTRO`, `PRESS TO ENTER FOTOHVN`, and the development-only A/B switcher. No Brand Strip, Photo Strip, welcome-copy hold, audio, or development hold was added.
 - Interaction affordances: passed. Entry and Skip remain semantic buttons with pointer, Enter, and Space support; focus treatment and button contrast remain visible.
 
 ## Motion and browser checks
 
-- Variant A sequence: passed. The 5.125-second supplied video carries the closed exterior into the left-wall assembly. Its paused final frame then continues through a 1900 ms centered dolly until the black glass fills the viewport; the full-page capture develops from near-black at low exposure and heavy blur, focuses to a crisp page, and hands off to the live homepage.
+- Variant A sequence: passed. The 5.125-second supplied video carries the closed exterior into the left-wall assembly. Its paused final frame then continues through a 1900 ms centered dolly until the black glass fills the viewport; the already-mounted live page develops from near-black at low exposure and heavy blur into its normal crisp state.
 - Spatial continuity: passed for the selected supplied video. The camera lands on the left-hand screen wall with the `LOOK HERE` lens, landscape black screen, paired vertical lights, and metal control. The post-video stage preserves that exact frame until the black screen takes over; it does not introduce a miniature webpage, alternate curtain, portal edge, or geometry-changing still swap.
-- Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow restores, scroll remains at 0, and focus moves to `#hero-heading` with no visible page jump.
+- Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow restores, scroll remains at 0, and focus moves to `#hero-heading`. A stable root scrollbar gutter keeps the live page width unchanged when scrolling is restored.
 - Pointer activation: passed in the in-app browser.
 - Actual browser CUA keyboard activation: passed. Tab reached Skip and then Enter; CUA Enter ran the full sequence and completed with focus on `hero-heading`.
 - Escape and Skip: passed. DOM-CUA Escape dismissed both idle and in-motion states after a visible control received focus; pointer Skip dismissed the idle state.
 - Variant regression: passed. Direct `?variant=B` rendered Variant B without an A flash; ArrowRight switched B to A; PREV switched A back to B; Variant B completed in its unchanged 2200 ms path.
-- Scroll and containment: passed. During idle and motion, body overflow was `hidden`, `#site-content` was inert, and `scrollWidth === clientWidth`. After completion, normal scrolling returned with no horizontal overflow.
+- Scroll and containment: passed. During idle and motion, body overflow was `hidden`, `#site-content` was inert, and the scrollbar gutter remained reserved. After completion, normal scrolling returned with no horizontal overflow or content-width change.
 - Console warnings/errors: `[]` after the final repair.
 - Reduced-motion fast path: source-verified and unchanged. The component still completes in 40 ms when `prefers-reduced-motion: reduce` matches, and the media rule collapses the new stage animations to 1 ms. Fresh runtime media emulation was skipped because the in-app browser surface does not expose a reduced-motion override; this gate is recorded as source verification, not a fresh runtime pass.
 
@@ -112,6 +112,13 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 - Replaced the transition source with an exact 1440 x 900 homepage capture and removed every homepage transform from the development/focus animation. Only opacity, brightness, saturation, and blur now change.
 - Fresh browser measurements at both development and focus-pull states report a 1440 x 900 portal, a 1440 x 900 natural/client image, and computed `transform: none`.
 - Rebuilt `video-flow-selected-storyboard-comparison.png` from the corrected browser captures. The crisp capture and final live-page screenshots remain pixel-identical, with no new P0, P1, or P2 finding.
+
+### Pass 7 - passed after removing the raster handoff
+
+- The user still observed an apparent scale correction after the screenshot reached focus. Browser measurements confirmed that a raster-to-live-DOM swap could not stay faithful across responsive widths; they also exposed a separate 15 px width change when the locked page released its vertical scrollbar.
+- Removed `variant-a-homepage-live-exact-1440x900.png` and the entire screenshot portal. The real server-rendered `#site-content` now stays mounted underneath and receives only opacity, brightness, saturation, and blur animation; computed `transform` remains `none` throughout.
+- Reserved the root scrollbar gutter while body scrolling is locked. At 1440 x 900, 1280 x 720, and 1024 x 768, the measured live-page widths remain respectively 1425 px, 1265 px, and 1009 px before, during, and after the reveal.
+- Fresh browser evidence confirms no portal image exists, final focus reaches `#hero-heading`, normal scroll/inert cleanup completes, and the comparison board shows the same live DOM from the first visible page frame through completion. No actionable P0, P1, or P2 finding remains.
 
 ## Follow-up polish
 

@@ -29,8 +29,6 @@
 .curtainRailFrame,
 .curtainRailFrame img,
 .journeyVideo,
-.screenPortal,
-.screenPortal img,
 .veil {
   position: absolute;
   inset: 0;
@@ -51,8 +49,7 @@
   z-index: 0;
 }
 
-.journeyVideo,
-.screenPortal {
+.journeyVideo {
   display: none;
   pointer-events: none;
 }
@@ -68,27 +65,6 @@
   opacity: 0;
   background: var(--color-dark-walnut);
   will-change: opacity, transform;
-}
-
-.screenPortal img {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  object-fit: cover;
-  object-position: center center;
-}
-
-.screenPortal {
-  z-index: 2;
-  overflow: hidden;
-  opacity: 0;
-  transform: none;
-  background: var(--color-ebony);
-  will-change: filter, opacity;
-}
-
-.screenPortal img {
-  object-position: top center;
 }
 
 .curtainFoldFrame,
@@ -387,19 +363,19 @@
   }
 
   38%,
-  82% {
+  42% {
     opacity: 1;
     transform: scale(var(--screen-zoom));
   }
 
-  94%,
+  56%,
   100% {
     opacity: 0;
     transform: scale(var(--screen-zoom));
   }
 }
 
-@keyframes realistic-homepage-develop-desktop {
+@keyframes realistic-live-page-develop-desktop {
   0%,
   42% {
     filter: brightness(0.04) saturate(0.72) blur(28px);
@@ -430,6 +406,35 @@
     filter: brightness(1) saturate(1) blur(0);
     opacity: 1;
   }
+}
+
+@keyframes realistic-intro-to-live-desktop {
+  0%,
+  42% {
+    background-color: var(--color-dark-walnut);
+  }
+
+  50% {
+    background-color: rgb(30 26 23 / 88%);
+  }
+
+  68% {
+    background-color: rgb(30 26 23 / 46%);
+  }
+
+  84% {
+    background-color: rgb(30 26 23 / 12%);
+  }
+
+  95%,
+  100% {
+    background-color: transparent;
+  }
+}
+
+.siteDeveloping {
+  animation: realistic-live-page-develop-desktop 1900ms linear both;
+  will-change: filter, opacity;
 }
 
 @keyframes real-scene-enter {
@@ -602,8 +607,7 @@
     display: none;
   }
 
-  .variantA .journeyVideo,
-  .variantA .screenPortal {
+  .variantA .journeyVideo {
     display: block;
   }
 
@@ -628,8 +632,8 @@
       cubic-bezier(0.5, 0, 0.15, 1) forwards;
   }
 
-  .landing.variantA .screenPortal {
-    animation: realistic-homepage-develop-desktop 1900ms linear forwards;
+  .landing.variantA {
+    animation: realistic-intro-to-live-desktop 1900ms linear forwards;
   }
 }
 
@@ -729,7 +733,6 @@
   .entering .curtainFoldFrame,
   .entering .curtainRailFrame,
   .entering .journeyVideo,
-  .entering .screenPortal,
   .entering .inkTrace {
     animation-duration: 1ms;
     animation-delay: 0ms;

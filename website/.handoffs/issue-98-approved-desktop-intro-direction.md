@@ -76,8 +76,8 @@ The selected video and post-video storyboard supersede the earlier miniature-pag
 
 4. **Enter the welcome screen**
    - Continue the camera dolly directly into the black physical touchscreen until the black glass fills the entire viewport and all bezel/equipment edges have moved off-screen.
-   - Only after full black takes over, develop the full-viewport homepage capture from near-black at low exposure and heavy blur, then complete a gentle focus pull into the crisp page.
-   - Match that crisp capture into the actual live, server-rendered homepage. Never show a floating, bordered, or miniature webpage overlay.
+   - Only after full black takes over, reveal the already-mounted live, server-rendered homepage from near-black at low exposure and heavy blur, then complete a gentle focus pull into its normal crisp state.
+   - Never swap a raster screenshot into the live page and never show a floating, bordered, or miniature webpage overlay.
    - Complete by unmounting the intro, restoring body scroll, and focusing `#hero-heading` without scrolling.
 
 Exact milliseconds are not locked. Tune a slow, continuous, cinematic desktop sequence. Spatial continuity matters more than a specific duration.
@@ -101,8 +101,9 @@ The approved camera moves left and excludes the right/rear background. The user'
   - a close left-wall screen assembly view with a clearly bounded physical display.
 - Do not enlarge a low-resolution crop until it pixelates.
 - Avoid a visibly swapped curtain texture, giant curtain close-up, disconnected rail layer, CSS fold simulation, or abrupt cut between unrelated perspectives.
-- For the post-video handoff, reuse the exact `1440 x 900` real-homepage capture full-viewport only after black takeover, then match it into the live page. Keep that capture at its final viewport geometry from its first visible frame; animate only exposure, opacity, and focus, never scale or reflow. Do not place it inside the bounded physical display or insert generic placeholder UI.
-- Keep the homepage server-rendered underneath and preserve progressive-enhancement behavior.
+- For the post-video handoff, reveal the actual server-rendered homepage already mounted beneath the intro. Animate only its exposure, opacity, and focus; never scale, reflow, or replace it with a viewport-specific raster capture.
+- Reserve the scrollbar gutter while body scroll is locked so restoring scroll cannot change the live page's responsive width at completion.
+- Preserve progressive-enhancement behavior.
 - Keep Variant B (`?variant=B`) unchanged. It remains an alternate prototype, not the selected implementation direction.
 
 ## Existing code seams
