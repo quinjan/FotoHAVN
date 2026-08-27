@@ -37,10 +37,13 @@ These repository files are durable and must be opened visually, not inferred fro
 - Real open-doorway and interior orientation: `website/prototype-qa/issue-98/references/real-booth-open-doorway-reference.png`
 - Real left-wall screen/camera/light assembly: `website/prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`
 - User-corrected paired-light end-frame master: `website/public/prototype/issue-98/variant-a-left-wall-screen-paired-lights-desktop.png`
+- External animation-generator pack (three consistently framed `1920 x 1080` keyframes): `website/public/prototype/issue-98/video-generator-pack-16x9/`
 - Human-approved desktop storyboard: `website/prototype-qa/issue-98/references/approved-left-wall-welcome-screen-storyboard.png`
 - Live homepage end state: the actual server-rendered homepage under the intro. Existing browser evidence may help with matching, but do not replace the final page with a screenshot.
 
 The approved storyboard is the selected visual target. The two real interior photos control physical anatomy and camera orientation wherever the generated storyboard is ambiguous.
+
+The `video-generator-pack-16x9` files are dedicated inputs for an external image-to-video model. They do not replace the browser prototype's `16:10` raster masters, and they intentionally leave the final physical screen black so the browser can composite the real homepage itself.
 
 ## Approved desktop sequence
 

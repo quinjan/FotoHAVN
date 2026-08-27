@@ -89,6 +89,13 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 - Fresh 1440 x 900 browser evidence confirms the real homepage remains registered inside the physical bezel, both lights flank the display cleanly, the final live-page match completes, normal focus/scroll/inert cleanup remains intact, horizontal overflow is absent, and the console is clean.
 - Rebuilt the full-sequence and focused anatomy comparison boards with the paired-light end frame. No actionable P0, P1, or P2 findings were introduced.
 
+### Pass 4 - corrected external generator-pack framing
+
+- Replaced the previously mixed `3:2` and `16:10` generator references with three dedicated `1920 x 1080` (`16:9`) keyframes under `public/prototype/issue-98/video-generator-pack-16x9/`.
+- Used source-guided horizontal outpainting so the animation inputs gain side environment instead of losing booth, sign, curtain, floor, screen, lights, or control to a vertical crop.
+- Verified all three exported files report exactly `1920 x 1080`; `prototype-qa/issue-98/video-generator-pack-16x9-contact-sheet.png` shows the complete sequence on matching canvases.
+- The browser prototype's `16:10` masters and live homepage composition remain unchanged. This pass affects only assets handed to the external video generator.
+
 ## Follow-up polish
 
 - Production-matched booth photography, final camera-path exports, rights, compression, and mobile choreography remain separate follow-up work. Mobile is deferred until the user approves this desktop animation.
