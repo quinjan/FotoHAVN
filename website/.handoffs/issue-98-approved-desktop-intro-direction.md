@@ -1,4 +1,4 @@
-# Issue 98 approved desktop intro direction handoff
+# Issue 98 approved responsive intro direction handoff
 
 Date: 2026-08-28
 Status: ready for a fresh implementation agent  
@@ -8,7 +8,7 @@ Worktree: `C:\Quinjan\Repos\FotoHAVN-prototype-98`
 
 ## Fresh-agent mission
 
-Replace only Variant A's **desktop** intro choreography with the approved outside-to-inside booth journey below. Preserve the realistic booth artifact, Variant B, accessibility behavior, live homepage, and development-only variant switcher.
+Preserve Variant A's approved desktop outside-to-inside journey and its responsive mobile adaptation. Preserve the realistic booth artifact, Variant B, accessibility behavior, live homepage, and development-only variant switcher.
 
 This remains a throwaway Wayfinder prototype. Produce a new browser-review checkpoint, publish it on this branch, and leave the HITL ticket open for the user's reaction. Do not treat this handoff as production authorization.
 
@@ -49,7 +49,7 @@ The `video-generator-pack-16x9` files are dedicated inputs for an external image
 
 The selected video and post-video storyboard supersede the earlier miniature-page-in-screen handoff. The video's own final frame controls the browser zoom origin; do not crossfade to a differently proportioned still before the camera push.
 
-## Approved desktop sequence
+## Approved responsive sequence
 
 1. **Idle exterior**
    - Start on the existing realistic, zoomed-out, fully closed booth artifact.
@@ -80,7 +80,13 @@ The selected video and post-video storyboard supersede the earlier miniature-pag
    - Never swap a raster screenshot into the live page and never show a floating, bordered, or miniature webpage overlay.
    - Complete by unmounting the intro, restoring body scroll, and focusing `#hero-heading` without scrolling.
 
-Exact milliseconds are not locked. Tune a slow, continuous, cinematic desktop sequence. Spatial continuity matters more than a specific duration.
+Exact milliseconds are not locked. Tune a slow, continuous, cinematic sequence. Spatial continuity matters more than a specific duration.
+
+### Mobile adaptation
+
+- At 390 x 844 and 320 x 720, retain the existing portrait booth and curtain assets rather than center-cropping the 16:9 desktop video.
+- Move from the portrait exterior into the cream curtain, clear the curtain into a full dark takeover, then reveal the already-mounted responsive homepage through the same exposure and focus treatment.
+- Keep the live mobile page at its final native responsive geometry throughout. Do not introduce a screenshot bridge, transform, or partial webpage behind the opening curtain.
 
 ## Spatial rule that must not drift
 
@@ -93,8 +99,8 @@ The approved camera moves left and excludes the right/rear background. The user'
 
 ## Implementation guidance
 
-- Limit implementation and review to desktop. The agreed decision viewport is `1440 x 900` CSS px at DPR 1.
-- Mobile adaptation is explicitly paused until the user approves the desktop animation. Do not regenerate mobile assets, tune mobile motion, or report mobile as passed.
+- Review the approved desktop/tablet checkpoints at `1440 x 900`, `1280 x 720`, and `1024 x 768` CSS px at DPR 1.
+- Review the approved mobile checkpoints at `390 x 844` and `320 x 720` CSS px at DPR 1. The desktop result was approved before mobile implementation began.
 - Reuse the existing Variant A idle artifact rather than regenerating it.
 - Generate purpose-made desktop intermediate raster assets if needed. Likely useful states are:
   - a left-biased open-doorway/threshold view;
@@ -102,7 +108,7 @@ The approved camera moves left and excludes the right/rear background. The user'
 - Do not enlarge a low-resolution crop until it pixelates.
 - Avoid a visibly swapped curtain texture, giant curtain close-up, disconnected rail layer, CSS fold simulation, or abrupt cut between unrelated perspectives.
 - For the post-video handoff, reveal the actual server-rendered homepage already mounted beneath the intro. Animate only its exposure, opacity, and focus; never scale, reflow, or replace it with a viewport-specific raster capture.
-- Reserve the scrollbar gutter while body scroll is locked so restoring scroll cannot change the live page's responsive width at completion.
+- Compensate for the hidden scrollbar while body scroll is locked so restoring scroll cannot change the live page's responsive width at completion, while still letting the intro cover the entire viewport.
 - Preserve progressive-enhancement behavior.
 - Keep Variant B (`?variant=B`) unchanged. It remains an alternate prototype, not the selected implementation direction.
 
@@ -147,14 +153,14 @@ Do not revive these without new user approval:
 - Showing the right/rear standing/sitting background as the camera enters.
 - Placing the interior screen on the wrong wall or approaching it from the wrong angle.
 - Showing the webpage as a miniature overlay inside the physical screen before the camera reaches full black.
-- Building or tuning mobile before the desktop flow is approved.
+- Center-cropping the supplied 16:9 desktop video into the portrait mobile flow.
 - Selecting Variant B's drawing/canvas treatment as the primary direction.
 
 ## Verification and handoff gates
 
 The next agent must not hand off from code/build confidence alone.
 
-1. Run browser-rendered desktop QA at `1440 x 900` using the in-app Browser and `http://localhost:4173/`.
+1. Run browser-rendered QA at the approved desktop/tablet and mobile checkpoints using the in-app Browser and `http://localhost:4173/`.
 2. Capture and inspect at minimum:
    - idle exterior;
    - curtain opening with left-biased threshold entry;
@@ -180,4 +186,4 @@ git diff --check
 
 ## Definition of the next checkpoint
 
-A fresh agent is done when the approved outside-to-left-wall-to-physical-screen journey is running at the Variant A desktop URL, the user can inspect it locally, all desktop gates above pass, the branch and ticket point to the evidence, Variant B is intact, mobile is explicitly untouched/deferred, and issue 98 remains open for HITL review.
+A fresh agent is done when the approved outside-to-left-wall-to-physical-screen journey and its native mobile adaptation are running at the Variant A URL, the user can inspect them locally, all responsive gates above pass, the branch and ticket point to the evidence, Variant B is intact, and issue 98 remains open for HITL review.

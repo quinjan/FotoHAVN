@@ -2,6 +2,7 @@
   position: fixed;
   z-index: 1000;
   inset: 0;
+  width: var(--intro-viewport-width, 100vw);
   min-height: 100svh;
   isolation: isolate;
   overflow: hidden;
@@ -518,13 +519,43 @@
 
 @keyframes background-to-home-a {
   0%,
-  31% {
+  100% {
+    background-color: var(--color-dark-walnut);
+  }
+}
+
+@keyframes realistic-intro-to-live-mobile {
+  0%,
+  42% {
     background-color: var(--color-dark-walnut);
   }
 
-  36%,
+  52% {
+    background-color: rgb(30 26 23 / 84%);
+  }
+
+  72% {
+    background-color: rgb(30 26 23 / 38%);
+  }
+
+  88% {
+    background-color: rgb(30 26 23 / 8%);
+  }
+
   100% {
     background-color: transparent;
+  }
+}
+
+@keyframes mobile-curtain-clear {
+  0% {
+    opacity: 1;
+    transform: scaleX(0.08);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(0.08);
   }
 }
 
@@ -665,6 +696,19 @@
 
   .curtainRailFrame {
     clip-path: inset(0 0 94% 0);
+  }
+
+  .landing.variantA {
+    animation: realistic-intro-to-live-mobile 1900ms linear forwards;
+  }
+
+  .landing.variantA .curtainFoldFrame {
+    animation: mobile-curtain-clear 240ms ease-out forwards;
+  }
+
+  .landing.variantA .curtainRailFrame {
+    animation: none;
+    opacity: 0;
   }
 
   .wordmark {

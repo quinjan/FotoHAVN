@@ -1,7 +1,7 @@
-# FOTOHVN Website Intro Experience approved desktop-flow design QA
+# FOTOHVN Website Intro Experience approved responsive-flow design QA
 
 Date: 2026-08-28
-Scope: Wayfinder throwaway prototype for GitHub issue 98; Variant A desktop/tablet reveal at 1440 x 900, 1280 x 720, and 1024 x 768
+Scope: Wayfinder throwaway prototype for GitHub issue 98; Variant A responsive reveal at 1440 x 900, 1280 x 720, 1024 x 768, 390 x 844, and 320 x 720
 Prototype branch: `codex/prototype-website-intro-98`  
 Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://localhost:4173/fotohvn?variant=B`
 
@@ -14,14 +14,15 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Selected desktop journey asset: `public/prototype/issue-98/variant-a-generated-journey-desktop.mp4` (1920 x 1080, 5.125 seconds), with `public/prototype/issue-98/video-generator-pack-16x9/01-exterior-closed-1920x1080.png` as the matching desktop poster.
 - Faithful post-video content: the actual server-rendered `#site-content`, already mounted beneath the intro at the current responsive viewport size. There is no raster screenshot bridge.
 - Browser implementation evidence: `prototype-qa/issue-98/video-flow-video-end-1440x900.png`, `video-flow-black-takeover-1440x900.png`, `video-flow-develop-dark-1440x900.png`, `video-flow-focus-pull-1440x900.png`, `video-flow-sharp-capture-1440x900.png`, and `video-flow-final-live-1440x900.png`.
-- Viewport and density: 1440 x 900 CSS px at DPR 1; browser captures are 1440 x 900 image px. No density normalization was required.
+- Viewport and density: all checks used DPR 1. Browser captures match their CSS viewports exactly at 1440 x 900, 390 x 844, and 320 x 720 image px; no density normalization was required.
 - States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
-- Mobile choreography remains explicitly deferred. The live-page reveal was reviewed at the three agreed desktop/tablet resolutions above; no mobile viewport is reported as passed in this checkpoint.
+- Mobile choreography is now included following the user's desktop approval. The supplied 16:9 video remains desktop-only; mobile preserves the approved portrait booth and curtain assets, resolves them into full dark, then reveals the same already-mounted responsive page without scaling.
 
 ## Combined visual evidence
 
 - Full sequence comparison: `prototype-qa/issue-98/approved-flow-storyboard-browser-comparison.png` (2400 x 1760 px). This board combines the cropped four-frame approved storyboard and five browser-rendered implementation states in one comparison input.
 - Selected post-video comparison: `prototype-qa/issue-98/video-flow-selected-storyboard-comparison.png` (2600 x 1050 px). This board puts the user-selected six-stage black-development/focus-pull storyboard beside the six same-state browser captures.
+- Responsive mobile comparison: `prototype-qa/issue-98/mobile-native-reveal-comparison.png` (2600 x 1600 px). This board places the selected dark-development/focus workflow beside the browser-rendered 390 x 844 and 320 x 720 adaptations.
 - Focused anatomy comparison: `prototype-qa/issue-98/approved-flow-left-wall-detail-comparison.png` (2400 x 1500 px). This board combines the real interior authority, generated assembly, and browser-rendered homepage-inside-screen state.
 - gpt-taste conformance: `prototype-qa/issue-98/approved-flow-gpt-taste-conformance.md`.
 
@@ -50,13 +51,14 @@ Focused comparison was required because the camera label, physical screen bounds
 ## Motion and browser checks
 
 - Variant A sequence: passed. The 5.125-second supplied video carries the closed exterior into the left-wall assembly. Its paused final frame then continues through a 1900 ms centered dolly until the black glass fills the viewport; the already-mounted live page develops from near-black at low exposure and heavy blur into its normal crisp state.
+- Variant A mobile sequence: passed. The existing portrait booth zooms into the cream curtain, the curtain clears into a full dark takeover, and the live mobile page develops through the same exposure/focus treatment. The complete mobile path is about 4.7 seconds and does not crop the supplied 16:9 desktop video into portrait.
 - Spatial continuity: passed for the selected supplied video. The camera lands on the left-hand screen wall with the `LOOK HERE` lens, landscape black screen, paired vertical lights, and metal control. The post-video stage preserves that exact frame until the black screen takes over; it does not introduce a miniature webpage, alternate curtain, portal edge, or geometry-changing still swap.
-- Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow restores, scroll remains at 0, and focus moves to `#hero-heading`. A stable root scrollbar gutter keeps the live page width unchanged when scrolling is restored.
+- Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow and padding restore, scroll remains at 0, and focus moves to `#hero-heading`. Measured scroll-lock compensation keeps the live page width unchanged when scrolling is restored.
 - Pointer activation: passed in the in-app browser.
 - Actual browser CUA keyboard activation: passed. Tab reached Skip and then Enter; CUA Enter ran the full sequence and completed with focus on `hero-heading`.
 - Escape and Skip: passed. DOM-CUA Escape dismissed both idle and in-motion states after a visible control received focus; pointer Skip dismissed the idle state.
 - Variant regression: passed. Direct `?variant=B` rendered Variant B without an A flash; ArrowRight switched B to A; PREV switched A back to B; Variant B completed in its unchanged 2200 ms path.
-- Scroll and containment: passed. During idle and motion, body overflow was `hidden`, `#site-content` was inert, and the scrollbar gutter remained reserved. After completion, normal scrolling returned with no horizontal overflow or content-width change.
+- Scroll and containment: passed. During idle and motion, body overflow was `hidden`, `#site-content` was inert, and temporary body padding compensated for the hidden scrollbar. After completion, normal scrolling returned with no horizontal overflow or content-width/height change.
 - Console warnings/errors: `[]` after the final repair.
 - Reduced-motion fast path: source-verified and unchanged. The component still completes in 40 ms when `prefers-reduced-motion: reduce` matches, and the media rule collapses the new stage animations to 1 ms. Fresh runtime media emulation was skipped because the in-app browser surface does not expose a reduced-motion override; this gate is recorded as source verification, not a fresh runtime pass.
 
@@ -120,9 +122,16 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 - Reserved the root scrollbar gutter while body scrolling is locked. At 1440 x 900, 1280 x 720, and 1024 x 768, the measured live-page widths remain respectively 1425 px, 1265 px, and 1009 px before, during, and after the reveal.
 - Fresh browser evidence confirms no portal image exists, final focus reaches `#hero-heading`, normal scroll/inert cleanup completes, and the comparison board shows the same live DOM from the first visible page frame through completion. No actionable P0, P1, or P2 finding remains.
 
+### Pass 8 - passed after responsive mobile completion
+
+- The user approved the desktop result and explicitly authorized the remaining mobile resolutions. The desktop 16:9 journey video was intentionally not center-cropped into portrait; mobile keeps the existing portrait booth/curtain assets, then joins the approved full-dark development workflow.
+- Updated Variant A mobile to enter a dedicated `landing` phase after its 2800 ms curtain motion. The real mobile `#site-content` remains mounted and receives only opacity, brightness, saturation, and blur; computed `transform` stays `none`.
+- Replaced root scrollbar-gutter reservation with measured body-padding compensation while scroll is locked. This lets the intro cover the full 390 px and 320 px viewport while holding the live page at its final native widths of 375 px and 305 px. Full document height also remains unchanged through cleanup.
+- At both resolutions, pointer entry, actual browser CUA Tab/Enter activation, Skip, Escape, final focus on `#hero-heading`, inert/scroll restoration, zero horizontal overflow, and a clean warning/error console passed. `mobile-native-reveal-comparison.png` contains the normalized source/implementation evidence. No actionable P0, P1, or P2 finding remains.
+
 ## Follow-up polish
 
 - [P3] The user-supplied free Vidu render retains its visible bottom-right watermark during the generated-video portion. Acceptable for this throwaway HITL prototype; a licensed clean export is required for production.
-- Production-matched booth photography, final camera-path exports, rights, compression, and mobile choreography remain separate follow-up work. Mobile is deferred until the user approves this desktop animation.
+- Production-matched booth photography, final camera-path exports, rights, compression, and real-device performance remain separate follow-up work.
 
 final result: passed

@@ -73,7 +73,7 @@ const realisticJourneyVideo = withSiteBasePath(
 );
 
 const realisticDesktopVideoFallbackDuration = 5600;
-const realisticDesktopLandingDuration = 1900;
+const realisticPageLandingDuration = 1900;
 const realisticMobileMotionDuration = 2800;
 
 const variantMotionDuration: Record<VariantKey, number> = {
@@ -223,6 +223,7 @@ export default function WebsiteIntroPrototype({
   const pathname = usePathname();
   const [phase, setPhase] = useState<IntroPhase>("idle");
   const [variant, setVariant] = useState<VariantKey>(initialVariant);
+  const introActive = phase !== "complete";
   const introRef = useRef<HTMLElement>(null);
   const journeyVideoRef = useRef<HTMLVideoElement>(null);
   const handoffStartedRef = useRef(false);
@@ -243,7 +244,7 @@ export default function WebsiteIntroPrototype({
     setPhase("landing");
     completionTimerRef.current = window.setTimeout(
       finishIntro,
-      realisticDesktopLandingDuration,
+      realisticPageLandingDuration,
     );
   }, [finishIntro]);
 
@@ -299,6 +300,14 @@ export default function WebsiteIntroPrototype({
       }
 
       beginScreenHandoff();
+      return;
+    }
+
+    if (variant === "A") {
+      completionTimerRef.current = window.setTimeout(
+        beginScreenHandoff,
+        realisticMobileMotionDuration,
+      );
       return;
     }
 
@@ -361,17 +370,32 @@ export default function WebsiteIntroPrototype({
   }, [selectVariant, variant]);
 
   useEffect(() => {
-    if (phase === "complete") return;
+    if (!introActive) return;
 
+    const introElement = introRef.current;
     const siteContent = document.getElementById("site-content");
     const root = document.documentElement;
     const previousOverflow = document.body.style.overflow;
-    const previousScrollbarGutter = root.style.scrollbarGutter;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const computedPaddingRight = Number.parseFloat(
+      window.getComputedStyle(document.body).paddingRight,
+    );
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+    const syncIntroViewportWidth = () => {
+      introElement?.style.setProperty(
+        "--intro-viewport-width",
+        `${window.innerWidth}px`,
+      );
+    };
 
     siteContent?.setAttribute("inert", "");
-    root.style.scrollbarGutter = "stable";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${computedPaddingRight + scrollbarWidth}px`;
+    }
     document.body.style.overflow = "hidden";
-    introRef.current?.focus({ preventScroll: true });
+    syncIntroViewportWidth();
+    window.addEventListener("resize", syncIntroViewportWidth);
+    introElement?.focus({ preventScroll: true });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -406,11 +430,13 @@ export default function WebsiteIntroPrototype({
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", syncIntroViewportWidth);
+      introElement?.style.removeProperty("--intro-viewport-width");
       siteContent?.removeAttribute("inert");
-      root.style.scrollbarGutter = previousScrollbarGutter;
+      document.body.style.paddingRight = previousPaddingRight;
       document.body.style.overflow = previousOverflow;
     };
-  }, [phase, skipIntro]);
+  }, [introActive, skipIntro]);
 
   useEffect(
     () => () => {
