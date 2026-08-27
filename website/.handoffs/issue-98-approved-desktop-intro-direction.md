@@ -101,7 +101,7 @@ The approved camera moves left and excludes the right/rear background. The user'
   - a close left-wall screen assembly view with a clearly bounded physical display.
 - Do not enlarge a low-resolution crop until it pixelates.
 - Avoid a visibly swapped curtain texture, giant curtain close-up, disconnected rail layer, CSS fold simulation, or abrupt cut between unrelated perspectives.
-- For the post-video handoff, reuse the faithful real-homepage capture full-viewport only after black takeover, then match it into the live page. Do not place it inside the bounded physical display or insert generic placeholder UI.
+- For the post-video handoff, reuse the exact `1440 x 900` real-homepage capture full-viewport only after black takeover, then match it into the live page. Keep that capture at its final viewport geometry from its first visible frame; animate only exposure, opacity, and focus, never scale or reflow. Do not place it inside the bounded physical display or insert generic placeholder UI.
 - Keep the homepage server-rendered underneath and preserve progressive-enhancement behavior.
 - Keep Variant B (`?variant=B`) unchanged. It remains an alternate prototype, not the selected implementation direction.
 

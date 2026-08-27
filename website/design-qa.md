@@ -12,7 +12,7 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Physical-anatomy authority: `prototype-qa/issue-98/references/real-booth-open-doorway-reference.png` and `prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`.
 - Retained idle exterior: `public/prototype/issue-98/variant-a-real-booth-closed.png`.
 - Selected desktop journey asset: `public/prototype/issue-98/variant-a-generated-journey-desktop.mp4` (1920 x 1080, 5.125 seconds), with `public/prototype/issue-98/video-generator-pack-16x9/01-exterior-closed-1920x1080.png` as the matching desktop poster.
-- Faithful physical-screen content: `public/prototype/issue-98/variant-a-homepage-live-desktop.png`, captured from the real server-rendered homepage at 1440 x 900 CSS/image px.
+- Faithful post-video content: `public/prototype/issue-98/variant-a-homepage-live-exact-1440x900.png`, normalized from the real server-rendered homepage to exactly 1440 x 900 image px for a 1:1 DPR-1 reveal.
 - Browser implementation evidence: `prototype-qa/issue-98/video-flow-video-end-1440x900.png`, `video-flow-black-takeover-1440x900.png`, `video-flow-develop-dark-1440x900.png`, `video-flow-focus-pull-1440x900.png`, `video-flow-sharp-capture-1440x900.png`, and `video-flow-final-live-1440x900.png`.
 - Viewport and density: 1440 x 900 CSS px at DPR 1; browser captures are 1440 x 900 image px. No density normalization was required.
 - States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
@@ -105,6 +105,13 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 - The first repaired ending faded the screenshot against the live page and briefly doubled typography. The final repair holds the crisp capture fully opaque until the intro unmounts; `video-flow-sharp-capture-1440x900.png` and `video-flow-final-live-1440x900.png` are pixel-identical.
 - Actual browser CUA Tab reached Skip and Enter; CUA Enter completed the full video and post-video transition; Escape dismissed during video playback. Pointer Skip, final focus, scroll restoration, inert cleanup, Variant B completion, zero horizontal overflow, and a clean browser console also passed.
 - The selected storyboard/browser comparison contains no remaining actionable P0, P1, or P2 mismatch.
+
+### Pass 6 - passed after native-size reveal correction
+
+- The user observed the homepage adjusting its size while it developed from black. Evidence confirmed two causes: the earlier capture was 1425 x 891 and the reveal keyframes scaled the page from 1.04 to 1.
+- Replaced the transition source with an exact 1440 x 900 homepage capture and removed every homepage transform from the development/focus animation. Only opacity, brightness, saturation, and blur now change.
+- Fresh browser measurements at both development and focus-pull states report a 1440 x 900 portal, a 1440 x 900 natural/client image, and computed `transform: none`.
+- Rebuilt `video-flow-selected-storyboard-comparison.png` from the corrected browser captures. The crisp capture and final live-page screenshots remain pixel-identical, with no new P0, P1, or P2 finding.
 
 ## Follow-up polish
 

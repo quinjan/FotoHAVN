@@ -82,8 +82,9 @@
   z-index: 2;
   overflow: hidden;
   opacity: 0;
+  transform: none;
   background: var(--color-ebony);
-  will-change: filter, opacity, transform;
+  will-change: filter, opacity;
 }
 
 .screenPortal img {
@@ -403,37 +404,31 @@
   42% {
     filter: brightness(0.04) saturate(0.72) blur(28px);
     opacity: 0;
-    transform: scale(1.04);
   }
 
   50% {
     filter: brightness(0.12) saturate(0.76) blur(24px);
     opacity: 1;
-    transform: scale(1.035);
   }
 
   68% {
     filter: brightness(0.38) saturate(0.84) blur(15px);
     opacity: 1;
-    transform: scale(1.025);
   }
 
   84% {
     filter: brightness(0.76) saturate(0.94) blur(6px);
     opacity: 1;
-    transform: scale(1.01);
   }
 
   95% {
     filter: brightness(1) saturate(1) blur(0);
     opacity: 1;
-    transform: scale(1);
   }
 
   100% {
     filter: brightness(1) saturate(1) blur(0);
     opacity: 1;
-    transform: scale(1);
   }
 }
 

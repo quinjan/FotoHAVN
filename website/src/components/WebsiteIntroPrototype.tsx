@@ -69,7 +69,7 @@ const realisticCurtainAssets = {
 };
 
 const realisticHomepageAsset = withSiteBasePath(
-  "/prototype/issue-98/variant-a-homepage-live-desktop.png",
+  "/prototype/issue-98/variant-a-homepage-live-exact-1440x900.png",
 );
 
 const realisticJourneyVideo = withSiteBasePath(
