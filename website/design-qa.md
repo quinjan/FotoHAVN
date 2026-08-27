@@ -1,93 +1,90 @@
-# FOTOHVN Website Intro Experience two-variant design QA
+# FOTOHVN Website Intro Experience approved desktop-flow design QA
 
-Date: 2026-08-27
-Scope: Wayfinder throwaway prototype for GitHub issue 98
-Prototype branch: `codex/prototype-website-intro-98`
+Date: 2026-08-27  
+Scope: Wayfinder throwaway prototype for GitHub issue 98; Variant A desktop at 1440 x 900 only  
+Prototype branch: `codex/prototype-website-intro-98`  
 Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://localhost:4173/fotohvn?variant=B`
 
 ## Comparison target
 
-- Variant A source visual truth: `prototype-qa/issue-98/references/real-photobooth-reference.png` (1276 x 1574 px), plus the user's correction that only the upper framed half of the right-hand column is a mirror and the lower half remains walnut cabinetry.
-- Variant B source visual truth: `prototype-qa/issue-98/references/drawn-photobooth-reference.png` (1440 x 1440 px), interpreted through the corrected real-booth anatomy.
-- Desktop implementation evidence: `prototype-qa/issue-98/variant-a-idle-1440x900.png`, `variant-a-fold-zoom-1440x900.png`, `variant-a-fold-live-reveal-mid-1440x900.png`, `variant-a-fold-final-1440x900.png`, and `variant-b-idle-1440x900.png` (1440 x 900 CSS px and image px).
-- Tablet implementation evidence: `prototype-qa/issue-98/variant-a-idle-768x1024.png` and `prototype-qa/issue-98/variant-b-idle-768x1024.png` (768 x 1024 CSS px and image px).
-- Small-mobile implementation evidence: `prototype-qa/issue-98/variant-a-fold-live-reveal-mid-390x844.png`, `variant-a-idle-320x720.png`, `variant-b-idle-320x720.png`, and `variant-b-mid-320x720.png` (390 x 844 and 320 x 720 CSS px and image px).
-- Additional interaction viewport: 390 x 844 CSS px.
-- Density normalization: browser captures used device pixel ratio 1. Comparison boards fit each source and implementation proportionally into labelled equal-width cells without cropping; detail boards use labelled booth crops.
-- States: idle closed curtain, controlled mid-transition, completed live-homepage handoff, Skip, Escape, pointer activation, keyboard activation, URL-selected variants, arrow-key switching, and switcher-button switching.
+- Current decision authority: `.handoffs/issue-98-approved-desktop-intro-direction.md`.
+- Selected visual target: `prototype-qa/issue-98/references/approved-left-wall-welcome-screen-storyboard.png` (3072 x 2048 px).
+- Physical-anatomy authority: `prototype-qa/issue-98/references/real-booth-open-doorway-reference.png` and `prototype-qa/issue-98/references/real-booth-left-wall-screen-reference.png`.
+- Retained idle exterior: `public/prototype/issue-98/variant-a-real-booth-closed.png`.
+- New desktop assets: `public/prototype/issue-98/variant-a-threshold-left-wall-desktop.png` and `public/prototype/issue-98/variant-a-left-wall-screen-desktop.png` (1586 x 992 px each).
+- Faithful physical-screen content: `public/prototype/issue-98/variant-a-homepage-live-desktop.png`, captured from the real server-rendered homepage at 1440 x 900 CSS/image px.
+- Browser implementation evidence: `prototype-qa/issue-98/approved-flow-implementation-idle-1440x900.png`, `approved-flow-repair1-threshold-1440x900.png`, `approved-flow-repair1-interior-1440x900.png`, `approved-flow-screen-push-1440x900.png`, and `approved-flow-final-live-1440x900.png`.
+- Viewport and density: 1440 x 900 CSS px at DPR 1; browser captures are 1440 x 900 image px. No density normalization was required.
+- States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
+- Mobile adaptation and responsive tuning are explicitly deferred. No mobile viewport was reviewed or reported as passed in this checkpoint.
 
 ## Combined visual evidence
 
-- Variant A full comparison: `prototype-qa/issue-98/variant-a-full-comparison.png` (1600 x 980 px).
-- Variant A focused booth comparison: `prototype-qa/issue-98/variant-a-detail-comparison.png` (1600 x 980 px).
-- Variant B full comparison: `prototype-qa/issue-98/variant-b-full-comparison.png` (1600 x 980 px).
-- Variant B focused booth comparison: `prototype-qa/issue-98/variant-b-detail-comparison.png` (1600 x 980 px).
-- Variant A motion-contract comparison: `prototype-qa/issue-98/variant-a-fold-motion-comparison.png` (1800 x 1200 px), combining the previously approved zoom/curtain/live-hero source sequence with the revised browser-rendered implementation states.
+- Full sequence comparison: `prototype-qa/issue-98/approved-flow-storyboard-browser-comparison.png` (2400 x 1760 px). This board combines the cropped four-frame approved storyboard and five browser-rendered implementation states in one comparison input.
+- Focused anatomy comparison: `prototype-qa/issue-98/approved-flow-left-wall-detail-comparison.png` (2400 x 1500 px). This board combines the real interior authority, generated assembly, and browser-rendered homepage-inside-screen state.
+- gpt-taste conformance: `prototype-qa/issue-98/approved-flow-gpt-taste-conformance.md`.
 
-Focused comparisons were required because the mirror/cabinet divider, curtain rail, left utility panel, and material treatment were too small to judge reliably in the full boards. The mid-transition mobile captures verify that the open asset is revealed from left to right and ends with the curtain gathered at the right edge.
+Focused comparison was required because the camera label, physical screen bounds, vertical light ownership, control placement, curtain edges, and absence of the rear guest background are too small to judge from the full sequence alone.
 
 ## Findings
 
 - P0: none.
 - P1: none.
 - P2: none after repair.
-- [P3] Generated booth details are not documentary reproductions.
-  - Surface: image quality and asset fidelity.
-  - Evidence: Variant A retains the real booth's illuminated sign, dark walnut structure, cream ring-hung curtain, left display/delivery area, and corrected upper-right mirror/lower-right wood split, but its mall reflections and small printed details are generated approximations. Variant B intentionally remixes those cues in pencil, ink, warm paper, and restrained walnut color.
-  - Impact: acceptable for a throwaway composition and motion decision; these assets are not production-authority exports.
-  - Follow-up: issue 99 owns the production asset and hero contract.
+- [P3] Generated intermediate photography is prototype evidence rather than documentary asset authority.
+  - Surface: image quality and production continuity.
+  - Evidence: the two purpose-made desktop stages preserve the approved warm walnut/cream material language and physical anatomy, but fine joinery and lighting continuity are generated approximations rather than exact matched photographs of the production booth.
+  - Impact: acceptable for the issue-98 composition/motion decision; it does not authorize production asset use.
+  - Follow-up: issue 99 owns production asset continuity, rights, compression, and exact exports.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: passed. Existing FOTOHVN display and sans typography are reused. Wordmark and controls retain the site's uppercase hierarchy, optical weight, tracking, and readable contrast at all checked widths.
-- Spacing and layout rhythm: passed. Both variants begin zoomed out, keep the booth centered as the dominant object, and preserve the fixed wordmark, skip action, primary entry action, and development-only variant switcher without collisions at 1440, 768, 390, or 320 CSS px.
-- Colors and visual tokens: passed. Variant A uses warm mall light, cream, and walnut. Variant B uses warm ivory paper, dark ink, and restrained walnut tint. Controls reuse existing off-white, ebony, and walnut tokens; no gradients or decorative code-drawn assets were introduced.
-- Image quality and asset fidelity: passed for prototype scope. Variant A retains its corrected realistic closed-booth desktop/mobile assets, then crossfades before magnification artifacts appear to dedicated high-resolution curtain close-ups with smooth fine linen, a real raster rail, rings, and clips. Variant B retains its matched closed/open drawing pair and paper/ink treatment. No curtain, clip, rail, or illustration was reconstructed as CSS or vector art.
-- Copy and content: passed. Visible intro copy is limited to `FOTOHVN`, `SKIP INTRO`, `PRESS TO ENTER FOTOHVN`, and the development-only A/B switcher. The source image's `developing...` caption and carousel arrows were correctly excluded.
-- Icons: not applicable. No icon is needed for the selected entry flow.
-- Responsiveness: passed. No horizontal overflow was present at 768, 390, or 320 CSS px. Controls remain visible and usable, with the main action at least 56 px high.
-- Accessibility and interaction: passed. The homepage remains inert and body scrolling is locked while the modal is active. Tab reaches Skip then Enter; actual browser keyboard Enter activates the sequence; Escape and Skip dismiss it; completed focus moves to `hero-heading`; scrolling is restored; reduced-motion CSS collapses the animation duration.
+- Fonts and typography: passed. Intro wordmark, Skip, entry action, and development switcher retain the existing FOTOHVN type hierarchy. The physical screen uses a real homepage capture, so its typography matches the live page rather than a generated imitation.
+- Spacing and layout rhythm: passed after repair. Every stage is full-bleed at 1440 x 900, the exterior remains the dominant idle object, the threshold turns left without exposing the guest background, and the interior holds enough surrounding wall for the physical assembly to register before the push.
+- Colors and visual tokens: passed. The flow stays within warm mall light, cream linen, dark walnut, ebony, and off-white. Existing token-backed controls remain unchanged.
+- Image quality and asset fidelity: passed for throwaway-prototype scope. Both new stage assets exceed the decision viewport's useful density, use the approved physical order, and avoid enlarged low-resolution crops. The homepage inside the touchscreen is a browser capture of the actual site. No booth, curtain, camera, light, screen, or control is reconstructed as CSS, SVG, canvas, icon, or placeholder art.
+- Copy and content: passed. Visible intro copy remains `FOTOHVN`, `SKIP INTRO`, `PRESS TO ENTER FOTOHVN`, and the development-only A/B switcher. No Brand Strip, Photo Strip, welcome-copy hold, audio, or development hold was added.
+- Interaction affordances: passed. Entry and Skip remain semantic buttons with pointer, Enter, and Space support; focus treatment and button contrast remain visible.
 
 ## Motion and browser checks
 
-- Variant A: passed. The realistic scene now uses a 2800 ms sequence: it zooms tightly to the curtain, invisibly hands off to a high-resolution curtain close-up before the source booth raster would pixelate, then folds the curtain smoothly toward the right over 1650 ms while the live homepage expands behind it. The rail remains in place and the raster clips gather with the folded fabric before the final handoff.
-- Variant B: passed. The canvas scene uses a slower 2200 ms zoom-and-reveal sequence; the curtain wipe begins after 760 ms, runs for 1040 ms, and is paired with a restrained stepped ink-trace animation.
-- Final handoff: passed. Variant A reveals the live server-rendered homepage directly behind the folding curtain with no generated open-booth intermediate; Variant B retains its illustrated open-booth transition. No Photo Strip remains in the intro.
-- Direct URLs: passed. `?variant=A` and `?variant=B` server-render their requested variant without an initial wrong-variant flash.
-- Variant controls: passed. PREV/NEXT buttons and ArrowLeft/ArrowRight update the query parameter and reset the selected intro for replay.
-- Browser console warnings/errors: `[]`.
+- Variant A sequence: passed. The 5600 ms desktop journey moves from the retained closed exterior into a right-gathered curtain/left-biased threshold, crossfades into the left-wall assembly, holds the real homepage inside its physical screen, then expands that same capture until it matches the live page.
+- Spatial continuity: passed. The right/rear standing or sitting background never appears. The physical order remains `LOOK HERE` lens, landscape screen, vertical light immediately right, and metal control below.
+- Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow restores, scroll remains at 0, and focus moves to `#hero-heading` with no visible page jump.
+- Pointer activation: passed in the in-app browser.
+- Actual browser CUA keyboard activation: passed. Tab reached Skip and then Enter; CUA Enter ran the full sequence and completed with focus on `hero-heading`.
+- Escape and Skip: passed. DOM-CUA Escape dismissed both idle and in-motion states after a visible control received focus; pointer Skip dismissed the idle state.
+- Variant regression: passed. Direct `?variant=B` rendered Variant B without an A flash; ArrowRight switched B to A; PREV switched A back to B; Variant B completed in its unchanged 2200 ms path.
+- Scroll and containment: passed. During idle and motion, body overflow was `hidden`, `#site-content` was inert, and `scrollWidth === clientWidth`. After completion, normal scrolling returned with no horizontal overflow.
+- Console warnings/errors: `[]` after the final repair.
+- Reduced-motion fast path: source-verified and unchanged. The component still completes in 40 ms when `prefers-reduced-motion: reduce` matches, and the media rule collapses the new stage animations to 1 ms. Fresh runtime media emulation was skipped because the in-app browser surface does not expose a reduced-motion override; this gate is recorded as source verification, not a fresh runtime pass.
+
+## Engineering gates
+
+- `npm run lint`: passed with no errors or warnings.
+- `npx tsc --noEmit --pretty false`: passed.
+- `npm run build`: passed on Next.js 16.3.2.
+- `git diff --check`: passed; only the repository's existing LF-to-CRLF working-copy notices were emitted.
+- gpt-taste scoped plan-conformance review: passed after the full-bleed repair. Randomized redesign, new GSAP dependencies, AIDA restructuring, and bento rules were correctly treated as outside this already-selected intro-overlay scope.
 
 ## Comparison history
 
 ### Pass 1 - blocked
 
-- [P2] The generated realistic right-hand column used the mirror across the entire column instead of only its upper framed section.
-- [P2] Completion focus was attempted before the homepage's `inert` state had been removed, leaving focus on `body` instead of the hero heading.
+- [P2] The threshold and interior stages briefly exposed a dark matte around their edges because their opening keyframes scaled the full-bleed rasters below 1.
+- [P2] A scaled interior hold risked drifting the live homepage overlay away from the physical screen bezel.
 
-Fixes: regenerated all four realistic desktop/mobile closed/open frames with an upper mirror and lower walnut panel; moved focus transfer to a post-completion effect that runs after the modal cleanup.
+Fixes: kept the threshold above full-bleed scale throughout; held the interior raster at scale 1 while the physical-screen idea registers; reserved the final enlargement for the screen portal itself.
 
 ### Pass 2 - passed
 
-- Combined full and focused boards confirm the corrected booth anatomy and both selected art directions.
-- Fresh browser evidence confirms desktop, tablet, 390 px, and 320 px layouts; controlled transition frames; actual keyboard activation; pointer activation; Skip; Escape; focus handoff; scroll restoration; URL switching; and a clean console.
-- No actionable P0, P1, or P2 findings remain.
-
-### Pass 3 - blocked after motion refinement
-
-- [P2] Zooming the full realistic booth raster until the curtain filled the viewport made the fabric visibly pixelated.
-- [P2] A straight clip-path wipe revealed the page but did not visibly fold the curtain or show the top hardware moving with it.
-
-Fixes: added purpose-generated desktop and mobile close-range curtain assets with subtle linen texture and visible rail/clips; crossfaded to them before the booth raster exceeded useful detail; replaced Variant A's wipe with a right-anchored folding transform; kept the real raster rail in place while the clips and fabric gather to the right.
-
-### Pass 4 - passed
-
-- The combined motion board shows the retained initial booth, tight curtain zoom, visible top rail/clips, smooth rightward fold over the live homepage, and direct final handoff.
-- Fresh browser checks passed at 1440 x 900, 390 x 844, and 320 x 720 with no horizontal overflow or console warnings/errors.
-- Actual browser keyboard Enter, pointer activation, Skip, Escape, focus handoff, scroll restoration, and Variant B regression checks passed.
+- Fresh same-viewport browser captures show full-bleed threshold and interior states with no matte edges.
+- The focused comparison confirms the homepage stays inside the bounded landscape touchscreen, the lens/light/control retain their physical ownership, and the rear guest background is absent.
+- Pointer, actual CUA keyboard entry, Escape, Skip, focus handoff, scroll restoration, inert cleanup, URL-selected variants, A/B switching, Variant B completion, overflow, and console checks all passed.
 - No actionable P0, P1, or P2 findings remain.
 
 ## Follow-up polish
 
-- Production-ready photographic continuity, exact print/fixture details, rights, compression, and final hero matching remain issue 99 work and are not approved by this prototype pass.
+- Production-matched booth photography, final camera-path exports, rights, compression, and mobile choreography remain separate follow-up work. Mobile is deferred until the user approves this desktop animation.
 
 final result: passed

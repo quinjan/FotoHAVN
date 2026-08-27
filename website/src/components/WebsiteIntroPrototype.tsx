@@ -62,8 +62,23 @@ const realisticCurtainAssets = {
   ),
 };
 
+const realisticJourneyAssets = {
+  threshold: withSiteBasePath(
+    "/prototype/issue-98/variant-a-threshold-left-wall-desktop.png",
+  ),
+  interior: withSiteBasePath(
+    "/prototype/issue-98/variant-a-left-wall-screen-desktop.png",
+  ),
+  homepage: withSiteBasePath(
+    "/prototype/issue-98/variant-a-homepage-live-desktop.png",
+  ),
+};
+
+const realisticDesktopMotionDuration = 5600;
+const realisticMobileMotionDuration = 2800;
+
 const variantMotionDuration: Record<VariantKey, number> = {
-  A: 2800,
+  A: realisticMobileMotionDuration,
   B: 2200,
 };
 
@@ -104,6 +119,21 @@ function VariantARealistic({ assets }: { assets: VariantAssets }) {
           mobile={assets.closedMobile}
         />
       </div>
+      <picture
+        className={`${styles.desktopJourneyFrame} ${styles.thresholdFrame}`}
+      >
+        <img src={realisticJourneyAssets.threshold} alt="" />
+      </picture>
+      <picture
+        className={`${styles.desktopJourneyFrame} ${styles.interiorFrame}`}
+      >
+        <img src={realisticJourneyAssets.interior} alt="" />
+      </picture>
+      <BoothPicture
+        className={styles.screenPortal}
+        desktop={realisticJourneyAssets.homepage}
+        mobile={realisticJourneyAssets.homepage}
+      />
       <BoothPicture
         className={styles.curtainFoldFrame}
         desktop={realisticCurtainAssets.desktop}
@@ -214,9 +244,15 @@ export default function WebsiteIntroPrototype({
     ).matches;
 
     setPhase("entering");
+    const isRealisticDesktop =
+      variant === "A" && window.matchMedia("(min-width: 768px)").matches;
     completionTimerRef.current = window.setTimeout(
       finishIntro,
-      prefersReducedMotion ? 40 : variantMotionDuration[variant],
+      prefersReducedMotion
+        ? 40
+        : isRealisticDesktop
+          ? realisticDesktopMotionDuration
+          : variantMotionDuration[variant],
     );
   }, [finishIntro, phase, variant]);
 
@@ -354,14 +390,16 @@ export default function WebsiteIntroPrototype({
       aria-labelledby="intro-title"
       aria-describedby="intro-description"
       data-variant={variant}
+      data-phase={phase}
       tabIndex={-1}
     >
       <h1 id="intro-title" className={styles.screenReaderText}>
         Enter FOTOHVN
       </h1>
       <p id="intro-description" className={styles.screenReaderText}>
-        Variant {variant}. Zoom into the photobooth curtain, then open it from
-        left to right to reveal the FOTOHVN website, or skip the intro.
+        {variant === "A"
+          ? "Variant A. Enter the photobooth, turn toward its left-wall welcome screen, then move into the live FOTOHVN website, or skip the intro."
+          : "Variant B. Zoom into the illustrated photobooth curtain, then open it from left to right to reveal the FOTOHVN website, or skip the intro."}
       </p>
 
       {variant === "A" ? (
