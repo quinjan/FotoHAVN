@@ -9,6 +9,9 @@
 }
 
 .variantA {
+  --screen-origin-x: 50.9%;
+  --screen-origin-y: 54%;
+  --screen-zoom: 5.6;
   color: var(--color-off-white);
   background: var(--color-dark-walnut);
 }
@@ -25,10 +28,6 @@
 .scene,
 .boothFrame,
 .boothFrame img,
-.curtainFoldFrame,
-.curtainFoldFrame img,
-.curtainRailFrame,
-.curtainRailFrame img,
 .journeyVideo,
 .veil {
   position: absolute;
@@ -41,21 +40,12 @@
   will-change: transform, opacity;
 }
 
-.realisticScene {
-  --realistic-zoom: 4.8;
-  transform-origin: 50% 47%;
-}
-
 .realisticZoomFrame {
   z-index: 0;
 }
 
 .journeyVideo {
-  display: none;
-  pointer-events: none;
-}
-
-.journeyVideo {
+  display: block;
   z-index: 0;
   width: 100%;
   height: 100%;
@@ -64,37 +54,10 @@
   object-fit: cover;
   object-position: center center;
   opacity: 0;
+  pointer-events: none;
+  transform-origin: var(--screen-origin-x) var(--screen-origin-y);
   background: var(--color-dark-walnut);
   will-change: opacity, transform;
-}
-
-.curtainFoldFrame,
-.curtainRailFrame {
-  z-index: -1;
-  display: block;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.curtainFoldFrame {
-  transform: scaleX(1);
-  transform-origin: right center;
-  will-change: opacity, transform;
-}
-
-.curtainRailFrame {
-  z-index: 0;
-  clip-path: inset(0 0 93% 0);
-  will-change: opacity;
-}
-
-.curtainFoldFrame img,
-.curtainRailFrame img {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  object-fit: cover;
-  object-position: center center;
 }
 
 .boothFrame {
@@ -240,7 +203,7 @@
 }
 
 .entering.variantA {
-  animation: background-to-home-a 2800ms linear forwards;
+  animation: none;
 }
 
 .entering.variantB {
@@ -248,21 +211,20 @@
 }
 
 .entering.variantA .scene {
-  animation: real-scene-enter 2800ms cubic-bezier(0.72, 0, 0.22, 1) forwards;
+  animation: realistic-idle-to-video-desktop 220ms ease-out forwards;
 }
 
 .entering.variantB .scene {
   animation: canvas-scene-enter 2200ms cubic-bezier(0.66, 0, 0.18, 1) forwards;
 }
 
-.entering.variantA .curtainFoldFrame {
-  animation:
-    curtain-closeup-opacity 2800ms linear forwards,
-    curtain-fold-right 1650ms cubic-bezier(0.45, 0, 0.55, 1) 1050ms forwards;
+.entering.variantA .journeyVideo {
+  opacity: 1;
 }
 
-.entering.variantA .curtainRailFrame {
-  animation: curtain-rail-opacity 2800ms linear forwards;
+.landing.variantA .journeyVideo {
+  animation: realistic-video-into-black-desktop 1900ms
+    cubic-bezier(0.5, 0, 0.15, 1) forwards;
 }
 
 .entering.variantB .closedFrame {
@@ -438,63 +400,6 @@
   will-change: filter, opacity;
 }
 
-@keyframes real-scene-enter {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  30% {
-    opacity: 1;
-    transform: scale(var(--realistic-zoom));
-  }
-
-  36%,
-  100% {
-    opacity: 0;
-    transform: scale(var(--realistic-zoom));
-  }
-}
-
-@keyframes curtain-closeup-opacity {
-  0%,
-  22% {
-    opacity: 0;
-  }
-
-  34%,
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes curtain-rail-opacity {
-  0%,
-  22% {
-    opacity: 0;
-  }
-
-  34%,
-  92% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes curtain-fold-right {
-  0%,
-  4% {
-    transform: scaleX(1);
-  }
-
-  100% {
-    transform: scaleX(0.08);
-  }
-}
-
 @keyframes canvas-scene-enter {
   0% {
     opacity: 1;
@@ -514,13 +419,6 @@
   100% {
     opacity: 0;
     transform: scale(1.5) rotate(0deg);
-  }
-}
-
-@keyframes background-to-home-a {
-  0%,
-  100% {
-    background-color: var(--color-dark-walnut);
   }
 }
 
@@ -544,18 +442,6 @@
 
   100% {
     background-color: transparent;
-  }
-}
-
-@keyframes mobile-curtain-clear {
-  0% {
-    opacity: 1;
-    transform: scaleX(0.08);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scaleX(0.08);
   }
 }
 
@@ -627,42 +513,6 @@
 }
 
 @media (min-width: 768px) {
-  .variantA {
-    --screen-origin-x: 50.9%;
-    --screen-origin-y: 54%;
-    --screen-zoom: 5.6;
-  }
-
-  .variantA .curtainFoldFrame,
-  .variantA .curtainRailFrame {
-    display: none;
-  }
-
-  .variantA .journeyVideo {
-    display: block;
-  }
-
-  .variantA .journeyVideo {
-    transform-origin: var(--screen-origin-x) var(--screen-origin-y);
-  }
-
-  .entering.variantA {
-    animation: none;
-  }
-
-  .entering.variantA .journeyVideo {
-    opacity: 1;
-  }
-
-  .entering.variantA .realisticScene {
-    animation: realistic-idle-to-video-desktop 220ms ease-out forwards;
-  }
-
-  .landing.variantA .journeyVideo {
-    animation: realistic-video-into-black-desktop 1900ms
-      cubic-bezier(0.5, 0, 0.15, 1) forwards;
-  }
-
   .landing.variantA {
     animation: realistic-intro-to-live-desktop 1900ms linear forwards;
   }
@@ -678,37 +528,21 @@
   }
 }
 
-@media (min-width: 768px) and (orientation: portrait) {
-  .realisticScene {
-    --realistic-zoom: 2.65;
-  }
-}
-
 @media (max-width: 767px) {
+  .entering .wordmark,
+  .entering .skipButton,
+  .entering .enterButton,
+  .entering .veil,
+  .entering .prototypeSwitcher {
+    visibility: hidden;
+  }
+
   .scene {
     transform-origin: 52% 48%;
   }
 
-  .realisticScene {
-    --realistic-zoom: 2.3;
-    transform-origin: 50% 47%;
-  }
-
-  .curtainRailFrame {
-    clip-path: inset(0 0 94% 0);
-  }
-
   .landing.variantA {
     animation: realistic-intro-to-live-mobile 1900ms linear forwards;
-  }
-
-  .landing.variantA .curtainFoldFrame {
-    animation: mobile-curtain-clear 240ms ease-out forwards;
-  }
-
-  .landing.variantA .curtainRailFrame {
-    animation: none;
-    opacity: 0;
   }
 
   .wordmark {
@@ -774,8 +608,6 @@
   .entering,
   .entering .scene,
   .entering .closedFrame,
-  .entering .curtainFoldFrame,
-  .entering .curtainRailFrame,
   .entering .journeyVideo,
   .entering .inkTrace {
     animation-duration: 1ms;

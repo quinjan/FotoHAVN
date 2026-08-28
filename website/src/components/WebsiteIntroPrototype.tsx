@@ -59,27 +59,13 @@ const prototypeAssets: Record<VariantKey, VariantAssets> = {
   },
 };
 
-const realisticCurtainAssets = {
-  desktop: withSiteBasePath(
-    "/prototype/issue-98/variant-a-curtain-closeup-desktop.png",
-  ),
-  mobile: withSiteBasePath(
-    "/prototype/issue-98/variant-a-curtain-closeup-mobile.png",
-  ),
-};
-
 const realisticJourneyVideo = withSiteBasePath(
   "/prototype/issue-98/variant-a-generated-journey-desktop.mp4",
 );
 
 const realisticDesktopVideoFallbackDuration = 5600;
 const realisticPageLandingDuration = 1900;
-const realisticMobileMotionDuration = 2800;
-
-const variantMotionDuration: Record<VariantKey, number> = {
-  A: realisticMobileMotionDuration,
-  B: 2200,
-};
+const canvasMotionDuration = 2200;
 
 const variantLabels: Record<VariantKey, string> = {
   A: "REALISTIC",
@@ -138,16 +124,6 @@ function VariantARealistic({
       >
         <source src={realisticJourneyVideo} type="video/mp4" />
       </video>
-      <BoothPicture
-        className={styles.curtainFoldFrame}
-        desktop={realisticCurtainAssets.desktop}
-        mobile={realisticCurtainAssets.mobile}
-      />
-      <BoothPicture
-        className={styles.curtainRailFrame}
-        desktop={realisticCurtainAssets.desktop}
-        mobile={realisticCurtainAssets.mobile}
-      />
     </>
   );
 }
@@ -279,15 +255,12 @@ export default function WebsiteIntroPrototype({
 
     handoffStartedRef.current = false;
     setPhase("entering");
-    const isRealisticDesktop =
-      variant === "A" && window.matchMedia("(min-width: 768px)").matches;
-
     if (prefersReducedMotion) {
       completionTimerRef.current = window.setTimeout(finishIntro, 40);
       return;
     }
 
-    if (isRealisticDesktop) {
+    if (variant === "A") {
       const video = journeyVideoRef.current;
       if (video) {
         video.currentTime = 0;
@@ -303,17 +276,9 @@ export default function WebsiteIntroPrototype({
       return;
     }
 
-    if (variant === "A") {
-      completionTimerRef.current = window.setTimeout(
-        beginScreenHandoff,
-        realisticMobileMotionDuration,
-      );
-      return;
-    }
-
     completionTimerRef.current = window.setTimeout(
       finishIntro,
-      variantMotionDuration[variant],
+      canvasMotionDuration,
     );
   }, [beginScreenHandoff, finishIntro, phase, variant]);
 

@@ -16,13 +16,13 @@ Implementation URLs: `http://localhost:4173/fotohvn?variant=A` and `http://local
 - Browser implementation evidence: `prototype-qa/issue-98/video-flow-video-end-1440x900.png`, `video-flow-black-takeover-1440x900.png`, `video-flow-develop-dark-1440x900.png`, `video-flow-focus-pull-1440x900.png`, `video-flow-sharp-capture-1440x900.png`, and `video-flow-final-live-1440x900.png`.
 - Viewport and density: all checks used DPR 1. Browser captures match their CSS viewports exactly at 1440 x 900, 390 x 844, and 320 x 720 image px; no density normalization was required.
 - States: idle exterior, left-biased threshold, inside left-wall assembly, physical-screen hold, screen push, completed live homepage, Skip, Escape, pointer entry, CUA keyboard entry, URL-selected variants, and A/B switching.
-- Mobile choreography is now included following the user's desktop approval. The supplied 16:9 video remains desktop-only; mobile preserves the approved portrait booth and curtain assets, resolves them into full dark, then reveals the same already-mounted responsive page without scaling.
+- Mobile choreography uses the exact same supplied 5.125-second MP4 as desktop and tablet. Portrait viewports use a centered full-bleed cover crop, then continue through the shared zoom-to-black and native live-page reveal without scaling the webpage.
 
 ## Combined visual evidence
 
 - Full sequence comparison: `prototype-qa/issue-98/approved-flow-storyboard-browser-comparison.png` (2400 x 1760 px). This board combines the cropped four-frame approved storyboard and five browser-rendered implementation states in one comparison input.
 - Selected post-video comparison: `prototype-qa/issue-98/video-flow-selected-storyboard-comparison.png` (2600 x 1050 px). This board puts the user-selected six-stage black-development/focus-pull storyboard beside the six same-state browser captures.
-- Responsive mobile comparison: `prototype-qa/issue-98/mobile-native-reveal-comparison.png` (2600 x 1600 px). This board places the selected dark-development/focus workflow beside the browser-rendered 390 x 844 and 320 x 720 adaptations.
+- Responsive mobile comparison: `prototype-qa/issue-98/mobile-same-video-reveal-comparison.png` (2600 x 1600 px). This board confirms the supplied MP4 journey, its screen destination, black takeover, and live-page reveal at 390 x 844 and 320 x 720.
 - Focused anatomy comparison: `prototype-qa/issue-98/approved-flow-left-wall-detail-comparison.png` (2400 x 1500 px). This board combines the real interior authority, generated assembly, and browser-rendered homepage-inside-screen state.
 - gpt-taste conformance: `prototype-qa/issue-98/approved-flow-gpt-taste-conformance.md`.
 
@@ -51,7 +51,7 @@ Focused comparison was required because the camera label, physical screen bounds
 ## Motion and browser checks
 
 - Variant A sequence: passed. The 5.125-second supplied video carries the closed exterior into the left-wall assembly. Its paused final frame then continues through a 1900 ms centered dolly until the black glass fills the viewport; the already-mounted live page develops from near-black at low exposure and heavy blur into its normal crisp state.
-- Variant A mobile sequence: passed. The existing portrait booth zooms into the cream curtain, the curtain clears into a full dark takeover, and the live mobile page develops through the same exposure/focus treatment. The complete mobile path is about 4.7 seconds and does not crop the supplied 16:9 desktop video into portrait.
+- Variant A mobile sequence: passed. The exact 5.125-second supplied MP4 plays in a centered portrait cover crop, reaches its own left-wall black screen, then runs the shared 1900 ms zoom-to-black and live-page exposure/focus treatment. The webpage remains the native responsive DOM throughout.
 - Spatial continuity: passed for the selected supplied video. The camera lands on the left-hand screen wall with the `LOOK HERE` lens, landscape black screen, paired vertical lights, and metal control. The post-video stage preserves that exact frame until the black screen takes over; it does not introduce a miniature webpage, alternate curtain, portal edge, or geometry-changing still swap.
 - Final handoff: passed. The intro unmounts, `#site-content` loses `inert`, body overflow and padding restore, scroll remains at 0, and focus moves to `#hero-heading`. Measured scroll-lock compensation keeps the live page width unchanged when scrolling is restored.
 - Pointer activation: passed in the in-app browser.
@@ -127,7 +127,15 @@ Fixes: kept the threshold above full-bleed scale throughout; held the interior r
 - The user approved the desktop result and explicitly authorized the remaining mobile resolutions. The desktop 16:9 journey video was intentionally not center-cropped into portrait; mobile keeps the existing portrait booth/curtain assets, then joins the approved full-dark development workflow.
 - Updated Variant A mobile to enter a dedicated `landing` phase after its 2800 ms curtain motion. The real mobile `#site-content` remains mounted and receives only opacity, brightness, saturation, and blur; computed `transform` stays `none`.
 - Replaced root scrollbar-gutter reservation with measured body-padding compensation while scroll is locked. This lets the intro cover the full 390 px and 320 px viewport while holding the live page at its final native widths of 375 px and 305 px. Full document height also remains unchanged through cleanup.
-- At both resolutions, pointer entry, actual browser CUA Tab/Enter activation, Skip, Escape, final focus on `#hero-heading`, inert/scroll restoration, zero horizontal overflow, and a clean warning/error console passed. `mobile-native-reveal-comparison.png` contains the normalized source/implementation evidence. No actionable P0, P1, or P2 finding remains.
+- At both resolutions, pointer entry, actual browser CUA Tab/Enter activation, Skip, Escape, final focus on `#hero-heading`, inert/scroll restoration, zero horizontal overflow, and a clean warning/error console passed. This curtain-only checkpoint is preserved in commit `893aa77` and superseded by Pass 9.
+
+### Pass 9 - corrected to use the supplied video on mobile
+
+- The user identified that Pass 8 still used the legacy portrait curtain animation. Browser reproduction confirmed three linked causes: the video was hidden below 768 px, mobile completed on an independent 2800 ms timer, and the video zoom-to-black animation existed only in the desktop media query.
+- Removed the alternate curtain-only path and its now-unused curtain layers. Variant A now plays the same MP4 and waits for the same `ended` event at every breakpoint; the shared landing animation carries that video into black before revealing the live DOM.
+- Mobile hides the intro controls immediately once playback begins so the video remains visually clean. The centered cover crop keeps the booth entrance and final screen destination legible at both portrait widths.
+- Runtime evidence reports active MP4 playback (`paused: false`, advancing `currentTime`) at 390 x 844 and 320 x 720, then a paused 5.125-second final frame during landing. The live page finishes with `transform: none`, stable native geometry, zero horizontal overflow, and focus on `#hero-heading`.
+- Replaced the superseded curtain-only evidence with `mobile-same-video-reveal-comparison.png`. No actionable P0, P1, or P2 finding remains.
 
 ## Follow-up polish
 

@@ -84,8 +84,8 @@ Exact milliseconds are not locked. Tune a slow, continuous, cinematic sequence. 
 
 ### Mobile adaptation
 
-- At 390 x 844 and 320 x 720, retain the existing portrait booth and curtain assets rather than center-cropping the 16:9 desktop video.
-- Move from the portrait exterior into the cream curtain, clear the curtain into a full dark takeover, then reveal the already-mounted responsive homepage through the same exposure and focus treatment.
+- At 390 x 844 and 320 x 720, play the exact same supplied 16:9 MP4 used by desktop and tablet. Use a centered full-bleed cover crop; do not substitute a separate curtain-only animation.
+- Let the MP4 reach its own left-wall screen, then continue the same zoom into black before revealing the already-mounted responsive homepage through the shared exposure and focus treatment.
 - Keep the live mobile page at its final native responsive geometry throughout. Do not introduce a screenshot bridge, transform, or partial webpage behind the opening curtain.
 
 ## Spatial rule that must not drift
@@ -153,7 +153,7 @@ Do not revive these without new user approval:
 - Showing the right/rear standing/sitting background as the camera enters.
 - Placing the interior screen on the wrong wall or approaching it from the wrong angle.
 - Showing the webpage as a miniature overlay inside the physical screen before the camera reaches full black.
-- Center-cropping the supplied 16:9 desktop video into the portrait mobile flow.
+- Replacing the supplied video with the legacy portrait curtain-only animation.
 - Selecting Variant B's drawing/canvas treatment as the primary direction.
 
 ## Verification and handoff gates
@@ -171,7 +171,7 @@ The next agent must not hand off from code/build confidence alone.
 3. Test pointer activation and actual browser CUA keyboard activation, not only source inspection or locator `.press()`.
 4. Re-test Skip, Escape, focus handoff, scroll restoration, A/B switching, horizontal overflow, and browser console warnings/errors.
 5. Put the approved storyboard/real interior references and implementation captures together in combined comparison boards before judging fidelity.
-6. Update `website/design-qa.md`; it must end exactly `final result: passed` for the desktop-only scope with mobile explicitly deferred.
+6. Update `website/design-qa.md`; it must end exactly `final result: passed` for the approved responsive scope.
 7. Run:
 
 ```powershell
