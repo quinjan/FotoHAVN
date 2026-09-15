@@ -1,4 +1,10 @@
 fotohavn.com {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+		}
+	}
+
 	@legacy_exact path /fotohavn
 	redir @legacy_exact / permanent
 
@@ -10,6 +16,12 @@ fotohavn.com {
 }
 
 www.fotohavn.com {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+		}
+	}
+
 	redir https://fotohavn.com{uri} permanent
 }
 
