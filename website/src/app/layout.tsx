@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
-import { stagingSiteUrl, withSiteBasePath } from "../../site.config";
+import { siteUrl, withSiteBasePath } from "../../site.config";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -21,10 +21,13 @@ export const metadata: Metadata = {
   title: "FOTOHAVN | Photographs, Developed Differently",
   description:
     "An enclosed vintage photobooth experience for celebrations worth remembering.",
-  metadataBase: new URL(stagingSiteUrl),
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   robots: {
-    follow: false,
-    index: false,
+    follow: true,
+    index: true,
   },
   openGraph: {
     title: "FOTOHAVN | Photographs, Developed Differently",
@@ -33,9 +36,10 @@ export const metadata: Metadata = {
     images: [
       new URL(
         withSiteBasePath("/images/evia/booth-close.webp"),
-        new URL(stagingSiteUrl).origin,
+        new URL(siteUrl).origin,
       ),
     ],
+    url: "/",
     type: "website",
   },
 };

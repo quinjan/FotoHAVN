@@ -132,7 +132,7 @@ main() {
   fi
 
   if ! grep --fixed-strings --line-regexp --quiet "$CADDY_IMPORT" "$PHOTOBIZ_CADDYFILE"; then
-    printf '\n# FotoHAVN temporary raw-IP staging route.\n%s\n' "$CADDY_IMPORT" \
+    printf '\n# FotoHAVN production route and raw-IP rollback boundary.\n%s\n' "$CADDY_IMPORT" \
       >> "$PHOTOBIZ_CADDYFILE"
     caddy_changed=1
   fi
