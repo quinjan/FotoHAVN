@@ -35,7 +35,7 @@ export const metadata: Metadata = {
       "An enclosed vintage photobooth experience for celebrations worth remembering.",
     images: [
       new URL(
-        withSiteBasePath("/images/evia/booth-close.webp"),
+        withSiteBasePath("/images/experience-online/keepsake-reunion.webp"),
         new URL(siteUrl).origin,
       ),
     ],
