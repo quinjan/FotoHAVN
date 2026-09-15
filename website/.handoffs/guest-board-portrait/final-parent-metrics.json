@@ -1,0 +1,50 @@
+[
+  {
+    "buttons": [
+      {
+        "h": 48,
+        "label": "Previous photograph",
+        "text": "",
+        "w": 48
+      },
+      {
+        "h": 64,
+        "label": null,
+        "text": "See the photograph",
+        "w": 137
+      },
+      {
+        "h": 48,
+        "label": "Next photograph",
+        "text": "",
+        "w": 48
+      }
+    ],
+    "height": 964.765625,
+    "state": "note",
+    "widths": [
+      305,
+      305
+    ]
+  },
+  {
+    "height": 964.765625,
+    "state": "photo"
+  },
+  {
+    "hint": 48,
+    "state": "375portrait",
+    "widths": [
+      360,
+      360
+    ]
+  },
+  {
+    "hint": 0,
+    "state": "844landscape",
+    "widths": [
+      829,
+      829
+    ]
+  }
+]

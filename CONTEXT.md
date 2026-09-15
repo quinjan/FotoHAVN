@@ -4,6 +4,14 @@ FotoHAVN coordinates the guest-facing flow from taking photos to receiving a phy
 
 ## Language
 
+**Website Intro Experience**:
+A skippable brand threshold before the website's main experience, using the enclosed booth, a curtain opening, and one fixed FOTOHAVN Brand Strip to introduce FOTOHAVN before yielding to the brand site.
+_Avoid_: Landing page, startup splash, loading screen
+
+**FOTOHAVN Brand Strip**:
+A narrow printed brand object used by the Website Intro Experience, with four typographic panels for FOTOHAVN, Enclosed, Printed, and Distinctive and no photographic Captures.
+_Avoid_: Photo Strip, placeholder strip, template
+
 **Event**:
 A named booth run that fixes the camera and printer used by its Guest Cycles and groups their saved artifacts.
 _Avoid_: Booth session, job

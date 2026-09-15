@@ -1,0 +1,2278 @@
+{
+  "checks": [
+    {
+      "check": "320-overview",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "three-quarter",
+        "status": "Overview view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-front",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "front",
+        "status": "Front view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-side",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "side",
+        "status": "Side view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-back",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "back",
+        "status": "Back view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-inside",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Close the curtainClose curtain↙",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "inside",
+        "status": "Inside view. Curtain open.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-bench",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Close the curtainClose curtain↙",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "bench",
+        "status": "Bench view. Curtain open.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-custom-controls",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 255.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": -224.453125,
+            "width": 305,
+            "x": 0,
+            "y": -224.453125
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 351.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 303.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 303.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 351.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 303.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 303.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 351.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 303.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 303.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 351.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 303.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 303.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 424.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 376.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 376.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Close the curtainClose curtain↙",
+            "rect": {
+              "bottom": 424.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 376.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 376.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 484.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 436.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 436.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2894,
+        "selected": "custom",
+        "status": "Custom view. Curtain open.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-keyboard-rotation-minus",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 463.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": -16.453125,
+            "width": 305,
+            "x": 0,
+            "y": -16.453125
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 559.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 511.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 511.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 559.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 511.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 511.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 559.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 511.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 511.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 559.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 511.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 511.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 632.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 584.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 584.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 632.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 584.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 584.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 692.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 644.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 644.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2686,
+        "selected": "custom",
+        "status": "Custom view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      },
+      "focus": {
+        "active": "Interactive 3D model of the FOTOHAVN booth",
+        "outline": "rgb(30, 26, 23) solid 2px",
+        "outlineOffset": "-5px"
+      }
+    },
+    {
+      "check": "320-pointer-drag",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 567.546875,
+            "height": 480,
+            "left": 0,
+            "right": 305,
+            "top": 87.546875,
+            "width": 305,
+            "x": 0,
+            "y": 87.546875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 305,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 56.5,
+              "right": 104.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 56.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 104.5,
+              "right": 152.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 104.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 152.5,
+              "right": 200.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 152.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 663.734375,
+              "height": 48,
+              "left": 200.5,
+              "right": 248.5,
+              "top": 615.734375,
+              "width": 48,
+              "x": 200.5,
+              "y": 615.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 24,
+              "right": 148.5,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 24,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 736.734375,
+              "height": 48,
+              "left": 156.5,
+              "right": 281,
+              "top": 688.734375,
+              "width": 124.5,
+              "x": 156.5,
+              "y": 688.734375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 796.734375,
+              "height": 48,
+              "left": 117.5,
+              "right": 187.484375,
+              "top": 748.734375,
+              "width": 69.984375,
+              "x": 117.5,
+              "y": 748.734375
+            }
+          }
+        ],
+        "scrollWidth": 305,
+        "scrollY": 2582,
+        "selected": "custom",
+        "status": "Custom view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          320,
+          568
+        ]
+      }
+    },
+    {
+      "check": "320-scroll-over-canvas",
+      "before": 2582,
+      "after": 2866
+    },
+    {
+      "check": "390-overview",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 706.25,
+            "height": 480,
+            "left": 0,
+            "right": 375,
+            "top": 226.25,
+            "width": 375,
+            "x": 0,
+            "y": 226.25
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 375,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 802.4375,
+              "height": 48,
+              "left": 91.5,
+              "right": 139.5,
+              "top": 754.4375,
+              "width": 48,
+              "x": 91.5,
+              "y": 754.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 802.4375,
+              "height": 48,
+              "left": 139.5,
+              "right": 187.5,
+              "top": 754.4375,
+              "width": 48,
+              "x": 139.5,
+              "y": 754.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 802.4375,
+              "height": 48,
+              "left": 187.5,
+              "right": 235.5,
+              "top": 754.4375,
+              "width": 48,
+              "x": 187.5,
+              "y": 754.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 802.4375,
+              "height": 48,
+              "left": 235.5,
+              "right": 283.5,
+              "top": 754.4375,
+              "width": 48,
+              "x": 235.5,
+              "y": 754.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 875.4375,
+              "height": 48,
+              "left": 24,
+              "right": 183.5,
+              "top": 827.4375,
+              "width": 159.5,
+              "x": 24,
+              "y": 827.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 875.4375,
+              "height": 48,
+              "left": 191.5,
+              "right": 351,
+              "top": 827.4375,
+              "width": 159.5,
+              "x": 191.5,
+              "y": 827.4375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 935.4375,
+              "height": 48,
+              "left": 152.5,
+              "right": 222.484375,
+              "top": 887.4375,
+              "width": 69.984375,
+              "x": 152.5,
+              "y": 887.4375
+            }
+          }
+        ],
+        "scrollWidth": 375,
+        "scrollY": 2674,
+        "selected": "three-quarter",
+        "status": "Overview view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          390,
+          844
+        ]
+      }
+    },
+    {
+      "check": "390-front-open-before-resize",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 321.25,
+            "height": 480,
+            "left": 0,
+            "right": 375,
+            "top": -158.75,
+            "width": 375,
+            "x": 0,
+            "y": -158.75
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 375,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 91.5,
+              "right": 139.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 91.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 139.5,
+              "right": 187.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 139.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 187.5,
+              "right": 235.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 187.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 235.5,
+              "right": 283.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 235.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 490.4375,
+              "height": 48,
+              "left": 24,
+              "right": 183.5,
+              "top": 442.4375,
+              "width": 159.5,
+              "x": 24,
+              "y": 442.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Close the curtainClose curtain↙",
+            "rect": {
+              "bottom": 490.4375,
+              "height": 48,
+              "left": 191.5,
+              "right": 351,
+              "top": 442.4375,
+              "width": 159.5,
+              "x": 191.5,
+              "y": 442.4375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 550.4375,
+              "height": 48,
+              "left": 152.5,
+              "right": 222.484375,
+              "top": 502.4375,
+              "width": 69.984375,
+              "x": 152.5,
+              "y": 502.4375
+            }
+          }
+        ],
+        "scrollWidth": 375,
+        "scrollY": 3059,
+        "selected": "front",
+        "status": "Front view. Curtain open.",
+        "touchAction": "auto",
+        "viewport": [
+          390,
+          844
+        ]
+      }
+    },
+    {
+      "check": "844x390-front-open",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 549.328125,
+            "height": 620,
+            "left": 42.4375,
+            "right": 476.5,
+            "top": -70.671875,
+            "width": 434.0625,
+            "x": 42.4375,
+            "y": -70.671875
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 829,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 500.328125,
+              "height": 44,
+              "left": 73.4375,
+              "right": 117.4375,
+              "top": 456.328125,
+              "width": 44,
+              "x": 73.4375,
+              "y": 456.328125
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 500.328125,
+              "height": 44,
+              "left": 174.4375,
+              "right": 218.4375,
+              "top": 456.328125,
+              "width": 44,
+              "x": 174.4375,
+              "y": 456.328125
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 500.328125,
+              "height": 44,
+              "left": 220.4375,
+              "right": 264.4375,
+              "top": 456.328125,
+              "width": 44,
+              "x": 220.4375,
+              "y": 456.328125
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 500.328125,
+              "height": 44,
+              "left": 119.4375,
+              "right": 163.4375,
+              "top": 456.328125,
+              "width": 44,
+              "x": 119.4375,
+              "y": 456.328125
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Overview",
+            "rect": {
+              "bottom": 389.140625,
+              "height": 44,
+              "left": 494.5,
+              "right": 567.03125,
+              "top": 345.140625,
+              "width": 72.53125,
+              "x": 494.5,
+              "y": 345.140625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Front",
+            "rect": {
+              "bottom": 389.140625,
+              "height": 44,
+              "left": 571.03125,
+              "right": 623.875,
+              "top": 345.140625,
+              "width": 52.84375,
+              "x": 571.03125,
+              "y": 345.140625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Side",
+            "rect": {
+              "bottom": 389.140625,
+              "height": 44,
+              "left": 627.875,
+              "right": 676.1875,
+              "top": 345.140625,
+              "width": 48.3125,
+              "x": 627.875,
+              "y": 345.140625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Back",
+            "rect": {
+              "bottom": 389.140625,
+              "height": 44,
+              "left": 680.1875,
+              "right": 730.59375,
+              "top": 345.140625,
+              "width": 50.40625,
+              "x": 680.1875,
+              "y": 345.140625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Inside",
+            "rect": {
+              "bottom": 437.140625,
+              "height": 44,
+              "left": 494.5,
+              "right": 550.90625,
+              "top": 393.140625,
+              "width": 56.40625,
+              "x": 494.5,
+              "y": 393.140625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Bench",
+            "rect": {
+              "bottom": 437.140625,
+              "height": 44,
+              "left": 554.90625,
+              "right": 613.046875,
+              "top": 393.140625,
+              "width": 58.140625,
+              "x": 554.90625,
+              "y": 393.140625
+            }
+          },
+          {
+            "font": "13px",
+            "label": "Close the curtainClose curtain↙",
+            "rect": {
+              "bottom": 514.140625,
+              "height": 52,
+              "left": 494.5,
+              "right": 762.546875,
+              "top": 462.140625,
+              "width": 268.046875,
+              "x": 494.5,
+              "y": 462.140625
+            }
+          },
+          {
+            "font": "12px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 568.140625,
+              "height": 44,
+              "left": 494.5,
+              "right": 554.484375,
+              "top": 524.140625,
+              "width": 59.984375,
+              "x": 494.5,
+              "y": 524.140625
+            }
+          }
+        ],
+        "scrollWidth": 829,
+        "scrollY": 1974,
+        "selected": "front",
+        "status": "Front view. Curtain open.",
+        "touchAction": "auto",
+        "viewport": [
+          844,
+          390
+        ]
+      }
+    },
+    {
+      "check": "390-returned-front-toggle-closed",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 321.25,
+            "height": 480,
+            "left": 0,
+            "right": 375,
+            "top": -158.75,
+            "width": 375,
+            "x": 0,
+            "y": -158.75
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 375,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 91.5,
+              "right": 139.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 91.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 139.5,
+              "right": 187.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 139.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 187.5,
+              "right": 235.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 187.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 417.4375,
+              "height": 48,
+              "left": 235.5,
+              "right": 283.5,
+              "top": 369.4375,
+              "width": 48,
+              "x": 235.5,
+              "y": 369.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 490.4375,
+              "height": 48,
+              "left": 24,
+              "right": 183.5,
+              "top": 442.4375,
+              "width": 159.5,
+              "x": 24,
+              "y": 442.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 490.4375,
+              "height": 48,
+              "left": 191.5,
+              "right": 351,
+              "top": 442.4375,
+              "width": 159.5,
+              "x": 191.5,
+              "y": 442.4375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 550.4375,
+              "height": 48,
+              "left": 152.5,
+              "right": 222.484375,
+              "top": 502.4375,
+              "width": 69.984375,
+              "x": 152.5,
+              "y": 502.4375
+            }
+          }
+        ],
+        "scrollWidth": 375,
+        "scrollY": 3059,
+        "selected": "front",
+        "status": "Front view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          390,
+          844
+        ]
+      }
+    },
+    {
+      "check": "1440x900-desktop",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 806.40625,
+            "height": 625,
+            "left": 72.25,
+            "right": 895.421875,
+            "top": 181.40625,
+            "width": 823.171875,
+            "x": 72.25,
+            "y": 181.40625
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 1425,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 757.40625,
+              "height": 44,
+              "left": 103.25,
+              "right": 147.25,
+              "top": 713.40625,
+              "width": 44,
+              "x": 103.25,
+              "y": 713.40625
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 757.40625,
+              "height": 44,
+              "left": 204.25,
+              "right": 248.25,
+              "top": 713.40625,
+              "width": 44,
+              "x": 204.25,
+              "y": 713.40625
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 757.40625,
+              "height": 44,
+              "left": 250.25,
+              "right": 294.25,
+              "top": 713.40625,
+              "width": 44,
+              "x": 250.25,
+              "y": 713.40625
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 757.40625,
+              "height": 44,
+              "left": 149.25,
+              "right": 193.25,
+              "top": 713.40625,
+              "width": 44,
+              "x": 149.25,
+              "y": 713.40625
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Overview",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 925.421875,
+              "right": 997.953125,
+              "top": 585.796875,
+              "width": 72.53125,
+              "x": 925.421875,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Front",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 1001.953125,
+              "right": 1054.796875,
+              "top": 585.796875,
+              "width": 52.84375,
+              "x": 1001.953125,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Side",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 1058.796875,
+              "right": 1107.109375,
+              "top": 585.796875,
+              "width": 48.3125,
+              "x": 1058.796875,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Back",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 1111.109375,
+              "right": 1161.515625,
+              "top": 585.796875,
+              "width": 50.40625,
+              "x": 1111.109375,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Inside",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 1165.515625,
+              "right": 1221.921875,
+              "top": 585.796875,
+              "width": 56.40625,
+              "x": 1165.515625,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Bench",
+            "rect": {
+              "bottom": 629.796875,
+              "height": 44,
+              "left": 1225.921875,
+              "right": 1284.0625,
+              "top": 585.796875,
+              "width": 58.140625,
+              "x": 1225.921875,
+              "y": 585.796875
+            }
+          },
+          {
+            "font": "13px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 706.796875,
+              "height": 52,
+              "left": 925.421875,
+              "right": 1310.75,
+              "top": 654.796875,
+              "width": 385.328125,
+              "x": 925.421875,
+              "y": 654.796875
+            }
+          },
+          {
+            "font": "12px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 760.796875,
+              "height": 44,
+              "left": 925.421875,
+              "right": 985.40625,
+              "top": 716.796875,
+              "width": 59.984375,
+              "x": 925.421875,
+              "y": 716.796875
+            }
+          }
+        ],
+        "scrollWidth": 1425,
+        "scrollY": 2151,
+        "selected": "three-quarter",
+        "status": "Overview view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          1440,
+          900
+        ]
+      }
+    },
+    {
+      "check": "820x1180-tablet",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 943.859375,
+            "height": 620,
+            "left": 41.25,
+            "right": 462.703125,
+            "top": 323.859375,
+            "width": 421.453125,
+            "x": 41.25,
+            "y": 323.859375
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 805,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 894.859375,
+              "height": 44,
+              "left": 72.25,
+              "right": 116.25,
+              "top": 850.859375,
+              "width": 44,
+              "x": 72.25,
+              "y": 850.859375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 894.859375,
+              "height": 44,
+              "left": 173.25,
+              "right": 217.25,
+              "top": 850.859375,
+              "width": 44,
+              "x": 173.25,
+              "y": 850.859375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 894.859375,
+              "height": 44,
+              "left": 219.25,
+              "right": 263.25,
+              "top": 850.859375,
+              "width": 44,
+              "x": 219.25,
+              "y": 850.859375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 894.859375,
+              "height": 44,
+              "left": 118.25,
+              "right": 162.25,
+              "top": 850.859375,
+              "width": 44,
+              "x": 118.25,
+              "y": 850.859375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Overview",
+            "rect": {
+              "bottom": 776.484375,
+              "height": 44,
+              "left": 480.703125,
+              "right": 553.234375,
+              "top": 732.484375,
+              "width": 72.53125,
+              "x": 480.703125,
+              "y": 732.484375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Front",
+            "rect": {
+              "bottom": 776.484375,
+              "height": 44,
+              "left": 557.234375,
+              "right": 610.078125,
+              "top": 732.484375,
+              "width": 52.84375,
+              "x": 557.234375,
+              "y": 732.484375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Side",
+            "rect": {
+              "bottom": 776.484375,
+              "height": 44,
+              "left": 614.078125,
+              "right": 662.390625,
+              "top": 732.484375,
+              "width": 48.3125,
+              "x": 614.078125,
+              "y": 732.484375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Back",
+            "rect": {
+              "bottom": 776.484375,
+              "height": 44,
+              "left": 666.390625,
+              "right": 716.796875,
+              "top": 732.484375,
+              "width": 50.40625,
+              "x": 666.390625,
+              "y": 732.484375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Inside",
+            "rect": {
+              "bottom": 824.484375,
+              "height": 44,
+              "left": 480.703125,
+              "right": 537.109375,
+              "top": 780.484375,
+              "width": 56.40625,
+              "x": 480.703125,
+              "y": 780.484375
+            }
+          },
+          {
+            "font": "11px",
+            "label": "Bench",
+            "rect": {
+              "bottom": 824.484375,
+              "height": 44,
+              "left": 541.109375,
+              "right": 599.25,
+              "top": 780.484375,
+              "width": 58.140625,
+              "x": 541.109375,
+              "y": 780.484375
+            }
+          },
+          {
+            "font": "13px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 901.484375,
+              "height": 52,
+              "left": 480.703125,
+              "right": 739.734375,
+              "top": 849.484375,
+              "width": 259.03125,
+              "x": 480.703125,
+              "y": 849.484375
+            }
+          },
+          {
+            "font": "12px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 955.484375,
+              "height": 44,
+              "left": 480.703125,
+              "right": 540.6875,
+              "top": 911.484375,
+              "width": 59.984375,
+              "x": 480.703125,
+              "y": 911.484375
+            }
+          }
+        ],
+        "scrollWidth": 805,
+        "scrollY": 2207,
+        "selected": "three-quarter",
+        "status": "Overview view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          820,
+          1180
+        ]
+      }
+    },
+    {
+      "check": "390x1050-preview-only",
+      "data": {
+        "canvas": [
+          {
+            "bottom": 809.25,
+            "height": 480,
+            "left": 0,
+            "right": 375,
+            "top": 329.25,
+            "width": 375,
+            "x": 0,
+            "y": 329.25
+          }
+        ],
+        "canvasCount": 1,
+        "clientWidth": 375,
+        "controls": [
+          {
+            "font": "21px",
+            "label": "Rotate booth left",
+            "rect": {
+              "bottom": 905.4375,
+              "height": 48,
+              "left": 91.5,
+              "right": 139.5,
+              "top": 857.4375,
+              "width": 48,
+              "x": 91.5,
+              "y": 857.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom out",
+            "rect": {
+              "bottom": 905.4375,
+              "height": 48,
+              "left": 139.5,
+              "right": 187.5,
+              "top": 857.4375,
+              "width": 48,
+              "x": 139.5,
+              "y": 857.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Zoom in",
+            "rect": {
+              "bottom": 905.4375,
+              "height": 48,
+              "left": 187.5,
+              "right": 235.5,
+              "top": 857.4375,
+              "width": 48,
+              "x": 187.5,
+              "y": 857.4375
+            }
+          },
+          {
+            "font": "21px",
+            "label": "Rotate booth right",
+            "rect": {
+              "bottom": 905.4375,
+              "height": 48,
+              "left": 235.5,
+              "right": 283.5,
+              "top": 857.4375,
+              "width": 48,
+              "x": 235.5,
+              "y": 857.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Custom viewOverviewFrontSideBackInsideBench",
+            "rect": {
+              "bottom": 978.4375,
+              "height": 48,
+              "left": 24,
+              "right": 183.5,
+              "top": 930.4375,
+              "width": 159.5,
+              "x": 24,
+              "y": 930.4375
+            }
+          },
+          {
+            "font": "16px",
+            "label": "Open the curtainOpen curtain↗",
+            "rect": {
+              "bottom": 978.4375,
+              "height": 48,
+              "left": 191.5,
+              "right": 351,
+              "top": 930.4375,
+              "width": 159.5,
+              "x": 191.5,
+              "y": 930.4375
+            }
+          },
+          {
+            "font": "14px",
+            "label": "Reset view",
+            "rect": {
+              "bottom": 1038.4375,
+              "height": 48,
+              "left": 152.5,
+              "right": 222.484375,
+              "top": 990.4375,
+              "width": 69.984375,
+              "x": 152.5,
+              "y": 990.4375
+            }
+          }
+        ],
+        "scrollWidth": 375,
+        "scrollY": 2571,
+        "selected": "three-quarter",
+        "status": "Overview view. Curtain closed.",
+        "touchAction": "auto",
+        "viewport": [
+          390,
+          1050
+        ]
+      }
+    }
+  ],
+  "console": [],
+  "limits": [
+    "Pointer/wheel automation is not physical mobile touch.",
+    "WebGL failure and reduced-motion overrides not live-tested in this pass.",
+    "Tall 390x1050 screenshot is presentation evidence; actual phone QA was 390x844 and 320x568."
+  ]
+}

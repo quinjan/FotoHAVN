@@ -1,162 +1,102 @@
+import ExperienceMotion from "./ExperienceMotion";
+import { inquirySectionId, instagramMessageUrl } from "../../site.config";
 import styles from "./ClosingExperience.module.css";
 
 export default function ClosingExperience() {
   return (
     <>
-      <section
-        className={styles.actionSection}
-        aria-labelledby="action-heading"
-      >
-        <div className={styles.container}>
-          <header className={styles.actionHeader}>
-            <p className={styles.sectionLabel}>BEGIN HERE</p>
-            <h2 id="action-heading">CHOOSE HOW YOU WANT TO BEGIN.</h2>
-          </header>
-
-          <div className={styles.pathSplit}>
-            <article id="find-a-booth" className={styles.mallPath}>
-              <p className={styles.pathLabel}>MALL BOOTH</p>
-              <h3>FIND A BOOTH</h3>
-              <p>
-                Current mall location, hours, price, payment methods, and session
-                details must be confirmed.
-              </p>
-              <a href="mailto:hello@fotohavn.ph?subject=Current%20FOTOHVN%20booth">
-                ASK FOR CURRENT DETAILS
-              </a>
-            </article>
-
-            <article id="rent-fotohavn" className={styles.eventPath}>
-              <p className={styles.pathLabel}>EVENT RENTAL</p>
-              <h3>RENT FOTOHVN</h3>
-              <p>Event rental is offered by the hour with unlimited prints.</p>
-              <p>Share your event date and city or venue to begin.</p>
-              <a href="#inquiry">ASK ABOUT YOUR DATE</a>
-            </article>
-          </div>
-
-          <div id="inquiry" className={styles.inquiryGrid}>
-            <div className={styles.inquiryIntro}>
-              <p className={styles.sectionLabel}>INQUIRY</p>
-              <h3>START WITH WHAT YOU KNOW.</h3>
-              <p>
-                Choose the path that fits, then share only the details you have.
-              </p>
-              <a href="mailto:hello@fotohavn.ph">hello@fotohavn.ph</a>
-            </div>
-
-            <form
-              className={styles.inquiryForm}
-              action="mailto:hello@fotohavn.ph?subject=FOTOHVN%20inquiry"
-              method="post"
-              encType="text/plain"
-              aria-describedby="inquiry-note"
-            >
-              <fieldset className={styles.intentField}>
-                <legend>What would you like to ask about?</legend>
-                <label>
-                  <input
-                    name="Intent"
-                    type="radio"
-                    value="Mall booth"
-                    required
-                  />
-                  <span>Mall booth</span>
-                </label>
-                <label>
-                  <input
-                    name="Intent"
-                    type="radio"
-                    value="Event rental"
-                    required
-                  />
-                  <span>Event rental</span>
-                </label>
-              </fieldset>
-
-              <div className={styles.field}>
-                <label htmlFor="inquiry-name">Name</label>
-                <input
-                  id="inquiry-name"
-                  name="Name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="inquiry-email">Email</label>
-                <input
-                  id="inquiry-email"
-                  name="Email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="inquiry-date">Event date (optional)</label>
-                <input id="inquiry-date" name="Event date" type="date" />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="inquiry-place">City or venue (optional)</label>
-                <input
-                  id="inquiry-place"
-                  name="City or venue"
-                  type="text"
-                  autoComplete="address-level2"
-                />
-              </div>
-
-              <div className={styles.fullField}>
-                <label htmlFor="inquiry-notes">Notes (optional)</label>
-                <textarea id="inquiry-notes" name="Notes" rows={5} />
-              </div>
-
-              <div className={styles.formFooter}>
-                <p id="inquiry-note">
-                  Submitting opens your email app with these details ready to
-                  send.
-                </p>
-                <button type="submit">START THE CONVERSATION</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div>
-            <p className={styles.footerBrand}>FOTOHVN</p>
-            <p className={styles.footerLine}>
-              PHOTOGRAPHS, DEVELOPED DIFFERENTLY.
+      <ExperienceMotion>
+        <section
+          id={inquirySectionId}
+          className={styles.begin}
+          aria-labelledby="begin-heading"
+        >
+          <div className={styles.beginHeading} data-reveal>
+            <h2 id="begin-heading">
+              Let’s make
+              <br />
+              something
+              <br />
+              <em>worth keeping.</em>
+            </h2>
+            <p>
+              A spontaneous stop. A celebration you’ve been planning. There’s a
+              little room for both.
             </p>
           </div>
-          <nav
-            className={styles.footerNavigation}
-            aria-label="Social and contact links"
-          >
+          <div className={styles.paths}>
+            <article id="find-the-booth" data-reveal>
+              <p className={styles.pathLabel}>MAKE A LITTLE DETOUR</p>
+              <h3>Find the booth.</h3>
+              <p>
+                Drop by for a pay-per-use visit. Ask us for the current
+                location, hours, and details before you go.
+              </p>
+              <a
+                className="textLink"
+                href={instagramMessageUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                ASK FOR CURRENT DETAILS <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+            <article id="rent-fotohavn" data-reveal>
+              <p className={styles.pathLabel}>BRING EVERYONE TOGETHER</p>
+              <h3>Rent FOTOHAVN.</h3>
+              <p>
+                Your celebration, our little haven. Event rental is offered by
+                the hour with unlimited prints.
+              </p>
+              <a
+                className="textLink"
+                href={instagramMessageUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                ASK ABOUT YOUR DATE <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+          </div>
+        </section>
+      </ExperienceMotion>
+      <footer className={styles.footer}>
+        <div className={styles.footerTop}>
+          <p>
+            PHOTOGRAPHS,
+            <br />
+            DEVELOPED DIFFERENTLY.
+          </p>
+          <nav aria-label="Social links">
             <a
-              href="https://www.instagram.com/fotohavn"
+              href="https://www.instagram.com/fotohavn.ph/"
               target="_blank"
               rel="noreferrer"
             >
-              Instagram
+              Instagram <span aria-hidden="true">↗</span>
             </a>
             <a
-              href="https://www.facebook.com/fotohavn"
+              href="https://www.facebook.com/profile.php?id=61593369275724"
               target="_blank"
               rel="noreferrer"
             >
-              Facebook
+              Facebook <span aria-hidden="true">↗</span>
             </a>
-            <a href="mailto:hello@fotohavn.ph">Email</a>
+            <a
+              href="https://www.tiktok.com/@fotohavn.ph"
+              target="_blank"
+              rel="noreferrer"
+            >
+              TikTok <span aria-hidden="true">↗</span>
+            </a>
           </nav>
-          <p className={styles.copyright}>© 2026 FOTOHVN</p>
+        </div>
+        <p className={styles.footerBrand}>FOTOHAVN</p>
+        <div className={styles.footerBottom}>
+          <p>© 2026 FOTOHAVN</p>
+          <a href="#top">
+            BACK TO TOP <span aria-hidden="true">↑</span>
+          </a>
         </div>
       </footer>
     </>

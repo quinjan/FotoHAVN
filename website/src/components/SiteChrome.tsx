@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  findBoothSectionHash,
+  rentFotohavnSectionHash,
+  withSiteBasePath,
+} from "../../site.config";
 
 import styles from "./SiteChrome.module.css";
 
@@ -8,6 +13,7 @@ const navigation = [
   { href: "#experience", label: "EXPERIENCE" },
   { href: "#the-booth", label: "THE BOOTH" },
   { href: "#prints", label: "PRINTS" },
+  { href: withSiteBasePath("/online"), label: "ONLINE BOOTH" },
 ] as const;
 
 export default function SiteChrome() {
@@ -17,11 +23,22 @@ export default function SiteChrome() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const updateNavigation = () => setIsScrolled(window.scrollY > 24);
+    const sentinel = document.getElementById("top-sentinel");
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsScrolled(!entry.isIntersecting),
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
-    updateNavigation();
-    window.addEventListener("scroll", updateNavigation, { passive: true });
-    return () => window.removeEventListener("scroll", updateNavigation);
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) setIsMenuOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
 
   useEffect(() => {
@@ -63,13 +80,16 @@ export default function SiteChrome() {
         <a
           className={styles.brand}
           href="#top"
-          aria-label="FOTOHVN, back to the top"
+          aria-label="FOTOHAVN, back to the top"
           onClick={closeMenu}
         >
-          FOTOHVN
+          FOTOHAVN
         </a>
 
-        <nav className={styles.desktopNavigation} aria-label="Primary navigation">
+        <nav
+          className={styles.desktopNavigation}
+          aria-label="Primary navigation"
+        >
           <ul className={styles.navigationList}>
             {navigation.map((item) => (
               <li key={item.href}>
@@ -82,11 +102,17 @@ export default function SiteChrome() {
         </nav>
 
         <div className={styles.desktopActions}>
-          <a className={styles.findAction} href="#find-a-booth">
-            FIND A BOOTH
+          <a
+            className={styles.findAction}
+            href={findBoothSectionHash}
+          >
+            FIND THE BOOTH
           </a>
-          <a className={styles.rentAction} href="#rent-fotohavn">
-            RENT FOTOHVN
+          <a
+            className={styles.rentAction}
+            href={rentFotohavnSectionHash}
+          >
+            RENT FOTOHAVN
           </a>
         </div>
 
@@ -94,6 +120,7 @@ export default function SiteChrome() {
           ref={menuButtonRef}
           className={styles.menuButton}
           type="button"
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-navigation"
           onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
@@ -124,17 +151,17 @@ export default function SiteChrome() {
         <div className={styles.mobileActions}>
           <a
             className={styles.mobileFindAction}
-            href="#find-a-booth"
+            href={findBoothSectionHash}
             onClick={closeMenu}
           >
-            FIND A BOOTH
+            FIND THE BOOTH
           </a>
           <a
             className={styles.mobileRentAction}
-            href="#rent-fotohavn"
+            href={rentFotohavnSectionHash}
             onClick={closeMenu}
           >
-            RENT FOTOHVN
+            RENT FOTOHAVN
           </a>
         </div>
       </nav>

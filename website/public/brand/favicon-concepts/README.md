@@ -1,6 +1,6 @@
-# FOTOHVN favicon concepts
+# FOTOHAVN favicon concepts
 
-Generated on 2026-08-22 from the approved FOTOHVN website design language.
+Generated on 2026-08-22 from the approved FOTOHAVN website design language.
 
 - `01-editorial-f-monogram.png` — editorial monogram direction.
 - `02-booth-portal-selected.png` — selected browser-tab direction.

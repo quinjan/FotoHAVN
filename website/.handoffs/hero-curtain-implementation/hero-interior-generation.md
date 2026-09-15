@@ -1,0 +1,12 @@
+# Hero curtain interior asset
+
+- Mode: built-in ImageGen, one reference-based generation; no CLI or API key.
+- Input: `approved-hero.png`, used only for walnut/cream material and lighting direction.
+- Workspace result: `hero-interior-source.png`, 1316 x 1195 pixels (aspect 1.101).
+- Retained original: `C:/Users/QUINJ3875/.codex/generated_images/01a086fd-6a0f-7fc1-9a5b-360e92d94f5c/exec-5eb0ba39-6f1e-4586-895d-f8913c195cb8.png`.
+- Inspection: shallow walnut enclosure, cream bench, left-side camera/screen and vertical practical light. No curtain, doorway frame, exterior facade, sign, people, or UI. A small console slot below the screen is an interpretive generated detail.
+- Accuracy boundary: the interior is an illustration matching the selected hero's material palette, not a measured reconstruction of the physical booth.
+
+## Exact prompt
+
+Use case: product-mockup. Asset type: interior-only photorealistic raster layer revealed behind the cream curtain in a website hero. Image 1 is a material, lighting, and enclosure-style reference ONLY, not a UI layout to reproduce. Generate ONE separate image of the inside of this small vintage walnut photobooth, viewed straight-on from the open curtain aperture. The image fills the complete rectangular opening: no external cabinet, no doorway frame, no curtain, no top lightbox, no PHOTOBOOTH sign, no web UI, no letters, no watermark, no people, no plants, no unrelated props. Composition: a small, enclosed, intimate booth interior with warm brown wood walls; a simple modest cream upholstered bench against the back wall, realistic shallow enclosure depth, enough dark warm empty central space to read the shape clearly. Along the LEFT inner sidewall show a discreet small capture console and camera lens, and a soft vertical practical light. Keep the center calm, cozy, and unoccupied. Not a huge room or a lounge. The wood finish, warm ivory practical lighting, and photographic material quality should harmonize closely with the supplied reference. Camera at about seated upper-body height looking straight into the shallow interior, verticals straight, no fisheye. Restrained realistic contrast; not blacked out, not gold luxury glamour, no fantasy architecture. Full-bleed image, with no margins. Intended output approximately 1200 x 1088 pixels (landscape ratio 1.10:1); the final app will crop it to a 850:770 aperture. Render only the interior artwork, not the reference website.

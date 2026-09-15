@@ -1,0 +1,330 @@
+{
+  "states": [
+    {
+      "state": "390-photo",
+      "album": {
+        "height": 943.375,
+        "width": 375,
+        "y": 88.03125
+      },
+      "button": {
+        "height": 48,
+        "pressed": "false",
+        "text": "Read the note",
+        "width": 207,
+        "y": 757.921875
+      },
+      "doc": {
+        "client": 375,
+        "scroll": 375
+      },
+      "images": [
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/evia/sisters-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-solo-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 96,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/silver-clip-small.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-trio-640w.webp"
+        }
+      ],
+      "photo": "guest-trio",
+      "print": {
+        "height": 389.40185546875,
+        "width": 304.23541259765625,
+        "y": 326.595947265625
+      },
+      "side": "photo",
+      "stage": {
+        "height": 431.25,
+        "width": 375,
+        "y": 298.671875
+      },
+      "viewport": {
+        "h": 844,
+        "w": 390
+      }
+    },
+    {
+      "state": "390-note",
+      "album": {
+        "height": 943.375,
+        "width": 375,
+        "y": -227.96875
+      },
+      "button": {
+        "height": 48,
+        "pressed": "true",
+        "text": "See the photograph",
+        "width": 207,
+        "y": 441.921875
+      },
+      "doc": {
+        "client": 375,
+        "scroll": 375
+      },
+      "images": [
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/evia/sisters-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-solo-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 96,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/silver-clip-small.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 296,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-trio-640w.webp"
+        }
+      ],
+      "photo": "guest-trio",
+      "print": {
+        "height": 389.40179443359375,
+        "width": 304.23541259765625,
+        "y": 10.595962524414062
+      },
+      "side": "note",
+      "stage": {
+        "height": 431.25,
+        "width": 375,
+        "y": -17.328125
+      },
+      "viewport": {
+        "h": 844,
+        "w": 390
+      }
+    },
+    {
+      "state": "320-photo",
+      "album": {
+        "height": 964.765625,
+        "width": 305,
+        "y": -355.5
+      },
+      "button": {
+        "height": 64,
+        "pressed": "false",
+        "text": "Read the note",
+        "width": 137,
+        "y": 295.78125
+      },
+      "doc": {
+        "client": 305,
+        "scroll": 305
+      },
+      "images": [
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/evia/sisters-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-solo-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 96,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/silver-clip-small.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-trio-640w.webp"
+        }
+      ],
+      "photo": "guest-trio",
+      "print": {
+        "height": 336.6859130859375,
+        "width": 248.4884033203125,
+        "y": -88.56170654296875
+      },
+      "side": "photo",
+      "stage": {
+        "height": 390,
+        "width": 305,
+        "y": -122.21875
+      },
+      "viewport": {
+        "h": 568,
+        "w": 320
+      }
+    },
+    {
+      "state": "320-note",
+      "album": {
+        "height": 964.765625,
+        "width": 305,
+        "y": -355.5
+      },
+      "button": {
+        "height": 64,
+        "pressed": "true",
+        "text": "See the photograph",
+        "width": 137,
+        "y": 295.78125
+      },
+      "doc": {
+        "client": 305,
+        "scroll": 305
+      },
+      "images": [
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/evia/sisters-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "absolute",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-solo-640w.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 96,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/silver-clip-small.webp"
+        },
+        {
+          "complete": true,
+          "fit": "contain",
+          "naturalWidth": 243,
+          "parentPosition": "relative",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/guest-trio-640w.webp"
+        }
+      ],
+      "photo": "guest-trio",
+      "print": {
+        "height": 336.6859130859375,
+        "width": 248.4884033203125,
+        "y": -88.56170654296875
+      },
+      "side": "note",
+      "stage": {
+        "height": 390,
+        "width": 305,
+        "y": -122.21875
+      },
+      "viewport": {
+        "h": 568,
+        "w": 320
+      }
+    },
+    {
+      "state": "landscape-hidden-image-parents",
+      "album": {
+        "height": 809.546875,
+        "width": 829,
+        "y": -1573.0625
+      },
+      "button": {
+        "height": 0,
+        "pressed": "true",
+        "text": "See the photograph",
+        "width": 0,
+        "y": 0
+      },
+      "doc": {
+        "client": 829,
+        "scroll": 829
+      },
+      "images": [
+        {
+          "complete": false,
+          "fit": "fill",
+          "naturalWidth": 0,
+          "parentPosition": "relative",
+          "src": ""
+        },
+        {
+          "complete": false,
+          "fit": "fill",
+          "naturalWidth": 0,
+          "parentPosition": "relative",
+          "src": ""
+        },
+        {
+          "complete": true,
+          "fit": "fill",
+          "naturalWidth": 96,
+          "parentPosition": "static",
+          "src": "http://localhost:3000/fotohavn/images/guest-board/silver-clip-small.webp"
+        },
+        {
+          "complete": false,
+          "fit": "fill",
+          "naturalWidth": 0,
+          "parentPosition": "relative",
+          "src": ""
+        }
+      ],
+      "photo": "guest-trio",
+      "print": {
+        "height": 0,
+        "width": 0,
+        "y": 0
+      },
+      "side": "note",
+      "stage": {
+        "height": 0,
+        "width": 0,
+        "y": 0
+      },
+      "viewport": {
+        "h": 390,
+        "w": 844
+      }
+    }
+  ],
+  "logs": []
+}

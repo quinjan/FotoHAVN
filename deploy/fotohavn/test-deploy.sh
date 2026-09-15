@@ -61,7 +61,7 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
-printf '<html><title>FOTOHVN</title></html>\n' > "$output_file"
+printf '<html><title>FOTOHAVN</title></html>\n' > "$output_file"
 FAKE_CURL
 
   cat > "${FAKE_BIN}/flock" <<'FAKE_FLOCK'

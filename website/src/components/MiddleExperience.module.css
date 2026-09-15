@@ -1,524 +1,258 @@
-.middleExperience {
-  color: var(--color-ebony);
-  background: var(--color-off-white);
-}
-
-.container {
-  width: min(calc(100% - 128px), 1280px);
-  margin-inline: auto;
-}
-
-.gallerySection,
-.stackSection,
-.notesSection {
-  padding-block: clamp(80px, 10vw, 144px);
-}
-
-.gallerySection {
-  background: var(--color-warm-ivory);
-}
-
-.galleryGrid {
+.prints {
+  max-width: 1400px;
+  margin: auto;
+  padding: 100px clamp(24px, 5vw, 80px) 145px;
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
 }
-
-.galleryHeading {
-  grid-column: 1 / 5;
-  align-self: start;
+.printCopy h2 {
+  font: 400 clamp(55px, 5.8vw, 84px)/1 var(--font-display);
+  letter-spacing: -0.045em;
+  margin: 0 0 32px;
 }
-
-.sectionLabel,
-.noteAttribution,
-.galleryStory figcaption {
-  margin: 0;
+.printCopy h2 em {
+  line-height: 1.12;
+  font-weight: 400;
+}
+.printCopy > p {
+  max-width: 350px;
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.printCopy > p.smallCopy {
   color: var(--color-soft-brown);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  line-height: 1.2;
+  font-size: 13px;
 }
-
-.galleryHeading h2,
-.stackHeader h2,
-.notesHeader h2,
-.stackCopy h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.025em;
+.printCopy :global(.textLink) {
+  margin-top: 12px;
 }
-
-.galleryHeading h2 {
-  max-width: 8ch;
-  margin-top: 24px;
-  font-size: clamp(2.75rem, 5vw, 4.5rem);
-  line-height: 0.94;
+.printLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-
-.galleryHeading > p:last-child {
-  max-width: 30ch;
-  margin: 32px 0 0;
-  font-size: 18px;
-  line-height: 1.6;
+.digitalLink {
+  color: var(--color-text-secondary);
 }
-
-.galleryStories {
-  grid-column: 5 / 13;
-  display: grid;
-  gap: 80px;
+.digitalLink svg {
+  flex-shrink: 0;
+  transition: transform var(--duration-standard) var(--ease-standard);
 }
-
-.galleryStory {
-  margin: 0;
+.digitalLink:hover svg,
+.digitalLink:focus-visible svg {
+  transform: translateX(3px);
 }
-
-.galleryMedia {
+@media (prefers-reduced-motion: reduce) {
+  .digitalLink:hover svg,
+  .digitalLink:focus-visible svg {
+    transform: none;
+  }
+}
+.printComposition {
   position: relative;
-  aspect-ratio: 16 / 11;
-  border-radius: 2px;
+  padding-top: 10px;
+}
+.printPhoto {
+  aspect-ratio: 3 / 4;
+  position: relative;
+  border: 12px solid var(--color-off-white);
+  box-shadow: var(--shadow-photo);
+  transform: rotate(3deg);
   background: var(--color-cream-paper);
-  overflow: hidden;
-  transform-origin: center;
 }
-
-.galleryStory:nth-child(even) .galleryMedia {
-  aspect-ratio: 4 / 5;
-  width: 72%;
-  margin-left: auto;
-}
-
-.image {
+.printPhoto img {
   object-fit: cover;
+  object-position: center;
 }
-
-.galleryOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(30, 26, 23, 0.72);
-  opacity: 0;
+.printCaption {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-align: right;
+  margin: 30px 0 0;
+}
+.album {
+  background: var(--color-warm-ivory);
+  padding: 75px 0 32px;
+}
+.albumHeader {
+  padding: 0 clamp(24px, 5vw, 80px);
+  max-width: 1440px;
+  margin: auto;
+}
+.albumHeader h2 {
+  font: 400 clamp(80px, 9vw, 136px)/1 var(--font-display);
+  letter-spacing: -0.055em;
+  margin: 0 0 18px;
+}
+.albumHeader h2 em {
+  font-weight: 400;
+  line-height: 1.12;
+}
+.albumHeader p {
+  font-size: 14px;
+  color: var(--color-soft-brown);
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.8;
+}
+.albumTrack {
+  display: flex;
+  align-items: center;
+  gap: 55px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 62px clamp(24px, 5vw, 80px) 44px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-antique-metal) transparent;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+}
+.albumTrack:active {
+  cursor: grabbing;
+}
+.albumTrack:focus-visible {
+  outline-offset: -7px;
+}
+.albumPhoto {
+  width: clamp(275px, 26vw, 365px);
+  flex-shrink: 0;
+  background: var(--color-off-white);
+  padding: 10px 10px 0;
+  user-select: none;
+  transform: rotate(-3deg);
+}
+.albumPhoto > div {
+  position: relative;
+  aspect-ratio: 3 / 3.7;
+  overflow: hidden;
+}
+.albumPhoto img {
+  object-fit: cover;
+  object-position: center 55%;
   pointer-events: none;
 }
-
-.galleryStory figcaption {
-  margin-top: 16px;
+.albumPhoto figcaption {
+  font: italic 400 23px/1.25 var(--font-display);
+  padding: 17px 10px 20px;
+  text-align: center;
 }
-
-.stackSection {
-  background:
-    radial-gradient(circle at 18% 12%, rgba(232, 221, 206, 0.68), transparent 34%),
-    var(--color-off-white);
+.albumPhoto:nth-child(2n) {
+  transform: rotate(3deg);
+  margin-top: 24px;
+  width: clamp(255px, 23vw, 325px);
 }
-
-.stackHeader {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  align-items: end;
-  margin-bottom: 80px;
+.albumPhoto:nth-child(3n) {
+  transform: rotate(-1deg);
+  margin-top: -25px;
 }
-
-.stackHeader .sectionLabel {
-  grid-column: 1 / 4;
-}
-
-.stackHeader h2 {
-  grid-column: 5 / 13;
-  max-width: 13ch;
-  font-size: clamp(2.75rem, 5vw, 4.5rem);
-  line-height: 0.94;
-}
-
-.stackCards {
-  padding-bottom: 144px;
-}
-
-.stackCard {
-  position: sticky;
-  z-index: calc(var(--stack-index) + 1);
-  top: calc(96px + (var(--stack-index) * 72px));
-  min-height: min(72vh, 720px);
-  margin-bottom: 144px;
-  border-top: 1px solid var(--color-muted-brass);
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  color: var(--color-ebony);
-  background: var(--color-warm-ivory);
-  overflow: hidden;
-  transform-origin: bottom center;
-}
-
-.stackCard:nth-child(2) {
-  background: var(--color-cream-paper);
-}
-
-.stackCard:nth-child(3) {
-  background: var(--color-off-white);
-}
-
-.stackCopy {
-  grid-column: 1 / 6;
-  padding: 48px;
-}
-
-.stackCopy h3 {
-  max-width: 9ch;
-  font-size: clamp(2.75rem, 5vw, 4.5rem);
-  line-height: 0.94;
-}
-
-.stackCopy p {
-  max-width: 40ch;
-  margin: 32px 0 0;
-  font-size: 17px;
-  line-height: 1.65;
-}
-
-.stackMedia {
-  position: relative;
-  grid-column: 6 / 13;
-  min-height: 100%;
-}
-
-.notesSection {
-  background: var(--color-off-white);
-}
-
-.notesHeader {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  align-items: end;
-}
-
-.notesHeader .sectionLabel {
-  grid-column: 1 / 4;
-}
-
-.notesHeader h2 {
-  grid-column: 5 / 13;
-  max-width: 11ch;
-  font-size: clamp(2.75rem, 5vw, 4.5rem);
-  line-height: 0.94;
-}
-
-.carousel {
-  margin-top: 80px;
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  align-items: center;
-  outline: none;
-}
-
-.carousel:focus-visible {
-  outline: 2px solid var(--color-ebony);
-  outline-offset: 6px;
-}
-
-.portraitComposition {
-  position: relative;
-  grid-column: 1 / 7;
-  min-height: 640px;
-}
-
-.portraitPrimary,
-.portraitSecondary {
-  position: absolute;
-  border: 8px solid var(--color-off-white);
-  background: var(--color-cream-paper);
-  overflow: hidden;
-}
-
-.portraitPrimary {
-  inset: 0 18% 12% 0;
-}
-
-.portraitSecondary {
-  z-index: 1;
-  right: 0;
-  bottom: 0;
-  width: 42%;
-  aspect-ratio: 4 / 5;
-}
-
-.noteCopy {
-  grid-column: 8 / 13;
-}
-
-.noteAttribution {
-  color: var(--color-ebony);
-}
-
-.noteCopy blockquote {
-  max-width: 15ch;
-  margin: 24px 0 0;
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 4vw, 4rem);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.04;
-}
-
-.carouselControls {
+.albumFooter {
+  max-width: 1440px;
+  padding: 24px clamp(24px, 5vw, 80px) 0;
+  margin: auto;
   display: flex;
-  gap: 24px;
-  margin-top: 48px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
 }
-
-.carouselControls button {
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid currentColor;
-  color: var(--color-ebony);
+.albumFooter > p {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  margin: 0;
+}
+.albumControls {
+  display: flex;
+  gap: 10px;
+}
+.albumControls button {
+  width: 50px;
+  height: 50px;
   background: transparent;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  cursor: pointer;
-  transition: color 180ms ease;
+  border: 1px solid var(--color-soft-brown);
+  border-radius: 50%;
+  font-size: 24px;
+  color: var(--color-ebony);
 }
-
-.carouselControls button:hover {
-  color: var(--color-dark-walnut);
+.albumControls button:hover:enabled {
+  background: var(--color-cream-paper);
 }
-
-.carouselControls button:focus-visible {
-  outline: 2px solid var(--color-ebony);
-  outline-offset: 3px;
+.albumControls button:disabled {
+  opacity: 0.3;
 }
-
-.screenReaderStatus {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  border: 0;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-@media (max-width: 1199px) {
-  .container {
-    width: calc(100% - 96px);
+@media (max-width: 1100px) {
+  .prints {
+    gap: 55px;
+    padding-block: 75px 100px;
+  }
+  .printCopy h2 {
+    font-size: 64px;
   }
 }
-
-@media (max-width: 1023px) {
-  .galleryGrid {
-    display: block;
-  }
-
-  .galleryHeading {
-    position: static !important;
-    transform: none !important;
-  }
-
-  .galleryHeading h2 {
-    max-width: 11ch;
-  }
-
-  .galleryStories {
-    margin-top: 64px;
-    gap: 48px;
-  }
-
-  .galleryMedia,
-  .galleryStory:nth-child(even) .galleryMedia {
-    width: 100%;
-    margin-left: 0;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .galleryOverlay {
-    opacity: 0 !important;
-  }
-
-  .stackHeader,
-  .notesHeader {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .stackHeader .sectionLabel,
-  .notesHeader .sectionLabel {
-    grid-column: 1 / 3;
-  }
-
-  .stackHeader h2,
-  .notesHeader h2 {
-    grid-column: 3 / 7;
-  }
-
-  .stackCards {
-    display: grid;
-    gap: 24px;
-    padding-bottom: 0;
-  }
-
-  .stackCard {
-    position: static;
-    min-height: 620px;
-    margin-bottom: 0;
-    transform: none !important;
-  }
-
-  .carousel {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .portraitComposition {
-    grid-column: 1 / 4;
-    min-height: 520px;
-  }
-
-  .noteCopy {
-    grid-column: 4 / 7;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .stackCopy h3 {
-    max-width: 100%;
-    font-size: clamp(2.2rem, 4.6vw, 2.75rem);
-    line-height: 0.96;
-  }
-}
-
 @media (max-width: 767px) {
-  .container {
-    width: calc(100% - 48px);
+  .prints {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 60px 24px 76px;
+    gap: 35px;
   }
-
-  .galleryHeading h2,
-  .stackHeader h2,
-  .notesHeader h2 {
-    max-width: 100%;
-    font-size: clamp(2.6rem, 13vw, 3.5rem);
+  .printCopy h2 {
+    font-size: clamp(50px, 12vw, 78px);
   }
-
-  .stackHeader h2 {
-    font-size: clamp(2.35rem, 11.5vw, 3.5rem);
+  .printCopy > p {
+    font-size: 15px;
   }
-
-  .galleryStories {
-    gap: 48px;
+  .printComposition {
+    padding-inline: 12px;
   }
-
-  .galleryMedia,
-  .galleryStory:nth-child(even) .galleryMedia {
-    aspect-ratio: 4 / 5;
+  .printPhoto {
+    border-width: 8px;
+    aspect-ratio: 3 / 4;
   }
-
-  .stackHeader,
-  .notesHeader {
-    display: block;
-    margin-bottom: 48px;
+  .printCaption {
+    font-size: 8px;
+    margin-top: 23px;
   }
-
-  .stackHeader h2,
-  .notesHeader h2 {
-    margin-top: 24px;
+  .album {
+    padding-top: 55px;
   }
-
-  .stackCards {
-    gap: 16px;
+  .albumHeader h2 {
+    font-size: clamp(70px, 18vw, 110px);
   }
-
-  .stackCard {
-    min-height: 680px;
-    display: flex;
-    flex-direction: column;
+  .albumHeader p {
+    font-size: 13px;
+    max-width: 320px;
   }
-
-  .stackCopy {
-    padding: 32px 24px;
+  .albumTrack {
+    gap: 26px;
+    padding-block: 48px 28px;
+    scroll-snap-type: x proximity;
   }
-
-  .stackCopy h3 {
-    max-width: 100%;
-    font-size: clamp(1.95rem, 9.75vw, 2.75rem);
-    line-height: 0.98;
+  .albumPhoto,
+  .albumPhoto:nth-child(2n) {
+    width: 72vw;
+    max-width: 340px;
+    scroll-snap-align: center;
   }
-
-  .stackMedia {
-    min-height: 380px;
-    flex: 1;
+  .albumPhoto figcaption {
+    font-size: 21px;
+    padding-inline: 0;
   }
-
-  .carousel {
-    display: flex;
-    flex-direction: column;
-    gap: 48px;
-    margin-top: 0;
+  .albumFooter > p {
+    max-width: 160px;
+    font-size: 8px;
+    line-height: 1.8;
   }
-
-  .portraitComposition {
-    width: 100%;
-    min-height: 480px;
-  }
-
-  .noteCopy {
-    width: 100%;
-  }
-
-  .noteCopy blockquote {
-    max-width: 16ch;
-    font-size: clamp(2.35rem, 11vw, 3.2rem);
-  }
-
-  .carouselControls {
-    justify-content: space-between;
+  .albumControls button {
+    width: 44px;
+    height: 44px;
   }
 }
 
-@media (max-width: 360px) {
-  .galleryHeading h2,
-  .notesHeader h2 {
-    font-size: 2.55rem;
-  }
-
-  .portraitComposition {
-    min-height: 420px;
-  }
-
-  .noteCopy blockquote {
-    font-size: 2.2rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .galleryHeading,
-  .galleryMedia,
-  .galleryOverlay,
-  .stackCard {
-    position: static;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .galleryOverlay {
-    display: none;
-  }
-
-  .stackCards {
-    display: grid;
-    gap: 24px;
-    padding-bottom: 0;
-  }
-
-  .stackCard {
-    margin-bottom: 0;
-  }
-
-  .carouselControls button {
-    transition-duration: 1ms;
-  }
+.printCopy > p,
+.printCopy > p.smallCopy,
+.albumHeader p {
+  font-size: 16px;
 }

@@ -1,0 +1,42 @@
+[
+  {
+    "boxWidth": 257,
+    "centerOffset": -0.0078125,
+    "fits": true,
+    "fontSize": "48.83px",
+    "textWidth": 239.140625,
+    "viewport": 320
+  },
+  {
+    "boxWidth": 327,
+    "centerOffset": -0.0078125,
+    "fits": true,
+    "fontSize": "62.13px",
+    "textWidth": 304.265625,
+    "viewport": 390
+  },
+  {
+    "boxWidth": 677.71875,
+    "centerOffset": 0,
+    "fits": true,
+    "fontSize": "128.767px",
+    "textWidth": 630.5625,
+    "viewport": 768
+  },
+  {
+    "boxWidth": 1282.5,
+    "centerOffset": 0,
+    "fits": true,
+    "fontSize": "243.675px",
+    "textWidth": 1193.3125,
+    "viewport": 1440
+  },
+  {
+    "boxWidth": 1745,
+    "centerOffset": 0,
+    "fits": true,
+    "fontSize": "305px",
+    "textWidth": 1493.65625,
+    "viewport": 1920
+  }
+]

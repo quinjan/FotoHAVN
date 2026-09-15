@@ -1,0 +1,3780 @@
+{
+  "results": [
+    {
+      "test": "320-photo",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 786.78125,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 738.78125,
+              "width": 48,
+              "x": 24,
+              "y": 738.78125
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 135,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 786.78125,
+              "height": 48,
+              "left": 84,
+              "right": 221,
+              "top": 738.78125,
+              "width": 137,
+              "x": 84,
+              "y": 738.78125
+            },
+            "scrollWidth": 135
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 786.78125,
+              "height": 48,
+              "left": 233,
+              "right": 281,
+              "top": 738.78125,
+              "width": 48,
+              "x": 233,
+              "y": 738.78125
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests holding their prints beside the booth's grey photo display.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          },
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Three guests standing together in front of the cream-curtained booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 691.1242065429688,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": 354.43829345703125,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": 354.43829345703125
+          },
+          "scroll": 382
+        },
+        "print": {
+          "id": "guest-trio",
+          "rect": {
+            "bottom": 691.1242065429688,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": 354.43829345703125,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": 354.43829345703125
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 1036.265625,
+          "height": 948.765625,
+          "left": 0,
+          "right": 305,
+          "top": 87.5,
+          "width": 305,
+          "x": 0,
+          "y": 87.5
+        },
+        "stage": {
+          "bottom": 710.78125,
+          "height": 390,
+          "left": 0,
+          "right": 305,
+          "top": 320.78125,
+          "width": 305,
+          "x": 0,
+          "y": 320.78125
+        },
+        "viewport": [
+          320,
+          568
+        ],
+        "widths": [
+          305,
+          305
+        ]
+      }
+    },
+    {
+      "test": "320-note",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__turnButton\" aria-pressed=\"true\">See the photograph</button>",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 358.375,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 310.375,
+              "width": 48,
+              "x": 24,
+              "y": 310.375
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 135,
+            "font": "14px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 364.96875,
+              "height": 61.1875,
+              "left": 84,
+              "right": 221,
+              "top": 303.78125,
+              "width": 137,
+              "x": 84,
+              "y": 303.78125
+            },
+            "scrollWidth": 135
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 358.375,
+              "height": 48,
+              "left": 233,
+              "right": 281,
+              "top": 310.375,
+              "width": 48,
+              "x": 233,
+              "y": 310.375
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests holding their prints beside the booth's grey photo display.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          },
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Three guests standing together in front of the cream-curtained booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 256.12420654296875,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": -80.56170654296875,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": -80.56170654296875
+          },
+          "scroll": 382
+        },
+        "print": {
+          "id": "guest-trio",
+          "rect": {
+            "bottom": 256.12420654296875,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": -80.56170654296875,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": -80.56170654296875
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 614.453125,
+          "height": 961.953125,
+          "left": 0,
+          "right": 305,
+          "top": -347.5,
+          "width": 305,
+          "x": 0,
+          "y": -347.5
+        },
+        "stage": {
+          "bottom": 275.78125,
+          "height": 390,
+          "left": 0,
+          "right": 305,
+          "top": -114.21875,
+          "width": 305,
+          "x": 0,
+          "y": -114.21875
+        },
+        "viewport": [
+          320,
+          568
+        ],
+        "widths": [
+          305,
+          305
+        ]
+      }
+    },
+    {
+      "test": "320-next-photo",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__nextButton\" aria-label=\"Next photograph\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 351.78125,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 303.78125,
+              "width": 48,
+              "x": 24,
+              "y": 303.78125
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 135,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 351.78125,
+              "height": 48,
+              "left": 84,
+              "right": 221,
+              "top": 303.78125,
+              "width": 137,
+              "x": 84,
+              "y": 303.78125
+            },
+            "scrollWidth": 135
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 351.78125,
+              "height": 48,
+              "left": 233,
+              "right": 281,
+              "top": 303.78125,
+              "width": 48,
+              "x": 233,
+              "y": 303.78125
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Three guests standing together in front of the cream-curtained booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": false,
+            "fit": "contain",
+            "natural": [
+              0,
+              0
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              243,
+              324
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 256.12420654296875,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": -80.56170654296875,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": -80.56170654296875
+          },
+          "scroll": 358
+        },
+        "print": {
+          "id": "guest-solo",
+          "rect": {
+            "bottom": 256.12420654296875,
+            "height": 336.6859130859375,
+            "left": 28.24799156188965,
+            "right": 276.73639488220215,
+            "top": -80.56170654296875,
+            "width": 248.4884033203125,
+            "x": 28.24799156188965,
+            "y": -80.56170654296875
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 601.265625,
+          "height": 948.765625,
+          "left": 0,
+          "right": 305,
+          "top": -347.5,
+          "width": 305,
+          "x": 0,
+          "y": -347.5
+        },
+        "stage": {
+          "bottom": 275.78125,
+          "height": 390,
+          "left": 0,
+          "right": 305,
+          "top": -114.21875,
+          "width": 305,
+          "x": 0,
+          "y": -114.21875
+        },
+        "viewport": [
+          320,
+          568
+        ],
+        "widths": [
+          305,
+          305
+        ]
+      }
+    },
+    {
+      "test": "390-pointer-drag-left",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 535.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 487.921875,
+              "width": 48,
+              "x": 24,
+              "y": 487.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 535.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 487.921875,
+              "width": 207,
+              "x": 84,
+              "y": 487.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 535.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 487.921875,
+              "width": 48,
+              "x": 303,
+              "y": 487.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 445.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 56.59596252441406,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 56.59596252441406
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 445.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 56.59596252441406,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 56.59596252441406
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 761.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -181.96875,
+          "width": 375,
+          "x": 0,
+          "y": -181.96875
+        },
+        "stage": {
+          "bottom": 459.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": 28.671875,
+          "width": 375,
+          "x": 0,
+          "y": 28.671875
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "390-vertical-scroll",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 360.921875,
+              "width": 48,
+              "x": 24,
+              "y": 360.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 360.921875,
+              "width": 207,
+              "x": 84,
+              "y": 360.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 360.921875,
+              "width": 48,
+              "x": 303,
+              "y": 360.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 318.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": -70.40403747558594,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": -70.40403747558594
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 318.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": -70.40403747558594,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": -70.40403747558594
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 634.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -308.96875,
+          "width": 375,
+          "x": 0,
+          "y": -308.96875
+        },
+        "stage": {
+          "bottom": 332.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -98.328125,
+          "width": 375,
+          "x": 0,
+          "y": -98.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "390-vertical-pointer-drag",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 360.921875,
+              "width": 48,
+              "x": 24,
+              "y": 360.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 360.921875,
+              "width": 207,
+              "x": 84,
+              "y": 360.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 408.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 360.921875,
+              "width": 48,
+              "x": 303,
+              "y": 360.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 318.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": -70.40403747558594,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": -70.40403747558594
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 318.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": -70.40403747558594,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": -70.40403747558594
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 634.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -308.96875,
+          "width": 375,
+          "x": 0,
+          "y": -308.96875
+        },
+        "stage": {
+          "bottom": 332.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -98.328125,
+          "width": 375,
+          "x": 0,
+          "y": -98.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "390-note-before-rotation",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__turnButton\" aria-pressed=\"true\">See the photograph</button>",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 441.921875,
+              "width": 48,
+              "x": 24,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 441.921875,
+              "width": 207,
+              "x": 84,
+              "y": 441.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 441.921875,
+              "width": 48,
+              "x": 303,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 715.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -227.96875,
+          "width": 375,
+          "x": 0,
+          "y": -227.96875
+        },
+        "stage": {
+          "bottom": 413.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -17.328125,
+          "width": 375,
+          "x": 0,
+          "y": -17.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "844-landscape-rotate-from-note",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": -885.3125,
+          "height": 506.75,
+          "left": 41.4375,
+          "right": 787.5625,
+          "top": -1392.0625,
+          "width": 746.125,
+          "x": 41.4375,
+          "y": -1392.0625
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              641,
+              855
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              641,
+              855
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              641,
+              855
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": -789.515625,
+          "height": 809.546875,
+          "left": 0,
+          "right": 829,
+          "top": -1599.0625,
+          "width": 829,
+          "x": 0,
+          "y": -1599.0625
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          844,
+          390
+        ],
+        "widths": [
+          829,
+          829
+        ]
+      }
+    },
+    {
+      "test": "390-note-restored",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 603.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 555.921875,
+              "width": 48,
+              "x": 24,
+              "y": 555.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 603.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 555.921875,
+              "width": 207,
+              "x": 84,
+              "y": 555.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 603.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 555.921875,
+              "width": 48,
+              "x": 303,
+              "y": 555.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 513.9978179931641,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 124.59596252441406,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 124.59596252441406
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-duo",
+          "rect": {
+            "bottom": 513.9978179931641,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 124.59596252441406,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 124.59596252441406
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 829.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -113.96875,
+          "width": 375,
+          "x": 0,
+          "y": -113.96875
+        },
+        "stage": {
+          "bottom": 527.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": 96.671875,
+          "width": 375,
+          "x": 0,
+          "y": 96.671875
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "focused-arrow-resets-note",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__nextButton\" aria-label=\"Next photograph\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 500.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 452.921875,
+              "width": 48,
+              "x": 24,
+              "y": 452.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 500.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 452.921875,
+              "width": 207,
+              "x": 84,
+              "y": 452.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 500.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 452.921875,
+              "width": 48,
+              "x": 303,
+              "y": 452.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests, one wearing a blue cap, holding their photographs outside FOTOHAVN.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Three guests holding Photo Strips beside the booth's Jacobean Walnut exterior.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two guests with a pink bouquet and printed photographs in front of the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 405.10118293762207,
+            "height": 389.0084838867187,
+            "left": 37.939170837402344,
+            "right": 328.54463958740234,
+            "top": 16.09269905090332,
+            "width": 290.60546875,
+            "x": 37.939170837402344,
+            "y": 16.09269905090332
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-flowers",
+          "rect": {
+            "bottom": 410.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 21.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 21.595962524414062
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 726.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -216.96875,
+          "width": 375,
+          "x": 0,
+          "y": -216.96875
+        },
+        "stage": {
+          "bottom": 424.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -6.328125,
+          "width": 375,
+          "x": 0,
+          "y": -6.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "keyboard-last-to-first",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__nextButton\" aria-label=\"Next photograph\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 441.921875,
+              "width": 48,
+              "x": 24,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 441.921875,
+              "width": 207,
+              "x": 84,
+              "y": 441.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 441.921875,
+              "width": 48,
+              "x": 303,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              266,
+              833
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 715.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -227.96875,
+          "width": 375,
+          "x": 0,
+          "y": -227.96875
+        },
+        "stage": {
+          "bottom": 413.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -17.328125,
+          "width": 375,
+          "x": 0,
+          "y": -17.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "keyboard-first-to-last",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__nextButton\" aria-label=\"Next photograph\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 441.921875,
+              "width": 48,
+              "x": 24,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 441.921875,
+              "width": 207,
+              "x": 84,
+              "y": 441.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 441.921875,
+              "width": 48,
+              "x": 303,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests in dark clothing holding their Photo Strips beneath the booth sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              266,
+              833
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-together",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 715.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -227.96875,
+          "width": 375,
+          "x": 0,
+          "y": -227.96875
+        },
+        "stage": {
+          "bottom": 413.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -17.328125,
+          "width": 375,
+          "x": 0,
+          "y": -17.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "390-full-strip",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__nextButton\" aria-label=\"Next photograph\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 441.921875,
+              "width": 48,
+              "x": 24,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 441.921875,
+              "width": 207,
+              "x": 84,
+              "y": 441.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 489.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 441.921875,
+              "width": 48,
+              "x": 303,
+              "y": 441.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              266,
+              833
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 399.9977569580078,
+            "height": 389.40179443359375,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 10.595962524414062,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 10.595962524414062
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 715.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": -227.96875,
+          "width": 375,
+          "x": 0,
+          "y": -227.96875
+        },
+        "stage": {
+          "bottom": 413.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": -17.328125,
+          "width": 375,
+          "x": 0,
+          "y": -17.328125
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "keyboard-outside-viewer",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 805.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 757.921875,
+              "width": 48,
+              "x": 24,
+              "y": 757.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 805.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 757.921875,
+              "width": 207,
+              "x": 84,
+              "y": 757.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 805.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 757.921875,
+              "width": 48,
+              "x": 303,
+              "y": 757.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              266,
+              833
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 715.997802734375,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 326.595947265625,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 326.595947265625
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 715.997802734375,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 326.595947265625,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 326.595947265625
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 1031.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": 88.03125,
+          "width": 375,
+          "x": 0,
+          "y": 88.03125
+        },
+        "stage": {
+          "bottom": 729.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": 298.671875,
+          "width": 375,
+          "x": 0,
+          "y": 298.671875
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "430-portrait",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 858.828125,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 810.828125,
+              "width": 48,
+              "x": 24,
+              "y": 810.828125
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 245,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 858.828125,
+              "height": 48,
+              "left": 84,
+              "right": 331,
+              "top": 810.828125,
+              "width": 247,
+              "x": 84,
+              "y": 810.828125
+            },
+            "scrollWidth": 245
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 858.828125,
+              "height": 48,
+              "left": 343,
+              "right": 391,
+              "top": 810.828125,
+              "width": 48,
+              "x": 343,
+              "y": 810.828125
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              293,
+              919
+            ]
+          },
+          {
+            "alt": "Four-frame monochrome Photo Strip of a guest wearing glasses, making different expressions.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              293,
+              919
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              326,
+              435
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 766.671875,
+            "height": 430.9375,
+            "left": 39.15327835083008,
+            "right": 375.8310737609863,
+            "top": 335.734375,
+            "width": 336.67779541015625,
+            "x": 39.15327835083008,
+            "y": 335.734375
+          },
+          "scroll": 415
+        },
+        "print": {
+          "id": "friends",
+          "rect": {
+            "bottom": 766.671875,
+            "height": 430.9375,
+            "left": 39.15327835083008,
+            "right": 375.8310737609863,
+            "top": 335.734375,
+            "width": 336.67779541015625,
+            "x": 39.15327835083008,
+            "y": 335.734375
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 1084.3125,
+          "height": 996.171875,
+          "left": 0,
+          "right": 415,
+          "top": 88.140625,
+          "width": 415,
+          "x": 0,
+          "y": 88.140625
+        },
+        "stage": {
+          "bottom": 782.828125,
+          "height": 477.25,
+          "left": 0,
+          "right": 415,
+          "top": 305.578125,
+          "width": 415,
+          "x": 0,
+          "y": 305.578125
+        },
+        "viewport": [
+          430,
+          932
+        ],
+        "widths": [
+          415,
+          415
+        ]
+      }
+    },
+    {
+      "test": "844-landscape-board",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 528.6875,
+          "height": 506.75,
+          "left": 41.4375,
+          "right": 787.5625,
+          "top": 21.9375,
+          "width": 746.125,
+          "x": 41.4375,
+          "y": 21.9375
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              384,
+              1202
+            ]
+          },
+          {
+            "alt": "Four-frame monochrome Photo Strip of a guest wearing glasses, making different expressions.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              383,
+              1202
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              641,
+              855
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "friends",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 624.484375,
+          "height": 809.546875,
+          "left": 0,
+          "right": 829,
+          "top": -185.0625,
+          "width": 829,
+          "x": 0,
+          "y": -185.0625
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          844,
+          390
+        ],
+        "widths": [
+          829,
+          829
+        ]
+      }
+    },
+    {
+      "test": "844-modal",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"></path></svg> Back to the board</button>",
+        "buttons": [],
+        "viewport": [
+          844,
+          390
+        ]
+      }
+    },
+    {
+      "test": "844-modal-controls-scrolled",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"></path></svg> Back to the board</button>",
+        "buttons": [],
+        "viewport": [
+          844,
+          390
+        ]
+      }
+    },
+    {
+      "test": "landscape-modal-rotated-portrait",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"></path></svg> Back to the board</button>",
+        "buttons": [],
+        "viewport": [
+          390,
+          844
+        ]
+      }
+    },
+    {
+      "test": "rotation-modal-closed-focus",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__turnButton\" aria-pressed=\"false\">Read the note</button>",
+        "board": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "controls": [
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 812.921875,
+              "height": 48,
+              "left": 24,
+              "right": 72,
+              "top": 764.921875,
+              "width": 48,
+              "x": 24,
+              "y": 764.921875
+            },
+            "scrollWidth": 46
+          },
+          {
+            "clientWidth": 205,
+            "font": "14px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 812.921875,
+              "height": 48,
+              "left": 84,
+              "right": 291,
+              "top": 764.921875,
+              "width": 207,
+              "x": 84,
+              "y": 764.921875
+            },
+            "scrollWidth": 205
+          },
+          {
+            "clientWidth": 46,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 812.921875,
+              "height": 48,
+              "left": 303,
+              "right": 351,
+              "top": 764.921875,
+              "width": 48,
+              "x": 303,
+              "y": 764.921875
+            },
+            "scrollWidth": 46
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests holding their prints beside the booth's grey photo display.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Three guests standing together in front of the cream-curtained booth.",
+            "complete": true,
+            "fit": "contain",
+            "natural": [
+              296,
+              395
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 722.997802734375,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 333.595947265625,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 333.595947265625
+          },
+          "scroll": 375
+        },
+        "print": {
+          "id": "guest-trio",
+          "rect": {
+            "bottom": 722.997802734375,
+            "height": 389.40185546875,
+            "left": 35.382301330566406,
+            "right": 339.61771392822266,
+            "top": 333.595947265625,
+            "width": 304.23541259765625,
+            "x": 35.382301330566406,
+            "y": 333.595947265625
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 1038.40625,
+          "height": 943.375,
+          "left": 0,
+          "right": 375,
+          "top": 95.03125,
+          "width": 375,
+          "x": 0,
+          "y": 95.03125
+        },
+        "stage": {
+          "bottom": 736.921875,
+          "height": 431.25,
+          "left": 0,
+          "right": 375,
+          "top": 305.671875,
+          "width": 375,
+          "x": 0,
+          "y": 305.671875
+        },
+        "viewport": [
+          390,
+          844
+        ],
+        "widths": [
+          375,
+          375
+        ]
+      }
+    },
+    {
+      "test": "568-landscape-board",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 486.296875,
+          "height": 351.328125,
+          "left": 18,
+          "right": 535,
+          "top": 134.96875,
+          "width": 517,
+          "x": 18,
+          "y": 134.96875
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "Read the note",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two guests holding their prints beside the booth's grey photo display.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              431,
+              575
+            ]
+          },
+          {
+            "alt": "A guest in black holding two Photo Strips beneath the PHOTOBOOTH sign.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              431,
+              575
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Three guests standing together in front of the cream-curtained booth.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              431,
+              575
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "guest-trio",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "photo"
+        },
+        "section": {
+          "bottom": 590.9375,
+          "height": 774.453125,
+          "left": 0,
+          "right": 553,
+          "top": -183.515625,
+          "width": 553,
+          "x": 0,
+          "y": -183.515625
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          568,
+          320
+        ],
+        "widths": [
+          553,
+          553
+        ]
+      }
+    },
+    {
+      "test": "568-modal-initial",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.",
+        "ancestors": [
+          {
+            "overflow": "auto",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 541,
+            "scrollTop": 0,
+            "tag": "DIV"
+          },
+          {
+            "overflow": "hidden",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 320,
+            "scrollTop": 0,
+            "tag": "DIALOG"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Return photograph to the board",
+            "rect": {
+              "bottom": 494,
+              "height": 44,
+              "left": 195.6875,
+              "right": 342.3125,
+              "top": 450,
+              "width": 146.625,
+              "x": 195.6875,
+              "y": 450
+            },
+            "text": " Back to the board"
+          },
+          {
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 442,
+              "height": 48,
+              "left": 74,
+              "right": 118,
+              "top": 394,
+              "width": 44,
+              "x": 74,
+              "y": 394
+            },
+            "text": ""
+          },
+          {
+            "label": null,
+            "rect": {
+              "bottom": 442,
+              "height": 48,
+              "left": 128,
+              "right": 410,
+              "top": 394,
+              "width": 282,
+              "x": 128,
+              "y": 394
+            },
+            "text": "Read the note"
+          },
+          {
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 442,
+              "height": 48,
+              "left": 420,
+              "right": 464,
+              "top": 394,
+              "width": 44,
+              "x": 420,
+              "y": 394
+            },
+            "text": ""
+          }
+        ],
+        "viewer": {
+          "bottom": 524.5,
+          "height": 508.5,
+          "left": 74,
+          "right": 464,
+          "top": 16,
+          "width": 390,
+          "x": 74,
+          "y": 16
+        },
+        "viewport": [
+          568,
+          320
+        ]
+      }
+    },
+    {
+      "test": "568-modal-after-scroll",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.",
+        "ancestors": [
+          {
+            "overflow": "auto",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 541,
+            "scrollTop": 221,
+            "tag": "DIV"
+          },
+          {
+            "overflow": "hidden",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 320,
+            "scrollTop": 0,
+            "tag": "DIALOG"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Return photograph to the board",
+            "rect": {
+              "bottom": 273,
+              "height": 44,
+              "left": 195.6875,
+              "right": 342.3125,
+              "top": 229,
+              "width": 146.625,
+              "x": 195.6875,
+              "y": 229
+            },
+            "text": " Back to the board"
+          },
+          {
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 74,
+              "right": 118,
+              "top": 173,
+              "width": 44,
+              "x": 74,
+              "y": 173
+            },
+            "text": ""
+          },
+          {
+            "label": null,
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 128,
+              "right": 410,
+              "top": 173,
+              "width": 282,
+              "x": 128,
+              "y": 173
+            },
+            "text": "Read the note"
+          },
+          {
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 420,
+              "right": 464,
+              "top": 173,
+              "width": 44,
+              "x": 420,
+              "y": 173
+            },
+            "text": ""
+          }
+        ],
+        "viewer": {
+          "bottom": 303.5,
+          "height": 508.5,
+          "left": 74,
+          "right": 464,
+          "top": -205,
+          "width": 390,
+          "x": 74,
+          "y": -205
+        },
+        "viewport": [
+          568,
+          320
+        ]
+      }
+    },
+    {
+      "test": "568-modal-note",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__turnButton\" aria-pressed=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M240,56v48a8,8,0,0,1-8,8H184a",
+        "ancestors": [
+          {
+            "overflow": "auto",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 541,
+            "scrollTop": 221,
+            "tag": "DIV"
+          },
+          {
+            "overflow": "hidden",
+            "rect": {
+              "bottom": 320,
+              "height": 320,
+              "left": 0,
+              "right": 553,
+              "top": 0,
+              "width": 553,
+              "x": 0,
+              "y": 0
+            },
+            "scrollHeight": 320,
+            "scrollTop": 0,
+            "tag": "DIALOG"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Return photograph to the board",
+            "rect": {
+              "bottom": 273,
+              "height": 44,
+              "left": 195.6875,
+              "right": 342.3125,
+              "top": 229,
+              "width": 146.625,
+              "x": 195.6875,
+              "y": 229
+            },
+            "text": " Back to the board"
+          },
+          {
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 74,
+              "right": 118,
+              "top": 173,
+              "width": 44,
+              "x": 74,
+              "y": 173
+            },
+            "text": ""
+          },
+          {
+            "label": null,
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 128,
+              "right": 410,
+              "top": 173,
+              "width": 282,
+              "x": 128,
+              "y": 173
+            },
+            "text": "See the photograph"
+          },
+          {
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 221,
+              "height": 48,
+              "left": 420,
+              "right": 464,
+              "top": 173,
+              "width": 44,
+              "x": 420,
+              "y": 173
+            },
+            "text": ""
+          }
+        ],
+        "viewer": {
+          "bottom": 303.5,
+          "height": 508.5,
+          "left": 74,
+          "right": 464,
+          "top": -205,
+          "width": 390,
+          "x": 74,
+          "y": -205
+        },
+        "viewport": [
+          568,
+          320
+        ]
+      }
+    },
+    {
+      "test": "568-modal-closed-after-two-rotations",
+      "data": {
+        "active": "<button type=\"button\" class=\"GuestAlbum-module___eGyzq__closePhoto\" aria-label=\"Return photograph to the board\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"currentColor\" viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66",
+        "board": {
+          "bottom": 449.296875,
+          "height": 351.328125,
+          "left": 18,
+          "right": 535,
+          "top": 97.96875,
+          "width": 517,
+          "x": 18,
+          "y": 97.96875
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              431,
+              575
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              431,
+              575
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              387,
+              1214
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 553.9375,
+          "height": 774.453125,
+          "left": 0,
+          "right": 553,
+          "top": -220.515625,
+          "width": 553,
+          "x": 0,
+          "y": -220.515625
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          568,
+          320
+        ],
+        "widths": [
+          568,
+          553
+        ]
+      }
+    },
+    {
+      "test": "820-tablet",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 785.375,
+          "height": 492.328125,
+          "left": 40.25,
+          "right": 764.75,
+          "top": 293.046875,
+          "width": 724.5,
+          "x": 40.25,
+          "y": 293.046875
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              623,
+              830
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              623,
+              830
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              559,
+              1752
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 881.171875,
+          "height": 793.125,
+          "left": 0,
+          "right": 805,
+          "top": 88.046875,
+          "width": 805,
+          "x": 0,
+          "y": 88.046875
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          820,
+          1180
+        ],
+        "widths": [
+          805,
+          805
+        ]
+      }
+    },
+    {
+      "test": "1440-desktop",
+      "data": {
+        "active": "<body><div hidden=\"\"><!--$--><!--/$--></div><div id=\"top\"><div id=\"top-sentinel\" aria-hidden=\"true\"></div><a class=\"skipLink\" href=\"#main-content\">Skip to main content</a><header class=\"SiteChrome-module__oXFrKG__header SiteChrome-module__oXFrKG__scrolled\"><div class=\"SiteChrome-module__oXFrKG__bar\"><a class=\"SiteChrome-module__oXFrKG__brand\" href=",
+        "board": {
+          "bottom": 965.484375,
+          "height": 864.328125,
+          "left": 71.25,
+          "right": 1353.75,
+          "top": 101.15625,
+          "width": 1282.5,
+          "x": 71.25,
+          "y": 101.15625
+        },
+        "controls": [
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Previous photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "13px",
+            "label": "See the photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          },
+          {
+            "clientWidth": 0,
+            "font": "16px",
+            "label": "Next photograph",
+            "rect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "scrollWidth": 0
+          }
+        ],
+        "hint": "block",
+        "images": [
+          {
+            "alt": "Two smiling guests holding photographs, one with a blue fan, at the booth.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              750,
+              1000
+            ]
+          },
+          {
+            "alt": "Four friends holding their Photo Strips outside FOTOHAVN at Evia.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              750,
+              1000
+            ]
+          },
+          {
+            "alt": "",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              96,
+              123
+            ]
+          },
+          {
+            "alt": "Four-frame sepia Photo Strip of a guest with a small white dog.",
+            "complete": true,
+            "fit": "fill",
+            "natural": [
+              449,
+              1407
+            ]
+          }
+        ],
+        "note": {
+          "font": "16px",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "scroll": 0
+        },
+        "print": {
+          "id": "sepia-strip",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "side": "note"
+        },
+        "section": {
+          "bottom": 1061.28125,
+          "height": 1216.59375,
+          "left": 0,
+          "right": 1425,
+          "top": -155.3125,
+          "width": 1425,
+          "x": 0,
+          "y": -155.3125
+        },
+        "stage": {
+          "bottom": 0,
+          "height": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "width": 0,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": [
+          1440,
+          900
+        ],
+        "widths": [
+          1425,
+          1425
+        ]
+      }
+    }
+  ],
+  "logs": [
+    {
+      "level": "warn",
+      "message": "Image with src \"http://localhost:3000/fotohavn/images/guest-board/guest-solo-1400w.webp\" has \"fill\" and parent element with invalid \"position\". Provided \"static\" should be one of absolute,fixed,relative.",
+      "timestamp": "2026-09-15T03:46:26.396Z",
+      "url": "http://localhost:3000/fotohavn/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js"
+    },
+    {
+      "level": "warn",
+      "message": "Image with src \"http://localhost:3000/fotohavn/images/guest-board/guest-together-1400w.webp\" has \"fill\" and parent element with invalid \"position\". Provided \"static\" should be one of absolute,fixed,relative.",
+      "timestamp": "2026-09-15T03:46:59.070Z",
+      "url": "http://localhost:3000/fotohavn/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js"
+    },
+    {
+      "level": "warn",
+      "message": "Image with src \"http://localhost:3000/fotohavn/images/evia/friends-1400w.webp\" has \"fill\" and parent element with invalid \"position\". Provided \"static\" should be one of absolute,fixed,relative.",
+      "timestamp": "2026-09-15T03:46:59.070Z",
+      "url": "http://localhost:3000/fotohavn/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js"
+    },
+    {
+      "level": "warn",
+      "message": "Image with src \"http://localhost:3000/fotohavn/images/guest-board/strip-sepia-1400w.webp\" has \"fill\" and parent element with invalid \"position\". Provided \"static\" should be one of absolute,fixed,relative.",
+      "timestamp": "2026-09-15T03:46:59.070Z",
+      "url": "http://localhost:3000/fotohavn/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js"
+    }
+  ]
+}

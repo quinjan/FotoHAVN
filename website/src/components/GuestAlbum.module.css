@@ -1,0 +1,184 @@
+.album {
+  padding: 24px clamp(18px, 5vw, 80px) 48px;
+  background: var(--color-warm-ivory);
+}
+.intro { text-align: center; }
+.eyebrow { font-size: 10px; letter-spacing: .24em; margin: 0 0 12px; color: var(--color-soft-brown); }
+.intro h2 { font: 400 clamp(64px, 8.3vw, 126px)/1 var(--font-display); letter-spacing: -.055em; margin: 0; }
+.intro h2 em, .fullToolbar h2 em { font-weight: 400; }
+.invitation { font-size: 18px; margin: 12px 0 8px; color: var(--color-soft-brown); }
+.boardToolbar, .boardFooter { max-width: 1320px; margin: auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.boardToolbar { margin-top: -16px; margin-bottom: 8px; }
+.boardToolbar p { margin: 0; color: var(--color-soft-brown); font-size: 13px; }
+.textButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 0; color: var(--color-ebony); padding: 10px 2px; min-height: 44px; font-size: 12px; text-underline-offset: 5px; text-decoration: underline; }
+.textButton:hover { color: var(--color-soft-brown); }
+.metalBoard { max-width: 1320px; margin: auto; border: 14px solid transparent; border-image-slice: 34 fill; border-image-repeat: stretch; box-shadow: var(--shadow-photo); container-type: inline-size; }
+.prints { position: relative; isolation: isolate; list-style: none; margin: 0; padding: 0; aspect-ratio: 1.5; }
+/* Fixed scatter anchors keep the arrangement stable while browsing and returning prints. */
+.prints li { position: absolute; left: var(--x); top: var(--y); width: var(--print-width); min-width: 0; transform: translate(-50%, -50%); z-index: var(--layer); pointer-events: none; }
+.prints li:has(.print:hover), .prints li:focus-within { z-index: 11; }
+.prints .stripItem { min-width: 0; }
+.prints [data-print="sepia-strip"] { --x: 11%; --y: 29%; --print-width: 8%; --layer: 5; }
+.prints [data-print="friends"] { --x: 28%; --y: 24%; --print-width: 17.5%; --layer: 1; }
+.prints [data-print="classic-strip"] { --x: 29%; --y: 52%; --print-width: 7.5%; --layer: 6; }
+.prints [data-print="couple"] { --x: 60%; --y: 24%; --print-width: 18%; --layer: 1; }
+.prints [data-print="monochrome-strip"] { --x: 76%; --y: 28%; --print-width: 7.5%; --layer: 5; }
+.prints [data-print="family"] { --x: 11%; --y: 57%; --print-width: 17%; --layer: 3; }
+.prints [data-print="smiles"] { --x: 30%; --y: 79%; --print-width: 17.5%; --layer: 4; }
+.prints [data-print="naturale-strip"] { --x: 44%; --y: 79%; --print-width: 8%; --layer: 7; }
+.prints [data-print="weekend"] { --x: 73%; --y: 56%; --print-width: 18%; --layer: 3; }
+.prints [data-print="keepsakes"] { --x: 88%; --y: 26%; --print-width: 16%; --layer: 2; }
+.prints [data-print="guest-sisters"] { --x: 44%; --y: 28%; --print-width: 17%; --layer: 2; }
+.prints [data-print="guest-trio"] { --x: 43%; --y: 53%; --print-width: 18%; --layer: 3; }
+.prints [data-print="guest-solo"] { --x: 58%; --y: 50%; --print-width: 15.5%; --layer: 4; }
+.prints [data-print="guest-duo"] { --x: 13%; --y: 81%; --print-width: 17%; --layer: 4; }
+.prints [data-print="guest-flowers"] { --x: 57%; --y: 81%; --print-width: 17.5%; --layer: 5; }
+.prints [data-print="guest-three"] { --x: 73%; --y: 82%; --print-width: 17%; --layer: 6; }
+.prints [data-print="guest-close"] { --x: 90%; --y: 55%; --print-width: 16.5%; --layer: 4; }
+.prints [data-print="guest-together"] { --x: 89%; --y: 80%; --print-width: 16.5%; --layer: 5; }
+.keepsake { user-select: none; }
+.keepsake img { display: block; width: 100%; height: auto; pointer-events: none; transform: rotate(var(--keepsake-tilt)); filter: drop-shadow(0 6px 5px rgb(30 26 23 / 22%)); }
+.prints [data-keepsake="teddy-charm"] { --x: 4%; --y: 15%; --print-width: 12%; --layer: 8; --keepsake-tilt: -8deg; }
+.prints [data-keepsake="bunny-charm"] { --x: 98%; --y: 64%; --print-width: 11%; --layer: 9; --keepsake-tilt: 9deg; }
+.prints [data-keepsake="ribbon-keepsake"] { --x: 51%; --y: 6%; --print-width: 9%; --layer: 8; --keepsake-tilt: -12deg; }
+.prints [data-keepsake="ticket-keepsake"] { --x: 51%; --y: 97%; --print-width: 13%; --layer: 8; --keepsake-tilt: -6deg; }
+.prints [data-keepsake="ribbon-lower"] { --x: 4%; --y: 78%; --print-width: 9%; --layer: 8; --keepsake-tilt: 17deg; }
+.prints [data-keepsake="ticket-upper"] { --x: 94%; --y: 10%; --print-width: 11%; --layer: 8; --keepsake-tilt: 14deg; }
+.print { position: relative; display: block; width: 100%; margin: 0; padding: 7px 7px 0; border: 0; color: var(--color-ebony); background: var(--color-off-white); box-shadow: 0 5px 8px rgb(30 26 23 / 23%), 0 15px 24px rgb(30 26 23 / 18%); transform: rotate(var(--tilt)); transition: transform 280ms var(--ease-standard), box-shadow 280ms var(--ease-standard); pointer-events: auto; }
+.stripItem .print { padding: 4px 4px 0; }
+.print:hover, .print:focus-visible { transform: translateY(-9px) rotate(0deg) scale(1.035); box-shadow: 0 22px 30px rgb(30 26 23 / 32%); }
+.print:focus-visible { outline-color: var(--color-off-white); outline-offset: 6px; }
+.clip { position: absolute; top: -23px; left: 50%; transform: translateX(-50%); z-index: 1; width: 25px; height: 34px; object-fit: contain; pointer-events: none; }
+.printImage { display: block; position: relative; width: 100%; aspect-ratio: 3 / 4; }
+.stripItem .printImage { aspect-ratio: 574 / 1800; }
+.printImage img { object-fit: contain; }
+.printLabel { font: italic 400 clamp(11px, 1.3cqw, 17px)/1.15 var(--font-display); display: block; padding: 6px 1px 8px; }
+.stripItem .printLabel { font-size: 12px; padding: 8px 0; }
+.openHint { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 3px; font: 600 9px/1.3 var(--font-sans); background: var(--color-off-white); opacity: 0; transition: opacity 200ms; }
+.print:hover .openHint, .print:focus-visible .openHint { opacity: 1; }
+.boardFooter { padding-top: 28px; }
+.boardFooter p { margin: 0; font-size: 9px; letter-spacing: .14em; }
+.boardFooter span { font-size: 12px; color: var(--color-soft-brown); }
+.modal { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-ebony); overflow: hidden; }
+.modal::backdrop { background: rgb(251 248 242 / 22%); }
+.modal[data-fullscreen="true"] { background: var(--color-warm-ivory); }
+.fullBoard { height: 100%; overflow: auto; overscroll-behavior: contain; padding: 30px clamp(18px, 4vw, 64px) 42px; }
+.fullToolbar { max-width: 1320px; margin: auto auto 26px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.fullToolbar h2 { font: 400 54px/1 var(--font-display); letter-spacing: -.04em; margin: 0 0 10px; }
+.fullToolbar p { margin: 0; font-size: 14px; color: var(--color-soft-brown); }
+.photoLayer { position: absolute; inset: 0; display: grid; place-items: center; overflow: auto; overscroll-behavior: contain; padding: 130px 16px 16px; }
+.fullBoard + .photoLayer { background: rgb(251 248 242 / 40%); }
+.viewer { display: flex; flex-direction: column; width: min(400px, 100%); min-width: 0; margin: auto; perspective: 1500px; }
+.closePhoto { display: flex; align-items: center; justify-content: center; order: 3; gap: 8px; min-height: 44px; margin: 10px auto 0; background: var(--color-off-white); border: 0; padding: 8px 12px; font-size: 12px; color: var(--color-ebony); border-radius: 4px; }
+.sheet { position: relative; width: 100%; height: min(500px, calc(100dvh - 300px)); min-height: 420px; transform-origin: center; }
+.turningSheet { position: relative; height: 100%; transform-style: preserve-3d; transition: transform 700ms cubic-bezier(.2,.75,.2,1); }
+.turningSheet[data-side="note"] { transform: rotateY(180deg); }
+.front, .back { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 26px 26px 22px; background: var(--color-off-white); backface-visibility: hidden; box-shadow: 0 20px 40px rgb(30 26 23 / 25%); text-align: center; }
+.back { transform: rotateY(180deg); align-items: center; overflow: auto; }
+.fullPhoto { position: relative; flex: 1; min-height: 0; }
+.fullPhoto img { object-fit: contain; }
+.front h3, .back h3 { font: 400 34px/1.05 var(--font-display); letter-spacing: -.035em; margin: 20px 0 10px; }
+.frontCaption { font-size: 12px; color: var(--color-soft-brown); margin: 0; }
+.notePhoto { position: relative; width: 100%; height: 165px; flex-shrink: 0; }
+.notePhoto img { object-fit: cover; object-position: center 60%; }
+.notePhoto[data-kind="strip"] img { object-fit: contain; }
+.noteLabel { font-size: 9px; letter-spacing: .16em; color: var(--color-soft-brown); margin: 20px 0 0; }
+.back h3 { margin: 16px 0; }
+.noteText, .back blockquote { margin: 0; font: 400 24px/1.35 var(--font-display); }
+.captionCredit { display: block; font-size: 11px; color: var(--color-soft-brown); margin-top: auto; padding-top: 20px; }
+.viewerControls { margin-top: 18px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; }
+.turnButton { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 48px; border: 1px solid var(--color-ebony); border-radius: var(--radius-button); background: var(--color-ebony); color: var(--color-off-white); padding: 10px; font-size: 13px; }
+.turnButton:hover { background: var(--color-dark-walnut); }
+.nextButton { display: grid; place-items: center; min-width: 44px; min-height: 48px; padding: 8px; border: 0; border-radius: 4px; background: var(--color-off-white); color: var(--color-ebony); }
+.nextButton:hover { background: var(--color-cream-paper); }
+.position { order: 4; width: fit-content; margin: 8px auto 0; background: var(--color-off-white); padding: 3px 10px; font-size: 10px; color: var(--color-soft-brown); }
+.failedPhoto { visibility: hidden; }
+.imageError { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px; font-size: 12px; line-height: 1.5; color: var(--color-ebony); background: var(--color-cream-paper); }
+.album button:focus-visible, .portraitBack:focus-visible { outline: 2px solid var(--color-ebony); outline-offset: 3px; }
+.portraitViewer { display: none; }
+.portraitImage, .neighbor { position: relative; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+@media (max-width: 767px) {
+  .album { padding: 50px 18px 38px; }
+  .invitation { font-size: 16px; margin: 16px 0 24px; }
+  .boardToolbar { flex-direction: column; gap: 6px; margin-top: 0; margin-bottom: 20px; text-align: center; }
+  .boardToolbar p { font-size: 12px; max-width: 260px; }
+  .metalBoard { border-width: 10px; }
+  .print { padding: 5px 5px 0; }
+  .printLabel { font-size: 12px; padding: 6px 1px 8px; }
+  .stripItem .printLabel { font-size: 11px; }
+  .clip { width: 20px; height: 28px; top: -20px; }
+  .boardFooter { flex-direction: column; gap: 8px; padding-top: 24px; text-align: center; }
+  .fullBoard { padding: 20px 12px 32px; }
+  .fullToolbar { align-items: start; gap: 14px; }
+  .fullToolbar h2 { font-size: 42px; }
+  .fullToolbar p { font-size: 12px; max-width: 170px; }
+  .fullToolbar .textButton { max-width: 112px; flex-shrink: 0; font-size: 11px; }
+  .viewer { max-width: 390px; }
+  .photoLayer { padding: 16px; }
+  .sheet { height: min(570px, calc(100dvh - 195px)); min-height: 410px; }
+  .front, .back { padding: 20px 18px 18px; }
+  .front h3, .back h3 { font-size: 30px; }
+  .notePhoto { height: 145px; }
+  .noteText, .back blockquote { font-size: 22px; }
+  .closePhoto { margin-top: 8px; }
+}
+
+/* One stationary window onto a wide metal surface. Both layouts stay mounted
+   so changing orientation cannot reset selection or close an active dialog. */
+@media (max-width: 767px) and (orientation: portrait) {
+  .album { padding: 40px 24px 38px; }
+  .intro h2 { font-size: clamp(60px, 17vw, 72px); }
+  .invitation { margin: 16px 0 36px; font-size: 16px; }
+  .album > .boardToolbar, .album > .metalBoard, .album > .boardFooter { display: none; }
+  .portraitViewer { display: block; margin-inline: -24px; }
+  .portraitStage { position: relative; isolation: isolate; display: grid; place-items: center; height: clamp(390px, 115vw, 540px); overflow: hidden; touch-action: pan-y; }
+  .portraitStage::before { content: ""; position: absolute; z-index: -1; inset-block: 0; left: 50%; width: max(900px, 150%); transform: translateX(-50%); border: 12px solid transparent; border-image-source: var(--board-material); border-image-slice: 34 fill; border-image-repeat: stretch; }
+  .portraitPrint { position: relative; width: min(76vw, 420px); height: clamp(325px, 100vw, 440px); transform: translateY(7px) rotate(3deg); perspective: 1500px; }
+  .portraitClip { position: absolute; z-index: 2; top: -35px; left: 50%; transform: translateX(-50%); width: 40px; height: 54px; object-fit: contain; pointer-events: none; }
+  .portraitPrint .turningSheet { transition-duration: 240ms; }
+  .portraitFront, .portraitBack { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--color-off-white); padding: 11px 11px 26px; backface-visibility: hidden; box-shadow: var(--shadow-photo); }
+  .portraitImage { position: relative; height: 100%; min-height: 0; }
+  .portraitImage img, .neighbor img { object-fit: contain; }
+  .portraitPrint[data-kind="strip"][data-side="photo"] .portraitFront { width: 42%; left: 29%; }
+  .portraitBack { transform: rotateY(180deg); padding: 28px 20px; text-align: center; overflow-y: auto; overscroll-behavior-y: contain; }
+  .portraitBack .noteLabel { margin: 0; font-size: 10px; }
+  .portraitBack h3 { font: 400 32px/1.05 var(--font-display); letter-spacing: -.035em; margin: 20px 0 16px; }
+  .portraitNote, .portraitBack blockquote { font-size: 16px; line-height: 1.55; margin: 0; }
+  .portraitBack .captionCredit { font-size: 12px; line-height: 1.5; padding-top: 22px; }
+  .neighbor { position: absolute; top: 19%; width: min(76vw, 420px); height: 72%; border: 10px solid var(--color-off-white); background: var(--color-off-white); box-shadow: var(--shadow-photo); pointer-events: none; }
+  .neighbor[data-direction="-1"] { right: calc(100% - 28px); transform: rotate(-5deg); }
+  .neighbor[data-direction="1"] { left: calc(100% - 28px); transform: rotate(5deg); }
+  .neighbor[data-direction="-1"] img { object-position: right center; }
+  .neighbor[data-direction="1"] img { object-position: left center; }
+  .portraitControls { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 12px; align-items: center; margin: 28px 24px 0; }
+  .portraitControls .nextButton { width: 48px; height: 48px; min-height: 48px; border: 1px solid var(--color-hairline); border-radius: 50%; }
+  .portraitControls .turnButton { min-height: 48px; padding: 10px 8px; border-radius: 999px; font-size: 14px; line-height: 1.4; }
+  .portraitPosition { margin: 12px 0 0; text-align: center; font-size: 14px; }
+  .swipeHint { margin: 6px 0 0; text-align: center; font-size: 16px; color: var(--color-soft-brown); }
+  .landscapeHint { margin: 28px 24px 0; text-align: center; color: var(--color-soft-brown); }
+  .landscapeHint svg { display: block; margin: 0 auto 8px; }
+  .landscapeHint p { margin: 0; font-size: 16px; line-height: 1.5; }
+}
+
+/* Reserve two readable label lines so flipping cannot move narrow-phone controls. */
+@media (max-width: 389px) and (orientation: portrait) {
+  .portraitControls .turnButton { min-height: 64px; }
+}
+
+/* Short landscape screens keep the close and browsing controls reachable. */
+@media (max-height: 600px) and (orientation: landscape) {
+  .photoLayer { padding: 16px; place-items: start center; }
+  .sheet { height: 360px; min-height: 0; }
+  .front, .back { padding: 16px; }
+  .front h3, .back h3 { margin: 12px 0 8px; font-size: 28px; }
+  .notePhoto { height: 100px; }
+  .fullToolbar { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .print, .openHint, .turningSheet, .portraitPrint .turningSheet { transition: none; }
+  .print:hover, .print:focus-visible { transform: rotate(var(--tilt)); }
+}
+

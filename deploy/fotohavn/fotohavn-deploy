@@ -8,8 +8,8 @@ readonly STATE_DIR="/var/lib/fotohavn"
 readonly CURRENT_FILE="${STATE_DIR}/current-image"
 readonly PREVIOUS_FILE="${STATE_DIR}/previous-image"
 readonly LOCK_FILE="/run/lock/fotohavn-deploy.lock"
-readonly PUBLIC_URL="http://159.223.47.227/fotohvn"
-readonly PAGE_MARKER="FOTOHVN"
+readonly PUBLIC_URL="http://159.223.47.227/fotohavn"
+readonly PAGE_MARKER="FOTOHAVN"
 readonly IMAGE_PATTERN='^ghcr\.io/quinjan/fotohavn-website@sha256:[0-9a-f]{64}$'
 
 log() {

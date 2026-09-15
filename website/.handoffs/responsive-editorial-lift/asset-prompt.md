@@ -1,0 +1,11 @@
+# Portrait asset provenance
+
+Generated with the built-in ImageGen tool, not CLI/API fallback. Original generated file remains at `C:/Users/QUINJ3875/.codex/generated_images/01a0864b-7ffa-7920-a2c4-6bb8edae4292/exec-ac5911a0-54f8-4b75-8aed-da7aefb85543.png`.
+
+Workspace source: `portrait-source.png`. Final runtime asset: `../../public/images/hero/exterior-portrait.webp` plus seven responsive derivatives. Original wide exterior is unchanged. This remains an illustrative camera composition, not measured booth geometry.
+
+## Final prompt
+
+Use case: precise-object-edit. Create a portrait extension/reframing of the attached approved FOTOHVN booth artwork for a mobile website hero. This is a production background asset, NOT a website mockup: NO headline, buttons, navigation, caption or watermark.
+Reference/edit target: the attached wide exterior is the exact approved cabinet identity and material/lighting reference. Keep the curtain completely closed; preserve walnut timber, ivory linen with subtle folds, warm luminous PHOTOBOOTH sign on top of the rail, mounted WITHOUT ANY WOOD WINGS beside the raised sign. Exact sign text "PHOTOBOOTH". Preserve its elegant serif lettering and physical aspect ratio.
+Output portrait 1024x1536. Frontal camera, no perspective distortion. Reframe closer on the central doorway: the cream curtain occupies about 82% of image width and most of the height. The whole illuminated sign is visible with margin at the very top, centered, not clipped. Thin timber jambs frame the curtain at the extreme sides; only small hints of left cabinet and right window if space permits. It is okay for the outside panels to extend beyond the portrait crop; DO NOT compress or stretch the booth to squeeze its entire wide facade into portrait. Extend the view downward to a believable curtain hem and small warm floor area, preserving realistic enclosed booth scale. At y25%-80%, center 80% of the frame is quiet, softly lit cream fabric with low-contrast folds, suitable for legible live dark type. Retain tactile warm editorial photographic rendering, subdued walnut, cream, ivory, no new ornaments. No people or floating photos. The raised lightbox is fully intact and unblocked. This is a closer portrait camera composition of the SAME booth, not a narrower redesigned booth.

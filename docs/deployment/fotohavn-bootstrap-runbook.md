@@ -108,8 +108,8 @@ Normal deployments require no registry credential on the VPS. Deployments use th
 A successful workflow proves all of the following:
 
 - repository gates passed against the current `main` revision;
-- the built container became healthy at `/fotohvn`;
-- the public route returned HTTP 200 and contained `FOTOHVN`;
+- the built container became healthy at `/fotohavn`;
+- the public route returned HTTP 200 and contained `FOTOHAVN`;
 - `/` on the raw IP still returned 404;
 - the deployed state records the immutable GHCR digest.
 

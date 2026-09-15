@@ -1,0 +1,248 @@
+.hero {
+  /* Darker blend of existing inks stays readable over the deepest cloth folds. */
+  --hero-secondary-ink: color-mix(in srgb, var(--color-soft-brown) 60%, var(--color-ebony));
+  position: relative;
+  isolation: isolate;
+  background: var(--color-off-white);
+}
+
+.scene {
+  position: relative;
+  aspect-ratio: 1652 / 952;
+  overflow: clip;
+}
+
+.scene picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.exterior {
+  object-fit: cover;
+}
+
+.copy {
+  position: absolute;
+  left: 50.5%;
+  top: 33%;
+  width: 49%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 28px;
+  color: var(--hero-secondary-ink);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+.copy h1 {
+  margin: 0 0 24px;
+  font-family: var(--font-display);
+  font-size: clamp(52px, 6.05vw, 108px);
+  font-weight: 400;
+  letter-spacing: -0.047em;
+  line-height: 1;
+}
+
+.copy h1 span,
+.copy h1 em {
+  display: block;
+}
+
+.copy h1 em {
+  font-size: 0.86em;
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.04em;
+}
+
+.description {
+  max-width: 390px;
+  margin: 0 auto;
+  color: var(--hero-secondary-ink);
+  font-size: clamp(16px, 1.25vw, 20px);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  margin-top: 26px;
+  padding: 8px;
+  background: transparent;
+}
+
+.actions :global(.button) {
+  min-height: 50px;
+  gap: 30px;
+  white-space: nowrap;
+}
+
+.explore {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50px;
+  padding: 10px 0;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ebony);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.explore span {
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  text-decoration-thickness: 1px;
+}
+
+.explore svg {
+  transition: transform 300ms var(--ease-standard);
+}
+
+.explore:hover svg {
+  transform: translateY(3px);
+}
+
+.status {
+  margin: 10px auto 0;
+  max-width: 400px;
+  font-size: 12px;
+  color: var(--color-ebony);
+  line-height: 1.5;
+}
+
+.hero[data-image-failed="true"] .scene {
+  display: none;
+}
+
+.hero[data-image-failed="true"] .copy {
+  position: relative;
+  inset: auto;
+  width: min(850px, 100%);
+  margin: auto;
+  padding: 100px 24px;
+  transform: none;
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+  .copy {
+    top: 30%;
+    width: 52%;
+  }
+  .eyebrow {
+    font-size: 10px;
+    margin-bottom: 18px;
+  }
+  .copy h1 {
+    font-size: 6.2vw;
+    margin-bottom: 18px;
+  }
+  .description {
+    max-width: 340px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .actions {
+    gap: 16px;
+    margin-top: 20px;
+    padding: 4px;
+  }
+  .actions :global(.button) {
+    padding-inline: 14px;
+    gap: 12px;
+  }
+  .explore {
+    gap: 10px;
+  }
+}
+
+/* A portrait camera composition, not a squeezed version of the wide cabinet.
+   Copy remains in flow so enlarged text can grow the scene without clipping. */
+@media (max-width: 767px), (max-width: 1100px) and (orientation: portrait) {
+  .hero {
+    display: grid;
+    min-height: min(calc(100svh - 73px), 180vw);
+  }
+  .scene {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+  .exterior {
+    object-position: center top;
+  }
+  .copy {
+    position: relative;
+    inset: auto;
+    width: 82%;
+    max-width: 650px;
+    margin-inline: auto;
+    transform: none;
+    align-self: center;
+    padding: clamp(120px, 20svh, 240px) 0 64px;
+  }
+  .copy h1 {
+    font-size: clamp(48px, 7.5vw, 80px);
+  }
+  .description {
+    color: var(--color-dark-walnut);
+  }
+  .hero[data-image-failed="true"] {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .copy { padding-bottom: 48px; }
+
+  .eyebrow {
+    margin-bottom: 20px;
+    font-size: 10px;
+    letter-spacing: 0.13em;
+  }
+  .copy h1 {
+    margin-bottom: 22px;
+    font-size: clamp(36px, 10.8vw, 64px);
+  }
+  .copy h1 em {
+    font-size: 0.86em;
+  }
+  .description {
+    max-width: 355px;
+    font-size: 16px;
+  }
+  .actions {
+    gap: 12px;
+    flex-direction: column;
+    margin-top: 22px;
+    padding: 0;
+  }
+
+  .status {
+    max-width: 305px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore svg {
+    transition: none;
+  }
+}

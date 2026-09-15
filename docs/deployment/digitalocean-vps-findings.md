@@ -166,18 +166,18 @@ The design interview resolved the deployment shape on 2026-08-22. The durable ra
 
 1. A manually dispatched workflow deploys only the current `main` revision; other refs are rejected.
 2. GitHub-hosted runners execute `npm ci`, lint, TypeScript checking, the production build, and a local container smoke test before publishing.
-3. The workflow builds a standalone Next.js image with the `/fotohvn` base path, without changing the inquiry flow or other product behavior.
+3. The workflow builds a standalone Next.js image with the `/fotohavn` base path, without changing the inquiry flow or other product behavior.
 4. The image is public in GHCR and is deployed by immutable commit SHA and digest rather than by `latest`.
 5. A dedicated `fotohavn-deploy` SSH key and account invoke only a root-owned forced deployment command; the key has no general shell, forwarding, PTY, or unrestricted Docker access.
 6. FotoHAVN runs as an isolated Compose project with no public host port, explicit memory/CPU/PID limits, restart policy, and rotated logs.
-7. Temporary staging is exposed only at `http://159.223.47.227/fotohvn`; the IP root returns `404`, staging metadata is `noindex`, and trusted HTTPS waits for a hostname.
+7. Temporary staging is exposed only at `http://159.223.47.227/fotohavn`; the IP root returns `404`, staging metadata is `noindex`, and trusted HTTPS waits for a hostname.
 8. A one-time bootstrap gives the existing Caddy project an imported FotoHAVN route and shared external proxy network. Routine releases do not restart Caddy or unrelated services.
 9. Deployments are serialized. Internal and public HTTP checks must pass; otherwise the previous digest is restored automatically.
 10. Deployment secrets live in a reviewer-free GitHub `production` environment. Manual dispatch is the sole approval step.
 11. Bootstrap is delivered as a human-reviewed runbook plus an idempotent script and is not part of the recurring deployment workflow.
 12. No uptime target is imposed for staging, and pending OS updates/reboot do not gate this deployment work.
 
-The current site metadata names `https://fotohvn.com`, but `fotohvn.com` and `www.fotohvn.com` returned no DNS records during this inspection. Moving from raw-IP staging to a public hostname remains a separate future decision.
+The current site metadata names `https://fotohavn.com`, but `fotohavn.com` and `www.fotohavn.com` returned no DNS records during this inspection. Moving from raw-IP staging to a public hostname remains a separate future decision.
 
 ### Repository implementation status
 
@@ -214,7 +214,7 @@ This status does not mean the workflow has run. No GHCR image was published, Git
 - Cloudflare or other DNS account ownership and records.
 - GitHub repository Environments, secrets, branch protections, packages/registry permissions, and current Actions workflows.
 - Off-server backups and recovery testing for the existing PhotoBIZ data services.
-- Whether `fotohvn.com` is the final canonical domain or a temporary value.
+- Whether `fotohavn.com` is the final canonical domain or a temporary value.
 
 ## Evidence summary
 

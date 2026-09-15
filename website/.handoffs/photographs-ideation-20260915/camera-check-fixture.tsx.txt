@@ -1,0 +1,32 @@
+"use client";
+import { useEffect, useState } from "react";
+import OnlinePhotobooth from "@/components/onlinePhotobooth/OnlinePhotobooth";
+import { withSiteBasePath } from "../../../../site.config";
+
+// Temporary local QA harness. Synthetic camera only, removed before build.
+export default function CameraCheck() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let disposed = false;
+    const streams: MediaStream[] = [];
+    const camera = navigator.mediaDevices;
+    const original = camera.getUserMedia.bind(camera);
+    const canvas = document.createElement("canvas"); canvas.width = 1280; canvas.height = 720;
+    const image = new Image(); image.src = withSiteBasePath("/images/experience-online/candid-v2.webp");
+    let timer: ReturnType<typeof setInterval>;
+    void image.decode().then(() => {
+      if (disposed) return;
+      const draw = () => {
+        const context = canvas.getContext("2d")!;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      };
+      draw(); timer = setInterval(draw, 60);
+      camera.getUserMedia = async () => {
+        const stream = canvas.captureStream(20); streams.push(stream); return stream;
+      };
+      setReady(true);
+    });
+    return () => { disposed = true; clearInterval(timer); streams.forEach((stream) => stream.getTracks().forEach((track) => track.stop())); camera.getUserMedia = original; };
+  }, []);
+  return ready ? <OnlinePhotobooth /> : <p>Preparing synthetic camera test…</p>;
+}

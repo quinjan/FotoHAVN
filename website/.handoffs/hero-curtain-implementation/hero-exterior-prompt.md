@@ -1,0 +1,11 @@
+# Closed hero exterior asset
+
+- Tool: built-in ImageGen, precise-object-edit mode.
+- Edit target: `approved-hero.png`.
+- Workspace output: `hero-exterior-source.png`, 1652 × 952 pixels.
+- Original output retained: `C:/Users/QUINJ3875/.codex/generated_images/01a086fd-0494-7fc0-94b2-dff1be2996b2/exec-fff782cc-5aeb-44e2-b457-7e6a8bc21fa4.png`.
+- Inspection: navigation and all curtain-overlay UI removed. Physical lettering, photo board, print hatch, window, full-width timber rail, and corrected open background beside the raised sign retained. Approximate cloth bounds: x 23.5–78.5%, y 17–100%; cloth edges are not perfectly rectangular.
+
+## Final prompt
+
+Use case: precise-object-edit. Asset type: production website hero artwork, NOT a webpage mockup. Input image 1 is the exact approved edit target. Perform only UI removal and a precise crop: remove the entire top navigation bar (approximately the top 77 pixels of this 1586 by 992 source), leaving ONLY the photographic booth scene beneath it. The final image has approximately 1.733:1 aspect ratio (1586:915), preferably 2000 pixels wide or more for crisp production use. Remove ALL superimposed website copy and UI from the central cream curtain: eyebrow, both large headline lines, descriptive paragraph, both buttons/links, and arrows. Restore clean uninterrupted cream cloth with the same curtain folds and soft warm lighting. Preserve the precise frontal cabinet composition, perspective, wood texture, cream curtain aperture edges, window and reflections, side panels, photo display board, physical PHOTOS delivered here plaque and print hatch. Preserve the physical lit PHOTOBOOTH sign lettering exactly. CRITICAL geometry invariant: the raised LED PHOTOBOOTH sign has OPEN BACKGROUND to both its left and right, with absolutely NO timber wings flanking it at sign height. It stands on the full-width horizontal timber rail beneath it. Preserve that rail. Do not crop off the sign, change the camera, open the curtain, rearrange any physical booth element, change scene lighting, add people, add decorative objects, add new text, or create a new design. This is an image-only artifact: no navigation, no headline, no web text, no buttons, no UI. The entire central curtain must be untouched-looking fabric without traces of removed typography.

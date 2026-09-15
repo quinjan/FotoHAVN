@@ -1,18 +1,18 @@
-# FOTOHVN — Design Language
+# FOTOHAVN — Design Language
 
 > Editorial photography studio × vintage European photo booth × modern boutique brand
 
 **Theme:** light-led, warm, tactile, and photography-first
 
-FOTOHVN is a vintage enclosed photobooth experience in the Philippines. The website must position it as a considered photography experience—not a commodity booth rental. It should feel nostalgic without becoming costume-like, premium without becoming ornate, and intimate without becoming dark or cinematic.
+FOTOHAVN is a vintage enclosed photobooth experience in the Philippines. The website must position it as a considered photography experience—not a commodity booth rental. It should feel nostalgic without becoming costume-like, premium without becoming ornate, and intimate without becoming dark or cinematic.
 
-The visual system adapts the reference design’s generous breathing room, poster-scale hierarchy, flat surfaces, minimal elevation, disciplined spacing, and subtle geometry. FOTOHVN replaces the reference’s pastel taxonomy, geometric-only typography, gradients, and illustration-led imagery with restrained earth tones, serif-led editorial type, tactile photography, and quiet antique-metal details.
+The visual system adapts the reference design’s generous breathing room, poster-scale hierarchy, flat surfaces, minimal elevation, disciplined spacing, and subtle geometry. FOTOHAVN replaces the reference’s pastel taxonomy, geometric-only typography, gradients, and illustration-led imagery with restrained earth tones, serif-led editorial type, tactile photography, and quiet antique-metal details.
 
 ## Authority
 
 When sources disagree, apply this order:
 
-1. The approved FOTOHVN brand and content brief.
+1. The approved FOTOHAVN brand and content brief.
 2. This document.
 3. `tokens.json`, `variables.css`, and `theme.css`.
 4. The Refero/Amplemarket reference, used only for structural restraint.
@@ -49,7 +49,7 @@ Avoid balloons, confetti, loud colors, cheesy party graphics, excessive icons, e
 
 ## Core Brand Copy
 
-**Brand:** FOTOHVN
+**Brand:** FOTOHAVN
 
 **Hero headline:**
 
@@ -165,7 +165,7 @@ Photography is the primary visual language. It should communicate the physical b
 
 ### Subject Priority
 
-1. The full enclosed FOTOHVN booth in a real event environment.
+1. The full enclosed FOTOHAVN booth in a real event environment.
 2. Guests inside or entering the booth, shown candidly and respectfully.
 3. Printed strips held, exchanged, pinned, or resting on tactile surfaces.
 4. Close details: curtain, flash, camera, metal fittings, wood, paper, and hands.
@@ -181,13 +181,13 @@ Photography is the primary visual language. It should communicate the physical b
 - Never use party stock photography, fake bokeh overlays, confetti, balloons, neon, or generic camera icons.
 - Do not represent photographic looks as one-click novelty filters. Show credible full-frame examples with consistent subjects where possible.
 
-When approved FOTOHVN imagery is unavailable, implementation should use purpose-made editorial photo assets or omit optional images. Do not ship blank placeholder boxes or unrelated stock-party imagery.
+When approved FOTOHAVN imagery is unavailable, implementation should use purpose-made editorial photo assets or omit optional images. Do not ship blank placeholder boxes or unrelated stock-party imagery.
 
 ## Components
 
 ### Navigation
 
-A quiet sticky bar approximately 72px tall. It begins transparent over the hero when contrast is sufficient and becomes Off-white with a hairline lower border on scroll. FOTOHVN sits left; minimal text links sit right with one compact `BOOK FOTOHVN` action. Use no icon row.
+A quiet sticky bar approximately 72px tall. It begins transparent over the hero when contrast is sufficient and becomes Off-white with a hairline lower border on scroll. FOTOHAVN sits left; minimal text links sit right with one compact `BOOK FOTOHAVN` action. Use no icon row.
 
 ### Primary Button
 
@@ -215,7 +215,7 @@ One photograph, a short uppercase title, and one sentence. The three items—Enc
 
 ### Photographic Look Selector
 
-The selector combines one dominant example image with four text-led tabs: Classic, Vintage, Monochrome, and FOTOHVN Signature. The active tab uses an Ebony label and Muted Brass rule; inactive tabs use Soft Brown. Selecting a tab crossfades the image and updates its descriptive caption without moving the surrounding layout.
+The selector combines one dominant example image with four text-led tabs: Classic, Vintage, Monochrome, and FOTOHAVN Signature. The active tab uses an Ebony label and Muted Brass rule; inactive tabs use Soft Brown. Selecting a tab crossfades the image and updates its descriptive caption without moving the surrounding layout.
 
 Use accessible tab semantics, visible focus, arrow-key navigation, and a URL/hash or anchor fallback. If the target platform supports only links, each option should jump to its corresponding example figure.
 
@@ -237,45 +237,45 @@ The production site follows this order.
 
 ### 1. Hero
 
-Use a sophisticated full-width image of the FOTOHVN booth at approximately 80–90svh. Place the text in genuine negative space, preferably lower-left or left-center. A restrained directional image overlay may be used only to preserve text contrast; keep the photograph luminous rather than cinematic.
+Use a sophisticated full-width image of the FOTOHAVN booth at approximately 80–90svh. Place the text in genuine negative space, preferably lower-left or left-center. A restrained directional image overlay may be used only to preserve text contrast; keep the photograph luminous rather than cinematic.
 
 **Headline:** `PHOTOGRAPHS,` / `DEVELOPED DIFFERENTLY.`<br>
 **Supporting text:** `An enclosed vintage photobooth experience for celebrations worth remembering.`<br>
-**Primary CTA:** `BOOK FOTOHVN`<br>
+**Primary CTA:** `BOOK FOTOHAVN`<br>
 **Secondary CTA:** `EXPLORE THE EXPERIENCE`
 
 The first viewport must communicate a premium photography experience before it communicates rental logistics.
 
-### 2. The FOTOHVN Experience
+### 2. The FOTOHAVN Experience
 
-**Heading:** `THE FOTOHVN EXPERIENCE`<br>
+**Heading:** `THE FOTOHAVN EXPERIENCE`<br>
 **Intro:** `A little room for photographs, laughter, and moments you'll want to keep.`
 
 Present three photography-led features:
 
 - **ENCLOSED** — A private little space made for candid moments.
 - **PRINTED** — Take home photographs, not just digital files.
-- **DISTINCTIVE** — Choose from FOTOHVN's specialized photographic looks.
+- **DISTINCTIVE** — Choose from FOTOHAVN's specialized photographic looks.
 
 ### 3. Photographic Looks
 
 This is one of the two most visually important sections after the hero.
 
-**Eyebrow:** `FOTOHVN PHOTOGRAPHIC LOOKS`<br>
+**Eyebrow:** `FOTOHAVN PHOTOGRAPHIC LOOKS`<br>
 **Heading:** `CHOOSE YOUR LOOK`<br>
 **Subheading:** `One booth. Four ways to remember it.`
 
 - **CLASSIC** — Clean, timeless tones with subtle analog character.
 - **VINTAGE** — Warm, faded tones inspired by old photographs.
 - **MONOCHROME** — Rich black-and-white with a classic studio feel.
-- **FOTOHVN SIGNATURE** — A distinctive FOTOHVN house look developed specifically for the brand.
+- **FOTOHAVN SIGNATURE** — A distinctive FOTOHAVN house look developed specifically for the brand.
 
 On desktop, use a 7/5 split with the dominant image on one side and the selector on the other. On mobile, place the image first and use a horizontally scrollable tab list or compact stacked list with clear selection.
 
 ### 4. Signature Package
 
 **Eyebrow:** `SIGNATURE EXPERIENCE`<br>
-**Heading:** `THE FOTOHVN EXPERIENCE`<br>
+**Heading:** `THE FOTOHAVN EXPERIENCE`<br>
 **Price:** `₱8,500`<br>
 **Duration:** `3 HOURS`
 
@@ -286,10 +286,10 @@ Include:
 - Digital copies
 - Event attendant
 - Custom event photo template
-- Specialized FOTOHVN photographic looks
+- Specialized FOTOHAVN photographic looks
 - Setup & teardown
 
-**CTA:** `BOOK FOTOHVN`<br>
+**CTA:** `BOOK FOTOHAVN`<br>
 **Supporting line:** `ONE BOOTH. ONE EXPERIENCE. YOUR LOOK.`
 
 Use a strong grid, generous space, and one fine brass rule. The price and duration may be visually paired but should not sit inside a conventional rounded pricing card.
@@ -298,7 +298,7 @@ Use a strong grid, generous space, and one fine brass rule. The price and durati
 
 **Heading:** `SEE IT IN ACTION`
 
-Build an editorial sequence rather than a uniform grid: one landscape anchor, one tall portrait, one narrow strip detail, and supporting candid images. Vary scale and vertical position while keeping calm margins. Use approved FOTOHVN photographs whenever available.
+Build an editorial sequence rather than a uniform grid: one landscape anchor, one tall portrait, one narrow strip detail, and supporting candid images. Vary scale and vertical position while keeping calm margins. Use approved FOTOHAVN photographs whenever available.
 
 ### 6. Events
 
@@ -320,7 +320,7 @@ Use large visual moments with minimal text. The photography should carry the dif
 
 **Approved editorial copy:**
 
-> FOTOHVN was created for people who want more than a quick snapshot. Step inside, draw the curtain, and take a little time to laugh, experiment, and make something together. Our vintage-inspired booth pairs an intimate experience with distinctive photographic looks and physical prints—keepsakes made to be held, shared, and kept long after the celebration.
+> FOTOHAVN was created for people who want more than a quick snapshot. Step inside, draw the curtain, and take a little time to laugh, experiment, and make something together. Our vintage-inspired booth pairs an intimate experience with distinctive photographic looks and physical prints—keepsakes made to be held, shared, and kept long after the celebration.
 
 Pair the story with one quiet booth-detail or print-handling photograph. Avoid founder-corporate language or a dense timeline.
 
@@ -329,20 +329,20 @@ Pair the story with one quiet booth-detail or print-handling photograph. Avoid f
 Use one visually striking booth or print photograph with ample negative space, or a restrained Warm Ivory statement panel beside photography.
 
 **Headline:** `LET'S MAKE SOMETHING WORTH KEEPING.`<br>
-**Supporting text:** `Bring FOTOHVN to your next celebration.`<br>
+**Supporting text:** `Bring FOTOHAVN to your next celebration.`<br>
 **CTA:** `INQUIRE NOW`
 
-The CTA links to the inquiry/contact section or the approved external inquiry form.
+The CTA links to the approved FOTOHAVN Instagram direct-message route.
 
 ### Footer
 
 Keep the footer minimal on an Ebony surface.
 
-**FOTOHVN**<br>
+**FOTOHAVN**<br>
 **PHOTOGRAPHS, DEVELOPED DIFFERENTLY.**
 
-Links: Instagram · Facebook · Email<br>
-Legal: `© 2026 FOTOHVN`
+Links: Instagram · Facebook · TikTok<br>
+Legal: `© 2026 FOTOHAVN`
 
 ## Interaction and Motion
 
@@ -412,6 +412,6 @@ Legal: `© 2026 FOTOHVN`
 
 **Retain from the reference:** generous whitespace, poster-scale hierarchy, flat surfaces, minimal shadow, controlled radii, tight grid discipline, and a confident light-to-dark rhythm.
 
-**Replace for FOTOHVN:** pastel taxonomy → restrained material palette; geometric-only typography → editorial serif plus modern sans; gradient/illustration hero → immersive booth photography; product card grids → image-led editorial compositions; software conversion language → intimate photography-experience language.
+**Replace for FOTOHAVN:** pastel taxonomy → restrained material palette; geometric-only typography → editorial serif plus modern sans; gradient/illustration hero → immersive booth photography; product card grids → image-led editorial compositions; software conversion language → intimate photography-experience language.
 
 **Reject entirely:** confetti, loud multi-hue accents, generic pricing cards, novelty-filter framing, excessive icons, and decorative party styling.

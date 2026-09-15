@@ -4,8 +4,10 @@
 
 :root {
   --font-display: var(--font-cormorant), "Times New Roman", Georgia, serif;
-  --font-sans: "Cabinet Grotesk", var(--font-manrope), Inter, "Segoe UI",
-    sans-serif;
+  --font-sans: var(--font-manrope), "Segoe UI", sans-serif;
+  /* Layer order: composed photos 1-2; header 20; mobile menu 21; skip link 1000. */
+  --layer-header: 20;
+  --layer-menu: 21;
 }
 
 *,
@@ -16,6 +18,7 @@
 
 html {
   min-inline-size: 0;
+  scrollbar-gutter: stable;
   background: var(--surface-canvas);
   scroll-padding-top: calc(var(--navigation-height) + var(--spacing-16));
 }
@@ -66,9 +69,107 @@ main {
   min-inline-size: 0;
 }
 
-main.overflow-x-hidden {
+.siteMain {
   overflow-x: clip;
   overflow-y: visible;
+}
+
+
+#top-sentinel {
+  height: 1px;
+  position: absolute;
+  top: 0;
+  width: 1px;
+}
+figure {
+  margin: 0;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+button,
+a,
+input,
+textarea,
+select,
+summary {
+  outline-offset: 5px;
+}
+:focus-visible {
+  outline: 2px solid var(--color-ebony);
+  outline-offset: 5px;
+}
+section[id],
+article[id],
+div[id="inquiry"] {
+  scroll-margin-top: 0;
+}
+.button {
+  min-height: 48px;
+  padding: 14px 22px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  border: 1px solid var(--color-ebony);
+  border-radius: var(--radius-button);
+  background: var(--color-ebony);
+  color: var(--color-off-white);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 240ms,
+    transform 240ms;
+}
+.button span {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  transition: transform 240ms var(--ease-standard);
+}
+.button:hover {
+  background: var(--color-dark-walnut);
+}
+.button:hover span {
+  transform: translate(2px, -2px);
+}
+.textLink {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  padding-block: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-underline-offset: 7px;
+  text-decoration-color: var(--color-hairline);
+  transition: text-decoration-color 240ms;
+}
+.textLink:hover {
+  text-decoration-color: currentColor;
+}
+.textLink span {
+  font-size: 19px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skipLink {
