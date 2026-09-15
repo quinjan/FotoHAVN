@@ -1,6 +1,6 @@
 # FotoHAVN staging bootstrap runbook
 
-This runbook provisions the one-time VPS seam required by the accepted deployment design in [ADR-0002](../adr/0002-deploy-website-as-an-immutable-container.md). It does not deploy an image. Review the script and every path below before execution.
+This runbook provisions and refreshes the VPS seam required by the accepted deployment design in [ADR-0002](../adr/0002-deploy-website-as-an-immutable-container.md). Run it for initial setup and whenever the workflow reports that the installed deployment bundle is stale. It does not deploy an image. Review the script and every path below before execution.
 
 ## Scope
 
@@ -68,6 +68,8 @@ ssh -t -i C:\Users\QUINJ3875\.ssh\photobiz_pilot_ed25519 root@159.223.47.227 'cd
 ```
 
 The script prints the backup directory created under `/var/backups/fotohavn-bootstrap/`. Record that path in the change evidence.
+
+It also prints the installed deployment bundle fingerprint. The deploy and rollback jobs compare that fingerprint with the checked-in Compose file, Caddy route, deploy command, and forced-command wrapper before changing the running container. A mismatch is a hard preflight failure and requires this reviewed refresh.
 
 ## Verify the restricted identity
 
