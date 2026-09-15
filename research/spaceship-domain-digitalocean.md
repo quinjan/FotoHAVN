@@ -4,7 +4,7 @@ Research date: 2026-09-15
 
 ## Execution status
 
-The user approved the clean-root option for a coordinated cutover on 2026-09-15. The implementation now targets `https://fotohavn.com/`, removes the Next.js `/fotohavn` base path, enables canonical production metadata and indexing, redirects `www` to the apex, and retains the raw-IP `/fotohavn` route only for rollback compatibility. The planning and alternative-rollout sections below are preserved as research history; where they conflict with this execution status, this section and the current deployment files are authoritative.
+The user approved the clean-root option for a coordinated cutover on 2026-09-15. The implementation now targets `https://fotohavn.com/`, removes the Next.js `/fotohavn` base path, enables canonical production metadata and indexing, redirects `www` to the apex, and retains the raw-IP `/fotohavn` route only for rollback compatibility. Because the shared parent Caddyfile pins ZeroSSL and that provider timed out during the cutover, the FotoHAVN site blocks explicitly use Let's Encrypt without changing certificate policy for PhotoBIZ. The planning and alternative-rollout sections below are preserved as research history; where they conflict with this execution status, this section and the current deployment files are authoritative.
 
 ## Decision-ready answer
 
