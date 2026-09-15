@@ -6,10 +6,10 @@ fotohavn.com {
 	}
 
 	@legacy_exact path /fotohavn
-	redir @legacy_exact / permanent
+	redir @legacy_exact / 308
 
 	@legacy_path path_regexp legacy ^/fotohavn(?P<remainder>/.*)$
-	redir @legacy_path {re.legacy.remainder} permanent
+	redir @legacy_path {re.legacy.remainder} 308
 
 	encode zstd gzip
 	reverse_proxy fotohavn-web:3000
@@ -22,7 +22,7 @@ www.fotohavn.com {
 		}
 	}
 
-	redir https://fotohavn.com{uri} permanent
+	redir https://fotohavn.com{uri} 308
 }
 
 http://159.223.47.227 {
