@@ -8,6 +8,17 @@ readonly IMAGE_ONE="ghcr.io/quinjan/fotohavn-website@sha256:11111111111111111111
 readonly IMAGE_TWO="ghcr.io/quinjan/fotohavn-website@sha256:2222222222222222222222222222222222222222222222222222222222222222"
 readonly IMAGE_BAD="ghcr.io/quinjan/fotohavn-website@sha256:3333333333333333333333333333333333333333333333333333333333333333"
 
+bundle_fingerprint() {
+  sha256sum \
+    "${SCRIPT_DIR}/compose.yml" \
+    "${SCRIPT_DIR}/fotohavn.caddy" \
+    "${SCRIPT_DIR}/fotohavn-deploy" \
+    "${SCRIPT_DIR}/fotohavn-ssh-command" \
+    | awk '{print $1}' \
+    | sha256sum \
+    | awk '{print $1}'
+}
+
 fail() {
   printf 'FAIL: %s\n' "$*" >&2
   exit 1
@@ -73,11 +84,26 @@ FAKE_FLOCK
 }
 
 main() {
+  local expected_fingerprint actual_fingerprint tampered_fingerprint
   install -d -m 0755 /opt/fotohavn /usr/local/sbin /var/lib/fotohavn
+  install -d -m 0755 /opt/fotohavn/caddy /usr/local/bin
   install -m 0644 "${SCRIPT_DIR}/compose.yml" /opt/fotohavn/compose.yml
+  install -m 0644 "${SCRIPT_DIR}/fotohavn.caddy" /opt/fotohavn/caddy/fotohavn.caddy
   install -m 0755 "${SCRIPT_DIR}/fotohavn-deploy" /usr/local/sbin/fotohavn-deploy
+  install -m 0755 "${SCRIPT_DIR}/fotohavn-ssh-command" /usr/local/bin/fotohavn-ssh-command
   install_fakes
   export PATH="${FAKE_BIN}:${PATH}"
+
+  expected_fingerprint="$(bundle_fingerprint)"
+  actual_fingerprint="$(/usr/local/sbin/fotohavn-deploy bundle-fingerprint)"
+  [[ "$actual_fingerprint" == "$expected_fingerprint" ]] \
+    || fail "The installed deployment bundle fingerprint did not match its source."
+
+  printf '\n# fingerprint tamper test\n' >> /opt/fotohavn/caddy/fotohavn.caddy
+  tampered_fingerprint="$(/usr/local/sbin/fotohavn-deploy bundle-fingerprint)"
+  [[ "$tampered_fingerprint" != "$expected_fingerprint" ]] \
+    || fail "A changed installed deployment bundle was not detected."
+  install -m 0644 "${SCRIPT_DIR}/fotohavn.caddy" /opt/fotohavn/caddy/fotohavn.caddy
 
   if /usr/local/sbin/fotohavn-deploy "deploy ghcr.io/example/not-approved@sha256:1111"; then
     fail "An unapproved image was accepted."

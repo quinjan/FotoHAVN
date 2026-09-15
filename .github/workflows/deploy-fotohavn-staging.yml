@@ -75,6 +75,10 @@ jobs:
         working-directory: website
         run: npx tsc --noEmit --pretty false
 
+      - name: Test deployment state machine
+        shell: bash
+        run: sudo bash deploy/fotohavn/test-deploy.sh
+
       - name: Build website
         working-directory: website
         run: npm run build
@@ -171,6 +175,11 @@ jobs:
       IMAGE_REF: ${{ needs.publish.outputs.image_ref }}
       VPS_HOST: ${{ vars.FOTOHAVN_VPS_HOST }}
     steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
       - name: Deploy through the restricted SSH command
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.FOTOHAVN_SSH_KNOWN_HOSTS }}
@@ -191,15 +200,39 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$ssh_dir/deploy_key"
           chmod 0600 "$ssh_dir/known_hosts" "$ssh_dir/deploy_key"
 
-          ssh \
-            -o BatchMode=yes \
-            -o ConnectTimeout=15 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
-            -i "$ssh_dir/deploy_key" \
-            "${DEPLOY_USER}@${VPS_HOST}" \
-            "deploy ${IMAGE_REF}"
+          run_remote() {
+            ssh \
+              -o BatchMode=yes \
+              -o ConnectTimeout=15 \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+              -i "$ssh_dir/deploy_key" \
+              "${DEPLOY_USER}@${VPS_HOST}" \
+              "$1"
+          }
+
+          local_fingerprint="$(
+            sha256sum \
+              deploy/fotohavn/compose.yml \
+              deploy/fotohavn/fotohavn.caddy \
+              deploy/fotohavn/fotohavn-deploy \
+              deploy/fotohavn/fotohavn-ssh-command \
+              | awk '{print $1}' \
+              | sha256sum \
+              | awk '{print $1}'
+          )"
+
+          if ! remote_fingerprint="$(run_remote bundle-fingerprint)"; then
+            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before deploying." >&2
+            exit 1
+          fi
+          if [[ "$remote_fingerprint" != "$local_fingerprint" ]]; then
+            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before deploying." >&2
+            exit 1
+          fi
+
+          run_remote "deploy ${IMAGE_REF}"
 
       - name: Verify the public staging boundary
         shell: bash
@@ -232,6 +265,11 @@ jobs:
       DEPLOY_USER: ${{ vars.FOTOHAVN_DEPLOY_USER }}
       VPS_HOST: ${{ vars.FOTOHAVN_VPS_HOST }}
     steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
       - name: Roll back through the restricted SSH command
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.FOTOHAVN_SSH_KNOWN_HOSTS }}
@@ -252,15 +290,39 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$ssh_dir/deploy_key"
           chmod 0600 "$ssh_dir/known_hosts" "$ssh_dir/deploy_key"
 
-          ssh \
-            -o BatchMode=yes \
-            -o ConnectTimeout=15 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$ssh_dir/known_hosts" \
-            -i "$ssh_dir/deploy_key" \
-            "${DEPLOY_USER}@${VPS_HOST}" \
-            rollback
+          run_remote() {
+            ssh \
+              -o BatchMode=yes \
+              -o ConnectTimeout=15 \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+              -i "$ssh_dir/deploy_key" \
+              "${DEPLOY_USER}@${VPS_HOST}" \
+              "$1"
+          }
+
+          local_fingerprint="$(
+            sha256sum \
+              deploy/fotohavn/compose.yml \
+              deploy/fotohavn/fotohavn.caddy \
+              deploy/fotohavn/fotohavn-deploy \
+              deploy/fotohavn/fotohavn-ssh-command \
+              | awk '{print $1}' \
+              | sha256sum \
+              | awk '{print $1}'
+          )"
+
+          if ! remote_fingerprint="$(run_remote bundle-fingerprint)"; then
+            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before rolling back." >&2
+            exit 1
+          fi
+          if [[ "$remote_fingerprint" != "$local_fingerprint" ]]; then
+            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before rolling back." >&2
+            exit 1
+          fi
+
+          run_remote rollback
 
           response_file="$(mktemp)"
           trap 'rm -f -- "$response_file"' EXIT

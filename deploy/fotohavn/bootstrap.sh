@@ -37,7 +37,7 @@ main() {
   [[ -n "$public_key_file" && -f "$public_key_file" ]] \
     || fail "Usage: sudo bash bootstrap.sh /path/to/fotohavn_deploy_ed25519.pub"
 
-  for command_name in cmp docker curl flock getent install sed ssh-keygen visudo; do
+  for command_name in awk cmp docker curl flock getent install sed sha256sum ssh-keygen visudo; do
     require_command "$command_name"
   done
 
@@ -159,6 +159,7 @@ main() {
 
   trap - ERR
   log "Bootstrap completed. Backup: ${backup_dir}"
+  log "Installed deployment bundle fingerprint: $(/usr/local/sbin/fotohavn-deploy bundle-fingerprint)"
   log "No FotoHAVN image was deployed."
 }
 

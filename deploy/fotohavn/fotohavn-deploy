@@ -3,11 +3,13 @@ set -Eeuo pipefail
 
 readonly APP_DIR="/opt/fotohavn"
 readonly COMPOSE_FILE="${APP_DIR}/compose.yml"
+readonly ROUTE_FILE="${APP_DIR}/caddy/fotohavn.caddy"
 readonly ENV_FILE="${APP_DIR}/.env"
 readonly STATE_DIR="/var/lib/fotohavn"
 readonly CURRENT_FILE="${STATE_DIR}/current-image"
 readonly PREVIOUS_FILE="${STATE_DIR}/previous-image"
 readonly LOCK_FILE="/run/lock/fotohavn-deploy.lock"
+readonly SSH_COMMAND_FILE="/usr/local/bin/fotohavn-ssh-command"
 readonly PUBLIC_URL="http://159.223.47.227/fotohavn"
 readonly PAGE_MARKER="FOTOHAVN"
 readonly IMAGE_PATTERN='^ghcr\.io/quinjan/fotohavn-website@sha256:[0-9a-f]{64}$'
@@ -23,6 +25,17 @@ fail() {
 
 is_valid_image() {
   [[ "${1:-}" =~ $IMAGE_PATTERN ]]
+}
+
+bundle_fingerprint() {
+  sha256sum \
+    "$COMPOSE_FILE" \
+    "$ROUTE_FILE" \
+    "$0" \
+    "$SSH_COMMAND_FILE" \
+    | awk '{print $1}' \
+    | sha256sum \
+    | awk '{print $1}'
 }
 
 read_state() {
@@ -185,8 +198,12 @@ main() {
       [[ -z "${argument:-}" ]] || fail "Rollback does not accept an image argument."
       rollback_image
       ;;
+    bundle-fingerprint)
+      [[ -z "${argument:-}" ]] || fail "Bundle fingerprint does not accept an argument."
+      bundle_fingerprint
+      ;;
     *)
-      fail "Allowed commands: deploy <approved-image-digest> or rollback."
+      fail "Allowed commands: deploy <approved-image-digest>, rollback, or bundle-fingerprint."
       ;;
   esac
 }
