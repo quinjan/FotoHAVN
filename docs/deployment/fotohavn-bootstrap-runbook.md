@@ -1,4 +1,4 @@
-# FotoHAVN staging bootstrap runbook
+# FotoHAVN production bootstrap runbook
 
 This runbook provisions and refreshes the VPS seam required by the accepted deployment design in [ADR-0002](../adr/0002-deploy-website-as-an-immutable-container.md). Run it for initial setup and whenever the workflow reports that the installed deployment bundle is stale. It does not deploy an image. Review the script and every path below before execution.
 
@@ -91,6 +91,7 @@ In `quinjan/FotoHAVN`:
 3. Add environment secret `FOTOHAVN_SSH_KNOWN_HOSTS` containing the verified `known_hosts` line for `159.223.47.227`.
 4. Add environment variable `FOTOHAVN_VPS_HOST` with `159.223.47.227`.
 5. Add environment variable `FOTOHAVN_DEPLOY_USER` with `fotohavn-deploy`.
+6. Add environment variable `FOTOHAVN_PUBLIC_URL` with `https://fotohavn.com/`.
 
 The verified VPS ED25519 host-key fingerprint is `SHA256:qWJ3i6xyF04ofG+dMtmRCYAIpD9B4zGc4wi99i3AbbA`. Verify a freshly collected host key against that independently observed fingerprint before storing it; do not trust an `ssh-keyscan` result merely because the workflow collected it.
 
@@ -98,7 +99,7 @@ The verified VPS ED25519 host-key fingerprint is `SHA256:qWJ3i6xyF04ofG+dMtmRCYA
 
 New GHCR packages are private initially. The workflow therefore includes a `publish-only` operation for the first run:
 
-1. Manually run `Deploy FotoHAVN staging` from `main` with `operation=publish-only`.
+1. Manually run `Deploy FotoHAVN production` from `main` with `operation=publish-only`.
 2. Open the newly created `fotohavn-website` container package settings.
 3. Change package visibility to **Public**.
 4. Run the workflow again with `operation=deploy`.
@@ -110,8 +111,9 @@ Normal deployments require no registry credential on the VPS. Deployments use th
 A successful workflow proves all of the following:
 
 - repository gates passed against the current `main` revision;
-- the built container became healthy at `/fotohavn`;
-- the public route returned HTTP 200 and contained `FOTOHAVN`;
+- the built container became healthy at `/`;
+- `https://fotohavn.com/` returned HTTP 200 and contained `FOTOHAVN`;
+- the public legacy `/fotohavn` path returned a permanent redirect;
 - `/` on the raw IP still returned 404;
 - the deployed state records the immutable GHCR digest.
 
@@ -119,7 +121,7 @@ Also verify the existing named PhotoBIZ routes after the first deployment. The F
 
 ## Rollback
 
-Run the same workflow with `operation=rollback`. The forced command swaps the current and previous recorded digests and verifies the restored container. A failed normal deployment performs this rollback automatically.
+Run the same workflow with `operation=rollback`. The forced command swaps the current and previous recorded digests and verifies the restored container. While the previous slot still contains the old base-path build, verification falls back to `http://159.223.47.227/fotohavn`; newer root builds verify through the production URL. A failed normal deployment performs this rollback automatically.
 
 The VPS keeps the current and previous image locally. Do not run broad Docker cleanup commands on this shared host. Retain the ten most recent successful package versions in GHCR until a package lifecycle policy is automated and reviewed.
 

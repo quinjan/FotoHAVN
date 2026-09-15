@@ -2,6 +2,10 @@
 
 Research date: 2026-09-15
 
+## Execution status
+
+The user approved the clean-root option for a coordinated cutover on 2026-09-15. The implementation now targets `https://fotohavn.com/`, removes the Next.js `/fotohavn` base path, enables canonical production metadata and indexing, redirects `www` to the apex, and retains the raw-IP `/fotohavn` route only for rollback compatibility. The planning and alternative-rollout sections below are preserved as research history; where they conflict with this execution status, this section and the current deployment files are authoritative.
+
 ## Decision-ready answer
 
 Keep DNS on Spaceship for this cutover. Point the apex domain to the DigitalOcean server with one `A` record, point `www` to the apex with one `CNAME`, and configure the **existing PhotoBIZ Caddy container** to recognize both hostnames. There is no requirement to move DNS hosting to DigitalOcean merely because the web server is a DigitalOcean Droplet.

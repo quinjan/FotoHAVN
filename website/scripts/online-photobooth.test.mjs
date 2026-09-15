@@ -8,7 +8,7 @@ function compile(name, dependencies = {}, globals = {}) {
   const source = readFileSync(new URL(`../src/components/onlinePhotobooth/${name}.ts`, import.meta.url), "utf8");
   const result = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } });
   const exports = {};
-  dependencies = { "../../../site.config": { withSiteBasePath: (path) => `/fotohavn${path}` }, ...dependencies };
+  dependencies = { "../../../site.config": { withSiteBasePath: (path) => path }, ...dependencies };
   vm.runInNewContext(result.outputText, { exports, require: (id) => {
     assert.ok(id in dependencies, `Unmapped import ${id}`); return dependencies[id];
   }, Blob, DOMException, AbortController, Uint8ClampedArray, setTimeout, clearTimeout, ...globals });
@@ -165,7 +165,7 @@ test("every authored frame/layout renders the correct photo order and exports on
     };
     lastCanvas = { width: 0, height: 0, getContext: () => ctx, calls }; canvases.push(lastCanvas); return lastCanvas;
   } };
-  const compositor = compile("compositor", { "./presets": presets, "./media": media, "../../../site.config": { withSiteBasePath: (path) => `/fotohavn${path}` } }, { document });
+  const compositor = compile("compositor", { "./presets": presets, "./media": media, "../../../site.config": { withSiteBasePath: (path) => path } }, { document });
   for (const layout of presets.layouts) for (const frame of presets.frames) {
     const photos = layout.slots.map((_, i) => photo(String(i)));
     const output = await compositor.renderComposition({ layoutId: layout.id, frameId: frame.id, lookId: "naturale-v1", photos }, { display: "Cormorant Garamond", sans: "Manrope" }, new AbortController().signal);
@@ -312,7 +312,7 @@ test("all combined templates compose blank and captured windows with their nativ
     const placed = rendered.calls.filter(c => c.type === "image" && c.url.startsWith("blob:"));
     assert.deepEqual(serial(placed.map(c => c.url)), serial(photos.map(p => p.url)));
     assert.deepEqual(serial(placed.map(c => c.args.slice(-4))), serial(template.slots.map(r => [r.x, r.y, r.width, r.height])));
-    if (template.artwork) assert.ok(rendered.calls.some(c => c.url === `/fotohavn${template.artwork}`));
+    if (template.artwork) assert.ok(rendered.calls.some(c => c.url === template.artwork));
     else assert.ok(rendered.calls.some(c => c.text === "FOTOHAVN"));
   }
 });

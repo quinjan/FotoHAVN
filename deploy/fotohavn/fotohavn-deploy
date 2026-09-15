@@ -10,7 +10,8 @@ readonly CURRENT_FILE="${STATE_DIR}/current-image"
 readonly PREVIOUS_FILE="${STATE_DIR}/previous-image"
 readonly LOCK_FILE="/run/lock/fotohavn-deploy.lock"
 readonly SSH_COMMAND_FILE="/usr/local/bin/fotohavn-ssh-command"
-readonly PUBLIC_URL="http://159.223.47.227/fotohavn"
+readonly PUBLIC_URL="https://fotohavn.com/"
+readonly LEGACY_ROLLBACK_URL="http://159.223.47.227/fotohavn"
 readonly PAGE_MARKER="FOTOHAVN"
 readonly IMAGE_PATTERN='^ghcr\.io/quinjan/fotohavn-website@sha256:[0-9a-f]{64}$'
 
@@ -88,14 +89,16 @@ wait_for_container_health() {
 }
 
 public_smoke_test() {
-  local response_file
+  local response_file url
   response_file="$(mktemp)"
-  if curl --fail --silent --show-error --max-time 10 \
-    --output "$response_file" "$PUBLIC_URL" \
-    && grep -Fq "$PAGE_MARKER" "$response_file"; then
-    rm -f "$response_file"
-    return 0
-  fi
+  for url in "$PUBLIC_URL" "$LEGACY_ROLLBACK_URL"; do
+    if curl --fail --silent --show-error --max-time 10 \
+      --output "$response_file" "$url" \
+      && grep -Fq "$PAGE_MARKER" "$response_file"; then
+      rm -f "$response_file"
+      return 0
+    fi
+  done
   rm -f "$response_file"
   return 1
 }

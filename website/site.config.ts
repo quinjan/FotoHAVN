@@ -1,5 +1,5 @@
-export const siteBasePath = "/fotohavn";
-export const stagingSiteUrl = `http://159.223.47.227${siteBasePath}`;
+export const siteBasePath = "";
+export const siteUrl = "https://fotohavn.com";
 export const instagramMessageUrl = "https://ig.me/m/fotohavn.ph";
 export const inquirySectionId = "make-something-worth-keeping";
 export const findBoothSectionHash = "#find-the-booth";
