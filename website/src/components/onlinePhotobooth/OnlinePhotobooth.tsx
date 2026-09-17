@@ -3,12 +3,12 @@
 /* Captures and composed PNGs are in-memory blob URLs, never optimizer requests. */
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useReducer, useRef, useState, type ChangeEvent } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, CameraIcon, DownloadSimpleIcon, CheckIcon, XIcon, StopIcon, ToggleLeftIcon, ToggleRightIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, ArrowRightIcon, DownloadSimpleIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
 import { findBoothSectionUrl, withSiteBasePath } from "../../../site.config";
 import { getLayout, looks } from "./presets";
 import { canContinue, initialSession, isComplete, sessionReducer, type MoveSource, type Photo, type PositionMoveSource, type Stage } from "./session";
 import { disposePhoto, photoFromFile, photoFromVideo, waitFor } from "./media";
-import { CameraFrameGuide } from "./CameraFrameGuide";
+import { CameraWorkspace } from "./CameraWorkspace";
 import { useCamera } from "./useCamera";
 import { useComposition } from "./useComposition";
 import { PrintPreview } from "./PrintPreview";
@@ -31,6 +31,7 @@ export default function OnlinePhotobooth() {
   const [reviewWhenReady, setReviewWhenReady] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
   const [mirror, setMirror] = useState(true);
+  const [countdownSeconds, setCountdownSeconds] = useState(3);
   const [moveDestination, setMoveDestination] = useState(0);
   const [confirmReset, setConfirmReset] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -159,7 +160,7 @@ export default function OnlinePhotobooth() {
     if (!selectedPhoto || locked || busy.current) return;
     setReplacementSource("camera"); setCaptureTab("camera");
     makeOperation("retake", state.selected);
-    setNotice(`Retaking photograph ${state.selected + 1}. Your original stays until you accept a replacement.`);
+    setNotice("Your original is kept until you accept.");
   }
 
   async function capture() {
@@ -173,7 +174,7 @@ export default function OnlinePhotobooth() {
     busy.current = true; setWorking(true); setNotice("");
     try {
       for (const slot of positions) {
-        for (let number = 3; number > 0; number--) {
+        for (let number = countdownSeconds; number > 0; number--) {
           setCountdown({ number, slot });
           await waitFor(1000, controller.signal);
         }
@@ -309,7 +310,7 @@ export default function OnlinePhotobooth() {
     {print.error ? <><p>{print.error}</p><button className={styles.textButton} type="button" onClick={print.retry}>Try preview again</button></> : !print.ready ? <p>Preparing your framed preview…</p> : null}
   </div>;
 
-  return <div className={styles.booth} onKeyDown={(event) => {
+  return <div className={`${styles.booth} ${state.stage === "capture" && captureTab === "camera" ? styles.cameraMode : ""}`} onKeyDown={(event) => {
     if (event.key === "Escape" && state.move) { event.preventDefault(); cancelMove(); }
     else if (event.key === "Escape" && state.operation) { event.preventDefault(); if (retaking) cancelRetake(); else cancelPending(); }
   }}>
@@ -352,44 +353,20 @@ export default function OnlinePhotobooth() {
               }
             }}>{tab === "camera" ? "Camera" : "Arrange"}</button>)}
           </div>
-          <section id="camera-panel" role="tabpanel" aria-labelledby="camera-tab" hidden={captureTab !== "camera"}>
-            <div className={`${styles.viewfinder} ${styles.cameraCanvas} ${camera.status !== "ready" ? styles.viewfinderIdle : ""}`} style={{ aspectRatio: `${layout.slots[0].width} / ${layout.slots[0].height}` }}>
-              <video ref={videoRef} className={`${styles.video} ${mirror ? styles.mirrored : ""}`} autoPlay playsInline muted aria-label="Live camera preview" />
-              <CameraFrameGuide videoRef={videoRef} ratio={layout.slots[0].width / layout.slots[0].height} active={captureTab === "camera" && camera.status === "ready"} />
-              {camera.status !== "ready" && <div className={styles.cameraWelcome}>
-                <CameraIcon size={30} weight="light" aria-hidden="true" />
-                <h2>{camera.status === "error" ? "A little interruption." : "Your moment awaits."}</h2>
-                <p>{camera.status === "requesting" ? "Allow camera access when your browser asks." : camera.message || "Opening your camera…"}</p>
-                {camera.status === "error" && <button type="button" className={styles.secondary} onClick={() => void camera.request()}>Try camera again</button>}
-              </div>}
-              {camera.status === "ready" && <>
-                <span className={styles.liveBadge}>LIVE</span>
-                <button className={styles.mirrorToggle} type="button" role="switch" aria-label="Mirror photographs" aria-checked={mirror} disabled={working} onClick={() => setMirror((value) => !value)}>
-                  Mirror {mirror ? <ToggleRightIcon size={36} weight="fill" aria-hidden="true" /> : <ToggleLeftIcon size={36} weight="fill" aria-hidden="true" />}
-                </button>
-                {retaking && !candidate && <p className={styles.retakeLabel}>Retaking photograph {target! + 1}</p>}
-                {countdown && (countdown.number === 0
-                  ? <div key={`captured-${countdown.slot}`} className={styles.captureFeedback} role="status" aria-live="polite">
-                    <span className={styles.captureFlash} aria-hidden="true" />
-                    <span className={styles.capturedLabel}><CheckIcon size={22} weight="bold" aria-hidden="true" />Captured</span>
-                  </div>
-                  : <div className={styles.countdown} role="status" aria-live="polite" aria-atomic="true"><span key={countdown.number}>{countdown.number}</span></div>)}
-                {(remaining > 0 || retaking) && !reviewWhenReady && <div className={styles.shutterControl}>
-                  <button id="capture-shutter" type="button" className={styles.shutter} aria-label={working ? "Stop capturing" : retaking ? "Take replacement" : `Take ${remaining} ${photoWord(remaining)}`} onClick={() => {
-                    if (working) { cancelPending(); if (retaking) makeOperation("retake", target!); setNotice(""); }
-                    else void capture();
-                  }}>{working ? <StopIcon size={28} weight="fill" aria-hidden="true" /> : <CameraIcon size={28} weight="fill" aria-hidden="true" />}</button>
-                  <span aria-hidden="true">{working ? "Stop capturing" : retaking ? "Take replacement" : `Take ${remaining} ${photoWord(remaining)}`}</span>
-                </div>}
-              </>}
-            </div>
-            <div className={styles.cameraBelow}>
-              {!working && !reviewWhenReady && (remaining > 0 || retaking) && <button type="button" className={styles.textButton} onClick={() => openFiles(retaking ? target : null)}>Import photos</button>}
-              {retaking && !working && !reviewWhenReady && <button type="button" className={styles.textButton} onClick={cancelRetake}>Keep original</button>}
-              {complete && !retaking && !working && !reviewWhenReady && <button type="button" className={styles.primary} onClick={() => changeCaptureTab("arrange")}>Review photographs<ArrowRightIcon size={18} aria-hidden="true" /></button>}
-              {reviewWhenReady && renderMessage}
-            </div>
-          </section>
+          <CameraWorkspace active={captureTab === "camera"} videoRef={videoRef} camera={camera}
+            ratio={layout.slots[0].width / layout.slots[0].height} template={layout.name} slots={state.slots}
+            mirror={mirror} onMirror={setMirror} seconds={countdownSeconds} onSeconds={setCountdownSeconds}
+            working={working} preparing={reviewWhenReady} countdown={countdown} retake={target}
+            notice={notice} renderMessage={renderMessage} onStart={() => void capture()}
+            onStop={() => { cancelPending(); if (retaking) makeOperation("retake", target!); setNotice("Stopped. Your photographs are still here."); }}
+            onExit={() => {
+              cancelPending(); camera.stop(); setReviewWhenReady(false); setNotice("");
+              if (retaking) cancelRetake();
+              else if (state.slots.some(Boolean)) setCaptureTab("arrange");
+              else dispatch({ type: "stage", stage: "layout" });
+              requestAnimationFrame(() => document.getElementById("arrange-tab")?.focus());
+            }}
+            onImport={() => openFiles(retaking ? target : null)} onReview={() => changeCaptureTab("arrange")} onKeepOriginal={cancelRetake} />
           <section id="arrange-panel" role="tabpanel" aria-labelledby="arrange-tab" hidden={captureTab !== "arrange"} className={styles.arrangeCanvas}>
             {preview(true)}
             {candidate ? <div className={styles.candidateActions}>

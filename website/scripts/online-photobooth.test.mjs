@@ -220,18 +220,19 @@ test("the compositor confines each look to photo windows and leaves authored pap
 });
 
 test("camera requests are explicit, video-only, and late permission grants stop every returned track", async () => {
-  let resolveRequest, requestArguments, state, effectCleanup, interrupted = 0;
+  let resolveRequest, requestArguments, state, interrupted = 0, cell = 0;
+  const cleanups = [];
   const react = {
-    useState: (initial) => { state = initial; return [state, (value) => { state = value; }]; },
+    useState: (initial) => { const index = cell++; if (index === 0) state = initial; return [initial, (value) => { if (index === 0) state = value; }]; },
     useRef: (value) => ({ current: value }), useCallback: (fn) => fn,
-    useEffect: (effect) => { effectCleanup = effect(); },
+    useEffect: (effect) => { cleanups.push(effect()); },
   };
   let stopped = 0;
-  const track = { stop() { stopped += 1; }, onended: null };
+  const track = { stop() { stopped += 1; }, getSettings: () => ({ deviceId: "front", facingMode: "user" }), onended: null };
   const stream = { getTracks: () => [track], getVideoTracks: () => [track] };
   const video = { srcObject: null, readyState: 2, videoWidth: 1280, videoHeight: 960, play: async () => {}, addEventListener() {}, removeEventListener() {} };
   const useCamera = compile("useCamera", { react }, {
-    navigator: { mediaDevices: { getUserMedia: (args) => { requestArguments = args; return new Promise((resolve) => { resolveRequest = resolve; }); } } },
+    navigator: { mediaDevices: { enumerateDevices: async () => [], getUserMedia: (args) => { requestArguments = args; return new Promise((resolve) => { resolveRequest = resolve; }); } } },
     window: { isSecureContext: true },
   }).useCamera;
   const camera = useCamera({ current: video }, () => { interrupted += 1; });
@@ -243,8 +244,64 @@ test("camera requests are explicit, video-only, and late permission grants stop 
   const next = camera.request(); resolveRequest(stream); await next;
   assert.equal(state.status, "ready"); assert.equal(video.srcObject, stream);
   track.onended(); assert.equal(interrupted, 1); assert.equal(state.status, "error"); assert.equal(video.srcObject, null);
-  const leaving = camera.request(); effectCleanup(); resolveRequest(stream); await leaving;
+  const leaving = camera.request(); cleanups.forEach((cleanup) => cleanup?.()); resolveRequest(stream); await leaving;
   assert.equal(stopped, 3, "unmount also rejects a delayed camera grant");
+});
+
+test("switching cameras releases the lens, verifies facing, and retries the last working source after failure", async () => {
+  let state, cell = 0;
+  const events = [], cleanups = [];
+  const react = {
+    useState: (initial) => { const index = cell++; return [initial, (value) => { if (index === 0) state = value; }]; },
+    useRef: (value) => ({ current: value }), useCallback: (fn) => fn,
+    useEffect: (effect) => { cleanups.push(effect()); },
+  };
+  let facing = "user", rejectNext = false, wrongLens = false;
+  const mediaDevices = {
+    enumerateDevices: async () => { throw new Error("enumeration unavailable"); },
+    getUserMedia: async ({ audio, video }) => {
+      assert.equal(audio, false);
+      events.push(["open", serial(video)]);
+      if (rejectNext) { rejectNext = false; throw new DOMException("Busy", "NotReadableError"); }
+      facing = wrongLens ? "user" : video.facingMode?.exact ?? "user";
+      const track = { onended: null, getSettings: () => ({ facingMode: facing, deviceId: facing }), stop: () => events.push(["stop"]) };
+      return { getTracks: () => [track], getVideoTracks: () => [track] };
+    },
+  };
+  const video = { srcObject: null, readyState: 2, videoWidth: 1280, videoHeight: 960, play: async () => {}, addEventListener() {}, removeEventListener() {} };
+  const { useCamera } = compile("useCamera", { react }, { navigator: { mediaDevices }, window: { isSecureContext: true } });
+  const camera = useCamera({ current: video }, () => {});
+  await camera.request(); assert.equal(state.status, "ready");
+  const rear = await camera.request({ facingMode: "environment" });
+  assert.equal(rear.facingMode, "environment"); assert.equal(state.status, "ready");
+  assert.equal(events[1][0], "stop"); assert.equal(events[2][1].facingMode.exact, "environment");
+  rejectNext = true; await camera.request({ deviceId: "missing" });
+  assert.equal(state.status, "error"); assert.equal(video.srcObject, null);
+  const recovered = await camera.request(); assert.equal(recovered.facingMode, "environment");
+  assert.equal(events.at(-1)[1].facingMode.exact, "environment", "retry remembers only successful selection");
+  wrongLens = true; await camera.request({ facingMode: "environment" });
+  assert.equal(state.status, "error"); assert.equal(video.srcObject, null, "a false rear-camera result must be released");
+  cleanups.forEach((cleanup) => cleanup?.());
+});
+
+test("exact camera preview maps template crops back onto portrait and landscape sensor pixels", () => {
+  const { cameraPreviewGeometry } = compile("cameraGeometry", { "./presets": presets });
+  for (const [width, height] of [[720, 1280], [1920, 1080], [1280, 960]]) {
+    for (const template of presets.templates) {
+      const ratio = template.slots[0].width / template.slots[0].height;
+      const geometry = cameraPreviewGeometry(width, height, ratio);
+      const normalized = presets.coverCrop(width, height);
+      const crop = presets.coverCrop(normalized.width, normalized.height, ratio);
+      const previewCropWidth = width / (parseFloat(geometry.width) / 100);
+      const previewCropHeight = height / (parseFloat(geometry.height) / 100);
+      assert.ok(Math.abs(previewCropWidth - crop.width) < .00001);
+      assert.ok(Math.abs(previewCropHeight - crop.height) < .00001);
+      assert.ok(Math.abs(-parseFloat(geometry.left) / 100 * crop.width - normalized.x - crop.x) < .00001);
+      assert.ok(Math.abs(-parseFloat(geometry.top) / 100 * crop.height - normalized.y - crop.y) < .00001);
+    }
+  }
+  assert.equal(cameraPreviewGeometry(0, 1280, .75), null);
+  assert.equal(cameraPreviewGeometry(720, 1280, NaN), null);
 });
 
 test("mirrored video capture uses the same center crop and commits one bounded local PNG", async () => {

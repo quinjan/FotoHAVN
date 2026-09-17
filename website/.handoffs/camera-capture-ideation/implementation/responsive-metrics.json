@@ -1,0 +1,177 @@
+[
+  {
+    "controls": [
+      {
+        "bottom": 49.046875,
+        "height": 44,
+        "name": "Toggle fullscreen",
+        "width": 44
+      },
+      {
+        "bottom": 49.046875,
+        "height": 44,
+        "name": "Exit camera",
+        "width": 50.234375
+      },
+      {
+        "bottom": 650,
+        "height": 44,
+        "name": "3s",
+        "width": 44
+      },
+      {
+        "bottom": 650,
+        "height": 44,
+        "name": "5s",
+        "width": 44
+      },
+      {
+        "bottom": 650,
+        "height": 44,
+        "name": "10s",
+        "width": 44
+      },
+      {
+        "bottom": 732.21875,
+        "height": 64.4375,
+        "name": "Mirror photographs",
+        "width": 96.65625
+      },
+      {
+        "bottom": 720.203125,
+        "height": 66,
+        "name": "Take replacement",
+        "width": 66
+      },
+      {
+        "bottom": 731.21875,
+        "height": 62.4375,
+        "name": "Flip camera",
+        "width": 96.671875
+      },
+      {
+        "bottom": 794,
+        "height": 44,
+        "name": "Import photos",
+        "width": 84.453125
+      },
+      {
+        "bottom": 794,
+        "height": 44,
+        "name": "Keep original",
+        "width": 76.625
+      }
+    ],
+    "preview": {
+      "bottom": 595,
+      "height": 500,
+      "left": 0,
+      "right": 375,
+      "top": 95,
+      "width": 375,
+      "x": 0,
+      "y": 95
+    },
+    "scrollWidth": 375,
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "controls": [
+      {
+        "bottom": 64,
+        "height": 44,
+        "name": "Toggle fullscreen",
+        "width": 44
+      },
+      {
+        "bottom": 64,
+        "height": 44,
+        "name": "Exit camera",
+        "width": 50.234375
+      },
+      {
+        "bottom": 830,
+        "height": 44,
+        "name": "3s",
+        "width": 44
+      },
+      {
+        "bottom": 830,
+        "height": 44,
+        "name": "5s",
+        "width": 44
+      },
+      {
+        "bottom": 830,
+        "height": 44,
+        "name": "10s",
+        "width": 44
+      },
+      {
+        "bottom": 912.21875,
+        "height": 64.4375,
+        "name": "Mirror photographs",
+        "width": 121.203125
+      },
+      {
+        "bottom": 900.203125,
+        "height": 66,
+        "name": "Take replacement",
+        "width": 66
+      },
+      {
+        "bottom": 911.21875,
+        "height": 62.4375,
+        "name": "Flip camera",
+        "width": 121.203125
+      },
+      {
+        "bottom": 974,
+        "height": 44,
+        "name": "Import photos",
+        "width": 84.453125
+      },
+      {
+        "bottom": 974,
+        "height": 44,
+        "name": "Keep original",
+        "width": 76.625
+      }
+    ],
+    "preview": {
+      "bottom": 782,
+      "height": 698,
+      "left": 450.75,
+      "right": 974.25,
+      "top": 84,
+      "width": 523.5,
+      "x": 450.75,
+      "y": 84
+    },
+    "scrollWidth": 1425,
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "preview": {
+      "bottom": 952,
+      "height": 868,
+      "left": 84,
+      "right": 735,
+      "top": 84,
+      "width": 651,
+      "x": 84,
+      "y": 84
+    },
+    "scrollWidth": 819,
+    "viewport": [
+      834,
+      1194
+    ]
+  }
+]

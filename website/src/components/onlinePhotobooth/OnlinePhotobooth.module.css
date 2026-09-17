@@ -1,4 +1,7 @@
 .booth { min-block-size: 100dvh; background: var(--color-off-white); color: var(--color-ebony); }
+.cameraMode > .header, .cameraMode > .footer, .cameraMode .progress, .cameraMode .intro, .cameraMode .captureTabs, .cameraMode .captureFooter { display: none; }
+.cameraMode .stageContent { animation: none; transform: none; }
+.cameraMode .notice { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .booth:has(.templateWorkspace) .main { max-width: 1488px; }
 .booth:has(.templateWorkspace) .header { max-width: 1488px; min-height: 74px; }
 .booth:has(.templateWorkspace) .progress { margin-top: 10px; }
