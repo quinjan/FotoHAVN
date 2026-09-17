@@ -37,6 +37,8 @@ export function createBoothScene(
   asset: (name: string) => string,
   onError: () => void,
   onInteract: () => void,
+  expanded = false,
+  onCurtainChange: (open: boolean) => void = () => {},
 ) {
   const cleanups: Array<() => void> = [];
   let frame = 0;
@@ -111,6 +113,9 @@ export function createBoothScene(
       lookX: 0,
       lookZ: 0,
       fov: 35,
+      panX: 0,
+      panY: 0,
+      panZ: 0,
     };
     const current = {
       ...target,
@@ -194,6 +199,8 @@ export function createBoothScene(
           Math.cos(current.yaw) * Math.cos(current.pitch) * distance,
       );
       camera.lookAt(current.lookX, current.lookY, current.lookZ);
+      // Translate both camera and focus equally: panning never rotates the booth.
+      camera.position.add(new THREE.Vector3(current.panX, current.panY, current.panZ));
       if (Math.abs(current.curtain - lastCurtain) > 0.0001) {
         model.setCurtain(current.curtain);
         lastCurtain = current.curtain;
@@ -242,46 +249,130 @@ export function createBoothScene(
     portrait.addEventListener("change", reducedChanged);
     cleanups.push(() => portrait.removeEventListener("change", reducedChanged));
 
-    let pointer: { id: number; x: number; y: number; moved: boolean } | null =
-      null;
+    let mode: "rotate" | "move" = "rotate";
+    const fingers = new Map<number, { x: number; y: number }>();
+    function pan(dx: number, dy: number) {
+      if (!Number.isFinite(dx) || !Number.isFinite(dy)) return;
+      const scale = 2 * camera.position.distanceTo(new THREE.Vector3(
+        current.lookX + current.panX, current.lookY + current.panY, current.lookZ + current.panZ,
+      )) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / Math.max(1, host.getBoundingClientRect().height);
+      const offset = new THREE.Vector3(-dx * scale, dy * scale, 0).applyQuaternion(camera.quaternion);
+      const limit = inside ? 0.08 : 1.5;
+      const next = new THREE.Vector3(target.panX, target.panY, target.panZ).add(offset).clampLength(0, limit);
+      target.panX = next.x;
+      target.panY = next.y;
+      target.panZ = next.z;
+      onInteract();
+      invalidate();
+    }
+    function dolly(factor: number) {
+      if (!Number.isFinite(factor) || factor <= 0) return;
+      target.distance = THREE.MathUtils.clamp(target.distance * factor, inside ? 1.45 : 3.8, inside ? 1.8 : 8);
+      onInteract();
+      invalidate();
+    }
+    function pair() {
+      const [a, b] = [...fingers.values()];
+      return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, distance: Math.hypot(a.x - b.x, a.y - b.y) };
+    }
+    type Pointer = { id: number; x: number; y: number; moved: boolean; scrolling: boolean; tap: boolean };
+    let pointer: Pointer | null = null;
+    const raycaster = new THREE.Raycaster();
+    function toggleCurtainAt(x: number, y: number) {
+      const rect = host.getBoundingClientRect();
+      camera.updateMatrixWorld(true);
+      model.group.updateMatrixWorld(true);
+      raycaster.setFromCamera(new THREE.Vector2(
+        (x - rect.left) / rect.width * 2 - 1,
+        -(y - rect.top) / rect.height * 2 + 1,
+      ), camera);
+      // Only the nearest visible surface counts; never click through a wall.
+      const hit = raycaster.intersectObject(model.group, true)[0];
+      if (hit && ["front-curtain", "rear-curtain"].includes(hit.object.name)) {
+        target.curtain = target.curtain > 0.5 ? 0 : 1;
+        onCurtainChange(target.curtain === 1);
+        invalidate();
+      }
+    }
     function down(event: PointerEvent) {
-      if (event.button !== 0 || !event.isPrimary) return;
+      if (event.button !== 0 || fingers.size >= 2) return;
+      fingers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       pointer = {
-        id: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        moved: false,
+        id: event.pointerId, x: event.clientX, y: event.clientY,
+        moved: false, scrolling: false, tap: fingers.size === 1,
       };
       canvas.setPointerCapture(event.pointerId);
     }
     function move(event: PointerEvent) {
-      if (!pointer || pointer.id !== event.pointerId) return;
-      const dx = event.clientX - pointer.x,
-        dy = event.clientY - pointer.y;
-      if (!pointer.moved) {
-        if (event.pointerType === "touch") {
-          if (Math.abs(dy) >= 6 && Math.abs(dy) > Math.abs(dx)) {
-            pointer = null;
-            return;
-          }
-          if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
-        } else if (Math.abs(dx) + Math.abs(dy) < 4) return;
-        onInteract();
-        pointer.moved = true;
+      if (!fingers.has(event.pointerId)) return;
+      const before = fingers.size === 2 ? pair() : null;
+      fingers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (before) {
+        const after = pair();
+        pan(after.x - before.x, after.y - before.y);
+        if (before.distance > 2 && after.distance > 2) dolly(before.distance / after.distance);
+        if (pointer) pointer.tap = false;
+        return;
       }
-      target.yaw -= dx * 0.009;
-      if (event.pointerType !== "touch")
-        target.pitch = THREE.MathUtils.clamp(
-          target.pitch + dy * 0.005,
-          -0.12,
-          0.65,
-        );
+      if (!pointer || pointer.id !== event.pointerId) return;
+      const dx = event.clientX - pointer.x, dy = event.clientY - pointer.y;
+      if (!pointer.moved) {
+        if (Math.hypot(dx, dy) < 6) return;
+        pointer.scrolling = event.pointerType === "touch" && !expanded && Math.abs(dy) > Math.abs(dx);
+        pointer.moved = true;
+        pointer.tap = false;
+      }
+      if (pointer.scrolling) {
+        // The canvas owns multi-touch. Pass one-finger vertical intent to the page.
+        window.scrollBy({ top: -dy, behavior: "instant" });
+      } else if (mode === "move") {
+        pan(dx, event.pointerType === "touch" && !expanded ? 0 : dy);
+      } else {
+        onInteract();
+        target.yaw -= dx * 0.009;
+        if (expanded || event.pointerType !== "touch")
+          target.pitch = THREE.MathUtils.clamp(target.pitch + dy * 0.005, -0.12, 0.65);
+        invalidate();
+      }
       pointer.x = event.clientX;
       pointer.y = event.clientY;
-      invalidate();
     }
-    function up() {
+    function up(event?: PointerEvent) {
+      if (event?.type === "pointerup" && pointer?.id === event.pointerId && pointer.tap &&
+          !pointer.moved && fingers.size === 1 && Math.hypot(event.clientX - pointer.x, event.clientY - pointer.y) < 6) {
+        toggleCurtainAt(event.clientX, event.clientY);
+      }
       pointer = null;
+      if (!event) fingers.clear();
+      else fingers.delete(event.pointerId);
+      if (fingers.size === 1) {
+        const [id, point] = [...fingers.entries()][0];
+        pointer = { id, ...point, moved: false, scrolling: false, tap: false };
+      }
+    }
+    // Safari trackpads can report native gesture events instead of Ctrl+wheel.
+    let gestureScale: number | null = null;
+    function gestureStart(event: Event) {
+      event.preventDefault();
+      gestureScale = 1;
+    }
+    function gestureChange(event: Event) {
+      if (gestureScale === null) return;
+      event.preventDefault();
+      const scale = (event as Event & { scale: number }).scale;
+      if (!Number.isFinite(scale) || scale <= 0) return;
+      if (fingers.size < 2) dolly(gestureScale / scale);
+      gestureScale = scale;
+    }
+    function gestureEnd() { gestureScale = null; }
+    function wheel(event: WheelEvent) {
+      // Trackpads emit wheel events, not two touch pointers. Capture them only
+      // over this canvas, in both inline and fullscreen presentations.
+      event.preventDefault();
+      if (gestureScale !== null) return;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? host.getBoundingClientRect().height : 1;
+      if (event.ctrlKey || event.metaKey) dolly(Math.exp(THREE.MathUtils.clamp(event.deltaY * unit * 0.01, -0.3, 0.3)));
+      else pan(-event.deltaX * unit, -event.deltaY * unit);
     }
     function rotate(direction: number) {
       target.yaw += direction * 0.28;
@@ -289,15 +380,16 @@ export function createBoothScene(
       invalidate();
     }
     function zoom(direction: number) {
-      target.distance = THREE.MathUtils.clamp(
-        target.distance - direction * (inside ? 0.1 : 0.55),
-        inside ? 0.65 : 3.8,
-        8,
-      );
-      invalidate();
+      dolly(Math.exp(-direction * 0.12));
     }
     function keydown(event: KeyboardEvent) {
       if (event.target !== host) return;
+      if (mode === "move" && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+        pan(event.key === "ArrowLeft" ? -24 : event.key === "ArrowRight" ? 24 : 0,
+          event.key === "ArrowUp" ? -24 : event.key === "ArrowDown" ? 24 : 0);
+        return;
+      }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
         rotate(event.key === "ArrowLeft" ? -1 : 1);
@@ -326,6 +418,10 @@ export function createBoothScene(
       onError();
     };
     canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("wheel", wheel, { passive: false });
+    canvas.addEventListener("gesturestart", gestureStart, { passive: false });
+    canvas.addEventListener("gesturechange", gestureChange, { passive: false });
+    canvas.addEventListener("gestureend", gestureEnd);
     canvas.addEventListener("pointermove", move);
     canvas.addEventListener("pointerup", up);
     canvas.addEventListener("pointercancel", up);
@@ -334,6 +430,10 @@ export function createBoothScene(
     host.addEventListener("keydown", keydown);
     cleanups.push(() => {
       canvas.removeEventListener("pointerdown", down);
+      canvas.removeEventListener("wheel", wheel);
+      canvas.removeEventListener("gesturestart", gestureStart);
+      canvas.removeEventListener("gesturechange", gestureChange);
+      canvas.removeEventListener("gestureend", gestureEnd);
       canvas.removeEventListener("pointermove", move);
       canvas.removeEventListener("pointerup", up);
       canvas.removeEventListener("pointercancel", up);
@@ -343,6 +443,12 @@ export function createBoothScene(
     });
 
     return {
+      setExpanded(next: boolean) {
+        expanded = next;
+        fingers.clear();
+        pointer = null;
+        invalidate();
+      },
       setView(view: BoothView) {
         const presets = {
           "three-quarter": {
@@ -395,7 +501,9 @@ export function createBoothScene(
           },
         };
         inside = view === "inside" || view === "bench";
-        Object.assign(target, presets[view], { fov: view === "bench" ? 65 : 35 });
+        fingers.clear();
+        pointer = null;
+        Object.assign(target, presets[view], { fov: view === "bench" ? 65 : 35, panX: 0, panY: 0, panZ: 0 });
         invalidate();
       },
       setCurtain(open: boolean) {
@@ -403,6 +511,11 @@ export function createBoothScene(
         invalidate();
       },
       rotate,
+      setMode(next: "rotate" | "move") {
+        mode = next;
+        fingers.clear();
+        pointer = null;
+      },
       zoom,
       dispose,
     };

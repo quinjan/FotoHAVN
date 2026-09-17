@@ -17,11 +17,12 @@ function harness({ contextAvailable = true, reduced = true, portrait = false, wi
   const released = new Set();
   const renderers = [];
   const requests = [];
+  const scrolls = [];
   const observers = [];
   const frames = new Map();
   let nextFrame = 0;
   class Element {
-    rect = { width, height };
+    rect = { width, height, left: 0, top: 0 };
     children = [];
     events = new Map();
     setAttribute() {}
@@ -133,7 +134,7 @@ function harness({ contextAvailable = true, reduced = true, portrait = false, wi
   }
   const common = {
     document,
-    window: { devicePixelRatio: 2, matchMedia: (query) => query.includes("prefers-reduced-motion") ? media : portraitMedia },
+    window: { scrollBy: (options) => scrolls.push(options.top), devicePixelRatio: 2, matchMedia: (query) => query.includes("prefers-reduced-motion") ? media : portraitMedia },
     ResizeObserver: Observer,
     IntersectionObserver: Observer,
     requestAnimationFrame: (callback) => {
@@ -190,11 +191,127 @@ function harness({ contextAvailable = true, reduced = true, portrait = false, wi
     released,
     renderers,
     requests,
+    scrolls,
     observers,
     frames,
     flush,
   };
 }
+
+test("expanded Move translates the camera without rotating and Reset restores framing", () => {
+  const h = harness();
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, true);
+  h.flush();
+  const renderer = h.renderers[0];
+  const start = renderer.camera.clone();
+  const orientation = renderer.viewCamera.quaternion.clone();
+  const events = h.host.children[0].events;
+  scene.setMode("move");
+  const event = (x, y) => ({ button: 0, pointerId: 1, pointerType: "touch", clientX: x, clientY: y });
+  events.get("pointerdown")(event(100, 100));
+  events.get("pointermove")(event(170, 140));
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(start) > 0.1);
+  assert.ok(orientation.angleTo(renderer.viewCamera.quaternion) < 0.000001);
+  scene.setView("three-quarter");
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(start) < 0.000001);
+  scene.dispose();
+});
+
+test("two fingers pinch and pan without rotation; releasing either finger rebases the drag", () => {
+  const h = harness();
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, true);
+  h.flush();
+  const renderer = h.renderers[0];
+  const start = renderer.camera.clone();
+  const orientation = renderer.viewCamera.quaternion.clone();
+  const events = h.host.children[0].events;
+  const event = (id, x, y) => ({ button: 0, isPrimary: id === 1, pointerId: id, pointerType: "touch", clientX: x, clientY: y });
+  events.get("pointerdown")(event(1, 100, 100));
+  events.get("pointerdown")(event(2, 200, 100));
+  events.get("pointermove")(event(2, 250, 150));
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(start) > 0.5);
+  assert.ok(orientation.angleTo(renderer.viewCamera.quaternion) < 0.000001);
+  events.get("pointerup")(event(2, 250, 150));
+  const after = renderer.camera.clone();
+  events.get("pointermove")(event(1, 100, 100));
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(after) < 0.000001, "remaining stationary finger must not jump");
+  events.get("pointermove")(event(1, 140, 100));
+  h.flush();
+  assert.ok(orientation.angleTo(renderer.viewCamera.quaternion) > 0.01);
+  events.get("pointercancel")(event(1, 140, 100));
+  const cancelled = renderer.camera.clone();
+  events.get("pointermove")(event(1, 250, 180));
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(cancelled) < 0.000001);
+  scene.dispose();
+});
+
+test("trackpad two-finger scrolling pans without rotation both inline and fullscreen", () => {
+  for (const expanded of [false, true]) {
+    const h = harness();
+    const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, expanded);
+    h.flush();
+    const renderer = h.renderers[0];
+    const start = renderer.camera.clone();
+    const orientation = renderer.viewCamera.quaternion.clone();
+    const wheel = h.host.children[0].events.get("wheel");
+    let prevented = 0;
+    wheel({ deltaX: 50, deltaY: 40, deltaMode: 0, preventDefault: () => prevented++ });
+    h.flush();
+    assert.equal(prevented, 1, "the model must consume two-finger scrolling inline too");
+    assert.ok(renderer.camera.distanceTo(start) > 0.1, "two-finger scrolling must move the view");
+    assert.ok(orientation.angleTo(renderer.viewCamera.quaternion) < 0.000001);
+    scene.setView("three-quarter");
+    h.flush();
+    wheel({ deltaX: 0, deltaY: -20, deltaMode: 0, ctrlKey: true, preventDefault: () => prevented++ });
+    h.flush();
+    assert.ok(renderer.camera.distanceTo(start) > 0.1, "pinch zoom works inline and expanded");
+    scene.dispose();
+  }
+});
+
+test("native Safari pinch events zoom only the expanded canvas without double counting wheel", () => {
+  const h = harness();
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, true);
+  h.flush();
+  const renderer = h.renderers[0];
+  const initial = renderer.camera.clone();
+  const events = h.host.children[0].events;
+  events.get("gesturestart")({ preventDefault() {} });
+  events.get("gesturechange")({ scale: 1.2, preventDefault() {} });
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(initial) > 0.1);
+  const pinched = renderer.camera.clone();
+  events.get("wheel")({ ctrlKey: true, deltaY: -40, deltaMode: 0, preventDefault() {} });
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(pinched) < 0.000001);
+  events.get("gestureend")();
+  scene.dispose();
+});
+
+test("expanded interior pan and zoom are bounded and presets clear pan", () => {
+  const h = harness();
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, true);
+  scene.setView("inside");
+  h.flush();
+  const renderer = h.renderers[0];
+  const initial = renderer.camera.clone();
+  const wheel = h.host.children[0].events.get("wheel");
+  wheel({ deltaX: 1e6, deltaY: 1e6, deltaMode: 0, preventDefault() {} });
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(initial) <= 0.080001);
+  scene.setView("inside");
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(initial) < 0.000001);
+  for (let i = 0; i < 100; i++) scene.zoom(-1);
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(new THREE.Vector3(-0.87, 1.52, -0.04)) <= 1.800001);
+  scene.dispose();
+});
 
 test("normal disposal releases the model, renderer, observers and listeners exactly once", () => {
   const h = harness();
@@ -457,6 +574,7 @@ test("vertical touch intent scrolls without rotating, horizontal intent rotates,
   h.flush();
   assert.equal(interactions, 0);
   assert.equal(initialCamera.distanceTo(h.renderers[0].camera), 0);
+  assert.equal(h.scrolls[0], -50);
   events.get("pointerdown")(event(100, 100));
   events.get("pointermove")(event(165, 102));
   h.flush();
@@ -468,4 +586,62 @@ test("vertical touch intent scrolls without rotating, horizontal intent rotates,
   h.flush();
   assert.equal(releasedCamera.distanceTo(h.renderers[0].camera), 0);
   controller.dispose();
+});
+
+
+test("curtain raycast opens visible fabric, closes gathered fabric, and ignores drags and cancellations", () => {
+  const h = harness();
+  const changes = [];
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {}, false, open => changes.push(open));
+  scene.setView("front"); h.flush();
+  const renderer = h.renderers[0];
+  const events = h.host.children[0].events;
+  const at = (x, type = "pointerup") => {
+    const point = new THREE.Vector3(x, 1.4, 0.82).project(renderer.viewCamera);
+    return { type, pointerId: 1, button: 0, isPrimary: true, pointerType: "mouse",
+      clientX: (point.x + 1) / 2 * 780, clientY: (1 - point.y) / 2 * 625 };
+  };
+  events.get("pointerdown")(at(0, "pointerdown"));
+  events.get("pointerup")(at(0)); h.flush();
+  assert.deepEqual(changes, [true]);
+  events.get("pointerdown")(at(0.37, "pointerdown"));
+  events.get("pointerup")(at(0.37)); h.flush();
+  assert.deepEqual(changes, [true, false]);
+  const start = at(0, "pointerdown");
+  events.get("pointerdown")(start);
+  events.get("pointermove")({ ...start, clientX: start.clientX + 40 });
+  events.get("pointerup")({ ...start, type: "pointerup", clientX: start.clientX + 40 });
+  h.flush();
+  assert.equal(changes.length, 2);
+  events.get("pointerdown")(at(0, "pointerdown"));
+  events.get("pointercancel")(at(0, "pointercancel"));
+  assert.equal(changes.length, 2);
+  scene.dispose();
+});
+
+test("inline two-finger pinch and Move work; fullscreen transitions preserve the camera", () => {
+  const h = harness();
+  const scene = h.createBoothScene(h.host, name => name, () => {}, () => {});
+  h.flush();
+  const renderer = h.renderers[0], events = h.host.children[0].events;
+  const point = (id, x, y) => ({ pointerId: id, button: 0, pointerType: "touch", clientX: x, clientY: y });
+  const initial = renderer.camera.clone();
+  events.get("pointerdown")(point(1, 100, 100));
+  events.get("pointerdown")(point(2, 200, 100));
+  events.get("pointermove")(point(2, 260, 140));
+  h.flush();
+  assert.ok(renderer.camera.distanceTo(initial) > .1);
+  assert.equal(h.scrolls.length, 0);
+  scene.setMode("move");
+  const rotation = renderer.viewCamera.quaternion.clone();
+  events.get("pointerdown")(point(1, 100, 100));
+  events.get("pointermove")(point(1, 150, 102));
+  h.flush();
+  assert.ok(rotation.angleTo(renderer.viewCamera.quaternion) < .000001);
+  const custom = renderer.camera.clone();
+  scene.setExpanded(true); h.flush();
+  assert.ok(custom.distanceTo(renderer.camera) < .000001);
+  scene.setExpanded(false); h.flush();
+  assert.ok(custom.distanceTo(renderer.camera) < .000001);
+  scene.dispose();
 });
