@@ -120,6 +120,7 @@ test("server markup exposes every posted image as a named native button", () => 
     if (name === "react/jsx-runtime") return JSXRuntime;
     if (name === "./guestBoardData") return data;
     if (name === "./guestBoardMotion") return motion;
+    if (name === "./GuestAlbumCarousel") return { default: () => null };
     if (name === "../../site.config") return { withSiteBasePath: value => `/FOTOHAVN${value}` };
     if (name.endsWith(".module.css")) return { default: new Proxy({}, { get: (_object, key) => key }) };
     if (name === "next/image") return { default: () => null };

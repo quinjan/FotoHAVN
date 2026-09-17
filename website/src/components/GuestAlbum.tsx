@@ -1,17 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useId, useLayoutEffect, useReducer, useRef, type CSSProperties } from "react";
-import GuestAlbumMotionPrototype from "./GuestAlbumMotionPrototype";
+import { useEffect, useId, useLayoutEffect, useReducer, useRef, type CSSProperties } from "react";
+import GuestAlbumCarousel from "./GuestAlbumCarousel";
 import StaticImage from "next/image";
 import { ArrowsOutIcon } from "@phosphor-icons/react/dist/csr/ArrowsOut";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/csr/ArrowClockwise";
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
-import { DeviceRotateIcon } from "@phosphor-icons/react/dist/csr/DeviceRotate";
 import { withSiteBasePath } from "../../site.config";
 import GuestBoardPhoto from "./GuestBoardPhoto";
-import { guestPhotographs, guestBoardReducer, initialBoardState, adjacentPhotograph, photographSwipe } from "./guestBoardData";
+import { guestPhotographs, guestBoardReducer, initialBoardState } from "./guestBoardData";
 import { animateLift, liftTransform, type Rect } from "./guestBoardMotion";
 import styles from "./GuestAlbum.module.css";
 
@@ -36,7 +35,6 @@ export default function GuestAlbum() {
   const closePhotoButton = useRef<HTMLButtonElement>(null);
   const fullscreenButton = useRef<HTMLButtonElement>(null);
   const portraitFlipButton = useRef<HTMLButtonElement>(null);
-  const gesture = useRef<{ id: number; x: number; y: number } | null>(null);
   const closeBoardButton = useRef<HTMLButtonElement>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const returningFocus = useRef<HTMLButtonElement | null>(null);
@@ -49,7 +47,6 @@ export default function GuestAlbum() {
   const photoId = useId();
   const boardId = useId();
   const selected = state.index === null ? null : guestPhotographs[state.index];
-  const portraitPhoto = guestPhotographs[state.selectedIndex];
   const isOpen = state.fullscreen || selected !== null;
 
 
@@ -186,71 +183,9 @@ export default function GuestAlbum() {
       <h2 id="album-heading">Look at <em>you.</em></h2>
       <p className={styles.invitation}>Every photograph has another side.</p>
     </div>
-    {process.env.NODE_ENV !== "production" && <Suspense fallback={null}><GuestAlbumMotionPrototype /></Suspense>}
-    <div className={styles.portraitViewer} role="region" aria-label="Explore the guest photographs"
-      onKeyDown={event => {
-        if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-        event.preventDefault();
-        dispatch({ type: "portrait-next", direction: event.key === "ArrowLeft" ? -1 : 1 });
-      }}>
-      <div className={styles.portraitStage} style={{ "--board-material": `url("${asset("metal-board.webp")}")` } as CSSProperties}
-        onPointerDown={event => {
-          if (!event.isPrimary || event.button !== 0) return;
-          gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerCancel={() => { gesture.current = null; }}
-        onLostPointerCapture={() => { gesture.current = null; }}
-        onPointerUp={event => {
-          const start = gesture.current;
-          gesture.current = null;
-          if (!start || start.id !== event.pointerId) return;
-          const direction = photographSwipe(event.clientX - start.x, event.clientY - start.y);
-          if (direction) dispatch({ type: "portrait-next", direction });
-        }}>
-        {[-1, 1].map(direction => {
-          const neighbor = guestPhotographs[adjacentPhotograph(state.selectedIndex, direction)];
-          return <div key={direction} className={styles.neighbor} data-direction={direction} aria-hidden="true" inert>
-            <GuestBoardPhoto key={neighbor.id} photo={neighbor} sizes="76vw" />
-          </div>;
-        })}
-        <div className={styles.portraitPrint} data-portrait-photo={portraitPhoto.id} data-kind={portraitPhoto.kind} data-side={state.side}>
-          <StaticImage src={asset("silver-clip-small.webp")} alt="" aria-hidden="true"
-            width={40} height={54} unoptimized className={styles.portraitClip} />
-          <div className={styles.turningSheet} data-side={state.side}>
-            <div className={styles.portraitFront} aria-hidden={state.side !== "photo"} inert={state.side !== "photo"}>
-              <div className={styles.portraitImage}>
-                <GuestBoardPhoto key={portraitPhoto.id} photo={portraitPhoto} sizes="76vw" />
-              </div>
-            </div>
-            <div className={styles.portraitBack} aria-hidden={state.side !== "note"} inert={state.side !== "note"}
-              tabIndex={state.side === "note" ? 0 : -1} role="group" aria-label={`Note: ${portraitPhoto.title}`}>
-              <p className={styles.noteLabel}>{portraitPhoto.testimonial ? "IN THEIR WORDS" : "FROM THE FOTOHAVN ALBUM"}</p>
-              <h3>{portraitPhoto.title}</h3>
-              {portraitPhoto.testimonial
-                ? <><blockquote>{portraitPhoto.testimonial.quote}</blockquote><p>{portraitPhoto.testimonial.attribution}</p></>
-                : <><p className={styles.portraitNote}>{portraitPhoto.note}</p><span className={styles.captionCredit}>An editorial note from FOTOHAVN.</span></>}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className={styles.portraitControls}>
-        <button type="button" className={styles.nextButton} aria-label="Previous photograph"
-          onClick={() => dispatch({ type: "portrait-next", direction: -1 })}><ArrowLeftIcon size={22} aria-hidden="true" /></button>
-        <button ref={portraitFlipButton} type="button" className={styles.turnButton} aria-pressed={state.side === "note"}
-          onClick={() => dispatch({ type: "flip" })}>{state.side === "photo" ? "Read the note" : "See the photograph"}</button>
-        <button type="button" className={styles.nextButton} aria-label="Next photograph"
-          onClick={() => dispatch({ type: "portrait-next", direction: 1 })}><ArrowRightIcon size={22} aria-hidden="true" /></button>
-      </div>
-      <p className={styles.portraitPosition} aria-live="polite" aria-atomic="true">
-        <span className={styles.srOnly}>{portraitPhoto.title} Photograph </span>{state.selectedIndex + 1} / {guestPhotographs.length}
-      </p>
-      <p className={styles.swipeHint}>Swipe to explore.</p>
-      <div className={styles.landscapeHint}>
-        <DeviceRotateIcon size={36} weight="light" aria-hidden="true" />
-        <p>Better in landscape.<br />Turn your phone to see the whole board.</p>
-      </div>
-    </div>
+    <GuestAlbumCarousel selectedIndex={state.selectedIndex} side={state.side}
+      onSelect={index => dispatch({ type: "portrait-next", direction: index - state.selectedIndex })}
+      onFlip={() => dispatch({ type: "flip" })} flipRef={portraitFlipButton} />
     <div className={styles.boardToolbar}>
       <p>Choose any photograph. There’s a little note behind each one.</p>
       <button ref={fullscreenButton} type="button" className={styles.textButton} onClick={openBoard}>

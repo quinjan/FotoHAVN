@@ -95,8 +95,7 @@
 .failedPhoto { visibility: hidden; }
 .imageError { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px; font-size: 12px; line-height: 1.5; color: var(--color-ebony); background: var(--color-cream-paper); }
 .album button:focus-visible, .portraitBack:focus-visible { outline: 2px solid var(--color-ebony); outline-offset: 3px; }
-.portraitViewer { display: none; }
-.portraitImage, .neighbor { position: relative; }
+.portraitImage { position: relative; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 @media (max-width: 767px) {
@@ -132,27 +131,17 @@
   .intro h2 { font-size: clamp(60px, 17vw, 72px); }
   .invitation { margin: 16px 0 36px; font-size: 16px; }
   .album > .boardToolbar, .album > .metalBoard, .album > .boardFooter { display: none; }
-  .portraitViewer { display: block; margin-inline: -24px; }
-  .album:has([data-album-prototype]) .portraitViewer { display: none; }
-  .portraitStage { position: relative; isolation: isolate; display: grid; place-items: center; height: clamp(390px, 115vw, 540px); overflow: hidden; touch-action: pan-y; }
-  .portraitStage::before { content: ""; position: absolute; z-index: -1; inset-block: 0; left: 50%; width: max(900px, 150%); transform: translateX(-50%); border: 12px solid transparent; border-image-source: var(--board-material); border-image-slice: 34 fill; border-image-repeat: stretch; }
   .portraitPrint { position: relative; width: min(76vw, 420px); height: clamp(325px, 100vw, 440px); transform: translateY(7px) rotate(3deg); perspective: 1500px; }
-  .portraitClip { position: absolute; z-index: 2; top: -35px; left: 50%; transform: translateX(-50%); width: 40px; height: 54px; object-fit: contain; pointer-events: none; }
   .portraitPrint .turningSheet { transition-duration: 240ms; }
   .portraitFront, .portraitBack { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--color-off-white); padding: 11px 11px 26px; backface-visibility: hidden; box-shadow: var(--shadow-photo); }
   .portraitImage { position: relative; height: 100%; min-height: 0; }
-  .portraitImage img, .neighbor img { object-fit: contain; }
+  .portraitImage img { object-fit: contain; }
   .portraitPrint[data-kind="strip"][data-side="photo"] .portraitFront { width: 42%; left: 29%; }
   .portraitBack { transform: rotateY(180deg); padding: 28px 20px; text-align: center; overflow-y: auto; overscroll-behavior-y: contain; }
   .portraitBack .noteLabel { margin: 0; font-size: 10px; }
   .portraitBack h3 { font: 400 32px/1.05 var(--font-display); letter-spacing: -.035em; margin: 20px 0 16px; }
   .portraitNote, .portraitBack blockquote { font-size: 16px; line-height: 1.55; margin: 0; }
   .portraitBack .captionCredit { font-size: 12px; line-height: 1.5; padding-top: 22px; }
-  .neighbor { position: absolute; top: 19%; width: min(76vw, 420px); height: 72%; border: 10px solid var(--color-off-white); background: var(--color-off-white); box-shadow: var(--shadow-photo); pointer-events: none; }
-  .neighbor[data-direction="-1"] { right: calc(100% - 28px); transform: rotate(-5deg); }
-  .neighbor[data-direction="1"] { left: calc(100% - 28px); transform: rotate(5deg); }
-  .neighbor[data-direction="-1"] img { object-position: right center; }
-  .neighbor[data-direction="1"] img { object-position: left center; }
   .portraitControls { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 12px; align-items: center; margin: 28px 24px 0; }
   .portraitControls .nextButton { width: 48px; height: 48px; min-height: 48px; border: 1px solid var(--color-hairline); border-radius: 50%; }
   .portraitControls .turnButton { min-height: 48px; padding: 10px 8px; border-radius: 999px; font-size: 14px; line-height: 1.4; }

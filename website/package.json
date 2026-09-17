@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prototype:album": "next dev --port 3017",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
