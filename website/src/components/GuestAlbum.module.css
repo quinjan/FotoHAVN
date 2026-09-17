@@ -133,6 +133,7 @@
   .invitation { margin: 16px 0 36px; font-size: 16px; }
   .album > .boardToolbar, .album > .metalBoard, .album > .boardFooter { display: none; }
   .portraitViewer { display: block; margin-inline: -24px; }
+  .album:has([data-album-prototype]) .portraitViewer { display: none; }
   .portraitStage { position: relative; isolation: isolate; display: grid; place-items: center; height: clamp(390px, 115vw, 540px); overflow: hidden; touch-action: pan-y; }
   .portraitStage::before { content: ""; position: absolute; z-index: -1; inset-block: 0; left: 50%; width: max(900px, 150%); transform: translateX(-50%); border: 12px solid transparent; border-image-source: var(--board-material); border-image-slice: 34 fill; border-image-repeat: stretch; }
   .portraitPrint { position: relative; width: min(76vw, 420px); height: clamp(325px, 100vw, 440px); transform: translateY(7px) rotate(3deg); perspective: 1500px; }

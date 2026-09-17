@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useReducer, useRef, type CSSProperties } from "react";
+import { Suspense, useEffect, useId, useLayoutEffect, useReducer, useRef, type CSSProperties } from "react";
+import GuestAlbumMotionPrototype from "./GuestAlbumMotionPrototype";
 import StaticImage from "next/image";
 import { ArrowsOutIcon } from "@phosphor-icons/react/dist/csr/ArrowsOut";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
@@ -185,6 +186,7 @@ export default function GuestAlbum() {
       <h2 id="album-heading">Look at <em>you.</em></h2>
       <p className={styles.invitation}>Every photograph has another side.</p>
     </div>
+    {process.env.NODE_ENV !== "production" && <Suspense fallback={null}><GuestAlbumMotionPrototype /></Suspense>}
     <div className={styles.portraitViewer} role="region" aria-label="Explore the guest photographs"
       onKeyDown={event => {
         if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
