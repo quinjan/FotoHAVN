@@ -3,12 +3,19 @@
   .carousel { display: block; margin-inline: -24px; }
   .stage { position: relative; isolation: isolate; }
   .stage::before { content: ""; position: absolute; z-index: -1; inset: 0; border: 12px solid transparent; border-image: var(--material) 34 fill / 12px; }
-  .track { display: flex; position: relative; gap: 24px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 36px max(0px, calc((100% - 76vw) / 2)) 30px; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; touch-action: pan-x pan-y; }
+  .track { display: flex; position: relative; gap: 24px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 50px max(0px, calc((100% - 76vw) / 2)) 44px; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; touch-action: pan-x pan-y; }
   .track::-webkit-scrollbar { display: none; }
   .track:focus-visible { outline: 2px solid var(--color-ebony); outline-offset: -4px; }
-  .slot { flex: 0 0 76vw; min-width: 0; scroll-snap-align: center; display: grid; place-items: center; }
+  .slot { position: relative; flex: 0 0 76vw; min-width: 0; scroll-snap-align: center; display: grid; place-items: center; }
+  .slot[aria-hidden="false"] { z-index: 1; }
   .slot .print { width: 100%; transform: rotate(var(--tilt)); }
+  .clip { position: absolute; z-index: 3; top: -28px; left: 50%; width: 34px; height: 46px; transform: translateX(-50%) rotate(-3deg); object-fit: contain; pointer-events: none; }
+  .keepsake { position: absolute; z-index: 2; width: 54px; height: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 4px 3px rgb(30 26 23 / 20%)); }
+  .keepsake[data-placement="right"] { top: -30px; right: -22px; transform: rotate(11deg); }
+  .keepsake[data-placement="left"] { top: -25px; left: -22px; transform: rotate(-13deg); }
+  .keepsake[data-placement="bottom"] { bottom: -30px; right: -8px; width: 88px; transform: rotate(-8deg); }
   .print .front { padding: 10px 10px 12px; }
+  .print .back > p:first-child { max-width: calc(100% - 32px); align-self: center; line-height: 1.5; }
   .print[data-kind="strip"][data-side="photo"] .front { width: 48%; left: 26%; }
   .caption { flex-shrink: 0; min-height: 30px; margin: 8px 0 0; text-align: center; font: italic 15px/1 var(--font-display); }
 }

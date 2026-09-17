@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type Ref } from "react";
+import Image from "next/image";
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { DeviceRotateIcon } from "@phosphor-icons/react/dist/csr/DeviceRotate";
@@ -14,6 +15,20 @@ const count = guestPhotographs.length;
 // Keep one full copy on each side so a wrap has the same neighbours and geometry.
 const photographs = [...guestPhotographs, ...guestPhotographs, ...guestPhotographs];
 const indexOf = (slot: number) => ((slot % count) + count) % count;
+const asset = (name: string) => withSiteBasePath(`/images/guest-board/${name}`);
+// Seed each tilt by photograph identity: irregular, but stable across renders and loop copies.
+function printTilt(id: string) {
+  const seed = [...id].reduce((hash, character) => Math.imul(hash, 31) + character.charCodeAt(0) | 0, 7);
+  return ((seed >>> 0) % 19 - 9) / 2;
+}
+const keepsakes: Record<string, { image: string; width: number; height: number; placement: string }> = {
+  "guest-trio": { image: "teddy-charm.webp", width: 480, height: 720, placement: "right" },
+  "friends": { image: "ribbon-keepsake.webp", width: 480, height: 525, placement: "left" },
+  "family": { image: "bunny-charm.webp", width: 480, height: 720, placement: "left" },
+  "keepsakes": { image: "ticket-keepsake.webp", width: 480, height: 285, placement: "bottom" },
+  "guest-flowers": { image: "ribbon-keepsake.webp", width: 480, height: 525, placement: "right" },
+  "guest-together": { image: "ticket-keepsake.webp", width: 480, height: 285, placement: "bottom" },
+};
 
 export default function GuestAlbumCarousel({ selectedIndex, side, onSelect, onFlip, flipRef }: {
   selectedIndex: number;
@@ -102,15 +117,18 @@ export default function GuestAlbumCarousel({ selectedIndex, side, onSelect, onFl
         {photographs.map((photo, slot) => {
           const active = slot === count + selectedIndex;
           const showNote = active && side === "note";
+          const keepsake = keepsakes[photo.id];
           return <div key={slot} className={styles.slot} aria-hidden={!active} inert={!active}>
             <div className={`${album.portraitPrint} ${styles.print}`} data-kind={photo.kind} data-side={showNote ? "note" : "photo"}
-              data-portrait-photo={active ? photo.id : undefined} style={{ "--tilt": `${slot % 2 ? -2 : 2}deg` } as CSSProperties}>
+              data-portrait-photo={active ? photo.id : undefined} style={{ "--tilt": `${printTilt(photo.id)}deg` } as CSSProperties}>
+              <Image className={styles.clip} src={asset("silver-clip-small.webp")} alt="" aria-hidden="true"
+                width={34} height={46} unoptimized draggable={false} />
               <div className={album.turningSheet} data-side={showNote ? "note" : "photo"}>
                 <div className={`${album.portraitFront} ${styles.front}`} aria-hidden={showNote} inert={showNote}>
                   <div className={album.portraitImage}><GuestBoardPhoto photo={photo} sizes="(max-width: 767px) 76vw, 420px" /></div>
                   <p className={styles.caption}>{photo.title}</p>
                 </div>
-                {active && <div className={album.portraitBack} aria-hidden={!showNote} inert={!showNote}
+                {active && <div className={`${album.portraitBack} ${styles.back}`} aria-hidden={!showNote} inert={!showNote}
                   tabIndex={showNote ? 0 : -1} role="group" aria-label={`Note: ${photo.title}`}>
                   <p className={album.noteLabel}>{photo.testimonial ? "IN THEIR WORDS" : "FROM THE FOTOHAVN ALBUM"}</p>
                   <h3>{photo.title}</h3>
@@ -119,6 +137,9 @@ export default function GuestAlbumCarousel({ selectedIndex, side, onSelect, onFl
                     : <><p className={album.portraitNote}>{photo.note}</p><span className={album.captionCredit}>An editorial note from FOTOHAVN.</span></>}
                 </div>}
               </div>
+              {keepsake && <Image className={styles.keepsake} data-placement={keepsake.placement}
+                src={asset(keepsake.image)} alt="" aria-hidden="true" width={keepsake.width} height={keepsake.height}
+                unoptimized draggable={false} />}
             </div>
           </div>;
         })}

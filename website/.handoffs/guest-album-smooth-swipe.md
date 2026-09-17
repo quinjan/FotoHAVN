@@ -26,3 +26,9 @@ The prototype implementation and artifacts have been removed from this branch's 
 - Physical iOS/Android testing was not available; browser emulation does not establish device-specific performance.
 
 Run from `website`: `npm run dev -- --port 3017`. Preview: http://localhost:3017/#guest-album (mobile portrait).
+
+## Tactile details — 2026-09-18
+
+User requested varied note orientations, restored clips, and keepsake assets on some notes. Added identity-seeded angles from -4.5 to +4.5 degrees, so repeated loop copies and revisited notes never jump to a new tilt. Every print has the existing silver clip. Six photographs carry existing teddy, bunny, ribbon, or ticket accents; decorations stay outside the turning sheet, moving with the carousel without blocking input or entering the accessibility tree.
+
+Checked 320px teddy/ticket notes and 390px bunny notes, corrected corner/label overlap, and verified no horizontal page overflow. The 18 photographs have 11 distinct tilts; clip and accent counts are consistent across the three loop copies. TypeScript, scoped ESLint, and diff checks passed. Browser console reported no errors or warnings. This visual-only follow-up did not rerun the production build or unchanged unit suite.
