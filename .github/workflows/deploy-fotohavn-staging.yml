@@ -41,6 +41,9 @@ jobs:
     needs: validate-request
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    environment:
+      name: production
+      deployment: false
     permissions:
       contents: read
       packages: write
@@ -75,22 +78,31 @@ jobs:
         working-directory: website
         run: npx tsc --noEmit --pretty false
 
+      - name: Test website analytics contracts
+        working-directory: website
+        run: npm run test:analytics
+
       - name: Test deployment state machine
         shell: bash
         run: sudo bash deploy/fotohavn/test-deploy.sh
 
       - name: Build website
         working-directory: website
+        env:
+          NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ vars.FOTOHAVN_CLARITY_PROJECT_ID }}
         run: npm run build
 
       - name: Build immutable container candidate
         id: image
+        env:
+          CLARITY_PROJECT_ID: ${{ vars.FOTOHAVN_CLARITY_PROJECT_ID }}
         shell: bash
         run: |
           set -Eeuo pipefail
           image_tag="ghcr.io/quinjan/fotohavn-website:sha-${GITHUB_SHA}"
           docker build \
             --file website/Dockerfile \
+            --build-arg NEXT_PUBLIC_CLARITY_PROJECT_ID="$CLARITY_PROJECT_ID" \
             --tag "$image_tag" \
             website
           echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"

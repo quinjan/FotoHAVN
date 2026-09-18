@@ -1,0 +1,214 @@
+.prototypeRoot {
+  --prototype-bottom: 84px;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+.prototypeRoot button, .prototypeRoot a { min-height: 44px; font-family: inherit; }
+.prototypeRoot button:focus-visible, .prototypeRoot a:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+.edgeSettings {
+  position: fixed;
+  z-index: 78;
+  top: 42%;
+  right: 0;
+  display: grid;
+  width: 44px;
+  min-width: 44px;
+  height: 56px;
+  min-height: 56px !important;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ebony);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: height var(--duration-fast) var(--ease-standard);
+}
+.edgeSettings::before {
+  position: absolute;
+  right: 0;
+  width: 16px;
+  height: 56px;
+  border: 1px solid var(--color-muted-brass);
+  border-radius: 5px 0 0 5px;
+  background: var(--surface-canvas);
+  box-shadow: -2px 4px 10px rgba(45, 33, 27, 0.04);
+  content: "";
+  transition: width var(--duration-fast) var(--ease-standard), height var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+.edgeSettingsLabel {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.edgeSettings:focus-visible,
+.edgeExpanded {
+  height: 142px;
+}
+.edgeSettings:focus-visible::before,
+.edgeExpanded::before {
+  width: 44px;
+  height: 142px;
+  box-shadow: -3px 6px 16px rgba(45, 33, 27, 0.06);
+}
+.edgeSettings:focus-visible .edgeSettingsLabel,
+.edgeExpanded .edgeSettingsLabel {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .edgeSettings:hover { height: 142px; }
+  .edgeSettings:hover::before { width: 44px; height: 142px; box-shadow: -3px 6px 16px rgba(45, 33, 27, 0.06); }
+  .edgeSettings:hover .edgeSettingsLabel { opacity: 1; }
+}
+.prompt { position: fixed; z-index: 80; border: 1px solid var(--color-hairline); background: var(--surface-canvas); box-shadow: 0 24px 60px rgba(45, 33, 27, 0.18); }
+.prompt h2, .settingsPanel h2, .privacyPage h1, .privacySection h2 { font-family: var(--font-display); font-weight: 500; }
+.prompt h2, .settingsPanel h2 { margin: 0; font-size: clamp(2rem, 3vw, 3.5rem); line-height: 0.98; letter-spacing: -0.025em; }
+.prompt h2 em, .privacyPage h1 em { display: inline-block; padding-bottom: 0.08em; font-weight: 400; line-height: 1.1; }
+.prompt p, .settingsPanel p, .privacyPage p { margin: 0; font-size: 0.95rem; line-height: 1.65; }
+.promptBody { display: grid; gap: 12px; align-content: center; max-width: 58ch; }
+.photoPromise { color: var(--color-text-secondary); font-size: 0.84rem !important; }
+.choiceActions, .settingsActions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; }
+.primaryAction, .secondaryAction, .backButton, .closeButton { border-radius: var(--radius-button); cursor: pointer; transition: transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+.primaryAction:active, .secondaryAction:active, .backButton:active, .closeButton:active { transform: translateY(1px); }
+.primaryAction, .secondaryAction { padding: 0 18px; border: 1px solid var(--color-ebony); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.primaryAction { color: var(--color-off-white); background: var(--color-action-primary); }
+.primaryAction:hover { background: var(--color-action-primary-hover); }
+.secondaryAction { color: var(--color-ebony); background: transparent; }
+.secondaryAction:hover { background: var(--surface-paper); }
+.inlinePrivacy { display: inline; min-height: auto !important; padding: 0; color: inherit; border: 0; border-bottom: 1px solid currentColor; border-radius: 0; background: transparent; cursor: pointer; font: inherit; line-height: inherit; text-align: left; text-underline-offset: 0.18em; }
+.inlinePrivacy:hover { color: var(--color-dark-walnut); }
+.kicker { margin-bottom: 14px !important; font-size: 0.68rem !important; font-weight: 700; letter-spacing: 0.18em; }
+
+.variantA .prompt { right: 20px; bottom: var(--prototype-bottom); left: 20px; display: grid; grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.25fr) minmax(320px, 0.9fr); gap: clamp(24px, 4vw, 64px); align-items: center; padding: clamp(28px, 3vw, 46px); border-top: 3px solid var(--color-muted-brass); }
+.variantA .choiceActions { justify-content: flex-end; }
+.variantB .prompt { top: 88px; right: 24px; bottom: var(--prototype-bottom); display: flex; width: min(410px, calc(100vw - 48px)); padding: clamp(32px, 4vw, 56px) 34px; flex-direction: column; justify-content: space-between; border-top: 6px solid var(--color-muted-brass); background: var(--surface-editorial); }
+.variantB .prompt h2 { max-width: 8ch; font-size: clamp(3rem, 5vw, 5.4rem); }
+.variantB .promptBody { margin: 32px 0; }
+.variantB .choiceActions { align-items: stretch; flex-direction: column; }
+.variantC .prompt { right: 14px; bottom: var(--prototype-bottom); left: 14px; display: grid; grid-template-columns: minmax(360px, 1fr) auto; gap: 30px; align-items: center; padding: 18px 24px; background: var(--surface-deep); color: var(--color-text-inverse); border-color: var(--color-border-dark); }
+.variantC .railCopy { display: grid; grid-template-columns: auto minmax(260px, 680px); gap: 24px; align-items: center; }
+.variantC .railCopy h2 { color: var(--color-off-white); font-family: var(--font-sans); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1.2; text-transform: uppercase; white-space: nowrap; }
+.variantC .railCopy p { color: var(--color-text-inverse-muted); font-size: 0.84rem; line-height: 1.45; }
+.variantC .choiceActions { flex-wrap: nowrap; }
+.variantC .prompt .primaryAction { color: var(--color-ebony); background: var(--color-off-white); border-color: var(--color-off-white); }
+.variantC .prompt .secondaryAction { color: var(--color-off-white); border-color: var(--color-off-white); }
+
+.surfaceBackdrop { position: fixed; z-index: 84; inset: 0; display: grid; padding: 24px 24px var(--prototype-bottom); align-items: end; background: rgba(30, 26, 23, 0.5); }
+.settingsPanel { position: relative; width: min(760px, 100%); max-height: calc(100dvh - 120px); overflow: auto; padding: clamp(28px, 4vw, 52px); border: 1px solid var(--color-hairline); border-radius: var(--radius-panel); background: var(--surface-canvas); box-shadow: var(--shadow-photo); }
+.variantA .settingsPanel { justify-self: center; }
+.variantB .surfaceBackdrop { justify-items: end; padding: 0 24px var(--prototype-bottom); }
+.variantB .settingsPanel { width: min(480px, 100%); height: calc(100dvh - var(--prototype-bottom)); max-height: none; border-radius: 0; }
+.variantC .surfaceBackdrop { align-items: center; justify-items: center; }
+.variantC .settingsPanel { width: min(620px, 100%); border-top: 5px solid var(--color-muted-brass); }
+.closeButton { position: absolute; top: 18px; right: 18px; display: grid; width: 44px; padding: 0; place-items: center; color: var(--color-ebony); border: 1px solid var(--color-hairline); background: transparent; }
+.settingsIntro { max-width: 56ch; margin-top: 18px !important; color: var(--color-text-secondary); }
+.options { display: grid; gap: 12px; margin: 30px 0; padding: 0; border: 0; }
+.options legend { margin-bottom: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.consentOption { display: grid; min-height: 94px; padding: 18px; grid-template-columns: auto 1fr auto; gap: 16px; align-items: start; border: 1px solid var(--color-hairline); border-radius: var(--radius-control); cursor: pointer; }
+.consentOption input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--color-ebony); }
+.consentOption > span { display: grid; gap: 5px; }
+.consentOption strong { font-size: 0.94rem; }
+.consentOption span span { color: var(--color-text-secondary); font-size: 0.82rem; line-height: 1.5; }
+.selectedOption { background: var(--surface-editorial); border-color: var(--color-muted-brass); }
+.withdrawalNote { margin: -12px 0 26px; padding: 18px; border-left: 3px solid var(--color-muted-brass); background: var(--surface-paper); }
+.withdrawalNote p { margin-top: 5px; font-size: 0.84rem; }
+
+.privacyPage { position: fixed; z-index: 86; inset: 0 0 70px; overflow: auto; background: var(--surface-canvas); }
+.privacyHeader, .privacyFooter { display: flex; min-height: 72px; padding: 0 clamp(24px, 5vw, 72px); align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-hairline); }
+.privacyHeader > span { font-family: var(--font-display); font-size: 1.5rem; }
+.backButton, .privacyFooter button { display: inline-flex; gap: 8px; align-items: center; padding: 0; color: var(--color-ebony); border: 0; border-bottom: 1px solid currentColor; background: transparent; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.privacyMain { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: clamp(64px, 10vw, 130px) 0; }
+.privacyIntroduction { max-width: 800px; margin-bottom: clamp(64px, 8vw, 110px); }
+.privacyIntroduction h1 { margin: 0 0 28px; font-size: clamp(3.2rem, 8vw, 7.4rem); line-height: 0.88; letter-spacing: -0.04em; }
+.privacyIntroduction > p:last-child { max-width: 54ch; color: var(--color-text-secondary); font-size: clamp(1rem, 2vw, 1.25rem); }
+.privacySplit { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: clamp(48px, 9vw, 120px); }
+.privacySplit nav { position: sticky; top: 30px; display: grid; align-self: start; gap: 13px; color: var(--color-text-secondary); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.privacyArticle { display: grid; }
+.privacySection { display: grid; padding: 28px 0; grid-template-columns: minmax(180px, 0.8fr) minmax(280px, 1.2fr); gap: 32px; border-top: 1px solid var(--color-hairline); }
+.privacySection h2 { margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.05; }
+.privacySection p { max-width: 58ch; color: var(--color-text-secondary); }
+.privacyLetter { display: grid; grid-template-columns: 220px minmax(0, 680px); gap: clamp(36px, 8vw, 100px); justify-content: center; }
+.privacyLetter aside { align-self: start; padding: 22px; border-top: 4px solid var(--color-muted-brass); background: var(--surface-editorial); }
+.privacyLetter aside p { margin-top: 12px; color: var(--color-text-secondary); }
+.privacyLetter .privacySection { grid-template-columns: 1fr; gap: 12px; }
+.privacyQuestions { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; }
+.privacyQuestions .privacySection { grid-template-columns: 1fr; gap: 14px; }
+.privacyFooter { border-top: 1px solid var(--color-hairline); border-bottom: 0; font-size: 0.75rem; }
+
+.prototypeBar { position: fixed; z-index: 100; bottom: 10px; left: 50%; display: flex; min-height: 58px; max-width: calc(100vw - 20px); padding: 6px; gap: 8px; align-items: center; transform: translateX(-50%); color: #fbf8f2; border: 1px solid rgba(251, 248, 242, 0.24); border-radius: 8px; background: #1e1a17; box-shadow: 0 12px 32px rgba(30, 26, 23, 0.28); font-family: var(--font-sans); }
+.prototypeBar button { display: grid; min-width: 40px; min-height: 40px; padding: 0 10px; place-items: center; color: #fbf8f2; border: 1px solid transparent; border-radius: 4px; background: transparent; cursor: pointer; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+.prototypeBar button:hover, .prototypeBar button[aria-pressed="true"] { border-color: rgba(251, 248, 242, 0.28); background: rgba(251, 248, 242, 0.11); }
+.prototypeBar button:focus-visible { outline-color: #fbf8f2; }
+.variantControls, .surfaceControls { display: flex; align-items: center; }
+.variantControls { gap: 4px; }
+.variantControls > div { display: grid; min-width: 186px; padding: 0 10px; gap: 2px; text-align: center; }
+.variantControls strong { font-size: 0.72rem; }
+.variantControls span { color: #b39a78; font-size: 0.62rem; }
+.surfaceControls { padding-left: 7px; border-left: 1px solid rgba(251, 248, 242, 0.2); }
+
+@media (max-width: 960px) {
+  .edgeSettings { top: 34%; height: 48px; min-height: 48px !important; }
+  .edgeSettings::before { width: 14px; height: 48px; }
+  .edgeSettings:focus-visible, .edgeExpanded { height: 128px; }
+  .edgeSettings:focus-visible::before, .edgeExpanded::before { width: 44px; height: 128px; }
+  @media (hover: hover) {
+    .edgeSettings:hover { height: 128px; }
+    .edgeSettings:hover::before { width: 44px; height: 128px; }
+  }
+  .variantA .prompt { grid-template-columns: 1fr 1.3fr; }
+  .variantA .choiceActions { grid-column: 1 / -1; justify-content: flex-end; }
+  .variantC .prompt { grid-template-columns: 1fr; gap: 14px; }
+  .variantC .choiceActions { justify-content: flex-end; }
+  .privacyQuestions { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .prototypeRoot { --prototype-bottom: 126px; }
+  .edgeSettings {
+    top: 25%;
+    height: 44px;
+    min-height: 44px !important;
+  }
+  .edgeSettings::before { width: 14px; height: 44px; }
+  .edgeSettingsLabel { font-size: 0.54rem; letter-spacing: 0.06em; }
+  .edgeSettings:focus-visible, .edgeExpanded { height: 112px; }
+  .edgeSettings:focus-visible::before, .edgeExpanded::before { width: 44px; height: 112px; }
+  @media (hover: hover) {
+    .edgeSettings:hover { height: 112px; }
+    .edgeSettings:hover::before { width: 44px; height: 112px; }
+  }
+  .prompt, .variantA .prompt, .variantB .prompt, .variantC .prompt { top: auto; right: 10px; bottom: var(--prototype-bottom); left: 10px; display: flex; width: auto; max-height: calc(100dvh - 150px); padding: 24px; gap: 18px; overflow: auto; flex-direction: column; align-items: stretch; }
+  .variantB .prompt h2 { max-width: none; font-size: 3rem; }
+  .variantC .railCopy { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .variantC .choiceActions, .choiceActions, .settingsActions { align-items: stretch; flex-direction: column; }
+  .surfaceBackdrop, .variantB .surfaceBackdrop, .variantC .surfaceBackdrop { padding: 10px 10px var(--prototype-bottom); align-items: end; }
+  .settingsPanel, .variantB .settingsPanel, .variantC .settingsPanel { width: 100%; height: auto; max-height: calc(100dvh - 150px); padding: 28px 22px; border-radius: var(--radius-panel); }
+  .privacyPage { bottom: 112px; }
+  .privacyHeader, .privacyFooter { padding: 0 20px; }
+  .privacyMain { width: min(100% - 40px, 1180px); padding: 56px 0 80px; }
+  .privacyIntroduction h1 { font-size: clamp(3rem, 17vw, 5rem); }
+  .privacySplit, .privacyLetter, .privacyQuestions { grid-template-columns: 1fr; }
+  .privacySplit nav, .privacyLetter aside { position: static; }
+  .privacySection { grid-template-columns: 1fr; gap: 12px; }
+  .privacyFooter { min-height: 88px; gap: 14px; align-items: flex-start; justify-content: center; flex-direction: column; }
+  .prototypeBar { right: 8px; bottom: 8px; left: 8px; display: grid; min-height: 108px; max-width: none; transform: none; }
+  .variantControls { justify-content: space-between; }
+  .variantControls > div { min-width: 0; flex: 1; }
+  .surfaceControls { padding: 4px 0 0; justify-content: space-between; border-top: 1px solid rgba(251, 248, 242, 0.2); border-left: 0; }
+  .surfaceControls button { min-width: 0; padding: 0 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prototypeRoot *, .prototypeRoot *::before, .prototypeRoot *::after { scroll-behavior: auto !important; transition-duration: 1ms !important; }
+}

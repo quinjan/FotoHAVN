@@ -1,4 +1,6 @@
 import ExperienceMotion from "./ExperienceMotion";
+import AnalyticsEventLink from "./AnalyticsEventLink";
+import { analyticsEvents } from "@/analytics/contracts";
 import { inquirySectionId, instagramMessageUrl } from "../../site.config";
 import styles from "./ClosingExperience.module.css";
 
@@ -32,14 +34,15 @@ export default function ClosingExperience() {
                 Drop by for a pay-per-use visit. Ask us for the current
                 location, hours, and details before you go.
               </p>
-              <a
+              <AnalyticsEventLink
+                event={analyticsEvents.findBoothInquiryIntent}
                 className="textLink"
                 href={instagramMessageUrl}
                 target="_blank"
                 rel="noreferrer"
               >
                 ASK FOR CURRENT DETAILS <span aria-hidden="true">↗</span>
-              </a>
+              </AnalyticsEventLink>
             </article>
             <article id="rent-fotohavn" data-reveal>
               <p className={styles.pathLabel}>BRING EVERYONE TOGETHER</p>
@@ -48,14 +51,15 @@ export default function ClosingExperience() {
                 Your celebration, our little haven. Event rental is offered by
                 the hour with unlimited prints.
               </p>
-              <a
+              <AnalyticsEventLink
+                event={analyticsEvents.rentFotohavnInquiryIntent}
                 className="textLink"
                 href={instagramMessageUrl}
                 target="_blank"
                 rel="noreferrer"
               >
                 ASK ABOUT YOUR DATE <span aria-hidden="true">↗</span>
-              </a>
+              </AnalyticsEventLink>
             </article>
           </div>
         </section>

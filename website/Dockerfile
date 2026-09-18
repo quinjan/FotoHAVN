@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM dependencies AS builder
+ARG NEXT_PUBLIC_CLARITY_PROJECT_ID=""
+ENV NEXT_PUBLIC_CLARITY_PROJECT_ID=${NEXT_PUBLIC_CLARITY_PROJECT_ID}
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY . .
 RUN npm run build

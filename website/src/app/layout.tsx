@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import AnalyticsProvider from "@/components/AnalyticsProvider";
 import { siteUrl, withSiteBasePath } from "../../site.config";
 import "./globals.css";
 
@@ -52,7 +53,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${displayFont.variable} ${sansFont.variable}`}>
-      <body>{children}</body>
+      <body><AnalyticsProvider>{children}</AnalyticsProvider></body>
     </html>
   );
 }

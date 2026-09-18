@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:booth": "node --test scripts/booth-scene.test.mjs",
     "test:hero": "node --test scripts/editorial-lift.test.mjs",
-    "test:board": "node --test scripts/guest-board.test.mjs"
+    "test:board": "node --test scripts/guest-board.test.mjs",
+    "test:analytics": "node --test scripts/analytics.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

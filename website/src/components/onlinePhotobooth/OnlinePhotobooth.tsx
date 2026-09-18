@@ -4,6 +4,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useReducer, useRef, useState, type ChangeEvent } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, DownloadSimpleIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
+import { createOnlineBoothCycleTracker, emitAnalyticsEvent } from "@/analytics/client";
+import { analyticsEvents } from "@/analytics/contracts";
 import { findBoothSectionUrl, withSiteBasePath } from "../../../site.config";
 import { getLayout, looks } from "./presets";
 import { canContinue, initialSession, isComplete, sessionReducer, type MoveSource, type Photo, type PositionMoveSource, type Stage } from "./session";
@@ -45,6 +47,7 @@ export default function OnlinePhotobooth() {
   const priorPhotos = useRef(state.photos);
   const stateRef = useRef(state);
   const pendingFocus = useRef<number | null>(null);
+  const [analyticsCycle] = useState(createOnlineBoothCycleTracker);
 
   useEffect(() => { stateRef.current = state; }, [state]);
 
@@ -140,6 +143,8 @@ export default function OnlinePhotobooth() {
     setReviewWhenReady(false);
     if (stage === "capture") setCaptureTab(complete ? "arrange" : "camera");
     if ((stage === "look" || stage === "download") && (!canContinue(state) || !print.ready || print.error)) return;
+    if (state.stage === "layout" && stage === "capture") analyticsCycle.start();
+    if (stage === "download") analyticsCycle.complete();
     cancelPending(); camera.stop(); pendingFocus.current = null; setNotice(""); setConfirmReset(false);
     dispatch({ type: "stage", stage });
     requestAnimationFrame(() => headingRef.current?.scrollIntoView({ block: "start", behavior: "instant" }));
@@ -297,6 +302,7 @@ export default function OnlinePhotobooth() {
 
   function reset() {
     cancelPending(); camera.stop(); pendingFocus.current = null; setNotice(""); setConfirmReset(false);
+    analyticsCycle.reset();
     dispatch({ type: "reset" });
     requestAnimationFrame(() => headingRef.current?.scrollIntoView({ block: "start", behavior: "instant" }));
   }
@@ -310,7 +316,7 @@ export default function OnlinePhotobooth() {
     {print.error ? <><p>{print.error}</p><button className={styles.textButton} type="button" onClick={print.retry}>Try preview again</button></> : !print.ready ? <p>Preparing your framed preview…</p> : null}
   </div>;
 
-  return <div className={`${styles.booth} ${state.stage === "capture" && captureTab === "camera" ? styles.cameraMode : ""}`} onKeyDown={(event) => {
+  return <div data-clarity-mask="true" className={`${styles.booth} ${state.stage === "capture" && captureTab === "camera" ? styles.cameraMode : ""}`} onKeyDown={(event) => {
     if (event.key === "Escape" && state.move) { event.preventDefault(); cancelMove(); }
     else if (event.key === "Escape" && state.operation) { event.preventDefault(); if (retaking) cancelRetake(); else cancelPending(); }
   }}>
@@ -429,11 +435,11 @@ export default function OnlinePhotobooth() {
           <div className={`${styles.controls} ${styles.downloadControls}`}>
             <p className={styles.finishedNote}>A small record<br />of <em>right now.</em></p>
             <p>{layout.slots.length} photographs. {layout.name} template. {look.name} filter.<br />Made by you, with FOTOHAVN.</p>
-            {print.url && print.ready && <a className={styles.primary} href={print.url} download={print.filename}><DownloadSimpleIcon size={20} aria-hidden="true" />Download PNG</a>}
+            {print.url && print.ready && <a className={styles.primary} href={print.url} download={print.filename} onClick={analyticsCycle.downloaded}><DownloadSimpleIcon size={20} aria-hidden="true" />Download PNG</a>}
             {print.url && <a className={styles.textButton} href={print.url} target="_blank" rel="noreferrer">Open image to save</a>}
             <div className={styles.actionRow}><button type="button" className={styles.secondary} onClick={() => goTo("look")}>Edit your strip</button><button type="button" className={styles.textButton} onClick={() => setConfirmReset(true)}>Make another</button></div>
             {confirmReset && <div className={styles.resetConfirmation}><p>Start a fresh strip? Download this one first if you’d like to keep it.</p><div className={styles.actionRow}><button type="button" className={styles.secondary} onClick={reset}>Start a new strip</button><button type="button" className={styles.textButton} onClick={() => setConfirmReset(false)}>Keep this one</button></div></div>}
-            <a className={styles.physicalLink} href={findBoothSectionUrl}>There’s a little room for you in person, too.<ArrowRightIcon size={18} aria-hidden="true" /></a>
+            <a className={styles.physicalLink} href={findBoothSectionUrl} onClick={() => emitAnalyticsEvent(analyticsEvents.onlinePhysicalBoothInvitation)}>There’s a little room for you in person, too.<ArrowRightIcon size={18} aria-hidden="true" /></a>
           </div>
         </div>}
       </div>

@@ -1,374 +1,93 @@
-# Design QA: Healthy Guest Cycle
-
-## Comparison target
-
-- Visual truth: issue #20, approved Variant A (`design-qa/issue-20-variant-a-start-reference.png`, `design-qa/issue-20-variant-a-countdown-reference.png`, and `design-qa/issue-20-photo-strip-reference.png`).
-- Implementation evidence: `design-qa/issue-28-start-implementation.jpg`, `design-qa/issue-28-countdown-implementation.jpg`, and `design-qa/issue-28-photo-strip-implementation.jpg`.
-- Source and implementation viewport: 1280 × 720 px at 1× density. This is a native WinUI app, so CSS viewport normalization does not apply.
-- States compared: Start, countdown with live mirrored Camera preview, and the ten-second Photo Strip preview.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatches remain.
-- Typography and hierarchy: pass — the uppercase Event label, oversized guest-facing headings, supporting copy, tracked status labels, and high-contrast countdown match Variant A.
-- Spacing and layout: pass — the fixed header, centered Start composition, top-right Capture progress, primary content alignment, and Photo Strip preview follow the reference rhythm at the target viewport.
-- Color and controls: pass — neutral canvas, white surfaces, black primary action, subtle borders, and visible 3 px keyboard focus styling preserve the reference palette and accessibility requirements.
-- Camera state: pass — the guest preview is mirrored and labeled, the active Capture is explicit in text and four progress circles, and the countdown remains centered over the live image.
-- Photo Strip state: pass — the 600 × 1800 lossless strip is shown only after decode, the full Event name is visible, the progress line is present, and the booth returns automatically after ten seconds plus the completion transition.
-- Acceptance-driven differences: the live preview uses the required exact 3:2 guest frame rather than the wider issue #20 illustration; the final strip uses the required exact 2:6 output ratio rather than the wider illustrative mock. These are intentional and not defects.
+# Analytics Edge Notch Design QA
 
 ## Evidence
 
-- Full-view comparisons: each source/implementation pair was opened together at 1:1 density. Header, copy hierarchy, primary actions, Capture progress, and final-strip composition were compared across the entire 1280 × 720 surface.
-- Focused regions: Start CTA foreground and pointer states; countdown overlay and progress circles; Photo Strip proportions, gutters, label, timer copy, and progress line.
-- Primary interaction run: created and started a local Event, completed four real Camera Captures, observed canonical strip composition, watched the ten-second preview and 450 ms transition, and confirmed automatic return to Start.
-- Persistence evidence: the exercised Guest Cycle produced exactly four canonical JPEGs, `photo-strip.png`, and a versioned completed `guest-cycle.json` with all four ordered Capture names and the Photo Strip reference.
-- No unhandled native app errors were observed. Browser console checks are not applicable to this WinUI app.
+- Source visual truth: `C:\Users\QUINJ3875\.codex\generated_images\01a0b28d-500d-7322-88be-65d74d13fa4c\exec-0ea5b8de-d8bd-4b53-8d62-57d062232249.png`
+- Desktop implementation: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-c-desktop.png`
+- Tablet implementation: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-c-tablet-834.png`
+- Mobile implementation: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-c-mobile-390.png`
+- Implementation board: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-implementation-board.png`
+- Full-view comparison: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-qa-full.png`
+- Focused edge comparison: `C:\Quinjan\Repos\FotoHAVN\website\.playwright-cli\analytics-notch-qa-focus.png`
+- Route: `http://localhost:3000/?analytics-prototype=1&variant=C`
+- State: cookieless choice made, settings closed, edge control in its collapsed resting state.
 
-## Comparison history
+## Viewport And Normalization
 
-1. The first rendered Start comparison exposed a P1 contrast defect: the nested CTA content rendered black, and the WinUI pointer-over state replaced the black fill.
-2. The CTA now pins its icon and text to white and explicitly preserves the black fill for pointer-over and pressed states.
-3. Post-fix Start evidence shows the expected black/white action at rest and under pointer interaction.
-4. Countdown and Photo Strip comparisons found no remaining actionable P0/P1/P2 differences.
-
-## Follow-up polish
-
-- P3/test gap: Operator Assistance recovery is covered by presentation and orchestration tests, but was not forced during the final physical-Camera visual run.
-
-Previous report result: passed
-
----
-
-# Design QA: Saved Events card redesign
-
-## Comparison target
-
-- Source visual truth: `docs/design-system/reference-states/review/saved-events-card-selected-reference.png`, the approved refinement of Product Design option 3.
-- Implementation evidence: `docs/design-system/reference-states/targets/saved-events/busy--1280x720.png`.
-- Full-view comparison: `docs/design-system/reference-states/review/saved-events-card-full-comparison.png`.
-- Focused card comparison: `docs/design-system/reference-states/review/saved-events-card-focused-comparison.png`.
-- Source dimensions: 1774 × 887 px at 1× density. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
-- Normalization: the full source was resized proportionally to 1280 × 640 and stacked with the 1280 × 720 implementation. The focused source crop was resized to 1184 px wide and stacked with the 1184 × 257 implementation card row.
-- State: first Event busy (`Opening Event…`); two Events idle.
+- Source responsive board: 1536 x 1024 pixels.
+- Desktop browser override: 1440 x 1024 CSS pixels at device pixel ratio 1; captured content area 1425 x 1013 pixels.
+- Tablet browser override: 834 x 1194 CSS pixels at device pixel ratio 1; captured content area 819 x 1173 pixels.
+- Mobile browser override: 390 x 844 CSS pixels at device pixel ratio 1; captured content area 375 x 812 pixels.
+- The implementation board contains each unwarped browser capture fitted within the equivalent source frame. The full comparison places the source and implementation boards at equal 1536 x 1024 board size.
 
 ## Findings
 
-- No actionable P0/P1/P2 visual mismatches remain.
-- Fonts and typography: pass — the cards load the repository’s Inter variable font; Event names, tracked Event ID labels, ID values, and muted saved-recency copy preserve the selected hierarchy without wrapping at Standard.
-- Spacing and layout rhythm: pass — the cards retain the selected vertical structure, generous empty body, and bottom-right action placement. The implementation uses a 256 px card height instead of the taller ImageGen canvas proportion so six Events remain practical in the canonical 1280 × 720 operator layout; overflow is contained in the main operator content.
-- Colors and visual tokens: pass — off-white canvas, white panels, near-black typography, subtle neutral borders, gray busy surface, and restrained dark-red Delete glyph follow the source and FotoHAVN tokens.
-- Image quality and asset fidelity: pass — no raster artwork is required. Edit and Delete use the installed Segoe MDL2/Fluent icon font rather than custom SVG, CSS drawing, emoji, or placeholder art.
-- Copy and content: pass — idle `Ready to start` copy and all visible Start buttons are absent. The busy card retains one loader with `Opening Event…`; Event names, IDs, and saved-recency values remain intact.
-- Interaction and accessibility: pass — the full neutral card body is an independent Start button with an Event-specific accessible name. Edit and Delete remain separate 48 × 48 buttons with accessible names and tooltips. Busy Start, Edit, and Delete controls are disabled together.
-- Responsive behavior: pass — the 12 Saved Events references cover Standard, Compact, scale-equivalent, and 640 × 360 Stress layouts without horizontal scrolling or clipped actions.
+- No actionable P0, P1, or P2 mismatch remains.
+- Fonts and typography: the implementation preserves the real FotoHAVN display and utility fonts. The analytics label remains hidden at rest and uses the existing uppercase utility treatment when revealed.
+- Spacing and layout rhythm: the resting notch remains flush with the right viewport edge and is visually secondary at all three breakpoints. The transparent control retains a 44-pixel interaction width while only the 16-pixel desktop or 14-pixel tablet/mobile notch is painted.
+- Colors and visual tokens: ivory surface, ebony label, and muted-brass outline match the source direction and existing site tokens. The exposed corners use a restrained five-pixel radius.
+- Image quality and asset fidelity: the live implementation keeps the real FotoHAVN photography and does not replace any visual asset.
+- Copy and content: no analytics label appears in the resting state. On reveal, the control reads `Analytics settings`.
+- Interaction and accessibility: desktop reveals the label on hover or keyboard focus and opens Settings on activation. Tablet/mobile use first tap to reveal and second tap to open. Keyboard activation opens directly. Settings focus moves to its heading.
+- Responsive behavior: desktop, tablet, and mobile had `scrollWidth` equal to `clientWidth`; the control introduced no horizontal overflow.
+- Console: no warnings or errors were reported in the final in-app browser pass.
 
-## Primary interaction checks
+## Comparison History
 
-- Clicking the first idle card navigated to Start Event confirmation.
-- Edit navigated to Edit Event without starting the Event.
-- Delete navigated to Delete Event confirmation without starting the Event.
-- New Event navigated to New Event setup.
-- The idle screen contains zero `Ready to start` labels.
-- The busy card exposes one `Opening Event…` message and disables Start, Edit, and Delete.
-- Browser console warning/error check: none observed.
+1. The selected responsive source established a tiny ivory-and-brass resting notch at all three breakpoints, expanding only on interaction.
+2. The first implementation matched the responsive placement and behavior but used sharper exposed corners and sat too quietly against the viewport edge for the user's preference.
+3. The notch was widened from 12 to 16 pixels on desktop and from 10 to 14 pixels on tablet/mobile, with a five-pixel radius on the exposed corners. Updated captures confirm the control protrudes slightly farther while remaining unobtrusive.
 
-## Comparison history
+## Focused Comparison
 
-1. First coded comparison found a P2 icon mismatch: the initial MDL2 code point rendered a settings gear instead of the selected pencil. It was replaced with the MDL2 Edit glyph (`E70F`).
-2. First coded comparison also found a P2 density mismatch: 208 px cards compressed the selected whitespace and used the browser fallback font. Cards were increased to 256 px and scoped to the repository’s Inter variable font.
-3. Busy icon buttons initially lost their boundaries against the disabled card surface. Their disabled border and surface were restored.
-4. Post-fix full and focused comparisons show the approved hierarchy, bottom-right icon actions, empty idle lower-left area, and busy treatment with no remaining actionable P0/P1/P2 differences.
+The focused comparison was required because the resting control is intentionally too small to judge accurately in the full responsive board. It confirms the same right-edge placement, ivory fill, muted-brass outline, compact proportions, and softened exposed corners across desktop, tablet, and mobile.
 
-## Follow-up polish
+## Primary Interactions Tested
 
-- P3 intentional difference: the ImageGen source uses taller illustrative cards than the canonical six-Event desktop matrix. The implementation keeps the same design direction at a denser operator-friendly height.
+- Collapsed resting notch at 1440, 834, and 390 widths.
+- Keyboard focus reveals the label; Enter opens Settings directly.
+- First tablet/mobile tap reveals the label without opening Settings.
+- Second tablet/mobile tap opens Settings.
+- Leaving the control collapses it again.
+- Settings retains the inline privacy-information link and right-aligned desktop actions.
 
-final result: passed
+## Follow-up Polish
 
-# Design QA: Guest Cycle, Capture, Operator Assistance, and Photo Strip
-
-## Comparison target
-
-- Source visual truth: the approved Batch 5 targets under `docs/design-system/reference-states/targets/capture`, `operator-assistance`, and `photo-strip`.
-- Native evidence: the 36 Batch 5 fixture folders under `artifacts/ui-verification/batch-5-owned`, followed by focused recaptures under `artifacts/ui-verification/batch-5-assistance-fixed`, `photo-strip-asset`, and `issue-77-final-samples`.
-- Responsive coverage: 1280 × 720, 1024 × 768, 1024 × 576, 853 × 480, and 640 × 360 effective viewports.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatch remains after the correction loop.
-- Capture: the native surface keeps one four-step Capture progress concept, a large mirrored camera viewport, a single state-owned countdown or saved overlay, and stable geometry from countdown through flash and saved states. The deterministic camera frame is deliberately abstract and contains no embedded countdown, cursor, or production guest image.
-- Operator Assistance: cause, preserved Capture progress, recovery action, and guarded Exit remain visible and programmatically ordered. The 640 × 360 layout keeps the Retry target at 48 px and removes only the redundant eyebrow.
-- Photo Strip: the preview now uses a deterministic crop of the approved four-Capture strip instead of embedding the full concept screenshot. Preparing, visible, returning, and failure states retain the approved content hierarchy and responsive portrait preview.
-- Accessibility: the final focused recapture reports zero reading-order, focus, live-region, target-size, or responsive-geometry violations for all 12 assistance fixtures. Capture and Photo Strip representative fixtures also report zero semantic violations.
-
-## Explained pixel differences
-
-- P3 intentional difference: WinUI text metrics, native focus visuals, progress controls, and the guarded hold action differ at the pixel level from the browser-rendered reference while preserving the approved tokens and hierarchy.
-- P3 intentional difference: the verification camera is an abstract privacy-safe frame; the approved reference uses an illustrative couple. The state overlay and camera composition contract, rather than depicted people, are the acceptance seam.
-- P3 intentional difference: the native Photo Strip is upright inside a bordered viewport instead of applying the reference renderer's slight rotation and CSS shadow. The complete four-Capture asset, label, countdown, and responsive bounds are preserved.
+- None required for the selected prototype direction.
 
 final result: passed
 
 ---
 
-# Design QA: Guest Cycle assistance alignment
+# Production Analytics Consent QA Audit
 
-## Comparison target
+## Audit scope
 
-- Visual truth: `docs/design-system/reference-states/targets/operator-assistance/camera-3-preserved--1280x720.png`, the established Operator Assistance composition.
-- Browser-rendered implementation: `docs/design-system/reference-states/review/guest-start-unavailable-implementation.png`.
-- Responsive evidence: `docs/design-system/reference-states/review/guest-start-unavailable-stress-640x360.png`.
-- Primary state: `guest-start-unavailable.camera-retry.standard`; responsive-risk state: `guest-start-unavailable.longest-recovery-copy.scale-200-stress-equivalent`.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatches remain.
-- Shared composition: pass — Guest Start unavailable now uses the same centered white Operator Assistance panel, eyebrow, heading hierarchy, reason copy, and centered recovery action as the established assistance state.
-- Capture-progress exception: pass — the unavailable state renders zero Capture progress circles and zero saved-photo summary elements, as required before a Guest Cycle has begun.
-- Exit safeguard: pass — unavailable and in-cycle Operator Assistance states both use the revised key-icon hold-to-exit control in the shared header.
-- Guest Cycle header context: pass — Guest Start, Capture, Operator Assistance, and Photo Strip render no Event name in their header region. Guest Start retains the Event name only as centered stage context.
-- Responsive behavior: pass — at 640 x 360 the long recovery copy, destructive action, brand lockup, and guarded Exit action remain visible without horizontal or vertical overflow.
-
-## Primary interaction checks
-
-- The unavailable state exposes `Please call the operator`, one appropriate recovery action, and the accessible `Hold to exit Event` header action.
-- The unavailable state rendered zero `.step` and `.preserved` elements.
-- Guest Start, Capture, Operator Assistance, and Photo Strip exposed no Event-name header context.
-- All 103 registered targets were recaptured; the evidence builder reported `complete: true` and zero missing targets.
-
-## Comparison history
-
-1. The previous unavailable state used a separate left-aligned recovery layout with its own callout treatment.
-2. It was replaced with the established centered Operator Assistance panel anatomy.
-3. Capture progress and preserved-photo messaging were intentionally omitted, while the revised Exit safeguard and empty Guest Cycle header context were applied consistently.
-
-final result: passed
-
----
-
-# Design QA: Guest Start and shared brand header
-
-## Comparison target
-
-- Source visual truth: `docs/design-system/reference-states/review/guest-start-selected-reference.png` and `docs/design-system/reference-states/review/guest-start-hold-selected-reference.png`, supplied as the approved Guest Start and Exit hold references.
-- Browser-rendered implementation: `docs/design-system/reference-states/review/guest-start-implementation.png` and `docs/design-system/reference-states/review/guest-start-hold-implementation.png`.
-- First-pass implementation evidence: `docs/design-system/reference-states/review/guest-start-first-pass.png`.
-- Responsive evidence: `docs/design-system/reference-states/review/guest-start-stress-640x360.png`.
-- Full-view comparison: `docs/design-system/reference-states/review/guest-start-full-comparison.png`.
-- Focused stage comparison: `docs/design-system/reference-states/review/guest-start-focused-comparison.png`.
-- Focused Exit hold comparison: `docs/design-system/reference-states/review/guest-start-hold-comparison.png`.
-- Source dimensions: 2647 × 1232 px for Guest Start and 341 × 120 px for the hold reference. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
-- Normalization: full views were proportionally resized to a common 1280 px width. The centered-stage crops were normalized to 960 px width. The source and implementation hold controls were cropped from their actual screenshots and normalized to a common 470 px width without stretching.
-- States: `guest-start.ready.standard`, `guest-start.exit-holding.standard`, and `guest-start.long-event-name-and-exit-hold.scale-200-stress-equivalent`.
+- Fresh implementation run on 2026-09-18 in the Codex in-app Chromium browser against `http://localhost:3000/` and `http://localhost:3000/online`.
+- Viewports: 1440 x 1024 desktop, 834 x 1194 tablet, 390 x 844 mobile, and 320 x 720 narrow mobile.
+- States captured and inspected: initial consent rail, privacy explanation, cookieless Edge Notch rest, keyboard-focus reveal, first-tap mobile reveal, second-tap Settings open, Settings selected states, withdrawal confirmation, Escape close, and the masked Online Booth template state.
+- This audit evaluates UX, visual design, responsive reflow, focus behavior, target size, and observable semantics. It does not claim full assistive-technology or legal compliance.
 
 ## Findings
 
-- No actionable P0/P1/P2 visual mismatches remain.
-- Fonts and typography: pass — the renderer uses FotoHAVN’s Inter stack, reproduces the centered tracked Event name, 60 px guest heading, muted instruction line, compact header action, and strong Start label without clipping or unintended wrapping.
-- Spacing and layout rhythm: pass — Guest Start is now a true centered flex stage beneath the fixed header. The Event name sits immediately above the heading, the Start action follows the reference spacing, and the retention note is centered near the bottom edge. Compact and Stress preserve the hierarchy without scrolling.
-- Colors and visual tokens: pass — the off-white stage, white header, neutral divider, black Start action, monochrome Exit treatment, and restrained gray supporting copy match the source and existing tokens.
-- Image quality and asset fidelity: pass — the shared header uses a source-derived lossless FotoHAVN mark asset with the product name, not a CSS approximation. Play, Permissions/key, and Refresh use the installed Windows icon font.
-- Copy and content: pass — the screen reads `Let’s take some photos.`, `Four Captures. A quick countdown before each one.`, `Touch to start`, and `Photos stay with this Event.` The Event name is absent from the header and retained in the centered stage.
-- Exit safeguard: pass — idle Exit is a key-icon action at the top right. Holding switches to the bordered `Keep holding…` control, shows Refresh on the right, and exposes black determinate progress on the bottom edge. A quick release cancels without navigation.
-- Shared header: pass — every rendered application page now uses the same source-derived `F` mark plus `FotoHAVN` lockup through the shared App Header. Setup overlays remain intentionally self-contained and do not duplicate the brand inside their modal panel.
-- Responsive behavior: pass — the 640 × 360 long-name/hold target keeps the full brand lockup, Event name, heading, instructions, Start action, and guarded Exit control visible without overlap, clipping, or scroll.
+- No actionable P0, P1, or P2 findings remain after the repair pass.
+- The dark consent rail preserves approved direction C, states that cookieless measurement continues, keeps the photograph promise visible, and gives both choices full 44-pixel actions. Desktop/tablet actions align right; 390 and 320 layouts stack without clipping.
+- The warm-ivory Settings dialog preserves the approved hierarchy, explicit radio choices, inline privacy action, right-aligned desktop actions, stacked narrow-mobile actions, and a clear two-step withdrawal confirmation.
+- The privacy explanation reflows from a two-column desktop editorial layout to one column on mobile. Its fixed header, Back action, headings, and copy remain readable without horizontal overflow.
+- The Edge Notch retains a 44-pixel interaction target with a 16-pixel desktop or 14-pixel tablet/mobile painted rest state. Desktop keyboard focus reveals the label. Mobile first tap reveals it and second tap opens Settings.
+- At 320 pixels, `scrollWidth` equals `clientWidth` and both consent buttons measure 235 x 44 pixels. The Settings panel scrolls internally and exposes both stacked actions at its lower edge.
+- The `/online` root has `data-clarity-mask="true"` before generated preview blobs render. At 390 pixels, the route reports equal document `scrollWidth` and `clientWidth`.
+- Browser console inspection found no application errors. Development-only Fast Refresh warnings were excluded from production findings.
 
-## Primary interaction checks
+## Repair and fresh verification
 
-- Touch to start navigated from Guest Start to Capture 1.
-- A quick click/release on Hold to exit Event remained on Guest Start.
-- The canonical hold and Exit confirmation states rendered with the expected progress and confirmation handoff.
-- The shared brand image loaded in the header and exposed one combined `FotoHAVN` accessible name.
-- Browser console warning/error check: none observed.
-- All 103 registered targets were recaptured after the shared header change; the evidence builder reported `complete: true` and zero missing targets.
+1. First-pass keyboard testing found a P2 focus-restoration defect: Escape from Settings returned focus to the page root because the fixed Edge Notch unmounted while the dialog was open.
+2. Settings close and save now schedule focus onto the remounted Edge Notch without scrolling.
+3. Fresh 320-pixel interaction evidence confirmed the complete sequence: resting notch, first-tap expanded notch, second-tap Settings, heading focus entry, Escape close, and focus restored to the revealed Edge Notch.
 
-## Comparison history
+## Remaining release gates
 
-1. The first browser pass exposed a P1 composition mismatch: Guest Start content flowed from the top instead of being vertically centered, and the retention note landed at the bottom left.
-2. The first pass also exposed a P1 icon mismatch: the WinUI code point in the older source mapped to Power Button in the browser font instead of the reference key symbol.
-3. The stage became a centered flex column, the retention note received explicit horizontal centering, and the Exit action moved to the browser’s Permissions/key glyph.
-4. Post-fix full, focused, hold, and Stress comparisons preserve the reference hierarchy and control anatomy with no remaining actionable P0/P1/P2 differences.
+- A real Clarity project ID is not present in the checkout. Production Clarity loading, cookie writes, `/collect` payload inspection, recording masking, synthetic report validation, and HTTPS behavior remain release-blocking external checks.
+- Camera permission and customer-created media were not used in this visual audit. Focused deterministic tests cover the Online Booth Cycle analytics boundary; the existing booth tests cover capture/import behavior independently.
 
-## Follow-up polish
-
-- P3 intentional difference: the supplied Guest Start source is a much wider 2647 × 1232 capture. The canonical renderer remains 1280 × 720 and preserves the same relative vertical hierarchy without stretching the source.
-
-final result: passed
-
----
-
-# Design QA: Shared confirmation dialog standard
-
-## Comparison target
-
-- Source visual truth: `docs/design-system/reference-states/review/confirmation-dialog-selected-reference.png`, selected Product Design option 3.
-- Browser-rendered implementation: `docs/design-system/reference-states/review/confirmation-dialog-implementation.png`.
-- First-pass implementation evidence: `docs/design-system/reference-states/review/confirmation-dialog-first-pass.png`.
-- Full-view comparison: `docs/design-system/reference-states/review/confirmation-dialog-full-comparison.png`.
-- Focused modal comparison: `docs/design-system/reference-states/review/confirmation-dialog-focused-comparison.png`.
-- Exit/Discard exception comparison: `docs/design-system/reference-states/review/confirmation-dialog-exit-discard-comparison.png`, stacking the selected standard with the two identity-free variants at a common 720 px modal width.
-- Source dimensions: 1453 × 1082 px at 1× density. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
-- Normalization: full views were proportionally resized to a common 960 px display width. Modal crops were proportionally resized to a common 720 px display width; neither artifact was stretched.
-- Primary state: `confirmation.start-idle.standard`. Supporting states include Save, Discard, Exit, Delete, busy, failed/Retry, and the four registered responsive-risk viewports.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatches remain.
-- Fonts and typography: pass — FotoHAVN’s Inter stack reproduces the selected centered title, tracked Event labels, bold Event name, muted monospace ID, and balanced action labels without clipping.
-- Spacing and layout rhythm: pass — the renderer follows the selected icon/title/divider/identity/divider/action-rail anatomy. The 500 px contract width keeps the dialog compact in the 1280 × 720 product surface while preserving the reference hierarchy.
-- Colors and visual tokens: pass — neutral decisions use near-black iconography and Primary action styling. Exit, Delete, and Discard use the existing dark-red destructive token for both icon and confirming action. The white panel, gray scrim, borders, and focus ring remain token-aligned.
-- Image quality and asset fidelity: pass — no raster artwork is required. The icons use layered Segoe MDL2/Fluent system glyphs, including a ring plus action-specific glyph, rather than custom SVG, CSS illustration, emoji, or placeholder art.
-- Copy and content: pass — Start, Save, Delete, and retained-context Retry preserve Event name and full Event ID. Exit and Discard intentionally omit Event identity because the current-flow consequence already provides sufficient context. Start and Save avoid generic filler copy; destructive decisions add one specific consequence sentence. Confirmation eyebrows and bordered identity cards are absent.
-- Interaction and accessibility: pass — each dialog exposes one level-1 heading, the consequence through `aria-describedby` when present, a hidden redundant icon, initial focus on the safe action, and 48 px controls. Busy states retain the leading loader and disable conflicting actions.
-- Responsive behavior: pass — all 16 Confirmation references were recaptured. At 640 × 360 the long-name destructive busy state keeps 16 px margins, two 48 px actions, no page overflow, and no internal clipping.
-
-## Primary interaction checks
-
-- Start Event navigated to Guest Start.
-- Save changes navigated to the approved success acknowledgement.
-- Delete Retry navigated to the Delete busy state.
-- Exit and Discard each rendered zero Event identity sections while retaining their specific consequence copy and both actions.
-- Keep event active returned to Guest Start, and Discard changes returned to Saved Events.
-- Browser console warning/error check: none observed.
-- The evidence builder reported 103 frames, `complete: true`, and zero missing targets after recapturing the Confirmation family and embedded Exit confirmation.
-
-## Comparison history
-
-1. The first implementation pass had a P1 icon mismatch: the selected outline circle rendered as a solid black disk because the wrong system status-circle layer was used. Evidence: `docs/design-system/reference-states/review/confirmation-dialog-first-pass.png`.
-2. The icon layer was replaced with the system ring glyph while retaining the action-specific center glyph.
-3. Post-fix full and focused comparisons show the selected outline icon, centered heading, divider-based identity, and paired full-width action rail with no remaining actionable P0/P1/P2 differences.
-4. Product refinement removed Event identity from Exit and Discard only. The combined comparison confirms that both variants preserve the selected icon, centered hierarchy, consequence copy, and paired action rail without leaving an empty divider or awkward vertical gap.
-
-## Follow-up polish
-
-- P3 intentional difference: the generated reference presents a taller, larger modal relative to its canvas. The renderer uses FotoHAVN’s 500 px maximum and tighter product spacing so confirmations remain practical at all required desktop sizes.
-- P3 intentional difference: the renderer shows the required initial keyboard focus ring on the safe action; the generated reference depicts an unfocused pointer state.
-
-final result: passed
-
----
-
-# Design QA: Success and information acknowledgement dialog
-
-## Comparison target
-
-- Source visual truth: `docs/design-system/reference-states/review/success-dialog-selected-reference.png`, the selected Product Design option 3.
-- Browser-rendered implementation: `docs/design-system/reference-states/review/success-dialog-implementation.png`.
-- Full-view comparison: `docs/design-system/reference-states/review/success-dialog-full-comparison.png`.
-- Focused modal comparison: `docs/design-system/reference-states/review/success-dialog-focused-comparison.png`.
-- Source dimensions: 1535 × 1024 px at 1× density. Implementation dimensions and CSS viewport: 1280 × 720 px at 1× density.
-- Normalization: full views were proportionally resized to a common 960 px display width. Modal crops were proportionally resized to a common 720 px display width; neither artifact was stretched.
-- State: `confirmation.success-destination.standard`.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatches remain.
-- Fonts and typography: pass — the renderer uses FotoHAVN’s Inter stack, preserves the selected centered hierarchy, and keeps the title, one-sentence message, and action readable without wrapping.
-- Spacing and layout rhythm: pass — the implementation follows the selected icon/title/message/full-width-action anatomy with balanced vertical spacing. The 440 px modal maximum follows the repository dialog contract; the larger generated canvas presentation was normalized for the focused comparison.
-- Colors and visual tokens: pass — the white panel, near-black copy/action, gray scrim, and restrained semantic green use existing FotoHAVN tokens. The dialog adds no gradient or decorative color.
-- Image quality and asset fidelity: pass — no raster artwork is required. The circular check is the installed Segoe MDL2 `Completed` icon, not custom SVG, CSS art, emoji, or a placeholder.
-- Copy and content: pass — the dialog contains only `Event saved`, `Your changes have been saved.`, and `Continue`. Event name, Event ID, confirmation eyebrow, and Cancel are absent.
-- Interaction and accessibility: pass — the dialog has one programmatic level-1 heading, an accessible description, one 48 px Primary action with initial focus, and a redundant status icon hidden from accessibility. Continue returns to Saved Events.
-- Responsive behavior: pass — at 640 × 360 the dialog keeps 16 px margins, a 48 px full-width action, zero horizontal overflow, and no clipped content. Evidence: `docs/design-system/reference-states/review/success-dialog-stress-640x360.png`.
-
-## Primary interaction checks
-
-- The 1280 × 720 browser render contained zero Event identity panels and zero Cancel buttons.
-- Initial focus entered on Continue.
-- Clicking Continue navigated to `saved-events.card-idle`.
-- Browser console warning/error check: none observed.
-- The evidence builder reported 103 frames, `complete: true`, and zero missing targets.
-
-## Comparison history
-
-1. The selected visual established the centered completion icon, concise acknowledgement copy, and single full-width action.
-2. The implementation translated that structure into FotoHAVN’s 440 px standard acknowledgement dialog and existing type, spacing, color, and icon tokens.
-3. The first browser-rendered full and focused comparisons found no actionable P0/P1/P2 mismatch; no visual correction loop was required.
-
-## Follow-up polish
-
-- P3 intentional difference: the ImageGen source presents the modal at a larger relative canvas scale. The renderer uses the approved 440 px acknowledgement maximum so it remains consistent with FotoHAVN’s desktop dialog system.
-
-final result: passed
-
----
-
-# Design QA: Guarded Exit hold alignment and motion
-
-## Comparison target
-
-- Source visual truth: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-41ff377b-3b1f-4a6e-8242-7bba6cef68d1.png`, the operator-supplied field capture.
-- Implementation evidence: `artifacts/ui-verification/issue-76-hold-layout-final/guest-start_exit-holding_standard/actual.png`.
-- Focused comparison: `artifacts/ui-verification/issue-76-hold-layout-final/design-qa/hold-focused-comparison.png`.
-- Source dimensions: 336 × 112 physical pixels at 125% Windows scaling. Implementation dimensions and native viewport: 1280 × 720 at 1× capture density.
-- Normalization: the implementation control crop was scaled to 125% and stacked with the source control crop without changing either crop's aspect ratio.
-- State: `guest-start.exit-holding.standard` with keyboard focus on the guarded Exit action.
-
-## Findings
-
-- No actionable P0/P1/P2 visual mismatches remain.
-- Fonts and typography: pass — `Keep holding…` retains the approved Inter control label, weight, line height, and copy without clipping.
-- Spacing and layout rhythm: pass — the key, label, and repeat indicator occupy one centered horizontal row with approved inline spacing. The progress track is contained along the button's bottom edge instead of relying on negative margins.
-- Colors and visual tokens: pass — the white holding surface, black foreground/progress, neutral track, border, and visible focus treatment use the approved component resources.
-- Image quality and asset fidelity: pass — both icons use the installed Segoe MDL2 icon font. The 20 px icon slots preserve the full key and repeat glyph bounds without raster substitution or clipping.
-- Copy and content: pass — the holding label remains exactly `Keep holding…`.
-- Motion and accessibility: pass — the repeat indicator angle advances from the same determinate hold progress that fills the line, completes one rotation over the 1.5-second hold, and remains static when system animations are disabled. The Windows integration test covers both motion modes.
-- UI Automation: pass — the final pinned capture reports the Exit action in `Holding` state, focused, enabled, on-screen, and free of semantic violations.
-
-## Comparison history
-
-1. The operator capture exposed a P1 interaction presentation defect: the key and label did not share a clean visual center, the repeat glyph was clipped in a 16 px box, and the repeat glyph did not move.
-2. The control now gives both icons 20 px slots, centers all three objects in one row, contains the determinate line inside the button, and derives repeat rotation from hold progress.
-3. The post-fix full-view and focused comparison show aligned glyphs/text, an unclipped repeat indicator, and a contained progress track. The full automated suite passes: 36 design-contract, 82 acceptance, and 48 Windows integration tests.
-
-## Follow-up polish
-
-- The final capture includes the required keyboard focus ring; the pointer-state source crop does not. This is an intentional accessibility difference.
-
-final result: passed
-
----
-
-# Design QA: Photo Strip preview fidelity
-
-## Comparison target
-
-- Source visual truth: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-9906216a-e4ac-47c0-96f2-ec1961eaf7ff.png`, the operator-supplied 600 × 1800 generated Photo Strip.
-- Supporting source: `C:/Users/QUINJ3~1/AppData/Local/Temp/codex-clipboard-03a0c692-a057-448e-b0c9-92b500d69e93.png`, the field capture showing the extra preview whitespace.
-- Implementation screenshot: `artifacts/ui-verification/merge-readiness-smoke-fb9d8c6/photo-strip_visible-10-seconds_standard/actual.png`.
-- Viewport: 1280 × 720 native WinUI client at 1× capture density; source strip is 600 × 1800 pixels.
-- State: Photo Strip visible with ten seconds remaining. Preparing, five-second, returning, failed, and four responsive-risk states were also exercised.
-
-## Findings
-
-- [P0 resolved] The pinned interactive host now produces a valid native screenshot instead of the former all-white frame.
-  - Evidence: `artifacts/ui-verification/merge-readiness-full-fb9d8c6` contains all 103 current fixture results, matches the pinned environment, and has no missing evidence files.
-  - Review: the operator inspected the running branch through the complete manual flow and approved it on 2026-08-10. The native visible Photo Strip also received a focused side-by-side review against the supplied 600 × 1800 generated strip.
-  - Result: no unexplained or actionable visual difference remains for the Photo Strip fidelity change.
-- Fonts and typography: pass — hierarchy, weights, wrapping, and countdown copy remain aligned with the approved experience.
-- Spacing and layout rhythm: pass — the shared geometry contract computes preview width from height at exactly `600 / 1800`; all nine responsive-geometry checks pass with zero violations.
-- Colors and visual tokens: pass — the production surface continues to use the governed neutral canvas, border, text, and progress resources.
-- Image quality and asset fidelity: pass — the production-composited 600 × 1800 strip retains its white margins, capture gutters, and Event label without adding horizontal whitespace in the preview.
-- Copy and content: unchanged and present in the UI Automation evidence.
-
-## Primary interaction and state checks
-
-- Photo Strip preparing, visible at ten seconds, visible at five seconds, returning, failed, Compact, and Stress states all settled successfully.
-- All nine fixtures report zero UI Automation violations and pass surface structure, reading order, focus, live-region, target-size, and responsive-geometry checks.
-- The current pinned full-boundary run produced 103 of 103 results with zero missing evidence files. Eight global-focus mismatches were traced to MongoDB Compass and Windows Find stealing focus; focused host recaptures under `merge-readiness-focus-rerun-fb9d8c6`, `merge-readiness-focus-single-fb9d8c6`, and `focus-stress-rerun` settled all eight with zero UI Automation violations.
-- The full automated suite passes: 45 design-contract, 82 acceptance, and 53 Windows integration tests.
-
-## Comparison history
-
-1. The supplied field capture showed the complete generated strip letterboxed inside a wider preview frame.
-2. The compositor and preview now consume one canonical 600 × 1800 geometry contract; responsive preview widths are derived from height instead of independent magic numbers.
-3. The old 295 × 540 QA image was replaced by a production-composited 600 × 1800 privacy-safe strip, and a regression test pins both dimensions.
-4. Earlier native capture attempts returned blank white frames because the desktop capture handle was unavailable.
-5. The merge-readiness pinned run restored valid native captures for all 103 fixtures; the focused Photo Strip comparison and operator manual review close the previous blocked result.
-
-## Follow-up polish
-
-- None identified.
-
-final result: passed
+final result: passed locally; production provider verification pending

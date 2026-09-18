@@ -1,0 +1,430 @@
+.root {
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+.root button,
+.root a {
+  min-height: 44px;
+  font-family: inherit;
+}
+
+.root button:focus-visible,
+.root a:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+.prompt {
+  position: fixed;
+  z-index: 80;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) auto;
+  gap: 30px;
+  align-items: center;
+  padding: 18px 24px;
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-border-dark);
+  background: var(--surface-deep);
+  box-shadow: 0 24px 60px rgba(45, 33, 27, 0.18);
+}
+
+.railCopy {
+  display: grid;
+  grid-template-columns: auto minmax(260px, 720px);
+  gap: 24px;
+  align-items: center;
+}
+
+.railCopy h2 {
+  margin: 0;
+  color: var(--color-off-white);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.prompt p,
+.settingsPanel p,
+.privacyPage p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.railCopy p {
+  color: var(--color-text-inverse-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.choiceActions,
+.settingsActions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.primaryAction,
+.secondaryAction,
+.backButton,
+.closeButton {
+  border-radius: var(--radius-button);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
+}
+
+.primaryAction:active,
+.secondaryAction:active,
+.backButton:active,
+.closeButton:active {
+  transform: translateY(1px);
+}
+
+.primaryAction,
+.secondaryAction {
+  padding: 0 18px;
+  border: 1px solid var(--color-ebony);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.primaryAction {
+  color: var(--color-off-white);
+  background: var(--color-action-primary);
+}
+
+.primaryAction:hover { background: var(--color-action-primary-hover); }
+.secondaryAction { color: var(--color-ebony); background: transparent; }
+.secondaryAction:hover { background: var(--surface-paper); }
+.prompt .primaryAction { color: var(--color-ebony); border-color: var(--color-off-white); background: var(--color-off-white); }
+.prompt .secondaryAction { color: var(--color-off-white); border-color: var(--color-off-white); }
+
+.inlinePrivacy {
+  display: inline;
+  min-height: auto !important;
+  padding: 0;
+  color: inherit;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+}
+
+.inlinePrivacy:hover { color: var(--color-muted-brass); }
+
+.edgeSettings {
+  position: fixed;
+  z-index: 78;
+  top: 42%;
+  right: 0;
+  display: grid;
+  width: 44px;
+  min-width: 44px;
+  height: 56px;
+  min-height: 56px !important;
+  padding: 0;
+  place-items: center;
+  color: var(--color-ebony);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: height var(--duration-fast) var(--ease-standard);
+}
+
+.edgeSettings::before {
+  position: absolute;
+  right: 0;
+  width: 16px;
+  height: 56px;
+  border: 1px solid var(--color-muted-brass);
+  border-radius: 5px 0 0 5px;
+  background: var(--surface-canvas);
+  box-shadow: -2px 4px 10px rgba(45, 33, 27, 0.04);
+  content: "";
+  transition: width var(--duration-fast) var(--ease-standard), height var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.edgeSettingsLabel {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.edgeSettings:focus-visible,
+.edgeExpanded { height: 142px; }
+.edgeSettings:focus-visible::before,
+.edgeExpanded::before { width: 44px; height: 142px; box-shadow: -3px 6px 16px rgba(45, 33, 27, 0.06); }
+.edgeSettings:focus-visible .edgeSettingsLabel,
+.edgeExpanded .edgeSettingsLabel { opacity: 1; }
+
+@media (hover: hover) {
+  .edgeSettings:hover { height: 142px; }
+  .edgeSettings:hover::before { width: 44px; height: 142px; box-shadow: -3px 6px 16px rgba(45, 33, 27, 0.06); }
+  .edgeSettings:hover .edgeSettingsLabel { opacity: 1; }
+}
+
+.surfaceBackdrop {
+  position: fixed;
+  z-index: 84;
+  inset: 0;
+  display: grid;
+  padding: 24px;
+  place-items: center;
+  background: rgba(30, 26, 23, 0.5);
+}
+
+.settingsPanel {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  padding: clamp(28px, 4vw, 52px);
+  border: 1px solid var(--color-hairline);
+  border-top: 5px solid var(--color-muted-brass);
+  border-radius: var(--radius-panel);
+  background: var(--surface-canvas);
+  box-shadow: var(--shadow-photo);
+}
+
+.settingsPanel h2,
+.privacyPage h1,
+.privacySection h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.settingsPanel h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+}
+
+.closeButton {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 44px;
+  padding: 0;
+  place-items: center;
+  color: var(--color-ebony);
+  border: 1px solid var(--color-hairline);
+  background: transparent;
+}
+
+.kicker {
+  margin-bottom: 14px !important;
+  font-size: 0.68rem !important;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.settingsIntro {
+  max-width: 56ch;
+  margin-top: 18px !important;
+  color: var(--color-text-secondary);
+}
+
+.options {
+  display: grid;
+  gap: 12px;
+  margin: 30px 0;
+  padding: 0;
+  border: 0;
+}
+
+.options legend {
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.consentOption {
+  display: grid;
+  min-height: 94px;
+  padding: 18px;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: start;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.consentOption input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  accent-color: var(--color-ebony);
+}
+
+.consentOption > span { display: grid; gap: 5px; }
+.consentOption strong { font-size: 0.94rem; }
+.consentOption span span { color: var(--color-text-secondary); font-size: 0.82rem; line-height: 1.5; }
+.selectedOption { border-color: var(--color-muted-brass); background: var(--surface-editorial); }
+
+.withdrawalNote {
+  margin: -12px 0 26px;
+  padding: 18px;
+  border-left: 3px solid var(--color-muted-brass);
+  background: var(--surface-paper);
+}
+
+.withdrawalNote p { margin-top: 5px; font-size: 0.84rem; }
+
+.privacyPage {
+  position: fixed;
+  z-index: 86;
+  inset: 0;
+  overflow: auto;
+  background: var(--surface-canvas);
+}
+
+.privacyHeader,
+.privacyFooter {
+  display: flex;
+  min-height: 72px;
+  padding: 0 clamp(24px, 5vw, 72px);
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.privacyHeader > span { font-family: var(--font-display); font-size: 1.5rem; }
+.backButton,
+.privacyFooter button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 0;
+  color: var(--color-ebony);
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.privacyMain {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: clamp(64px, 10vw, 130px) 0;
+}
+
+.privacyIntroduction {
+  max-width: 800px;
+  margin-bottom: clamp(64px, 8vw, 110px);
+}
+
+.privacyIntroduction h1 {
+  margin: 0 0 28px;
+  font-size: clamp(3.2rem, 8vw, 7.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.privacyIntroduction h1 em { display: inline-block; padding-bottom: 0.08em; font-weight: 400; line-height: 1.1; }
+.privacyIntroduction > p:last-child { max-width: 54ch; color: var(--color-text-secondary); font-size: clamp(1rem, 2vw, 1.25rem); }
+.privacyQuestions { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; }
+
+.privacySection {
+  display: grid;
+  padding: 28px 0;
+  gap: 14px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.privacySection h2 { margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.05; }
+.privacySection p { max-width: 58ch; color: var(--color-text-secondary); }
+.privacyFooter { border-top: 1px solid var(--color-hairline); border-bottom: 0; font-size: 0.75rem; }
+
+@media (max-width: 960px) {
+  .prompt { grid-template-columns: 1fr; gap: 14px; }
+  .edgeSettings { top: 34%; height: 48px; min-height: 48px !important; }
+  .edgeSettings::before { width: 14px; height: 48px; }
+  .edgeSettings:focus-visible,
+  .edgeExpanded { height: 128px; }
+  .edgeSettings:focus-visible::before,
+  .edgeExpanded::before { width: 44px; height: 128px; }
+  @media (hover: hover) {
+    .edgeSettings:hover { height: 128px; }
+    .edgeSettings:hover::before { width: 44px; height: 128px; }
+  }
+}
+
+@media (max-width: 720px) {
+  .edgeSettings { top: 25%; height: 44px; min-height: 44px !important; }
+  .edgeSettings::before { width: 14px; height: 44px; }
+  .edgeSettingsLabel { font-size: 0.54rem; letter-spacing: 0.06em; }
+  .edgeSettings:focus-visible,
+  .edgeExpanded { height: 112px; }
+  .edgeSettings:focus-visible::before,
+  .edgeExpanded::before { width: 44px; height: 112px; }
+  @media (hover: hover) {
+    .edgeSettings:hover { height: 112px; }
+    .edgeSettings:hover::before { width: 44px; height: 112px; }
+  }
+  .prompt {
+    top: auto;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    width: auto;
+    max-height: calc(100dvh - 20px);
+    padding: 24px;
+    gap: 18px;
+    overflow: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .railCopy { grid-template-columns: 1fr; gap: 8px; }
+  .choiceActions,
+  .settingsActions { align-items: stretch; flex-direction: column; }
+  .surfaceBackdrop { padding: 10px; align-items: end; }
+  .settingsPanel { width: 100%; max-height: calc(100dvh - 20px); padding: 28px 22px; }
+  .privacyHeader,
+  .privacyFooter { padding: 0 20px; }
+  .privacyMain { width: min(100% - 40px, 1180px); padding: 56px 0 80px; }
+  .privacyIntroduction h1 { font-size: clamp(3rem, 17vw, 5rem); }
+  .privacyQuestions { grid-template-columns: 1fr; }
+  .privacyFooter { min-height: 88px; gap: 14px; align-items: flex-start; justify-content: center; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root *,
+  .root *::before,
+  .root *::after { scroll-behavior: auto !important; transition-duration: 1ms !important; }
+}

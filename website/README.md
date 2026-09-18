@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Analytics production setup
+
+Follow the [Microsoft Clarity production setup runbook](docs/microsoft-clarity-production-runbook.md) before enabling analytics on the production image.
+
 ## Getting Started
 
 First, run the development server:
