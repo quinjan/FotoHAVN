@@ -6,7 +6,7 @@ node_modules/
 
 # Browser automation output
 .playwright-cli/
-output/playwright/
+app/output/playwright/
 
 # Frontend build output and Vite cache
 dist/

@@ -34,8 +34,8 @@ This is a strategy hypothesis, not final copy. It is unusually compatible with t
 - Mall use is charged per photo/use; the exact priced unit and what it includes still need to be confirmed.
 - Event rental is sold by the hour with unlimited prints.
 - The intended website must explain who FotoHAVN is, what it offers, the value it creates, proof that it delivers, and how to start a conversation.
-- The repository defines FotoHAVN as coordinating the guest-facing journey from taking photos through receiving a physical print. It calls the narrow keepsake a **Photo Strip** and the submitted printer composition a **Print Sheet**. See the repository's [domain context](../../CONTEXT.md).
-- The current product design contract is calm, direct, monochrome, Inter-based, and accessibility-led. It explicitly says it is not a rebrand. See [design foundations](../design-system/foundations.md) and [design-contract authority](../design-system/README.md).
+- The repository defines FotoHAVN as coordinating the guest-facing journey from taking photos through receiving a physical print. It calls the narrow keepsake a **Photo Strip** and the submitted printer composition a **Print Sheet**. See the repository's [domain context](../../../CONTEXT.md).
+- The desktop product design contract is calm, direct, monochrome, Inter-based, and accessibility-led. It explicitly says it is not a rebrand. See [design foundations](../../../app/docs/design-system/foundations.md) and [design-contract authority](../../../app/docs/design-system/README.md).
 
 ### Details the website must not fabricate
 

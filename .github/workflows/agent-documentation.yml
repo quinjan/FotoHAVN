@@ -1,0 +1,87 @@
+name: Agent documentation contract
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/agent-documentation.yml"
+      - ".gitignore"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "CONTEXT.md"
+      - "CONTEXT-MAP.md"
+      - "README.md"
+      - "app/AGENTS.md"
+      - "app/CLAUDE.md"
+      - "app/CONTEXT.md"
+      - "app/README.md"
+      - "app/FotoHAVN.slnx"
+      - "app/scripts/**"
+      - "app/prototypes/**"
+      - "app/docs/adr/**"
+      - "app/docs/design-system/README.md"
+      - "app/docs/local-development-guide.md"
+      - "docs/agents/**"
+      - "deploy/fotohavn/AGENTS.md"
+      - "deploy/fotohavn/docs/adr/**"
+      - "marketing/reels/AGENTS.md"
+      - "website/AGENTS.md"
+      - "website/CLAUDE.md"
+      - "website/CONTEXT.md"
+      - "website/README.md"
+      - "website/package.json"
+      - "website/docs/website-analytics.md"
+      - "scripts/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/agent-documentation.yml"
+      - ".gitignore"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "CONTEXT.md"
+      - "CONTEXT-MAP.md"
+      - "README.md"
+      - "app/AGENTS.md"
+      - "app/CLAUDE.md"
+      - "app/CONTEXT.md"
+      - "app/README.md"
+      - "app/FotoHAVN.slnx"
+      - "app/scripts/**"
+      - "app/prototypes/**"
+      - "app/docs/adr/**"
+      - "app/docs/design-system/README.md"
+      - "app/docs/local-development-guide.md"
+      - "docs/agents/**"
+      - "deploy/fotohavn/AGENTS.md"
+      - "deploy/fotohavn/docs/adr/**"
+      - "marketing/reels/AGENTS.md"
+      - "website/AGENTS.md"
+      - "website/CLAUDE.md"
+      - "website/CONTEXT.md"
+      - "website/README.md"
+      - "website/package.json"
+      - "website/docs/website-analytics.md"
+      - "scripts/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.19.0
+
+      - name: Verify agent documentation
+        shell: pwsh
+        run: ./scripts/verify-agent-docs.ps1

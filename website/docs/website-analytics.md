@@ -1,6 +1,6 @@
 # Website analytics contract
 
-Production setup and verification: [`website/docs/microsoft-clarity-production-runbook.md`](../website/docs/microsoft-clarity-production-runbook.md).
+Production setup and verification: [`microsoft-clarity-production-runbook.md`](microsoft-clarity-production-runbook.md).
 
 FotoHAVN uses Microsoft Clarity as its only website analytics provider. The integration is optional at runtime and fails open: rendering, the Online Booth Cycle, downloads, and outbound navigation continue if Clarity is missing, blocked, or throws.
 

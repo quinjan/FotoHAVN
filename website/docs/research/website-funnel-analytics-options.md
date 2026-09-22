@@ -18,7 +18,7 @@ The accepted collection model is hybrid:
 - The entire online booth is masked. Customer-created photographs, previews, filenames, blob URLs, camera details, imported-image metadata, contact information, and free text are prohibited from analytics.
 - The cross-page funnel is reported only for consented anonymous journeys. Cookieless page activity uses a separate denominator.
 
-The canonical terminology and measurement definitions are in [`CONTEXT.md`](../../CONTEXT.md). A development-only, three-variant visual prototype is available on the `codex/clarity-consent-prototype` branch at `/?analytics-prototype=1&variant=A`, with `B` and `C` as alternate structures. It does not load Clarity or persist a consent choice.
+The canonical terminology and measurement definitions are in [`website/CONTEXT.md`](../../CONTEXT.md). A development-only, three-variant visual prototype is available on the `codex/clarity-consent-prototype` branch at `/?analytics-prototype=1&variant=A`, with `B` and `C` as alternate structures. It does not load Clarity or persist a consent choice.
 
 ### Approved prototype decision
 
@@ -42,12 +42,12 @@ Do not start with a two-provider stack. GA4 plus Clarity would provide excellent
 
 The present website is well suited to client-side analytics:
 
-- It is a Next.js 16 App Router application with a shared root layout in [`website/src/app/layout.tsx`](../../website/src/app/layout.tsx).
-- It is built as a standalone Docker image rather than as a Vercel-specific deployment; the repository's [`website/Dockerfile`](../../website/Dockerfile) runs the generated Next.js standalone server.
-- The main site is `/`; the online booth is a separate `/online` route in [`website/src/app/online/page.tsx`](../../website/src/app/online/page.tsx).
-- The booth is a client component with an explicit four-stage state machine: `layout`, `capture`, `look`, and `download`. The central transition function and completed download state in [`OnlinePhotobooth.tsx`](../../website/src/components/onlinePhotobooth/OnlinePhotobooth.tsx) are more reliable instrumentation points than generic click tracking.
-- Inquiry calls to action are outbound links to the Instagram message URL defined in [`website/site.config.ts`](../../website/site.config.ts) and rendered in [`ClosingExperience.tsx`](../../website/src/components/ClosingExperience.tsx).
-- No analytics SDK is currently listed in [`website/package.json`](../../website/package.json).
+- It is a Next.js 16 App Router application with a shared root layout in [`website/src/app/layout.tsx`](../../src/app/layout.tsx).
+- It is built as a standalone Docker image rather than as a Vercel-specific deployment; the repository's [`website/Dockerfile`](../../Dockerfile) runs the generated Next.js standalone server.
+- The main site is `/`; the online booth is a separate `/online` route in [`website/src/app/online/page.tsx`](../../src/app/online/page.tsx).
+- The booth is a client component with an explicit four-stage state machine: `layout`, `capture`, `look`, and `download`. The central transition function and completed download state in [`OnlinePhotobooth.tsx`](../../src/components/onlinePhotobooth/OnlinePhotobooth.tsx) are more reliable instrumentation points than generic click tracking.
+- Inquiry calls to action are outbound links to the Instagram message URL defined in [`website/site.config.ts`](../../site.config.ts) and rendered in [`ClosingExperience.tsx`](../../src/components/ClosingExperience.tsx).
+- No analytics SDK is currently listed in [`website/package.json`](../../package.json).
 
 This architecture means a provider should be initialized once in the root layout, while the booth and inquiry components emit a small, stable event contract. It does not require a new backend merely to count the funnel.
 

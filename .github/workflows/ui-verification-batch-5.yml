@@ -28,6 +28,9 @@ jobs:
       - dpi-120
       - dotnet-10.0.302
     timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Check out the requested revision
@@ -85,13 +88,13 @@ jobs:
           Get-Content artifacts/ui-verification/batch-5/summary.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
 
       - name: Upload targets, actuals, diffs, and semantic evidence
-        if: always() && hashFiles('artifacts/ui-verification/batch-5/run.json') != ''
+        if: always() && hashFiles('app/artifacts/ui-verification/batch-5/run.json') != ''
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ui-verification-batch-5-${{ github.sha }}
           retention-days: 30
           if-no-files-found: error
           path: |
-            artifacts/ui-verification/batch-5
-            docs/design-system/reference-states/targets
-            tools/FotoHavn.UiVerificationHost/pinned-environment.json
+            app/artifacts/ui-verification/batch-5
+            app/docs/design-system/reference-states/targets
+            app/tools/FotoHavn.UiVerificationHost/pinned-environment.json

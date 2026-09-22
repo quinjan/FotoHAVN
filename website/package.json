@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit --pretty false",
     "test:booth": "node --test scripts/booth-scene.test.mjs",
     "test:hero": "node --test scripts/editorial-lift.test.mjs",
     "test:board": "node --test scripts/guest-board.test.mjs",
-    "test:analytics": "node --test scripts/analytics.test.mjs"
+    "test:analytics": "node --test scripts/analytics.test.mjs",
+    "test:online": "node --test scripts/online-photobooth.test.mjs scripts/online-photobooth-preview.test.mjs scripts/online-photobooth-gesture.test.mjs",
+    "test": "npm run test:analytics && npm run test:booth && npm run test:hero && npm run test:board && npm run test:online",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

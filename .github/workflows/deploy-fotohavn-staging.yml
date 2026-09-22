@@ -237,11 +237,11 @@ jobs:
           )"
 
           if ! remote_fingerprint="$(run_remote bundle-fingerprint)"; then
-            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before deploying." >&2
+            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with deploy/fotohavn/docs/fotohavn-bootstrap-runbook.md before deploying." >&2
             exit 1
           fi
           if [[ "$remote_fingerprint" != "$local_fingerprint" ]]; then
-            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before deploying." >&2
+            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with deploy/fotohavn/docs/fotohavn-bootstrap-runbook.md before deploying." >&2
             exit 1
           fi
 
@@ -337,11 +337,11 @@ jobs:
           )"
 
           if ! remote_fingerprint="$(run_remote bundle-fingerprint)"; then
-            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before rolling back." >&2
+            echo "::error::The VPS deployment bundle is stale or cannot report its fingerprint. Refresh it with deploy/fotohavn/docs/fotohavn-bootstrap-runbook.md before rolling back." >&2
             exit 1
           fi
           if [[ "$remote_fingerprint" != "$local_fingerprint" ]]; then
-            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with docs/deployment/fotohavn-bootstrap-runbook.md before rolling back." >&2
+            echo "::error::The VPS deployment bundle does not match this revision. Refresh it with deploy/fotohavn/docs/fotohavn-bootstrap-runbook.md before rolling back." >&2
             exit 1
           fi
 

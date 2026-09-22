@@ -28,6 +28,9 @@ jobs:
       - dpi-120
       - dotnet-10.0.302
     timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Check out the dispatched revision
@@ -49,7 +52,7 @@ jobs:
         run: |
           node scripts/build-design-traceability.mjs
           node scripts/validate-design-traceability.mjs
-          node --test tests/operator-event-management-contract.test.mjs tests/ui-verification-host.test.mjs tests/design-traceability-validator.test.mjs
+          node --test tests/operator-event-management-contract.test.mjs tests/ui-verification-injection.test.mjs tests/design-traceability-validator.test.mjs
           dotnet test tests/FotoHavn.WindowsIntegrationTests/FotoHavn.WindowsIntegrationTests.csproj --filter UiVerificationHostTests --artifacts-path artifacts/dotnet-host-tests
           dotnet build src/FotoHavn.App/FotoHavn.App.csproj -p:UiVerificationBuild=true -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --artifacts-path artifacts/dotnet-ui
           dotnet build tools/FotoHavn.UiVerificationHost/FotoHavn.UiVerificationHost.csproj -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --artifacts-path artifacts/dotnet-host
@@ -78,15 +81,15 @@ jobs:
           Get-Content artifacts/ui-verification/batch-3/summary.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
 
       - name: Upload targets, actuals, diffs, and semantic evidence
-        if: always() && hashFiles('artifacts/ui-verification/batch-3/run.json') != ''
+        if: always() && hashFiles('app/artifacts/ui-verification/batch-3/run.json') != ''
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ui-verification-batch-3-${{ github.sha }}
           retention-days: 30
           if-no-files-found: error
           path: |
-            artifacts/ui-verification/batch-3
-            docs/design-system/reference-states/targets/saved-events
-            docs/design-system/reference-states/targets/event-setup
-            docs/design-system/reference-states/targets/confirmation
-            tools/FotoHavn.UiVerificationHost/pinned-environment.json
+            app/artifacts/ui-verification/batch-3
+            app/docs/design-system/reference-states/targets/saved-events
+            app/docs/design-system/reference-states/targets/event-setup
+            app/docs/design-system/reference-states/targets/confirmation
+            app/tools/FotoHavn.UiVerificationHost/pinned-environment.json

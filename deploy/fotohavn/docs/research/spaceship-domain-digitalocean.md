@@ -24,10 +24,10 @@ The repository's last inspected Droplet address is `159.223.47.227`, but this is
 
 This is not a DNS-only change:
 
-- The website currently has Next.js `basePath: "/fotohavn"` through [`website/site.config.ts`](../website/site.config.ts) and [`website/next.config.ts`](../website/next.config.ts). Its current public route is therefore `/fotohavn`, not `/`.
-- The staging metadata URL is still the raw HTTP IP and the site is explicitly `noindex` in [`website/src/app/layout.tsx`](../website/src/app/layout.tsx). A production launch must change the canonical origin to `https://<domain>` and deliberately enable indexing when ready.
-- Container health checks, the deployment script, and GitHub Actions all hard-code the current raw-IP/subpath boundary in [`website/Dockerfile`](../website/Dockerfile), [`deploy/fotohavn/fotohavn-deploy`](../deploy/fotohavn/fotohavn-deploy), and [`.github/workflows/deploy-fotohavn-staging.yml`](../.github/workflows/deploy-fotohavn-staging.yml).
-- The current Caddy fragment declares `@fotohavn` but uses `handle @fotohvn`. That matcher-name mismatch in [`deploy/fotohavn/fotohavn.caddy`](../deploy/fotohavn/fotohavn.caddy) is a pre-cutover defect and must be fixed and validated before the fragment reaches the server.
+- The website currently has Next.js `basePath: "/fotohavn"` through [`website/site.config.ts`](../../../../website/site.config.ts) and [`website/next.config.ts`](../../../../website/next.config.ts). Its current public route is therefore `/fotohavn`, not `/`.
+- The staging metadata URL is still the raw HTTP IP and the site is explicitly `noindex` in [`website/src/app/layout.tsx`](../../../../website/src/app/layout.tsx). A production launch must change the canonical origin to `https://<domain>` and deliberately enable indexing when ready.
+- Container health checks, the deployment script, and GitHub Actions all hard-code the current raw-IP/subpath boundary in [`website/Dockerfile`](../../../../website/Dockerfile), [`deploy/fotohavn/fotohavn-deploy`](../../fotohavn-deploy), and [`.github/workflows/deploy-fotohavn-staging.yml`](../../../../.github/workflows/deploy-fotohavn-staging.yml).
+- The current Caddy fragment declares `@fotohavn` but uses `handle @fotohvn`. That matcher-name mismatch in [`deploy/fotohavn/fotohavn.caddy`](../../fotohavn.caddy) is a pre-cutover defect and must be fixed and validated before the fragment reaches the server.
 - The deployment script and GitHub Actions smoke tests still search for the legacy `FOTOHVN` page marker even though the rendered brand is now `FOTOHAVN`. Update those markers before relying on the deployment/rollback checks for launch evidence.
 - Caddy already owns host ports 80 and 443 for several PhotoBIZ services. FotoHAVN should continue to share its Docker network and reverse proxy to `fotohavn-web:3000`; do **not** publish container port 3000 or install a second proxy.
 

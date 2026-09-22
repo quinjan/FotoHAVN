@@ -5,7 +5,7 @@ FotoHAVN is a Windows 11 x64 desktop application built with .NET 10 and WinUI 3.
 ## Prerequisites
 
 - Windows 11 x64, version 21H2 (build 22000) or later.
-- The .NET SDK selected by [`global.json`](../global.json): .NET 10 SDK `10.0.302`, or a compatible later patch in the same feature band.
+- The exact .NET SDK selected by [`global.json`](../global.json): .NET 10 SDK `10.0.302`. SDK roll-forward is disabled.
 - The Windows 11 SDK `10.0.26100` when the required targeting pack is not already installed. It can be added through the Visual Studio Installer.
 - Internet access to restore packages from NuGet.org.
 - A Windows video-capture device for exercising Camera selection and the live preview. Automated tests do not require Camera hardware.
@@ -14,7 +14,7 @@ For local Camera access, open **Settings > Privacy & security > Camera** and ena
 
 ## Restore and build
 
-Run commands from the repository root:
+Run commands from the `app/` directory:
 
 ```powershell
 dotnet --version
@@ -44,7 +44,13 @@ Removing or editing that directory changes local development data, so preserve i
 
 ## Run tests
 
-Run the complete test suite:
+Run the complete desktop gate, including restore, build, .NET tests, repository contract tests, and agent-document routing checks:
+
+```powershell
+./scripts/verify-desktop.ps1
+```
+
+Run only the .NET test suite:
 
 ```powershell
 dotnet test FotoHAVN.slnx

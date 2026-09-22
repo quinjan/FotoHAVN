@@ -10,7 +10,7 @@
 
 For FOTOHVN, the most coherent concept is **“Develop the photograph”**: the visitor presses a real semantic control, a photographic strip resolves from latent/soft detail to a finished FOTOHVN image in no more than the approved 600 ms reveal duration, and an `ENTER FOTOHVN` action hands focus and scroll cleanly to the existing branding-site hero. The interaction should feel like a tactile photographic ritual, not a game of chance.
 
-This follows the brand's light-led, warm, tactile, photography-first direction and its requirement to feel nostalgic without becoming ornate or costume-like ([`website/DESIGN.md`](../website/DESIGN.md):3-9). It also respects the explicit ban on confetti, wedding-template styling, party graphics, metallic gradients, and novelty-filter framing ([`website/DESIGN.md`](../website/DESIGN.md):20,40-48,87-94,379-400).
+This follows the brand's light-led, warm, tactile, photography-first direction and its requirement to feel nostalgic without becoming ornate or costume-like ([`website/DESIGN.md`](../../DESIGN.md):3-9). It also respects the explicit ban on confetti, wedding-template styling, party graphics, metallic gradients, and novelty-filter framing ([`website/DESIGN.md`](../../DESIGN.md):20,40-48,87-94,379-400).
 
 ## Evidence labels
 
@@ -56,10 +56,10 @@ Primary web sources:
 
 Canonical FOTOHVN sources inspected:
 
-- [`website/DESIGN.md`](../website/DESIGN.md)
-- [`website/tokens.json`](../website/tokens.json)
-- [`website/variables.css`](../website/variables.css)
-- [`website/theme.css`](../website/theme.css)
+- [`website/DESIGN.md`](../../DESIGN.md)
+- [`website/tokens.json`](../../tokens.json)
+- [`website/variables.css`](../../variables.css)
+- [`website/theme.css`](../../theme.css)
 
 ## Reference experience: mechanics and flow
 
@@ -134,7 +134,7 @@ The experience succeeds because it gives the visitor one obvious task and delays
 - Generous whitespace and a calm, poster-like hierarchy.
 - A replay affordance only if it serves a real purpose, such as showing another approved image—not as a hidden repeat gesture.
 
-These are consistent with FOTOHVN's approved generous spacing, editorial hierarchy, flat surfaces, and restrained geometry ([`website/DESIGN.md`](../website/DESIGN.md):9,127-160,411-417).
+These are consistent with FOTOHVN's approved generous spacing, editorial hierarchy, flat surfaces, and restrained geometry ([`website/DESIGN.md`](../../DESIGN.md):9,127-160,411-417).
 
 ### Replace
 
@@ -151,7 +151,7 @@ These are consistent with FOTOHVN's approved generous spacing, editorial hierarc
 | Wedding-template copy | Sensory FOTOHVN language about photographs, the enclosed booth, printed keepsakes, and entering the experience. |
 | `Add to Calendar` | `ENTER FOTOHVN`; booking remains in the branding site's established hierarchy. |
 
-The required materials are already codified: warm photographic paper and wood colors ([`website/DESIGN.md`](../website/DESIGN.md):69-94; [`website/tokens.json`](../website/tokens.json):3-114), Cormorant Garamond plus Manrope ([`website/DESIGN.md`](../website/DESIGN.md):96-125; [`website/tokens.json`](../website/tokens.json):116-243), and restrained motion tokens of 150/240/600 ms ([`website/tokens.json`](../website/tokens.json):327-343; [`website/variables.css`](../website/variables.css):119-123).
+The required materials are already codified: warm photographic paper and wood colors ([`website/DESIGN.md`](../../DESIGN.md):69-94; [`website/tokens.json`](../../tokens.json):3-114), Cormorant Garamond plus Manrope ([`website/DESIGN.md`](../../DESIGN.md):96-125; [`website/tokens.json`](../../tokens.json):116-243), and restrained motion tokens of 150/240/600 ms ([`website/tokens.json`](../../tokens.json):327-343; [`website/variables.css`](../../variables.css):119-123).
 
 ## Recommended FOTOHVN concept
 
@@ -180,7 +180,7 @@ Handoff:
 - The existing branding-site hero becomes the first page content and retains its approved headline, `PHOTOGRAPHS, DEVELOPED DIFFERENTLY.`
 - Focus moves to the hero heading or the first meaningful hero control, not to the browser body.
 
-This avoids repeating the hero headline inside the intro while still priming the three approved experience qualities. Those qualities already exist in the canonical content model as `ENCLOSED`, `PRINTED`, and `DISTINCTIVE` ([`website/DESIGN.md`](../website/DESIGN.md):212-215,254-258).
+This avoids repeating the hero headline inside the intro while still priming the three approved experience qualities. Those qualities already exist in the canonical content model as `ENCLOSED`, `PRINTED`, and `DISTINCTIVE` ([`website/DESIGN.md`](../../DESIGN.md):212-215,254-258).
 
 ## Exact handoff into the main branding site
 
@@ -260,7 +260,7 @@ Collect only aggregate interaction data and do not block the experience on analy
 4. Image focal-point/crop instructions for 320 px mobile, tablet, and wide desktop.
 5. Rights/usage confirmation for every photograph and audio asset.
 
-The local authority prioritizes the full enclosed booth, guests entering/inside it, printed strips, and tactile booth details, and requires real or purpose-made photography rather than blank or unrelated stock imagery ([`website/DESIGN.md`](../website/DESIGN.md):162-184,402-409).
+The local authority prioritizes the full enclosed booth, guests entering/inside it, printed strips, and tactile booth details, and requires real or purpose-made photography rather than blank or unrelated stock imagery ([`website/DESIGN.md`](../../DESIGN.md):162-184,402-409).
 
 ### Optional audio
 
@@ -300,9 +300,9 @@ At a **320 px viewport**, the reference retains the fixed 352 px machine. The me
 
 - Design and test at **320, 375, 390, 768, 1024, and 1280 px**.
 - Give the interactive visual a fluid inline size such as `min(100%, <approved max>)`; do not preserve a desktop intrinsic width on mobile.
-- Keep at least 24 px mobile gutters, aligned with the canonical tokens ([`website/tokens.json`](../website/tokens.json):260-292; [`website/variables.css`](../website/variables.css):93-101).
+- Keep at least 24 px mobile gutters, aligned with the canonical tokens ([`website/tokens.json`](../../tokens.json):260-292; [`website/variables.css`](../../variables.css):93-101).
 - Keep primary and skip controls fully visible without horizontal scrolling.
-- Use 48 px minimum control height, matching the canonical component token ([`website/tokens.json`](../website/tokens.json):345-352; [`website/variables.css`](../website/variables.css):125-128).
+- Use 48 px minimum control height, matching the canonical component token ([`website/tokens.json`](../../tokens.json):345-352; [`website/variables.css`](../../variables.css):125-128).
 - Verify `scrollWidth === clientWidth` at every narrow viewport.
 - Preserve the image's focal subject and avoid shrinking it into an unreadable thumbnail.
 - Account for short mobile heights, browser chrome, landscape orientation, and safe-area insets; the intro must scroll vertically if content cannot fit.
@@ -327,12 +327,12 @@ At a **320 px viewport**, the reference retains the fixed 352 px machine. The me
 **Recommendation**
 
 - Use a real `<button>` for the primary interaction. The photographed control may be decorative, but it must not be the only hit target.
-- Give every action a 48 px minimum target and the approved 2 px focus ring with 3 px offset ([`website/DESIGN.md`](../website/DESIGN.md):192-198,368-377; [`website/variables.css`](../website/variables.css):103-117).
+- Give every action a 48 px minimum target and the approved 2 px focus ring with 3 px offset ([`website/DESIGN.md`](../../DESIGN.md):192-198,368-377; [`website/variables.css`](../../variables.css):103-117).
 - Support Enter and Space; do not require dragging, swiping, pointer precision, or device motion.
 - Keep `SKIP INTRO` in the keyboard order from the beginning.
 - Use `aria-busy` while developing and one polite live-region announcement after completion.
 - Apply `inert` to the underlying main only while the intro is active; restore it before moving focus into the main site.
-- Respect `prefers-reduced-motion`: remove transforms, particles, vibration, and staged waiting; complete immediately or nearly immediately. The canonical CSS variables already collapse motion durations under that preference ([`website/variables.css`](../website/variables.css):136-141).
+- Respect `prefers-reduced-motion`: remove transforms, particles, vibration, and staged waiting; complete immediately or nearly immediately. The canonical CSS variables already collapse motion durations under that preference ([`website/variables.css`](../../variables.css):136-141).
 - Do not make audio necessary for understanding. Provide an explicit sound preference if audio is included.
 - Do not convey completion by color or blur alone; pair the visual change with visible text and an announced state.
 - Test keyboard-only operation, screen-reader reading/focus order, 200% zoom, Windows High Contrast/forced colors, and touch target behavior before acceptance.
@@ -398,7 +398,7 @@ Implementation background: [MDN `sessionStorage`](https://developer.mozilla.org/
 ## Evidence limits
 
 - This report is based on the reference as served on 2026-08-23; the owner can change its deployed assets and behavior later.
-- Current-run screenshots are embedded above and stored under `research/reference-slot-machine/`; they establish only the captured viewport states, not behavior in untested browsers or devices.
+- Current-run screenshots are embedded above and stored under `website/docs/research/reference-slot-machine/`; they establish only the captured viewport states, not behavior in untested browsers or devices.
 - The shipped code establishes the calendar payload and download mechanism, but the downloaded `.ics` file was not imported into Apple, Google, or Outlook calendars.
 - Audio asset availability and invocation were verified from the live source; audible quality and loudness were not judged in a controlled listening test.
 - No real screen reader, switch-control device, Android haptic device, Safari browser, or iOS browser was tested. Accessibility findings are risks and implementation requirements, not a WCAG conformance claim.

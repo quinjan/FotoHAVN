@@ -1,40 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FotoHAVN website
 
-## Analytics production setup
+The public FotoHAVN brand site and browser-based online booth are implemented with Next.js. Route and link behavior comes from `site.config.ts`, `next.config.ts`, and `src/app/`.
 
-Follow the [Microsoft Clarity production setup runbook](docs/microsoft-clarity-production-runbook.md) before enabling analytics on the production image.
+## Development
 
-## Getting Started
-
-First, run the development server:
-
-```bash
+```powershell
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` and use the routes currently present in `src/app/`. Restart the development server after changing base-path configuration.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verification
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run focused scripts from `package.json` while iterating. Run the complete local gate before handoff:
 
-## Learn More
+```powershell
+npm run check
+```
 
-To learn more about Next.js, take a look at the following resources:
+Visual and interaction changes also require rendered-browser checks at the widths listed in `AGENTS.md`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Authority
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `CONTEXT.md` defines website, online-booth, inquiry, consent, and analytics language.
+- `DESIGN.md` and its declared token files define the visual and copy direction.
+- `docs/website-analytics.md` defines the fixed privacy-safe measurement contract.
+- `.handoffs/`, `design-qa.md`, and generated designs are evidence or proposals rather than current authority.
 
-## Deploy on Vercel
+## Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The website is built as an immutable standalone container through the manually dispatched production workflow. Read the deployment ADR and `../deploy/fotohavn/AGENTS.md` before changing or running that path.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Follow [the Microsoft Clarity production runbook](docs/microsoft-clarity-production-runbook.md) when enabling or changing analytics.

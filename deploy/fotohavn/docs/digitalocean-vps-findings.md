@@ -162,7 +162,7 @@ The local worktree already contains extensive uncommitted website changes and QA
 
 ## Agreed deployment direction
 
-The design interview resolved the deployment shape on 2026-08-22. The durable rationale is recorded in [ADR-0002](../adr/0002-deploy-website-as-an-immutable-container.md).
+The design interview resolved the deployment shape on 2026-08-22. The durable rationale is recorded in [ADR-0002](adr/0002-deploy-website-as-an-immutable-container.md).
 
 1. A manually dispatched workflow deploys only the current `main` revision; other refs are rejected.
 2. GitHub-hosted runners execute `npm ci`, lint, TypeScript checking, the production build, and a local container smoke test before publishing.
@@ -183,9 +183,9 @@ The current site metadata names `https://fotohavn.com`, but `fotohavn.com` and `
 
 The repository implementation was completed and locally verified on 2026-08-22:
 
-- [the manual staging workflow](../../.github/workflows/deploy-fotohavn-staging.yml) builds, publishes, deploys, or rolls back;
-- [the standalone website image](../../website/Dockerfile) serves the base-path-aware Next.js app;
-- [the deployment bundle](../../deploy/fotohavn/) contains the isolated Compose service, Caddy route, restricted deploy command, executable state-machine test, and idempotent bootstrap;
+- [the manual staging workflow](../../../.github/workflows/deploy-fotohavn-staging.yml) builds, publishes, deploys, or rolls back;
+- [the standalone website image](../../../website/Dockerfile) serves the base-path-aware Next.js app;
+- [the deployment bundle](../) contains the isolated Compose service, Caddy route, restricted deploy command, executable state-machine test, and idempotent bootstrap;
 - [the bootstrap runbook](fotohavn-bootstrap-runbook.md) separates repository preparation from reviewed VPS and GitHub configuration.
 
 This status does not mean the workflow has run. No GHCR image was published, GitHub Environment or secret was created, bootstrap was executed, or VPS configuration was changed during implementation.

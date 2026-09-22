@@ -8,7 +8,7 @@ Use this runbook once for the FotoHAVN production Clarity project, then repeat t
 - Clarity uses its anonymous first-party analytics cookie only after the visitor selects `Allow analytics cookies`.
 - Advertising storage remains denied in every FotoHAVN consent state.
 - The complete Online Booth is masked. Customer-created photographs, previews, canvas pixels, filenames, blob or data URLs, camera details, contact information, and free text must not appear in recordings or collection requests.
-- Only the event names documented in `../../docs/website-analytics.md` are emitted by FotoHAVN.
+- Only the event names documented in `website-analytics.md` are emitted by FotoHAVN.
 
 ## 1. Create the Clarity project
 
@@ -170,7 +170,7 @@ Do not call Clarity's Identify API, add custom tags, create a visitor ID, or add
 
 ## 9. Build the three reports
 
-Use the exact denominators from `../../docs/website-analytics.md`:
+Use the exact denominators from `website-analytics.md`:
 
 1. **Homepage Progression**: all appropriate cookieless and consented homepage activity; compare Section Reach and Section Engagement across the five named sections.
 2. **Online Booth Completion**: all appropriate cookieless and consented `/online` activity; compare page activity, cycle starts, completions, and first downloads.

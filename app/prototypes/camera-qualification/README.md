@@ -12,7 +12,7 @@ Run from this directory:
 .\run.ps1
 ```
 
-Then open <http://127.0.0.1:4180/camera-qualification-prototype/?variant=A&scenario=1> at a 1280 × 720 viewport.
+The runner uses Python's dependency-free static HTTP server. Open <http://127.0.0.1:4180/?variant=A&scenario=1> at a 1280 × 720 viewport.
 
 Keyboard:
 
