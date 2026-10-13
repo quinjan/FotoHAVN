@@ -1,0 +1,39 @@
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8) var(--space-32);
+  max-width: calc(var(--app-measure-prose) + var(--space-144));
+  padding: var(--space-8) var(--space-24);
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-control);
+  color: var(--app-tone-ink);
+}
+
+/* An empty notice keeps only its live region, which takes no space and draws nothing. */
+.notice[data-empty="true"] {
+  display: contents;
+}
+
+.message {
+  flex: 1 1 auto;
+  max-width: var(--app-measure-prose);
+  padding-block: var(--space-12);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  font-weight: var(--typography-body-font-weight);
+  letter-spacing: var(--typography-body-letter-spacing);
+  line-height: var(--typography-body-line-height);
+}
+
+.notice[data-empty="true"] .message {
+  padding: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-24);
+}

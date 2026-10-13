@@ -1,0 +1,43 @@
+.overlay {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 100%;
+  padding: var(--app-gutter);
+  pointer-events: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  min-inline-size: calc(var(--space-144) * 2);
+  max-inline-size: 100%;
+  padding: var(--space-48) var(--space-64);
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-panel);
+  background-color: var(--semantic-surface-canvas);
+  color: var(--app-tone-ink);
+  text-align: center;
+}
+
+.number {
+  font-family: var(--typography-display-font-family);
+  font-size: var(--app-text-display);
+  font-weight: var(--typography-display-font-weight);
+  letter-spacing: var(--typography-display-letter-spacing);
+  line-height: var(--typography-display-line-height);
+  font-variant-numeric: lining-nums;
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
