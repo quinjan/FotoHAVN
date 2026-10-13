@@ -19,6 +19,7 @@
     <Project Path="tests/FotoHavn.Camera.Windows.Tests/FotoHavn.Camera.Windows.Tests.csproj" />
     <Project Path="tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj" />
     <Project Path="tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Host.Headless.Tests/FotoHavn.Host.Headless.Tests.csproj" />
     <Project Path="tests/FotoHavn.Host.Windows.Tests/FotoHavn.Host.Windows.Tests.csproj" />
     <Project Path="tests/FotoHavn.Protocol.Tests/FotoHavn.Protocol.Tests.csproj" />
     <Project Path="tests/FotoHavn.Storage.Tests/FotoHavn.Storage.Tests.csproj" />
