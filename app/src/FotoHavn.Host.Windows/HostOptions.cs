@@ -4,9 +4,11 @@ namespace FotoHavn.Host.Windows;
 
 /// <summary>
 /// The host command line. <c>--remote-debugging-port</c> and <c>--e2e-camera</c> are read in every build so the
-/// command line stays the same, but only E2E builds act on them.
+/// command line stays the same, but only E2E builds act on them. <c>--webview2-runtime</c> names a Fixed Version
+/// WebView2 runtime folder; without it the host uses <c>runtime/webview2</c> beside the executable when present, and
+/// the Evergreen runtime otherwise.
 /// </summary>
-internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera)
+internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera, string? WebView2RuntimeFolder = null)
 {
     public static HostOptions Default { get; } = new(null, null, null);
 
@@ -28,6 +30,9 @@ internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort,
                     break;
                 case "--e2e-camera":
                     options = options with { E2ECamera = ReadValue(args, ref index, name, inlineValue) };
+                    break;
+                case "--webview2-runtime":
+                    options = options with { WebView2RuntimeFolder = ReadValue(args, ref index, name, inlineValue) };
                     break;
                 default:
                     throw new HostOptionsException($"Unknown option '{args[index]}'.");
