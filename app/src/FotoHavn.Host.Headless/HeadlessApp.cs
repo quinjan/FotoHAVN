@@ -242,7 +242,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         LogClientConnected(logger, role);
         try
         {
-            await session.RunAsync(Brain, App.Lifetime.ApplicationStopping).ConfigureAwait(false);
+            await session.RunAsync(Brain, App.Lifetime.ApplicationStopping, context.RequestAborted).ConfigureAwait(false);
         }
         finally
         {

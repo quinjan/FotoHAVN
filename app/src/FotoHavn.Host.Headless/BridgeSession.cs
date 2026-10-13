@@ -13,7 +13,7 @@ namespace FotoHavn.Host.Headless;
 /// <see cref="ProtocolLimits.MaxMessageBytes"/> UTF-8 bytes) and handed to <see cref="IBrainConnection.Receive"/>; the
 /// brain's messages go out through an ordered queue with a single writer, which also sends the close frame. A message
 /// over the limit is answered with <c>error payloadTooLarge</c> and the socket stays open. Binary frames and invalid
-/// UTF-8 close the socket.
+/// UTF-8 close the socket; the WebSocket stack itself rejects invalid UTF-8 (see <see cref="LingerAfterProtocolErrorAsync"/>).
 /// </summary>
 internal sealed partial class BridgeSession
 {
@@ -28,6 +28,7 @@ internal sealed partial class BridgeSession
     private readonly ILogger _logger;
     private readonly Channel<string> _outgoing = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleReader = true });
     private int _closeRequested;
+    private int _abortedByHost;
     private WebSocketCloseStatus _closeStatus;
     private string? _closeDescription;
 
@@ -46,7 +47,11 @@ internal sealed partial class BridgeSession
     public void Send(string json) => _outgoing.Writer.TryWrite(json);
 
     /// <summary>Ends the connection at once without a close handshake (the headless <c>test.crashUi</c>).</summary>
-    public void Abort() => _socket.Abort();
+    public void Abort()
+    {
+        Volatile.Write(ref _abortedByHost, 1);
+        _socket.Abort();
+    }
 
     /// <summary>
     /// Starts a server-initiated close: the writer sends what is queued, then the close frame. The first request wins.
@@ -63,8 +68,11 @@ internal sealed partial class BridgeSession
         _outgoing.Writer.TryComplete();
     }
 
-    /// <summary>Connects to the brain and runs the session until the socket closes or aborts.</summary>
-    public async Task RunAsync(IBrain brain, CancellationToken stopping)
+    /// <summary>
+    /// Connects to the brain and runs the session until the socket closes or aborts. <paramref name="clientGone"/> fires
+    /// when the client's connection ends.
+    /// </summary>
+    public async Task RunAsync(IBrain brain, CancellationToken stopping, CancellationToken clientGone)
     {
         ArgumentNullException.ThrowIfNull(brain);
 
@@ -84,9 +92,10 @@ internal sealed partial class BridgeSession
 
         using var stoppingRegistration = stopping.Register(
             () => RequestClose(WebSocketCloseStatus.EndpointUnavailable, "The headless host is stopping."));
+        using var linger = CancellationTokenSource.CreateLinkedTokenSource(stopping, clientGone);
         try
         {
-            await ReceiveLoopAsync(connection).ConfigureAwait(false);
+            await ReceiveLoopAsync(connection, linger.Token).ConfigureAwait(false);
         }
         finally
         {
@@ -98,7 +107,7 @@ internal sealed partial class BridgeSession
 
     private bool IsClosing => Volatile.Read(ref _closeRequested) != 0;
 
-    private async Task ReceiveLoopAsync(IBrainConnection? connection)
+    private async Task ReceiveLoopAsync(IBrainConnection? connection, CancellationToken lingerEnd)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(ReceiveBufferBytes);
         var message = new ArrayBufferWriter<byte>(ReceiveBufferBytes);
@@ -114,6 +123,11 @@ internal sealed partial class BridgeSession
                 }
                 catch (Exception exception) when (exception is WebSocketException or OperationCanceledException or ObjectDisposedException)
                 {
+                    if (exception is WebSocketException { InnerException: null } && Volatile.Read(ref _abortedByHost) == 0)
+                    {
+                        await LingerAfterProtocolErrorAsync(lingerEnd).ConfigureAwait(false);
+                    }
+
                     return;
                 }
 
@@ -201,6 +215,24 @@ internal sealed partial class BridgeSession
         catch (Exception exception) when (exception is WebSocketException or OperationCanceledException or ObjectDisposedException)
         {
             _socket.Abort();
+        }
+    }
+
+    /// <summary>
+    /// The WebSocket stack validates incoming text as UTF-8 and breaks the frame rules itself: it sends the close frame
+    /// (1007 for invalid UTF-8), aborts the socket, and throws without an inner exception. Ending the request at once
+    /// would reset the TCP connection, and on Windows a reset discards the close frame the client hasn't read yet. So the
+    /// request stays open until the client's connection ends, for at most <see cref="CloseTimeout"/>.
+    /// </summary>
+    private static async Task LingerAfterProtocolErrorAsync(CancellationToken lingerEnd)
+    {
+        try
+        {
+            await Task.Delay(CloseTimeout, lingerEnd).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // The client's connection ended or the host is stopping: nothing is left to wait for.
         }
     }
 

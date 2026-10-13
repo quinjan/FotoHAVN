@@ -233,6 +233,30 @@ public sealed class BridgeTests
     }
 
     [Fact]
+    public async Task Invalid_utf8_close_frame_reaches_a_client_that_reads_late()
+    {
+        await using var host = await TestHost.StartAsync();
+        using var client = await host.ConnectAsync(Role.Operator);
+
+        await client.SendFragmentsAsync([0x7B, 0xFF, 0x7D], int.MaxValue);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        Assert.Equal(WebSocketCloseStatus.InvalidPayloadData, await client.ReceiveCloseAsync());
+    }
+
+    [Fact]
+    public async Task Binary_close_frame_reaches_a_client_that_reads_late()
+    {
+        await using var host = await TestHost.StartAsync();
+        using var client = await host.ConnectAsync(Role.Operator);
+
+        await client.SendFragmentsAsync(Encoding.UTF8.GetBytes(Hello), int.MaxValue, WebSocketMessageType.Binary);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        Assert.Equal(WebSocketCloseStatus.InvalidMessageType, await client.ReceiveCloseAsync());
+    }
+
+    [Fact]
     public async Task A_brain_that_refuses_the_connection_closes_the_socket()
     {
         await using var host = await TestHost.StartAsync(failConnect: true);
