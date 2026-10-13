@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="NuGet.Config" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/FotoHavn.Camera.Windows/FotoHavn.Camera.Windows.csproj" />
+    <Project Path="src/FotoHavn.Catalog/FotoHavn.Catalog.csproj" />
+    <Project Path="src/FotoHavn.Core/FotoHavn.Core.csproj" />
+    <Project Path="src/FotoHavn.Host.Headless/FotoHavn.Host.Headless.csproj" />
+    <Project Path="src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj" />
+    <Project Path="src/FotoHavn.Protocol/FotoHavn.Protocol.csproj" />
+    <Project Path="src/FotoHavn.Storage/FotoHavn.Storage.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FotoHavn.Camera.Windows.Tests/FotoHavn.Camera.Windows.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Host.Windows.Tests/FotoHavn.Host.Windows.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Protocol.Tests/FotoHavn.Protocol.Tests.csproj" />
+    <Project Path="tests/FotoHavn.Storage.Tests/FotoHavn.Storage.Tests.csproj" />
+  </Folder>
+</Solution>

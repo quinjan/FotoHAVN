@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(FotoHavnWindowsTargetFramework)</TargetFramework>
+    <SupportedOSPlatformVersion>$(FotoHavnWindowsMinimumVersion)</SupportedOSPlatformVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>FOTOHAVN</AssemblyName>
+    <RootNamespace>FotoHavn.Host.Windows</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FotoHavn.Camera.Windows\FotoHavn.Camera.Windows.csproj" />
+    <ProjectReference Include="..\FotoHavn.Catalog\FotoHavn.Catalog.csproj" />
+    <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
+    <ProjectReference Include="..\FotoHavn.Protocol\FotoHavn.Protocol.csproj" />
+    <ProjectReference Include="..\FotoHavn.Storage\FotoHavn.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FotoHavn.Host.Windows.Tests" />
+  </ItemGroup>
+
+  <!-- The built React UI (ui/dist) ships as wwwroot/ beside FOTOHAVN.exe when it exists. -->
+  <PropertyGroup>
+    <FotoHavnUiDist>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\ui\dist'))</FotoHavnUiDist>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(FotoHavnUiDist)')">
+    <Content Include="$(FotoHavnUiDist)\**\*"
+             LinkBase="wwwroot"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Publish guard: a field build must never contain the E2E test hooks.
+    `dotnet publish` sets _IsPublishing, so the guard fails before anything builds; PrepareForPublish covers msbuild -t:Publish.
+  -->
+  <PropertyGroup>
+    <FotoHavnPublishGuardMessage>FOTOHAVN field builds must not include E2E hooks. Remove -p:FotoHavnE2E=true before publishing; E2E builds are for local end-to-end runs only.</FotoHavnPublishGuardMessage>
+  </PropertyGroup>
+  <Target Name="FotoHavnRefuseE2EPublishEarly"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(FotoHavnE2E)' == 'true' and '$(_IsPublishing)' == 'true'">
+    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
+  </Target>
+  <Target Name="FotoHavnRefuseE2EPublish"
+          BeforeTargets="PrepareForPublish"
+          Condition="'$(FotoHavnE2E)' == 'true'">
+    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
+  </Target>
+</Project>
