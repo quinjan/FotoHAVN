@@ -1,0 +1,56 @@
+/* Fixture-only thumbnails: Template outlines and Look swatches drawn from tokens. Never import from product code. */
+.template {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.paper {
+  fill: var(--color-off-white);
+  stroke: var(--color-hairline);
+  stroke-width: 0.3;
+}
+
+.window {
+  fill: var(--color-hairline);
+}
+
+.butter {
+  fill: var(--color-warm-ivory);
+  stroke: var(--color-muted-brass);
+  stroke-width: 0.3;
+}
+
+.look {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radius-hairline);
+}
+
+.look[data-look="monochrome"] {
+  background: linear-gradient(135deg, var(--color-ebony), var(--color-off-white));
+}
+
+.look[data-look="naturale"] {
+  background: linear-gradient(135deg, var(--color-muted-brass), var(--color-warm-ivory) 60%, var(--color-soft-brown));
+}
+
+.look[data-look="soft-monochrome"] {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-ebony) 60%, var(--color-off-white)), var(--color-off-white));
+}
+
+.look[data-look="soft-color"] {
+  background: linear-gradient(135deg, var(--color-antique-metal), var(--color-warm-ivory));
+}
+
+.look[data-look="sepia"] {
+  background: linear-gradient(135deg, var(--color-soft-brown), var(--color-cream-paper));
+}
+
+.look[data-look="warm-monochrome"] {
+  background: linear-gradient(135deg, var(--color-dark-walnut), var(--color-cream-paper));
+}
+
+.look[data-look="classic"] {
+  background: linear-gradient(135deg, var(--color-muted-brass), var(--color-warm-ivory));
+}

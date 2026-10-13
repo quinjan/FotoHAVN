@@ -1,0 +1,10 @@
+/* The box, label, and messages come from shared/field.module.css. Notes wrap and resize vertically only. */
+.textarea {
+  min-block-size: calc(var(--app-target) * 2);
+  resize: vertical;
+}
+
+.textarea:disabled,
+.textarea[readonly] {
+  resize: none;
+}

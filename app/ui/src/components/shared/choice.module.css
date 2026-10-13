@@ -1,0 +1,152 @@
+/*
+ * Checkbox and radio internals shared by Checkbox, Radio, and OptionList. The native input is invisible and stretched
+ * over its clickable area (position the area relatively); the mark is a later sibling and follows the input's state.
+ */
+.input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--app-icon-action);
+  block-size: var(--app-icon-action);
+  border: var(--stroke-hairline) solid var(--app-tone-ink-secondary);
+  border-radius: var(--radius-control);
+  background-color: var(--app-tone-surface);
+  color: var(--app-tone-ink);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    border-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+.mark[data-kind="radio"] {
+  border-radius: var(--radius-round);
+}
+
+.glyph {
+  display: inline-flex;
+  visibility: hidden;
+  font-size: calc(var(--app-icon-action) * 0.75);
+}
+
+.mark[data-kind="radio"] .glyph {
+  font-size: calc(var(--app-icon-action) * 0.5);
+}
+
+/* In a standalone row, the mark centers on the label's first line. */
+.option > .mark {
+  margin-block-start: calc((var(--app-text-body) * var(--typography-body-line-height) - var(--app-icon-action)) / 2);
+}
+
+@media (hover: hover) {
+  .input:hover:not(:disabled) ~ .mark {
+    border-color: var(--app-tone-ink);
+  }
+}
+
+/* Checked checkbox: the ink fills the box and an Off-white check shows. */
+.input:checked ~ .mark[data-kind="checkbox"] {
+  border-color: var(--app-tone-ink);
+  background-color: var(--app-tone-ink);
+  color: var(--app-tone-surface);
+}
+
+/* Checked radio: a Muted Brass ring and a filled brass dot (brand option list). */
+.input:checked ~ .mark[data-kind="radio"] {
+  border-color: var(--app-tone-accent);
+  box-shadow: inset 0 0 0 var(--stroke-hairline) var(--app-tone-accent);
+  color: var(--app-tone-accent);
+}
+
+.input:checked ~ .mark .glyph {
+  visibility: visible;
+}
+
+.input[aria-invalid="true"] ~ .mark {
+  border-color: var(--app-tone-ink);
+  box-shadow: inset 0 0 0 var(--stroke-hairline) var(--app-tone-ink);
+}
+
+.input:disabled ~ .mark {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--app-tone-ink-secondary);
+}
+
+/* A standalone checkbox or radio row: the mark, then the label and an optional description. */
+.option {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-block-size: var(--app-target);
+  padding-block: calc((var(--app-target) - var(--app-text-body) * var(--typography-body-line-height)) / 2);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.option:has(> .input:focus-visible) {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}
+
+.option:has(> .input:disabled) {
+  cursor: not-allowed;
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.optionLabel {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  font-weight: var(--typography-body-font-weight);
+  line-height: var(--typography-body-line-height);
+}
+
+.optionDescription {
+  max-inline-size: var(--app-measure-prose);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.option:has(> .input:disabled) .optionLabel {
+  color: var(--app-tone-ink-secondary);
+}
+
+@media (forced-colors: active) {
+  .option:has(> .input:disabled) .optionLabel,
+  .option:has(> .input:disabled) .optionDescription {
+    color: GrayText;
+  }
+}
+
+@media (forced-colors: active) {
+  .input:checked ~ .mark {
+    border-color: Highlight;
+  }
+
+  .input:disabled ~ .mark {
+    border-color: GrayText;
+    color: GrayText;
+  }
+}

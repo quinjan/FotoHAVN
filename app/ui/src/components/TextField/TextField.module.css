@@ -1,0 +1,6 @@
+/* The box, label, and messages come from shared/field.module.css; a single line clips long values with an ellipsis. */
+.input {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

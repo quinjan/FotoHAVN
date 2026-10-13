@@ -1,0 +1,90 @@
+/* An on/off setting: a track with a thumb, and the state in words. The whole button is the target. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  align-self: flex-start;
+  min-inline-size: var(--app-target);
+  min-block-size: var(--app-target);
+  padding-inline-end: var(--space-8);
+  border-radius: var(--radius-control);
+  color: var(--app-tone-ink);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  font-weight: var(--typography-body-font-weight);
+  line-height: var(--typography-body-line-height);
+}
+
+.track {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-start;
+  inline-size: calc(var(--app-icon-action) * 2.2);
+  block-size: calc(var(--app-icon-action) * 1.2);
+  padding-inline: calc(var(--app-icon-action) * 0.1);
+  border: var(--stroke-hairline) solid var(--app-tone-ink-secondary);
+  border-radius: var(--radius-round);
+  background-color: var(--app-tone-surface);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    border-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+/* The thumb jumps to its end; position, fill, and the state text all change, never color alone. */
+.track[data-checked="true"] {
+  justify-content: flex-end;
+  border-color: var(--app-tone-ink);
+  background-color: var(--app-tone-ink);
+}
+
+.thumb {
+  display: inline-flex;
+  color: var(--app-tone-ink-secondary);
+  font-size: calc(var(--app-icon-action) * 0.8);
+}
+
+.track[data-checked="true"] .thumb {
+  color: var(--app-tone-surface);
+}
+
+.state {
+  min-inline-size: 3ch;
+  text-align: start;
+}
+
+@media (hover: hover) {
+  .switch:hover:not([aria-disabled="true"]) .track {
+    border-color: var(--app-tone-ink);
+  }
+}
+
+.switch[aria-invalid="true"] .track {
+  border-color: var(--app-tone-ink);
+  box-shadow: 0 0 0 var(--stroke-hairline) var(--app-tone-ink);
+}
+
+.switch[aria-disabled="true"] {
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}
+
+.switch[aria-disabled="true"] .track {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+}
+
+.switch[aria-disabled="true"] .thumb {
+  color: var(--app-tone-rule);
+}
+
+@media (forced-colors: active) {
+  .track[data-checked="true"] {
+    border-color: Highlight;
+    border-width: calc(var(--stroke-hairline) * 2);
+  }
+
+  .switch[aria-disabled="true"] .track {
+    border-color: GrayText;
+  }
+}
