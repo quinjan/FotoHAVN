@@ -1,0 +1,4 @@
+/* Confirmations share one minimum width, so a short question doesn't shrink the panel around its actions. */
+.confirm {
+  min-inline-size: min(100%, 24em);
+}

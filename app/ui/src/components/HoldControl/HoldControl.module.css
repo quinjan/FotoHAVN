@@ -1,0 +1,93 @@
+.hold {
+  position: relative;
+  z-index: var(--app-z-exit-hold);
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--space-12);
+  color: var(--app-tone-ink-secondary);
+}
+
+.button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--app-target);
+  block-size: var(--app-target);
+  border-radius: var(--radius-round);
+  color: var(--app-tone-ink-secondary);
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.ring {
+  position: absolute;
+  inset: var(--space-4);
+  inline-size: calc(100% - 2 * var(--space-4));
+  block-size: calc(100% - 2 * var(--space-4));
+  overflow: visible;
+}
+
+.track,
+.arc {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: var(--stroke-hairline);
+}
+
+.track {
+  stroke: var(--app-tone-rule);
+}
+
+/* The arc's length is the progress (pathLength is 1), drawn clockwise from the top. */
+.arc {
+  stroke: var(--app-tone-ink);
+  stroke-width: var(--stroke-focus);
+  stroke-dasharray: var(--hold-progress, 0) 1;
+}
+
+.icon {
+  display: inline-flex;
+  font-size: var(--app-icon-action);
+  line-height: 1;
+}
+
+.hold[data-phase="holding"] .button,
+.hold[data-phase="complete"] .button {
+  color: var(--app-tone-ink);
+}
+
+.progress {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+  white-space: nowrap;
+}
+
+.progress:empty {
+  display: none;
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .track {
+    stroke: GrayText;
+  }
+
+  .arc {
+    stroke: ButtonText;
+  }
+}

@@ -1,0 +1,153 @@
+/* Reading and Tab order: the entry, the keys, then the actions; the keys sit beside both. */
+.pad {
+  display: grid;
+  grid-template-areas:
+    "status keys"
+    "actions keys";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  gap: var(--app-stack-gap) calc(var(--app-stack-gap) * 2);
+  color: var(--app-tone-ink);
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+  grid-area: status;
+}
+
+.dots {
+  display: flex;
+  gap: var(--space-12);
+  font-size: var(--app-icon-action);
+  line-height: 1;
+}
+
+.dot {
+  display: inline-flex;
+  color: var(--app-tone-ink-secondary);
+}
+
+.dot[data-filled] {
+  color: var(--app-tone-ink);
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-block-size: calc(2 * var(--typography-supporting-line-height) * 1em);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.alert {
+  color: var(--app-tone-ink);
+  font-weight: var(--font-weight-semibold);
+}
+
+.countdown {
+  color: var(--app-tone-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  color: var(--app-tone-ink-secondary);
+}
+
+.alert ~ .hint,
+.countdown ~ .hint {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: end;
+  gap: var(--space-16);
+  grid-area: actions;
+}
+
+.keys {
+  display: grid;
+  grid-area: keys;
+  grid-template-columns: repeat(3, var(--pin-key));
+  gap: var(--space-12);
+
+  --pin-key: max(var(--app-target), calc(var(--app-text-subheading) * 2));
+}
+
+.key {
+  display: grid;
+  place-items: center;
+  inline-size: var(--pin-key);
+  block-size: var(--pin-key);
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-control);
+  color: var(--app-tone-ink);
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--typography-subheading-font-weight);
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  transition: background-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+@media (hover: hover) {
+  .key:hover {
+    background-color: var(--app-tone-wash);
+  }
+}
+
+.key:active {
+  background-color: var(--app-tone-wash);
+}
+
+.key[aria-disabled="true"] {
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .key[aria-disabled="true"]:hover {
+    background-color: transparent;
+  }
+}
+
+.key[aria-disabled="true"]:active {
+  background-color: transparent;
+}
+
+.icon {
+  display: inline-flex;
+  font-size: var(--app-icon-control);
+}
+
+.spacer {
+  inline-size: var(--pin-key);
+  block-size: var(--pin-key);
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .key {
+    border-color: ButtonText;
+  }
+
+  .key[aria-disabled="true"] {
+    border-color: GrayText;
+  }
+}

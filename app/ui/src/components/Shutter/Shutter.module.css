@@ -1,0 +1,81 @@
+.shutter {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
+  color: var(--app-tone-ink);
+}
+
+.button {
+  --shutter-size: max(var(--app-target-shutter), calc(var(--app-icon-control) * 2.5));
+  --shutter-ring: var(--space-4);
+
+  display: grid;
+  place-items: center;
+  inline-size: var(--shutter-size);
+  block-size: var(--shutter-size);
+  border: var(--stroke-hairline) solid var(--app-tone-action-fill);
+  border-radius: var(--radius-round);
+  background-color: var(--app-tone-action-fill);
+  box-shadow:
+    0 0 0 var(--shutter-ring) var(--app-tone-surface),
+    0 0 0 calc(var(--shutter-ring) + var(--stroke-hairline)) var(--app-tone-action-fill);
+  color: var(--app-tone-action-label);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    border-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+/* The focus ring clears the outer ring. */
+.button:focus-visible {
+  outline-offset: calc(var(--stroke-focus-offset) + var(--shutter-ring));
+}
+
+@media (hover: hover) {
+  .button:hover {
+    border-color: var(--app-tone-action-fill-emphasis);
+    background-color: var(--app-tone-action-fill-emphasis);
+  }
+}
+
+.button:active {
+  border-color: var(--app-tone-action-fill-emphasis);
+  background-color: var(--app-tone-action-fill-emphasis);
+}
+
+.button[aria-disabled="true"] {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}
+
+.icon {
+  display: inline-flex;
+  font-size: var(--app-icon-control);
+  line-height: 1;
+}
+
+.label {
+  font-family: var(--typography-action-font-family);
+  font-size: var(--app-text-action);
+  font-weight: var(--typography-action-font-weight);
+  letter-spacing: var(--typography-action-letter-spacing);
+  line-height: var(--typography-action-line-height);
+  text-transform: var(--typography-action-text-transform);
+}
+
+.shutter:has(.button[aria-disabled="true"]) .label {
+  color: var(--app-tone-ink-secondary);
+}
+
+@media (forced-colors: active) {
+  .button {
+    border-color: ButtonText;
+  }
+
+  .button[aria-disabled="true"] {
+    border-color: GrayText;
+  }
+}

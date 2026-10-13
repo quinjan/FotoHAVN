@@ -1,0 +1,32 @@
+.flash {
+  position: absolute;
+  inset: 0;
+  z-index: var(--app-z-flash);
+  background-color: var(--semantic-surface-canvas);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flash[data-state="peak"] {
+  opacity: 0.88;
+}
+
+/* One fade from bright to clear: opacity only, once. */
+.flash[data-state="flash"][data-motion="animated"] {
+  animation: capture-flash var(--motion-duration-flash) var(--motion-easing-editorial) both;
+}
+
+@keyframes capture-flash {
+  from {
+    opacity: 0.88;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: a still tint for the flash's moment, removed at once. */
+.flash[data-state="flash"][data-motion="static"] {
+  opacity: 0.5;
+}
