@@ -1,4 +1,11 @@
-/* Placeholder base styles until brand-tokens.css and app-tokens.css arrive in M3. */
+/* Placeholder base styles until brand-tokens.css and app-tokens.css arrive in M3. Neutral values only. */
+:root {
+  --placeholder-canvas: #ffffff;
+  --placeholder-ink: #1a1a1a;
+  --placeholder-muted: #595959;
+  --placeholder-rule: #d6d6d6;
+}
+
 html,
 body,
 #root {
@@ -7,7 +14,16 @@ body,
 }
 
 body {
-  background: #ffffff;
-  color: #1a1a1a;
+  background: var(--placeholder-canvas);
+  color: var(--placeholder-ink);
   font-family: system-ui, sans-serif;
+}
+
+button {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 24px;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }

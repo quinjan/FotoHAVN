@@ -1,33 +1,167 @@
 import { StrictMode } from "react";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { ProtocolBrainClient } from "../brain/protocolClient.ts";
+import { guestStart, operatorEventListEmpty, operatorEventListWithRows } from "../fixtures/inlineFixtures.ts";
+import type { OperatorPresentation } from "../protocol/generated.ts";
+import { ManualTransport } from "../test/manualTransport.ts";
 import { App } from "./App.tsx";
 
-describe("App placeholder", () => {
-  it("renders the heading and status text inside main", () => {
-    render(<App />);
+function renderApp(options: { strict?: boolean; fixtureNames?: readonly string[] } = {}) {
+  const transport = new ManualTransport();
+  const client = new ProtocolBrainClient(transport);
+  client.connect();
+  const app = <App client={client} {...(options.fixtureNames === undefined ? {} : { fixtureNames: options.fixtureNames })} />;
+  render(options.strict === true ? <StrictMode>{app}</StrictMode> : app);
+  const deliver = (message: unknown) => {
+    act(() => {
+      transport.receive(message);
+    });
+  };
+  return { transport, client, deliver };
+}
+
+const root = document.documentElement;
+
+describe("App root routing", () => {
+  it("shows the connecting screen until welcome, without a role", () => {
+    const { transport } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    expect(screen.getByRole("main")).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("heading", { level: 1, name: "FOTOHAVN" })).toBeVisible();
+    expect(root.dataset.fotohavnStatus).toBe("connecting");
+    expect(root.dataset.fotohavnRole).toBeUndefined();
+  });
+
+  it("routes an operator welcome to the operator surfaces and marks the role and revision", () => {
+    const { transport, deliver } = renderApp({ strict: true });
+    act(() => {
+      transport.open();
+    });
+    deliver(operatorEventListEmpty);
+
+    expect(screen.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
+    expect(screen.getByText("No Events yet.")).toBeVisible();
+    expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "eventList");
+    expect(root.dataset).toMatchObject({ fotohavnStatus: "connected", fotohavnRole: "operator", fotohavnRevision: "1" });
+    expect(transport.sent.filter((message) => message.type === "hello")).toHaveLength(1);
+  });
+
+  it("routes a guest welcome to the guest surfaces", () => {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver(guestStart);
+
+    expect(screen.getByRole("heading", { level: 1, name: "Small room. Whole other world." })).toBeVisible();
+    expect(screen.getByText("FOTOHAVN")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "NEW EVENT" })).not.toBeInTheDocument();
+    expect(root.dataset).toMatchObject({ fotohavnRole: "guest", fotohavnRevision: "1" });
+  });
+
+  it("updates the revision mark after each accepted snapshot and ignores stale ones", () => {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver(operatorEventListEmpty);
+    deliver({ type: "presentation", role: "operator", revision: 2, presentation: operatorEventListWithRows.presentation });
+    expect(root.dataset.fotohavnRevision).toBe("2");
+    expect(screen.getByRole("heading", { level: 2, name: "Mara's 30th" })).toBeVisible();
+
+    deliver({ type: "presentation", role: "operator", revision: 2, presentation: operatorEventListEmpty.presentation });
+    expect(root.dataset.fotohavnRevision).toBe("2");
+    expect(screen.queryByText("No Events yet.")).not.toBeInTheDocument();
+  });
+
+  it("keeps the last snapshot and announces reconnecting while the connection is down", () => {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver(guestStart);
+    act(() => {
+      transport.close();
+    });
+
+    expect(screen.getByRole("heading", { level: 1, name: "Small room. Whole other world." })).toBeVisible();
+    expect(screen.getByText("Reconnecting to the booth.")).toBeVisible();
+    expect(root.dataset).toMatchObject({ fotohavnStatus: "reconnecting", fotohavnRole: "guest" });
+
+    act(() => {
+      transport.open();
+    });
+    deliver(guestStart);
+    expect(screen.queryByText("Reconnecting to the booth.")).not.toBeInTheDocument();
+  });
+
+  it("shows the fixed protocol mismatch screen and clears the role", () => {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver(operatorEventListEmpty);
+    deliver({ type: "protocolMismatch", brainVersion: 1, uiVersion: 0 });
 
     const main = screen.getByRole("main");
-    expect(main).toContainElement(screen.getByRole("heading", { level: 1, name: "FOTOHAVN" }));
-    expect(main).toHaveTextContent("The booth is getting ready.");
+    expect(main).toHaveAttribute("data-fotohavn-screen", "protocolMismatch");
+    expect(screen.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
+    expect(main).toHaveTextContent("This screen and the booth are out of step. Restart FOTOHAVN to fix it.");
+    expect(main).toHaveTextContent("Booth version 1 · Screen version 0");
+    expect(root.dataset.fotohavnStatus).toBe("protocolMismatch");
+    expect(root.dataset.fotohavnRole).toBeUndefined();
+    expect(root.dataset.fotohavnRevision).toBeUndefined();
   });
 
-  it("posts ready to the host exactly once, even under StrictMode", () => {
-    const postMessage = vi.fn();
-    vi.stubGlobal("chrome", { webview: { postMessage } });
+  it("shows the not-connected screen without a bridge, listing fixtures only when given", () => {
+    const client = new ProtocolBrainClient(null);
+    const { unmount } = render(<App client={client} />);
+    expect(screen.getByRole("heading", { level: 1, name: "Not connected." })).toBeVisible();
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+    expect(root.dataset.fotohavnStatus).toBe("notConnected");
+    unmount();
 
-    render(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
+    render(<App client={client} fixtureNames={["guest-start"]} />);
+    expect(screen.getByRole("link", { name: "guest-start" })).toHaveAttribute("href", "?fixture=guest-start");
+  });
+});
 
-    expect(postMessage).toHaveBeenCalledTimes(1);
-    expect(postMessage).toHaveBeenCalledWith({ type: "ready" });
+describe("Operator surfaces", () => {
+  function operator(presentation: Partial<OperatorPresentation>) {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver({ ...operatorEventListEmpty, presentation: { ...operatorEventListEmpty.presentation, ...presentation } });
+  }
+
+  it("renders the fatal surface with the brain's reason", () => {
+    operator({ surface: "fatal", eventList: null, fatal: { reason: "The Data folder can't be written." } });
+    expect(screen.getByRole("heading", { level: 1, name: "Something needs attention." })).toBeVisible();
+    expect(screen.getByText("The Data folder can't be written.")).toBeVisible();
   });
 
-  it("renders without throwing outside WebView2", () => {
-    expect(window.chrome).toBeUndefined();
-    expect(() => render(<App />)).not.toThrow();
+  it("renders the fatal surface without a reason", () => {
+    operator({ surface: "fatal", eventList: null, fatal: null });
+    expect(screen.getByRole("heading", { level: 1, name: "Something needs attention." })).toBeVisible();
+  });
+
+  it("renders a placeholder for surfaces later milestones build", () => {
+    operator({ surface: "eventSetup", eventList: null });
+    expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "eventSetup");
+    expect(screen.getByText("This view isn't ready yet.")).toBeVisible();
+  });
+
+  it("treats a missing event list as empty", () => {
+    operator({ eventList: null });
+    expect(screen.getByText("No Events yet.")).toBeVisible();
+  });
+
+  it("shows the brain's notice", () => {
+    operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { message: "The guest display is disconnected." } } });
+    expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The guest display is disconnected.");
   });
 });
