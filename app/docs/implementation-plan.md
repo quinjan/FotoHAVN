@@ -1138,23 +1138,23 @@ Verification record (M1):
 ### M2: host, two screens, bridge, and protocol (M)
 
 Tasks:
-- [ ] `FotoHavn.Protocol`: envelope records with roles, commands, both presentation roots, a version constant, and JSON options.
-- [ ] Schema export and TypeScript generation, plus the drift test.
-- [ ] `FotoHavn.Host.Windows`:
+- [x] `FotoHavn.Protocol`: envelope records with roles, commands, both presentation roots, a version constant, and JSON options.
+- [x] Schema export and TypeScript generation, plus the drift test.
+- [x] `FotoHavn.Host.Windows`:
   - An Operator window (maximized on the primary display) and a Guest window (borderless, covering a given display's full bounds, topmost in field builds), both with per-monitor DPI v2.
   - One shared WebView2 environment with a user-data folder under `Data/` and an optional fixed runtime folder.
   - Virtual host mappings for `app.fotohavn`, `media.fotohavn`, and `preview.fotohavn`.
-- [ ] Display adapter: enumerate displays with stable identities, watch changes, and report them to the brain. Add a fake adapter for tests and the headless host.
-- [ ] Brain rules in `FotoHavn.Core` for display identity matching and single-screen detection.
-- [ ] WebView2 guardrails for both windows:
+- [x] Display adapter: enumerate displays with stable identities, watch changes, and report them to the brain. Add a fake adapter for tests and the headless host.
+- [x] Brain rules in `FotoHavn.Core` for display identity matching and single-screen detection.
+- [x] WebView2 guardrails for both windows:
   - Disable the default context menu, DevTools (field builds), browser accelerator keys, pinch zoom, swipe navigation, the status bar, and autofill.
   - Allow navigation only to `app.fotohavn`; cancel new windows.
   - On `ProcessFailed`, recreate that window's WebView2 and resend its presentation.
-- [ ] Bridge per window: the host assigns the role; `WebMessageReceived` → role-checked command dispatcher on the brain's single-threaded executor; `PostWebMessageAsJson` for each role's presentations; correlation IDs.
-- [ ] `FotoHavn.Host.Headless`: Kestrel on 127.0.0.1 with a random port and a startup token per role, a WebSocket that speaks the same envelope, static UI files, and the same media and preview routes.
-- [ ] UI `BrainClient` interface with WebView2, WebSocket, and fixture implementations, chosen at startup; role-based root routing (operator or guest surfaces).
-- [ ] A minimal brain answering `hello` with the Event list for the operator role. A development-only command opens a placeholder Guest window on a chosen display, so both screens work before M6.
-- [ ] Hooks: `test.getDiagnostics`, `test.setWindowBounds(role, …)`, `test.crashUi(role)`, `test.useVirtualDisplays`, `test.disconnectDisplay`, `test.connectDisplay`.
+- [x] Bridge per window: the host assigns the role; `WebMessageReceived` → role-checked command dispatcher on the brain's single-threaded executor; `PostWebMessageAsJson` for each role's presentations; correlation IDs.
+- [x] `FotoHavn.Host.Headless`: Kestrel on 127.0.0.1 with a random port and a startup token per role, a WebSocket that speaks the same envelope, static UI files, and the same media and preview routes.
+- [x] UI `BrainClient` interface with WebView2, WebSocket, and fixture implementations, chosen at startup; role-based root routing (operator or guest surfaces).
+- [x] A minimal brain answering `hello` with the Event list for the operator role. A development-only command opens a placeholder Guest window on a chosen display, so both screens work before M6.
+- [x] Hooks: `test.getDiagnostics`, `test.setWindowBounds(role, …)`, `test.crashUi(role)`, `test.useVirtualDisplays`, `test.disconnectDisplay`, `test.connectDisplay`.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
@@ -1185,6 +1185,56 @@ Verification. The implementing agent writes and runs these through the [verifica
   - The Operator window maximizes on the primary display.
   - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
   - Alt+Tab behavior is noted for M10.
+
+Verification record (M2):
+- **Date and commits:** 2026-10-13. Protocol `20560da`, contract addendum `470e2b6`, parallel merges `b39caae`, integration `6285baf`, `ff9debf`, and `48d3760`.
+- **Machine and camera:** developer laptop with Windows 11, .NET SDK 10.0.401, Node 24.20.0, and one display at 100% scaling. Camera: `Integrated Webcam (\\?\USB#VID_0BDA&PID_5596&MI_00#6&339f1394&0&0000#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL)`.
+- **Results:** from an independent clean clone at `48d3760`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 14 projects; 0 warnings |
+  | 2 | `dotnet test` with coverage | 863 passed, 0 failed, 0 skipped |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 350 passed |
+  | 3 | UI `lint`, `typecheck`, `build` | Pass |
+  | 3 | UI `test:coverage` | 98 passed |
+  | 3 | UI `test:fixtures` | 36 passed: 32 fixture-lane and 4 headless-host round trips in Chromium |
+  | 4 | End-to-end `npm ci`, `typecheck` | Pass |
+  | 5 | `@m2` regression | 7 passed, 1 skipped |
+  | 5 | `@m1` regression | 9 passed |
+  | 5 | Smoke | 2 passed |
+  | 6 | Screenshots | Operator Event list and guest Start placeholder at several sizes: nothing broken or clipped |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.2% | 95.8% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 100% | No branches |
+  | `FotoHavn.Catalog` | 100% | No branches |
+
+  UI: 100% statements, 99.1% branches, 100% functions, and 100% lines.
+- **GitHub CI:** `Desktop app` run 38421045609 (`48d3760`) succeeded.
+- **Review:** a code review of security (role isolation, hooks in field builds, headless loopback and tokens, media path scope, navigation guard), concurrency, and protocol correctness found no significant issues.
+- **Integration fixes:**
+  - `test.setWindowBounds` now sizes the page viewport instead of the outer window, and windows can exceed the screen size for 2560×1440 checks.
+  - Field UI builds contain no fixture code.
+  - Hosts ignore `CloseGuestScreen` when no Guest Screen is open.
+  - A headless options test no longer depends on a built `ui/dist`.
+- **Decision:** the Guest zoom uses the monitor's actual scale, as Q14 intends.
+- **Manual (pending, to be run by the owner):**
+  - The Operator window maximizes on the primary display. It did on the one-display laptop; this check is still needed on the booth.
+  - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
+  - Note Alt+Tab behavior for M10.
+- **Not proven:**
+  - `regression/host/physical-displays` (`@physical-displays`) is not run: one display.
+  - Scaling other than 100%. At other scaling, the Operator page's CSS viewport is the requested size divided by the scale.
+  - Display hot-plug, touch, Alt+F4 on the Guest window, and a fixed-version WebView2 runtime.
+  - A raw `..` path from a page: Chromium normalizes it before the request leaves the page, so only encoded forms reach the host. Host unit tests cover raw paths.
+  - The `npm run dev` plus headless host loop wasn't exercised by hand.
+  - Guest pages currently allow text selection; M3's global styles disable it.
 
 ### M3: brand foundation in the UI (M)
 
