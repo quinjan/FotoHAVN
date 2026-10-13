@@ -1,17 +1,13 @@
-import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
 
-// Fixture gallery lane: renders the built UI in Chromium. Run `npm run build` first;
-// the browser comes from `npx playwright install chromium`.
+// Fixture lane: renders the UI in Chromium through the fixture transport (`?fixture=`), which only development and
+// E2E builds honor, so the web server builds the E2E bundle (dist-e2e/) and previews it; the field build in dist/ is
+// left alone. The browser comes from `npx playwright install chromium`.
 const uiDir = dirname(fileURLToPath(import.meta.url));
 const resultsDir = resolve(uiDir, "../output/ui-fixtures");
 const port = 4173;
-
-if (!existsSync(resolve(uiDir, "dist/index.html"))) {
-  throw new Error("ui/dist/index.html is missing. Run `npm run build` before `npm run test:fixtures`.");
-}
 
 export default defineConfig({
   testDir: "tests/fixtures",
@@ -36,9 +32,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npx vite preview --host 127.0.0.1 --port ${String(port)} --strictPort`,
+    command: `npx vite build --mode e2e && npx vite preview --mode e2e --host 127.0.0.1 --port ${String(port)} --strictPort`,
     url: `http://127.0.0.1:${String(port)}/index.html`,
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 120_000,
   },
 });
