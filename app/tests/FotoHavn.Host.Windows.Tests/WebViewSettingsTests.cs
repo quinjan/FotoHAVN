@@ -14,6 +14,15 @@ public sealed class WebViewSettingsTests
     }
 
     [Fact]
+    public void Environment_uses_Fluent_overlay_scrollbars_and_keeps_the_browser_arguments()
+    {
+        var options = WebViewEnvironmentProvider.BuildOptions("--remote-debugging-port=9333");
+
+        Assert.Equal(CoreWebView2ScrollbarStyle.FluentOverlay, options.ScrollBarStyle);
+        Assert.Equal("--remote-debugging-port=9333", options.AdditionalBrowserArguments);
+    }
+
+    [Fact]
     public void Start_url_is_on_the_app_virtual_host()
     {
         Assert.Equal("https://app.fotohavn/index.html", WebViewSettings.StartUri.AbsoluteUri);

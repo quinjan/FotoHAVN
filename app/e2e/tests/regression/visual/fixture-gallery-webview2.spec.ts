@@ -24,24 +24,11 @@ const pixelThreshold = 0.1;
 /** The most pixels that may differ in one screenshot. */
 const maxDiffRatio = 0.01;
 
-/**
- * Fixtures where WebView2 and the Chromium lane differ for a reason in the product's host or UI, not in this capture.
- * They are still compared and measured, and their evidence (actual, expected, diff) is still attached, but a difference
- * above the limit is reported as an annotation rather than a failure. Remove an entry when its cause is fixed.
- */
-const knownEngineDifferences: Readonly<Record<string, string>> = {
-  "guest-cycle-list-guest":
-    "WebView2 reserves a 10 px layout strip for the row's thin horizontal scrollbar, while the headless Chromium baseline's " +
-    "overlay scrollbar reserves 0 px, so the strip row is 10 px shorter and sits 5 px higher. The cause is the WebView2 " +
-    "environment's default scrollbar style (the host sets no CoreWebView2EnvironmentOptions.ScrollBarStyle).",
-};
-
 interface Measurement {
   readonly id: string;
   readonly resolution: string;
   readonly ratio: number;
   readonly differingPixels: number;
-  readonly knownDifference?: true;
 }
 
 const measurementsFile = path.join(paths.e2eOutput, "visual-measurements.json");
@@ -103,16 +90,9 @@ for (const resolution of resolutions) {
         }
       }
 
-      const known = measured.filter((measurement) => measurement.knownDifference === true);
       const ratios = measured.map((measurement) => measurement.ratio);
       testInfo.annotations.push({ type: "fixtures compared", description: `${String(measured.length)} of ${String(manifest.length)} at ${name}` });
       testInfo.annotations.push({ type: "max diff ratio", description: `${(Math.max(0, ...ratios) * 100).toFixed(4)}% (limit ${(maxDiffRatio * 100).toFixed(1)}%)` });
-      for (const measurement of known) {
-        testInfo.annotations.push({
-          type: "known engine difference",
-          description: `${measurement.id} at ${name}: ${(measurement.ratio * 100).toFixed(3)}%. ${knownEngineDifferences[measurement.id] ?? ""}`,
-        });
-      }
     } finally {
       recordMeasurements(name, measured);
       await returnToApp(page);
@@ -147,14 +127,7 @@ async function compareFixture(
   const diff = new PNG({ width: actual.width, height: actual.height });
   const differingPixels = pixelmatch(actual.data, expected.data, diff.data, actual.width, actual.height, { threshold: pixelThreshold });
   const ratio = differingPixels / (actual.width * actual.height);
-  const known = knownEngineDifferences[fixture.id] !== undefined;
-  const measurement: Measurement = {
-    id: fixture.id,
-    resolution: name,
-    ratio,
-    differingPixels,
-    ...(known && ratio > maxDiffRatio ? { knownDifference: true as const } : {}),
-  };
+  const measurement: Measurement = { id: fixture.id, resolution: name, ratio, differingPixels };
 
   if (ratio > maxDiffRatio) {
     const files = [
@@ -168,11 +141,9 @@ async function compareFixture(
       writeFileSync(file, data);
       await testInfo.attach(`${fixture.id}-${name}-${kind}`, { path: file, contentType: "image/png" });
     }
-    if (!known) {
-      throw new Error(
-        `${fixture.id} at ${name}: ${String(differingPixels)} pixels differ (${(ratio * 100).toFixed(3)}%, limit ${(maxDiffRatio * 100).toFixed(1)}%).`,
-      );
-    }
+    throw new Error(
+      `${fixture.id} at ${name}: ${String(differingPixels)} pixels differ (${(ratio * 100).toFixed(3)}%, limit ${(maxDiffRatio * 100).toFixed(1)}%).`,
+    );
   }
   return measurement;
 }

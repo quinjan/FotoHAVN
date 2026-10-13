@@ -32,12 +32,18 @@ internal sealed class WebViewEnvironmentProvider(string userDataFolder, string? 
 
     private Task<CoreWebView2Environment> CreateAsync()
     {
-        var options = new CoreWebView2EnvironmentOptions
-        {
-            AdditionalBrowserArguments = additionalBrowserArguments,
-        };
-        return CoreWebView2Environment.CreateAsync(runtimeFolder, userDataFolder, options);
+        return CoreWebView2Environment.CreateAsync(runtimeFolder, userDataFolder, BuildOptions(additionalBrowserArguments));
     }
+
+    /// <summary>
+    /// Fluent overlay scrollbars reserve no layout space, so scrolling regions (the Guest gallery strip row, Operator
+    /// pages) lay out like the Chromium fixture lane.
+    /// </summary>
+    internal static CoreWebView2EnvironmentOptions BuildOptions(string? additionalBrowserArguments) => new()
+    {
+        AdditionalBrowserArguments = additionalBrowserArguments,
+        ScrollBarStyle = CoreWebView2ScrollbarStyle.FluentOverlay,
+    };
 }
 
 /// <summary>

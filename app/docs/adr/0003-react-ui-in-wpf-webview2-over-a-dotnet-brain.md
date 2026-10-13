@@ -48,6 +48,7 @@ Replaces: the deleted WinUI 3 desktop app (`FotoHavn.App` and `FotoHavn.Core`) a
   - `https://media.fotohavn/` serves saved artifacts and derived thumbnails read-only, only from inside `Data/Events` and `Data/Cache/thumbnails`, and refuses path traversal. (Proposed default Q10, plan section 18; confirmed by the owner at the M0 gate.)
   - `https://preview.fotohavn/` serves composed previews from an in-memory cache.
 - Guardrails in both windows: no default context menu, no DevTools in field builds, no browser accelerator keys, pinch zoom, swipe navigation, status bar, or autofill. Navigation is allowed only to `app.fotohavn`, and new windows are cancelled.
+- One shared WebView2 environment for both windows, created with `ScrollBarStyle = FluentOverlay`, so scrollbars are overlays that reserve no layout space and the real WebView2 matches the Chromium fixture lane.
 - On `ProcessFailed`, the host recreates that window's WebView2 and resends its role's current presentation.
 - Live preview frames use a separate channel ([ADR 0004](0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md)).
 
