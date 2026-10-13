@@ -105,7 +105,9 @@
         "type": "Project",
         "dependencies": {
           "FotoHavn.Core": "[1.0.0, )",
-          "Microsoft.Data.Sqlite": "[10.0.12, 10.0.12]"
+          "Microsoft.Data.Sqlite": "[10.0.12, 10.0.12]",
+          "SkiaSharp": "[3.119.4, 3.119.4]",
+          "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
         }
       },
       "Microsoft.Data.Sqlite": {
