@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Integration tests: they run the host on Kestrel at 127.0.0.1 and talk to it over HTTP and WebSockets. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FotoHavn.Host.Headless\FotoHavn.Host.Headless.csproj" />
+  </ItemGroup>
+</Project>

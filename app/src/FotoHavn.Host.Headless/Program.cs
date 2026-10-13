@@ -1,45 +1,26 @@
-using Microsoft.Extensions.FileProviders;
+using FotoHavn.Host.Headless;
 
-// M1 placeholder for the headless dev host: Kestrel on 127.0.0.1 (random port) serving the built UI.
-// M2 adds the brain, the fake camera, and the WebSocket bridge.
-var uiDist = ResolveUiDist(args);
-
-var builder = WebApplication.CreateSlimBuilder(args);
-builder.WebHost.UseUrls("http://127.0.0.1:0");
-
-var app = builder.Build();
-if (uiDist is not null)
+// The headless dev host: the real brain over a WebSocket bridge, the built UI, and the media and preview routes, on
+// 127.0.0.1. Usage: dotnet run --project src/FotoHavn.Host.Headless -- [--data <dir>] [--port <n>] [--ui <dir>]
+HeadlessOptions options;
+try
 {
-    var files = new PhysicalFileProvider(uiDist);
-    app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = files });
-    app.UseStaticFiles(new StaticFileOptions { FileProvider = files });
+    options = HeadlessOptions.Parse(args);
 }
-else
+catch (HeadlessOptionsException exception)
 {
-    app.MapGet("/", () => Results.Text("The FOTOHAVN UI is not built.", "text/plain"));
+    await Console.Error.WriteLineAsync(exception.Message);
+    await Console.Error.WriteLineAsync("Usage: FotoHavn.Host.Headless [--data <dir>] [--port <n>] [--ui <dir>]");
+    return 2;
 }
 
-await app.StartAsync();
-var addresses = app.Urls;
-Console.WriteLine($"FOTOHAVN headless host listening on {string.Join(", ", addresses)} (UI: {uiDist ?? "not built"})");
-await app.WaitForShutdownAsync();
+var settings = new HeadlessSettings(
+    options.ResolveDataFolder(AppContext.BaseDirectory),
+    options.ResolveUiFolder(Directory.GetCurrentDirectory()),
+    options.Port);
 
-static string? ResolveUiDist(string[] args)
-{
-    var index = Array.IndexOf(args, "--ui-dist");
-    if (index >= 0 && index + 1 < args.Length)
-    {
-        return Directory.Exists(args[index + 1]) ? Path.GetFullPath(args[index + 1]) : null;
-    }
-
-    for (var folder = new DirectoryInfo(Directory.GetCurrentDirectory()); folder is not null; folder = folder.Parent)
-    {
-        var candidate = Path.Combine(folder.FullName, "ui", "dist");
-        if (File.Exists(Path.Combine(candidate, "index.html")))
-        {
-            return candidate;
-        }
-    }
-
-    return null;
-}
+await using var host = HeadlessApp.Create(settings);
+var endpoints = await host.StartAsync();
+host.WriteStartup(Console.Out, endpoints);
+await host.App.WaitForShutdownAsync();
+return 0;

@@ -1,0 +1,296 @@
+using System.Globalization;
+using System.Net;
+using System.Text.Json;
+using FotoHavn.Core;
+using FotoHavn.Core.Displays;
+using FotoHavn.Core.Media;
+using FotoHavn.Host.Headless.Interim;
+using FotoHavn.Protocol;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+
+namespace FotoHavn.Host.Headless;
+
+/// <summary>What the headless host runs with. Tests replace the brain, previews, displays, and logging.</summary>
+/// <param name="DataFolder">The Data folder (fully qualified); created at start.</param>
+/// <param name="UiFolder">The built UI to serve, or null when it isn't built.</param>
+/// <param name="Port">The loopback port; 0 picks a free one.</param>
+internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int Port)
+{
+    /// <summary>The default fake displays: a primary and a guest display side by side, both 1920×1080 at 100%.</summary>
+    public static IReadOnlyList<DisplayInfo> DefaultDisplays { get; } =
+    [
+        new("fake-primary", "Fake primary display", new DisplayRect(0, 0, 1920, 1080), new DisplayRect(0, 0, 1920, 1040), 1.0, true),
+        new("fake-guest", "Fake guest display", new DisplayRect(1920, 0, 1920, 1080), new DisplayRect(1920, 0, 1920, 1080), 1.0, false),
+    ];
+
+    public RoleTokens? Tokens { get; init; }
+
+    /// <summary>Builds the brain; the default is the real <see cref="Brain"/>.</summary>
+    public Func<BrainDependencies, IBrain>? BrainFactory { get; init; }
+
+    public IPreviewSource Previews { get; init; } = EmptyPreviewSource.Instance;
+
+    public IDisplayAdapter? Displays { get; init; }
+
+    public Action<ILoggingBuilder>? ConfigureLogging { get; init; }
+}
+
+/// <summary>Where a started headless host listens.</summary>
+internal sealed record HeadlessEndpoints(int Port, Uri BaseUrl, Uri BridgeUrl, Uri OperatorUrl, Uri GuestUrl, Uri MediaUrl, Uri PreviewUrl);
+
+/// <summary>
+/// The headless host: Kestrel on 127.0.0.1 with the real brain, a WebSocket bridge at <c>/bridge?token=</c> (the token
+/// decides the role), the built UI with an SPA fallback, and the media and preview routes. Composition happens here, so
+/// <c>Program</c> and the integration tests run the same host.
+/// </summary>
+internal sealed partial class HeadlessApp : IAsyncDisposable
+{
+    private readonly InterimBrainExecutor _executor;
+    private PhysicalFileProvider? _ui;
+    private bool _started;
+    private bool _disposed;
+
+    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, InterimBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions)
+    {
+        App = app;
+        Settings = settings;
+        Tokens = tokens;
+        _executor = executor;
+        Brain = brain;
+        HostServices = hostServices;
+        Sessions = sessions;
+    }
+
+    public WebApplication App { get; }
+
+    public HeadlessSettings Settings { get; }
+
+    public RoleTokens Tokens { get; }
+
+    public IBrain Brain { get; }
+
+    public HeadlessHostServices HostServices { get; }
+
+    public BridgeSessions Sessions { get; }
+
+    public static HeadlessApp Create(HeadlessSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        if (!Path.IsPathFullyQualified(settings.DataFolder))
+        {
+            throw new ArgumentException("The Data folder must be a fully qualified path.", nameof(settings));
+        }
+
+        Directory.CreateDirectory(settings.DataFolder);
+
+        var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions { Args = [], ContentRootPath = AppContext.BaseDirectory });
+        builder.WebHost.ConfigureKestrel(kestrel => kestrel.Listen(IPAddress.Loopback, settings.Port));
+        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
+        settings.ConfigureLogging?.Invoke(builder.Logging);
+        var app = builder.Build();
+
+        var loggers = app.Services.GetRequiredService<ILoggerFactory>();
+        var hostLogger = loggers.CreateLogger("FotoHavn.Host.Headless");
+        var tokens = settings.Tokens ?? RoleTokens.Create();
+        var displays = settings.Displays ?? new InterimDisplayAdapter([.. HeadlessSettings.DefaultDisplays]);
+        var hostServices = new HeadlessHostServices(displays, hostLogger);
+        var sessions = new BridgeSessions();
+        var brainLogger = loggers.CreateLogger("FotoHavn.Brain");
+        var executor = new InterimBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
+        var dependencies = new BrainDependencies(executor, new InterimSystemClock(), displays, hostServices)
+        {
+            Logger = brainLogger,
+#if E2E_HOOKS
+            HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime),
+#endif
+        };
+
+        IBrain brain;
+        try
+        {
+            brain = (settings.BrainFactory ?? (deps => new Brain(deps)))(dependencies);
+        }
+        catch
+        {
+            executor.Dispose();
+            throw;
+        }
+
+        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions);
+        host.MapRoutes(hostLogger);
+        return host;
+    }
+
+    /// <summary>Starts Kestrel and returns the URLs, with the port Kestrel picked.</summary>
+    public async Task<HeadlessEndpoints> StartAsync(CancellationToken cancellationToken = default)
+    {
+        await App.StartAsync(cancellationToken).ConfigureAwait(false);
+        _started = true;
+        var address = App.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault()
+            ?? throw new InvalidOperationException("Kestrel reported no address.");
+        var port = new Uri(address).Port;
+        var baseUrl = new Uri(string.Create(CultureInfo.InvariantCulture, $"http://127.0.0.1:{port}/"));
+        return new HeadlessEndpoints(
+            port,
+            baseUrl,
+            new Uri(string.Create(CultureInfo.InvariantCulture, $"ws://127.0.0.1:{port}/bridge")),
+            new Uri(baseUrl, "?token=" + Tokens.Operator),
+            new Uri(baseUrl, "?token=" + Tokens.Guest),
+            new Uri(baseUrl, "media/"),
+            new Uri(baseUrl, "preview/"));
+    }
+
+    /// <summary>
+    /// Writes the startup lines: human-readable URLs, then one JSON line (<c>{"event":"listening",…}</c>) for tooling.
+    /// </summary>
+    public void WriteStartup(TextWriter output, HeadlessEndpoints endpoints)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(endpoints);
+        output.WriteLine($"FOTOHAVN headless host listening on {endpoints.BaseUrl}");
+        output.WriteLine($"data: {Settings.DataFolder}");
+        output.WriteLine($"ui: {Settings.UiFolder ?? "not built (run npm run build in ui/)"}");
+        output.WriteLine($"operator: {endpoints.OperatorUrl}");
+        output.WriteLine($"guest: {endpoints.GuestUrl}");
+        output.WriteLine("Press Ctrl+C to stop.");
+        output.WriteLine(JsonSerializer.Serialize(new
+        {
+            @event = "listening",
+            port = endpoints.Port,
+            url = endpoints.BaseUrl.ToString(),
+            bridgeUrl = endpoints.BridgeUrl.ToString(),
+            operatorUrl = endpoints.OperatorUrl.ToString(),
+            guestUrl = endpoints.GuestUrl.ToString(),
+            operatorToken = Tokens.Operator,
+            guestToken = Tokens.Guest,
+            mediaUrl = endpoints.MediaUrl.ToString(),
+            previewUrl = endpoints.PreviewUrl.ToString(),
+            dataFolder = Settings.DataFolder,
+            uiFolder = Settings.UiFolder,
+        }));
+        output.Flush();
+    }
+
+    /// <summary>Stops Kestrel (closing every socket), then disposes the brain and its executor.</summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        if (_started)
+        {
+            await App.StopAsync().ConfigureAwait(false);
+        }
+
+        Brain.Dispose();
+        _executor.Dispose();
+        _ui?.Dispose();
+        await App.DisposeAsync().ConfigureAwait(false);
+    }
+
+    private void MapRoutes(ILogger logger)
+    {
+        App.Use(LoopbackGuard.RequireLoopbackHost);
+        App.UseWebSockets();
+
+        _ui = Settings.UiFolder is null ? null : new PhysicalFileProvider(Settings.UiFolder);
+        var ui = _ui;
+        if (ui is not null)
+        {
+            App.UseDefaultFiles(new DefaultFilesOptions { FileProvider = ui });
+            App.UseStaticFiles(new StaticFileOptions { FileProvider = ui });
+        }
+
+        string[] readOnly = [HttpMethods.Get, HttpMethods.Head];
+        App.MapMethods("/media/{**path}", readOnly, (HttpContext context) => MediaRoutes.Media(context, Settings.DataFolder));
+        App.MapMethods("/preview/{**key}", readOnly, (HttpContext context) => MediaRoutes.Preview(context, Settings.Previews));
+        App.Map("/bridge", (HttpContext context) => AcceptBridgeAsync(context, logger));
+        App.MapFallback((HttpContext context) => Fallback(context, ui));
+    }
+
+    private async Task AcceptBridgeAsync(HttpContext context, ILogger logger)
+    {
+        var token = context.Request.Query["token"];
+        if (token.Count != 1 || !Tokens.TryGetRole(token[0], out var role))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
+        if (!context.WebSockets.IsWebSocketRequest)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            return;
+        }
+
+        if (!LoopbackGuard.IsAllowedOrigin(context.Request.Headers.Origin))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+
+        using var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
+        var session = new BridgeSession(socket, role, logger);
+        Sessions.Add(session);
+        LogClientConnected(logger, role);
+        try
+        {
+            await session.RunAsync(Brain, App.Lifetime.ApplicationStopping).ConfigureAwait(false);
+        }
+        finally
+        {
+            Sessions.Remove(session);
+            LogClientDisconnected(logger, role);
+        }
+    }
+
+    /// <summary>
+    /// The SPA fallback: GET/HEAD of any other extension-less path serves <c>index.html</c>, so client routes and
+    /// <c>/?token=</c> load the UI. The media, preview, and bridge prefixes never fall back.
+    /// </summary>
+    private static IResult Fallback(HttpContext context, PhysicalFileProvider? ui)
+    {
+        var path = context.Request.Path;
+        if (!(HttpMethods.IsGet(context.Request.Method) || HttpMethods.IsHead(context.Request.Method))
+            || path.StartsWithSegments("/media", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/preview", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/bridge", StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.NotFound();
+        }
+
+        if (ui is null)
+        {
+            return Results.Text("The FOTOHAVN UI is not built. Run npm run build in ui/, or pass --ui <folder>.", "text/plain");
+        }
+
+        var index = ui.GetFileInfo("index.html");
+        if (!index.Exists || index.PhysicalPath is null)
+        {
+            return Results.NotFound();
+        }
+
+        context.Response.Headers.CacheControl = "no-cache";
+        return Results.File(index.PhysicalPath, "text/html; charset=utf-8");
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "A brain work item failed.")]
+    private static partial void LogBrainWorkFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{Role} client connected.")]
+    private static partial void LogClientConnected(ILogger logger, Role role);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{Role} client disconnected.")]
+    private static partial void LogClientDisconnected(ILogger logger, Role role);
+}

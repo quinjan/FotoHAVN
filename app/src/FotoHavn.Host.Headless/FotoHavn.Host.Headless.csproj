@@ -1,10 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <!-- `dotnet run` starts the host where it was invoked, so relative data and UI folder options mean what they say. -->
+    <RunWorkingDirectory>$(MSBuildStartupDirectory)</RunWorkingDirectory>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
     <ProjectReference Include="..\FotoHavn.Protocol\FotoHavn.Protocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FotoHavn.Host.Headless.Tests" />
   </ItemGroup>
 </Project>
