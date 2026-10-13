@@ -20,7 +20,7 @@ export default {
     "color-no-hex": [true, { message: `Hex colors belong only in the token files; ${useTokens}` }],
     "color-named": ["never", { message: `Named colors belong only in the token files; ${useTokens}` }],
     "function-disallowed-list": [
-      ["cubic-bezier", "rgb", "rgba", "hsl", "hsla"],
+      ["cubic-bezier", "rgb", "rgba", "hsl", "hsla", "oklch", "oklab", "lab", "lch", "hwb", "color"],
       { message: `Raw cubic-bezier() and color functions belong only in the token files; ${useTokens}` },
     ],
     "unit-disallowed-list": [["ms", "s"], { message: `Raw durations belong only in the token files; ${useTokens}` }],

@@ -2,19 +2,46 @@ import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react"
 import { cx } from "../shared/cx.ts";
 import styles from "./Dialog.module.css";
 
-const focusableSelector = [
-  "button:not([disabled])",
-  "a[href]",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(", ");
+const focusableSelector = ["button", "a[href]", "input", "select", "textarea", "[tabindex]"].join(", ");
 
-function focusableIn(container: HTMLElement): HTMLElement[] {
-  return [...container.querySelectorAll<HTMLElement>(focusableSelector)];
+/** Whether the element and every ancestor up to the container generate a box; jsdom has no layout, so this reads computed style. */
+function isRendered(element: HTMLElement, container: HTMLElement): boolean {
+  if (getComputedStyle(element).visibility !== "visible") {
+    return false;
+  }
+  for (let node: HTMLElement | null = element; node !== null && node !== container.parentElement; node = node.parentElement) {
+    if (node.hidden || getComputedStyle(node).display === "none") {
+      return false;
+    }
+  }
+  return true;
 }
 
+/** Whether the browser's Tab key would stop on a radio: the checked one, or the first when none in its group is checked. */
+function isRadioTabStop(radio: HTMLInputElement): boolean {
+  if (radio.name === "" || radio.checked) {
+    return true;
+  }
+  const group = [...(radio.form ?? radio.ownerDocument).querySelectorAll<HTMLInputElement>('input[type="radio"]')].filter(
+    (other) => other.name === radio.name && !other.disabled,
+  );
+  return !group.some((other) => other.checked) && group[0] === radio;
+}
+
+function isTabbable(element: HTMLElement, container: HTMLElement): boolean {
+  if (element.tabIndex < 0 || element.matches(":disabled") || element.closest("[inert]") !== null) {
+    return false;
+  }
+  if (element instanceof HTMLInputElement && (element.type === "hidden" || (element.type === "radio" && !isRadioTabStop(element)))) {
+    return false;
+  }
+  return isRendered(element, container);
+}
+
+/** The container's tab stops in document order: not the roving radios at tabindex -1, nor anything disabled, hidden, or inert. */
+function focusableIn(container: HTMLElement): HTMLElement[] {
+  return [...container.querySelectorAll<HTMLElement>(focusableSelector)].filter((element) => isTabbable(element, container));
+}
 /** Escape cancels; Tab and Shift+Tab wrap between the panel's first and last controls. */
 function handleKeyDown(event: KeyboardEvent, panel: HTMLElement, onCancel: () => void): void {
   if (event.key === "Escape") {

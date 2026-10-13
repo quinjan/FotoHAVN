@@ -4,6 +4,30 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+const colorFunction = "\\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb|color)\\(";
+// The CSS named colors, matched as whole words (system colors such as Highlight, and transparent/currentcolor, stay allowed).
+const namedColor =
+  "(?:^|[\\s,(])(?:" +
+  [
+    "aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown burlywood cadetblue",
+    "chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen darkgrey",
+    "darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray",
+    "darkslategrey darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen",
+    "fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory khaki",
+    "lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen",
+    "lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime",
+    "limegreen linen magenta maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue",
+    "mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite navy oldlace olive",
+    "olivedrab orange orangered orchid palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum",
+    "powderblue purple rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue",
+    "slateblue slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke",
+    "yellow yellowgreen",
+  ]
+    .join(" ")
+    .split(" ")
+    .join("|") +
+  ")(?=$|[\\s,)])";
+
 export default tseslint.config(
   {
     ignores: [
@@ -35,8 +59,8 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
     extends: [reactHooks.configs.flat["recommended-latest"], jsxA11y.flatConfigs.strict],
     rules: {
-      // app/DESIGN.md's token rule for TSX, matching stylelint's for CSS: no hex colors, and no raw easings or durations
-      // in inline styles. Colors and motion come from tokens (var(--…)). scripts/lint-rules.test.ts proves it fires.
+      // app/DESIGN.md's token rule for TSX, matching stylelint's for CSS: no hex colors, color functions, or named colors, and no raw easings, durations, or zIndex
+      // in inline styles. Colors, motion, and z-order come from tokens (var(--…)). scripts/lint-rules.test.ts proves it fires.
       "no-restricted-syntax": [
         "error",
         {
@@ -50,6 +74,26 @@ export default tseslint.config(
         {
           selector: "JSXAttribute[name.name='style'] TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b|cubic-bezier|\\d(?:ms|s)\\b/]",
           message: "Inline styles take no hex colors, cubic-bezier(), or raw durations; use var(--…) tokens.",
+        },
+        {
+          selector: `JSXAttribute[name.name='style'] Literal[value=/${colorFunction}/i]`,
+          message: "Inline styles take no color functions; use a var(--…) color token.",
+        },
+        {
+          selector: `JSXAttribute[name.name='style'] TemplateElement[value.raw=/${colorFunction}/i]`,
+          message: "Inline styles take no color functions; use a var(--…) color token.",
+        },
+        {
+          selector: `JSXAttribute[name.name='style'] Literal[value=/${namedColor}/i]`,
+          message: "Inline styles take no named colors; use a var(--…) color token.",
+        },
+        {
+          selector: "Property[key.name='zIndex']:not([value.value=/^var\\(--app-z-[a-z-]+\\)$/])",
+          message: "Use a z-order token, var(--app-z-…), from app-tokens.css; never a raw zIndex.",
+        },
+        {
+          selector: "Property[key.value='zIndex']:not([value.value=/^var\\(--app-z-[a-z-]+\\)$/])",
+          message: "Use a z-order token, var(--app-z-…), from app-tokens.css; never a raw zIndex.",
         },
       ],
     },

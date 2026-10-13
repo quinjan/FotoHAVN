@@ -14,14 +14,18 @@ import {
   type ManifestFixture,
 } from "../../../src/gallery";
 import { fromApp, paths } from "../../../src/paths";
+import { contentRegion, regionDiff, type Region } from "../../../src/visual";
 
 // Proves the real WebView2 renders every component fixture as the Chromium fixture lane does: the same fixture, the same
 // viewport size, captured the same way (app/ui/tests/fixtures/components.spec.ts), compared with that lane's baselines
 // in app/output/fixtures/components/<id>/<w>x<h>.png. Run `npm run test:fixtures` in app/ui first.
+//
+// The tolerance is measured over the fixture's content region (the padded bounding box of what Chromium drew), so a small
+// component can't pass with a wrong render inside a large, empty viewport. Nothing may differ outside that region.
 
 /** Per-pixel color distance, as a pixelmatch threshold (0 strict, 1 lenient). */
 const pixelThreshold = 0.1;
-/** The most pixels that may differ in one screenshot. */
+/** The most pixels that may differ, as a share of the content region. */
 const maxDiffRatio = 0.01;
 
 interface Measurement {
@@ -29,6 +33,8 @@ interface Measurement {
   readonly resolution: string;
   readonly ratio: number;
   readonly differingPixels: number;
+  readonly region: Region;
+  readonly regionPixels: number;
 }
 
 const measurementsFile = path.join(paths.e2eOutput, "visual-measurements.json");
@@ -50,6 +56,7 @@ function recordMeasurements(resolution: string, measured: readonly Measurement[]
         comparisons: ratios.length,
         maxRatio: Math.max(0, ...ratios),
         meanRatio: ratios.length === 0 ? 0 : ratios.reduce((sum, ratio) => sum + ratio, 0) / ratios.length,
+        measuredOver: "content region of the Chromium baseline",
         worst: [...all].sort((a, b) => b.ratio - a.ratio).slice(0, 10),
       },
       null,
@@ -83,7 +90,7 @@ for (const resolution of resolutions) {
       for (const fixture of manifest) {
         try {
           await test.step(`${fixture.id} at ${name}`, async () => {
-            measured.push(await compareFixture(page, fixture, resolution, name, testInfo));
+            measured.push(await compareFixture(page, fixture, resolution, name, testInfo, measured));
           });
         } catch (error) {
           failures.push(error instanceof Error ? (error.message.split("\n")[0] ?? "") : String(error));
@@ -108,6 +115,7 @@ async function compareFixture(
   resolution: { width: number; height: number },
   name: string,
   testInfo: TestInfo,
+  measured: Measurement[],
 ): Promise<Measurement> {
   const baselinePath = chromiumBaselinePath(fixture.id, resolution);
   if (!existsSync(baselinePath)) {
@@ -115,6 +123,10 @@ async function compareFixture(
   }
 
   await openFixture(page, fixture.id, fixture.role);
+  // Playwright's headless Chromium (the baselines' engine) launches with --hide-scrollbars; WebView2 draws its Fluent overlay
+  // scrollbar indicator. Hide it so the comparison covers what the app renders, not the engine's scrollbar chrome. Overlay
+  // scrollbars take no layout space, so nothing moves.
+  await page.addStyleTag({ content: "* { scrollbar-width: none !important; }" });
   const actual = PNG.sync.read(await page.screenshot());
   const expected = PNG.sync.read(readFileSync(baselinePath));
   if (actual.width !== expected.width || actual.height !== expected.height) {
@@ -124,12 +136,16 @@ async function compareFixture(
     );
   }
 
+  const region = contentRegion(expected);
+  if (!region) {
+    throw new Error(`${fixture.id} at ${name}: the Chromium baseline is blank, so there is nothing to compare. Fix the fixture.`);
+  }
   const diff = new PNG({ width: actual.width, height: actual.height });
-  const differingPixels = pixelmatch(actual.data, expected.data, diff.data, actual.width, actual.height, { threshold: pixelThreshold });
-  const ratio = differingPixels / (actual.width * actual.height);
-  const measurement: Measurement = { id: fixture.id, resolution: name, ratio, differingPixels };
-
-  if (ratio > maxDiffRatio) {
+  const result = regionDiff(actual, expected, region, { threshold: pixelThreshold, diff });
+  const { ratio, insidePixels: differingPixels, outsidePixels } = result;
+  const measurement: Measurement = { id: fixture.id, resolution: name, ratio, differingPixels, region, regionPixels: result.regionArea };
+  if (ratio > maxDiffRatio || outsidePixels > 0) {
+    measured.push(measurement); // a failing fixture is still measured, so the summary shows the worst ratios
     const files = [
       ["actual", PNG.sync.write(actual)],
       ["expected", PNG.sync.write(expected)],
@@ -142,7 +158,8 @@ async function compareFixture(
       await testInfo.attach(`${fixture.id}-${name}-${kind}`, { path: file, contentType: "image/png" });
     }
     throw new Error(
-      `${fixture.id} at ${name}: ${String(differingPixels)} pixels differ (${(ratio * 100).toFixed(3)}%, limit ${(maxDiffRatio * 100).toFixed(1)}%).`,
+      `${fixture.id} at ${name}: ${String(differingPixels)} of ${String(result.regionArea)} content-region pixels differ ` +
+        `(${(ratio * 100).toFixed(3)}%, limit ${(maxDiffRatio * 100).toFixed(1)}%), ${String(outsidePixels)} differ outside the region.`,
     );
   }
   return measurement;
