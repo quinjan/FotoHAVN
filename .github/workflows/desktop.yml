@@ -19,6 +19,8 @@ concurrency:
 
 jobs:
   verify:
+    # Multi-command pwsh steps set $PSNativeCommandUseErrorActionPreference so any failing command fails the step,
+    # not only the last one.
     name: Verify desktop app
     runs-on: windows-latest
     timeout-minutes: 45
@@ -52,19 +54,22 @@ jobs:
       # Verification step 1: build .NET (warnings are errors).
       - name: Build .NET
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
           dotnet restore FotoHAVN.slnx --locked-mode
           dotnet build FotoHAVN.slnx --no-restore
 
-      # Verification step 2: .NET tests with Cobertura coverage, then ReportGenerator.
-      # M1 checks that coverage is collected only (no minimumCoverageThresholds); gates start in M2.
+      # Verification step 2: .NET tests with Cobertura coverage, then ReportGenerator (commands as in app/AGENTS.md).
+      # M1 collects and reports coverage only. M2 adds the per-assembly gate loop from app/AGENTS.md after the summary:
+      # one ReportGenerator run per gated assembly with "minimumCoverageThresholds:lineCoverage=90" and
+      # "minimumCoverageThresholds:branchCoverage=90" (no leading dash; the dashed form is silently ignored).
       - name: Test .NET with coverage
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          Remove-Item output/coverage -Recurse -Force -ErrorAction Ignore
+          dotnet test --solution FotoHAVN.slnx --no-build --results-directory output/coverage --coverage --coverage-output-format cobertura
           dotnet tool restore
-          # exact flags: see app/AGENTS.md
-          dotnet test --solution FotoHAVN.slnx --no-build -- --coverage --coverage-output-format cobertura
-          # exact flags: see app/AGENTS.md
-          dotnet tool run reportgenerator "-reports:**/TestResults/**/*.cobertura.xml" "-targetdir:output/coverage" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
-          Get-Content output/coverage/Summary.txt
+          dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
+          Get-Content output/coverage/report/Summary.txt
 
       # Verification step 3: UI.
       - name: Install UI dependencies

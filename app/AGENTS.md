@@ -27,32 +27,40 @@ Use this guide for the desktop booth under `app/`: the .NET brain and adapters, 
 
 ## Verification
 
-Write unit tests for each rule first, then the end-to-end scenario. Before completing a milestone, run these from `app/` in order and fix every failure before going on. There are no wrapper scripts; CI runs the same commands. M0 runs only step 8 and its review. M1 runs every step, with the coverage threshold checked for collection only (run ReportGenerator without `minimumCoverageThresholds`). From M2 on, every step applies.
+Write unit tests for each rule first, then the end-to-end scenario. Before completing a milestone, run these from `app/` in order and fix every failure before going on. There are no wrapper scripts; CI runs steps 1–4 and 8 with the same commands. M0 runs only step 8 and its review. M1 runs every step, with coverage collected and reported but not gated. From M2 on, every step applies, including the per-assembly gate. [`docs/local-development-guide.md`](docs/local-development-guide.md) explains each command.
 
 ```powershell
 # 1. Build .NET (warnings are errors)
 dotnet restore FotoHAVN.slnx --locked-mode
 dotnet build FotoHAVN.slnx --no-restore
 
-# 2. .NET tests with Cobertura coverage, gated at 90% line and branch in each gated assembly
-#    Exact coverage flags: confirmed in M1.
-dotnet test --solution FotoHAVN.slnx --no-build -- --coverage --coverage-output-format cobertura
-dotnet tool run reportgenerator "-reports:**/TestResults/**/*.cobertura.xml" "-targetdir:output/coverage" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog" "-minimumCoverageThresholds:lineCoverage=90" "-minimumCoverageThresholds:branchCoverage=90"
+# 2. .NET tests with Cobertura coverage, then the ReportGenerator summary of the four gated assemblies
+Remove-Item output/coverage -Recurse -Force -ErrorAction Ignore
+dotnet test --solution FotoHAVN.slnx --no-build --results-directory output/coverage --coverage --coverage-output-format cobertura
+dotnet tool restore
+dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
+#    From M2: gate each assembly at 90% line and branch
+foreach ($assembly in 'FotoHavn.Core','FotoHavn.Protocol','FotoHavn.Storage','FotoHavn.Catalog') {
+  dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report/$assembly" "-reporttypes:TextSummary" "-assemblyfilters:+$assembly" "minimumCoverageThresholds:lineCoverage=90" "minimumCoverageThresholds:branchCoverage=90"
+  if ($LASTEXITCODE -ne 0) { throw "$assembly is below 90% line or branch coverage" }
+}
 
-# 3. UI (in ui/; test:coverage fails below 80%)
+# 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures)
 npm ci; npm run lint; npm run typecheck; npm run test:coverage; npm run build; npm run test:fixtures
 
-# 4-5. End-to-end (in e2e/; real camera required; set FOTOHAVN_E2E_CAMERA to choose one)
+# 4-5. End-to-end (in e2e/; real camera required; global setup runs `npm run build:e2e` in ui/ and the E2E build below)
 npm ci; npm run typecheck
+$env:FOTOHAVN_E2E_CAMERA = "<camera name or device id>"   # optional; defaults to the first camera
 npx playwright test --project=regression --grep "@m<N>"
 npx playwright test --project=smoke
+#    The E2E build on its own: dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build
 
 # 8. Agent docs (from the repository root)
 ./scripts/verify-agent-docs.ps1
 ```
 
-- M1 must configure the test runner as Microsoft.Testing.Platform (`"test": { "runner": "Microsoft.Testing.Platform" }` in `global.json`) so the `dotnet test --solution` command above works; the exact flags are confirmed in M1.
-- Each gated assembly (`FotoHavn.Core`, `FotoHavn.Protocol`, `FotoHavn.Storage`, `FotoHavn.Catalog`) must individually reach 90% line and branch coverage. The merged threshold flag alone isn't enough: check each assembly in the per-assembly summary, or run ReportGenerator once per assembly. M1 pins the exact method.
+- Delete `output/coverage` before each test run: the coverage files have GUID names and accumulate, so stale runs would be merged in.
+- Write the threshold as `"minimumCoverageThresholds:lineCoverage=90"`, with no leading dash; ReportGenerator silently ignores the dashed form. The merged summary can hide a weak assembly, so the gate runs once per assembly. An assembly with no branches passes the branch threshold.
 - Read the coverage text summary and the Playwright HTML report and trace for any failure; results land in `output/`.
 - With no Available Camera, report "end-to-end not run: no camera". From M1 on, a milestone without a passing end-to-end run is incomplete.
 - Report `@physical-displays` scenarios as "not run: one display" when fewer than two real displays exist, and cover them with the milestone's manual checks.

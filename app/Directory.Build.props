@@ -27,6 +27,14 @@
   </PropertyGroup>
 
   <!--
+    Projects that ship inside FOTOHAVN.exe also restore for win-x64, so packages.lock.json already holds the graph that
+    the self-contained `-r win-x64` field publish needs and the publish leaves the lock files unchanged.
+  -->
+  <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests')) and '$(MSBuildProjectName)' != 'FotoHavn.Host.Headless'">
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!--
     E2E build switch: `dotnet build -p:FotoHavnE2E=true` compiles the test hooks into every project.
     Field builds never set it; the publish guard in FotoHavn.Host.Windows refuses to publish with it.
   -->

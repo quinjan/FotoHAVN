@@ -40,6 +40,19 @@
   </ItemGroup>
 
   <!--
+    Vite names assets by content hash, so each UI build leaves the previous copy's files behind in wwwroot/.
+    Before copying, delete every file in <OutDir>/wwwroot that ui/dist no longer has (all of them when ui/dist is missing).
+  -->
+  <Target Name="FotoHavnRemoveStaleWwwroot" BeforeTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <_FotoHavnUiDistFile Include="$(FotoHavnUiDist)\**\*" Condition="Exists('$(FotoHavnUiDist)')" />
+      <_FotoHavnStaleWwwrootFile Include="$(OutDir)wwwroot\**\*" />
+      <_FotoHavnStaleWwwrootFile Remove="@(_FotoHavnUiDistFile->'$(OutDir)wwwroot\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <Delete Files="@(_FotoHavnStaleWwwrootFile)" />
+  </Target>
+
+  <!--
     Publish guard: a field build must never contain the E2E test hooks.
     `dotnet publish` sets _IsPublishing, so the guard fails before anything builds; PrepareForPublish covers msbuild -t:Publish.
   -->
