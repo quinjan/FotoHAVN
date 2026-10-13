@@ -64,7 +64,7 @@ public partial class App : Application
         _windows = new ScreenWindows(Dispatcher, _displays, _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Screens"));
         _executor = new DedicatedThreadBrainExecutor(exception => HostLog.BrainWorkFailed(logger, exception));
 
-        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem();
+        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem(paths.DataFolder);
 #if E2E_HOOKS
         var faults = new FaultInjectingStorageFileSystem(fileSystem);
         fileSystem = faults;

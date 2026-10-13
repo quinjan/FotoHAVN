@@ -145,16 +145,17 @@ public sealed class ReconcilerDeletionAndThumbnailTests
     }
 
     [Fact]
-    public async Task Step_6_deletes_the_file_of_a_capture_that_step_3_just_marked_discarded_only_if_it_exists()
+    public async Task Step_6_leaves_a_kept_capture_whose_file_is_missing_alone()
     {
         using var folder = new SeededDataFolder();
         var cycle = folder.AddCycle(folder.AddEvent(), "completed");
-        folder.AddCapture(cycle, 1, writeFile: false);
+        var capture = folder.AddCapture(cycle, 1, writeFile: false);
 
         var report = await ReconcilerKit.RunAsync(folder);
 
         Assert.Equal(1, report.ArtifactProblems);
         Assert.Equal(0, report.DiscardedFilesDeleted);
+        Assert.Equal("kept", folder.Text("SELECT state FROM captures WHERE id = $id", ("$id", capture.Id)));
     }
 
     [Fact]
@@ -231,18 +232,20 @@ public sealed class ReconcilerDeletionAndThumbnailTests
     }
 
     [Fact]
-    public async Task Step_7_deletes_the_thumbnail_of_a_photo_strip_whose_row_step_3_removed()
+    public async Task Step_7_keeps_the_thumbnails_of_rows_whose_file_is_missing_because_the_rows_stay()
     {
         using var folder = new SeededDataFolder();
         var cycle = folder.AddCycle(folder.AddEvent(), "completed");
-        var capture = folder.AddCapture(cycle, 1);
+        var capture = folder.AddCapture(cycle, 1, writeFile: false);
         var strip = folder.AddPhotoStrip(cycle, [capture.Id], writeFile: false);
-        var thumbnail = folder.AddThumbnail(cycle, strip.Sha256);
+        var captureThumbnail = folder.AddThumbnail(capture.Id, capture.Sha256);
+        var stripThumbnail = folder.AddThumbnail(cycle, strip.Sha256);
 
         var report = await ReconcilerKit.RunAsync(folder);
 
-        Assert.Equal(1, report.OrphanThumbnailsDeleted);
-        Assert.False(File.Exists(thumbnail));
+        Assert.Equal(0, report.OrphanThumbnailsDeleted);
+        Assert.True(File.Exists(captureThumbnail));
+        Assert.True(File.Exists(stripThumbnail));
     }
 
     [Fact]

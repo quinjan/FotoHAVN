@@ -15,12 +15,16 @@ namespace FotoHavn.Storage.Reconciliation;
 /// files before the rows that describe them, and changes rows in transactions.
 /// </para>
 /// <para>
-/// Decisions the plan leaves open (step 3), all reported in <see cref="ReconcileReport.Problems"/> by id only:
-/// a kept Capture whose file is missing is marked <c>discarded</c> (its row stays, because a Photo Strip's arrangement may
-/// name it; it no longer shows in the gallery and has no file to delete); a Photo Strip whose file is missing loses its row
-/// (nothing refers to it, and a completed cycle without a strip stays listed but not in the completed-only view); a file
-/// whose size or hash differs is kept and flagged again on every run. An unfinished cycle with any of these problems is
-/// ended as <c>unrecoverable</c>; its other files stay.
+/// Step 3 is log and keep, on the rule of ADR 0005: a row whose file is missing, or whose size or hash differs, is reported in
+/// <see cref="ReconcileReport.Problems"/> by id only, and nothing about it changes: the Capture keeps its state, the Photo Strip
+/// keeps its row, the cycle keeps its end, and a file that reappears is adopted as it is (step 2 sees its row, so it is never an
+/// orphan). Only an unfinished cycle with such a problem is ended, as <c>unrecoverable</c>; its other files stay. The gallery
+/// shows such an item as unavailable (M9).
+/// </para>
+/// <para>
+/// The reconciler never follows a junction or symbolic link: listings skip them, a delete through one is refused and
+/// reported, and a link found under <c>Events/</c> or <c>Cache/thumbnails/</c> is left in place and reported, because the
+/// operator made it on purpose.
 /// </para>
 /// <para>
 /// Step 2 deletes unreferenced files, then the Event and cycle folders that have no row. It sees folders only through the
@@ -83,8 +87,57 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             var (cycles, events) = FinishDeletions();
             var discarded = DeleteDiscardedFiles();
             var thumbnails = DeleteOrphanThumbnails();
+            ReportLinks();
 
             return new ReconcileReport(staging, orphans, artifactProblems, unrecoverable, appClosed, cycles, events, discarded, thumbnails, _problems.ToArray());
+        }
+
+        // Junctions and symbolic links are never followed or removed: the operator made them on purpose, so they are only reported.
+        private void ReportLinks()
+        {
+            foreach (var link in fs.FindReparsePoints(_eventsDir))
+            {
+                ct.ThrowIfCancellationRequested();
+                var segments = Segments(link);
+                _problems.Add(segments.Length > 1
+                    ? $"A junction or symbolic link in the folder of Event {segments[0]} was left alone."
+                    : "A junction or symbolic link directly under Events was left alone.");
+            }
+
+            foreach (var _ in fs.FindReparsePoints(_thumbnailsDir))
+            {
+                ct.ThrowIfCancellationRequested();
+                _problems.Add("A junction or symbolic link in the thumbnail cache was left alone.");
+            }
+        }
+
+        // A refused delete (the path goes through a link) is reported and skipped, never a crash.
+        private bool TryDelete(string file)
+        {
+            try
+            {
+                fs.Delete(file);
+                return true;
+            }
+            catch (ReparsePointException)
+            {
+                _problems.Add("A file reached through a junction or symbolic link was left alone.");
+                return false;
+            }
+        }
+
+        private bool TryDeleteDirectory(string directory)
+        {
+            try
+            {
+                fs.DeleteDirectoryRecursive(directory);
+                return true;
+            }
+            catch (ReparsePointException)
+            {
+                _problems.Add("A folder reached through a junction or symbolic link was left alone.");
+                return false;
+            }
         }
 
         // Step 1: every .staging file, under Events/ and the thumbnail staging folder Cache/thumbnails/.staging.
@@ -95,9 +148,8 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             {
                 ct.ThrowIfCancellationRequested();
                 var segments = Segments(file);
-                if (segments.Length > 1 && segments[..^1].Any(segment => segment.Equals(".staging", StringComparison.OrdinalIgnoreCase)))
+                if (segments.Length > 1 && segments[..^1].Any(segment => segment.Equals(".staging", StringComparison.OrdinalIgnoreCase)) && TryDelete(file))
                 {
-                    fs.Delete(file);
                     deleted++;
                 }
             }
@@ -105,8 +157,10 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             foreach (var file in fs.EnumerateFiles(Path.Combine(_thumbnailsDir, ".staging"), recursive: true))
             {
                 ct.ThrowIfCancellationRequested();
-                fs.Delete(file);
-                deleted++;
+                if (TryDelete(file))
+                {
+                    deleted++;
+                }
             }
 
             return deleted;
@@ -145,7 +199,11 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
                     continue;
                 }
 
-                fs.Delete(file);
+                if (!TryDelete(file))
+                {
+                    continue;
+                }
+
                 deleted++;
 
                 if (segments.Length >= 2 && !events.Contains(segments[0]))
@@ -162,13 +220,14 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             foreach (var folder in foldersToRemove)
             {
                 ct.ThrowIfCancellationRequested();
-                fs.DeleteDirectoryRecursive(folder);
+                _ = TryDeleteDirectory(folder);
             }
 
             return deleted;
         }
 
-        // Step 3: rows whose file is missing or differs.
+        // Step 3: rows whose file is missing or differs. Log and keep: nothing about the row changes (an unfinished cycle ends
+        // as unrecoverable); a file that reappears is adopted because its row is still there.
         private (int Problems, int Unrecoverable) CheckArtifacts()
         {
             var openCycles = Query($"SELECT c.id {LiveCycles} AND c.end_reason IS NULL", r => r.GetString(0)).ToHashSet(StringComparer.Ordinal);
@@ -181,8 +240,6 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
                 "WHERE c.deleting_at IS NULL AND e.deleting_at IS NULL ORDER BY s.guest_cycle_id",
                 r => new StripRow(r.GetString(0), r.GetString(1), r.GetString(2), r.GetInt64(3), r.GetString(4)));
 
-            var discard = new List<string>();
-            var dropStrips = new List<string>();
             var affectedCycles = new HashSet<string>(StringComparer.Ordinal);
             var problemCount = 0;
 
@@ -197,15 +254,9 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
 
                 problemCount++;
                 affectedCycles.Add(capture.CycleId);
-                if (check == FileCheck.Missing)
-                {
-                    discard.Add(capture.Id);
-                    _problems.Add($"Capture {capture.Id} of Guest Cycle {capture.CycleId}: its file is missing, so the Capture was marked discarded.");
-                }
-                else
-                {
-                    _problems.Add($"Capture {capture.Id} of Guest Cycle {capture.CycleId}: its file doesn't match the recorded size or hash; the Capture was kept.");
-                }
+                _problems.Add(check == FileCheck.Missing
+                    ? $"Capture {capture.Id} of Guest Cycle {capture.CycleId}: its file is missing; the Capture was kept."
+                    : $"Capture {capture.Id} of Guest Cycle {capture.CycleId}: its file doesn't match the recorded size or hash; the Capture was kept.");
             }
 
             foreach (var strip in strips)
@@ -219,31 +270,15 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
 
                 problemCount++;
                 affectedCycles.Add(strip.CycleId);
-                if (check == FileCheck.Missing)
-                {
-                    dropStrips.Add(strip.CycleId);
-                    _problems.Add($"Photo Strip of Guest Cycle {strip.CycleId}: its file is missing, so the Photo Strip was removed.");
-                }
-                else
-                {
-                    _problems.Add($"Photo Strip of Guest Cycle {strip.CycleId}: its file doesn't match the recorded size or hash; the Photo Strip was kept.");
-                }
+                _problems.Add(check == FileCheck.Missing
+                    ? $"Photo Strip of Guest Cycle {strip.CycleId}: its file is missing; the Photo Strip was kept."
+                    : $"Photo Strip of Guest Cycle {strip.CycleId}: its file doesn't match the recorded size or hash; the Photo Strip was kept.");
             }
 
             var unrecoverable = affectedCycles.Where(openCycles.Contains).OrderBy(id => id, StringComparer.Ordinal).ToList();
-            if (discard.Count + dropStrips.Count + unrecoverable.Count > 0)
+            if (unrecoverable.Count > 0)
             {
                 using var transaction = connection.BeginTransaction();
-                foreach (var id in discard)
-                {
-                    Execute(transaction, "UPDATE captures SET state = 'discarded' WHERE id = $id", ("$id", id));
-                }
-
-                foreach (var id in dropStrips)
-                {
-                    Execute(transaction, "DELETE FROM photo_strips WHERE guest_cycle_id = $id", ("$id", id));
-                }
-
                 foreach (var id in unrecoverable)
                 {
                     Execute(
@@ -303,7 +338,7 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
                 ct.ThrowIfCancellationRequested();
                 if (ThumbnailName.TryParse(Path.GetFileName(file), out var sourceId, out _, out _) && sourceIds.Contains(sourceId))
                 {
-                    fs.Delete(file);
+                    _ = TryDelete(file);
                 }
             }
 
@@ -312,9 +347,10 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             foreach (var eventId in deletingEvents)
             {
                 ct.ThrowIfCancellationRequested();
-                if (StorageIds.IsValid(eventId))
+                if (StorageIds.IsValid(eventId) && !TryDeleteDirectory(Path.Combine(_eventsDir, eventId)))
                 {
-                    fs.DeleteDirectoryRecursive(Path.Combine(_eventsDir, eventId));
+                    // The folder is behind a link: its rows stay marked deleting (hidden) and the problem is reported at every start.
+                    continue;
                 }
 
                 using var transaction = connection.BeginTransaction();
@@ -332,9 +368,9 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             foreach (var cycle in deletingCycles)
             {
                 ct.ThrowIfCancellationRequested();
-                if (StorageIds.IsValid(cycle.EventId) && StorageIds.IsValid(cycle.Id))
+                if (StorageIds.IsValid(cycle.EventId) && StorageIds.IsValid(cycle.Id) && !TryDeleteDirectory(CycleFolder(cycle.EventId, cycle.Id)))
                 {
-                    fs.DeleteDirectoryRecursive(CycleFolder(cycle.EventId, cycle.Id));
+                    continue;
                 }
 
                 using var transaction = connection.BeginTransaction();
@@ -359,9 +395,8 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             {
                 ct.ThrowIfCancellationRequested();
                 var path = FilePath(capture.EventId, capture.CycleId, capture.FileName);
-                if (path is not null && fs.Exists(path))
+                if (path is not null && fs.Exists(path) && TryDelete(path))
                 {
-                    fs.Delete(path);
                     deleted++;
                 }
             }
@@ -369,7 +404,9 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             return deleted;
         }
 
-        // Step 7: thumbnails whose source row is gone or whose recorded hash changed, and files that aren't thumbnails.
+        // Step 7: thumbnails whose source row is gone or whose recorded hash changed, and files that aren't thumbnails. A row
+        // whose file is missing still counts as a source, so its thumbnail stays (log and keep, as in step 3); the row says what
+        // the thumbnail shows, and the thumbnail is the only picture left of it.
         private int DeleteOrphanThumbnails()
         {
             var sources = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -391,9 +428,8 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
                     && width is >= ThumbnailName.MinimumWidth and <= ThumbnailName.MaximumWidth
                     && sources.TryGetValue(sourceId, out var sha)
                     && sha.StartsWith(sha8, StringComparison.OrdinalIgnoreCase);
-                if (!current)
+                if (!current && TryDelete(file))
                 {
-                    fs.Delete(file);
                     deleted++;
                 }
             }

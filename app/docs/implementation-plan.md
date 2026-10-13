@@ -666,7 +666,7 @@ It runs before the Event list appears:
 
 1. Delete every `.staging/` file.
 2. Delete files under `Data/Events/**` that have no row (orphans from a crash between rename and insert). Thumbnails in `Data/Cache/` are derived and handled in step 7; `fotohavn.db`, `logs/`, and `webview2-user-data/` are never touched.
-3. Rows whose file is missing or whose hash or size differs: log the problem, set `ended_at` and `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files.
+3. Rows whose file is missing or whose hash or size differs: log the problem, set `ended_at` and `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files. Change nothing else about the row (log and keep): a file that reappears is adopted as it is, and the gallery shows the item as unavailable (M9).
 4. Guest Cycles that still have no `end_reason`: set `ended_at` and `end_reason = 'app_closed'` (D17).
 5. Guest Cycles and Events marked `deleting_at`: finish deleting their folders and thumbnails, then delete their rows.
 6. Delete files of `discarded` Captures.

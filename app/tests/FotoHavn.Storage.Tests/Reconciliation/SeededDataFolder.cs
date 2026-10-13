@@ -49,6 +49,7 @@ public sealed class SeededDataFolder : IDisposable
     public SeededDataFolder()
     {
         DataRoot = _scratch.Combine("Data");
+        Fs = new PhysicalStorageFileSystem(DataRoot);
         Directory.CreateDirectory(DataRoot);
         DatabasePath = Path.Combine(DataRoot, "fotohavn.db");
         Connection = new SqliteConnection($"Data Source={DatabasePath};Pooling=False;Default Timeout=1");
@@ -72,7 +73,7 @@ public sealed class SeededDataFolder : IDisposable
 
     public SqliteConnection Connection { get; }
 
-    public PhysicalStorageFileSystem Fs { get; } = new();
+    public PhysicalStorageFileSystem Fs { get; }
 
     public void Dispose()
     {

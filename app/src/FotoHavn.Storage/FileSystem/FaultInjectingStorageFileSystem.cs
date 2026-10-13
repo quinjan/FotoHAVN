@@ -98,10 +98,10 @@ public sealed class FaultInjectingStorageFileSystem(IStorageFileSystem inner) : 
         inner.CreateDirectory(path);
     }
 
-    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes)
+    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes, Action? afterWrite = null)
     {
         ThrowIfFaulted();
-        inner.WriteAllBytesAndFlush(path, bytes);
+        inner.WriteAllBytesAndFlush(path, bytes, afterWrite);
     }
 
     public void Move(string source, string destination)
@@ -125,6 +125,8 @@ public sealed class FaultInjectingStorageFileSystem(IStorageFileSystem inner) : 
     public bool Exists(string path) => inner.Exists(path);
 
     public IReadOnlyList<string> EnumerateFiles(string directory, bool recursive) => inner.EnumerateFiles(directory, recursive);
+
+    public IReadOnlyList<string> FindReparsePoints(string directory) => inner.FindReparsePoints(directory);
 
     public byte[] ReadAllBytes(string path) => inner.ReadAllBytes(path);
 

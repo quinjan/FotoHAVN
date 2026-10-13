@@ -61,8 +61,8 @@ It must be on a local disk. Startup refuses network and cloud-synced paths it ca
 **Startup reconciler.** Before the Event list appears:
 
 1. Delete every `.staging/` file.
-2. Delete files under `Data/Events/**` that have no row. Thumbnails in `Data/Cache/` are derived and handled in step 7; `fotohavn.db`, `logs/`, and `webview2-user-data/` are never touched.
-3. For rows whose file is missing or whose hash or size differs, log the problem, set `ended_at` and `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files.
+2. Delete files under `Data/Events/**` that have no row. Thumbnails in `Data/Cache/` are derived and handled in step 7; `fotohavn.db`, `logs/`, and `webview2-user-data/` are never touched. The reconciler and the store never follow a junction or symbolic link: listings skip them, a delete through one is refused, and the reconciler reports a link it finds and leaves it in place.
+3. For rows whose file is missing or whose hash or size differs, log the problem, set `ended_at` and `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files. "Log and keep" is the rule: the reconciler changes nothing else about the row (a Capture stays `kept`, a Photo Strip keeps its row), so a file that reappears is adopted as it is, and the gallery shows such an item as unavailable (M9).
 4. End Guest Cycles that still have no `end_reason` with `ended_at` and `end_reason = 'app_closed'` (D17).
 5. Finish deleting Guest Cycles and Events marked `deleting_at`.
 6. Delete files of `discarded` Captures.

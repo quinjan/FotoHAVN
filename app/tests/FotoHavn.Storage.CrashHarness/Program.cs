@@ -75,17 +75,23 @@ internal sealed record HarnessOptions(string DataRoot, string Scenario, string C
     }
 }
 
-/// <summary>Ends the process at one named step, after leaving a marker file beside the Data folder.</summary>
+/// <summary>
+/// Ends the process at one named step, after leaving a marker file beside the Data folder. The marker lists every step reached
+/// so far, so a test can tell a crash at <c>staged</c> (before the flush) from one at <c>flushed</c> (after it).
+/// </summary>
 internal sealed class KillAtStep(string step, string markerPath, Func<string?> cycleId) : ICrashPoints
 {
+    private readonly List<string> _reached = [];
+
     public void Reached(string stepName)
     {
+        _reached.Add(stepName);
         if (stepName != step)
         {
             return;
         }
 
-        File.WriteAllText(markerPath, JsonSerializer.Serialize(new { step = stepName, cycleId = cycleId() }));
+        File.WriteAllText(markerPath, JsonSerializer.Serialize(new { step = stepName, cycleId = cycleId(), reached = _reached }));
         Process.GetCurrentProcess().Kill();
         Thread.Sleep(Timeout.Infinite);
     }
@@ -107,7 +113,7 @@ internal static class HarnessRun
         await using var store = new SqliteEventStore(
             options.DataRoot,
             clock,
-            new PhysicalStorageFileSystem(),
+            new PhysicalStorageFileSystem(options.DataRoot),
             new WindowsDataPathProbe(),
             new StartupReconciler(clock),
             crashPoints: crash);

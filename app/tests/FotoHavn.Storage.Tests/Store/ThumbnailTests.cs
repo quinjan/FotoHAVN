@@ -154,6 +154,29 @@ public sealed class ThumbnailTests
     }
 
     [Fact]
+    public async Task Rows_whose_files_are_gone_still_list_and_read_and_only_their_thumbnails_are_NotFound()
+    {
+        var (harness, record, cycle, capture) = await SeededAsync();
+        await using var lifetime = harness;
+        _ = await harness.Store.CommitPhotoStripAsync(Sample.Strip(cycle.Id, [capture.Id], Sample.Png(60, 180)), Ct);
+        var folder = harness.CycleFolder(record.Id, cycle.Id);
+        File.Delete(Path.Combine(folder, capture.FileName));
+        File.Delete(Path.Combine(folder, "photo-strip.png"));
+
+        var page = await harness.Store.ListGuestCyclesAsync(record.Id, GuestCycleFilter.CompletedOnly, null, 10, Ct);
+        var detail = await harness.Store.GetGuestCycleAsync(cycle.Id, Ct);
+
+        var item = Assert.Single(page.Items);
+        Assert.Equal(1, item.KeptCaptureCount);
+        Assert.NotNull(item.PhotoStrip);
+        Assert.Equal(GuestCycleEndReason.Completed, detail!.Cycle.EndReason);
+        Assert.Equal(capture.Id, Assert.Single(detail.Captures).Id);
+        Assert.NotNull(detail.PhotoStrip);
+        Assert.Equal(StorageErrorKind.NotFound, (await Assert.ThrowsAsync<StorageException>(() => harness.Store.GetThumbnailPathAsync(capture.Id, 64, Ct))).Kind);
+        Assert.Equal(StorageErrorKind.NotFound, (await Assert.ThrowsAsync<StorageException>(() => harness.Store.GetThumbnailPathAsync(cycle.Id, 64, Ct))).Kind);
+    }
+
+    [Fact]
     public async Task A_source_that_is_not_an_image_fails_and_leaves_no_thumbnail()
     {
         var harness = await StoreHarness.OpenedAsync();

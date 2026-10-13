@@ -44,6 +44,7 @@ public sealed class CrashRecoveryTests
         Assert.True(run.Crashed, $"The harness didn't reach {step}. Exit {run.ExitCode}. {run.Errors}");
         Assert.Equal(step, run.MarkerStep);
         Assert.NotEqual(0, run.ExitCode);
+        AssertCrashedAtTheStep(step, run.MarkerReached);
 
         var (store, opened) = await RealStore.OpenAsync(data);
         await using (store)
@@ -119,6 +120,23 @@ public sealed class CrashRecoveryTests
         Assert.Equal(2, unknownStep.ExitCode);
         Assert.Equal(2, missingEvent.ExitCode);
         Assert.False(unknownScenario.Crashed);
+    }
+
+    /// <summary>
+    /// The process died at <paramref name="step"/> and nowhere later. For a <c>*.staged</c> step that proves the crash came
+    /// before the flush (no <c>*.flushed</c> was reached); for <c>*.flushed</c>, that the staged write completed first.
+    /// </summary>
+    private static void AssertCrashedAtTheStep(string step, IReadOnlyList<string> reached)
+    {
+        Assert.Equal(step, reached[^1]);
+        if (step.EndsWith(".staged", StringComparison.Ordinal))
+        {
+            Assert.DoesNotContain(step[..^".staged".Length] + ".flushed", reached);
+        }
+        else if (step.EndsWith(".flushed", StringComparison.Ordinal))
+        {
+            Assert.Equal(step[..^".flushed".Length] + ".staged", reached[^2]);
+        }
     }
 
     /// <summary>What the next start's reconciler reports for a crash at <paramref name="step"/>.</summary>

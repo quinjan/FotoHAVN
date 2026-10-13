@@ -112,7 +112,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var sessions = new BridgeSessions();
         var brainLogger = loggers.CreateLogger("FotoHavn.Brain");
         var executor = new DedicatedThreadBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
-        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem();
+        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem(settings.DataFolder);
 #if E2E_HOOKS
         var faults = new FaultInjectingStorageFileSystem(fileSystem);
         fileSystem = faults;

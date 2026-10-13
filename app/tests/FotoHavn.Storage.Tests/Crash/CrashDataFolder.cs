@@ -17,7 +17,7 @@ public static class RealStore
         new(
             dataRoot,
             SystemClock.Instance,
-            fileSystem ?? new PhysicalStorageFileSystem(),
+            fileSystem ?? new PhysicalStorageFileSystem(dataRoot),
             new WindowsDataPathProbe(),
             new StartupReconciler(SystemClock.Instance),
             new FastPinHasher(),

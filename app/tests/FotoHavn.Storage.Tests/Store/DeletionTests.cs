@@ -308,4 +308,84 @@ public sealed class DeletionTests
         Assert.Equal(0, Rows(harness));
         await harness.DisposeAsync();
     }
+
+    private static string Precious(ScratchFolder outside)
+    {
+        var path = outside.Combine("precious.txt");
+        File.WriteAllText(path, "keep me");
+        return path;
+    }
+
+    [Fact]
+    public async Task Deleting_an_Event_never_follows_a_junction_in_its_folder_and_leaves_the_target_alone()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        using var outside = new ScratchFolder();
+        var done = await CompletedCycleAsync(harness);
+        var precious = Precious(outside);
+        Links.CreateJunction(Path.Combine(harness.CycleFolder(done.Event.Id, done.Cycle.Id), "link"), outside.Path);
+
+        await harness.Store.MarkEventDeletingAsync(done.Event.Id, Ct);
+        await harness.Store.DrainAsync(Ct);
+
+        Assert.True(File.Exists(precious));
+        Assert.Equal(0, Rows(harness));
+        Assert.False(Directory.Exists(Path.Combine(harness.DataRoot, "Events", done.Event.Id)));
+    }
+
+    [Fact]
+    public async Task Deleting_an_Event_whose_folder_is_a_junction_removes_only_the_link()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        using var outside = new ScratchFolder();
+        var done = await CompletedCycleAsync(harness);
+        var precious = Precious(outside);
+        var eventFolder = Path.Combine(harness.DataRoot, "Events", done.Event.Id);
+        Directory.Delete(eventFolder, recursive: true);
+        Links.CreateJunction(eventFolder, outside.Path);
+
+        await harness.Store.MarkEventDeletingAsync(done.Event.Id, Ct);
+        await harness.Store.DrainAsync(Ct);
+
+        Assert.True(File.Exists(precious));
+        Assert.False(Directory.Exists(eventFolder));
+        Assert.Equal(0, Rows(harness));
+    }
+
+    [Fact]
+    public async Task Deleting_a_Guest_Cycle_never_follows_a_junction_in_its_folder_and_leaves_the_target_alone()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        using var outside = new ScratchFolder();
+        var done = await CompletedCycleAsync(harness);
+        var precious = Precious(outside);
+        Links.CreateJunction(Path.Combine(harness.CycleFolder(done.Event.Id, done.Cycle.Id), "link"), outside.Path);
+
+        await harness.Store.MarkGuestCycleDeletingAsync(done.Cycle.Id, Ct);
+        await harness.Store.DrainAsync(Ct);
+
+        Assert.True(File.Exists(precious));
+        Assert.Equal(0, harness.Count("SELECT COUNT(*) FROM guest_cycles;"));
+        Assert.False(Directory.Exists(harness.CycleFolder(done.Event.Id, done.Cycle.Id)));
+    }
+
+    [Fact]
+    public async Task A_deletion_behind_a_junction_above_the_folder_deletes_nothing_and_stays_marked_for_the_reconciler()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        using var outside = new ScratchFolder();
+        var done = await CompletedCycleAsync(harness);
+        var moved = Path.Combine(outside.Path, "Events");
+        var events = Path.Combine(harness.DataRoot, "Events");
+        Directory.Move(events, moved);
+        Links.CreateJunction(events, moved);
+        var capture = Path.Combine(harness.CycleFolder(done.Event.Id, done.Cycle.Id), "capture-1.jpg");
+
+        await harness.Store.MarkEventDeletingAsync(done.Event.Id, Ct);
+        await harness.Store.DrainAsync(Ct);
+
+        Assert.True(File.Exists(capture));
+        Assert.Equal(1, harness.Count("SELECT COUNT(*) FROM events WHERE deleting_at IS NOT NULL;"));
+        Assert.DoesNotContain(CrashPoint.EventRowsDeleted, harness.Crash.Steps);
+    }
 }

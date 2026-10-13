@@ -304,9 +304,10 @@ public sealed partial class SqliteEventStore
     }
 
     /// <summary>
-    /// Writes <paramref name="bytes"/> as <paramref name="fileName"/> in the Guest Cycle folder: staged under <c>.staging</c>, flushed,
-    /// renamed, then <paramref name="insert"/> commits the row. A failure before the row exists leaves nothing under the final name
-    /// (a leftover staging file is the reconciler's). The crash points run after each step, outside the clean-up.
+    /// Writes <paramref name="bytes"/> as <paramref name="fileName"/> in the Guest Cycle folder: staged under <c>.staging</c>
+    /// (reported from inside the file system's write, after the bytes are written and before they are flushed), flushed,
+    /// renamed, then <paramref name="insert"/> commits the row. A failure before the row exists leaves nothing under the final
+    /// name (a leftover staging file is the reconciler's). The crash points after the write run outside the clean-up.
     /// </summary>
     private void CommitArtifact(
         string cycleDirectory,
@@ -318,18 +319,26 @@ public sealed partial class SqliteEventStore
         var stagingDirectory = Path.Combine(cycleDirectory, ".staging");
         var stagingPath = Path.Combine(stagingDirectory, StorageIds.NewId() + ".tmp");
         var finalPath = Path.Combine(cycleDirectory, fileName);
+        var inHook = false;
         try
         {
             _fs.CreateDirectory(stagingDirectory);
-            _fs.WriteAllBytesAndFlush(stagingPath, bytes.Span);
+            _fs.WriteAllBytesAndFlush(
+                stagingPath,
+                bytes.Span,
+                () =>
+                {
+                    inHook = true;
+                    _crash.Reached(steps.Staged);
+                    inHook = false;
+                });
         }
-        catch
+        catch (Exception) when (!inHook)
         {
             DeleteQuietly([stagingPath]);
             throw;
         }
 
-        _crash.Reached(steps.Staged);
         _crash.Reached(steps.Flushed);
         try
         {

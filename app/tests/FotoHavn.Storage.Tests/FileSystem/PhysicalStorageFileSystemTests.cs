@@ -125,4 +125,159 @@ public sealed class PhysicalStorageFileSystemTests : IDisposable
         Assert.Throws<FileNotFoundException>(() => _fs.ReadAllBytes(_folder.Combine("nope")));
         Assert.Throws<FileNotFoundException>(() => _fs.GetLength(_folder.Combine("nope")));
     }
+
+    [Fact]
+    public void Write_reports_afterWrite_once_after_the_bytes_and_not_when_the_write_fails()
+    {
+        var path = _folder.Combine("a.bin");
+        var calls = 0;
+
+        _fs.WriteAllBytesAndFlush(path, [1, 2, 3], () => calls++);
+        Assert.Throws<DirectoryNotFoundException>(() => _fs.WriteAllBytesAndFlush(_folder.Combine("missing", "a.bin"), [1], () => calls++));
+
+        Assert.Equal(1, calls);
+        Assert.Equal([1, 2, 3], _fs.ReadAllBytes(path));
+    }
+
+    [Fact]
+    public void Write_does_not_flush_when_afterWrite_throws()
+    {
+        var path = _folder.Combine("a.bin");
+
+        Assert.Throws<InvalidOperationException>(() => _fs.WriteAllBytesAndFlush(path, [1], () => throw new InvalidOperationException()));
+
+        Assert.True(_fs.Exists(path));
+    }
+
+    private (PhysicalStorageFileSystem Fs, string Root, string Outside, string Precious) Linked()
+    {
+        var root = _folder.Combine("Data");
+        var outside = _folder.Combine("outside");
+        _fs.CreateDirectory(Path.Combine(root, "Events", "e1"));
+        _fs.CreateDirectory(outside);
+        var precious = Path.Combine(outside, "precious.txt");
+        _fs.WriteAllBytesAndFlush(precious, [7]);
+        return (new PhysicalStorageFileSystem(root), root, outside, precious);
+    }
+
+    [Fact]
+    public void EnumerateFiles_never_follows_a_junction()
+    {
+        var (fs, root, outside, precious) = Linked();
+        var own = Path.Combine(root, "Events", "e1", "own.bin");
+        fs.WriteAllBytesAndFlush(own, [1]);
+        Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+
+        var found = fs.EnumerateFiles(Path.Combine(root, "Events"), recursive: true);
+
+        Assert.Equal([own], found);
+        Assert.True(File.Exists(precious));
+    }
+
+    [Fact]
+    public void EnumerateFiles_skips_a_file_symbolic_link()
+    {
+        var (fs, root, _, precious) = Linked();
+        var link = Path.Combine(root, "Events", "e1", "link.bin");
+        if (!Links.TryCreateFileSymbolicLink(link, precious))
+        {
+            Assert.Skip("This account can't create symbolic links (needs Developer Mode or elevation); the junction tests cover the same rule.");
+        }
+
+        Assert.Empty(fs.EnumerateFiles(Path.Combine(root, "Events"), recursive: true));
+        Assert.Throws<ReparsePointException>(() => fs.Delete(link));
+        Assert.True(File.Exists(precious));
+        Assert.Equal([link], fs.FindReparsePoints(Path.Combine(root, "Events")));
+    }
+
+    [Fact]
+    public void Delete_refuses_a_file_below_a_junction_and_a_junction_itself()
+    {
+        var (fs, root, outside, precious) = Linked();
+        var link = Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+
+        Assert.Throws<ReparsePointException>(() => fs.Delete(Path.Combine(link, "precious.txt")));
+        Assert.Throws<ReparsePointException>(() => fs.Delete(link));
+
+        Assert.True(File.Exists(precious));
+        Assert.True(Directory.Exists(link));
+    }
+
+    [Fact]
+    public void Delete_refuses_through_a_junction_that_is_deeper_than_one_level()
+    {
+        var (fs, root, outside, precious) = Linked();
+        var link = Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+        var deep = Path.Combine(outside, "a", "b");
+        Directory.CreateDirectory(deep);
+        File.WriteAllBytes(Path.Combine(deep, "deep.txt"), [1]);
+
+        Assert.Throws<ReparsePointException>(() => fs.Delete(Path.Combine(link, "a", "b", "deep.txt")));
+        Assert.Throws<ReparsePointException>(() => fs.DeleteDirectoryRecursive(Path.Combine(link, "a")));
+
+        Assert.True(File.Exists(Path.Combine(deep, "deep.txt")));
+        Assert.True(File.Exists(precious));
+    }
+
+    [Fact]
+    public void DeleteDirectoryRecursive_removes_only_a_junction_and_never_its_target()
+    {
+        var (fs, root, outside, precious) = Linked();
+        var link = Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+
+        fs.DeleteDirectoryRecursive(link);
+
+        Assert.False(Directory.Exists(link));
+        Assert.True(File.Exists(precious));
+    }
+
+    [Fact]
+    public void DeleteDirectoryRecursive_of_a_folder_that_holds_a_junction_leaves_the_target_alone()
+    {
+        var (fs, root, outside, precious) = Linked();
+        var own = Path.Combine(root, "Events", "e1", "own.bin");
+        fs.WriteAllBytesAndFlush(own, [1]);
+        Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+
+        fs.DeleteDirectoryRecursive(Path.Combine(root, "Events", "e1"));
+
+        Assert.False(Directory.Exists(Path.Combine(root, "Events", "e1")));
+        Assert.True(File.Exists(precious));
+    }
+
+    [Fact]
+    public void A_delete_works_through_a_guarded_root_that_is_itself_a_junction_and_outside_the_root()
+    {
+        var real = _folder.Combine("real");
+        _fs.CreateDirectory(Path.Combine(real, "Events", "e1"));
+        var root = Links.CreateJunction(_folder.Combine("mapped"), real);
+        var inside = Path.Combine(root, "Events", "e1", "a.bin");
+        var elsewhere = _folder.Combine("elsewhere.bin");
+        _fs.WriteAllBytesAndFlush(inside, [1]);
+        _fs.WriteAllBytesAndFlush(elsewhere, [1]);
+        var fs = new PhysicalStorageFileSystem(root + Path.DirectorySeparatorChar);
+
+        fs.Delete(inside);
+        fs.Delete(elsewhere);
+        fs.DeleteDirectoryRecursive(Path.Combine(root, "Events", "e1"));
+
+        Assert.False(File.Exists(inside));
+        Assert.False(File.Exists(elsewhere));
+        Assert.False(Directory.Exists(Path.Combine(real, "Events", "e1")));
+    }
+
+    [Fact]
+    public void FindReparsePoints_lists_junctions_without_following_them()
+    {
+        var (fs, root, outside, _) = Linked();
+        var first = Links.CreateJunction(Path.Combine(root, "Events", "e1", "link"), outside);
+        var second = Links.CreateJunction(Path.Combine(root, "Events", "top"), outside);
+        Directory.CreateDirectory(Path.Combine(outside, "inner"));
+        Links.CreateJunction(Path.Combine(outside, "inner", "deeper"), outside);
+
+        var found = fs.FindReparsePoints(Path.Combine(root, "Events"));
+
+        Assert.Equal([first, second], found.Order(StringComparer.Ordinal));
+        Assert.Empty(fs.FindReparsePoints(Path.Combine(root, "Cache")));
+    }
 }

@@ -21,7 +21,24 @@ public sealed class ScratchFolder : IDisposable
     {
         if (Directory.Exists(Path))
         {
+            RemoveLinks(new DirectoryInfo(Path));
             Directory.Delete(Path, recursive: true);
+        }
+    }
+
+    // Directory.Delete(recursive) fails on Windows when a junction is inside, so the links go first, on their own.
+    private static void RemoveLinks(DirectoryInfo directory)
+    {
+        foreach (var child in directory.EnumerateDirectories().ToList())
+        {
+            if (child.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                child.Delete();
+            }
+            else
+            {
+                RemoveLinks(child);
+            }
         }
     }
 }

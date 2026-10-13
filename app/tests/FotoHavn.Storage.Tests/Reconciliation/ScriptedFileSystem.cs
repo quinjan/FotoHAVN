@@ -30,10 +30,10 @@ public sealed class ScriptedFileSystem(IStorageFileSystem inner) : IStorageFileS
         inner.CreateDirectory(path);
     }
 
-    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes)
+    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes, Action? afterWrite = null)
     {
         Write(nameof(WriteAllBytesAndFlush), path);
-        inner.WriteAllBytesAndFlush(path, bytes);
+        inner.WriteAllBytesAndFlush(path, bytes, afterWrite);
     }
 
     public void Move(string source, string destination)
@@ -65,6 +65,8 @@ public sealed class ScriptedFileSystem(IStorageFileSystem inner) : IStorageFileS
         Record(nameof(EnumerateFiles), directory);
         return inner.EnumerateFiles(directory, recursive);
     }
+
+    public IReadOnlyList<string> FindReparsePoints(string directory) => inner.FindReparsePoints(directory);
 
     public byte[] ReadAllBytes(string path)
     {

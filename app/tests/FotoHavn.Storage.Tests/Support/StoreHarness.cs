@@ -73,7 +73,7 @@ public sealed class StoreHarness : IAsyncDisposable
 
     public StoreHarness(IReadOnlyList<MigrationScript>? migrations = null, IPinHasher? hasher = null)
     {
-        Faults = new FaultInjectingStorageFileSystem(new PhysicalStorageFileSystem());
+        Faults = new FaultInjectingStorageFileSystem(new PhysicalStorageFileSystem(DataRoot));
         Fs = new RecordingStorageFileSystem(Faults);
         Store = new SqliteEventStore(DataRoot, Clock, Fs, Probe, Reconciler, hasher ?? new FastPinHasher(), Crash, Classify, migrations);
     }

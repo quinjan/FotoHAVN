@@ -1,4 +1,5 @@
 using FotoHavn.Core.Storage;
+using FotoHavn.Storage.Tests.Reconciliation;
 using FotoHavn.Storage.Tests.Support;
 
 namespace FotoHavn.Storage.Tests.Store;
@@ -69,6 +70,72 @@ public sealed class CommitOrderTests
             ],
             log);
         Assert.Equal(CrashPoint.All.Skip(4).Take(4), harness.Crash.Steps.Skip(4));
+    }
+
+    [Fact]
+    public async Task The_staged_point_comes_after_the_bytes_are_written_and_before_the_flush_for_a_Capture_and_a_Photo_Strip()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        var record = Sample.Event();
+        await harness.Store.CreateEventAsync(record, Ct);
+        var cycle = await harness.Store.StartGuestCycleAsync(record.Id, Ct);
+        var log = new List<string>();
+        harness.Fs.WriteStage = (stage, _) => log.Add("fs:" + stage);
+        harness.Crash.OnReached = step => log.Add("crash:" + step);
+
+        var capture = await harness.Store.CommitCaptureAsync(Sample.Capture(cycle.Id), Ct);
+        _ = await harness.Store.CommitPhotoStripAsync(Sample.Strip(cycle.Id, [capture.Id]), Ct);
+
+        Assert.Equal(
+            [
+                "fs:written", "crash:capture.staged", "fs:flushed", "crash:capture.flushed", "crash:capture.renamed", "crash:capture.inserted",
+                "fs:written", "crash:strip.staged", "fs:flushed", "crash:strip.flushed", "crash:strip.renamed", "crash:strip.inserted",
+            ],
+            log);
+    }
+
+    [Fact]
+    public async Task A_hook_that_throws_at_the_staged_point_leaves_the_staging_file_as_it_was_at_that_step()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        var record = Sample.Event();
+        await harness.Store.CreateEventAsync(record, Ct);
+        var cycle = await harness.Store.StartGuestCycleAsync(record.Id, Ct);
+        var staging = Path.Combine(harness.CycleFolder(record.Id, cycle.Id), ".staging");
+        harness.Crash.OnReached = step =>
+        {
+            if (step == CrashPoint.CaptureStaged)
+            {
+                throw new SimulatedCrashException();
+            }
+        };
+
+        _ = await Assert.ThrowsAnyAsync<Exception>(() => harness.Store.CommitCaptureAsync(Sample.Capture(cycle.Id), Ct));
+
+        Assert.Single(StoreHarness.Files(staging));
+        Assert.Equal(0L, harness.Count("SELECT COUNT(*) FROM captures;"));
+    }
+
+    [Fact]
+    public async Task A_failed_flush_after_the_staged_point_still_cleans_up_the_staging_file()
+    {
+        await using var harness = await StoreHarness.OpenedAsync();
+        var record = Sample.Event();
+        await harness.Store.CreateEventAsync(record, Ct);
+        var cycle = await harness.Store.StartGuestCycleAsync(record.Id, Ct);
+        var staging = Path.Combine(harness.CycleFolder(record.Id, cycle.Id), ".staging");
+        harness.Fs.WriteStage = (stage, _) =>
+        {
+            if (stage == "written")
+            {
+                throw new IOException("The flush failed.");
+            }
+        };
+
+        _ = await Assert.ThrowsAnyAsync<Exception>(() => harness.Store.CommitCaptureAsync(Sample.Capture(cycle.Id), Ct));
+
+        Assert.Empty(StoreHarness.Files(staging));
+        Assert.DoesNotContain(CrashPoint.CaptureStaged, harness.Crash.Steps);
     }
 
     [Fact]

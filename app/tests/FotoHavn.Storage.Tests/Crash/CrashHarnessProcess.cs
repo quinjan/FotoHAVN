@@ -15,6 +15,9 @@ public sealed record HarnessResult(int ExitCode, string Output, string Errors, s
 
     public string? MarkerCycleId => Marker.GetProperty("cycleId").GetString();
 
+    /// <summary>Every crash point the harness reached up to and including the one it crashed at, in order.</summary>
+    public IReadOnlyList<string> MarkerReached => Marker.GetProperty("reached").EnumerateArray().Select(item => item.GetString()!).ToList();
+
     /// <summary>The cycle the harness worked on, from the marker (a crash) or its output (a clean run).</summary>
     public string? CycleId => Crashed
         ? MarkerCycleId

@@ -30,7 +30,7 @@ public sealed class ReconcilerArtifactTests
     }
 
     [Fact]
-    public async Task Step_3_marks_a_capture_with_a_missing_file_discarded_in_a_finished_cycle_and_keeps_the_cycle_and_other_files()
+    public async Task Step_3_keeps_a_capture_with_a_missing_file_as_kept_in_a_finished_cycle_and_keeps_the_cycle_and_other_files()
     {
         using var folder = new SeededDataFolder();
         var cycle = folder.AddCycle(folder.AddEvent(), "completed");
@@ -41,13 +41,74 @@ public sealed class ReconcilerArtifactTests
 
         Assert.Equal(1, report.ArtifactProblems);
         Assert.Equal(0, report.CyclesMarkedUnrecoverable);
-        Assert.Equal("discarded", CaptureState(folder, lost.Id));
+        Assert.Equal("kept", CaptureState(folder, lost.Id));
         Assert.Equal("kept", CaptureState(folder, other.Id));
+        Assert.Equal(2, folder.Count("captures"));
         Assert.Equal("completed", EndReason(folder, cycle));
         Assert.True(File.Exists(other.Path));
         var problem = Assert.Single(report.Problems);
         Assert.Contains(lost.Id, problem);
         Assert.Contains(cycle, problem);
+    }
+
+    [Fact]
+    public async Task Step_3_changes_no_row_for_a_missing_or_corrupt_file_in_a_finished_cycle()
+    {
+        using var folder = new SeededDataFolder();
+        var cycle = folder.AddCycle(folder.AddEvent(), "completed");
+        var missing = folder.AddCapture(cycle, 1, writeFile: false);
+        var corrupt = folder.AddCapture(cycle, 2);
+        File.WriteAllBytes(corrupt.Path, [1]);
+        _ = folder.AddPhotoStrip(cycle, [missing.Id], writeFile: false);
+        var before = Snapshot(folder);
+
+        var report = await ReconcilerKit.RunAsync(folder);
+
+        Assert.Equal(3, report.ArtifactProblems);
+        Assert.Equal(before, Snapshot(folder));
+        Assert.Equal(1, folder.Count("photo_strips"));
+    }
+
+    [Fact]
+    public async Task Step_3_adopts_a_file_that_reappears_because_its_row_was_kept()
+    {
+        using var folder = new SeededDataFolder();
+        var cycle = folder.AddCycle(folder.AddEvent(), "completed");
+        var capture = folder.AddCapture(cycle, 1, writeFile: false);
+        var strip = folder.AddPhotoStrip(cycle, [capture.Id], writeFile: false);
+
+        var missing = await ReconcilerKit.RunAsync(folder);
+        Directory.CreateDirectory(Path.GetDirectoryName(capture.Path)!);
+        File.WriteAllBytes(capture.Path, capture.Bytes);
+        File.WriteAllBytes(strip.Path, strip.Bytes);
+        var restored = await ReconcilerKit.RunAsync(folder);
+
+        Assert.Equal(2, missing.ArtifactProblems);
+        Assert.Equal(2, missing.Problems.Count);
+        Assert.False(restored.HasRepairs);
+        Assert.Empty(restored.Problems);
+        Assert.Equal(0, restored.OrphanFilesDeleted);
+        Assert.True(File.Exists(capture.Path));
+        Assert.True(File.Exists(strip.Path));
+        Assert.Equal("kept", CaptureState(folder, capture.Id));
+        Assert.Equal(1, folder.Count("photo_strips"));
+    }
+
+    private static List<string> Snapshot(SeededDataFolder folder)
+    {
+        var rows = new List<string>();
+        foreach (var table in new[] { "events", "guest_cycles", "captures", "photo_strips" })
+        {
+            using var command = folder.Connection.CreateCommand();
+            command.CommandText = $"SELECT * FROM {table} ORDER BY 1, 2";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                rows.Add(table + ":" + string.Join('|', Enumerable.Range(0, reader.FieldCount).Select(i => reader.IsDBNull(i) ? "<null>" : reader.GetValue(i).ToString())));
+            }
+        }
+
+        return rows;
     }
 
     [Fact]
@@ -153,7 +214,7 @@ public sealed class ReconcilerArtifactTests
     }
 
     [Fact]
-    public async Task Step_3_removes_the_row_of_a_photo_strip_whose_file_is_missing_and_leaves_the_cycle_completed()
+    public async Task Step_3_keeps_the_row_of_a_photo_strip_whose_file_is_missing_and_leaves_the_cycle_completed()
     {
         using var folder = new SeededDataFolder();
         var cycle = folder.AddCycle(folder.AddEvent(), "completed");
@@ -163,9 +224,11 @@ public sealed class ReconcilerArtifactTests
         var report = await ReconcilerKit.RunAsync(folder);
 
         Assert.Equal(1, report.ArtifactProblems);
-        Assert.Equal(0, folder.Count("photo_strips"));
+        Assert.Equal(1, folder.Count("photo_strips"));
         Assert.Equal("completed", EndReason(folder, cycle));
-        Assert.Contains("Photo Strip", Assert.Single(report.Problems));
+        var problem = Assert.Single(report.Problems);
+        Assert.Contains("Photo Strip", problem);
+        Assert.Contains("kept", problem);
     }
 
     [Fact]
@@ -200,7 +263,7 @@ public sealed class ReconcilerArtifactTests
         var report = await ReconcilerKit.RunAsync(folder);
 
         Assert.Equal(1, report.ArtifactProblems);
-        Assert.Equal("discarded", CaptureState(folder, capture.Id));
+        Assert.Equal("kept", CaptureState(folder, capture.Id));
         Assert.True(File.Exists(outside));
     }
 
@@ -223,7 +286,7 @@ public sealed class ReconcilerArtifactTests
         var report = await ReconcilerKit.RunAsync(folder);
 
         Assert.Equal(1, report.ArtifactProblems);
-        Assert.Equal("discarded", CaptureState(folder, capture.Id));
+        Assert.Equal("kept", CaptureState(folder, capture.Id));
     }
 
     [Fact]
@@ -265,7 +328,7 @@ public sealed class ReconcilerArtifactTests
     }
 
     [Fact]
-    public async Task Step_3_is_idempotent_for_missing_files()
+    public async Task Step_3_reports_a_missing_file_on_every_run_and_changes_nothing_after_the_first()
     {
         using var folder = new SeededDataFolder();
         var cycle = folder.AddCycle(folder.AddEvent());
@@ -273,10 +336,14 @@ public sealed class ReconcilerArtifactTests
         folder.AddPhotoStrip(cycle, [], writeFile: false);
 
         var first = await ReconcilerKit.RunAsync(folder);
+        var afterFirst = Snapshot(folder);
         var second = await ReconcilerKit.RunAsync(folder);
 
         Assert.Equal(2, first.ArtifactProblems);
-        Assert.False(second.HasRepairs);
+        Assert.Equal(1, first.CyclesMarkedUnrecoverable);
+        Assert.Equal(2, second.ArtifactProblems);
+        Assert.Equal(0, second.CyclesMarkedUnrecoverable);
+        Assert.Equal(afterFirst, Snapshot(folder));
     }
 
     [Fact]

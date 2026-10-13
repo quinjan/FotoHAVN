@@ -17,6 +17,12 @@ public sealed class RecordingStorageFileSystem(IStorageFileSystem inner) : IStor
     /// <summary>Runs before each forwarded call with the operation name (<c>Move</c>, <c>WriteAllBytesAndFlush</c>, ...) and the path.</summary>
     public Action<string, string>? Before { get; set; }
 
+    /// <summary>
+    /// Runs inside <c>WriteAllBytesAndFlush</c> with <c>"written"</c> (bytes written, before the flush, ahead of the caller's
+    /// <c>afterWrite</c>) and then <c>"flushed"</c> (the call is about to return), and the path.
+    /// </summary>
+    public Action<string, string>? WriteStage { get; set; }
+
     public IReadOnlyList<FileSystemCall> Calls
     {
         get
@@ -30,10 +36,18 @@ public sealed class RecordingStorageFileSystem(IStorageFileSystem inner) : IStor
 
     public void CreateDirectory(string path) => Forward(nameof(CreateDirectory), path, () => inner.CreateDirectory(path));
 
-    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes)
+    public void WriteAllBytesAndFlush(string path, ReadOnlySpan<byte> bytes, Action? afterWrite = null)
     {
         Record(nameof(WriteAllBytesAndFlush), path);
-        inner.WriteAllBytesAndFlush(path, bytes);
+        inner.WriteAllBytesAndFlush(
+            path,
+            bytes,
+            () =>
+            {
+                WriteStage?.Invoke("written", path);
+                afterWrite?.Invoke();
+            });
+        WriteStage?.Invoke("flushed", path);
     }
 
     public void Move(string source, string destination) => Forward(nameof(Move), source, () => inner.Move(source, destination));
@@ -45,6 +59,8 @@ public sealed class RecordingStorageFileSystem(IStorageFileSystem inner) : IStor
     public bool Exists(string path) => inner.Exists(path);
 
     public IReadOnlyList<string> EnumerateFiles(string directory, bool recursive) => inner.EnumerateFiles(directory, recursive);
+
+    public IReadOnlyList<string> FindReparsePoints(string directory) => inner.FindReparsePoints(directory);
 
     public byte[] ReadAllBytes(string path) => inner.ReadAllBytes(path);
 
