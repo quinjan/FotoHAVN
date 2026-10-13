@@ -170,6 +170,7 @@ public sealed class TestHookRegistryTests
         [
             TestHookNames.GetDiagnostics, TestHookNames.UseVirtualDisplays, TestHookNames.DisconnectDisplay,
             TestHookNames.ConnectDisplay, TestHookNames.OpenGuestScreen, TestHookNames.CloseGuestScreen,
+            TestHookNames.InjectStorageFault, TestHookNames.ClearStorageFault,
         ];
 
         Assert.All(TestHookRegistry.All, hook => Assert.Equal(brain.Contains(hook.Name) ? TestHookSide.Brain : TestHookSide.Host, hook.Side));
@@ -238,6 +239,17 @@ public sealed class TestHookRegistryTests
 
         Assert.False(TestHookRegistry.TryReadArgs(hook, Element(args), out var value));
         Assert.Null(value);
+    }
+
+    [Fact]
+    public void Reads_storage_fault_arguments_and_rejects_unknown_kinds()
+    {
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.InjectStorageFault, out var hook));
+
+        Assert.True(TestHookRegistry.TryReadArgs(hook, Element("""{"kind":"accessDenied","scope":"nextWrite"}"""), out var value));
+        Assert.Equal(new InjectStorageFaultArgs(StorageFaultKind.AccessDenied, StorageFaultScope.NextWrite), value);
+        Assert.False(TestHookRegistry.TryReadArgs(hook, Element("""{"kind":"corrupt","scope":"nextWrite"}"""), out _));
+        Assert.False(TestHookRegistry.TryReadArgs(hook, Element("""{"kind":"locked"}"""), out _));
     }
 
     [Fact]

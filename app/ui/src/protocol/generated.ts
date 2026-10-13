@@ -185,6 +185,21 @@ export type TestHookError =
  * via the `definition` "Role".
  */
 export type Role = "operator" | "guest";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageDiagnosticsState".
+ */
+export type StorageDiagnosticsState = "opening" | "ready" | "error";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageFaultKind".
+ */
+export type StorageFaultKind = "diskFull" | "accessDenied" | "locked";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageFaultScope".
+ */
+export type StorageFaultScope = "nextWrite" | "allWrites";
 
 /**
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
@@ -1648,6 +1663,14 @@ export interface TestHookMap {
     args: null;
     result: EmptyHookResult;
   };
+  "test.injectStorageFault": {
+    args: InjectStorageFaultArgs;
+    result: EmptyHookResult;
+  };
+  "test.clearStorageFault": {
+    args: null;
+    result: EmptyHookResult;
+  };
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1661,6 +1684,7 @@ export interface DiagnosticsResult {
   windows: TestWindow[];
   displays: DisplayDiagnostics;
   guestScreenOpen: boolean;
+  storage: StorageDiagnostics;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1720,6 +1744,32 @@ export interface TestDisplay {
   workArea: PixelRect;
   scale: number;
   isPrimary: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageDiagnostics".
+ */
+export interface StorageDiagnostics {
+  state: StorageDiagnosticsState;
+  kind: StorageErrorReason | null;
+  schemaVersion: number | null;
+  reconcile: ReconcileDiagnostics | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ReconcileDiagnostics".
+ */
+export interface ReconcileDiagnostics {
+  stagingFilesDeleted: number;
+  orphanFilesDeleted: number;
+  artifactProblems: number;
+  cyclesMarkedUnrecoverable: number;
+  cyclesClosedAsAppClosed: number;
+  guestCyclesDeleted: number;
+  eventsDeleted: number;
+  discardedFilesDeleted: number;
+  orphanThumbnailsDeleted: number;
+  problems: number;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1802,6 +1852,14 @@ export interface ListCamerasResult {
 export interface TestCamera {
   id: string;
   name: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "InjectStorageFaultArgs".
+ */
+export interface InjectStorageFaultArgs {
+  kind: StorageFaultKind;
+  scope: StorageFaultScope;
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */

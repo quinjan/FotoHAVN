@@ -1,5 +1,6 @@
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Hooks;
+using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
@@ -8,18 +9,22 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FotoHavn.Core;
 
-/// <summary>Everything the brain needs from its host. Later milestones add the Event store, camera, and compositor.</summary>
+/// <summary>Everything the brain needs from its host. Later milestones add the camera and compositor.</summary>
 /// <param name="Executor">The single-threaded executor the brain runs on. The host owns and disposes it.</param>
 /// <param name="Clock">Time and timers.</param>
 /// <param name="Displays">Display enumeration and change notifications.</param>
 /// <param name="Host">What the brain asks the host to do.</param>
-public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, IDisplayAdapter Displays, IHostServices Host)
+/// <param name="Store">The Event store. The brain opens it at startup; the host owns and disposes it.</param>
+public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, IDisplayAdapter Displays, IHostServices Host, IEventStore Store)
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
 
 #if E2E_HOOKS
     /// <summary>The host side of the test hooks. Null makes every host hook fail with <c>notSupported</c>.</summary>
     public E2E.IHostTestHooks? HostTestHooks { get; init; }
+
+    /// <summary>The host side of the storage fault hooks. Null makes them fail with <c>notSupported</c>.</summary>
+    public E2E.IStorageTestHooks? StorageTestHooks { get; init; }
 #endif
 }
 
@@ -29,9 +34,9 @@ public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, ID
 /// brain state is touched only there, one work item at a time, in the order posted.
 /// </summary>
 /// <remarks>
-/// M2 implements no command: every valid command from an allowed role is answered <c>rejected notAvailable</c>. The
-/// operator sees the empty Event list and the guest sees the Start placeholder; both stay at revision 1 unless the brain
-/// fails (<see cref="ShowFatal"/>).
+/// M4 implements one command, <c>RetryStorage</c>; every other valid command from an allowed role is answered
+/// <c>rejected notAvailable</c>. At startup the brain opens the Event store: the operator sees the Event list (empty
+/// until storage answers) or, when the store can't open, the storage error. The guest sees the Start placeholder.
 /// </remarks>
 public sealed partial class Brain : IBrain
 {
@@ -52,18 +57,20 @@ public sealed partial class Brain : IBrain
     private int _disposed;
 
     public Brain(BrainDependencies dependencies)
-        : this(dependencies, HooksCompiled, CreateHostHookPort(dependencies))
+        : this(dependencies, HooksCompiled, CreateHostHookPort(dependencies), CreateStorageHookPort(dependencies))
     {
     }
 
     /// <summary>The brain with its hook dispatcher switched on or off explicitly, so tests reach it in every build.</summary>
-    internal Brain(BrainDependencies dependencies, bool hooksEnabled, IHostHookPort? hostHooks)
+    internal Brain(BrainDependencies dependencies, bool hooksEnabled, IHostHookPort? hostHooks, IStorageHookPort? storageHooks = null)
     {
         ArgumentNullException.ThrowIfNull(dependencies);
+        ArgumentNullException.ThrowIfNull(dependencies.Store);
         _dependencies = dependencies;
         _logger = dependencies.Logger;
         _hooksEnabled = hooksEnabled;
         _hostHooks = hostHooks;
+        _storageHooks = storageHooks;
         _operator = new PresentationChannel<OperatorPresentation>(
             Role.Operator,
             RenderOperator(),
@@ -79,6 +86,7 @@ public sealed partial class Brain : IBrain
 
         dependencies.Displays.DisplaysChanged += OnDisplaysChanged;
         Post(ReadRealDisplays);
+        Post(StartStorageOpen);
     }
 
     private IReadOnlyList<DisplayInfo> CurrentDisplays => _virtualDisplays?.Current ?? _realDisplays;
@@ -107,6 +115,7 @@ public sealed partial class Brain : IBrain
         }
 
         _dependencies.Displays.DisplaysChanged -= OnDisplaysChanged;
+        _storageCancellation.Cancel();
     }
 
     /// <summary>
@@ -130,6 +139,18 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies);
 #if E2E_HOOKS
         return dependencies.HostTestHooks is { } hooks ? new E2E.HostTestHooksPort(hooks) : null;
+#else
+        return null;
+#endif
+    }
+
+#pragma warning disable CA1859 // The field build of this method has no E2E port type to return.
+    private static IStorageHookPort? CreateStorageHookPort(BrainDependencies dependencies)
+#pragma warning restore CA1859
+    {
+        ArgumentNullException.ThrowIfNull(dependencies);
+#if E2E_HOOKS
+        return dependencies.StorageTestHooks is { } hooks ? new E2E.StorageTestHooksPort(hooks) : null;
 #else
         return null;
 #endif
@@ -168,10 +189,12 @@ public sealed partial class Brain : IBrain
                     connection.Handshaken ? rejected.Reason : RejectReason.ProtocolMismatch));
                 break;
             case ParsedCommand command:
-                // M2 implements no command yet (contract section 3): every valid command is not available.
-                Answer(connection, command.Command.Name, CommandResultMessage.Rejected(
-                    command.Id,
-                    connection.Handshaken ? RejectReason.NotAvailable : RejectReason.ProtocolMismatch));
+                // Only RetryStorage is implemented so far; every other valid command is not available (contract section 3).
+                Answer(connection, command.Command.Name, !connection.Handshaken
+                    ? CommandResultMessage.Rejected(command.Id, RejectReason.ProtocolMismatch)
+                    : command.Payload is RetryStoragePayload
+                        ? RetryStorage(command.Id)
+                        : CommandResultMessage.Rejected(command.Id, RejectReason.NotAvailable));
                 break;
             default:
                 HandleTest(connection, ((ParsedTest)parsed).Message);
@@ -208,7 +231,9 @@ public sealed partial class Brain : IBrain
 
     private OperatorPresentation RenderOperator() => _fatalReason is { } reason
         ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null)
-        : new OperatorPresentation(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null);
+        : _storageError is { } storageError
+            ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot))
+            : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null);
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
         ? new GuestPresentation(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView(reason))

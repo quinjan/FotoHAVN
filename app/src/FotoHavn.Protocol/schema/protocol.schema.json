@@ -1417,6 +1417,9 @@
         },
         "guestScreenOpen": {
           "type": "boolean"
+        },
+        "storage": {
+          "$ref": "#/$defs/StorageDiagnostics"
         }
       },
       "required": [
@@ -1426,7 +1429,8 @@
         "lastCommandResults",
         "windows",
         "displays",
-        "guestScreenOpen"
+        "guestScreenOpen",
+        "storage"
       ],
       "additionalProperties": false
     },
@@ -2013,6 +2017,23 @@
     "IdentifyDisplaysPayload": {
       "title": "IdentifyDisplaysPayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "InjectStorageFaultArgs": {
+      "title": "InjectStorageFaultArgs",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/StorageFaultKind"
+        },
+        "scope": {
+          "$ref": "#/$defs/StorageFaultScope"
+        }
+      },
+      "required": [
+        "kind",
+        "scope"
+      ],
       "additionalProperties": false
     },
     "KeepGoingCommand": {
@@ -2850,6 +2871,55 @@
         "brainVersion",
         "uiVersion"
       ]
+    },
+    "ReconcileDiagnostics": {
+      "title": "ReconcileDiagnostics",
+      "type": "object",
+      "properties": {
+        "stagingFilesDeleted": {
+          "type": "integer"
+        },
+        "orphanFilesDeleted": {
+          "type": "integer"
+        },
+        "artifactProblems": {
+          "type": "integer"
+        },
+        "cyclesMarkedUnrecoverable": {
+          "type": "integer"
+        },
+        "cyclesClosedAsAppClosed": {
+          "type": "integer"
+        },
+        "guestCyclesDeleted": {
+          "type": "integer"
+        },
+        "eventsDeleted": {
+          "type": "integer"
+        },
+        "discardedFilesDeleted": {
+          "type": "integer"
+        },
+        "orphanThumbnailsDeleted": {
+          "type": "integer"
+        },
+        "problems": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "stagingFilesDeleted",
+        "orphanFilesDeleted",
+        "artifactProblems",
+        "cyclesMarkedUnrecoverable",
+        "cyclesClosedAsAppClosed",
+        "guestCyclesDeleted",
+        "eventsDeleted",
+        "discardedFilesDeleted",
+        "orphanThumbnailsDeleted",
+        "problems"
+      ],
+      "additionalProperties": false
     },
     "RejectReason": {
       "title": "RejectReason",
@@ -3790,6 +3860,56 @@
       "type": "object",
       "additionalProperties": false
     },
+    "StorageDiagnostics": {
+      "title": "StorageDiagnostics",
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/StorageDiagnosticsState"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageErrorReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schemaVersion": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "reconcile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReconcileDiagnostics"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "kind",
+        "schemaVersion",
+        "reconcile"
+      ],
+      "additionalProperties": false
+    },
+    "StorageDiagnosticsState": {
+      "title": "StorageDiagnosticsState",
+      "enum": [
+        "opening",
+        "ready",
+        "error"
+      ]
+    },
     "StorageErrorReason": {
       "title": "StorageErrorReason",
       "enum": [
@@ -3820,6 +3940,21 @@
         "dataPath"
       ],
       "additionalProperties": false
+    },
+    "StorageFaultKind": {
+      "title": "StorageFaultKind",
+      "enum": [
+        "diskFull",
+        "accessDenied",
+        "locked"
+      ]
+    },
+    "StorageFaultScope": {
+      "title": "StorageFaultScope",
+      "enum": [
+        "nextWrite",
+        "allWrites"
+      ]
     },
     "SubmitPinCommand": {
       "title": "SubmitPinCommand",
@@ -4115,6 +4250,38 @@
             "result"
           ],
           "additionalProperties": false
+        },
+        "test.injectStorageFault": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/InjectStorageFaultArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.clearStorageFault": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -4127,7 +4294,9 @@
         "test.setWindowBounds",
         "test.crashUi",
         "test.listCameras",
-        "test.exit"
+        "test.exit",
+        "test.injectStorageFault",
+        "test.clearStorageFault"
       ],
       "additionalProperties": false
     },
