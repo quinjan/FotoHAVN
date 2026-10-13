@@ -1323,12 +1323,12 @@ Verification record (M3):
 ### M4: storage (M)
 
 Tasks:
-- [ ] Migrations runner and first migration (section 10).
-- [ ] Event store implementing the brain's storage interface: Events CRUD with offered Templates, Looks, Phase Timers, and the guest gallery setting; PIN hash; Guest Cycle create, end, and delete; Capture commit; Photo Strip commit; discard; delete Event; Guest Cycle paging for the gallery; thumbnails.
-- [ ] Startup reconciler.
-- [ ] Data-path checks (local disk, writable) and an integrity check.
-- [ ] Crash-test harness (child process killed at each commit step) and fault injection.
-- [ ] Hooks: `test.injectStorageFault` and `test.clearStorageFault`.
+- [x] Migrations runner and first migration (section 10).
+- [x] Event store implementing the brain's storage interface: Events CRUD with offered Templates, Looks, Phase Timers, and the guest gallery setting; PIN hash; Guest Cycle create, end, and delete; Capture commit; Photo Strip commit; discard; delete Event; Guest Cycle paging for the gallery; thumbnails.
+- [x] Startup reconciler.
+- [x] Data-path checks (local disk, writable) and an integrity check.
+- [x] Crash-test harness (child process killed at each commit step) and fault injection.
+- [x] Hooks: `test.injectStorageFault` and `test.clearStorageFault`.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:**
@@ -1345,6 +1345,65 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/storage/reconcile-seeded-data`: the app starts on a seeded Data folder containing staging files, an orphan file, an unfinished Guest Cycle, a half-deleted Event, and a discarded Capture. After launch, `data.ts` confirms each repair and the Event list shows only live Events.
   - `regression/storage/startup-fault`: a storage fault injected at startup (`--e2e-storage-fault`) shows the storage error screen, and clearing it plus Retry recovers.
 - **Manual:** run the app from a USB drive and from a OneDrive-synced folder, and confirm the refusal message where detection applies.
+
+Verification record (M4):
+- **Date and commits:** 2026-10-14.
+  - Contracts: `3167caf`.
+  - Parallel merges: `6d4fe12`.
+  - Hosts, `starting` surface (protocol v3), and crash harness: `0ddee6a`.
+  - Starting screen and `@m4` end-to-end: `36c1559`.
+  - Review fixes: `ec21a3c`.
+- **Machine and camera:** developer laptop with Windows 11, .NET SDK 10.0.401, Node 24.20.0, one display, and Integrated Webcam.
+- **Results:** from an independent clean clone at `36c1559`, plus a full rerun after the review fixes at `ec21a3c`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` | 1462 passed in each of three clean-clone runs. 1491 passed and 2 skipped after the fixes. The skipped tests are file symlinks, which this account can't create; junction tests cover the same rule. |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 520 passed |
+  | 3 | UI `test:coverage` | 714 passed |
+  | 3 | UI `test:fixtures` | 314 passed |
+  | 4 | End-to-end `npm ci`, `typecheck` | Pass |
+  | 5 | `@m4` regression | 4 passed |
+  | 5 | `@m3` regression | 15 passed |
+  | 5 | `@m2` regression | 7 passed, 1 skipped (one display) |
+  | 5 | `@m1` regression | 9 passed |
+  | 5 | Smoke | 4 passed |
+  | 6 | Screenshots | Storage error screen (disk full, access denied, locked) and reconciled Event list: on-brand, nothing clipped |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.8% | 92.2% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 100% | No branches |
+
+  UI: 99.64% statements, 98.85% branches, 99.42% functions, and 99.72% lines.
+- **Integration evidence:**
+  - Kill-at-every-step crash tests: a child process is killed at each of 14 steps (Capture and Photo Strip staged, flushed, renamed, inserted; Event and Guest Cycle marked deleting, folder deleted, rows deleted). After a restart, every invariant holds. `staged` comes before the flush.
+  - Real faults: a read-only file gives access denied and a `FileShare.None` handle gives locked. The decorator covers disk full. Each recovers once the fault is cleared.
+  - Paging over 300 cycles.
+  - Opening a 300-cycle, 534 MiB Data folder, hashing every file: 0.77 s with a warm disk cache.
+- **Reconciled seeded data (end-to-end):** staging 1, orphans 2, `app_closed` 1, cycles deleted 2, Events deleted 1, discarded files 1, orphan thumbnails 4, problems 0. The same counts as the .NET `SeededDataFolder` scenario.
+- **GitHub CI:** `Desktop app` runs 38471777165 (`36c1559`) and 38476385042 (`ec21a3c`) both succeeded.
+- **Review:** three medium-severity issues, all fixed:
+  - The reconciler followed junctions and could delete files outside the Data folder. Now enumeration skips reparse points and deletes refuse them, proven with real junctions.
+  - Startup repair changed committed rows beyond the plan. It now logs and keeps.
+  - `staged` and `flushed` were the same crash state. A write callback now separates them.
+- **Decisions:**
+  - Protocol v3 adds the operator `starting` surface, so "No Events yet." never flashes before storage opens.
+  - A Data folder on a removable USB drive is allowed.
+  - The UI's storage-error lines are what the operator sees. Classifier reasons are for logs.
+  - Q18 (window numbers): `captures.sequence >= 1`, and the store validates the arrangement.
+- **Manual (pending, to be run by the owner):** run the app from a USB drive (expected to work) and from a OneDrive-synced folder (expected: the storage error screen with the cloud-synced line).
+- **Not proven:**
+  - Opening on a cold disk cache.
+  - File symlinks; junctions are covered.
+  - SQLite-level `SQLITE_FULL` and `SQLITE_BUSY` from the real engine; they're covered through the error mapper and the file seam.
+  - `npm audit`: the same development-only `braces` advisory as M3.
 
 ### M5: webcam adapter (M)
 
