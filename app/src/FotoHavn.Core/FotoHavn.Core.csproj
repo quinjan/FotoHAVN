@@ -8,6 +8,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="FotoHavn.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FotoHavn.Protocol\FotoHavn.Protocol.csproj" />
   </ItemGroup>
 </Project>

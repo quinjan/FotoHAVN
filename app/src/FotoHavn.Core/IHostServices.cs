@@ -22,4 +22,14 @@ public interface IHostServices
 
     /// <summary>Opens a folder in File Explorer (Event and Guest Cycle folders, from M6). The headless host logs it.</summary>
     void OpenFolder(string path);
+
+    /// <summary>
+    /// The <see cref="DisplayInfo.Id"/> of the display that currently contains the Operator window, or null when unknown
+    /// (no Operator window yet). Single-screen detection (D38) compares the Guest Display Binding to this id, not to the
+    /// primary display, because the operator may move the Operator window. The Windows host maps
+    /// <c>MonitorFromWindow(MONITOR_DEFAULTTONEAREST)</c> to the display's device path and keeps it cached (refreshed on
+    /// window moves and display changes) so this returns at once without touching the UI thread. The headless host and
+    /// the fakes return the primary display's id.
+    /// </summary>
+    string? GetOperatorDisplayId();
 }

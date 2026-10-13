@@ -72,5 +72,7 @@ public sealed class BrainContractTests
         public void CloseGuestScreen() => throw new NotSupportedException();
 
         public void OpenFolder(string path) => throw new NotSupportedException();
+
+        public string? GetOperatorDisplayId() => throw new NotSupportedException();
     }
 }
