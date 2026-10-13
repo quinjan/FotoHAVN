@@ -84,6 +84,7 @@ export async function attachRunEvidence(testInfo: TestInfo, run: RunRecord): Pro
     ["app-stdout", stdoutFile(run), "text/plain"],
     ["app-stderr", stderrFile(run), "text/plain"],
     ["final-screenshot", path.join(dir, "final.png"), "image/png"],
+    ["final-guest-screenshot", path.join(dir, "final-guest.png"), "image/png"],
   ];
   const logsDir = path.join(dir, "logs");
   if (existsSync(logsDir)) {

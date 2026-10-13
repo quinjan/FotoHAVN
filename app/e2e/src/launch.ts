@@ -6,7 +6,7 @@ import path from "node:path";
 import { chromium, type Browser, type Page } from "@playwright/test";
 import type { Camera } from "./camera";
 import { collectRunEvidence, evidenceDir, saveScreenshot, stderrFile, stdoutFile, type RunRecord } from "./evidence";
-import { HookClient } from "./hooks";
+import { HookClient, type Role } from "./hooks";
 import { fromApp, paths } from "./paths";
 
 /** The UI is served from this virtual host inside WebView2. */
@@ -34,7 +34,19 @@ export interface AppSession {
   readonly dataDir: string;
   readonly port: number;
   readonly browser: Browser;
+  /**
+   * The Operator page as last found. After `test.crashUi("operator")` the host recreates its WebView2, so a new page
+   * replaces it; use {@link AppSession.pageFor} to find the current one.
+   */
+  readonly operatorPage: Page;
+  /** The same as {@link AppSession.operatorPage}. */
   readonly page: Page;
+  /**
+   * The live page whose handshake gave it `role` (root `data-fotohavn-role`, status `connected`). Waits for it, for
+   * example for the Guest page after `test.openGuestScreen` or a page after `test.crashUi`.
+   */
+  pageFor(role: Role, options?: { timeoutMs?: number }): Promise<Page>;
+  /** Hooks through the Operator page's own brain connection. */
   readonly hooks: HookClient;
   readonly isClosed: boolean;
   /**
@@ -46,6 +58,7 @@ export interface AppSession {
 
 const defaultStartupTimeoutMs = 60_000;
 const defaultExitTimeoutMs = 20_000;
+const defaultPageTimeoutMs = 10_000;
 
 export function assertE2EBuildExists(): void {
   if (!existsSync(paths.exe)) {
@@ -57,7 +70,7 @@ export function assertE2EBuildExists(): void {
   }
 }
 
-/** Starts the E2E build with a fresh Data folder, connects over CDP, and waits for the UI. */
+/** Starts the E2E build with a fresh Data folder, connects over CDP, and waits for the operator handshake. */
 export async function launchApp(options: LaunchOptions): Promise<AppSession> {
   assertE2EBuildExists();
 
@@ -106,9 +119,8 @@ export async function launchApp(options: LaunchOptions): Promise<AppSession> {
     const deadline = Date.now() + startupTimeoutMs;
     await waitForDebugger(port, exited, deadline, run);
     browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: remaining(deadline) });
-    const page = await findAppPage(browser, exited, deadline, run);
-    // M1 readiness: the placeholder heading. M2 replaces this with the `hello` handshake.
-    await page.getByRole("heading", { level: 1 }).waitFor({ state: "visible", timeout: remaining(deadline) });
+    // Readiness: the Operator page completed its handshake (the `welcome` set the root's role and status).
+    const page = await findRolePage(browser, "operator", deadline, run);
     return createSession(run, child, exited, browser, page, () => {
       killed = true;
       if (run.exit !== undefined) {
@@ -138,11 +150,28 @@ function createSession(
   page: Page,
   markKilled: () => void,
 ): AppSession {
-  const hooks = new HookClient(page);
+  let operatorPage = page;
   let closing: Promise<ExitResult> | undefined;
 
+  const pageFor = async (role: Role, options: { timeoutMs?: number } = {}): Promise<Page> => {
+    if (role === "operator" && (await hasRole(operatorPage, role))) {
+      return operatorPage;
+    }
+    const found = await findRolePage(browser, role, Date.now() + (options.timeoutMs ?? defaultPageTimeoutMs), run);
+    if (role === "operator") {
+      operatorPage = found;
+    }
+    return found;
+  };
+  const hooks = new HookClient(() => pageFor("operator"));
+
   const close = async (timeoutMs: number): Promise<ExitResult> => {
-    await saveScreenshot(page, path.join(evidenceDir(run), "final.png"));
+    for (const role of ["operator", "guest"] as const) {
+      const rolePage = await pageFor(role, { timeoutMs: 1_000 }).catch(() => undefined);
+      if (rolePage !== undefined) {
+        await saveScreenshot(rolePage, path.join(evidenceDir(run), role === "operator" ? "final.png" : "final-guest.png"));
+      }
+    }
     try {
       await hooks.exit();
     } catch (error) {
@@ -170,7 +199,13 @@ function createSession(
     dataDir: run.dataDir,
     port: run.port,
     browser,
-    page,
+    get operatorPage() {
+      return operatorPage;
+    },
+    get page() {
+      return operatorPage;
+    },
+    pageFor,
     hooks,
     get isClosed() {
       return closing !== undefined;
@@ -208,30 +243,49 @@ async function waitForDebugger(
   throw new Error(`the debugging port ${port} did not answer at ${url} in time (${lastError})`);
 }
 
-async function findAppPage(
-  browser: Browser,
-  exited: Promise<ExitResult>,
-  deadline: number,
-  run: RunRecord,
-): Promise<Page> {
+/** The app's live pages: every page at the app origin that isn't closed. */
+export function appPages(browser: Browser): Page[] {
+  return browser
+    .contexts()
+    .flatMap((context) => context.pages())
+    .filter((candidate) => !candidate.isClosed() && candidate.url().startsWith(appOrigin));
+}
+
+/**
+ * Whether the page completed its handshake as `role`: the UI sets the root's `data-fotohavn-role` from the brain's
+ * `welcome` and `data-fotohavn-status="connected"`. A crashed or navigating page answers false.
+ */
+export async function hasRole(page: Page, role: Role): Promise<boolean> {
+  if (page.isClosed()) {
+    return false;
+  }
+  const probe = page
+    .evaluate(() => {
+      const root = document.documentElement;
+      return root.dataset.fotohavnStatus === "connected" ? (root.dataset.fotohavnRole ?? null) : null;
+    })
+    .catch(() => null);
+  return (await Promise.race([probe, delay(2_000).then(() => null)])) === role;
+}
+
+/** Waits for the live page whose handshake gave it `role`. */
+async function findRolePage(browser: Browser, role: Role, deadline: number, run: RunRecord): Promise<Page> {
   while (Date.now() < deadline) {
     if (run.exit !== undefined) {
-      throw new Error(`the app exited before its page loaded (exit code ${run.exit.code ?? "none"})`);
+      throw new Error(`the app exited before its ${role} page completed its handshake (exit code ${run.exit.code ?? "none"})`);
     }
-    const page = browser
-      .contexts()
-      .flatMap((context) => context.pages())
-      .find((candidate) => candidate.url().startsWith(appOrigin));
-    if (page !== undefined) {
-      return page;
+    for (const page of appPages(browser)) {
+      if (await hasRole(page, role)) {
+        return page;
+      }
     }
-    await Promise.race([exited, delay(200)]);
+    await delay(200);
   }
   const urls = browser
     .contexts()
     .flatMap((context) => context.pages())
     .map((page) => page.url());
-  throw new Error(`no page at ${appOrigin} appeared in time (pages: ${urls.join(", ") || "none"})`);
+  throw new Error(`no ${role} page at ${appOrigin} completed its handshake in time (pages: ${urls.join(", ") || "none"})`);
 }
 
 /** Ends the app and its WebView2 processes. */

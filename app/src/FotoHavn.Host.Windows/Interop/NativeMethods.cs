@@ -88,6 +88,28 @@ internal static partial class NativeMethods
         public int Y;
     }
 
+    public const int WmGetMinMaxInfo = 0x0024;
+    public const int WmNcDestroy = 0x0082;
+    public const int GwlpWndProc = -4;
+
+    public delegate IntPtr WindowProcedure(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]
+    public static extern IntPtr SetWindowLongPtr(IntPtr hwnd, int index, IntPtr value);
+
+    [DllImport("user32.dll", EntryPoint = "CallWindowProcW")]
+    public static extern IntPtr CallWindowProc(IntPtr previous, IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MinMaxInfo
+    {
+        public Point Reserved;
+        public Point MaxSize;
+        public Point MaxPosition;
+        public Point MinTrackSize;
+        public Point MaxTrackSize;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Rect
     {

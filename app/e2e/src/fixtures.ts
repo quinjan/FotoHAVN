@@ -46,7 +46,9 @@ export async function closeCleanly(session: AppSession): Promise<void> {
 interface TestFixtures {
   /** The running app for this test file. */
   app: AppSession;
-  /** The app's page at https://app.fotohavn/ (the Operator Screen from M2 on). */
+  /** The Operator page (https://app.fotohavn/, handshaken as `operator`) as of the start of the test. */
+  operatorPage: Page;
+  /** The same as `operatorPage`, so a test never gets a stray Chromium page by accident. */
   page: Page;
   hooks: HookClient;
   /** The run's Data folder, passed as `--data`. */
@@ -78,7 +80,12 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     const session = await appManager.sessionFor(testInfo.file, camera);
     await use(session);
     if (!session.isClosed) {
-      await captureTestScreenshot(session.page, testInfo, "end-of-test");
+      for (const role of ["operator", "guest"] as const) {
+        const rolePage = await session.pageFor(role, { timeoutMs: 1_000 }).catch(() => undefined);
+        if (rolePage !== undefined) {
+          await captureTestScreenshot(rolePage, testInfo, `end-of-test-${role}`);
+        }
+      }
     }
     if (testInfo.status !== testInfo.expectedStatus) {
       // Tear the app down now so its evidence belongs to the failing test.
@@ -91,8 +98,11 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       await attachRunEvidence(testInfo, session.run);
     }
   },
-  page: async ({ app }, use) => {
-    await use(app.page);
+  operatorPage: async ({ app }, use) => {
+    await use(await app.pageFor("operator"));
+  },
+  page: async ({ operatorPage }, use) => {
+    await use(operatorPage);
   },
   hooks: async ({ app }, use) => {
     await use(app.hooks);

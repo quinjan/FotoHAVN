@@ -41,6 +41,9 @@ internal sealed class BoothWindow : Window
     private bool _closed;
     private bool _hostClose;
     private DisplayRect? _pinnedBounds;
+    private (int Width, int Height)? _minimumMaxTrackSize;
+    private NativeMethods.WindowProcedure? _windowProcedure;
+    private IntPtr _previousWindowProcedure;
 
     public BoothWindow(Role role, BoothWindowServices services)
     {
@@ -99,6 +102,8 @@ internal sealed class BoothWindow : Window
                 _pinnedBounds = bounds;
             }
 
+            // Windows caps a window at about the virtual screen's size; the layout sizes (up to 2560×1440) may exceed it.
+            AllowTrackSize(bounds.Width, bounds.Height);
             ApplyBounds(bounds);
         }
     }
@@ -353,6 +358,53 @@ internal sealed class BoothWindow : Window
         {
             HostLog.GuestZoom(_services.Logger, zoom, scale);
         }
+    }
+
+    /// <summary>
+    /// Lets <see cref="SetClientSize"/> exceed the screen: Windows caps a window's size at its maximum tracking size
+    /// (about the virtual screen), which WPF only lowers. A subclass procedure above WPF's raises it after WPF answers
+    /// <c>WM_GETMINMAXINFO</c>. Installed on first use (only the E2E test hook resizes windows) and removed at
+    /// <c>WM_NCDESTROY</c>.
+    /// </summary>
+    private void AllowTrackSize(int width, int height)
+    {
+        _minimumMaxTrackSize = (width, height);
+        if (_windowProcedure is not null)
+        {
+            return;
+        }
+
+        _windowProcedure = SubclassProcedure;
+        _previousWindowProcedure = NativeMethods.SetWindowLongPtr(EnsureHandle(), NativeMethods.GwlpWndProc, Marshal.GetFunctionPointerForDelegate(_windowProcedure));
+    }
+
+    private IntPtr SubclassProcedure(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam)
+    {
+        var previous = _previousWindowProcedure;
+        if (message == NativeMethods.WmNcDestroy)
+        {
+            NativeMethods.SetWindowLongPtr(hwnd, NativeMethods.GwlpWndProc, previous);
+            return NativeMethods.CallWindowProc(previous, hwnd, message, wParam, lParam);
+        }
+
+        if (message == NativeMethods.WmGetMinMaxInfo && _minimumMaxTrackSize is { } wanted)
+        {
+            // Raise it before WPF reads it (WPF keeps the value as its own layout limit) and again after WPF answers.
+            RaiseMaxTrackSize(lParam, wanted);
+            var answer = NativeMethods.CallWindowProc(previous, hwnd, message, wParam, lParam);
+            RaiseMaxTrackSize(lParam, wanted);
+            return answer;
+        }
+
+        return NativeMethods.CallWindowProc(previous, hwnd, message, wParam, lParam);
+    }
+
+    private static void RaiseMaxTrackSize(IntPtr lParam, (int Width, int Height) wanted)
+    {
+        var info = Marshal.PtrToStructure<NativeMethods.MinMaxInfo>(lParam);
+        info.MaxTrackSize.X = Math.Max(info.MaxTrackSize.X, wanted.Width);
+        info.MaxTrackSize.Y = Math.Max(info.MaxTrackSize.Y, wanted.Height);
+        Marshal.StructureToPtr(info, lParam, fDeleteOld: false);
     }
 
     private void ApplyBounds(DisplayRect bounds)
