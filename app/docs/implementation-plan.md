@@ -1239,12 +1239,12 @@ Verification record (M2):
 ### M3: brand foundation in the UI (M)
 
 Tasks:
-- [ ] `scripts/generate-tokens.mjs` → `brand-tokens.css`, with its drift test.
-- [ ] `app-tokens.css` with the kiosk scale and target sizes; self-hosted fonts with `font-display: block` and a preload.
-- [ ] Global styles: reset, focus ring, reduced motion, `forced-colors`, no text selection or callouts on guest screens, `touch-action` rules, and no double-tap zoom.
-- [ ] Build every component in [Components to build](#components-to-build).
-- [ ] Fixture gallery route (enabled in development and E2E builds only) and its Playwright suite at four resolutions with axe, reduced motion, and forced colors.
-- [ ] A lint rule that rejects hex colors and raw `cubic-bezier` or duration values outside the token files.
+- [x] `scripts/generate-tokens.mjs` → `brand-tokens.css`, with its drift test.
+- [x] `app-tokens.css` with the kiosk scale and target sizes; self-hosted fonts with `font-display: block` and a preload.
+- [x] Global styles: reset, focus ring, reduced motion, `forced-colors`, no text selection or callouts on guest screens, `touch-action` rules, and no double-tap zoom.
+- [x] Build every component in [Components to build](#components-to-build).
+- [x] Fixture gallery route (enabled in development and E2E builds only) and its Playwright suite at four resolutions with axe, reduced motion, and forced colors.
+- [x] A lint rule that rejects hex colors and raw `cubic-bezier` or duration values outside the token files.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (UI):** every component's states, ARIA roles and states, keyboard behavior (option-list arrows, dialog focus trap and return), hold-control timing with fake timers, PIN pad entry and masking, `StartOverAction` confirmation flow, and the reduced-motion branches.
@@ -1254,6 +1254,67 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/visual/fixture-gallery-webview2`: for each component fixture, `test.setWindowBounds` at the four resolutions and screenshots compared with the Chromium baselines within a small tolerance, proving WebView2 renders as the fixture lane says.
   - `regression/a11y/keyboard-and-touch`: tab order, visible focus ring, and touch taps on 64×64 targets in the real host.
 - **Manual:** the components at 125% and 150% Windows display scaling on the developer monitor; one review of brand fidelity against `brand/` and `website/` references.
+
+Verification record (M3):
+- **Date and commits:** 2026-10-14.
+  - Foundation: `f6b99b9`.
+  - Component merges: `783f672`.
+  - UI fixes and design doc: `e8ff733`.
+  - `@m3` end-to-end: `5f7bed2`.
+  - Fluent overlay scrollbars: `9f0fffd`.
+  - Review fixes: `e0d4978`.
+  - Headless close-handshake fix: `8fe2232`.
+- **Machine and camera:** developer laptop with Windows 11, an Intel Arc 140T, .NET SDK 10.0.401, Node 24.20.0, and one display at 100% scaling. Camera: `Integrated Webcam (\\?\USB#VID_0BDA&PID_5596&MI_00#6&339f1394&0&0000#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL)`.
+- **Results:** from a clean clone at `9f0fffd`, plus reruns after the fixes.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` | 866 passed after the fix. Before the fix, `Invalid_utf8_closes_the_socket` failed intermittently. The fix was proven with 30 headless runs, 5 full-solution runs, and 6 runs under CPU stress. |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 350 passed |
+  | 3 | UI `lint` (ESLint and stylelint), `typecheck`, `build` | Pass |
+  | 3 | UI `test:coverage` | 665 passed |
+  | 3 | UI `test:fixtures` | 242 passed: 185 component fixtures at four resolutions with axe, plus reduced-motion and forced-colors runs, surface fixtures, and the headless round trip |
+  | 4 | End-to-end `npm ci`, `typecheck` | Pass |
+  | 5 | `@m3` regression | 15 passed: fixture gallery in WebView2, keyboard and touch, and visual-helper checks |
+  | 5 | `@m2` regression | 7 passed, 1 skipped |
+  | 5 | `@m1` regression | 9 passed |
+  | 5 | Smoke | 3 passed |
+  | 6 | Screenshots | PinPad, guest gallery, TextField error, running-Event panel, and countdown: on-brand, nothing clipped or overflowing |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+- **Coverage:**
+  - .NET:
+
+    | Assembly | Line | Branch |
+    | --- | --- | --- |
+    | `FotoHavn.Core` | 97.2% | 95.8% |
+    | `FotoHavn.Protocol` | 100% | 100% |
+    | `FotoHavn.Storage` | 100% | No branches |
+    | `FotoHavn.Catalog` | 100% | No branches |
+
+  - UI: 99.62% statements, 99.03% branches, 99.39% functions, and 99.71% lines.
+- **Visual parity (WebView2 against Chromium):**
+  - 740 comparisons, measured over each fixture's content area with a 1% limit and nothing allowed outside that area.
+  - Maximum 0.517% (`countdown-numeral-10` at 2560×1440), mean 0.0187%.
+  - Both windows use Fluent overlay scrollbars, and the comparison hides scrollbar chrome. Headless Chromium hides scrollbars, so this keeps the two engines comparable.
+- **Touch:** touch from the end-to-end tests (CDP `Input.dispatchTouchEvent`) reaches the page in WebView2 with `pointerType: "touch"`. PinPad keys measure 64×64, the shutter 112×112, and guest OptionList rows at least 64 px tall.
+- **GitHub CI:** `Desktop app` runs 38442817628 (`9f0fffd`) and 38454098728 (`8fe2232`) both succeeded.
+- **Review:** the code review found four issues, all fixed:
+  - The visual-diff ratio was measured over the whole viewport, so small components could change completely and pass. It is now measured over the content area, with helper tests.
+  - The lint didn't catch modern color functions or inline `zIndex` and color values.
+  - The Dialog focus trap counted controls Tab never reaches, so focus could leave the dialog.
+  - `DESIGN.md` had a duplicated bullet.
+- **Accepted risk:**
+  - `npm audit` in `app/ui` reports one high-severity advisory (GHSA-vfj7-8cjw-p6xm, `braces` 3.0.3) through stylelint. Development tools only: `npm audit --omit=dev` reports 0, and nothing from it ships in `dist`.
+  - There is no patched version yet; re-check when stylelint or `braces` releases one.
+- **Manual (pending, to be run by the owner):**
+  - The components at 125% and 150% Windows display scaling on the developer monitor.
+  - One review of brand fidelity against `brand/` and `website/` references.
+- **Not proven:**
+  - Touch on a physical touch screen.
+  - Display scaling other than 100%.
+  - The fixture gallery in the Guest window: the comparisons used the Operator window, which renders the same bundle.
 
 ### M4: storage (M)
 
