@@ -1,0 +1,65 @@
+/*
+ * A print: the image on an Off-white border (content-box sizing, so the proportion belongs to the image), one shadow.
+ * The print is a size container, so a quarter-turned image can size itself to the turned box with cq units.
+ */
+.fit {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  container-type: size;
+}
+
+.print {
+  --print-border: var(--space-8);
+
+  position: relative;
+  box-sizing: content-box;
+  flex: none;
+  aspect-ratio: var(--print-ratio);
+  padding: var(--print-border);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-canvas);
+  box-shadow: var(--shadow-print-contact);
+  container-type: size;
+}
+
+.print[data-shadow="lifted"] {
+  box-shadow: var(--shadow-print);
+}
+
+.fit > .print {
+  inline-size: min(100cqw - 2 * var(--print-border), (100cqh - 2 * var(--print-border)) * var(--print-ratio));
+}
+
+.print[data-fit="scale"] {
+  inline-size: calc(var(--print-scale, 150px) * var(--print-display-width) / 1000);
+}
+
+.image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* The quarter turn is layout, not motion: it applies under reduced motion too. */
+.print[data-rotated] .image {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 100cqh;
+  max-inline-size: none;
+  block-size: 100cqw;
+  translate: -50% -50%;
+  rotate: -90deg;
+}
+
+/* High Contrast drops shadows; a hairline keeps the print's edge. */
+@media (forced-colors: active) {
+  .print {
+    outline: var(--stroke-hairline) solid CanvasText;
+  }
+}
