@@ -12,6 +12,7 @@ public sealed partial class Brain
 {
     private readonly bool _hooksEnabled;
     private readonly IHostHookPort? _hostHooks;
+    private readonly IStorageHookPort? _storageHooks;
     private readonly Queue<CommandResultDiagnostics> _lastCommandResults = new();
     private VirtualDisplaySet? _virtualDisplays;
 
@@ -73,6 +74,13 @@ public sealed partial class Brain
             case TestHookNames.Exit:
                 Exit(connection, id);
                 break;
+            case TestHookNames.InjectStorageFault:
+                var fault = (InjectStorageFaultArgs)args!;
+                Reply(connection, id, RunStorageHook(hooks => hooks.InjectFault(fault.Kind, fault.Scope)));
+                break;
+            case TestHookNames.ClearStorageFault:
+                Reply(connection, id, RunStorageHook(hooks => hooks.ClearFault()));
+                break;
             default:
                 throw new InvalidOperationException($"The test hook {name} has no brain handler.");
         }
@@ -99,7 +107,28 @@ public sealed partial class Brain
         [.. _lastCommandResults],
         windows,
         new DisplayDiagnostics(_virtualDisplays is not null, [.. CurrentDisplays.Select(VirtualDisplaySet.ToTestDisplay)]),
-        _guestScreenDisplay is not null);
+        _guestScreenDisplay is not null,
+        StorageDiagnosticsNow());
+
+    private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
+    {
+        if (_storageHooks is not { } hooks)
+        {
+            return HookOutcome.Fail(TestHookError.NotSupported);
+        }
+
+        try
+        {
+            run(hooks);
+            return HookOutcome.Ok(EmptyHookResult.Instance);
+        }
+#pragma warning disable CA1031 // Any host failure becomes the hook's error (contract section 8).
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+            return HookOutcome.Fail(TestHookError.HookFailed);
+        }
+    }
 
     private HookOutcome UseVirtualDisplays(IReadOnlyList<VirtualDisplaySpec> specs)
     {

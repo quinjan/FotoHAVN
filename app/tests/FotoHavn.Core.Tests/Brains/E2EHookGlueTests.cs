@@ -18,7 +18,7 @@ public sealed class E2EHookGlueTests
     {
         var hooks = new Hooks();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices("fake-primary"))
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices("fake-primary"), new InMemoryEventStore())
         {
             HostTestHooks = hooks,
         });
@@ -45,7 +45,7 @@ public sealed class E2EHookGlueTests
     public void Without_host_hooks_the_brain_hooks_still_run()
     {
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices()));
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore()));
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 
@@ -54,6 +54,49 @@ public sealed class E2EHookGlueTests
         executor.RunPending();
 
         client.AssertReceived(TestResultMessage.Success(close, EmptyHookResult.Instance), TestResultMessage.Failure(exit, TestHookError.NotSupported));
+    }
+
+    [Fact]
+    public void The_public_constructor_forwards_storage_fault_hooks_through_IStorageTestHooks()
+    {
+        var hooks = new StorageHooks();
+        var executor = new ManualBrainExecutor();
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore())
+        {
+            StorageTestHooks = hooks,
+        });
+        var client = new TestClient(Role.Operator);
+        client.Connection = brain.Connect(Role.Operator, client.Receive);
+
+        var inject = client.Test(TestHookNames.InjectStorageFault, """{"kind":"diskFull","scope":"allWrites"}""");
+        var clear = client.Test(TestHookNames.ClearStorageFault);
+        executor.RunPending();
+
+        client.AssertReceived(TestResultMessage.Success(inject, EmptyHookResult.Instance), TestResultMessage.Success(clear, EmptyHookResult.Instance));
+        Assert.Equal(["InjectFault(DiskFull, AllWrites)", "ClearFault"], hooks.Calls);
+    }
+
+    [Fact]
+    public void Without_storage_hooks_the_fault_hooks_are_not_supported()
+    {
+        var executor = new ManualBrainExecutor();
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore()));
+        var client = new TestClient(Role.Operator);
+        client.Connection = brain.Connect(Role.Operator, client.Receive);
+
+        var inject = client.Test(TestHookNames.InjectStorageFault, """{"kind":"locked","scope":"nextWrite"}""");
+        executor.RunPending();
+
+        client.AssertReceived(TestResultMessage.Failure(inject, TestHookError.NotSupported));
+    }
+
+    private sealed class StorageHooks : IStorageTestHooks
+    {
+        public List<string> Calls { get; } = [];
+
+        public void InjectFault(StorageFaultKind kind, StorageFaultScope scope) => Calls.Add($"InjectFault({kind}, {scope})");
+
+        public void ClearFault() => Calls.Add("ClearFault");
     }
 
     private sealed class Hooks : IHostTestHooks

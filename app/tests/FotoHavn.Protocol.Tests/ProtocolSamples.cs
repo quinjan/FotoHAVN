@@ -129,7 +129,14 @@ internal static class ProtocolSamples
             [new CommandResultDiagnostics(Id, "OpenNewEvent", Role.Guest, CommandStatus.Rejected, RejectReason.WrongRole)],
             [new TestWindow(Role.Operator, PrimaryBounds, OperatorDisplay.Id), new TestWindow(Role.Guest, GuestDisplay.Bounds, GuestDisplay.Id)],
             new DisplayDiagnostics(true, [OperatorDisplay, GuestDisplay]),
-            true)),
+            true,
+            new StorageDiagnostics(
+                StorageDiagnosticsState.Error,
+                StorageErrorReason.DiskFull,
+                1,
+                new ReconcileDiagnostics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))),
+        ("storage-diagnostics-ready", new StorageDiagnostics(StorageDiagnosticsState.Ready, null, 1, null)),
+        ("inject-storage-fault-args", new InjectStorageFaultArgs(StorageFaultKind.DiskFull, StorageFaultScope.AllWrites)),
         ("use-virtual-displays-args", new UseVirtualDisplaysArgs(
         [
             new VirtualDisplaySpec("virtual-operator", "Virtual operator", new PixelRect(0, 0, 960, 1080), true),

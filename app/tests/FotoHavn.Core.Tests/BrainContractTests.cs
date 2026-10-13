@@ -1,4 +1,5 @@
 using FotoHavn.Core.Displays;
+using FotoHavn.Core.Fakes;
 using FotoHavn.Protocol;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,7 +10,7 @@ public sealed class BrainContractTests
     [Fact]
     public void Dependencies_default_to_a_null_logger()
     {
-        var dependencies = new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoHost());
+        var dependencies = new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoHost(), new InMemoryEventStore());
 
         Assert.Same(NullLogger.Instance, dependencies.Logger);
     }
@@ -24,12 +25,12 @@ public sealed class BrainContractTests
     public void Brain_posts_its_first_display_read_and_connections_to_the_executor()
     {
         var executor = new QueueExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoHost()));
+        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoHost(), new InMemoryEventStore()));
 
         var connection = brain.Connect(Role.Guest, _ => { });
 
         Assert.Equal(Role.Guest, connection.Role);
-        Assert.Equal(2, executor.Posted);
+        Assert.Equal(3, executor.Posted);
     }
 
     [Fact]

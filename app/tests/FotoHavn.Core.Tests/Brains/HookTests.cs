@@ -30,7 +30,7 @@ public sealed class HookTests
     {
         var executor = new ManualBrainExecutor();
         var host = new RecordingHostServices("fake-primary");
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), host));
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), host, new InMemoryEventStore()));
         var received = new List<string>();
         var connection = brain.Connect(Role.Guest, received.Add);
         var client = new TestClient(Role.Guest) { Connection = connection };

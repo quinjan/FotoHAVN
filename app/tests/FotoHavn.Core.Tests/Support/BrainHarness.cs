@@ -2,6 +2,7 @@ using System.Text.Json;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Hooks;
+using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
 using Microsoft.Extensions.Logging;
 
@@ -10,13 +11,15 @@ namespace FotoHavn.Core.Tests.Support;
 /// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, and clock; deterministic.</summary>
 internal sealed class BrainHarness : IDisposable
 {
-    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null)
+    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null)
     {
         Displays = displays ?? FakeDisplayAdapter.CreateDefault();
         Host = new RecordingHostServices(Displays.PrimaryDisplayId);
         HostHooks = hostHooks;
-        Dependencies = new BrainDependencies(Executor, Clock, Displays, Host) { Logger = Logger };
-        Brain = new Brain(Dependencies, hooks, hostHooks);
+        Store = store ?? new InMemoryEventStore();
+        StorageHooks = storageHooks;
+        Dependencies = new BrainDependencies(Executor, Clock, Displays, Host, Store) { Logger = Logger };
+        Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks);
         Run();
     }
 
@@ -29,6 +32,10 @@ internal sealed class BrainHarness : IDisposable
     public RecordingHostServices Host { get; }
 
     public FakeHostHookPort? HostHooks { get; }
+
+    public IEventStore Store { get; }
+
+    public FakeStorageHookPort? StorageHooks { get; }
 
     public RecordingLogger Logger { get; } = new();
 
@@ -107,6 +114,32 @@ internal sealed class TestClient(Role role)
         var argsMember = args is null ? string.Empty : $$""","args":{{args}}""";
         Send($$"""{"type":"test","id":"{{id}}","name":{{JsonSerializer.Serialize(name)}}{{argsMember}}}""");
         return id;
+    }
+}
+
+/// <summary>A storage hook port that records its calls.</summary>
+internal sealed class FakeStorageHookPort : IStorageHookPort
+{
+    public List<string> Calls { get; } = [];
+
+    public Exception? Failure { get; set; }
+
+    public void InjectFault(Protocol.Testing.StorageFaultKind kind, Protocol.Testing.StorageFaultScope scope)
+    {
+        Calls.Add($"InjectFault({kind}, {scope})");
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+    }
+
+    public void ClearFault()
+    {
+        Calls.Add("ClearFault");
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
     }
 }
 

@@ -1,3 +1,6 @@
+using FotoHavn.Core.Fakes;
+using FotoHavn.Core.Storage;
+using FotoHavn.Core.Tests.Brains;
 using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
 
@@ -13,22 +16,24 @@ public sealed class PresentationFixtureTests
 {
     private const string FatalReason = "FOTOHAVN stopped. Close it and open it again.";
 
-    private static readonly IReadOnlyDictionary<string, Func<string>> Fixtures = new Dictionary<string, Func<string>>(StringComparer.Ordinal)
+    private static readonly IReadOnlyDictionary<string, Func<Task<string>>> Fixtures = new Dictionary<string, Func<Task<string>>>(StringComparer.Ordinal)
     {
-        ["operator-event-list-empty"] = () => Welcome(Role.Operator),
-        ["guest-start"] = () => Welcome(Role.Guest),
-        ["operator-fatal"] = () => FatalPresentation(Role.Operator),
-        ["guest-fatal"] = () => FatalPresentation(Role.Guest),
-        ["protocol-mismatch"] = ProtocolMismatch,
+        ["operator-event-list-empty"] = () => Task.FromResult(Welcome(Role.Operator)),
+        ["operator-event-list-with-events"] = EventListWithEvents,
+        ["operator-storage-error-disk-full"] = () => Task.FromResult(StorageError(StorageErrorKind.DiskFull)),
+        ["guest-start"] = () => Task.FromResult(Welcome(Role.Guest)),
+        ["operator-fatal"] = () => Task.FromResult(FatalPresentation(Role.Operator)),
+        ["guest-fatal"] = () => Task.FromResult(FatalPresentation(Role.Guest)),
+        ["protocol-mismatch"] = () => Task.FromResult(ProtocolMismatch()),
     };
 
     public static TheoryData<string> Names => [.. Fixtures.Keys];
 
     [Theory]
     [MemberData(nameof(Names))]
-    public void Fixture_matches_what_the_brain_sends(string name)
+    public async Task Fixture_matches_what_the_brain_sends(string name)
     {
-        var json = Fixtures[name]() + "\n";
+        var json = await Fixtures[name]() + "\n";
         var path = Path.Combine(SourcePaths.PresentationFixtureFolder, name + ".json");
         if (SourcePaths.UpdatingFixtures)
         {
@@ -55,6 +60,26 @@ public sealed class PresentationFixtureTests
     {
         using var harness = new BrainHarness();
         var client = harness.Connect(role);
+        client.Hello();
+        harness.Run();
+        return Assert.Single(client.Raw);
+    }
+
+    private static async Task<string> EventListWithEvents()
+    {
+        using var harness = new BrainHarness(store: await StorageTests.SeededStoreAsync());
+        var client = harness.Connect(Role.Operator);
+        client.Hello();
+        harness.Run();
+        return Assert.Single(client.Raw);
+    }
+
+    private static string StorageError(StorageErrorKind kind)
+    {
+        var store = new InMemoryEventStore();
+        store.FailOpen(kind);
+        using var harness = new BrainHarness(store: store);
+        var client = harness.Connect(Role.Operator);
         client.Hello();
         harness.Run();
         return Assert.Single(client.Raw);

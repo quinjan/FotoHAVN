@@ -33,6 +33,12 @@ public static class TestHookNames
     public const string CrashUi = "test.crashUi";
     public const string ListCameras = "test.listCameras";
     public const string Exit = "test.exit";
+
+    /// <summary>Makes the Event store's file writes fail the way the disk would (E2E only).</summary>
+    public const string InjectStorageFault = "test.injectStorageFault";
+
+    /// <summary>Removes any fault <see cref="InjectStorageFault"/> set.</summary>
+    public const string ClearStorageFault = "test.clearStorageFault";
 }
 
 /// <summary>One hook: its name, where it runs, its arguments record (null when it takes none), and its result record.</summary>
@@ -53,6 +59,8 @@ public static class TestHookRegistry
         new(TestHookNames.CrashUi, TestHookSide.Host, typeof(CrashUiArgs), typeof(EmptyHookResult)),
         new(TestHookNames.ListCameras, TestHookSide.Host, null, typeof(ListCamerasResult)),
         new(TestHookNames.Exit, TestHookSide.Host, null, typeof(EmptyHookResult)),
+        new(TestHookNames.InjectStorageFault, TestHookSide.Brain, typeof(InjectStorageFaultArgs), typeof(EmptyHookResult)),
+        new(TestHookNames.ClearStorageFault, TestHookSide.Brain, null, typeof(EmptyHookResult)),
     ];
 
     public static bool TryGet(string name, out TestHookDescriptor hook)
@@ -141,6 +149,27 @@ public sealed record SetWindowBoundsArgs(Role Role, int Width, int Height);
 /// <summary>Ends one role's WebView2 process, so the host's crash recovery runs.</summary>
 public sealed record CrashUiArgs(Role Role);
 
+/// <summary>How an injected storage write fails (plan section 14).</summary>
+public enum StorageFaultKind
+{
+    DiskFull,
+    AccessDenied,
+    Locked,
+}
+
+/// <summary>How long an injected storage fault lasts.</summary>
+public enum StorageFaultScope
+{
+    /// <summary>Only the next write fails.</summary>
+    NextWrite,
+
+    /// <summary>Every write fails until <c>test.clearStorageFault</c>.</summary>
+    AllWrites,
+}
+
+/// <summary>Makes the Event store's file writes fail with <paramref name="Kind"/> for <paramref name="Scope"/>.</summary>
+public sealed record InjectStorageFaultArgs(StorageFaultKind Kind, StorageFaultScope Scope);
+
 /// <summary>The result of a hook that returns nothing: <c>{}</c>.</summary>
 public sealed record EmptyHookResult
 {
@@ -167,6 +196,41 @@ public sealed record CommandResultDiagnostics(string Id, string Name, Role Role,
 /// <summary>The displays the brain currently sees, and whether they are virtual.</summary>
 public sealed record DisplayDiagnostics(bool Virtual, IReadOnlyList<TestDisplay> Displays);
 
+/// <summary>Where the Event store is in its open sequence.</summary>
+public enum StorageDiagnosticsState
+{
+    /// <summary>Opening for the first time, or retrying.</summary>
+    Opening,
+    Ready,
+
+    /// <summary>The last open failed; the operator sees the storage error surface.</summary>
+    Error,
+}
+
+/// <summary>What the startup reconciler did on the last successful open: counts only, in the order of plan section 10.</summary>
+public sealed record ReconcileDiagnostics(
+    int StagingFilesDeleted,
+    int OrphanFilesDeleted,
+    int ArtifactProblems,
+    int CyclesMarkedUnrecoverable,
+    int CyclesClosedAsAppClosed,
+    int GuestCyclesDeleted,
+    int EventsDeleted,
+    int DiscardedFilesDeleted,
+    int OrphanThumbnailsDeleted,
+    int Problems);
+
+/// <summary>The Event store as the brain sees it.</summary>
+/// <param name="State">Opening, ready, or error.</param>
+/// <param name="Kind">The cause when <paramref name="State"/> is <see cref="StorageDiagnosticsState.Error"/>, else null.</param>
+/// <param name="SchemaVersion">The schema version after the last successful open, or null before one.</param>
+/// <param name="Reconcile">The reconciler's counts from the last successful open, or null before one.</param>
+public sealed record StorageDiagnostics(
+    StorageDiagnosticsState State,
+    Presentations.StorageErrorReason? Kind,
+    int? SchemaVersion,
+    ReconcileDiagnostics? Reconcile);
+
 /// <summary>The result of <c>test.getDiagnostics</c>.</summary>
 /// <param name="ProtocolVersion">The brain's protocol version.</param>
 /// <param name="ConnectedRoles">Roles with at least one connection that completed the handshake, operator first.</param>
@@ -175,6 +239,7 @@ public sealed record DisplayDiagnostics(bool Virtual, IReadOnlyList<TestDisplay>
 /// <param name="Windows">The host's open windows (empty in the headless host).</param>
 /// <param name="Displays">The display list the brain uses.</param>
 /// <param name="GuestScreenOpen">Whether the brain has asked the host to show the Guest Screen.</param>
+/// <param name="Storage">The Event store's state.</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -182,7 +247,8 @@ public sealed record DiagnosticsResult(
     IReadOnlyList<CommandResultDiagnostics> LastCommandResults,
     IReadOnlyList<TestWindow> Windows,
     DisplayDiagnostics Displays,
-    bool GuestScreenOpen)
+    bool GuestScreenOpen,
+    StorageDiagnostics Storage)
 {
     public const int MaxCommandResults = 20;
 }
