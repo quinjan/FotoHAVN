@@ -70,7 +70,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 | D18 | Phase timers | Each applicable Guest Cycle phase has a fixed timer, configured in Event setup. It starts when the phase begins and is not reset by guest input. When it runs out, the cycle continues automatically: with the current or default selection, and by starting the capture sequence for empty windows. An abandoned Guest Cycle always reaches a saved Photo Strip (and, later, a print). A visible countdown and `MORE TIME` appear near the end. |
 | D19 | Deletion | Delete all of `app/` except `app/docs/research/` (and this plan). Rewrite `app/CONTEXT.md`. Delete ADR 0001 and replace it with new ADRs. |
 | D20 | Plan location | This Markdown file. GitHub issues may be created from the milestones later. |
-| D21 | Start over | Guests get a quiet `START OVER` action on every step after Start, with a confirmation. It ends the Guest Cycle and returns to Start. Saved Captures stay in the Event; no Photo Strip is made. |
+| D21 | Start over | Guests get a quiet `START OVER` action on the Template, Photographs, and Filters steps, with a confirmation; Keepsake has none, because the Guest Cycle is already completed when its Photo Strip is committed. It ends the Guest Cycle and returns to Start. Saved Captures stay in the Event; no Photo Strip is made. |
 | D22 | Mirror | The Event's mirror setting applies to both the live preview and the saved Captures, as on the website (resolved Q1). |
 | D23 | Discarded Captures | Rejected Retake candidates and replaced originals are deleted when their Guest Cycle ends (resolved Q3). |
 | D24 | Start screen | Typographic in v1, with no booth photograph (resolved Q4). |
@@ -84,7 +84,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 | D32 | Screens | The app has two windows. The **Operator Screen** opens on the Windows primary display. The **Guest Screen** opens on the display chosen in the Event's setup when the Event starts, and closes when it ends. Two or more displays are supported. |
 | D33 | Guest Display Binding | Event setup lists every connected display. The Event stores the exact display chosen, and the app never silently moves the Guest Screen to another display. |
 | D34 | One Active Event | Only one Event runs at a time, whatever the number of displays. Other displays are only choices for where the Guest Screen goes. |
-| D35 | Operator Screen during an Active Event | The operator can create, edit, and delete other Events, and browse other Events' galleries. They can't edit, delete, or start Events while one is running. For the running Event, they see a read-only status panel (current step, camera state, completed cycles, Operator Assistance alerts with `RETRY`), its live operator gallery (including delete), and `END EVENT`. |
+| D35 | Operator Screen during an Active Event | The operator can create, edit, and delete other Events, and browse other Events' galleries. While one is running, they can't edit, delete, or restart it, and can't start any Event. For the running Event, they see a read-only status panel (current step, camera state, completed cycles, Operator Assistance alerts with `RETRY`), its live operator gallery (including delete), and `END EVENT`. |
 | D36 | Ending an Event | `END EVENT` on the Operator Screen asks for a confirmation but no PIN, because the Operator Screen is trusted. The hold and PIN on the Guest Screen remain as a backup. |
 | D37 | Guest display lost | If the bound display disconnects during an Active Event, the Event pauses in Operator Assistance: any countdown stops, saved Captures stay, and the Operator Screen alerts. `RETRY` puts the Guest Screen back once the same display returns. |
 | D38 | Single-screen setups | If the Guest Screen's display is the one showing the Operator Screen (or there's only one display), the Guest Screen covers it full screen, and the operator returns with the hold and PIN. |
@@ -119,7 +119,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 
 | Conflict | Resolution |
 | --- | --- |
-| [`brand/accessibility.md`](../../brand/accessibility.md) says never require a time limit to complete a task, but D18 adds phase timers that don't depend on input. | Warn at least 20 seconds before a timer ends with a visible countdown and a `MORE TIME` action that restarts the phase's full time. A guest who is present can always extend, so no task requires a time limit; an absent guest can't, so the cycle still completes. The operator may turn a timer off (0). Running out never discards work. Record this as a deliberate departure in `app/DESIGN.md`. |
+| [`brand/accessibility.md`](../../brand/accessibility.md) says never require a time limit to complete a task, but D18 adds phase timers that don't depend on input. | Warn at least 20 seconds before a timer ends with a visible countdown and a `MORE TIME` action that restarts the phase's full time (every timed phase except Keepsake, where the Photo Strip is already saved). A guest who is present can always extend, so no task requires a time limit; an absent guest can't, so the cycle still completes. The operator may turn a timer off (0). Running out never discards work. Record this as a deliberate departure in `app/DESIGN.md`. |
 | [`brand/photography.md`](../../brand/photography.md) says guest images are used publicly only with permission from the Event's Customer or the guests shown, and the guest gallery shows guests each other's Photo Strips. | The guest gallery is off by default. Its Event setup control says to turn it on only with the Customer's permission. It shows only the Active Event's completed Photo Strips. Deleting a Guest Cycle removes it from both gallery views immediately. |
 | [`brand/photography.md`](../../brand/photography.md) asks to treat original media as read-only and to store derivatives separately, recording their source. | Gallery and board thumbnails are derived files in `Data/Cache/thumbnails/`, named by source ID and hash. They are regenerable, never edited in place, and never stored beside originals. |
 | [`brand/motion.md`](../../brand/motion.md) prohibits autoplay carousels but permits browsing a guest album at the user's pace. | The guest gallery never moves on its own; guests browse it by touch. |
@@ -182,7 +182,7 @@ flowchart TB
 - **React UI.** One build serves both screens. The host tells each WebView2 its role (`operator` or `guest`); the page can't choose or change it. The UI renders whatever presentation the brain sends for its role and turns touches and keys into commands. It never stores Event data or decides a rule.
 - **Host.** It owns both windows, both WebView2 controls (sharing one WebView2 environment), the bridges, display enumeration, and other Windows-only behavior. It holds no domain logic.
 - **Brain.** It owns every rule and timer through injected interfaces (clock, camera, displays, store, compositor), so it runs headless and in tests. It keeps one presentation per role and accepts each command only from the role allowed to send it.
-- **Adapters.** They implement brain interfaces. Only the Event store writes the Data folder.
+- **Adapters.** They implement brain interfaces. The Event store is the only writer of Event data: `fotohavn.db`, `Events/`, and `Cache/thumbnails/`. The host owns `logs/` and `webview2-user-data/`.
 
 ### Projects
 
@@ -206,7 +206,7 @@ app/
 │  ├─ FotoHavn.Catalog.Tests/     kernel and golden-image tests
 │  ├─ FotoHavn.Storage.Tests/     store, migration, reconciler, and crash tests
 │  ├─ FotoHavn.Protocol.Tests/    serialization snapshots and schema drift
-│  ├─ FotoHavn.Camera.Windows.Tests/   hardware tests, skipped without a camera
+│  ├─ FotoHavn.Camera.Windows.Tests/   hardware tests, reported "not run" without a camera
 │  └─ FotoHavn.Host.Windows.Tests/     host guardrail and portable-launch tests
 ├─ scripts/                       field-test publish, schema and token generation (no verification wrappers)
 └─ docs/
@@ -259,28 +259,7 @@ FOTOHAVN/
 
 Rewrite `app/CONTEXT.md` before building behavior. It extends the shared terms in [`CONTEXT.md`](../../CONTEXT.md): Event, Capture, Photo Strip, Print Sheet, and Customer.
 
-| Term | Meaning in the new app | Avoid |
-| --- | --- | --- |
-| **Event Setup** | The operator's configuration of an Event: metadata, Camera Binding, Guest Display Binding, printer, offered Templates and Looks, countdown, mirror, Phase Timers, guest gallery, and operator PIN. | Settings, config |
-| **Operator Screen** | The app window on the Windows primary display where the operator manages Events, galleries, and the running Event. | Main window, admin |
-| **Guest Screen** | The full-screen window where guests use the Active Event, shown on the Event's bound display from Start Event until the Event ends. | Kiosk, second window |
-| **Available Display** | A display Windows currently reports to FotoHAVN. | Monitor list |
-| **Guest Display Binding** | An Event's link to the exact display chosen for its Guest Screen. The app never silently moves the Guest Screen to another display. | Default display |
-| **Active Event** | The single Event admitting Guest Cycles in the running app, whatever the number of displays. It never survives closing or restarting the app, and its setup can't be edited while it runs. | Session, resumed Event |
-| **Guest Cycle** | One guest group's use of the booth, from Start through Template, Photographs, and Filters to the Keepsake preview, ending when the booth returns to Start. | Session, Online Booth Cycle |
-| **Template** | A built-in design that defines the Photo Strip's size, photograph windows, paper, and artwork. An Event offers one or more. | Photo Strip, layout, frame |
-| **Look** | One of the seven photographic finishes applied to the photographs in a Photo Strip. Guests see it as a "filter". | Effect, preset |
-| **Arrangement** | The order of kept Captures across a Template's photograph windows. | Layout |
-| **Retake** | Replacing one arranged Capture with a new one; the original is kept until the guest accepts the replacement. | Redo |
-| **Phase Timer** | The configured maximum time for a Guest Cycle phase, counted from when the phase begins and not reset by guest input. When it runs out, the cycle continues automatically. | Idle timeout, inactivity timer |
-| **Start Over** | A guest's deliberate end of their Guest Cycle before it completes. Saved Captures stay in the Event; no Photo Strip is made. | Cancel, reset |
-| **Keepsake Preview** | The final Guest Cycle step that shows the saved Photo Strip before returning to Start. | Download, result screen |
-| **Event Gallery** | An Event's Guest Cycles, Photo Strips, and Captures, seen in one of two views. The operator view has every action. The guest view, enabled per Event, is read-only and shows only completed Photo Strips with their arranged Captures. | Album, history, photo board |
-| **Operator PIN** | The Event's digit code required to leave an Active Event from the Guest Screen. It keeps guests out of operator screens; it is not account security. | Password, login |
-| **Operator Assistance** | The paused state of an Active Event after a Camera, storage, or guest display failure, keeping saved Captures until Retry succeeds. | Error screen |
-| **Available Camera** | A camera Windows reports as a video-capture device. | Detected device |
-| **Eligible Camera** | The selected Available Camera after it has produced a fresh frame in a usable format. | Supported Camera |
-| **Camera Binding** | An Event's link to the exact camera the operator chose. The app never silently substitutes another camera. | Default camera |
+[`app/CONTEXT.md`](../CONTEXT.md) is the authority for the booth's vocabulary: each term's definition, the words to avoid, and the rules that use them. This plan uses those terms and doesn't redefine them.
 
 Template and Look are also used by the website's online booth. If they become shared language, promote them to the root `CONTEXT.md` in a later change.
 
@@ -293,45 +272,61 @@ The reference behavior is the website's online booth: [`OnlinePhotobooth.tsx`](.
 ```mermaid
 stateDiagram-v2
   [*] --> Start
-  Start --> StartUnavailable: Camera not eligible
-  StartUnavailable --> Start: Camera eligible again
-  Start --> Template: STEP INSIDE
+  Start --> StartUnavailable: Camera not eligible or storage not writable
+  StartUnavailable --> Start: Camera eligible and storage writable again
   Start --> GuestGallery: SEE THE GOOD COMPANY
   GuestGallery --> Start: BACK TO START or timer
-  Template --> Photographs: Continue or timer
-  state Photographs {
-    [*] --> Camera
-    Camera --> Countdown: Take photographs or timer
-    Countdown --> Flash
-    Flash --> Countdown: more empty windows
-    Flash --> Arrange: all windows filled
-    Arrange --> Camera: Retake
-    Camera --> Arrange: Review
-    Arrange --> Countdown: timer with empty windows
+  Start --> GuestCycle: STEP INSIDE
+  state GuestCycle {
+    [*] --> Template
+    Template --> Photographs: Continue or timer
+    state Photographs {
+      [*] --> Camera
+      Camera --> Countdown: Take photographs or timer
+      Countdown --> Flash
+      Flash --> Countdown: more empty windows
+      Flash --> Arrange: all windows filled
+      Arrange --> Camera: Retake
+      Camera --> Arrange: Review
+      Arrange --> Countdown: timer with empty windows
+    }
+    Photographs --> Template: Back
+    Photographs --> Filters: Continue or timer when complete
+    Filters --> Photographs: Back
+    Filters --> Keepsake: Finish or timer, Photo Strip committed, cycle completed
+    Template --> [*]: START OVER
+    Photographs --> [*]: START OVER
+    Filters --> [*]: START OVER
+    Keepsake --> [*]: display time ends
   }
-  Photographs --> Template: Back
-  Photographs --> Filters: Continue or timer when complete
-  Filters --> Photographs: Back
-  Filters --> Keepsake: Finish or timer
-  Keepsake --> Start: display time ends
-  Template --> Start: START OVER
-  Photographs --> Start: START OVER
-  Filters --> Start: START OVER
-  Photographs --> OperatorAssistance: Camera or storage failure
-  OperatorAssistance --> Photographs: Retry succeeds
-  Start --> [*]: hold and PIN
+  GuestCycle --> Start: Guest Cycle ends
+  GuestCycle --> OperatorAssistance: Camera, storage, or guest display failure
+  OperatorAssistance --> GuestCycle: RETRY succeeds, back to the step it was on
+  Start --> OperatorAssistance: guest display lost, or storage fails at STEP INSIDE
+  StartUnavailable --> OperatorAssistance: guest display lost
+  GuestGallery --> OperatorAssistance: guest display lost
+  OperatorAssistance --> Start: RETRY succeeds with no Guest Cycle
+  note right of OperatorAssistance: Phase Timers pause and saved Captures stay
+  Start --> EventEnded: hold and PIN, or END EVENT
+  StartUnavailable --> EventEnded: hold and PIN, or END EVENT
+  GuestGallery --> EventEnded: hold and PIN, or END EVENT
+  GuestCycle --> EventEnded: hold and PIN, or END EVENT
+  OperatorAssistance --> EventEnded: hold and PIN, or END EVENT
+  EventEnded --> [*]
 ```
 
 - **Skipped steps.** If an Event offers one Template, the Template step is skipped. If it offers one Look, the Filters step is skipped, and the Photo Strip is composed with that Look.
+- **Start unavailable.** Outside a Guest Cycle (the guest on Start or in the guest gallery), a Camera that isn't eligible doesn't enter Operator Assistance. Start shows Start unavailable, with `STEP INSIDE` disabled, until a fresh frame proves the Camera again, and recovers by itself with no operator action. The guest gallery keeps working because it needs no camera; returning from it to Start shows Start unavailable. The running-Event panel on the Operator Screen shows the camera state in text either way. Storage works the same way: outside a Guest Cycle, a storage failure shows Start unavailable until storage is writable again, and the guest gallery shows its own inline error if it can't read. A storage failure while creating the Guest Cycle record at `STEP INSIDE` enters Operator Assistance. A Guest Cycle begins only with `STEP INSIDE`; opening the guest gallery doesn't start one.
 - **Back navigation.** The step progress lets guests go back, as on the website. Going back restarts that phase's timer. Changing the Template keeps every kept Capture: they fill the new windows in order, and extras stay in a retained pool. A larger Template can't continue until its new empty windows are filled.
-- **Start over (D21).** A quiet `START OVER` text action appears on every step after Start. It asks "Start over? Your photographs stay with the Event, but no strip will be made." with `START OVER` and `KEEP GOING`. Confirming ends the Guest Cycle (`end_reason = 'started_over'`) and returns to Start. If the phase timer runs out while the confirmation is open, the confirmation closes as `KEEP GOING` and the cycle continues automatically.
-- **Hold to exit.** The exit hold and PIN are available on every Guest Screen view, including during a Guest Cycle. Exiting ends the Guest Cycle; its saved Captures stay in the Event. `END EVENT` on the Operator Screen does the same (D36).
+- **Completion.** A Guest Cycle is recorded as completed (`end_reason = 'completed'`) when its Photo Strip is committed. The Keepsake step only displays it, so ending the Event, closing the app, or a timer during Keepsake leaves it completed.
+- **Start over (D21).** A quiet `START OVER` text action appears on the Template, Photographs, and Filters steps, not on Keepsake. It asks "Start over? Your photographs stay with the Event, but no strip will be made." with `START OVER` and `KEEP GOING`. Confirming ends the Guest Cycle (`end_reason = 'started_over'`) and returns to Start. If the phase timer runs out while the confirmation is open, the confirmation closes as `KEEP GOING` and the cycle continues automatically.
+- **Hold to exit.** The exit hold and PIN are available on every Guest Screen view, including during a Guest Cycle. Exiting ends an unfinished Guest Cycle (`end_reason = 'operator_exit'`); its saved Captures stay in the Event. A Guest Cycle on Keepsake stays completed. `END EVENT` on the Operator Screen does the same (D36).
 
 ### Steps
 
 | Step | Guest sees | Guest can | Brain does | Copy (from [`brand/voice.md`](../../brand/voice.md)) |
 | --- | --- | --- | --- | --- |
-| **Start** | Typographic brand moment (D24). When the Event enables the guest gallery and has a completed Photo Strip, a secondary text link to it. | Tap the one primary action, or open the guest gallery | Checks Camera eligibility and storage; creates the Guest Cycle when the guest starts | Eyebrow `FOTOHAVN`, heading "Small room. *Whole other world.*", supporting "Come a little closer.", action `STEP INSIDE →`, text link `SEE THE GOOD COMPANY →` |
+| **Start** | Typographic brand moment (D24). When the Event enables the guest gallery and has a completed Photo Strip, a secondary text link to it. | Tap the one primary action, or open the guest gallery | Checks Camera eligibility and storage; creates the Guest Cycle when the guest starts | `FOTOHAVN` wordmark (no separate eyebrow repeating the name), heading "Small room. *Whole other world.*", supporting "Come a little closer.", action `STEP INSIDE →`, text link `SEE THE GOOD COMPANY →` |
 | **Template** | Blank preview of the selected Template as a print object; option list of offered Templates | Select a Template; continue | Composes blank Template previews once per Event start and caches them | "Make a little *Moment*", supporting "Choose your template.", action `CONTINUE TO PHOTOGRAPHS →` |
 | **Photographs: Camera** | Mirrored or plain live preview cropped to the window's ratio; capture progress | Start the sequence; stop it; review | Runs the countdown and flash, takes each Capture from the first fresh frame after the countdown, saves it, then arranges it | "Find your *light.*", supporting "Let this moment become a memory." |
 | **Photographs: Arrange** | The strip with the guest's photographs | Select a photograph, then Retake or Move; drag to reorder; accept or keep the original | Applies the website's transactional retake and swap rules | Arrange hint "Drag to rearrange · Tap a photograph to edit" |
@@ -348,7 +343,7 @@ The Template step heading copies the website's approved line exactly, including 
 4. The UI plays one flash (320–380 ms, from [`brand/motion.md`](../../brand/motion.md)). With reduced motion, it shows a near-instant static change instead.
 5. The brain applies the Event's mirror setting (D22), encodes a JPEG at quality 92, and commits the Capture (see [Storage](#10-storage)). The Capture is part of the cycle only once it is committed.
 6. It pauses for 800 ms, as the website does, before the next countdown or review.
-7. Stop cancels the remaining countdown; Captures already saved stay. The Photographs timer then starts again for the empty windows.
+7. Stop cancels the remaining countdown; Captures already saved stay. Stopping restarts the Photographs capture timer for the empty windows.
 
 ### Retake and arrangement rules
 
@@ -362,7 +357,7 @@ These are ported from the website reducer and its tests in `website/scripts/onli
 
 ### Phase timers (D18)
 
-A phase timer starts when its phase begins and runs regardless of touches or keys. Guest input never resets it; only `MORE TIME`, going back, or entering the phase again restarts it. While a countdown or capture is running, or the Active Event is in Operator Assistance, the timer is paused, so an automatic step never interrupts a photograph or a recovery.
+A phase timer starts when its phase begins and runs regardless of touches or keys. Guest input never resets it; only `MORE TIME`, going back, entering the phase again, or stopping a capture sequence (which restarts the capture timer) restarts it. While a countdown or capture is running, or the Active Event is in Operator Assistance, the timer pauses, and it resumes afterwards, so an automatic step never interrupts a photograph or a recovery.
 
 | Phase | Starts when | Default | Range | When it runs out |
 | --- | --- | ---: | --- | --- |
@@ -375,12 +370,14 @@ A phase timer starts when its phase begins and runs regardless of touches or key
 | Guest gallery | The guest view of the Event Gallery opens (outside a Guest Cycle) | 60 s | 20–300 s, never off | Return to Start |
 
 - **Outcome.** With every timer on, a Guest Cycle that nobody touches after `STEP INSIDE` runs through to a saved Photo Strip: default Template, automatic Captures, default arrangement, default Look, and Keepsake. Later it will also print. It's recorded and shown exactly like a cycle the guest finished (D28).
-- **Warning.** Within the last 20 seconds of a phase, the UI shows a polite countdown with `MORE TIME`. That action restarts the phase's full time. The minimum of 20 seconds means the warning always has at least 20 seconds to respond to.
+- **Warning.** Within the last 20 seconds of the Template, Photographs capture, Photographs review, Filters, and guest gallery phases, the UI shows a polite countdown with `MORE TIME`. That action restarts the phase's full time. The minimum of 20 seconds means the warning always has at least 20 seconds to respond to. The Keepsake phase has no warning and no `MORE TIME`: the Photo Strip is already saved, so returning to Start loses nothing.
 - **Assistive tech.** The warning announces once through a polite live region, not every second.
 - **Retained work.** A timer never deletes a kept Capture.
 - **Timer off.** If the operator turns a phase's timer off, an abandoned Guest Cycle waits at that phase until someone continues it or uses `START OVER`. Event setup says so beside the field.
 
 ### Failures inside a Guest Cycle
+
+Camera and storage failures enter Operator Assistance only during a Guest Cycle, or for storage, while creating the Guest Cycle record at `STEP INSIDE`; outside one, an ineligible Camera or unwritable storage shows Start unavailable instead (see [States](#states)). A guest display disconnect enters Operator Assistance at any time during the Active Event, including on Start and in the guest gallery.
 
 | Failure | Brain response | Guest sees |
 | --- | --- | --- |
@@ -392,7 +389,8 @@ A phase timer starts when its phase begins and runs regardless of touches or key
 
 **Operator Assistance.**
 - It shows `RETRY` on the Guest Screen to anyone, because retrying is harmless, and on the Operator Screen's status panel as an alert.
-- `RETRY` re-proves the camera with a fresh frame, checks storage, and checks that the bound display is connected, reopening the Guest Screen on it if needed. Then the cycle returns to the step it was on; the remaining Captures continue from the next empty window.
+- During a Guest Cycle, `RETRY` re-proves the camera with a fresh frame, checks storage, and checks the bound display, reopening the Guest Screen on it if needed. Then the cycle returns to the step it was on; the remaining Captures continue from the next empty window.
+- When no Guest Cycle is running (Operator Assistance entered from a guest display loss on Start or in the guest gallery, or from a storage failure at `STEP INSIDE`), `RETRY` checks only the bound display and storage. Then the Guest Screen returns to Start, which shows Start unavailable if the Camera still isn't eligible.
 - The Event can still be ended with `END EVENT` or the hold and PIN.
 
 ## 8. Operator specification
@@ -415,7 +413,7 @@ The app always opens here, on the Operator Screen (D17, D32).
 
 ### Event setup
 
-The form is one screen, with grouped sections in this order. It saves as a draft; `SAVE` and `SAVE AND START` validate.
+The form is one screen, with grouped sections in this order. It saves as a draft; `SAVE` and `SAVE AND START` validate. `SAVE` is the primary action; `SAVE AND START` is a secondary action, disabled with "End the running Event to start another." while another Event runs.
 
 | Section | Field | Rules |
 | --- | --- | --- |
@@ -424,7 +422,7 @@ The form is one screen, with grouped sections in this order. It saves as a draft
 | | Venue | Optional, up to 120 characters |
 | | Customer or host | Optional, up to 120 characters |
 | | Notes | Optional, up to 1,000 characters |
-| Camera | Camera | Required. Lists Available Cameras by name; the Camera Binding stores the device ID. Shows a live preview and the eligibility state: Checking, Ready, Not available, In use by another app, or In use by the running Event. In the last case, the binding can be saved but the preview and eligibility check wait until that Event ends. |
+| Camera | Camera | Required. Lists Available Cameras by name; the Camera Binding stores the device ID. Shows a live preview and the eligibility state: Checking, Ready, Not available, In use by another app, or In use by the running Event. In the last case, the binding can be saved but the preview and eligibility check wait until that Event ends. When the Windows camera privacy setting blocks access, the state is Not available with "Camera access is off in Windows privacy settings." |
 | Guest display | Guest display | Required. Lists Available Displays by name, resolution, and position, marking the one showing the Operator Screen. The Guest Display Binding stores the display's stable identity. `IDENTIFY DISPLAYS` shows a large number on every display for 3 s to match the list to the hardware. Choosing the Operator Screen's display shows the note "The Guest Screen will cover this screen. Use the hold and PIN to return." (D38). If the bound display isn't connected, the field says so and keeps the binding until the operator chooses another. |
 | | Mirror | On or off. Default on. Applies to the preview and saved Captures. |
 | | Countdown | 3, 5, or 10 seconds. Default 5. |
@@ -446,7 +444,7 @@ One gallery per Event, with two views. Both use the same paged data and thumbnai
 
 #### Operator view
 
-Opened from an Event row in the Event list, so it's reachable whenever no Event is active. During an Active Event, the operator gets there by exiting with the hold and PIN.
+Opened from an Event row in the Event list. During an Active Event, the operator opens the running Event's gallery live from the running-Event panel with `OPEN GALLERY` (D35); the hold and PIN aren't needed. In single-screen setups the Guest Screen covers the Operator Screen, so the gallery is reachable only after the Event ends (D38).
 
 - **List.** The Event's Guest Cycles, newest first. Each item shows the Photo Strip at its real proportion (strips are tall, so the list flows like strips laid on a table, not as uniform square cards), the time, Template, Look, and how it ended:
   - Completed (by the guest or by phase timers; D28)
@@ -467,7 +465,7 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 - **Heading.** The approved guest-album line "Look at *you.*" ([`brand/voice.md`](../../brand/voice.md)).
 - **List.** Only the Active Event's completed Guest Cycles, newest first, shown as Photo Strips at their real proportion. Cycles that were started over, ended by the operator, closed, or unrecoverable never appear.
 - **Detail view.** Tapping a strip shows it large with its arranged Captures. Discarded Captures never appear.
-- **Guests can:** scroll the list, open a strip and its Captures, close the detail, and go back with `BACK TO START ←`.
+- **Guests can:** scroll the row of strips horizontally by touch (the page itself never scrolls), open a strip and its Captures, close the detail, and go back with `BACK TO START ←`.
 - **Guests can't:** delete, open folders, export, zoom beyond the detail size, or see times, Template and Look names, end reasons, counts, or any Event metadata.
 - **Timer.** A `guest_gallery` phase timer (default 60 s, 20–300 s, never off) starts when the guest view opens. Browsing doesn't reset it. It shows the usual warning with `MORE TIME`, then returns to Start.
 - **Leaving.** The exit hold works here as on every guest screen. A new guest starts from Start, never from the gallery.
@@ -490,11 +488,12 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 
 - **Running-Event panel.** Pinned at the top of the Event list. It shows the Event name and these read-only facts, each with a text label:
   - the guest display and its state (Connected or Disconnected)
-  - camera state (Ready, Not available)
+  - camera state (Ready, Not available), shown whether or not a Guest Cycle is running
   - current guest step (Start, Template, Photographs, Filters, Keepsake, guest gallery, Operator Assistance)
   - completed Guest Cycles
   - time since start
 - **Panel actions:** `OPEN GALLERY` (the operator view, live and including delete), `RETRY` (only during Operator Assistance), and `END EVENT`.
+- **Alerts elsewhere.** The panel sits above the Event list only. On every other Operator Screen view (Event setup, galleries), an Operator Assistance alert appears as an inline status line with a text link back to the panel; `RETRY` is the primary action only on the panel.
 - **No edits.** The running Event can't be edited, deleted, or restarted. Commands that would change it are rejected by the brain, not only hidden by the UI.
 - **Live gallery.** It updates as Guest Cycles complete. Deleting a Guest Cycle removes it from the guest gallery view at once (section 8, Event Gallery).
 - **Other Events.** Creating, editing, and deleting other Events works as usual. Their camera previews say "In use by the running Event" when they share its camera.
@@ -505,11 +504,11 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 **From the Operator Screen** (D36):
 
 1. `END EVENT` opens a confirmation: "End this Event? Anyone using the booth will be stopped. Their photographs are kept." with `END EVENT` and `KEEP RUNNING`.
-2. Confirming ends any running Guest Cycle (`operator_exit`; its Captures stay), closes the Guest Screen, releases the camera and the wake lock, and returns the panel to the normal Event list.
+2. Confirming ends any unfinished Guest Cycle (`operator_exit`; its Captures stay; a Guest Cycle on Keepsake stays completed), closes the Guest Screen, releases the camera and the wake lock, and returns the panel to the normal Event list.
 
 **From the Guest Screen** (backup, and the only way in single-screen setups):
 
-1. **Hold.** A discreet control in the top-right corner of every Guest Screen view needs a 3-second press-and-hold. It shows a progress ring; with reduced motion, it shows progress as text.
+1. **Hold.** A discreet control in the top-right corner of every Guest Screen view needs a 3-second press-and-hold; from the keyboard, Enter or Space held for 3 seconds on the focused control. It shows a progress ring; with reduced motion, it shows progress as text.
 2. **PIN.** A PIN dialog with an on-screen digit pad (no system keyboard).
 3. **Wrong PIN.** Five wrong attempts lock the dialog for 30 seconds, with a visible countdown.
 4. **Correct PIN.** The Event ends exactly as with `END EVENT`, and the Event list shows on the Operator Screen.
@@ -557,6 +556,7 @@ Guest gallery view models carry only image URLs and alt text, never metadata, so
 - **Images.** The UI receives URLs, never file paths:
   - `https://media.fotohavn/events/<eventId>/guest-cycles/<cycleId>/<file>?v=<sha>` serves saved artifacts read-only.
   - `https://media.fotohavn/thumbnails/<sourceId>-<sha8>-<width>.jpg` serves derived thumbnails for both Event Gallery views.
+  - `media.fotohavn` serves files only from inside `Data/Events` and `Data/Cache/thumbnails`, and refuses path traversal.
   - `https://preview.fotohavn/<key>.png` serves composed previews from an in-memory cache.
   - `https://app.fotohavn/` serves the UI bundle.
 
@@ -579,7 +579,7 @@ Guest gallery view models carry only image URLs and alt text, never metadata, so
 
 ### Rules
 
-- The Event store is the only code that writes `Data/`. Other adapters hand it bytes.
+- The Event store is the only writer of Event data: `fotohavn.db`, `Events/`, and `Cache/thumbnails/`. The host owns `logs/` and `webview2-user-data/`. Other adapters hand the Event store bytes.
 - **Order of operations:** write to `.staging/<uuid>.tmp`, flush to disk, rename to the final name, then insert the row. The committed row is the point of truth; a file is never referenced before its row exists.
 - SQLite runs in WAL mode with full sync, foreign keys on, and a busy timeout. An integrity check runs at startup.
 - Schema versions use `PRAGMA user_version` and ordered SQL migration files embedded in `FotoHavn.Storage`.
@@ -662,9 +662,9 @@ CREATE TABLE photo_strips (
 It runs before the Event list appears:
 
 1. Delete every `.staging/` file.
-2. Delete files that have no row (orphans from a crash between rename and insert).
-3. Rows whose file is missing or whose hash or size differs: log the problem, set `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files.
-4. Unfinished Guest Cycles: set `ended_at` and `end_reason = 'app_closed'` (D17).
+2. Delete files under `Data/Events/**` that have no row (orphans from a crash between rename and insert). Thumbnails in `Data/Cache/` are derived and handled in step 7; `fotohavn.db`, `logs/`, and `webview2-user-data/` are never touched.
+3. Rows whose file is missing or whose hash or size differs: log the problem, set `ended_at` and `end_reason = 'unrecoverable'` on an unfinished cycle, and keep its other files.
+4. Guest Cycles that still have no `end_reason`: set `ended_at` and `end_reason = 'app_closed'` (D17).
 5. Guest Cycles and Events marked `deleting_at`: finish deleting their folders and thumbnails, then delete their rows.
 6. Delete files of `discarded` Captures.
 7. Delete thumbnails whose source no longer exists.
@@ -692,7 +692,7 @@ ADR 0008 records these decisions.
 - **Windows.**
   - The Operator window opens maximized on the primary display; the operator may move or resize it.
   - The Guest window is borderless, covers the bound display's full bounds (not just the work area), and stays topmost in field builds.
-  - Both declare per-monitor DPI awareness (v2), so each scales correctly on displays with different scaling.
+  - Both declare per-monitor DPI awareness (v2), so each scales correctly on displays with different scaling. The Operator window follows Windows display scaling. The Guest window's WebView2 zoom factor is set to 1 / (display scale), so the guest layout works in the display's physical pixels (section 13, Scaling).
 - **WebView2.** Both windows share one `CoreWebView2Environment` and user-data folder. Each has its own controller, bridge, and role. The Guest window's WebView2 is created at Start Event and disposed at end, so its process can't leak guest content into the next Event.
 - **Input.** Touch must map to the guest display through Windows "Tablet PC Settings → Setup", documented in `local-development-guide.md`. The Guest window takes touch without needing keyboard focus, so the operator using the mouse on the Operator Screen doesn't interrupt guests.
 - **Operator display loss.** If the Operator Screen's display disconnects, Windows moves the Operator window to a remaining display. If that's the guest display, the Operator window sits behind the topmost Guest Screen until the Event ends (D38 behavior).
@@ -750,15 +750,16 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | Guest touch targets of at least 64×64; the shutter at least 112×112; operator targets at least 48×48 | Standing distance and touch. The brand minimum is 44; raising it is allowed. |
 | Guest reading text of at least 20 px at 1280×720, scaling fluidly to 2560×1440 | Booth readability takes priority over editorial density ([`brand/mediums.md`](../../brand/mediums.md)). |
 | Phase timers with a warning and `MORE TIME` | D18; see [Conflicts and resolutions](#4-conflicts-and-resolutions). |
-| No scrolling on guest screens | Kiosk rule: every guest step fits the viewport at all four resolutions. |
+| No scrolling on guest screens, except the guest gallery's horizontal strip row | Kiosk rule: every guest step fits the viewport at all four resolutions. The guest gallery's row of Photo Strips is the only region that scrolls, horizontally by touch. |
+| A discreet 3 s press-and-hold exit on the Guest Screen | It's an operator-only control, not a guest task; guests never need it. Enter or Space held for 3 s on the focused control is the keyboard path. |
 | The live preview is the only dark surface on the Photographs step | The camera area works best on Dark Walnut; this still fits the "one dark band" rule. |
 
 ### Scaling
 
-- **Reference.** The reference frame is 1280×720 effective pixels. Role sizes grow fluidly with `clamp()` between 1280 and 2560 wide (for example, Body 20→26 px, Heading 56→84 px, Display 88→132 px).
+- **Reference.** The reference frame is 1280×720 physical pixels on the Guest Screen. Role sizes grow fluidly with `clamp()` between 1280 and 2560 wide (for example, Body 20→26 px, Heading 56→84 px, Display 88→132 px).
 - **Grid.** 12 columns with gutters from 24 to 80, as in [`brand/layout.md`](../../brand/layout.md).
-- **Fit.** Each guest step must fit without scrolling or overlap at all four resolutions and at Windows display scaling of 100%, 125%, and 150%.
-- **Separate screens.** The Operator Screen and Guest Screen scale independently on their own displays, and the guest rules (64 px targets, no scrolling) apply only to the Guest Screen. The Operator Screen follows the operator target sizes and may scroll.
+- **Fit.** Each guest step must fit without scrolling or overlap at all four resolutions and at Windows display scaling of 100%, 125%, and 150%. The Guest Screen ignores Windows display scaling for layout: the host sets the guest WebView2 zoom factor to 1 / (display scale), so the guest layout always works in the display's physical pixels, and the four resolutions are physical.
+- **Separate screens.** The Operator Screen and Guest Screen scale independently on their own displays, and the guest rules (64 px targets, no page scrolling) apply only to the Guest Screen. The Operator Screen follows Windows display scaling and the operator target sizes, and may scroll.
 
 ### Screen compositions
 
@@ -771,15 +772,16 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | Filters | Strip preview on the left; option list of Looks with thumbnails on the right | Option list, print object, primary action |
 | Keepsake | Centered single-subject moment: the strip lifted with the `print` shadow, revealed like paper developing (≤ 600 ms) | Statement heading (centered), print object |
 | Operator Assistance | One Dark Walnut band with Off-white type; `RETRY` | Statement heading, primary action (inverted) |
-| Event list | Off-white canvas, left-aligned heading, rows with Hairline rules | Statement heading, option-list rows, primary action |
-| Running-Event panel | A Warm Ivory band pinned above the Event list with a 2 px Muted Brass left rule, the Event name in the Subheading role, facts as Meta labels with values, and `OPEN GALLERY`, `RETRY`, and `END EVENT` actions. During Operator Assistance it adds an alert line in Ebony with the reason (never color alone). | Eyebrow, inline status, primary and text actions |
+| Event list | Off-white canvas, left-aligned heading, rows with Hairline rules; `NEW EVENT →` is the primary action, except during Operator Assistance | Statement heading, option-list rows, primary action |
+| Running-Event panel | A Warm Ivory band pinned above the Event list, and only there, with a 2 px Muted Brass left rule, the Event name in the Subheading role, facts as Meta labels with values, and `OPEN GALLERY`, `RETRY`, and `END EVENT` as secondary or text actions. During Operator Assistance it adds an alert line in Ebony with the reason (never color alone), and `RETRY` becomes the single primary action while `NEW EVENT` drops to a secondary action. `RETRY` is the primary action only here. | Eyebrow, inline status, primary, secondary, and text actions |
+| Operator Assistance alert elsewhere | On every other Operator Screen view (Event setup, galleries), an inline status line in Ebony with the reason and a text link back to the running-Event panel; the view's primary action doesn't change | Inline status, text link |
 | Single-screen placeholder | Shown in the Operator window only if the Guest Screen ever sits behind it: "The booth is running on this screen." | Statement heading |
 | Identify displays overlay | Off-white panel centered on each display with the display number in the Display role and its name in the Meta role | Statement heading |
 | Event Gallery | Off-white canvas; eyebrow with the Event name; Photo Strips at native proportion in a flowing row layout with captions in the Meta role, not uniform square cards | Eyebrow, statement heading, media frame, print objects |
 | Guest Cycle detail | The Photo Strip as a print object on the left; its Captures in a Cream Paper media frame on the right; metadata and actions below | Print object, media frame, text links |
 | Guest gallery | Warm Ivory surface; centered "Look at *you.*" heading (a single-subject moment); Photo Strips as print objects at native proportion with the `print-contact` shadow in a horizontally scrolling row sized for touch; `BACK TO START ←` | Statement heading (centered), print objects, text link |
 | Guest strip detail | The strip lifted with the `print` shadow, its arranged Captures beside it in a media frame, `CLOSE` | Print object, media frame, text link |
-| Event setup | Left-aligned sections with eyebrows; inputs with a 4 radius and Hairline borders; Template and Look pickers reuse option-list rows with checkboxes and a default radio | Eyebrow, inputs, option list |
+| Event setup | Left-aligned sections with eyebrows; inputs with a 4 radius and Hairline borders; Template and Look pickers reuse option-list rows with checkboxes and a default radio; `SAVE` is the primary action and `SAVE AND START` a secondary action, disabled with its reason while another Event runs | Eyebrow, inputs, option list, primary and secondary actions |
 | Dialogs (PIN, confirm) | Off-white panel, 8 radius, Hairline border, Ebony scrim at about 32% | Primary and secondary actions |
 
 ### Components to build
@@ -799,7 +801,7 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | `PinPad` | On-screen digits, masked entry, lockout state |
 | `Dialog`, `ConfirmDialog` | Focus trap, Escape to cancel, return focus |
 | `InlineStatus`, `Notice`, `PhaseTimerWarning` | Polite live regions; no toasts that disappear before they can be read; the warning carries `MORE TIME` |
-| `StartOverAction` | Quiet text link with confirmation dialog (`START OVER` / `KEEP GOING`) |
+| `StartOverAction` | Quiet text link with confirmation dialog (`START OVER` / `KEEP GOING`) on Template, Photographs, and Filters only |
 | `GuestCycleList`, `GuestCycleDetail` | One component pair with `operator` and `guest` modes. Strips at native proportion, paged loading, detail with Captures. The guest mode receives a reduced view model with no metadata or actions. |
 | `RunningEventPanel` | Read-only facts with text states, alert line, and actions; updates live |
 | `DisplayPicker` | Option-list rows with display name, resolution, position, and an "Operator Screen" marker; `IDENTIFY DISPLAYS` action |
@@ -854,7 +856,7 @@ flowchart TB
 | `ui/src` logic: brain client, view-model mapping, hooks, utilities, component behavior | Vitest + Testing Library | 80% |
 | `FotoHavn.Camera.Windows`, `FotoHavn.Host.Windows`, `FotoHavn.Host.Headless` | Integration and end-to-end | Excluded from the gate |
 
-- **.NET coverage.** Collected by `dotnet test` with `Microsoft.Testing.Extensions.CodeCoverage` in Cobertura format. ReportGenerator, pinned as a local .NET tool in `app/.config/dotnet-tools.json`, merges the reports and fails below the thresholds through its `minimumCoverageThresholds` setting, filtered to the four gated assemblies. M1 confirms the exact flags and records them in `app/AGENTS.md`.
+- **.NET coverage.** Collected by `dotnet test` with `Microsoft.Testing.Extensions.CodeCoverage` in Cobertura format. ReportGenerator, pinned as a local .NET tool in `app/.config/dotnet-tools.json`, merges the reports and fails below the thresholds through its `minimumCoverageThresholds` setting, filtered to the four gated assemblies. Each of the four gated assemblies must individually reach 90% line and branch coverage; the merged threshold flag alone isn't enough, so the check reads each assembly in the per-assembly summary or runs ReportGenerator once per assembly ([ADR 0007](adr/0007-unit-first-testing-with-real-camera-end-to-end.md)). M1 confirms the exact flags and records them in `app/AGENTS.md`.
 - **UI coverage.** Vitest's v8 coverage with `thresholds` in `vitest.config.ts`, so `npm run test:coverage` fails by itself.
 - **Exclusions.** Generated files (`generated.ts`, migrations as data, `brand-tokens.css`), entry points (`main.tsx`, `Program.cs`), and fixtures. Each exclusion is listed with its reason in the config file, and adding one requires a reason in review.
 - **Gate timing.** The gates are on from M2. M1 has placeholder code only, so its gate checks that coverage is collected and reported.
@@ -1061,11 +1063,11 @@ The webcam adapter (M5) comes before the operator screens (M6) because starting 
 ### M0: decisions and domain docs (S)
 
 Tasks:
-- [ ] Write ADRs 0003–0006 (status Accepted) from sections 5, 10, 11, and 12; ADR 0007 for the testing strategy in section 14 (real-camera end-to-end, E2E build hooks, coverage gates); and ADR 0008 for the Operator and Guest Screens on bound displays (D32–D38, section 11).
-- [ ] Draft the new `app/CONTEXT.md` (section 6) and `app/DESIGN.md` (section 13), including the Brand interpretation section and its departures.
-- [ ] Draft the new `app/AGENTS.md`:
+- [x] Write ADRs 0003–0006 (status Accepted) from sections 5, 10, 11, and 12; ADR 0007 for the testing strategy in section 14 (real-camera end-to-end, E2E build hooks, coverage gates); and ADR 0008 for the Operator and Guest Screens on bound displays (D32–D38, section 11).
+- [x] Draft the new `app/CONTEXT.md` (section 6) and `app/DESIGN.md` (section 13), including the Brand interpretation section and its departures.
+- [x] Draft the new `app/AGENTS.md`:
   - **Load order:** root context, `app/CONTEXT.md`, ADRs, `app/DESIGN.md`, `brand/`.
-  - **Boundaries:** the brain owns rules, the UI owns rendering, and the Event store is the only writer.
+  - **Boundaries:** the brain owns rules, the UI owns rendering, and the Event store is the only writer of Event data.
   - **Verification:** the [verification procedure](#verification-procedure-for-the-implementing-agent) as instructions, with the exact commands and flags, including "end-to-end not run: no camera" reporting.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
@@ -1073,6 +1075,13 @@ Verification. The implementing agent writes and runs these through the [verifica
 - `scripts/verify-agent-docs.ps1` passes once M1 lands the deletions with these documents.
 - No unit or end-to-end tests yet.
 
+Verification record (M0):
+- **Date and commit:** 2026-10-13, the M0 commit on `feature/desktop-booth-rebuild` (base `a9858a4`).
+- **Machine:** developer workstation (Windows, .NET SDK 10.0.401, Node 24.20.0). No camera or display was needed.
+- **Review:** an independent review found 2 blocking and 8 non-blocking issues (Camera failure scope, verification phasing, per-assembly coverage, reconciler scoping, Phase Timer restarts, primary actions, and others). All were fixed, and a re-review recorded "M0 gate: PASS". Its follow-up items were also fixed: the Event data writer scope, Guest Cycle completion, Retry outside a Guest Cycle, storage failures outside a Guest Cycle, the section 7 state diagram, and per-assembly coverage in section 14.
+- **Questions:** Q9–Q17 were raised and confirmed by the owner (section 18).
+- **`scripts/verify-agent-docs.ps1`:** 18 passed, 0 failed. It still passes against the old app tree; the contract test is rewritten in M1 with the deletions. A relative link and anchor check over the changed documents found 0 broken links.
+- **Not proven:** none for M0. The contract test's assertions about the new app layout are proven in M1.
 ### M1: teardown, scaffold, and test harness (M)
 
 Tasks:
@@ -1141,7 +1150,7 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/host/navigation-guard`: script navigation to an external URL and `window.open` are blocked in both windows.
   - `regression/host/ui-crash-recovery`: `test.crashUi('guest')` and then `test.crashUi('operator')`; each UI returns within 5 s at the same revision, and the other window is unaffected.
   - `regression/host/protocol-mismatch`: a UI started with a wrong protocol version shows the fixed error screen.
-  - `regression/host/media-hosts`: `media.fotohavn` serves files only inside `Data/Events` and refuses path traversal.
+  - `regression/host/media-hosts`: `media.fotohavn` serves files only inside `Data/Events` and `Data/Cache/thumbnails`, and refuses path traversal.
   - `regression/host/physical-displays` (`@physical-displays`): with two real displays, the Guest window covers the second display's full bounds.
 - **Manual:**
   - The Operator window maximizes on the primary display.
@@ -1197,7 +1206,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Tasks:
 - [ ] Spike S1 first (preview frame transport); record the result and the frame-rate floor in ADR 0004.
-- [ ] Policies in `FotoHavn.Core`: format selection with fallback, frame freshness and staleness, first-frame-after-timestamp selection, and the failure classification.
+- [ ] Policies in `FotoHavn.Core`: format selection with fallback, frame freshness and staleness, first-frame-after-timestamp selection, and the failure classification, including Windows camera privacy denial (`E_ACCESSDENIED`) as Not available with "Camera access is off in Windows privacy settings."
 - [ ] Adapter: device discovery and watcher; open with exclusive control; one long-lived frame reader; BGRA conversion; mirroring and JPEG encoding.
 - [ ] Preview frames to the shared buffer (WPF) and WebSocket (headless), with one frame in flight.
 - [ ] Fake camera with failure controls for unit and headless tests.
@@ -1222,6 +1231,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 - **Manual:**
   - Unplug and replug a USB webcam.
   - Open the Windows Camera app first to confirm the "In use by another app" state.
+  - Turn off camera access in Windows privacy settings to confirm Not available with "Camera access is off in Windows privacy settings."
   - Compare the preview frame rate on the booth laptop with the developer machine.
 
 ### M6: operator screens, Event setup, and running an Event (L)
@@ -1316,9 +1326,9 @@ Verification. The implementing agent writes and runs these through the [verifica
 - **Unit (.NET):**
   - Every row of the [Steps](#steps), [Phase timers](#phase-timers-d18), and [failures](#failures-inside-a-guest-cycle) tables.
   - The ported website cases (retake transactions, stale operations, swap semantics, Template changes keeping Captures, larger Templates needing filled windows).
-  - Skipped steps; back navigation restarting timers.
-  - Start Over at every step, including while the timer runs out during the confirmation.
-  - Timers paused during capture and Operator Assistance.
+  - Skipped steps; back navigation and stopping a capture sequence restarting timers.
+  - Start Over at Template, Photographs, and Filters, including while the timer runs out during the confirmation, and its absence on Keepsake.
+  - Timers paused during capture and Operator Assistance, and resumed afterwards.
   - `MORE TIME`.
   - The FsCheck safety invariants and the progress property (an untouched cycle reaches a committed Photo Strip).
 - **Unit (UI):** drag and Move parity, crop-guide geometry (ported cases), countdown and flash rendering in both motion modes, live-region announcement counts, and the timer warning.
@@ -1327,8 +1337,8 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `smoke/guest-cycle-touch`: with the real camera and default settings, use touch only: Start → Template → take four photographs → swap two by drag → Retake one and accept → choose a Look → Keepsake → Start. The database has one completed Guest Cycle, four kept Captures, one discarded file deleted, and a Photo Strip PNG of the Template's native size.
   - `regression/guest/keyboard-only`: the same cycle with the keyboard only, using Move instead of drag.
   - `regression/guest/untouched-runs-through`: with `test.setClockScale(10)`, tap `STEP INSIDE` only; the cycle completes with defaults, and its record matches a guest-finished cycle (D28).
-  - `regression/guest/more-time`: the warning appears in the last 20 s, `MORE TIME` restarts the phase, and the announcement is made once.
-  - `regression/guest/start-over`: Start Over from each step; saved Captures stay, there's no Photo Strip, and `end_reason` is `started_over`.
+  - `regression/guest/more-time`: the warning appears in the last 20 s, `MORE TIME` restarts the phase, and the announcement is made once. The Keepsake step shows no warning and no `MORE TIME`.
+  - `regression/guest/start-over`: Start Over from Template, Photographs, and Filters; saved Captures stay, there's no Photo Strip, and `end_reason` is `started_over`.
   - `regression/guest/template-change`: go back to Template after Captures, switch to Butter Gingham (3 windows) and back to a 4-window Template; Captures are kept and an empty window blocks continuing.
   - `regression/guest/skipped-steps`: an Event with one Template and one Look skips both steps.
   - `regression/guest/camera-fault-mid-sequence`: inject `failed` after Capture 2 → Operator Assistance; clear, `RETRY`, and the sequence continues from window 3.
@@ -1421,4 +1431,20 @@ Verification. The implementing agent writes and runs these through the [verifica
 No questions are open. New questions found during a milestone go here, each with a proposed default and the milestone that needs the answer.
 
 Resolved on 2026-10-13: Q1 → D22, Q2 → D18 and D21, Q3 → D23, Q4 → D24, Q5 → D25, Q6 → D26, Q7 → D27, Q8 → D28.
+
+Resolved during M0 (2026-10-13). Each is a proposed default adopted while drafting the M0 documents and confirmed by the owner on 2026-10-13.
+
+- **Q9** How does the operator reach the running Event's gallery during an Active Event? → Live from the running-Event panel with `OPEN GALLERY` (D35), with no hold or PIN. Relied on by M6 and M9.
+- **Q10** Which folders may `media.fotohavn` serve? → Only files inside `Data/Events` and `Data/Cache/thumbnails`, refusing path traversal. Relied on by M2.
+- **Q11** Which guest regions may scroll? → No guest screen scrolls as a page; only the guest gallery's strip row scrolls, horizontally by touch. Relied on by M3 and M9.
+- **Q12** How is the 3 s exit hold justified and reached by keyboard? → A declared departure in `app/DESIGN.md` (operator-only control, not a guest task); Enter or Space held for 3 s on the focused control. Relied on by M6.
+- **Q13** Does the Keepsake step show the Phase Timer warning? → No warning or `MORE TIME` on Keepsake, because the Photo Strip is already saved; the other timed phases keep the 20-second warning. Relied on by M8.
+- **Q14** Are the four guest resolutions physical or effective pixels? → Physical: the host sets the guest WebView2 zoom factor to 1 / (display scale); the Operator Screen follows Windows scaling and may scroll. Relied on by M2 and M3.
+- **Q15** Does Start show an eyebrow as well as the wordmark? → The `FOTOHAVN` wordmark only. Relied on by M8.
+- **Q16** How does Event setup report a camera blocked by Windows privacy settings (`E_ACCESSDENIED`)? → Not available with "Camera access is off in Windows privacy settings." Relied on by M5.
+- **Q17** Who writes the missing guest copy (Start unavailable, fatal view, stop, review, accept Retake, cancel Move, and placement of `START OVER` and the timer warning)? → Written from [`brand/voice.md`](../../brand/voice.md) during M8 and recorded in `app/DESIGN.md`. Relied on by M8.
+
+D35's wording was clarified during M0: while an Event runs, the operator can't edit, delete, or restart the running Event, or start any Event; other Events stay editable.
+
+D21's wording was clarified during M0: `START OVER` appears on the Template, Photographs, and Filters steps, not on Keepsake, because a Guest Cycle is recorded as completed when its Photo Strip is committed and the Keepsake step only displays it.
 
