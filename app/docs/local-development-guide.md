@@ -93,6 +93,8 @@ npm run test:fixtures
 
 Install Chromium once with `npx playwright install chromium`.
 
+The preview server listens on port 4173 with `--strictPort`. When another checkout or worktree already uses that port, set `FOTOHAVN_FIXTURE_PORT` for the run (`$env:FOTOHAVN_FIXTURE_PORT = "4174"; npm run test:fixtures`); `playwright.config.ts` and `vite.config.ts` read it, and an invalid value fails the run. The headless lane starts its own host on a random port and is unaffected.
+
 ### 4. End-to-end project
 
 In `e2e/`:

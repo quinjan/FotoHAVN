@@ -16,7 +16,21 @@ src/components/<Name>/
 ```
 
 - Import another component through its `index.ts` (`../PrimaryAction/index.ts`); a component's own tests and fixtures import `./<Name>.tsx`.
-- `shared/` holds internals, not components: `ActionArrow` (the Phosphor Light arrow after an action label), `cx`, `guardDisabled`, and fixture-only helpers (`FocusFirst`, `noop`, `fixtureLayout.module.css`). Use them; don't change them in a component change. If you need something new there, add a new file.
+- `shared/` holds internals, not components. One helper per job; look here before writing your own:
+
+  | File | Use |
+  | --- | --- |
+  | `cx.ts` | Joins class names |
+  | `guardDisabled.ts` | Makes an `aria-disabled` action swallow activation |
+  | `ActionArrow.tsx` | The Phosphor Light arrow after an action label |
+  | `field.tsx`, `field.module.css` | Operator input chrome: label, requirement mark, help and error messages with their ids (`useFieldIds`, `describedBy`, `FieldMessages`), and the `.control` box |
+  | `ChoiceMark.tsx`, `choice.module.css` | The checkbox and radio marks shared by `Checkbox`, `Radio`, `OptionList`, and `SegmentedChoice` |
+  | `roving.ts` | Arrow-key stepping and the roving tab stop for radio groups and option lists |
+  | `reducedMotion.ts` | `usePrefersReducedMotion()`, for behavior that changes (not CSS) |
+  | `secondsText.ts` | "1 second" / "N seconds" for announcements and messages |
+  | `fixtureHelpers.tsx`, `fixtureOverlayFrame.tsx`, `fixturePhotographs.ts`, `fixtureLayout.module.css`, `formFixture.module.css` | Fixture-only: `FocusFirst`, `noop`, the overlay frame, stand-in photographs, and layouts |
+
+  Use them; don't change them in a component change. If you need something new there, add a new file, and never write a second copy of a helper that exists.
 - There is no registry. The gallery and the fixture lane find `*.fixtures.tsx` by glob, so adding your folder is enough and parallel work never touches a shared list.
 
 ## Props and markup
@@ -39,19 +53,21 @@ Use only `var(--…)` tokens for colors, type, space, radius, stroke, shadow, mo
 | --- | --- | --- |
 | Ink, secondary ink, rules, accent, focus, action fill and label | `--app-tone-*` | `app-tokens.css`; set by the surface's `data-tone` |
 | Surfaces when you own one | `--semantic-surface-*`, plus `data-tone="light" \| "paper" \| "dark"` on the element | brand + app |
-| Type size by role | `--app-text-<role>` (`eyebrow`, `meta`, `action`, `supporting`, `body`, `body-lg`, `subheading`, `heading-sm`, `heading`, `heading-lg`, `display`) | app; brand sizes on the Operator Screen, the kiosk scale on the Guest Screen |
+| Type size by role | `--app-text-<role>` (`eyebrow`, `meta`, `action`, `supporting`, `body`, `body-lg`, `subheading`, `heading-sm`, `heading`, `heading-lg`, `display`); the countdown numeral alone uses `--app-type-countdown` | app; brand sizes on the Operator Screen, the kiosk scale on the Guest Screen |
 | Family, weight, tracking, line height, case by role | `--typography-<role>-font-family`, `-font-weight`, `-letter-spacing`, `-line-height`, `-text-transform` | brand |
 | Minimum target | `--app-target` (48 operator, 64 guest); `--app-target-shutter` (112) | app |
 | Icon size | `--app-icon-action`, `--app-icon-control` | app |
 | Space | `--space-<n>` (brand scale); `--app-space-fluid-<n>` for guest compositions that grow to 2560 | brand + app |
 | Page gutters, grid split, top band, stage | `--app-gutter`, `--app-grid-columns`, `--app-split-print`, `--app-split-options`, `--app-region-top`, `--app-region-stage` | app |
-| Radius, stroke, shadow | `--radius-*`, `--stroke-*`, `--shadow-print`, `--shadow-print-contact` | brand |
+| Radius, stroke, shadow | `--radius-*`, `--stroke-*`, `--shadow-print`, `--shadow-print-contact`; the 2 px Muted Brass rule (selected row, running-Event panel, current-step underline) is `--app-stroke-rule-accent` | brand + app |
 | Motion | `--motion-duration-*`, `--motion-easing-*`, `--motion-distance-reveal-max`, `--app-motion-nudge` | brand + app |
 | Z-order | `--app-z-*` | app |
 | Scrim, selection | `--app-scrim`, `--app-selection` | app |
 
 - Size for both roles at once: use the role-resolved `--app-text-*` and `--app-target` tokens, never a fixed pixel size, so the same component is right on both screens. The role comes from `data-fotohavn-role` on `<html>` (or on a gallery preview).
 - Read inks from `--app-tone-*`, never from primitives, so your component inverts on a dark surface without a prop. Respect the contrast pairs in `brand/color.md`: Soft Brown never on Cream Paper (`data-tone="paper"` switches the secondary ink), Antique Metal only on dark.
+- A control whose border is its only boundary (text inputs, select, PIN keys, segment, checkbox, radio, switch) draws it in `--app-tone-ink-secondary`, which is at least 3:1 against its surface (WCAG 1.4.11). `--app-tone-rule` (Hairline) is for decoration: dividers, row separators, panel edges, and disabled controls.
+- Errors are never color alone: ink text with a Phosphor warning icon, a heavier border, `aria-invalid`, and `aria-describedby` (see `shared/field.tsx`).
 - Component-local custom properties are fine when derived from tokens (`--shutter-size: calc(var(--app-target-shutter) * 1.25)`). Don't edit `app-tokens.css`, `global.css`, or `brand-tokens.css` in a component change; propose a new app token in your report instead.
 - Hover styles go inside `@media (hover: hover)`; give `:active` the same feedback for touch.
 - **Motion transforms go inside `@media (prefers-reduced-motion: no-preference)`.** `global.css` already makes every transition and animation 1 ms under reduced motion; transforms (translate, scale) must not apply at all there. Content never disappears with the motion.

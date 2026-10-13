@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { SecondaryAction } from "../SecondaryAction/index.ts";
 import { cx } from "../shared/cx.ts";
 import styles from "./PhaseTimerWarning.module.css";
-import { usePrefersReducedMotion } from "./usePrefersReducedMotion.ts";
+import { usePrefersReducedMotion } from "../shared/reducedMotion.ts";
 
 /**
  * The phases whose Phase Timer warns (implementation plan section 7, D18). Keepsake is deliberately absent: its Photo

@@ -35,6 +35,8 @@ describe("Select", () => {
     const placeholder = within(select).getByRole("option", { name: "Choose a camera" });
     expect(placeholder).toHaveValue("");
     expect(placeholder).toBeDisabled();
+    expect(placeholder).toHaveAttribute("data-placeholder");
+    expect(within(select).getByRole("option", { name: "Logitech BRIO" })).not.toHaveAttribute("data-placeholder");
     expect(select).toBeRequired();
     expect(screen.getByText("Required")).toBeInTheDocument();
   });

@@ -1,6 +1,6 @@
 /* The brand option list: Hairline-separated rows; the selected row in Warm Ivory with a 2 px Muted Brass left rule. */
 .root {
-  --option-rule: calc(var(--stroke-hairline) * 2);
+  --option-rule: var(--app-stroke-rule-accent);
 }
 
 .list {

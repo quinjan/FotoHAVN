@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cx } from "../shared/cx.ts";
 import { usePrefersReducedMotion } from "../shared/reducedMotion.ts";
+import { secondsText } from "../shared/secondsText.ts";
 import styles from "./HoldControl.module.css";
 
 /** How long the operator holds, in milliseconds (app/DESIGN.md: a 3-second press-and-hold). */
@@ -19,10 +20,6 @@ export const holdDurationMs = 3000;
 const tickMs = 50;
 
 export type HoldPhase = "idle" | "holding" | "complete";
-
-function secondsText(seconds: number): string {
-  return seconds === 1 ? "1 second" : `${String(seconds)} seconds`;
-}
 
 export interface HoldControlViewProps {
   readonly phase: HoldPhase;

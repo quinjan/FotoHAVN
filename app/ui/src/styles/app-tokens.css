@@ -23,6 +23,8 @@
   --app-type-heading: clamp(56px, calc(56px + (100vw - 1280px) * 28 / 1280), 84px);
   --app-type-heading-lg: clamp(72px, calc(72px + (100vw - 1280px) * 36 / 1280), 108px);
   --app-type-display: clamp(88px, calc(88px + (100vw - 1280px) * 44 / 1280), 132px);
+  /* The countdown numeral over the live preview, sized to read from 1.5 m */
+  --app-type-countdown: clamp(160px, calc(160px + (100vw - 1280px) * 160 / 1280), 320px);
 
   /* Guest icon sizes: beside action labels, and primary camera controls (brand: 18-20 beside text, 28-36 camera) */
   --app-icon-action-guest: clamp(24px, calc(24px + (100vw - 1280px) * 8 / 1280), 32px);
@@ -59,6 +61,9 @@
   --app-z-timer-warning: 40;
   --app-z-dialog: 50;
   --app-z-exit-hold: 60;
+
+  /* Muted Brass left rule on selected rows and the running-Event panel; current-step underline */
+  --app-stroke-rule-accent: 2px;
 
   /* Motion helpers */
   --app-motion-nudge: 2px; /* An action arrow's hover nudge (brand motion.md) */

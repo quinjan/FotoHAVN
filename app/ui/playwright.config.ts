@@ -1,6 +1,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+import { fixturePort } from "./scripts/fixture-port.ts";
 
 // `npm run test:fixtures` runs two Chromium projects against the E2E bundle (dist-e2e/), which the web server builds and
 // previews; the field build in dist/ is left alone. The browser comes from `npx playwright install chromium`.
@@ -9,7 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
 //   dist-e2e/ to an operator and a guest page over its WebSocket bridge.
 const uiDir = dirname(fileURLToPath(import.meta.url));
 const resultsDir = resolve(uiDir, "../output/ui-fixtures");
-const port = 4173;
+// FOTOHAVN_FIXTURE_PORT (default 4173) moves the preview server so parallel worktrees can run the lane side by side.
+const port = fixturePort();
 
 export default defineConfig({
   testDir: "tests",

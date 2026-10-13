@@ -33,6 +33,7 @@ These are not departures. They record how the booth meets a brand rule where the
 | Avoid "kiosk" ([voice.md](../brand/voice.md#vocabulary)). | "Kiosk" appears only in code and internal documents, never in user-facing copy. |
 | Event designs take priority inside a Photo Strip ([mediums.md](../brand/mediums.md#physical-booth-and-event-signage)). | Template artwork may carry its own colors inside the Photo Strip. The interface around it uses the palette only. |
 | Camera-flow icons include switch camera and mirror toggle ([iconography.md](../brand/iconography.md)). | Guests get no camera switch, mirror, countdown, or import controls. The operator sets mirror and countdown per Event. |
+| Essential non-text elements, such as a control's boundary, reach at least 3:1 ([accessibility.md](../brand/accessibility.md#contrast)). | A control whose border is its only boundary (text inputs, text area, date, select, PIN keys, segments, checkbox, radio, switch) draws it in Soft Brown instead of Hairline: 5.33:1 on Off-white and 4.77:1 on Warm Ivory (Hairline is 1.62:1 and 1.45:1). On Cream Paper the secondary ink is the derived `#52463D`; on dark it is Antique Metal. Hairline stays for decoration: dividers, row separators, and panel edges. |
 
 ## What the booth inherits
 
@@ -85,7 +86,8 @@ These live only in `ui/src/styles/app-tokens.css`.
 | `--app-type-heading-sm` | 44px → 64px | Guest small headings |
 | `--app-type-heading` | 56px → 84px | Guest step headings |
 | `--app-type-heading-lg` | 72px → 108px | Guest single moments: Keepsake, Operator Assistance, fatal |
-| `--app-type-display` | 88px → 132px | Start statement and countdown numerals |
+| `--app-type-display` | 88px → 132px | Start statement |
+| `--app-type-countdown` | 160px → 320px | The countdown numeral over the live preview, sized to read from 1.5 m; `clamp(160px, calc(160px + (100vw - 1280px) * 160 / 1280), 320px)` |
 | `--app-icon-action-guest` / `--app-icon-control-guest` | 24px → 32px / 36px → 48px | Guest icons beside action labels / on primary camera controls (operator: 20px / 28px) |
 | `--app-space-fluid-16` … `-96` | 16 → 24, 24 → 36, 32 → 48, 48 → 72, 64 → 96, 96 → 144 | Brand space steps that grow 1.5× by 2560, for guest compositions |
 | `--app-action-padding-block` / `-inline` | 14px / 22px (operator); 18px → 24px / 32px → 48px (guest) | Action padding |
@@ -96,7 +98,7 @@ Fluid values interpolate linearly by viewport width between the two widths, for 
 
 **Tones.** A surface sets `data-tone="light"` (Off-white, Warm Ivory; the default), `"paper"` (Cream Paper), or `"dark"` (Dark Walnut, Ebony). Components read the inks from `--app-tone-ink`, `-ink-secondary`, `-rule`, `-accent`, `-focus`, `-action-fill`, `-action-fill-emphasis`, `-action-label`, `-wash`, and `-surface`, so they invert on dark without a prop and keep the contrast pairs: on paper the secondary ink is the derived `#52463D`, never Soft Brown; on dark it is Antique Metal, the rule is Off-white at 28%, and the primary action is Off-white with an Ebony label, Warm Ivory on hover.
 
-**Other app values.** `--app-wordmark-tracking` (−0.05em, the wordmark set as type), `--app-motion-nudge` (2px), `--app-duration-instant` (1ms, reduced motion), `--app-scrim` (Ebony 32%), `--app-selection` (Muted Brass 24%), `--app-measure-prose` (65ch), and `--app-measure-supporting` (42ch).
+**Other app values.** `--app-stroke-rule-accent` (2px: the Muted Brass left rule on selected rows and the running-Event panel, and the current-step underline), `--app-wordmark-tracking` (−0.05em, the wordmark set as type), `--app-motion-nudge` (2px), `--app-duration-instant` (1ms, reduced motion), `--app-scrim` (Ebony 32%), `--app-selection` (Muted Brass 24%), `--app-measure-prose` (65ch), and `--app-measure-supporting` (42ch).
 
 ### Targets
 
@@ -159,7 +161,7 @@ From bottom to top. Each layer is a named token; components never set raw `z-ind
 | Guest strip detail | The Photo Strip lifted with the `print` shadow, its arranged Captures beside it in a media frame, and `CLOSE` | Print object, media frame, text link |
 | Dialogs | Start Over confirmation and PIN: Off-white panel, 8 radius, Hairline border, Ebony scrim at about 32% | Primary and secondary actions |
 
-Panorama Four's preview is rotated a quarter turn counterclockwise, as on the website; the saved Photo Strip keeps its native orientation.
+Panorama Four's preview is rotated a quarter turn counterclockwise, as on the website; the saved Photo Strip keeps its native orientation. Panorama Four strips also turn a quarter counterclockwise in the guest gallery and the guest detail; operator views keep native orientation.
 
 ### Operator Screen
 
@@ -168,7 +170,7 @@ Panorama Four's preview is rotated a quarter turn counterclockwise, as on the we
 | Event list | Off-white canvas, left-aligned heading, rows separated by Hairline rules, not cards. `NEW EVENT →` is the view's one primary action, whether or not an Event runs, except during Operator Assistance (see the running-Event panel); row actions are text actions. | Statement heading, option-list rows, primary action |
 | Running-Event panel | A Warm Ivory band pinned above the Event list, and only there, with a 2 px Muted Brass left rule, the Event name in the Subheading role, facts as Meta labels with values, and `OPEN GALLERY` (the running Event's live operator gallery, with no hold or PIN), `RETRY`, and `END EVENT`. Its actions are secondary or text actions, and `NEW EVENT →` stays the one primary action. During Operator Assistance it adds an alert line in Ebony with the reason, never color alone; `RETRY` becomes the single primary action and `NEW EVENT` drops to a secondary action, so the Operator Screen still has one primary action. `RETRY` is the primary action only here, on the panel. | Eyebrow, inline status, primary, secondary, and text actions |
 | Operator Assistance alert elsewhere | On every other Operator Screen view (Event setup, Event Galleries, Guest Cycle detail), an Operator Assistance alert appears as an inline status line in Ebony with the reason, never color alone, and a text link back to the running-Event panel. It doesn't change the view's primary action. | Inline status, text link |
-| Event setup | One screen of left-aligned sections with eyebrows; inputs with a 4 radius and Hairline borders, labels above fields; Template and Look pickers reuse option-list rows with checkboxes and a default radio. `SAVE` is the view's one primary action; `SAVE AND START` is a secondary action, disabled with "End the running Event to start another." while another Event runs. | Eyebrow, inputs, option list, primary and secondary actions |
+| Event setup | One screen of left-aligned sections with eyebrows; inputs with a 4 radius and Soft Brown borders (3:1), labels above fields; Template and Look pickers reuse option-list rows with checkboxes and a default radio. `SAVE` is the view's one primary action; `SAVE AND START` is a secondary action, disabled with "End the running Event to start another." while another Event runs. | Eyebrow, inputs, option list, primary and secondary actions |
 | Event Gallery | Off-white canvas; eyebrow with the Event name; Photo Strips at native proportion in a flowing row layout, like strips laid on a table, with captions in the Meta role, not uniform square cards | Eyebrow, statement heading, media frame, print objects |
 | Guest Cycle detail | The Photo Strip as a print object on the left; its Captures in a Cream Paper media frame on the right; metadata and actions below | Print object, media frame, text links |
 | Single-screen placeholder | Shown in the Operator window only if the Guest Screen ever sits behind it | Statement heading |
@@ -185,32 +187,33 @@ Static copy lives in the UI; strings with domain meaning, such as Template and L
 | --- | --- |
 | Start | `FOTOHAVN` wordmark (no eyebrow) · "Small room. *Whole other world.*" · "Come a little closer." · `STEP INSIDE →` · text link `SEE THE GOOD COMPANY →` |
 | Template | "Make a little *Moment*" (the website's approved line exactly, including the capital "M") · "Choose your template." · `CONTINUE TO PHOTOGRAPHS →` |
-| Photographs: Camera | "Find your *light.*" · "Let this moment become a memory." · `TAKE PHOTOGRAPHS` |
+| Photographs: Camera | "Find your *light.*" · "Let this moment become a memory." · `TAKE PHOTOGRAPHS` · *Interim copy confirmed in M3:* the shutter shows `STOP` while recording, with the accessible names "Take photographs" and "Stop taking photographs"; the live preview says "Getting the camera ready." while it waits and is named "Live camera preview"; announcements: "Keep holding: N seconds", "Next photograph in N seconds.", "Photograph N of M taken." |
 | Photographs: Arrange | "Drag to rearrange · Tap a photograph to edit" · `RETAKE` · `MOVE` · `TRY AGAIN` · `KEEP ORIGINAL` |
 | Filters | "Find the *feeling.*" · "Choose a filter for your photographs." · `FINISH MY STRIP →` |
 | Keepsake | "A little moment. *Yours.*" · "Keep the moment close." |
 | Step progress | `01 Template` · `02 Photographs` · `03 Filters` · `04 Keepsake` |
-| Phase Timer warning | A visible countdown with `MORE TIME` on Template, Photographs, Filters, and the guest gallery; none on Keepsake |
+| Phase Timer warning | A visible countdown with `MORE TIME` on Template, Photographs, Filters, and the guest gallery; none on Keepsake. *Interim copy confirmed in M3:* the visible line is `N SECONDS LEFT` (`1 SECOND LEFT`); it is announced as "N seconds left. Choose MORE TIME to stay a little longer."; `MORE TIME` is a secondary action. |
 | Start Over | `START OVER` · "Start over? Your photographs stay with the Event, but no strip will be made." · `START OVER` · `KEEP GOING` |
 | Operator Assistance | "A little *interruption.*" · "Please ask the FOTOHAVN team for help." · `RETRY` |
 | Composition failure | "Your strip couldn't be prepared. Try again." · `TRY AGAIN` |
-| Guest gallery | "Look at *you.*" · `BACK TO START ←` · `CLOSE` · alt text "Photo Strip from this Event", with no names or faces described |
+| Guest gallery | "Look at *you.*" · `BACK TO START ←` · `CLOSE` · alt text "Photo Strip from this Event", with no names or faces described. *Interim copy confirmed in M3:* paging `SHOW MORE ↓` with "Loading more photographs."; row action `OPEN`; a guest Capture's alt text is "Photograph from this Event"; Panorama Four strips turn a quarter counterclockwise in the guest gallery and the guest detail (operator views keep native orientation). |
 | Exit hold | Accessible name "Operator exit", with progress as text; operable by pressing and holding Enter or Space for 3 seconds |
+| PIN dialog | *Interim copy confirmed in M3:* title "Operator PIN" · "Enter the Event's Operator PIN to end the Event." · `END EVENT` · `KEEP RUNNING` · messages "4 to 6 digits.", "That PIN isn't right. Try again.", "Too many tries. The pad is locked for now.", "Try again in N seconds." |
 
 ### Operator Screen
 
 | Where | Copy |
 | --- | --- |
 | Event list | `NEW EVENT →` · row actions `START`, `GALLERY`, `EDIT`, `OPEN FOLDER`, `DELETE` · `RUNNING` on the running Event's row · "End the running Event to start another." · empty state "No Events yet." |
-| Event setup | `SAVE` (primary) · `SAVE AND START` (secondary; while another Event runs, disabled with "End the running Event to start another.") · leaving with changes: `SAVE`, `DISCARD CHANGES`, `KEEP EDITING` |
+| Event setup | `SAVE` (primary) · `SAVE AND START` (secondary; while another Event runs, disabled with "End the running Event to start another.") · leaving with changes: `SAVE`, `DISCARD CHANGES`, `KEEP EDITING` (*interim copy confirmed in M3:* the prompt reads "Save your changes?") |
 | Camera field | Checking · Ready · Not available · In use by another app · In use by the running Event · when Windows camera privacy blocks access, Not available with "Camera access is off in Windows privacy settings." |
 | Guest display field | `IDENTIFY DISPLAYS` · "Operator Screen" marker · "The Guest Screen will cover this screen. Use the hold and PIN to return." · "The chosen guest display isn't connected." |
 | Printer field | "No printer" |
 | Guest gallery field | "Turn this on only with the Customer's permission." |
-| Running-Event panel | Guest display Connected or Disconnected · camera Ready or Not available · current step (Start, Template, Photographs, Filters, Keepsake, guest gallery, Operator Assistance) · completed Guest Cycles · time since start · `OPEN GALLERY` · `RETRY` · `END EVENT` |
+| Running-Event panel | Guest display Connected or Disconnected · camera Ready or Not available · current step (Start, Template, Photographs, Filters, Keepsake, guest gallery, Operator Assistance) · completed Guest Cycles · time since start · `OPEN GALLERY` · `RETRY` · `END EVENT`. *Interim copy confirmed in M3:* the labels are `RUNNING`, `GUEST DISPLAY`, `CAMERA`, `CURRENT STEP`, `COMPLETED GUEST CYCLES`, and `TIME SINCE START`. |
 | Operator Assistance alert elsewhere | The reason in text · a text link back to the running-Event panel, its label written in M6 (see [Open items](#open-items)) |
 | End Event | "End this Event? Anyone using the booth will be stopped. Their photographs are kept." · `END EVENT` · `KEEP RUNNING` |
-| Event Gallery | Completed · Started over · Ended by operator · App closed · Unrecoverable · "No Photo Strip" · `OPEN FOLDER` · `DELETE` · empty state "No photographs yet." |
+| Event Gallery | Completed · Started over · Ended by operator · App closed · Unrecoverable · "No Photo Strip" · `OPEN FOLDER` · `DELETE` · empty state "No photographs yet." · *interim copy confirmed in M3:* paging `SHOW MORE ↓` with "Loading more photographs."; row action `OPEN`; Guest Cycle detail fact labels Time, Outcome, Template, Look, and Captures, with "No Captures" when there are none. Operator views keep every Photo Strip in native orientation, Panorama Four included. |
 | Single-screen placeholder | "The booth is running on this screen." |
 
 ## Components
@@ -236,12 +239,16 @@ Static copy lives in the UI; strings with domain meaning, such as Template and L
 | `DisplayPicker` | Option-list rows with display name, resolution, position, and the "Operator Screen" marker; `IDENTIFY DISPLAYS` |
 | `IdentifyOverlay` | Per-display number and name for 3 seconds, taking no focus |
 
+## Errors
+
+The palette has no red, so an error never relies on color. Every field error is ink text under the field, led by a Phosphor Light warning icon, with the control's border made heavier (the ink border plus an inset hairline; two pixels under `forced-colors`), `aria-invalid="true"` on the control, and the message tied to it by `aria-describedby`, ahead of help and the counter. `InlineStatus` carries other alerts the same way: text and an icon, never color alone. Screens move focus to the first invalid field on save (see [Open items](#open-items)).
+
 ## Motion
 
 All timing comes from the brand motion tokens in `brand-tokens.css`.
 
 - **Step changes:** crossfades at `standard` (240 ms) with the editorial ease. No layout shift; a Look change keeps the strip's dimensions.
-- **Countdown:** one numeral per second in the Display role. It is announced once when it starts, not every second.
+- **Countdown:** one numeral per second in the `--app-type-countdown` size (160 px at 1280 wide, 320 px at 2560), set in the Display role's family, so it reads from 1.5 m over the live preview. It is announced once when it starts, not every second.
 - **Capture flash:** one simulated exposure flash per Capture at `flash` (320–380 ms). Never more than three flashes per second.
 - **Keepsake:** the Photo Strip develops in at `reveal` (≤ 600 ms).
 - **Exit hold:** a progress ring over 3 seconds, with the same progress as text.
@@ -253,7 +260,7 @@ All timing comes from the brand motion tokens in `brand-tokens.css`.
 
 These apply [`brand/accessibility.md`](../brand/accessibility.md) to the booth:
 
-- **Contrast:** pairs from [`brand/color.md`](../brand/color.md#contrast-pairs) only. Soft Brown text never sits on Cream Paper, and Antique Metal only appears on dark surfaces.
+- **Contrast:** pairs from [`brand/color.md`](../brand/color.md#contrast-pairs) only. Soft Brown text never sits on Cream Paper, and Antique Metal only appears on dark surfaces. Control boundaries are at least 3:1 (WCAG 1.4.11): text inputs, text area, date, select, PIN keys, segments, checkboxes, radios, and switches use Soft Brown (5.33:1 on Off-white, 4.77:1 on Warm Ivory), Antique Metal on dark (5.81:1 on Dark Walnut). The Hairline's 1.62:1 is for decoration only.
 - **Focus:** a 2 px outline at a 5 px offset, Ebony on light and Off-white on dark.
 - **Order and structure:** keyboard order follows reading order, option lists use arrow keys, and landmarks and headings are in order.
 - **No gesture requirements:** never require drag, hover, or precision to finish a task. Move plus a destination choice does everything drag does, with taps or keys. Phase Timers on guest tasks always offer `MORE TIME`; Keepsake has no task left and no warning (see [Deliberate departures](#deliberate-departures-from-brand)). The exit hold is an operator control with a keyboard path (Enter or Space held for 3 seconds).
@@ -278,5 +285,6 @@ Report which lanes ran, their results, and what stays unproven.
 These are gaps between the implementation plan, `brand/`, and this document. Resolve each deliberately and update this document. Items closed during M0 are listed in [section 18 of the implementation plan](docs/implementation-plan.md#18-open-questions) (Q9–Q17).
 
 - **Missing copy and placement (M8).** The Start unavailable view, the fatal and protocol-mismatch view, the labels for stopping a capture sequence, reviewing from the Camera tab, accepting a Retake, and cancelling a Move, and the placement of `START OVER` and the Phase Timer warning in the guest top band are written from [`brand/voice.md`](../brand/voice.md) during M8 and recorded here. The exit hold stays in the top-right corner.
-- **Unset values (M3, resolved).** The guest sizes of every type role, the icon sizes, the fluid space steps, the region sizes, and the z-order values were set in `app-tokens.css` during M3 and are recorded in [App tokens](#app-tokens). Change them there and here together.
 - **Operator Assistance link label (M6).** The label of the text link from an Operator Assistance alert on Event setup or a gallery back to the running-Event panel is written from [`brand/voice.md`](../brand/voice.md) during M6 and recorded here.
+- **OptionList dark-surface styling.** Style `OptionList` for a dark surface only if a dark-surface use appears.
+- **Dialog inertness and invalid focus (M6, M8).** Screens make the content behind dialogs inert and move focus to the first invalid field on save.

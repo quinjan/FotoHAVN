@@ -49,7 +49,7 @@
   text-transform: var(--typography-meta-text-transform);
 }
 
-/* The bordered box of a text input, text area, date, or select: 4 radius and a Hairline border. */
+/* The bordered box of a text input, text area, date, or select: 4 radius and a Soft Brown border (3:1, WCAG 1.4.11). */
 .control {
   display: block;
   inline-size: 100%;
@@ -57,7 +57,7 @@
   min-block-size: var(--app-target);
   margin: 0;
   padding: var(--space-12) var(--space-16);
-  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border: var(--stroke-hairline) solid var(--app-tone-ink-secondary);
   border-radius: var(--radius-control);
   background-color: var(--app-tone-surface);
   color: var(--app-tone-ink);
@@ -78,7 +78,7 @@
 
 @media (hover: hover) {
   .control:hover:not(:disabled, [readonly]) {
-    border-color: var(--app-tone-ink-secondary);
+    border-color: var(--app-tone-ink);
   }
 }
 

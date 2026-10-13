@@ -87,7 +87,7 @@
   place-items: center;
   inline-size: var(--pin-key);
   block-size: var(--pin-key);
-  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border: var(--stroke-hairline) solid var(--app-tone-ink-secondary);
   border-radius: var(--radius-control);
   color: var(--app-tone-ink);
   font-family: var(--typography-subheading-font-family);
