@@ -1,0 +1,6 @@
+<Project>
+  <!-- WPF's implicit usings leave out System.IO (to avoid System.Windows.Shapes.Path); these projects don't use Shapes. -->
+  <ItemGroup Condition="'$(UseWPF)' == 'true' and '$(ImplicitUsings)' == 'enable'">
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>
