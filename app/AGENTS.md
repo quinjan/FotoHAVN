@@ -39,13 +39,16 @@ Remove-Item output/coverage -Recurse -Force -ErrorAction Ignore
 dotnet test --solution FotoHAVN.slnx --no-build --results-directory output/coverage --coverage --coverage-output-format cobertura
 dotnet tool restore
 dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
-#    From M2: gate each assembly at 90% line and branch
+#    Gate each assembly at 90% line and branch (from M2)
 foreach ($assembly in 'FotoHavn.Core','FotoHavn.Protocol','FotoHavn.Storage','FotoHavn.Catalog') {
   dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report/$assembly" "-reporttypes:TextSummary" "-assemblyfilters:+$assembly" "minimumCoverageThresholds:lineCoverage=90" "minimumCoverageThresholds:branchCoverage=90"
   if ($LASTEXITCODE -ne 0) { throw "$assembly is below 90% line or branch coverage" }
 }
+#    The Core tests again in the E2E build (obj/e2e, bin/e2e; no coverage), which cover the E2E_HOOKS glue
+dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:FotoHavnE2E=true
 
-# 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures)
+# 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures,
+#    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET)
 npm ci; npm run lint; npm run typecheck; npm run test:coverage; npm run build; npm run test:fixtures
 
 # 4-5. End-to-end (in e2e/; real camera required; global setup runs `npm run build:e2e` in ui/ and the E2E build below)

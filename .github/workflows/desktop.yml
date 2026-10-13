@@ -58,10 +58,9 @@ jobs:
           dotnet restore FotoHAVN.slnx --locked-mode
           dotnet build FotoHAVN.slnx --no-restore
 
-      # Verification step 2: .NET tests with Cobertura coverage, then ReportGenerator (commands as in app/AGENTS.md).
-      # M1 collects and reports coverage only. M2 adds the per-assembly gate loop from app/AGENTS.md after the summary:
-      # one ReportGenerator run per gated assembly with "minimumCoverageThresholds:lineCoverage=90" and
-      # "minimumCoverageThresholds:branchCoverage=90" (no leading dash; the dashed form is silently ignored).
+      # Verification step 2: .NET tests with Cobertura coverage, ReportGenerator, and the per-assembly gate (each gated
+      # assembly at 90% line and branch; commands as in app/AGENTS.md), then the Core tests in the E2E build, which
+      # cover the E2E_HOOKS glue (separate obj/e2e and bin/e2e; no coverage, so the gated numbers stay the field build's).
       - name: Test .NET with coverage
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
@@ -70,8 +69,14 @@ jobs:
           dotnet tool restore
           dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
           Get-Content output/coverage/report/Summary.txt
+          foreach ($assembly in 'FotoHavn.Core','FotoHavn.Protocol','FotoHavn.Storage','FotoHavn.Catalog') {
+            dotnet tool run reportgenerator "-reports:output/coverage/*.cobertura.xml" "-targetdir:output/coverage/report/$assembly" "-reporttypes:TextSummary" "-assemblyfilters:+$assembly" "minimumCoverageThresholds:lineCoverage=90" "minimumCoverageThresholds:branchCoverage=90"
+            if ($LASTEXITCODE -ne 0) { throw "$assembly is below 90% line or branch coverage" }
+          }
+          dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:FotoHavnE2E=true
 
-      # Verification step 3: UI.
+      # Verification step 3: UI. test:fixtures also runs the headless integration lane, which starts the headless host
+      # with `dotnet run --no-build`, so it relies on the .NET build in step 1.
       - name: Install UI dependencies
         working-directory: app/ui
         run: npm ci
@@ -96,7 +101,7 @@ jobs:
         working-directory: app/ui
         run: npx playwright install --with-deps chromium
 
-      - name: Test UI fixture gallery
+      - name: Test UI fixture gallery and headless integration
         working-directory: app/ui
         run: npm run test:fixtures
 
