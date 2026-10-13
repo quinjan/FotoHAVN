@@ -1,3 +1,4 @@
+/* Website interpretation of the shared FOTOHAVN brand tokens (../brand/tokens/tokens.json). See DESIGN.md. */
 :root {
   /* FOTOHAVN primitive colors */
   --color-warm-ivory: #F3EBDD;

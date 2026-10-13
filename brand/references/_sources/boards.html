@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FOTOHAVN brand reference boards (source)</title>
+<!-- Source for the generated boards in brand/references/{mood,do-dont,logo}.
+     Values, copy, and imagery follow the live website. Render with render-boards.playwright.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=block" rel="stylesheet">
+<!-- "Don't" examples only: deliberately off-brand fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Oswald:wght@700&family=Special+Elite&display=block" rel="stylesheet">
+<style>
+:root{
+  --off-white:#FBF8F2;--warm-ivory:#F3EBDD;--cream-paper:#E8DDCE;--hairline:#D1C4B4;
+  --antique-metal:#B39A78;--muted-brass:#9A7A4F;--soft-brown:#756457;--dark-walnut:#2D211B;--ebony:#1E1A17;
+  --ink-photo:#52463D;
+  --serif:"Cormorant Garamond","Times New Roman",Georgia,serif;--sans:Manrope,"Segoe UI",Arial,sans-serif;
+  --shadow-print:0 24px 60px rgba(45,33,27,.14);--shadow-contact:0 3px 8px rgba(45,33,27,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#8a8580;font-family:var(--sans);color:var(--ebony);padding:40px;display:flex;flex-direction:column;align-items:flex-start;gap:40px}
+img{display:block;width:100%;height:100%;object-fit:cover}
+em{font-style:italic;font-weight:400}
+.board{width:1600px;height:1000px;flex:none;background:var(--off-white);position:relative;overflow:hidden;padding:56px 64px 72px}
+.meta{position:absolute;left:64px;right:64px;bottom:24px;display:flex;justify-content:space-between;font:600 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--soft-brown)}
+.eyebrow{font:600 12px/1.4 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--soft-brown)}
+.dark .eyebrow{color:var(--antique-metal)}
+.h{font-family:var(--serif);font-weight:400;letter-spacing:-.045em;line-height:1}
+.h em{line-height:1.12}
+.sup{font:400 14px/1.8 var(--sans);color:var(--soft-brown)}
+.body{font:400 16px/1.65 var(--sans)}
+.frame{border-radius:2px;overflow:hidden}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:48px;height:100%}
+.verdict{font:600 13px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.verdict .mark{width:28px;height:28px;border-radius:9999px;display:grid;place-items:center;font-size:15px;letter-spacing:0;border:1px solid currentColor}
+.do .verdict{color:var(--ebony)}
+.dont .verdict{color:#7a2f22}
+.panel{height:calc(100% - 48px);border:1px solid var(--hairline);border-radius:2px;position:relative;overflow:hidden}
+.cap{margin-top:10px;font:600 11px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--soft-brown)}
+.btn{display:inline-flex;align-items:center;gap:26px;min-height:48px;padding:14px 22px;background:var(--ebony);color:var(--off-white);border:1px solid var(--ebony);border-radius:4px;font:600 12px/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.btn i{font-style:normal;font-size:20px;font-weight:400;line-height:1}
+.btn.inv{background:var(--off-white);color:var(--ebony);border-color:var(--off-white)}
+.link{display:inline-flex;align-items:center;gap:14px;font:600 12px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.link span{text-decoration:underline;text-underline-offset:7px;text-decoration-thickness:1px;text-decoration-color:var(--hairline)}
+.link i{font-style:normal;font-size:19px;font-weight:400}
+.overview > *{min-height:0;min-width:0;overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- ================= MOOD 01: MATERIAL WORLD ================= -->
+<section class="board" id="mood-01-material-world">
+  <div style="display:grid;grid-template-columns:4fr 8fr;gap:56px;height:100%">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;padding-top:8px">
+      <div>
+        <p class="eyebrow">Mood · material world</p>
+        <h1 class="h" style="font-size:80px;line-height:.97;margin-top:24px">Walnut, curtain,<br><em>paper.</em></h1>
+        <p class="sup" style="margin-top:24px;max-width:34ch;font-size:15px">Everything in the brand points back to real things: a Jacobean Walnut booth, a soft cream curtain, a metal board with silver clips, and prints in people's hands.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div><div style="height:56px;background:var(--dark-walnut)"></div><p class="cap">Walnut</p></div>
+        <div><div style="height:56px;background:var(--warm-ivory);border:1px solid var(--hairline)"></div><p class="cap">Curtain</p></div>
+        <div><div style="height:56px;background:var(--off-white);border:1px solid var(--hairline)"></div><p class="cap">Paper</p></div>
+        <div><div style="height:56px;background:var(--antique-metal)"></div><p class="cap">Metal</p></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:5fr 4fr 3fr;grid-template-rows:1fr 1fr;gap:16px">
+      <figure style="grid-row:1/3;display:flex;flex-direction:column"><div class="frame" style="flex:1"><img src="../photography/01-booth-close-evia.jpg" alt=""></div><figcaption class="cap">Walnut + curtain · the room</figcaption></figure>
+      <figure style="grid-row:1/3;display:flex;flex-direction:column"><div class="frame" style="flex:1"><img src="../photography/03-prints-in-hand-evia.jpg" alt=""></div><figcaption class="cap">Paper · the keepsake</figcaption></figure>
+      <figure style="display:flex;flex-direction:column"><div class="frame" style="flex:1"><img src="../photography/04-detail-silver-clip.jpg" alt="" style="object-position:50% 40%"></div><figcaption class="cap">Silver clip</figcaption></figure>
+      <figure style="display:flex;flex-direction:column"><div class="frame" style="flex:1"><img src="../photography/04-detail-photo-board.jpg" alt=""></div><figcaption class="cap">Metal photo board</figcaption></figure>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/mood</span><span>Generated board · composed from live-website imagery</span></div>
+</section>
+
+<!-- ================= MOOD 02: PALETTE ================= -->
+<section class="board" id="mood-02-palette-and-proportion">
+  <p class="eyebrow">Mood · palette and proportion</p>
+  <h1 class="h" style="font-size:56px;margin-top:18px;letter-spacing:-.035em">Mostly paper. A little wood. <em>A trace of brass.</em></h1>
+  <div style="display:flex;height:72px;margin-top:36px;border:1px solid var(--hairline);border-radius:2px;overflow:hidden">
+    <div style="flex:40;background:var(--off-white)"></div><div style="flex:22;background:var(--warm-ivory)"></div><div style="flex:13;background:var(--cream-paper)"></div><div style="flex:3;background:var(--hairline)"></div><div style="flex:3;background:var(--soft-brown)"></div><div style="flex:9;background:var(--dark-walnut)"></div><div style="flex:8;background:var(--ebony)"></div><div style="flex:2;background:var(--muted-brass)"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:10px" class="cap"><span>≈ 75% light surfaces + photography</span><span>≈ 20% wood tones · ≤ 2% brass</span></div>
+  <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:12px;margin-top:44px">
+    <div><div style="height:300px;background:#FBF8F2;border:1px solid var(--hairline);border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Off-white</p><p class="sup">#FBF8F2<br>251 248 242<br>C0 M1 Y4 K2</p></div>
+    <div><div style="height:300px;background:#F3EBDD;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Warm Ivory</p><p class="sup">#F3EBDD<br>243 235 221<br>C0 M3 Y9 K5</p></div>
+    <div><div style="height:300px;background:#E8DDCE;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Cream Paper</p><p class="sup">#E8DDCE<br>232 221 206<br>C0 M5 Y11 K9</p></div>
+    <div><div style="height:300px;background:#D1C4B4;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Hairline</p><p class="sup">#D1C4B4<br>209 196 180<br>C0 M6 Y14 K18</p></div>
+    <div><div style="height:300px;background:#B39A78;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Antique Metal</p><p class="sup">#B39A78<br>179 154 120<br>C0 M14 Y33 K30</p></div>
+    <div><div style="height:300px;background:#9A7A4F;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Muted Brass</p><p class="sup">#9A7A4F<br>154 122 79<br>C0 M21 Y49 K40</p></div>
+    <div><div style="height:300px;background:#756457;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Soft Brown</p><p class="sup">#756457<br>117 100 87<br>C0 M15 Y26 K54</p></div>
+    <div><div style="height:300px;background:#2D211B;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Dark Walnut</p><p class="sup">#2D211B<br>45 33 27<br>C0 M27 Y40 K82</p></div>
+    <div><div style="height:300px;background:#1E1A17;border-radius:2px"></div><p class="h" style="font-size:24px;margin-top:14px;letter-spacing:-.015em">Ebony</p><p class="sup">#1E1A17<br>30 26 23<br>C0 M13 Y23 K88</p></div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/mood · CMYK naive, proof before print</span><span>Generated board · values from brand/tokens/tokens.json</span></div>
+</section>
+
+<!-- ================= MOOD 03: TYPE ================= -->
+<section class="board" id="mood-03-type-pairing">
+  <div style="display:grid;grid-template-columns:7fr 5fr;gap:64px;height:100%">
+    <div style="display:flex;flex-direction:column;justify-content:space-between">
+      <p class="eyebrow">Mood · type pairing</p>
+      <div>
+        <p class="h" style="font-size:240px;line-height:.8;letter-spacing:-.04em">Aa <em style="font-size:.86em">Aa</em></p>
+        <p class="h" style="font-size:108px;letter-spacing:-.047em;margin-top:40px">Photographs,<br><em style="font-size:.86em;letter-spacing:-.04em">developed differently.</em></p>
+      </div>
+      <p class="sup">Cormorant Garamond 400, roman + italic · sentence case · the closing phrase turns italic</p>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--hairline);padding-left:56px">
+      <p class="eyebrow">Manrope 400 / 600</p>
+      <div style="display:grid;gap:28px">
+        <div><p class="cap" style="margin:0 0 8px">Eyebrow · 12 / 0.18em</p><p class="eyebrow" style="color:var(--ebony)">The FOTOHAVN experience</p></div>
+        <div><p class="cap" style="margin:0 0 8px">Body large · 20</p><p style="font:400 20px/1.6 var(--sans)">An enclosed vintage photobooth experience for celebrations worth remembering.</p></div>
+        <div><p class="cap" style="margin:0 0 8px">Supporting · 14 / 1.8</p><p class="sup" style="max-width:36ch">A few minutes inside. A memory that stays with you.</p></div>
+        <div><p class="cap" style="margin:0 0 10px">Action · 12 / 0.1em + arrow</p><div style="display:flex;gap:28px;align-items:center"><span class="btn">Rent FOTOHAVN <i>↓</i></span><span class="link"><span>Explore the experience</span><i>↓</i></span></div></div>
+      </div>
+      <p class="sup">Never heavier than 600 · no script, condensed, or typewriter faces</p>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/mood</span><span>Generated board · live brand fonts</span></div>
+</section>
+
+<!-- ================= MOOD 04: BRAND WORLD OVERVIEW ================= -->
+<section class="board" id="mood-04-brand-world-overview" style="background:var(--cream-paper);padding:40px 40px 64px">
+  <div class="overview" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:16px;height:100%">
+    <div style="background:var(--off-white);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="FOTOHAVN" style="width:62%;height:auto;object-fit:contain"><span class="cap" style="position:absolute;left:20px;bottom:16px;margin:0">01 · Wordmark</span></div>
+    <div class="frame" style="position:relative"><img src="../photography/01-booth-hero-exterior.jpg" alt=""><span class="cap" style="position:absolute;left:20px;bottom:16px;margin:0;color:var(--off-white)">02 · The booth</span></div>
+    <div style="background:var(--off-white);display:flex;flex-direction:column;justify-content:center;padding:32px;position:relative"><p class="eyebrow" style="font-size:10px">A little room. A lasting feeling.</p><p class="h" style="font-size:46px;margin-top:14px">Photographs,<br><em style="font-size:.86em">developed differently.</em></p><span class="cap" style="position:absolute;left:32px;bottom:16px;margin:0">03 · Brand line + the italic turn</span></div>
+    <div style="background:var(--off-white);padding:28px;display:flex;flex-direction:column;justify-content:space-between"><div style="display:flex;height:120px;border-radius:2px;overflow:hidden;border:1px solid var(--hairline)"><div style="flex:40;background:#FBF8F2"></div><div style="flex:22;background:#F3EBDD"></div><div style="flex:13;background:#E8DDCE"></div><div style="flex:3;background:#756457"></div><div style="flex:9;background:#2D211B"></div><div style="flex:8;background:#1E1A17"></div><div style="flex:2;background:#9A7A4F"></div></div><span class="cap" style="margin:0">04 · Paper, wood, a trace of brass</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><div style="width:44%;height:80%;background:var(--off-white);padding:10px;box-shadow:var(--shadow-print);transform:rotate(-4deg)"><img src="../looks/sepia-strip.jpg" alt="" style="object-fit:cover"></div><span class="cap" style="position:absolute;left:20px;bottom:16px;margin:0">05 · The print object</span></div>
+    <div class="frame" style="position:relative"><img src="../photography/02-guests-candid-inside.jpg" alt=""><span class="cap" style="position:absolute;left:20px;bottom:16px;margin:0;color:var(--off-white)">06 · Room to be yourself</span></div>
+    <div class="frame" style="position:relative;background:var(--off-white)"><img src="../applications/website-desktop-01-hero.png" alt="" style="object-position:50% 0"><span class="cap" style="position:absolute;left:20px;bottom:16px;margin:0;background:var(--off-white);padding:4px 6px">07 · Website</span></div>
+    <div style="background:var(--off-white);padding:28px;display:flex;flex-direction:column;justify-content:space-between"><div><p class="eyebrow" style="font-size:10px">Bring everyone together</p><p class="h" style="font-size:40px;margin-top:10px;letter-spacing:-.035em">Rent FOTOHAVN.</p><p class="sup" style="font-size:13px;margin-top:6px">Your celebration, our little haven.</p><p class="link" style="margin-top:12px;font-size:11px"><span>Ask about your date</span><i>↗</i></p></div><span class="cap" style="margin:0">08 · Invite, don't sell</span></div>
+    <div class="dark" style="background:var(--ebony);display:flex;flex-direction:column;justify-content:center;padding:28px;position:relative"><img src="../../assets/logo/fotohavn-wordmark-off-white.svg" alt="" style="width:100%;height:auto"><span class="cap" style="position:absolute;left:28px;bottom:16px;margin:0;color:var(--antique-metal)">09 · Oversized wordmark close</span></div>
+  </div>
+  <div class="meta" style="left:40px;right:40px"><span>FOTOHAVN brand · references/mood</span><span>Generated board · brand-world overview</span></div>
+</section>
+
+<!-- ================= DO/DON'T 01: COLOR ================= -->
+<section class="board" id="dodont-01-color">
+  <div class="split">
+    <div class="do"><p class="verdict"><span class="mark">✓</span>Do · light-led, one accent</p>
+      <div class="panel" style="background:var(--off-white);padding:48px;display:grid;grid-template-columns:7fr 4fr;gap:32px">
+        <div style="display:flex;flex-direction:column;justify-content:center"><p class="eyebrow">The FOTOHAVN experience</p><p class="h" style="font-size:58px;margin-top:20px;line-height:1.04">A little privacy.<br>A little <em>possibility.</em></p><p class="sup" style="margin-top:18px">A private space, away from the crowd.</p><div style="margin-top:28px"><span class="btn">Rent FOTOHAVN <i>↓</i></span></div></div>
+        <div class="frame"><img src="../photography/02-guests-candid-inside.jpg" alt=""></div>
+      </div>
+    </div>
+    <div class="dont"><p class="verdict"><span class="mark">✕</span>Don't · gold gradients, pastels, neon</p>
+      <div class="panel" style="background:linear-gradient(135deg,#ffd6e8,#d6f0ff 50%,#fff3c4);padding:56px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+        <p style="font:700 14px/1 var(--sans);letter-spacing:.1em;color:#ff2fa0">★ PARTY TIME ★</p>
+        <p style="font:700 64px/1 var(--serif);margin-top:18px;background:linear-gradient(180deg,#fff6b0,#d4a017 45%,#8a5a00 55%,#ffe36e);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #6b4400)">THE EXPERIENCE</p>
+        <p style="margin-top:24px;font:600 18px/1.4 var(--sans);color:#7a3cff">Fun for everyone!!!</p>
+        <span style="margin-top:28px;padding:18px 40px;border-radius:9999px;background:linear-gradient(90deg,#00f0ff,#ff00d4);color:#fff;font:700 16px/1 var(--sans);box-shadow:0 0 30px #ff00d4,0 10px 20px rgba(0,0,0,.3)">BOOK NOW!</span>
+      </div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see color.md</span><span>Generated board · "don't" side is deliberately off-brand</span></div>
+</section>
+
+<!-- ================= DO/DON'T 02: TYPOGRAPHY ================= -->
+<section class="board" id="dodont-02-typography">
+  <div class="split">
+    <div class="do"><p class="verdict"><span class="mark">✓</span>Do · sentence-case serif, italic turn, quiet sans</p>
+      <div class="panel" style="background:var(--warm-ivory);padding:64px;display:flex;flex-direction:column;justify-content:flex-end">
+        <p class="eyebrow">On the other side</p>
+        <p class="h" style="font-size:120px;margin-top:22px">Look at <em>you.</em></p>
+        <p class="sup" style="margin-top:20px;font-size:16px;max-width:30ch">Every photograph has another side.</p>
+      </div>
+    </div>
+    <div class="dont"><p class="verdict"><span class="mark">✕</span>Don't · script, condensed, typewriter, title case</p>
+      <div class="panel" style="background:var(--warm-ivory);padding:64px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+        <p style="font:400 72px/1.1 Pacifico,cursive;color:var(--dark-walnut)">Look At You!</p>
+        <p style="font:700 54px/1 Oswald,sans-serif;letter-spacing:.02em;margin-top:18px;color:var(--ebony)">ONE BOOTH. SEVEN LOOKS.</p>
+        <p style="font:400 22px/1.5 'Special Elite',monospace;margin-top:22px;max-width:30ch">Every Photograph Has Another Side, So Come And Party With Your Friends And Family!</p>
+      </div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see typography.md, voice.md</span><span>Generated board · "don't" side is deliberately off-brand</span></div>
+</section>
+
+<!-- ================= DO/DON'T 03: PHOTOGRAPHY ================= -->
+<section class="board" id="dodont-03-photography">
+  <div class="split">
+    <div class="do"><p class="verdict"><span class="mark">✓</span>Do · luminous photo, ink on the curtain</p>
+      <div class="panel" style="padding:0">
+        <img src="../photography/01-booth-hero-exterior-portrait.jpg" alt="" style="position:absolute;inset:0;object-position:50% 40%">
+        <div style="position:absolute;left:0;right:0;top:30%;text-align:center;padding:0 72px">
+          <p class="eyebrow" style="color:var(--ink-photo);font-size:11px">A little room. A lasting feeling.</p>
+          <p class="h" style="font-size:66px;margin-top:20px;letter-spacing:-.047em">Photographs,<br><em style="font-size:.86em;letter-spacing:-.04em">developed differently.</em></p>
+          <p style="font:400 16px/1.6 var(--sans);color:var(--ink-photo);margin:16px auto 0;max-width:30ch">An enclosed vintage photobooth experience for celebrations worth remembering.</p>
+          <div style="margin-top:24px"><span class="btn">Rent FOTOHAVN <i>↓</i></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="dont"><p class="verdict"><span class="mark">✕</span>Don't · crushed overlay, stickers, neon type</p>
+      <div class="panel" style="padding:0">
+        <img src="../photography/01-booth-hero-exterior-portrait.jpg" alt="" style="position:absolute;inset:0;object-position:50% 40%;filter:saturate(1.8) contrast(1.4) hue-rotate(-12deg)">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,0,200,.35),transparent 40%),radial-gradient(circle at 75% 70%,rgba(0,220,255,.35),transparent 40%)"></div>
+        <span style="position:absolute;top:36px;right:36px;transform:rotate(12deg);background:#ffe600;color:#000;font:800 20px/1 var(--sans);padding:22px 18px;border-radius:9999px">50% OFF!</span>
+        <span style="position:absolute;top:40px;left:40px;font-size:56px">🎉📸✨</span>
+        <div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff"><p style="font:800 54px/1.05 var(--sans);text-shadow:0 0 18px #ff00d4">BEST PHOTOBOOTH<br>IN TOWN!!!</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see photography.md, color.md</span><span>Generated board · "don't" side is deliberately off-brand</span></div>
+</section>
+
+<!-- ================= DO/DON'T 04: OFFER ================= -->
+<section class="board" id="dodont-04-offer">
+  <div class="split">
+    <div class="do"><p class="verdict"><span class="mark">✓</span>Do · paths that invite</p>
+      <div class="panel" style="background:var(--off-white);padding:56px;display:flex;flex-direction:column;justify-content:center">
+        <article style="padding-bottom:36px">
+          <p class="eyebrow" style="font-size:10px;letter-spacing:.13em">Make a little detour</p>
+          <p class="h" style="font-size:56px;margin-top:10px;letter-spacing:-.035em;line-height:1.1">Find the booth.</p>
+          <p class="sup" style="margin-top:12px;max-width:40ch">Drop by for a pay-per-use visit. Ask us for the current location, hours, and details before you go.</p>
+          <p class="link" style="margin-top:18px"><span>Ask for current details</span><i>↗</i></p>
+        </article>
+        <article style="border-top:1px solid var(--hairline);padding-top:40px">
+          <p class="eyebrow" style="font-size:10px;letter-spacing:.13em">Bring everyone together</p>
+          <p class="h" style="font-size:56px;margin-top:10px;letter-spacing:-.035em;line-height:1.1">Rent FOTOHAVN.</p>
+          <p class="sup" style="margin-top:12px;max-width:40ch">Your celebration, our little haven. Event rental is offered by the hour with unlimited prints.</p>
+          <p class="link" style="margin-top:18px"><span>Ask about your date</span><i>↗</i></p>
+        </article>
+      </div>
+    </div>
+    <div class="dont"><p class="verdict"><span class="mark">✕</span>Don't · pricing cards, ribbons, urgency</p>
+      <div class="panel" style="background:#f4f6fb;padding:48px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:center">
+        <div style="background:#fff;border-radius:24px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.12);text-align:center"><p style="font:700 18px/1 var(--sans)">Basic</p><p style="font:800 34px/1 var(--sans);margin-top:16px">₱5,999</p><p style="margin-top:14px;font-size:13px;line-height:2">✔ 2 hours<br>✔ 1 look<br>✘ Prints</p></div>
+        <div style="background:#6c3cff;color:#fff;border-radius:24px;padding:36px 28px;box-shadow:0 20px 40px rgba(108,60,255,.4);text-align:center;position:relative;transform:scale(1.06)"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#ffcc00;color:#000;font:800 11px/1 var(--sans);padding:8px 14px;border-radius:9999px;white-space:nowrap">BEST VALUE 🔥</span><p style="font:700 18px/1 var(--sans)">Premium</p><p style="font:600 16px/1 var(--sans);margin-top:14px;text-decoration:line-through;opacity:.7">₱12,000</p><p style="font:800 34px/1 var(--sans);margin-top:6px">₱8,500</p><p style="margin-top:14px;font-size:13px;line-height:2">✔ 3 hours<br>✔ All looks<br>✔ Prints</p></div>
+        <div style="background:#fff;border-radius:24px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.12);text-align:center"><p style="font:700 18px/1 var(--sans)">Ultimate</p><p style="font:800 34px/1 var(--sans);margin-top:16px">₱14,999</p><p style="margin-top:14px;font-size:13px;line-height:2">✔ 5 hours<br>✔ Props<br>✔ Prints</p></div>
+        <p style="grid-column:1/4;text-align:center;font:700 14px/1 var(--sans);color:#e11d48">⏰ LIMITED SLOTS — BOOK BEFORE IT'S GONE!</p>
+      </div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see components.md#path, voice.md#offers · prices are illustrative</span><span>Generated board · "don't" side is deliberately off-brand</span></div>
+</section>
+
+<!-- ================= DO/DON'T 05: LOOKS ================= -->
+<section class="board" id="dodont-05-looks">
+  <div class="split">
+    <div class="do"><p class="verdict"><span class="mark">✓</span>Do · real prints, named looks, quiet selection</p>
+      <div class="panel" style="background:var(--off-white);padding:36px;display:grid;grid-template-columns:5fr 6fr;gap:28px">
+        <div class="frame" style="background:var(--cream-paper)"><img src="../looks/looks-compared-prints.jpg" alt=""></div>
+        <div style="display:flex;flex-direction:column;justify-content:center">
+          <p class="h" style="font-size:30px;letter-spacing:-.015em;margin-bottom:12px">Find the <em>feeling.</em></p>
+          <div style="display:grid">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Monochrome</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Naturale</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Soft Monochrome</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Soft Color</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 10px;border-bottom:1px solid var(--hairline);background:rgba(243,235,221,.5);border-left:2px solid var(--muted-brass)"><span><span class="h" style="font-size:21px;letter-spacing:-.015em">Sepia</span><span class="sup" style="display:block;font-size:12px;line-height:1.4">Soft brown tones with faded contrast. · Selected</span></span><span style="width:18px;height:18px;border:1px solid var(--muted-brass);border-radius:50%;display:grid;place-items:center"><span style="width:10px;height:10px;border-radius:50%;background:var(--muted-brass)"></span></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Warm Monochrome</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 4px;border-bottom:1px solid var(--hairline)"><span class="h" style="font-size:21px;letter-spacing:-.015em">Classic</span><span style="width:18px;height:18px;border:1px solid var(--ebony);border-radius:50%"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dont"><p class="verdict"><span class="mark">✕</span>Don't · novelty bubbles, emoji, neon rings</p>
+      <div class="panel" style="background:#fff;padding:40px">
+        <p style="font:800 30px/1 var(--sans);text-align:center">✨ Pick a Vibe! ✨</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px">
+          <div><div style="height:150px;border-radius:9999px;overflow:hidden;border:4px solid #ff4fa3"><img src="../photography/02-guests-candid-inside.jpg" alt="" style="filter:hue-rotate(90deg) saturate(2)"></div><p style="text-align:center;margin-top:8px;font:700 13px var(--sans)">Retro 🌈</p></div>
+          <div><div style="height:150px;border-radius:9999px;overflow:hidden;border:4px solid #4fc3ff"><img src="../photography/02-guests-candid-inside.jpg" alt="" style="filter:hue-rotate(200deg) saturate(2.4)"></div><p style="text-align:center;margin-top:8px;font:700 13px var(--sans)">Cool 😎</p></div>
+          <div><div style="height:150px;border-radius:9999px;overflow:hidden;border:4px solid #a6ff4f"><img src="../photography/02-guests-candid-inside.jpg" alt="" style="filter:grayscale(1) contrast(2.2)"></div><p style="text-align:center;margin-top:8px;font:700 13px var(--sans)">B&amp;W 🖤</p></div>
+          <div><div style="height:150px;border-radius:9999px;overflow:hidden;border:4px solid #ffd84f"><img src="../photography/02-guests-candid-inside.jpg" alt="" style="filter:sepia(1) saturate(3)"></div><p style="text-align:center;margin-top:8px;font:700 13px var(--sans)">Gold ⭐</p></div>
+        </div>
+        <p style="margin-top:28px;text-align:center;font:600 15px var(--sans);color:#666">Tap a bubble to apply instantly!</p>
+      </div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see photography.md#looks, components.md#option-list</span><span>Generated board · "don't" side is deliberately off-brand</span></div>
+</section>
+
+<!-- ================= DO/DON'T 06: VOICE ================= -->
+<section class="board" id="dodont-06-voice">
+  <p class="eyebrow">Do and don't · voice</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 48px;margin-top:32px">
+    <p class="verdict" style="color:var(--ebony)"><span class="mark">✓</span>Write</p>
+    <p class="verdict" style="color:#7a2f22"><span class="mark">✕</span>Instead of</p>
+  </div>
+  <div style="display:grid;border-top:1px solid var(--hairline)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:22px 0;border-bottom:1px solid var(--hairline);align-items:center"><p class="h" style="font-size:38px;letter-spacing:-.035em">Keep the moment <em>close.</em></p><p style="font:400 22px/1.4 var(--sans);color:var(--soft-brown);text-decoration:line-through;text-decoration-thickness:1px">Get unlimited content for your socials!</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:22px 0;border-bottom:1px solid var(--hairline);align-items:center"><p class="h" style="font-size:38px;letter-spacing:-.035em">A little privacy. A little <em>possibility.</em></p><p style="font:400 22px/1.4 var(--sans);color:var(--soft-brown);text-decoration:line-through;text-decoration-thickness:1px">The #1 photobooth rental solution for your activation.</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:22px 0;border-bottom:1px solid var(--hairline);align-items:center"><p class="h" style="font-size:38px;letter-spacing:-.035em">Your celebration, our little <em>haven.</em></p><p style="font:400 22px/1.4 var(--sans);color:var(--soft-brown);text-decoration:line-through;text-decoration-thickness:1px">Compare our package options and save big!</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:22px 0;border-bottom:1px solid var(--hairline);align-items:center"><p class="h" style="font-size:38px;letter-spacing:-.035em">Drop by for a pay-per-use visit.</p><p style="font:400 22px/1.4 var(--sans);color:var(--soft-brown);text-decoration:line-through;text-decoration-thickness:1px">Hurry! Limited slots available!!!</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:22px 0;border-bottom:1px solid var(--hairline);align-items:center"><p class="link" style="font-size:14px"><span style="text-decoration-color:var(--ebony)">Ask about your date</span><i>↗</i></p><p style="font:400 22px/1.4 var(--sans);color:var(--soft-brown);text-decoration:line-through;text-decoration-thickness:1px">Click here to learn more!!!</p></div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/do-dont · see voice.md</span><span>Generated board · "write" lines are live-website copy</span></div>
+</section>
+
+<!-- ================= LOGO 01: CLEAR SPACE ================= -->
+<section class="board" id="logo-01-wordmark-clear-space">
+  <p class="eyebrow">Logo · wordmark clear space and minimum size</p>
+  <div style="display:grid;grid-template-columns:8fr 4fr;gap:56px;margin-top:40px;height:760px">
+    <div style="background:var(--warm-ivory);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;border-radius:2px">
+      <div style="position:relative;padding:73px;outline:1px dashed var(--muted-brass)">
+        <img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="FOTOHAVN" style="width:585px;height:auto">
+        <span style="position:absolute;left:0;top:0;width:73px;height:73px;border-right:1px solid var(--muted-brass);border-bottom:1px solid var(--muted-brass);display:grid;place-items:center" class="cap">x</span>
+        <span style="position:absolute;right:0;bottom:0;width:73px;height:73px;border-left:1px solid var(--muted-brass);border-top:1px solid var(--muted-brass);display:grid;place-items:center" class="cap">x</span>
+      </div>
+      <p class="sup">x = cap height of the O</p>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between">
+      <div><p class="cap" style="margin:0 0 12px">Minimum · screen 80px</p><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:80px;height:auto"></div>
+      <div><p class="cap" style="margin:0 0 12px">Minimum · print 20mm</p><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:120px;height:auto"></div>
+      <div><p class="cap" style="margin:0 0 12px">Wordmark + brand line</p><div style="display:inline-flex;flex-direction:column;align-items:stretch;gap:22px"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:300px;height:auto"><p style="font:600 9.6px/1 var(--sans);letter-spacing:.18em;text-align:center">PHOTOGRAPHS, DEVELOPED DIFFERENTLY.</p></div></div>
+      <div><p class="cap" style="margin:0 0 12px">Booth-portal mark · ¼ width clear space</p><div style="display:inline-block;padding:24px;outline:1px dashed var(--muted-brass)"><img src="../../assets/mark/fotohavn-booth-portal-master.png" alt="" style="width:96px;height:96px;mix-blend-mode:multiply"></div></div>
+    </div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/logo · see logo.md</span><span>Generated board · from brand/assets masters</span></div>
+</section>
+
+<!-- ================= LOGO 02: BACKGROUNDS ================= -->
+<section class="board" id="logo-02-wordmark-backgrounds">
+  <p class="eyebrow">Logo · approved backgrounds</p>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:16px;margin-top:32px;height:800px">
+    <div style="background:var(--off-white);border:1px solid var(--hairline);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:62%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0">Ebony on Off-white</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:62%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0">Ebony on Warm Ivory</span></div>
+    <div style="position:relative;overflow:hidden"><img src="../photography/01-booth-hero-exterior.jpg" alt="" style="position:absolute;inset:0;object-position:50% 55%"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="position:absolute;left:21%;top:52%;width:58%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0;color:var(--ebony);background:var(--off-white);padding:4px 6px">Ebony on the light curtain</span></div>
+    <div style="background:var(--dark-walnut);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-off-white.svg" alt="" style="width:62%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0;color:var(--antique-metal)">Off-white on Dark Walnut</span></div>
+    <div style="background:var(--ebony);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-off-white.svg" alt="" style="width:62%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0;color:var(--antique-metal)">Off-white on Ebony</span></div>
+    <div style="background:var(--ebony);display:flex;align-items:center;padding:0 18px;position:relative"><img src="../../assets/logo/fotohavn-wordmark-off-white.svg" alt="" style="width:100%;height:auto"><span class="cap" style="position:absolute;left:20px;bottom:14px;margin:0;color:var(--antique-metal)">Oversized close (footer)</span></div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/logo · see logo.md#color</span><span>Generated board · from brand/assets masters</span></div>
+</section>
+
+<!-- ================= LOGO 03: MISUSE ================= -->
+<section class="board" id="logo-03-misuse">
+  <p class="eyebrow">Logo · misuse</p>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:16px;margin-top:32px;height:800px">
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:52%;height:auto;transform:scale(1.25,1.9)"><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Stretched</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><p style="font:700 44px/1 Oswald,sans-serif;letter-spacing:.06em">FOTOHAVN</p><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Retypeset in another font</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><p class="h" style="font-size:52px;letter-spacing:-.05em;font-weight:500">Fotohavn</p><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Changed case</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><p class="h" style="font-size:52px;letter-spacing:-.05em;font-weight:500;background:linear-gradient(180deg,#fff2a8,#c9971a 45%,#7a5200 55%,#f3d36b);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 1px rgba(0,0,0,.45))">FOTOHAVN</p><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Gold gradient or foil effect</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><div style="background:var(--ebony);border-radius:9999px;padding:22px 36px"><img src="../../assets/logo/fotohavn-wordmark-off-white.svg" alt="" style="width:220px;height:auto"></div><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Enclosed in a pill or badge</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:70%;height:auto;transform:rotate(-14deg)"><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Rotated</span></div>
+    <div style="position:relative;overflow:hidden"><img src="../photography/02-guests-friends-evia.jpg" alt="" style="position:absolute;inset:0"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="position:absolute;left:12%;top:44%;width:76%;height:auto"><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:var(--off-white);background:#7a2f22;padding:6px 8px">✕ Over a busy photo area</span></div>
+    <div style="background:var(--warm-ivory);display:grid;place-items:center;position:relative"><img src="../../assets/logo/fotohavn-wordmark-ebony.svg" alt="" style="width:70%;height:auto;filter:drop-shadow(0 8px 6px rgba(0,0,0,.5)) drop-shadow(0 0 12px #ffd76a)"><span class="cap" style="position:absolute;left:18px;bottom:14px;margin:0;color:#7a2f22">✕ Shadow or glow</span></div>
+  </div>
+  <div class="meta"><span>FOTOHAVN brand · references/logo · see logo.md#misuse</span><span>Generated board · deliberately incorrect examples</span></div>
+</section>
+
+</body>
+</html>

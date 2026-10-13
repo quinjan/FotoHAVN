@@ -1,417 +1,108 @@
-# FOTOHAVN — Design Language
+# FOTOHAVN website design
 
-> Editorial photography studio × vintage European photo booth × modern boutique brand
+## Brand interpretation
 
-**Theme:** light-led, warm, tactile, and photography-first
+This document is the **website's interpretation** of the shared FOTOHAVN brand system in [`../brand/`](../brand/README.md). The brand system owns the foundation, voice, palette, type, photography, logo, motion, and accessibility rules. This document owns only what is specific to the website and online booth: page architecture, web components, responsive behavior, implementation files, and verification.
 
-FOTOHAVN is a vintage enclosed photobooth experience in the Philippines. The website must position it as a considered photography experience—not a commodity booth rental. It should feel nostalgic without becoming costume-like, premium without becoming ornate, and intimate without becoming dark or cinematic.
+- **Interprets:** [`brand/`](../brand/README.md) on the default branch. The brand system has no version numbers.
+- **Reference implementation:** the live website is the brand's reference implementation. When this document drifts from what the website renders, **the website wins**. Update this document (and `brand/` if the change is brand-level) to match, or fix the website deliberately.
+- **Deliberate departures from `brand/`:** none. Known drift is listed in [Recorded drift](#recorded-drift).
 
-The visual system adapts the reference design’s generous breathing room, poster-scale hierarchy, flat surfaces, minimal elevation, disciplined spacing, and subtle geometry. FOTOHAVN replaces the reference’s pastel taxonomy, geometric-only typography, gradients, and illustration-led imagery with restrained earth tones, serif-led editorial type, tactile photography, and quiet antique-metal details.
+Read [`CONTEXT.md`](CONTEXT.md) for website language such as the Website Intro Experience, Online Booth Cycle, and Inquiry Intent.
 
-## Authority
+## What the website inherits
 
-When sources disagree, apply this order:
+| Topic | Source of truth |
+| --- | --- |
+| Positioning, mood, principles, the three moments | [brand/foundation.md](../brand/foundation.md) |
+| Voice, approved lines, actions, offers | [brand/voice.md](../brand/voice.md) |
+| Palette, surfaces, contrast, derived inks | [brand/color.md](../brand/color.md) |
+| Type pairing, roles, the italic turn | [brand/typography.md](../brand/typography.md) |
+| Space, composition, shape, elevation | [brand/layout.md](../brand/layout.md) |
+| Photography, looks, consent, alt text | [brand/photography.md](../brand/photography.md) |
+| Wordmark and booth-portal mark | [brand/logo.md](../brand/logo.md) |
+| Icons (Phosphor Light) | [brand/iconography.md](../brand/iconography.md) |
+| Motion and reduced motion | [brand/motion.md](../brand/motion.md) |
+| Accessibility baseline | [brand/accessibility.md](../brand/accessibility.md) |
+| Shared components: actions, eyebrow, statement heading, path, print object, option list, step progress, navigation, footer | [brand/components.md](../brand/components.md) |
 
-1. The approved FOTOHAVN brand and content brief.
-2. This document.
-3. `tokens.json`, `variables.css`, and `theme.css`.
-4. The Refero/Amplemarket reference, used only for structural restraint.
+## Implementation files
 
-Do not reintroduce the reference’s pastel colors, confetti language, product-marketing cards, geometric-only display type, illustrated hero, or vivid gradient accents.
+| File | Role |
+| --- | --- |
+| [`variables.css`](variables.css) | CSS custom properties for the brand primitives, semantic roles, and web-only values. Imported by `src/app/globals.css`. |
+| [`theme.css`](theme.css) | The same values exposed to Tailwind v4 through `@theme`. |
+| [`tokens.json`](tokens.json) | Machine-readable web token mirror. It must match `variables.css`. |
+| `src/app/globals.css` | Global type, `.button`, `.textLink`, focus, skip link, and reduced motion. |
+| `src/app/layout.tsx` | Loads Cormorant Garamond (400, 500, 600; normal and italic) and Manrope through `next/font/google`. |
+| `src/components/*.module.css` | Section and component styles. |
 
-## Brand Positioning
+Brand primitives in these files must match [`brand/tokens/tokens.json`](../brand/tokens/tokens.json) by name and value. Web-only additions such as breakpoints, navigation height, gallery overlap, and layer order live only here.
 
-**Core idea:** photographs, developed differently.
+## Page architecture
 
-**Brand promise:** a private, tactile photography experience that gives guests room to play and something physical to keep.
+### Home (`/`)
 
-**Mood:**
+The live order, from `src/app/page.tsx`:
 
-- nostalgic
-- refined
-- intimate
-- artistic
-- premium
-- understated
-- timeless
-- tactile
-- warm
+| # | Section | Anchor | Content |
+| --- | --- | --- | --- |
+| — | Navigation | — | Wordmark; `EXPERIENCE`, `THE BOOTH`, `PRINTS`, `ONLINE BOOTH`; `FIND THE BOOTH`; primary `RENT FOTOHAVN`. Mobile shows `MENU`. |
+| 1 | Hero | `#top` | Booth exterior photograph, with the statement heading centered on the curtain: `A LITTLE ROOM. A LASTING FEELING.` / Photographs, *developed differently.* Primary `RENT FOTOHAVN ↓` and text link `EXPLORE THE EXPERIENCE ↓`. |
+| 2 | Experience | `#experience` | `THE FOTOHAVN EXPERIENCE` / A little privacy. A little *possibility.* The three moments with photographs, then `EXPERIENCE FOTOHAVN ONLINE`. |
+| 3 | The booth | `#the-booth` | `THE BOOTH, UP CLOSE` / Small room. *Whole other world.* An interactive 3D booth with viewpoints, curtain toggle, and fullscreen. It is labeled as an illustrated approximation. |
+| 4 | Prints | `#prints` | Keep the moment *close.* The print object, with `SEE THE GOOD COMPANY ↘` and `MAKE A DIGITAL STRIP →`. Sign-off: `MADE TO BE HELD, SHARED, AND KEPT.` |
+| 5 | Guest album | `#guest-album` | `ON THE OTHER SIDE` / Look at *you.* Prints on a metal board with clips and keepsake charms. Prints lift and turn over to a note. It has a fullscreen board and a mobile carousel. |
+| 6 | Closing | `#make-something-worth-keeping` | Let's make something *worth keeping.* Two paths: `#find-the-booth` (pay-per-use visit) and `#rent-fotohavn` (event rental), each with an Instagram inquiry link ↗. |
+| — | Footer | — | Ebony surface, the brand line, Instagram / Facebook / TikTok ↗, the oversized wordmark, `© 2026 FOTOHAVN`, `BACK TO TOP ↑`. |
 
-**Never feel like:**
+### Online booth (`/online`)
 
-- a generic party supplier
-- a discount rental catalogue
-- a wedding-template website
-- a nightclub or cinematic luxury brand
-- a social-media filter product
+The Online Booth Cycle runs in four steps: `01 Template`, `02 Photographs`, `03 Filters`, `04 Download`. Each step has an italic-turn heading: Make a little *Moment*, Find your *light.*, Find the *feeling.*, A little moment. *Yours.* The header shows the wordmark, `THE ONLINE BOOTH`, and `← BACK TO FOTOHAVN`.
 
-Avoid balloons, confetti, loud colors, cheesy party graphics, excessive icons, excessive gold, black-heavy layouts, dense card grids, and crowded decoration.
+- **Templates:** Signature Strip, Panorama Four, Butter Gingham, Polka Keepsake, defined in `src/components/onlinePhotobooth/presets.ts`. Template artwork may carry its own colors inside the keepsake.
+- **Looks (filters):** the seven brand looks, in the order of [brand/photography.md](../brand/photography.md#looks). They are defined in `presets.ts` as visual approximations of the booth's published outputs, not the booth's actual color profiles.
+- Camera, preview, and download stay on the visitor's device. Customer-created media stays fully masked in analytics.
 
-## Core Brand Copy
+### Inquiry and analytics
 
-**Brand:** FOTOHAVN
+Inquiry actions open the FOTOHAVN Instagram direct-message route from `site.config.ts` (`instagramMessageUrl`). Each activation is an Inquiry Intent. Consent, masking, and measurement are specified in [`docs/website-analytics.md`](docs/website-analytics.md).
 
-**Hero headline:**
+## Web components
 
-> PHOTOGRAPHS,<br>
-> DEVELOPED DIFFERENTLY.
+These are web implementations of the [brand components](../brand/components.md):
 
-**Hero supporting text:**
+| Brand component | Web implementation |
+| --- | --- |
+| Primary action | `.button` in `globals.css`: 48 high, 14 × 22, 12px / 0.1em, with an arrow span that nudges on hover |
+| Text link | `.textLink` in `globals.css`: 12px / 0.08em, 7px underline offset, Hairline underline that turns to the text color on hover |
+| Statement heading | Section heading styles in each `*.module.css`. Headings use `<em>` for the italic turn. |
+| Navigation | `SiteChrome`: sticky, wordmark at 30px (28px mobile), Meta links, primary action, mobile menu |
+| Print object, guest album | `GuestAlbum`, `GuestAlbumCarousel`, `EditorialLift` |
+| Option list, step progress | `onlinePhotobooth/*` |
+| 3D booth | `BoothExplorer`, `booth/*` |
 
-> An enclosed vintage photobooth experience for celebrations worth remembering.
+## Responsive behavior
 
-**Brand line:**
+- The main breakpoint is **767 / 768px**: split layouts become a single column, and navigation becomes the `MENU` button. Secondary adjustments happen at 1100, 1023, 960, 720/700, and 389/360/350px.
+- Page gutters are fluid from 24 to 80. The hero keeps the booth and curtain visible at every width, and on mobile it uses the portrait exterior photograph.
+- Keep photography first at every breakpoint. Do not collapse sections into text followed by tiny thumbnails.
+- Text links and controls keep a target of at least 44 × 44. The primary action is at least 48 high.
+- Verify at desktop, tablet, 390px, and 320px widths (see [`AGENTS.md`](AGENTS.md)).
 
-> PHOTOGRAPHS, DEVELOPED DIFFERENTLY.
+## Recorded drift
 
-Copy should be concise, sensory, and human. Prefer “photographs,” “keepsakes,” “room,” “look,” and “experience” over “content,” “activation,” “solution,” “package options,” or “filters.”
+These are known differences between the live website and the brand system or the website's own files. They are recorded, not hidden. Fix them deliberately.
 
-## Foundations
+| Drift | Where | Brand position |
+| --- | --- | --- |
+| Footer brand line is Muted Brass small text on Ebony (4.34:1) | Footer | Use Antique Metal for small text on Ebony (6.43:1) |
+| `variables.css` defines `--focus-offset: 3px`; `globals.css` renders a 5px offset | `variables.css`, `globals.css` | 5px, as rendered |
+| `variables.css` and `tokens.json` type scale (500 weight, 52 / 72 / 96 sizes, price role) does not match the rendered 400-weight fluid headings | `variables.css`, `theme.css`, `tokens.json` | The rendered values in [brand/typography.md](../brand/typography.md#type-roles) |
+| Online booth wordmark tracking is −0.065em | `OnlinePhotobooth.module.css` | −0.05em, matching the master |
+| Online booth uses one-off colors `#655648` and `#C5C0BA` | `OnlinePhotobooth.module.css` | Allowed as functional one-offs; prefer derived inks |
+| Some consent and prototype styles use weight 700 | `AnalyticsConsent*.module.css` | Maximum weight is 600 |
 
-### Color Palette
+### Superseded by the live site
 
-The palette should resemble warm photographic paper, dark wood, aged leather, and quiet antique hardware. Warm ivory and off-white occupy most of the page. Ebony and dark walnut provide typography and occasional contrast. Muted brass is a precision accent, never a large decorative fill.
-
-| Name | Value | Token | Role |
-|---|---:|---|---|
-| Warm Ivory | `#F3EBDD` | `--color-warm-ivory` | Primary warm editorial surface |
-| Cream Paper | `#E8DDCE` | `--color-cream-paper` | Secondary section and photo-mat surface |
-| Off-white | `#FBF8F2` | `--color-off-white` | Main canvas and inverse text |
-| Ebony | `#1E1A17` | `--color-ebony` | Primary text and highest-emphasis action |
-| Dark Walnut | `#2D211B` | `--color-dark-walnut` | Controlled dark surface and hover state |
-| Soft Brown | `#756457` | `--color-soft-brown` | Secondary text and quiet labels |
-| Muted Brass | `#9A7A4F` | `--color-muted-brass` | Selected states, rules, and small brand moments |
-| Antique Metal | `#B39A78` | `--color-antique-metal` | Muted detail on dark surfaces |
-| Hairline | `#D1C4B4` | `--color-hairline` | Borders, dividers, and image frames |
-
-#### Color Rules
-
-- Keep 70–80% of visible surfaces in Off-white, Warm Ivory, or photography.
-- Use Ebony for body text rather than pure black.
-- Limit solid Dark Walnut or Ebony to one major content band plus the footer.
-- Use Muted Brass for rules, active indicators, focus-adjacent detail, or large display text only; it is not a default body-copy color.
-- Do not use metallic gradients, faux-gold effects, or glossy highlights.
-- Photography supplies variation. Do not add colors merely to differentiate sections.
-
-### Typography
-
-The type system pairs an expressive editorial serif with a clean modern sans-serif.
-
-**Display and headings:** `Cormorant Garamond`, with `Times New Roman` and `Georgia` fallbacks. Use weight 500 for most headings and 600 only for compact emphasis. Uppercase display copy may track slightly tighter; never use a heavy black weight.
-
-**Body and interface:** `Manrope`, with `Inter`, `Segoe UI`, and system sans-serif fallbacks. Use weight 400 for reading text and 600 for buttons or concise labels.
-
-| Role | Size | Line height | Tracking | Family | Weight |
-|---|---:|---:|---:|---|---:|
-| Eyebrow / label | 12px | 1.2 | `0.18em` | Sans | 600 |
-| Body small | 14px | 1.55 | `0` | Sans | 400 |
-| Body | 16px | 1.65 | `0` | Sans | 400 |
-| Body large | 20px | 1.5 | `-0.01em` | Sans | 400 |
-| Subheading | 28px | 1.2 | `-0.015em` | Serif | 500 |
-| Heading small | 36px | 1.08 | `-0.02em` | Serif | 500 |
-| Heading | 52px | 1.0 | `-0.025em` | Serif | 500 |
-| Heading large | 72px | 0.94 | `-0.03em` | Serif | 500 |
-| Display | 96px | 0.88 | `-0.035em` | Serif | 500 |
-| Price | 80px | 0.9 | `-0.03em` | Serif | 500 |
-
-Use fluid sizing in implementation. The display should resolve approximately as `clamp(3.5rem, 8vw, 6rem)` and the main section heading as `clamp(2.75rem, 5vw, 4.5rem)`.
-
-#### Typography Rules
-
-- Major headlines are editorial serif; supporting copy, navigation, buttons, prices metadata, and labels are sans-serif.
-- Uppercase is reserved for the hero, short headings, labels, CTAs, photographic-look names, and event names.
-- Keep prose in sentence case and a comfortable measure of 45–65 characters.
-- Do not center every section. Alternate restrained left alignment, split layouts, and rare centered statements.
-- Do not use playful script, condensed display, outlined, distressed, or typewriter fonts.
-
-### Spacing and Layout
-
-**Base unit:** 4px<br>
-**Page max width:** 1280px<br>
-**Reading measure:** 65ch<br>
-**Desktop section rhythm:** 120–144px<br>
-**Mobile section rhythm:** 72–96px
-
-The spacing scale is `4, 8, 12, 16, 24, 32, 40, 48, 64, 80, 96, 120, 144`.
-
-Use a 12-column desktop grid, a 6-column tablet grid, and a 4-column mobile grid. Full-bleed photography may leave the container; text remains aligned to the grid. Asymmetry is intentional but must still feel calm and balanced.
-
-### Shape
-
-| Element | Radius |
-|---|---:|
-| Hairline/photo edge | 2px |
-| Buttons and inputs | 4px |
-| Cards and panels | 8px |
-| Circular controls only | 9999px |
-
-Rounded geometry should feel subtle and crafted. Do not use oversized pill cards, bubbly containers, or nested rounded panels.
-
-### Surfaces and Elevation
-
-| Level | Surface | Purpose |
-|---|---|---|
-| 0 | Off-white | Primary page canvas |
-| 1 | Warm Ivory | Soft editorial section |
-| 2 | Cream Paper | Photo mat, quiet package detail, selected neutral state |
-| 3 | Dark Walnut | Signature package or one intentional contrast band |
-| 4 | Ebony | Footer and highest-emphasis detail |
-
-Prefer whitespace, cropping, hairline borders, and tonal surface changes over shadows. Standard cards have no drop shadow. A photographic print may use one soft shadow: `0 24px 60px rgba(45, 33, 27, 0.14)`. Do not stack multiple shadows.
-
-## Photography Direction
-
-Photography is the primary visual language. It should communicate the physical booth, the privacy of the enclosure, the act of making photographs, and the printed result.
-
-### Subject Priority
-
-1. The full enclosed FOTOHAVN booth in a real event environment.
-2. Guests inside or entering the booth, shown candidly and respectfully.
-3. Printed strips held, exchanged, pinned, or resting on tactile surfaces.
-4. Close details: curtain, flash, camera, metal fittings, wood, paper, and hands.
-5. Comparative examples of the four photographic looks.
-
-### Treatment
-
-- Favor warm available light, soft flash, visible texture, and natural skin tone.
-- Use editorial crops with deliberate negative space for type.
-- Preserve subtle grain and material detail; do not apply fake heavy film damage.
-- Use a mix of landscape, portrait, and narrow photo-strip proportions.
-- Borders may resemble a restrained photographic print mat, not a scrapbook.
-- Never use party stock photography, fake bokeh overlays, confetti, balloons, neon, or generic camera icons.
-- Do not represent photographic looks as one-click novelty filters. Show credible full-frame examples with consistent subjects where possible.
-
-When approved FOTOHAVN imagery is unavailable, implementation should use purpose-made editorial photo assets or omit optional images. Do not ship blank placeholder boxes or unrelated stock-party imagery.
-
-## Components
-
-### Navigation
-
-A quiet sticky bar approximately 72px tall. It begins transparent over the hero when contrast is sufficient and becomes Off-white with a hairline lower border on scroll. FOTOHAVN sits left; minimal text links sit right with one compact `BOOK FOTOHAVN` action. Use no icon row.
-
-### Primary Button
-
-Ebony background, Off-white text, 1px Ebony border, 4px radius, minimum height 48px, and 16px × 22px padding. Label uses 12–13px sans-serif, weight 600, uppercase, and `0.12em` tracking. Hover shifts to Dark Walnut; focus uses a 2px high-contrast ring with a 3px offset.
-
-### Secondary Button
-
-Transparent background with a current-text hairline border. On photography, use Off-white text and border; on light surfaces, use Ebony. Hover introduces a restrained translucent surface. It must remain visibly secondary to booking.
-
-### Editorial Text Link
-
-Text-only action with a 1px underline offset by 5–6px. Use for `EXPLORE THE EXPERIENCE` when a bordered second button feels too heavy.
-
-### Section Label
-
-Short uppercase sans-serif label with `0.18em` tracking. Use Soft Brown on light surfaces and Antique Metal on dark surfaces. A short Muted Brass rule may precede it.
-
-### Editorial Media Frame
-
-Photography sits in a 2px radius frame with optional 1px Hairline border. Captions use small sans-serif text and align to the image edge. Never overlay badges, icon buttons, or decorative stickers.
-
-### Experience Feature
-
-One photograph, a short uppercase title, and one sentence. The three items—Enclosed, Printed, Distinctive—share a baseline but may use different photo proportions. No icons.
-
-### Photographic Look Selector
-
-The selector combines one dominant example image with four text-led tabs: Classic, Vintage, Monochrome, and FOTOHAVN Signature. The active tab uses an Ebony label and Muted Brass rule; inactive tabs use Soft Brown. Selecting a tab crossfades the image and updates its descriptive caption without moving the surrounding layout.
-
-Use accessible tab semantics, visible focus, arrow-key navigation, and a URL/hash or anchor fallback. If the target platform supports only links, each option should jump to its corresponding example figure.
-
-### Signature Experience Block
-
-This is an editorial pricing statement, not a pricing card. Use one full-width composition with a large `₱8,500`, large `3 HOURS`, a concise inclusion list, and one booking action. A Dark Walnut surface is allowed here when the rest of the page stays light. Do not add ribbons, “best value,” comparisons, crossed-out pricing, or multiple packages.
-
-### Gallery Composition
-
-Use an asymmetric 12-column composition with large and small photographs, controlled overlaps of no more than 24px, occasional photo-mat borders, and generous gaps. Avoid equal square tiles, carousel dots, social-media chrome, or an Instagram-style grid.
-
-### Event Feature
-
-Each event type uses a large photograph and minimal uppercase title. Alternate image alignment or use a measured editorial sequence. Do not turn the five event types into small icon cards.
-
-## Page Architecture
-
-The production site follows this order.
-
-### 1. Hero
-
-Use a sophisticated full-width image of the FOTOHAVN booth at approximately 80–90svh. Place the text in genuine negative space, preferably lower-left or left-center. A restrained directional image overlay may be used only to preserve text contrast; keep the photograph luminous rather than cinematic.
-
-**Headline:** `PHOTOGRAPHS,` / `DEVELOPED DIFFERENTLY.`<br>
-**Supporting text:** `An enclosed vintage photobooth experience for celebrations worth remembering.`<br>
-**Primary CTA:** `BOOK FOTOHAVN`<br>
-**Secondary CTA:** `EXPLORE THE EXPERIENCE`
-
-The first viewport must communicate a premium photography experience before it communicates rental logistics.
-
-### 2. The FOTOHAVN Experience
-
-**Heading:** `THE FOTOHAVN EXPERIENCE`<br>
-**Intro:** `A little room for photographs, laughter, and moments you'll want to keep.`
-
-Present three photography-led features:
-
-- **ENCLOSED** — A private little space made for candid moments.
-- **PRINTED** — Take home photographs, not just digital files.
-- **DISTINCTIVE** — Choose from FOTOHAVN's specialized photographic looks.
-
-### 3. Photographic Looks
-
-This is one of the two most visually important sections after the hero.
-
-**Eyebrow:** `FOTOHAVN PHOTOGRAPHIC LOOKS`<br>
-**Heading:** `CHOOSE YOUR LOOK`<br>
-**Subheading:** `One booth. Four ways to remember it.`
-
-- **CLASSIC** — Clean, timeless tones with subtle analog character.
-- **VINTAGE** — Warm, faded tones inspired by old photographs.
-- **MONOCHROME** — Rich black-and-white with a classic studio feel.
-- **FOTOHAVN SIGNATURE** — A distinctive FOTOHAVN house look developed specifically for the brand.
-
-On desktop, use a 7/5 split with the dominant image on one side and the selector on the other. On mobile, place the image first and use a horizontally scrollable tab list or compact stacked list with clear selection.
-
-### 4. Signature Package
-
-**Eyebrow:** `SIGNATURE EXPERIENCE`<br>
-**Heading:** `THE FOTOHAVN EXPERIENCE`<br>
-**Price:** `₱8,500`<br>
-**Duration:** `3 HOURS`
-
-Include:
-
-- 3 hours of unlimited booth sessions
-- Printed photo strips
-- Digital copies
-- Event attendant
-- Custom event photo template
-- Specialized FOTOHAVN photographic looks
-- Setup & teardown
-
-**CTA:** `BOOK FOTOHAVN`<br>
-**Supporting line:** `ONE BOOTH. ONE EXPERIENCE. YOUR LOOK.`
-
-Use a strong grid, generous space, and one fine brass rule. The price and duration may be visually paired but should not sit inside a conventional rounded pricing card.
-
-### 5. Gallery
-
-**Heading:** `SEE IT IN ACTION`
-
-Build an editorial sequence rather than a uniform grid: one landscape anchor, one tall portrait, one narrow strip detail, and supporting candid images. Vary scale and vertical position while keeping calm margins. Use approved FOTOHAVN photographs whenever available.
-
-### 6. Events
-
-**Heading:** `MADE FOR MOMENTS LIKE THESE`
-
-Feature:
-
-- `WEDDINGS`
-- `DEBUTS`
-- `BIRTHDAYS`
-- `CORPORATE EVENTS`
-- `PRIVATE CELEBRATIONS`
-
-Use large visual moments with minimal text. The photography should carry the difference between event types; the interface should not introduce color coding or themed graphics.
-
-### 7. Brand Story
-
-**Heading:** `MORE THAN A PHOTOBOOTH.`
-
-**Approved editorial copy:**
-
-> FOTOHAVN was created for people who want more than a quick snapshot. Step inside, draw the curtain, and take a little time to laugh, experiment, and make something together. Our vintage-inspired booth pairs an intimate experience with distinctive photographic looks and physical prints—keepsakes made to be held, shared, and kept long after the celebration.
-
-Pair the story with one quiet booth-detail or print-handling photograph. Avoid founder-corporate language or a dense timeline.
-
-### 8. Final CTA
-
-Use one visually striking booth or print photograph with ample negative space, or a restrained Warm Ivory statement panel beside photography.
-
-**Headline:** `LET'S MAKE SOMETHING WORTH KEEPING.`<br>
-**Supporting text:** `Bring FOTOHAVN to your next celebration.`<br>
-**CTA:** `INQUIRE NOW`
-
-The CTA links to the approved FOTOHAVN Instagram direct-message route.
-
-### Footer
-
-Keep the footer minimal on an Ebony surface.
-
-**FOTOHAVN**<br>
-**PHOTOGRAPHS, DEVELOPED DIFFERENTLY.**
-
-Links: Instagram · Facebook · TikTok<br>
-Legal: `© 2026 FOTOHAVN`
-
-## Interaction and Motion
-
-- Standard interaction duration: 240ms.
-- Fast hover/focus feedback: 150ms.
-- Editorial reveal: up to 600ms using opacity and a maximum 16px vertical translation.
-- Image hover scale: maximum `1.015`; never create dramatic zoom.
-- Photographic-look transition: 240ms crossfade with stable dimensions.
-- Sticky navigation may transition its background, border, and text color.
-- Do not use autoplay carousels, bouncing elements, parallax that fights scrolling, cursor effects, or ornamental looping animation.
-- Respect `prefers-reduced-motion` by removing transforms and using immediate or near-immediate state changes.
-
-## Responsive Behavior
-
-- Preserve image priority on every breakpoint; do not collapse the site into text followed by tiny thumbnails.
-- Hero text must remain legible without covering the booth’s key details.
-- Shift split layouts to a single column below approximately 768px.
-- Keep at least 24px mobile page gutters and 48px tablet gutters.
-- Allow photographic-look tabs to scroll horizontally only when labels remain fully readable.
-- Convert gallery overlaps to a clean stacked rhythm on small screens.
-- Keep CTAs at least 44px tall and full-width only when the narrow viewport requires it.
-
-## Accessibility
-
-- Maintain at least WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text and controls.
-- Do not use Muted Brass for small body text on light surfaces.
-- Provide a visible 2px focus ring with a 3px offset on every interactive element.
-- Use semantic headings, landmarks, buttons, links, lists, and tabs.
-- Give photography concise, purposeful alt text; decorative texture assets use empty alt text.
-- Keep body copy at 16px minimum and avoid long centered paragraphs.
-- Never communicate the selected photographic look by color alone; pair the brass rule with text state and ARIA selection.
-- Keep inquiry links descriptive and ensure external forms expose an accessible name.
-
-## Do and Don’t
-
-### Do
-
-- Let one excellent photograph dominate each major section.
-- Use generous negative space and strong alignment.
-- Use serif scale, cropping, and tonal contrast to create drama.
-- Use physical details—paper, curtain, wood, metal, flash, and hands—to make the experience tactile.
-- Keep brass accents thin, quiet, and intentional.
-- Present one signature package with confidence.
-- Treat photographic looks as authored image treatments with credible examples.
-
-### Don’t
-
-- Don’t use party motifs, confetti, balloons, neon, or celebratory clip art.
-- Don’t use pastel category cards from the reference.
-- Don’t use a generic wedding-supplier template or dense package comparison.
-- Don’t over-darken photographs or fill the page with black sections.
-- Don’t add icons where photography or type can communicate the idea.
-- Don’t use gold gradients, metallic bevels, or ornate vintage decoration.
-- Don’t turn the gallery into a social feed.
-- Don’t call photographic looks “filters.”
-
-## Implementation Contract
-
-- `variables.css` is the canonical CSS custom-property source.
-- `tokens.json` is the canonical machine-readable token source and should mirror the same primitive values.
-- `theme.css` exposes the same approved primitives to Tailwind v4.
-- Load the approved serif and sans font files before relying on the named families; fallbacks must remain functional.
-- Use real or purpose-made photography assets. Do not approximate imagery with CSS drawings, emoji, icons, or empty blocks.
-- Preserve the page order, core copy, one-package model, and booking/inquiry hierarchy defined here.
-
-## Reference Inheritance Summary
-
-**Retain from the reference:** generous whitespace, poster-scale hierarchy, flat surfaces, minimal shadow, controlled radii, tight grid discipline, and a confident light-to-dark rhythm.
-
-**Replace for FOTOHAVN:** pastel taxonomy → restrained material palette; geometric-only typography → editorial serif plus modern sans; gradient/illustration hero → immersive booth photography; product card grids → image-led editorial compositions; software conversion language → intimate photography-experience language.
-
-**Reject entirely:** confetti, loud multi-hue accents, generic pricing cards, novelty-filter framing, excessive icons, and decorative party styling.
+Earlier versions of this document specified a four-look selector (Classic, Vintage, Monochrome, FOTOHAVN Signature), a `₱8,500 / 3 HOURS` signature package block, a gallery section, an events section, a brand-story section, an uppercase hero, and `BOOK FOTOHAVN` / `INQUIRE NOW` actions. None of these are on the live website, and they are no longer part of this interpretation. The history is in git.

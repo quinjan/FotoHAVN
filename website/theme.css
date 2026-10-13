@@ -1,3 +1,4 @@
+/* Website (Tailwind v4) interpretation of the shared FOTOHAVN brand tokens (../brand/tokens/tokens.json). See DESIGN.md. */
 @theme {
   /* FOTOHAVN primitive colors */
   --color-warm-ivory: #F3EBDD;

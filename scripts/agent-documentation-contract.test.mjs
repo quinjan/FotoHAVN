@@ -24,6 +24,11 @@ const promptRoutes = [
     target: "docs/agents/domain.md",
   },
   {
+    prompt: "design a FOTOHAVN poster",
+    trigger: /Brand, visual identity/,
+    target: "brand/README.md",
+  },
+  {
     prompt: "fix a Camera bug",
     trigger: /Desktop app/,
     target: "app/AGENTS.md",
@@ -54,6 +59,7 @@ for (const route of promptRoutes) {
 test("every root task route points to an existing document", () => {
   for (const target of [
     "docs/agents/domain.md",
+    "brand/README.md",
     "app/AGENTS.md",
     "website/AGENTS.md",
     "website/docs/website-analytics.md",
@@ -108,8 +114,21 @@ test("issue tracker keeps optional Wayfinder behavior behind a pointer", () => {
   assert.equal(existsSync(path.join(repoRoot, "docs/agents/wayfinder.md")), true);
 });
 
+function markdownFiles(relativeDirectory) {
+  return readdirSync(path.join(repoRoot, relativeDirectory), { recursive: true })
+    .filter((entry) => entry.endsWith(".md"))
+    .map((entry) => path.posix.join(relativeDirectory, entry.split(path.sep).join("/")));
+}
+
 test("local Markdown links in the documentation entry points resolve", () => {
-  for (const document of ["README.md", "CONTEXT-MAP.md", "app/README.md", "website/README.md"]) {
+  for (const document of [
+    "README.md",
+    "CONTEXT-MAP.md",
+    "app/README.md",
+    "website/README.md",
+    "website/DESIGN.md",
+    ...markdownFiles("brand"),
+  ]) {
     const content = read(document);
     const documentDirectory = path.dirname(path.join(repoRoot, document));
     const links = [...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((match) => match[1]);
@@ -124,6 +143,28 @@ test("local Markdown links in the documentation entry points resolve", () => {
       );
     }
   }
+});
+
+test("brand system tokens are complete and the website interprets them", () => {
+  const brand = JSON.parse(read("brand/tokens/tokens.json"));
+  const colors = Object.entries(brand.color);
+  assert.equal(colors.length, 9, "brand palette has nine primitive colors");
+  for (const [name, token] of colors) {
+    const meta = token.$extensions?.["com.fotohavn.brand"];
+    assert.match(token.$value, /^#[0-9A-F]{6}$/, `${name} has an uppercase HEX value`);
+    assert.equal(meta?.rgb?.length, 3, `${name} has RGB`);
+    assert.equal(meta?.cmyk?.length, 4, `${name} has CMYK`);
+  }
+
+  const website = JSON.parse(read("website/tokens.json"));
+  for (const [name, token] of colors) {
+    assert.equal(website.color[name]?.$value?.toUpperCase(), token.$value, `website ${name} matches brand`);
+  }
+
+  const design = read("website/DESIGN.md");
+  assert.match(design, /## Brand interpretation/);
+  assert.match(design, /\.\.\/brand\/README\.md/);
+  assert.match(read("marketing/reels/AGENTS.md"), /brand\/README\.md/);
 });
 
 test("Claude compatibility shims delegate to the canonical agent guides", () => {

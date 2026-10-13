@@ -15,7 +15,7 @@ Use these project rules with the managed Next.js block above.
 ## Load
 
 - Read `../CONTEXT.md` and `CONTEXT.md` before changing website behavior or product language.
-- Read `DESIGN.md` before changing visuals, layout, motion, imagery, icons, or customer-facing copy.
+- Read `../brand/README.md` and the affected `../brand/` documents, then `DESIGN.md`, before changing visuals, layout, motion, imagery, icons, or customer-facing copy. `DESIGN.md` is the website's interpretation of `../brand/`.
 - Read `docs/website-analytics.md` before changing analytics, consent, inquiry tracking, or privacy behavior.
 - Read `../deploy/fotohavn/docs/adr/0002-deploy-website-as-an-immutable-container.md` and `../deploy/fotohavn/AGENTS.md` for container or production work.
 
@@ -23,7 +23,8 @@ Use these project rules with the managed Next.js block above.
 
 - Resolve routes, base paths, external links, and section anchors from `site.config.ts`, `next.config.ts`, and the app tree.
 - Resolve commands from `package.json`; use focused scripts while iterating and `npm run check` for the complete local gate.
-- Treat `DESIGN.md` and its declared token files as visual authority. Treat `.handoffs/`, `design-qa.md`, generated concepts, and screenshots as evidence or proposals.
+- Treat `../brand/`, `DESIGN.md`, and its declared token files as visual authority, and the live website as the reference implementation: when `DESIGN.md` drifts from the rendered site, follow the site and update the document. Treat `.handoffs/`, `design-qa.md`, generated concepts, and screenshots as evidence or proposals.
+- When a visual change is brand-level, such as palette, type roles, voice, or logo, update `../brand/` in the same change.
 
 ## Verification
 
