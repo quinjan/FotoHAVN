@@ -1134,6 +1134,7 @@ Verification record (M1):
 - **Not proven:**
   - The "not run: no camera" path of `FotoHavn.Camera.Windows.Tests`, because a camera was connected. It is covered only by an in-process test.
   - `website/docs/research/photohavn-branding-website-benchmark.md` still links to the deleted `app/docs/design-system/`. It is website research, so it's allowed, but the link is broken.
+
 ### M2: host, two screens, bridge, and protocol (M)
 
 Tasks:
