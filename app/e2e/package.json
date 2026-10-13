@@ -1,0 +1,20 @@
+{
+  "name": "fotohavn-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "End-to-end tests that drive the real FOTOHAVN desktop app (E2E build) with a real camera.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:smoke": "playwright test --project=smoke",
+    "test:regression": "playwright test --project=regression"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  }
+}
