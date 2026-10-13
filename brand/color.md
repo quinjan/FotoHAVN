@@ -77,7 +77,7 @@ Consequences:
 
 ## Screen
 
-Treat HEX and RGB as sRGB. Color-managed tools such as browsers, Remotion, slide software, and WinUI use them directly.
+Treat HEX and RGB as sRGB. Color-managed tools such as browsers (including the desktop app's WebView2 UI), Remotion, and slide software use them directly.
 
 ## Print
 

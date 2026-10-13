@@ -40,4 +40,4 @@ Legibility and calm are part of the brand. Every interpretation meets this basel
 
 ## Verification
 
-Each interpretation names how it verifies this baseline. Examples are rendered-browser checks at the required widths, the desktop UI verification host, a proof review for print, or a frame review for video. The baseline is not a formal certification.
+Each interpretation names how it verifies this baseline. Examples are rendered-browser checks at the required widths, the desktop booth's Playwright fixture gallery at its four resolutions, a proof review for print, or a frame review for video. The baseline is not a formal certification.

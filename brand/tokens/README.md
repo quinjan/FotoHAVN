@@ -4,7 +4,7 @@
 
 ## What the file is
 
-- **Reference values, not an implementation.** Nothing builds from this file. Each interpretation (the website, a reel, a deck, a poster, and later the desktop app) reads it and writes its own implementation in its own tooling.
+- **Reference values, not an implementation.** Nothing builds from this file. Each interpretation (the website, the desktop app, a reel, a deck, or a poster) reads it and writes its own implementation in its own tooling.
 - **Medium-agnostic.** Pixel values describe the screen reference at 1×. Print and video convert by role (for example, "body text" or "display") rather than copying pixels. See [mediums.md](../mediums.md).
 - **Always current.** The file on the default branch is the current brand. It has no version numbers.
 

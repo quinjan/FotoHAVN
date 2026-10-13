@@ -6,7 +6,20 @@ node_modules/
 
 # Browser automation output
 .playwright-cli/
-app/output/playwright/
+
+# Desktop app build, test, and runtime output
+app/**/bin/
+app/**/obj/
+app/Data/
+app/output/
+app/ui/node_modules/
+app/ui/dist/
+app/ui/coverage/
+app/ui/test-results/
+app/ui/playwright-report/
+app/e2e/node_modules/
+app/e2e/test-results/
+app/e2e/playwright-report/
 
 # Frontend build output and Vite cache
 dist/

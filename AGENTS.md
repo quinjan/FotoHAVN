@@ -8,7 +8,7 @@ Route the task before exploring. Load only the branches that apply, then use the
 | --- | --- |
 | Domain language or product behavior | `docs/agents/domain.md`, beginning with its `CONTEXT-MAP.md` route |
 | Brand, visual identity, or any FOTOHAVN-branded material (decks, posters, print, social) | `brand/README.md` |
-| Desktop app or anything under `app/` | `app/AGENTS.md` |
+| Desktop app or anything under `app/` | `app/AGENTS.md`, plus `app/DESIGN.md` for desktop visuals |
 | Website or online booth under `website/` | `website/AGENTS.md` |
 | Website analytics, consent, or privacy | `website/AGENTS.md` and `website/docs/website-analytics.md` |
 | Production deployment, `deploy/`, or the deployment workflow | `deploy/fotohavn/AGENTS.md` |
@@ -21,8 +21,8 @@ Read every accepted ADR that touches the affected behavior. Surface conflicts in
 ## Authority and evidence
 
 - Treat code, configuration, package scripts, and command help as the executable source of truth.
-- Treat `CONTEXT*.md`, accepted ADRs, `brand/`, `website/DESIGN.md`, and `app/docs/design-system/` as normative within the scopes they declare. `brand/` is the shared brand system; `website/DESIGN.md` interprets it, and the live website wins when website design docs drift.
-- Treat `artifacts/`, `output/`, `.handoffs/`, `design-qa.md`, screenshots, `brand/references/`, and review records as evidence or history, not as current authority.
+- Treat `CONTEXT*.md`, accepted ADRs, `brand/`, `website/DESIGN.md`, and `app/DESIGN.md` as normative within the scopes they declare. `brand/` is the shared brand system; `website/DESIGN.md` and `app/DESIGN.md` interpret it, and the live website wins when website design docs drift.
+- Treat `artifacts/`, `output/`, `.handoffs/`, screenshots, `brand/references/`, and review records as evidence or history, not as current authority.
 
 ## Completion
 

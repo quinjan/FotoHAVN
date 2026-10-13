@@ -39,14 +39,13 @@ Use the defined product terms from [`CONTEXT.md`](../CONTEXT.md) exactly, for ex
 ## The name
 
 - **Everything a user sees says FOTOHAVN**, in uppercase: websites, apps, reels, decks, print, social, and signage. This applies inside sentence-case copy too ("Rent FOTOHAVN.").
-- Internal names are left as they are for now: code identifiers, .NET namespaces and project names (`FotoHavn.App`), the repository (`quinjan/FotoHAVN`), file and folder names, and lowercase technical slugs (`fotohavn.ph`, `deploy/fotohavn/`, `#rent-fotohavn`). Use FOTOHAVN for anything new when the technology allows it.
+- Internal names are left as they are for now: code identifiers, .NET namespaces and project names (`FotoHavn.Core`), the repository (`quinjan/FotoHAVN`), file and folder names, and lowercase technical slugs (`fotohavn.ph`, `deploy/fotohavn/`, `#rent-fotohavn`). Use FOTOHAVN for anything new when the technology allows it.
 - Never write "Fotohavn", "FotoHAVN", "Foto Havn", "FOTOHVN", or "FOTO HAVN" anywhere a user will see it.
 
 ### Known user-visible exceptions (to fix later)
 
 | Where | Currently shows | Notes |
 | --- | --- | --- |
-| Desktop booth app UI: header, window title, and several messages | `FotoHAVN` | Changing it affects the app design contract and its UI-verification reference states. Do it with the app refactor. |
 | Reel `fotohvn-evia-event`: end card and a scene name | `VISIT FOTOHVN`, `Find FOTOHVN` | Fix before rendering a master. |
 
 ## Casing

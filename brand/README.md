@@ -4,7 +4,7 @@
 
 This directory is the shared brand system for everything FOTOHAVN makes: the website and online booth, the desktop booth app, social reels, presentations, posters, print collateral, and future work.
 
-It describes the brand itself and does not depend on any tool. It contains no website code, no WinUI resources, and no Remotion components. Each product or medium writes an **interpretation** of it in its own tooling.
+It describes the brand itself and does not depend on any tool. It contains no website code, no desktop app UI code, and no Remotion components. Each product or medium writes an **interpretation** of it in its own tooling.
 
 ## Contents
 
@@ -71,7 +71,7 @@ It **must declare**:
 | --- | --- | --- |
 | Website and online booth | [`website/DESIGN.md`](../website/DESIGN.md) | Interprets this system |
 | Marketing reels | [`marketing/reels/AGENTS.md`](../marketing/reels/AGENTS.md) | Each reel interprets this system directly |
-| Desktop booth app | [`app/docs/design-system/`](../app/docs/design-system/README.md) | **Not yet aligned.** It is an independent monochrome Inter contract that predates this system. A future app refactor will reconcile it. Until then, the app contract remains authoritative for app UI. |
+| Desktop booth app | [`app/DESIGN.md`](../app/DESIGN.md) | Interprets this system |
 
 ## Changing the brand
 

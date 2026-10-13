@@ -24,8 +24,12 @@ Tracking and line height follow the role (see [typography.md](typography.md#type
 
 ## Desktop booth app
 
-- **Interpretation:** pending. The current [`app/docs/design-system/`](../app/docs/design-system/README.md) is an independent contract that predates this system.
-- When aligned, the app must also follow its own operator and Guest Cycle safety rules. Booth readability at kiosk distance takes priority over editorial density.
+- **Interpretation:** [`app/DESIGN.md`](../app/DESIGN.md). It generates its CSS from the token reference values and records each booth departure with its reason.
+- Booth readability at kiosk distance takes priority over editorial density. Type roles scale above the web reference from 1280 × 720 to 2560 × 1440, and guest reading text is at least 20px.
+- Touch targets are raised: at least 64 × 64 for guests, 112 × 112 for the shutter, and 48 × 48 for operators.
+- Guest screens never scroll as a page, and the live preview is the one dark band on the Photographs step.
+- Guest Cycle phases run under Phase Timers, with a visible countdown and `MORE TIME` near the end, so an abandoned Guest Cycle still reaches a saved Photo Strip.
+- The app must also follow its own operator and Guest Cycle safety rules. Verify at 1280 × 720, 1366 × 768, 1920 × 1080, and 2560 × 1440.
 
 ## Video: reels, stories, and shorts
 

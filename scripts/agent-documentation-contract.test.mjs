@@ -72,18 +72,34 @@ test("every root task route points to an existing document", () => {
   }
 });
 
+const desktopAdrs = [
+  "app/docs/adr/0003-react-ui-in-wpf-webview2-over-a-dotnet-brain.md",
+  "app/docs/adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md",
+  "app/docs/adr/0005-sqlite-metadata-with-file-artifacts-for-event-storage.md",
+  "app/docs/adr/0006-brain-side-composition-with-an-app-owned-catalog.md",
+  "app/docs/adr/0007-unit-first-testing-with-real-camera-end-to-end.md",
+  "app/docs/adr/0008-operator-and-guest-screens-on-bound-displays.md",
+];
+
 test("context map routes shared, desktop, and website language", () => {
   const content = read("CONTEXT-MAP.md");
   for (const target of [
     "CONTEXT.md",
     "app/CONTEXT.md",
-    "app/docs/adr/0001-capture-from-one-windows-video-stream.md",
+    ...desktopAdrs,
     "website/CONTEXT.md",
     "deploy/fotohavn/docs/adr/0002-deploy-website-as-an-immutable-container.md",
   ]) {
     assert.match(content, new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.equal(existsSync(path.join(repoRoot, target)), true);
+    assert.equal(existsSync(path.join(repoRoot, target)), true, `${target} must exist`);
   }
+
+  assert.doesNotMatch(content, /adr\/0001-/);
+  assert.equal(
+    readdirSync(path.join(repoRoot, "app", "docs", "adr")).some((entry) => entry.startsWith("0001-")),
+    false,
+    "the deleted desktop ADR 0001 must not return",
+  );
 });
 
 test("website agent file preserves managed rules and adds project routing", () => {
@@ -125,6 +141,10 @@ test("local Markdown links in the documentation entry points resolve", () => {
     "README.md",
     "CONTEXT-MAP.md",
     "app/README.md",
+    "app/AGENTS.md",
+    "app/CONTEXT.md",
+    "app/DESIGN.md",
+    ...markdownFiles("app/docs/adr"),
     "website/README.md",
     "website/DESIGN.md",
     ...markdownFiles("brand"),
@@ -167,6 +187,12 @@ test("brand system tokens are complete and the website interprets them", () => {
   assert.match(read("marketing/reels/AGENTS.md"), /brand\/README\.md/);
 });
 
+test("the desktop design interprets the brand system", () => {
+  const design = read("app/DESIGN.md");
+  assert.match(design, /## Brand interpretation/);
+  assert.match(design, /\.\.\/brand\/README\.md/);
+});
+
 test("Claude compatibility shims delegate to the canonical agent guides", () => {
   assert.equal(read("CLAUDE.md").trim(), "@AGENTS.md");
   assert.equal(read("app/CLAUDE.md").trim(), "@AGENTS.md");
@@ -198,35 +224,52 @@ test("repository root contains only cross-product modules and repository concern
     assert.equal(existsSync(path.join(repoRoot, legacyEntry)), false, `${legacyEntry} must not return to the root`);
   }
 
-  for (const appEntry of [
-    "AGENTS.md",
-    "CLAUDE.md",
-    "CONTEXT.md",
-    "README.md",
-    "FotoHAVN.slnx",
-    "Directory.Build.props",
-    "global.json",
-    "NuGet.Config",
-    "src",
-    "tests",
-    "tools",
-    "prototypes",
-    "scripts",
-    "docs",
-    "design-qa",
-    "design-qa.md",
-    "docs/local-development-guide.md",
-    "docs/design-system/README.md",
-  ]) {
-    assert.equal(existsSync(path.join(repoRoot, "app", appEntry)), true, `app/${appEntry} must exist`);
-  }
-
   assert.deepEqual(readdirSync(path.join(repoRoot, "docs")).sort(), ["agents"]);
   assert.deepEqual(
     readdirSync(path.join(repoRoot, "scripts")).sort(),
     ["agent-documentation-contract.test.mjs", "verify-agent-docs.ps1"],
   );
-  assert.deepEqual(readdirSync(path.join(repoRoot, "app", "prototypes")).sort(), ["camera-qualification"]);
+});
+
+test("desktop app module contains the rebuilt layout", () => {
+  for (const appEntry of [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "DESIGN.md",
+    "README.md",
+    "FotoHAVN.slnx",
+    "Directory.Build.props",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "src",
+    "tests",
+    "ui",
+    "e2e",
+    "scripts",
+    "docs",
+    "docs/local-development-guide.md",
+    "docs/implementation-plan.md",
+    "docs/research",
+  ]) {
+    assert.equal(existsSync(path.join(repoRoot, "app", appEntry)), true, `app/${appEntry} must exist`);
+  }
+});
+
+test("desktop app module does not keep the deleted app", () => {
+  for (const deletedEntry of [
+    "tools",
+    "prototypes",
+    "design-qa",
+    "design-qa.md",
+    "artifacts",
+    "docs/design-system",
+    "docs/field-test",
+    "docs/ux-audit",
+  ]) {
+    assert.equal(existsSync(path.join(repoRoot, "app", deletedEntry)), false, `app/${deletedEntry} must not return`);
+  }
 });
 
 test("desktop solution project paths resolve inside app", () => {
@@ -242,15 +285,11 @@ test("desktop solution project paths resolve inside app", () => {
   }
 });
 
-test("desktop UI workflows execute inside the app module", () => {
-  for (const workflowName of [
-    "ui-verification-batch-3.yml",
-    "ui-verification-batch-4.yml",
-    "ui-verification-batch-5.yml",
-  ]) {
-    const workflow = read(`.github/workflows/${workflowName}`);
-    assert.match(workflow, /working-directory: app/);
-    assert.match(workflow, /hashFiles\('app\/artifacts\/ui-verification\//);
-    assert.match(workflow, /app\/docs\/design-system\/reference-states\/targets/);
-  }
+test("desktop workflow executes inside the app module", () => {
+  const workflowPath = ".github/workflows/desktop.yml";
+  assert.equal(existsSync(path.join(repoRoot, workflowPath)), true, `${workflowPath} must exist`);
+  const workflow = read(workflowPath);
+  assert.match(workflow, /working-directory: app/);
+  assert.match(workflow, /^\s*-\s*["']?app\/\*\*["']?\s*$/m);
+  assert.match(workflow, /\.\/scripts\/verify-agent-docs\.ps1/);
 });
