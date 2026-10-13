@@ -20,13 +20,16 @@ public sealed class BrainContractTests
         Assert.Throws<ArgumentNullException>(() => new Brain(null!));
     }
 
-    // Wave B replaces this with the brain's behavior tests.
     [Fact]
-    public void Brain_connections_arrive_in_wave_B()
+    public void Brain_posts_its_first_display_read_and_connections_to_the_executor()
     {
-        using var brain = new Brain(new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoHost()));
+        var executor = new QueueExecutor();
+        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoHost()));
 
-        Assert.Throws<NotImplementedException>(() => brain.Connect(Role.Operator, _ => { }));
+        var connection = brain.Connect(Role.Guest, _ => { });
+
+        Assert.Equal(Role.Guest, connection.Role);
+        Assert.Equal(2, executor.Posted);
     }
 
     [Fact]
@@ -45,6 +48,15 @@ public sealed class BrainContractTests
         public bool IsCurrentThread => false;
 
         public void Post(Action work) => throw new NotSupportedException();
+    }
+
+    private sealed class QueueExecutor : IBrainExecutor
+    {
+        public int Posted { get; private set; }
+
+        public bool IsCurrentThread => false;
+
+        public void Post(Action work) => Posted++;
     }
 
     private sealed class NoClock : IClock
