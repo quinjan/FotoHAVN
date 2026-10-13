@@ -55,7 +55,7 @@ internal static class ProtocolSamples
             : (ICommandPayload)Activator.CreateInstance(command.PayloadType)!;
 
     public static OperatorPresentation EmptyEventList { get; } =
-        new(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null);
+        new(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null);
 
     public static OperatorPresentation EventListWithOverlays { get; } = new(
         OperatorSurface.EventList,
@@ -66,10 +66,14 @@ internal static class ProtocolSamples
         ]),
         new RunningEventPanel(),
         new OperatorOverlays(new ConfirmationOverlay(), new IdentifyDisplaysOverlay(), new NoticeOverlay("The chosen guest display isn't connected.")),
+        null,
         null);
 
     public static OperatorPresentation OperatorFatal { get; } =
-        new(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."));
+        new(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."), null);
+
+    public static OperatorPresentation OperatorStorageError { get; } =
+        new(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"));
 
     public static GuestPresentation GuestStart { get; } =
         new(GuestSurface.Start, new StartView(false), GuestOverlays.None, null);
@@ -94,6 +98,7 @@ internal static class ProtocolSamples
         ("presentation-operator-empty-event-list", new OperatorPresentationMessage(2, EmptyEventList)),
         ("presentation-operator-event-list-with-overlays", new OperatorPresentationMessage(3, EventListWithOverlays)),
         ("presentation-operator-fatal", new OperatorPresentationMessage(4, OperatorFatal)),
+        ("presentation-operator-storage-error", new OperatorPresentationMessage(5, OperatorStorageError)),
         ("presentation-guest-start", new GuestPresentationMessage(2, GuestStart)),
         ("presentation-guest-start-with-overlays", new GuestPresentationMessage(3, GuestStartWithOverlays)),
         ("presentation-guest-fatal", new GuestPresentationMessage(4, GuestFatal)),

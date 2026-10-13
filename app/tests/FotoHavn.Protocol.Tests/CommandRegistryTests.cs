@@ -11,7 +11,7 @@ public sealed class CommandRegistryTests
         "SetPin", "SaveEvent", "SaveAndStartEvent", "LeaveEventSetup", "ConfirmLeave",
         "OpenGallery", "LoadMoreGuestCycles", "OpenGuestCycle", "CloseGuestCycle", "OpenGuestCycleFolder", "DeleteGuestCycle",
         "ConfirmDeleteGuestCycle", "CancelDeleteGuestCycle", "CloseGallery",
-        "EndEvent", "ConfirmEndEvent", "KeepRunning", "RetryAssistance",
+        "EndEvent", "ConfirmEndEvent", "KeepRunning", "RetryAssistance", "RetryStorage",
     ];
 
     private static readonly string[] GuestRows =

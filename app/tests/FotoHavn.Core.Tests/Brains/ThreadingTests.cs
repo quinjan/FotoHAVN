@@ -77,7 +77,7 @@ public sealed class ThreadingTests
         var ids = new string[Clients][];
         Parallel.For(0, Clients, i =>
         {
-            connections[i].Receive("""{"type":"hello","protocolVersion":1}""");
+            connections[i].Receive($$"""{"type":"hello","protocolVersion":{{ProtocolVersion.Current}}}""");
             ids[i] = [.. Enumerable.Range(0, CommandsPerClient).Select(_ => Guid.NewGuid().ToString())];
             foreach (var id in ids[i])
             {
@@ -108,7 +108,7 @@ public sealed class ThreadingTests
         var broken = harness.Brain.Connect(Role.Operator, _ => throw new InvalidOperationException("Socket closed."));
         var healthy = harness.Handshake(Role.Operator);
 
-        broken.Receive("""{"type":"hello","protocolVersion":1}""");
+        broken.Receive($$"""{"type":"hello","protocolVersion":{{ProtocolVersion.Current}}}""");
         harness.Brain.ShowFatal("Stopped.");
         harness.Run();
 

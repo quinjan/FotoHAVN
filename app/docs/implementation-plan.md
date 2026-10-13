@@ -532,6 +532,7 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 | Event setup (operator) | `ChangeEventField(field, value)`, `SelectCamera(deviceId)`, `SelectGuestDisplay(displayId)`, `IdentifyDisplays`, `SetMirror(bool)`, `SetCountdown(seconds)`, `SetOfferedTemplates(ids)`, `SetDefaultTemplate(id)`, `SetOfferedLooks(ids)`, `SetDefaultLook(id)`, `SetPhaseTimer(phase, seconds)`, `SetGuestGallery(bool)`, `SetPin(pin, confirmation)`, `SaveEvent`, `SaveAndStartEvent`, `LeaveEventSetup`, `ConfirmLeave(choice)` |
 | Event Gallery (operator) | `OpenGallery(eventId)`, `LoadMoreGuestCycles(cursor)`, `OpenGuestCycle(guestCycleId)`, `CloseGuestCycle`, `OpenGuestCycleFolder(guestCycleId)`, `DeleteGuestCycle(guestCycleId)`, `ConfirmDeleteGuestCycle`, `CancelDeleteGuestCycle`, `CloseGallery` |
 | Running Event (operator) | `EndEvent`, `ConfirmEndEvent`, `KeepRunning`, `RetryAssistance` |
+| Storage (operator) | `RetryStorage` |
 | Guest Cycle (guest) | `BeginGuestCycle`, `SelectTemplate(id)`, `GoToStep(step)`, `ShowCameraTab`, `ShowArrangeTab`, `TakePhotographs`, `StopCapture`, `SelectPosition(index)`, `BeginRetake(index)`, `AcceptRetake`, `TryAgain`, `KeepOriginal`, `BeginMove(index)`, `MoveTo(index)`, `CancelMove`, `DragPlace(sourceIndex, captureId, revision, targetIndex)`, `SelectLook(id)`, `FinishStrip`, `MoreTime`, `StartOver`, `ConfirmStartOver`, `KeepGoing` |
 | Guest Screen (guest) | `BeginExitHold`, `CompleteExitHold`, `SubmitPin(digits)`, `CancelExit`, `RetryAssistance`, `OpenGuestGallery`, `LoadMoreGuestStrips(cursor)`, `OpenGuestStrip(guestCycleId)`, `CloseGuestStrip`, `BackToStart` |
 
@@ -541,7 +542,8 @@ The brain rejects operator commands that would change the running Event (edit, d
 
 **Operator presentation**
 
-- `surface`: `eventList`, `eventSetup`, `eventGallery`, `guestCycleDetail`, `guestScreenActive` (single-screen placeholder), or `fatal`.
+- `surface`: `eventList`, `eventSetup`, `eventGallery`, `guestCycleDetail`, `guestScreenActive` (single-screen placeholder), `storageError`, or `fatal`.
+- A `storageError` surface carries `{ kind, dataPath }`: `kind` is `diskFull`, `accessDenied`, `locked`, `notLocalDisk`, `cloudSynced`, `notWritable`, `integrityFailed`, `corrupt`, or `unknown`, and `dataPath` is the Data folder shown to the operator. Its only action is `RetryStorage`.
 - An optional `runningEvent` panel.
 - Overlays: `confirmation`, `identifyDisplays`, and `notice`.
 
@@ -632,7 +634,7 @@ CREATE TABLE guest_cycles (
 CREATE TABLE captures (
   id TEXT PRIMARY KEY,
   guest_cycle_id TEXT NOT NULL REFERENCES guest_cycles(id),
-  sequence INTEGER NOT NULL,
+  sequence INTEGER NOT NULL CHECK (sequence >= 1),
   file_name TEXT NOT NULL,
   byte_length INTEGER NOT NULL, sha256 TEXT NOT NULL,
   width INTEGER NOT NULL, height INTEGER NOT NULL,
@@ -1587,4 +1589,8 @@ Resolved during M0 (2026-10-13). Each is a proposed default adopted while drafti
 D35's wording was clarified during M0: while an Event runs, the operator can't edit, delete, or restart the running Event, or start any Event; other Events stay editable.
 
 D21's wording was clarified during M0: `START OVER` appears on the Template, Photographs, and Filters steps, not on Keepsake, because a Guest Cycle is recorded as completed when its Photo Strip is committed and the Keepsake step only displays it.
+
+Raised during M4 (2026-10-14):
+
+- **Q18** The M4 unit list names constraint violations for "window numbers", but the schema has no window-number column (the arrangement is JSON). → `captures.sequence` gets `CHECK (sequence >= 1)`, and the store validates that an arrangement is 1–4 distinct kept Capture ids of the cycle. Relied on by M4.
 

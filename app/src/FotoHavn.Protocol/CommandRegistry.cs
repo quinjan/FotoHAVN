@@ -76,6 +76,9 @@ public static class CommandRegistry
         Operator<KeepRunningPayload>(),
         Descriptor<RetryAssistancePayload>(CommandAudience.Both),
 
+        // Storage (operator)
+        Operator<RetryStoragePayload>(),
+
         // Guest Cycle (guest)
         Guest<BeginGuestCyclePayload>(),
         Guest<SelectTemplatePayload>(),

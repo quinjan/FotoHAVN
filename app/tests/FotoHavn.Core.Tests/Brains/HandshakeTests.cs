@@ -65,7 +65,7 @@ public sealed class HandshakeTests
         harness.Run();
 
         Assert.Equal(
-            """{"type":"welcome","role":"guest","protocolVersion":1,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
+            """{"type":"welcome","role":"guest","protocolVersion":2,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
             Assert.Single(client.Raw));
     }
 
@@ -83,7 +83,7 @@ public sealed class HandshakeTests
 
     [Theory]
     [InlineData(0)]
-    [InlineData(2)]
+    [InlineData(3)]
     [InlineData(-1)]
     public void A_different_protocol_version_is_answered_with_protocol_mismatch(int uiVersion)
     {
@@ -157,7 +157,7 @@ public sealed class HandshakeTests
         using var harness = new BrainHarness();
         var client = harness.Connect(Role.Guest);
 
-        client.Send("""{"type":"hello","protocolVersion":1,"role":"operator"}""");
+        client.Send($$"""{"type":"hello","protocolVersion":{{ProtocolVersion.Current}},"role":"operator"}""");
         client.Hello();
         harness.Run();
 

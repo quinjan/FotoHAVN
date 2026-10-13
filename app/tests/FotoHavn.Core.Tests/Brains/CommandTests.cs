@@ -90,7 +90,7 @@ public sealed class CommandTests
         var guest = harness.Handshake(Role.Guest);
 
         guest.Send($$"""{"type":"command","id":"{{Guid.NewGuid()}}","name":"OpenNewEvent","payload":{},"role":"operator"}""");
-        guest.Send("""{"type":"hello","protocolVersion":1,"role":"operator"}""");
+        guest.Send($$"""{"type":"hello","protocolVersion":{{ProtocolVersion.Current}},"role":"operator"}""");
         var stillGuest = guest.Command("OpenNewEvent", """{"role":"operator"}""");
         guest.Hello();
         harness.Run();

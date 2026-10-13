@@ -130,6 +130,11 @@ public sealed record KeepRunningPayload : ICommandPayload;
 /// <summary>Allowed from both roles: the running-Event panel and the Guest Screen's Operator Assistance.</summary>
 public sealed record RetryAssistancePayload : ICommandPayload;
 
+// Storage (operator)
+
+/// <summary>Operator-only: try opening storage again from the storage error surface (plan section 10).</summary>
+public sealed record RetryStoragePayload : ICommandPayload;
+
 // Guest Cycle (guest)
 public sealed record BeginGuestCyclePayload : ICommandPayload;
 

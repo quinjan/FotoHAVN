@@ -11,7 +11,7 @@ public sealed class MessageTests
     [Fact]
     public void Protocol_version_starts_at_one()
     {
-        Assert.Equal(1, ProtocolVersion.Current);
+        Assert.Equal(2, ProtocolVersion.Current);
     }
 
     [Fact]

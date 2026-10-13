@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 1
+      "const": 2
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -621,6 +621,9 @@
           "$ref": "#/$defs/RetryAssistanceCommand"
         },
         {
+          "$ref": "#/$defs/RetryStorageCommand"
+        },
+        {
           "$ref": "#/$defs/BeginGuestCycleCommand"
         },
         {
@@ -830,6 +833,9 @@
         "RetryAssistance": {
           "$ref": "#/$defs/RetryAssistancePayload"
         },
+        "RetryStorage": {
+          "$ref": "#/$defs/RetryStoragePayload"
+        },
         "BeginGuestCycle": {
           "$ref": "#/$defs/BeginGuestCyclePayload"
         },
@@ -962,6 +968,7 @@
         "ConfirmEndEvent",
         "KeepRunning",
         "RetryAssistance",
+        "RetryStorage",
         "BeginGuestCycle",
         "SelectTemplate",
         "GoToStep",
@@ -2668,6 +2675,16 @@
               "type": "null"
             }
           ]
+        },
+        "storageError": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageErrorView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2675,7 +2692,8 @@
         "eventList",
         "runningEvent",
         "overlays",
-        "fatal"
+        "fatal",
+        "storageError"
       ],
       "additionalProperties": false
     },
@@ -2712,7 +2730,8 @@
         "eventGallery",
         "guestCycleDetail",
         "guestScreenActive",
-        "fatal"
+        "fatal",
+        "storageError"
       ]
     },
     "OperatorWelcomeMessage": {
@@ -2872,6 +2891,37 @@
     },
     "RetryAssistancePayload": {
       "title": "RetryAssistancePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RetryStorageCommand": {
+      "title": "RetryStorageCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "RetryStorage"
+        },
+        "payload": {
+          "$ref": "#/$defs/RetryStoragePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "RetryStoragePayload": {
+      "title": "RetryStoragePayload",
       "type": "object",
       "additionalProperties": false
     },
@@ -3738,6 +3788,37 @@
     "StopCapturePayload": {
       "title": "StopCapturePayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "StorageErrorReason": {
+      "title": "StorageErrorReason",
+      "enum": [
+        "diskFull",
+        "accessDenied",
+        "locked",
+        "notLocalDisk",
+        "cloudSynced",
+        "notWritable",
+        "integrityFailed",
+        "corrupt",
+        "unknown"
+      ]
+    },
+    "StorageErrorView": {
+      "title": "StorageErrorView",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/StorageErrorReason"
+        },
+        "dataPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "dataPath"
+      ],
       "additionalProperties": false
     },
     "SubmitPinCommand": {

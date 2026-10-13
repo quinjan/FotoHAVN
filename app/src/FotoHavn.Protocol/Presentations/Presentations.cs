@@ -16,6 +16,9 @@ public enum OperatorSurface
     /// <summary>Single-screen placeholder while the Guest Screen covers the Operator Screen.</summary>
     GuestScreenActive,
     Fatal,
+
+    /// <summary>Storage couldn't open or failed outside a Guest Cycle; the operator sees the cause and <c>RetryStorage</c>.</summary>
+    StorageError,
 }
 
 /// <summary>The operator role's presentation.</summary>
@@ -24,12 +27,33 @@ public enum OperatorSurface
 /// <param name="RunningEvent">The running-Event panel; null while no Event runs (always null until M6).</param>
 /// <param name="Overlays">Overlays on top of the surface; each is null when not shown.</param>
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.Fatal"/>.</param>
+/// <param name="StorageError">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.StorageError"/>.</param>
 public sealed record OperatorPresentation(
     OperatorSurface Surface,
     EventListView? EventList,
     RunningEventPanel? RunningEvent,
     OperatorOverlays Overlays,
-    FatalView? Fatal);
+    FatalView? Fatal,
+    StorageErrorView? StorageError);
+
+/// <summary>What went wrong with storage, in the terms the operator screen can act on. The UI owns the copy for each.</summary>
+public enum StorageErrorReason
+{
+    DiskFull,
+    AccessDenied,
+    Locked,
+    NotLocalDisk,
+    CloudSynced,
+    NotWritable,
+    IntegrityFailed,
+    Corrupt,
+    Unknown,
+}
+
+/// <summary>The storage error surface (plan section 10): the cause and the Data folder it concerns.</summary>
+/// <param name="Kind">The cause.</param>
+/// <param name="DataPath">The absolute Data folder path, shown to the operator. It holds no personal data beyond what the operator already sees.</param>
+public sealed record StorageErrorView(StorageErrorReason Kind, string DataPath);
 
 /// <summary>The Event list, sorted by date, newest first (plan section 8). Empty shows "No Events yet."</summary>
 public sealed record EventListView(IReadOnlyList<EventListRow> Events);

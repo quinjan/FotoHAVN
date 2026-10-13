@@ -5,4 +5,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Migrations are embedded as FotoHavn.Storage.Migrations.NNNN_name.sql (see MigrationCatalog). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\*.sql" LogicalName="FotoHavn.Storage.Migrations.%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

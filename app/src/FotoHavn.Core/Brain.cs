@@ -207,8 +207,8 @@ public sealed partial class Brain : IBrain
     }
 
     private OperatorPresentation RenderOperator() => _fatalReason is { } reason
-        ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason))
-        : new OperatorPresentation(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null);
+        ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null)
+        : new OperatorPresentation(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null);
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
         ? new GuestPresentation(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView(reason))

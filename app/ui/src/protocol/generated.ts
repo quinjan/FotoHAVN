@@ -51,6 +51,7 @@ export type Command =
   | ConfirmEndEventCommand
   | KeepRunningCommand
   | RetryAssistanceCommand
+  | RetryStorageCommand
   | BeginGuestCycleCommand
   | SelectTemplateCommand
   | GoToStepCommand
@@ -121,7 +122,21 @@ export type ServerMessage =
  * via the `definition` "OperatorSurface".
  */
 export type OperatorSurface =
-  "eventList" | "eventSetup" | "eventGallery" | "guestCycleDetail" | "guestScreenActive" | "fatal";
+  "eventList" | "eventSetup" | "eventGallery" | "guestCycleDetail" | "guestScreenActive" | "fatal" | "storageError";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageErrorReason".
+ */
+export type StorageErrorReason =
+  | "diskFull"
+  | "accessDenied"
+  | "locked"
+  | "notLocalDisk"
+  | "cloudSynced"
+  | "notWritable"
+  | "integrityFailed"
+  | "corrupt"
+  | "unknown";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "GuestSurface".
@@ -175,7 +190,7 @@ export type Role = "operator" | "guest";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 1;
+  protocolVersion: 2;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -793,6 +808,21 @@ export interface RetryAssistanceCommand {
 export interface RetryAssistancePayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RetryStorageCommand".
+ */
+export interface RetryStorageCommand {
+  type: "command";
+  id: string;
+  name: "RetryStorage";
+  payload: RetryStoragePayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RetryStoragePayload".
+ */
+export interface RetryStoragePayload {}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "BeginGuestCycleCommand".
  */
 export interface BeginGuestCycleCommand {
@@ -1312,6 +1342,7 @@ export interface OperatorPresentation {
   runningEvent: RunningEventPanel | null;
   overlays: OperatorOverlays;
   fatal: FatalView | null;
+  storageError: StorageErrorView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1370,6 +1401,14 @@ export interface NoticeOverlay {
  */
 export interface FatalView {
   reason: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageErrorView".
+ */
+export interface StorageErrorView {
+  kind: StorageErrorReason;
+  dataPath: string;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1531,6 +1570,7 @@ export interface CommandPayloadMap {
   ConfirmEndEvent: ConfirmEndEventPayload;
   KeepRunning: KeepRunningPayload;
   RetryAssistance: RetryAssistancePayload;
+  RetryStorage: RetryStoragePayload;
   BeginGuestCycle: BeginGuestCyclePayload;
   SelectTemplate: SelectTemplatePayload;
   GoToStep: GoToStepPayload;
@@ -1765,4 +1805,4 @@ export interface TestCamera {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;

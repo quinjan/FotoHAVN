@@ -245,6 +245,7 @@
       "fotohavn.storage": {
         "type": "Project",
         "dependencies": {
+          "FotoHavn.Core": "[1.0.0, )",
           "Microsoft.Data.Sqlite": "[10.0.12, 10.0.12]"
         }
       },

@@ -67,7 +67,7 @@ describe("fixture lane", () => {
     expect(client.getState()).toEqual({
       status: "protocolMismatch",
       session: null,
-      mismatch: { brainVersion: 1, uiVersion: 0 },
+      mismatch: { brainVersion: PROTOCOL_VERSION, uiVersion: PROTOCOL_VERSION - 1 },
     });
   });
 });
