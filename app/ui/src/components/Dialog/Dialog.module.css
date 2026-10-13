@@ -1,0 +1,68 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--app-z-dialog);
+  display: grid;
+  place-items: center;
+  padding: var(--app-gutter);
+  background-color: var(--app-scrim);
+}
+
+.panel {
+  --dialog-padding: calc(var(--app-stack-gap) * 1.5);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--app-stack-gap);
+  /* As wide as its content (so a row of actions stays on one line), between the supporting and prose measures. */
+  inline-size: fit-content;
+  min-inline-size: min(100%, calc(var(--app-measure-supporting) + 2 * var(--dialog-padding)));
+  max-inline-size: min(100%, calc(var(--app-measure-prose) + 2 * var(--dialog-padding)));
+  max-block-size: 100%;
+  padding: var(--dialog-padding);
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-panel);
+  background-color: var(--semantic-surface-canvas);
+  color: var(--app-tone-ink);
+  font-size: var(--app-text-supporting);
+}
+
+.panel[data-size="wide"] {
+  inline-size: min(100%, calc(var(--app-measure-prose) + 2 * var(--dialog-padding)));
+}
+
+.panel:focus-visible {
+  outline-offset: calc(-1 * var(--stroke-focus) - var(--stroke-hairline));
+}
+
+.title {
+  font-family: var(--typography-heading-sm-font-family);
+  font-size: var(--app-text-heading-sm);
+  font-weight: var(--typography-heading-sm-font-weight);
+  letter-spacing: var(--typography-heading-sm-letter-spacing);
+  line-height: var(--typography-heading-sm-line-height);
+  text-wrap: balance;
+}
+
+.description {
+  max-inline-size: var(--app-measure-supporting);
+  margin-block-start: calc(var(--space-8) - var(--app-stack-gap));
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.body {
+  align-self: stretch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16);
+  margin-block-start: var(--space-8);
+}

@@ -1,0 +1,5 @@
+/* The top band holds the action on one line beside the step progress. */
+.action {
+  flex: none;
+  white-space: nowrap;
+}

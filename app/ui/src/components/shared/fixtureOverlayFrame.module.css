@@ -1,0 +1,10 @@
+/* Fixture-only: a containing block for fixed and absolute overlays (layout containment). Never import from product code. */
+.frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  place-self: stretch;
+  inline-size: 100%;
+  min-block-size: 32rem;
+  contain: layout;
+}
