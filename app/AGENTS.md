@@ -22,7 +22,7 @@ Use this guide for the desktop booth under `app/`: the .NET brain and adapters, 
 - The host assigns each window its role; the page can't choose it. The host holds no domain logic.
 - The Event store is the only writer of Event data: `fotohavn.db`, `Events/`, and `Cache/thumbnails/`. The host owns `logs/` and `webview2-user-data/`.
 - Keep adapters thin. Move any branch that isn't hardware or OS I/O (format choice, frame freshness, frame selection, retry policy) into a `FotoHavn.Core` policy class with unit tests.
-- Compile test hooks only into `FotoHavnE2E` builds (`dotnet build -p:FotoHavnE2E=true`). Never publish a field build with hooks.
+- Compile test hooks only into `FotoHavnE2E` builds (`dotnet build -p:FotoHavnE2E=true`, which compile into `obj/e2e/` and copy the E2E UI from `ui/dist-e2e`). Never publish a field build with hooks or the E2E UI; the publish guard in `Directory.Build.targets` refuses both.
 - Raise coverage with tests, not new exclusions; every exclusion needs a stated reason.
 
 ## Verification
@@ -53,7 +53,8 @@ npm ci; npm run typecheck
 $env:FOTOHAVN_E2E_CAMERA = "<camera name or device id>"   # optional; defaults to the first camera
 npx playwright test --project=regression --grep "@m<N>"
 npx playwright test --project=smoke
-#    The E2E build on its own: dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build
+#    The E2E build on its own (in ui/: npm run build:e2e, which writes ui/dist-e2e; then from app/):
+#    dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build
 
 # 8. Agent docs (from the repository root)
 ./scripts/verify-agent-docs.ps1

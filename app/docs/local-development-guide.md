@@ -104,7 +104,7 @@ npx playwright test --project=regression --grep "@m1"
 npx playwright test --project=smoke
 ```
 
-Replace `@m1` with the milestone being completed. Global setup builds the UI with `npm run build:e2e` (running `npm ci` in `ui/` first if `node_modules` is missing) and the E2E build of the host, launches the app once, applies the camera precondition, and prints the chosen camera, for example `E2E camera: Integrated Webcam (\\?\USB#VID_...\GLOBAL)`. Copy that line into the verification record. Set `FOTOHAVN_E2E_SKIP_BUILD=1` to reuse an existing E2E build in a fast loop.
+Replace `@m1` with the milestone being completed. Global setup builds the UI with `npm run build:e2e` (running `npm ci` in `ui/` first if `node_modules` is missing) and the E2E build of the host, launches the app once, applies the camera precondition, and prints the chosen camera, for example `E2E camera: Integrated Webcam (\\?\USB#VID_...\GLOBAL)`. Copy that line into the verification record. Set `FOTOHAVN_E2E_SKIP_BUILD=1` to reuse an existing E2E build in a fast loop. Set `FOTOHAVN_E2E_OUTPUT` to write a run's reports, `runs/`, and `camera.json` somewhere other than `output/e2e/`; the `@m1` camera-precondition regression uses it for the nested `smoke` runs it starts to check global setup itself.
 
 Tests run one at a time (the camera is opened exclusively). Each test file gets a fresh app process with its own Data folder, WebView2 user-data folder, and debugging port, and the app must exit with code 0 after `test.exit`.
 
@@ -140,10 +140,16 @@ dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:
 ```
 
 - `-p:FotoHavnE2E=true` defines `E2E_HOOKS` in every project. Only then are the `test.*` hooks compiled; other builds answer every `test.*` message with `hooksUnavailable`.
-- The host copies `ui/dist` into `wwwroot/` beside `FOTOHAVN.exe` and removes files a previous copy left there. Without `ui/dist`, the app shows "The FOTOHAVN UI is not built."
+- A hook build (`FotoHavnE2E=true`, or `E2E_HOOKS` defined any other way) restores and compiles into each project's own `obj/e2e/` and `bin/e2e/`, never the `obj/Debug/` or `bin/Debug/` of normal builds, so a later build, test run, or `dotnet publish --no-build` can't pick up a hook assembly. Every hook assembly also carries `[assembly: AssemblyMetadata("FotoHavnE2E", "true")]`.
+- `npm run build:e2e` writes the E2E UI (`VITE_E2E=true`) to `ui/dist-e2e/` with an `e2e-build.txt` marker; `npm run build` writes the field UI to `ui/dist/`. The E2E build of the host copies `ui/dist-e2e` into `wwwroot/` beside `FOTOHAVN.exe`, every other build copies `ui/dist`, and each removes files a previous copy left there. A field build fails if `ui/dist` holds the marker. Without the UI folder, the app shows "The FOTOHAVN UI is not built."
 - `FOTOHAVN.exe` takes `--data <folder>` (default `Data` beside the exe, created if missing) and, in E2E builds only, `--remote-debugging-port <port>` and `--e2e-camera <name or device id>`. Field builds never open a debugging port.
 - M1 hooks: `test.listCameras` and `test.exit`. Later milestones add the rest listed in [the plan](implementation-plan.md#e2e-build-and-test-hooks).
-- **Publish guard.** Any `dotnet publish` of the host with `-p:FotoHavnE2E=true` fails with `FOTOHAVN field builds must not include E2E hooks`, and so does `scripts/publish-field-test.ps1` when asked for hooks. A unit test in `FotoHavn.Host.Windows.Tests` checks by reflection that normally built assemblies contain no `.E2E` types, and the `@m1` regression suite checks the publish refusal.
+- **Publish guard.** It fails a publish of any project with `FOTOHAVN field builds must not include E2E hooks` when:
+  - the publish asks for hooks (`-p:FotoHavnE2E=true` or `E2E_HOOKS` in `DefineConstants`);
+  - a `FOTOHAVN` or `FotoHavn.*` assembly it would copy carries the `FotoHavnE2E` marker or an `.E2E` namespace, which also covers `--no-build` publishes (MSBuild target `FotoHavnRefuseE2EPublishedFiles` in `Directory.Build.targets`);
+  - the UI it would copy is the E2E build (`wwwroot/e2e-build.txt`).
+
+  `scripts/publish-field-test.ps1` refuses requests for hooks with the same text, and after publishing it checks the output's assemblies and `wwwroot/` again. Unit tests in `FotoHavn.Host.Windows.Tests` check that normally built assemblies have no `.E2E` types and no marker, and the `@m1` regression suite checks every refusal, including a `--no-build` publish right after an E2E build.
 
 To attach Playwright or DevTools by hand, start `output/e2e-build/FOTOHAVN.exe --data output/scratch/Data --remote-debugging-port 9222` and connect to `http://127.0.0.1:9222`.
 
@@ -162,7 +168,7 @@ In M1 the headless host only serves static files. M2 adds the real brain, the fa
 ./scripts/publish-field-test.ps1
 ```
 
-M1's script is minimal: it refuses E2E hooks and runs a self-contained `win-x64` Release publish of the host to `output/field-test/FOTOHAVN`. M10 completes the field-test build (packaging, the booth checklist, and the hardening checks).
+M1's script is minimal: it refuses E2E hooks, builds the field UI (`npm ci` if `ui/node_modules` is missing, then `npm run build`), runs a self-contained `win-x64` Release publish of the host to `output/field-test/FOTOHAVN`, and fails if the output has a hook assembly or the E2E UI marker. It needs PowerShell 7. M10 completes the field-test build (packaging, the booth checklist, and the hardening checks).
 
 ## Outputs
 
@@ -171,7 +177,7 @@ Everything lands under `app/output/` (git-ignored):
 | Path | Contents |
 | --- | --- |
 | `output/coverage/` | .NET Cobertura files, and `report/Summary.txt` with the ReportGenerator summary (per assembly under `report/<assembly>/` when gated) |
-| `output/e2e-build/` | The E2E build: `FOTOHAVN.exe` and `wwwroot/` |
+| `output/e2e-build/` | The E2E build: `FOTOHAVN.exe` and `wwwroot/` (from `ui/dist-e2e`); its intermediates are in each project's `obj/e2e/` |
 | `output/e2e/html/` | The end-to-end HTML report |
 | `output/e2e/junit.xml`, `output/e2e/test-results/` | JUnit results; traces and screenshots of failures |
 | `output/e2e/runs/` | One folder per app launch: Data folder, stdout and stderr, and `evidence/` (log, Data listing, final screenshot, summary) |

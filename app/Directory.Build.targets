@@ -3,4 +3,139 @@
   <ItemGroup Condition="'$(UseWPF)' == 'true' and '$(ImplicitUsings)' == 'enable'">
     <Using Include="System.IO" />
   </ItemGroup>
+
+  <!-- Re-check for hooks now that the project file has set its own DefineConstants. -->
+  <PropertyGroup>
+    <FotoHavnE2EHooks Condition="$([System.String]::Copy(';$(DefineConstants);').Replace(' ', '').Contains(';E2E_HOOKS;'))">true</FotoHavnE2EHooks>
+  </PropertyGroup>
+
+  <!-- Every assembly compiled with the hooks says so, so the publish guard can recognize it wherever it comes from. -->
+  <ItemGroup Condition="'$(FotoHavnE2EHooks)' == 'true'">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>FotoHavnE2E</_Parameter1>
+      <_Parameter2>true</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!--
+    Publish guard: a field build must never contain the E2E test hooks or the E2E UI. Three layers:
+    1. A publish of a hook build (FotoHavnE2E=true or E2E_HOOKS defined) fails. `dotnet publish` sets _IsPublishing, so
+       the first target fails before anything builds; PrepareForPublish covers msbuild -t:Publish.
+    2. Whatever the properties say, a publish fails when a FOTOHAVN or FotoHavn.* assembly it would copy carries the
+       FotoHavnE2E marker or an .E2E namespace. This also runs for publishes that skip the build.
+    3. A publish fails when it would copy the E2E UI marker (wwwroot/e2e-build.txt).
+  -->
+  <PropertyGroup>
+    <FotoHavnPublishGuardText>FOTOHAVN field builds must not include E2E hooks.</FotoHavnPublishGuardText>
+    <FotoHavnPublishGuardMessage>$(FotoHavnPublishGuardText) Remove -p:FotoHavnE2E=true (and E2E_HOOKS) before publishing; E2E builds are for local end-to-end runs only.</FotoHavnPublishGuardMessage>
+  </PropertyGroup>
+  <Target Name="FotoHavnRefuseE2EPublishEarly"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(FotoHavnE2EHooks)' == 'true' and '$(_IsPublishing)' == 'true'">
+    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
+  </Target>
+  <Target Name="FotoHavnRefuseE2EPublish"
+          BeforeTargets="PrepareForPublish"
+          Condition="'$(FotoHavnE2EHooks)' == 'true'">
+    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
+  </Target>
+  <Target Name="FotoHavnRefuseE2EPublishedFiles" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <_FotoHavnPublishedAssembly Include="@(ResolvedFileToPublish)"
+                                  Condition="'%(Extension)' == '.dll' and ('%(Filename)' == 'FOTOHAVN' or $([System.String]::Copy('%(Filename)').StartsWith('FotoHavn.')))" />
+      <_FotoHavnPublishedE2EUiMarker Include="@(ResolvedFileToPublish)"
+                                     Condition="'%(Filename)%(Extension)' == 'e2e-build.txt'" />
+    </ItemGroup>
+    <FotoHavnFindE2EAssemblies Assemblies="@(_FotoHavnPublishedAssembly)">
+      <Output TaskParameter="Offending" ItemName="_FotoHavnPublishedE2EAssembly" />
+    </FotoHavnFindE2EAssemblies>
+    <Error Code="FOTOHAVN0002"
+           Condition="'@(_FotoHavnPublishedE2EAssembly)' != ''"
+           Text="$(FotoHavnPublishGuardText) These assemblies were compiled with E2E hooks: @(_FotoHavnPublishedE2EAssembly->'%(FullPath)', ', '). Build without -p:FotoHavnE2E=true before publishing." />
+    <Error Code="FOTOHAVN0003"
+           Condition="'@(_FotoHavnPublishedE2EUiMarker)' != ''"
+           Text="$(FotoHavnPublishGuardText) The UI to publish is an E2E build (@(_FotoHavnPublishedE2EUiMarker->'%(FullPath)', ', ')). Run `npm run build` in ui/ before publishing." />
+  </Target>
+
+  <!--
+    Finds assemblies compiled with the hooks. MSBuild's inline tasks compile against netstandard, which has no
+    System.Reflection.Metadata, so this matches the exact metadata bytes instead: the serialized value of
+    [assembly: AssemblyMetadata("FotoHavnE2E", "true")] in the #Blob heap, and a namespace ending in ".E2E" in the
+    null-terminated #Strings heap. The unit tests and publish-field-test.ps1 read the same facts with System.Reflection.Metadata.
+  -->
+  <UsingTask TaskName="FotoHavnFindE2EAssemblies"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public sealed class FotoHavnFindE2EAssemblies : Task
+{
+    [Required]
+    public ITaskItem[] Assemblies { get; set; }
+
+    [Output]
+    public ITaskItem[] Offending { get; set; }
+
+    public override bool Execute()
+    {
+        var marker = new List<byte> { 0x01, 0x00, 0x0B };
+        marker.AddRange(Encoding.UTF8.GetBytes("FotoHavnE2E"));
+        marker.Add(0x04);
+        marker.AddRange(Encoding.UTF8.GetBytes("true"));
+        marker.AddRange(new byte[] { 0x00, 0x00 });
+        var patterns = new[] { marker.ToArray(), Encoding.UTF8.GetBytes(".E2E\0") };
+
+        var offending = new List<ITaskItem>();
+        foreach (var item in Assemblies)
+        {
+            var path = item.GetMetadata("FullPath");
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+
+            var bytes = File.ReadAllBytes(path);
+            foreach (var pattern in patterns)
+            {
+                if (IndexOf(bytes, pattern) >= 0)
+                {
+                    offending.Add(item);
+                    break;
+                }
+            }
+        }
+
+        Offending = offending.ToArray();
+        return true;
+    }
+
+    private static int IndexOf(byte[] haystack, byte[] needle)
+    {
+        for (var i = 0; i <= haystack.Length - needle.Length; i++)
+        {
+            var j = 0;
+            while (j < needle.Length && haystack[i + j] == needle[j])
+            {
+                j++;
+            }
+
+            if (j == needle.Length)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+}
+]]></Code>
+    </Task>
+  </UsingTask>
 </Project>

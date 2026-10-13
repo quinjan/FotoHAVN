@@ -22,6 +22,7 @@ export default async function globalSetup(): Promise<void> {
   console.log(describeCamera(camera));
 }
 
+/** Clears this run's camera file and runs/ folder; FOTOHAVN_E2E_OUTPUT points a nested run at its own folder. */
 function prepareOutput(): void {
   mkdirSync(paths.e2eOutput, { recursive: true });
   rmSync(paths.cameraFile, { force: true });
@@ -40,7 +41,11 @@ function buildE2E(): void {
   if (!existsSync(path.join(paths.uiDir, "node_modules"))) {
     run("npm ci", paths.uiDir);
   }
+  // build:e2e writes ui/dist-e2e (never ui/dist), which only the E2E build of the host copies to wwwroot/.
   run("npm run build:e2e", paths.uiDir);
+  if (!existsSync(path.join(paths.uiDistE2E, "index.html"))) {
+    throw new Error(`"npm run build:e2e" did not write ${fromApp(paths.uiDistE2E)}/index.html.`);
+  }
   run(e2eBuildCommand, paths.appDir);
 }
 

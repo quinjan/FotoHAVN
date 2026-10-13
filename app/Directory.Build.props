@@ -36,10 +36,33 @@
 
   <!--
     E2E build switch: `dotnet build -p:FotoHavnE2E=true` compiles the test hooks into every project.
-    Field builds never set it; the publish guard in FotoHavn.Host.Windows refuses to publish with it.
+    Field builds never set it; the publish guards in Directory.Build.targets refuse any publish that carries hooks.
   -->
   <PropertyGroup Condition="'$(FotoHavnE2E)' == 'true'">
     <DefineConstants>$(DefineConstants);E2E_HOOKS</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+    A build has hooks when FotoHavnE2E is set or E2E_HOOKS is defined directly (for example -p:DefineConstants=E2E_HOOKS).
+    Directory.Build.targets re-checks it after the project file, which could also add the constant.
+  -->
+  <PropertyGroup>
+    <FotoHavnE2EHooks>false</FotoHavnE2EHooks>
+    <FotoHavnE2EHooks Condition="$([System.String]::Copy(';$(DefineConstants);').Replace(' ', '').Contains(';E2E_HOOKS;'))">true</FotoHavnE2EHooks>
+  </PropertyGroup>
+
+  <!--
+    Hook builds compile, restore, and output into their own folders (obj/e2e/, bin/e2e/), so a later normal build, test
+    run, or publish without a build never picks up an assembly compiled with the hooks. The base paths must be set here,
+    before the SDK reads them. Each build excludes both trees from its default items, so neither compiles the other's
+    generated sources.
+  -->
+  <PropertyGroup Condition="'$(FotoHavnE2EHooks)' == 'true'">
+    <BaseIntermediateOutputPath>obj\e2e\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\e2e\</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- Test projects: xUnit v3 on Microsoft.Testing.Platform, with Microsoft code coverage. -->

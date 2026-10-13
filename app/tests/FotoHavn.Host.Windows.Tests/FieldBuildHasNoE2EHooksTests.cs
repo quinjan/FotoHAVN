@@ -1,11 +1,16 @@
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+
+// Proves the metadata reader below finds AssemblyMetadata entries; an E2E build adds ("FotoHavnE2E", "true") the same way.
+[assembly: AssemblyMetadata("FotoHavn.Host.Windows.Tests.MetadataProbe", "readable")]
 
 namespace FotoHavn.Host.Windows.Tests;
 
 /// <summary>
 /// Publish guard, by reflection: the normally built FOTOHAVN and FotoHavn.* assemblies contain no type in an
-/// <c>.E2E</c> namespace. Type metadata is read directly, so internal and nested types count too.
+/// <c>.E2E</c> namespace and no <c>FotoHavnE2E</c> assembly metadata, and the copied UI is not the E2E build.
+/// Metadata is read directly, so internal and nested types count too.
 /// </summary>
 public sealed class FieldBuildHasNoE2EHooksTests
 {
@@ -50,9 +55,68 @@ public sealed class FieldBuildHasNoE2EHooksTests
     }
 
     [Fact]
+    public void Metadata_reader_finds_assembly_metadata()
+    {
+        var entries = AssemblyMetadata(typeof(FieldBuildHasNoE2EHooksTests).Assembly.Location);
+
+        Assert.Contains(new KeyValuePair<string?, string?>("FotoHavn.Host.Windows.Tests.MetadataProbe", "readable"), entries);
+    }
+
+    [Fact]
+    public void Product_assemblies_carry_no_E2E_build_marker()
+    {
+        var marked = ProductAssemblies()
+            .Where(path => AssemblyMetadata(path).Any(entry => entry.Key == "FotoHavnE2E"))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.Empty(marked);
+    }
+
+    [Fact]
+    public void Copied_UI_is_not_the_E2E_build()
+    {
+        Assert.False(
+            File.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot", "e2e-build.txt")),
+            "wwwroot/ holds the E2E UI build (ui/dist-e2e); field builds copy ui/dist.");
+    }
+
+    [Fact]
     public void Hook_channel_is_not_compiled_in()
     {
         Assert.False(TestHooks.TestHookChannel.IsCompiled);
+    }
+
+    /// <summary>The <c>[assembly: AssemblyMetadata(key, value)]</c> entries, read without loading the assembly.</summary>
+    private static List<KeyValuePair<string?, string?>> AssemblyMetadata(string path)
+    {
+        using var stream = File.OpenRead(path);
+        using var pe = new PEReader(stream);
+        var metadata = pe.GetMetadataReader();
+        var entries = new List<KeyValuePair<string?, string?>>();
+        foreach (var handle in metadata.GetAssemblyDefinition().GetCustomAttributes())
+        {
+            var attribute = metadata.GetCustomAttribute(handle);
+            if (attribute.Constructor.Kind != HandleKind.MemberReference)
+            {
+                continue;
+            }
+
+            var constructor = metadata.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
+            if (constructor.Parent.Kind != HandleKind.TypeReference
+                || metadata.GetString(metadata.GetTypeReference((TypeReferenceHandle)constructor.Parent).Name) != "AssemblyMetadataAttribute")
+            {
+                continue;
+            }
+
+            var value = metadata.GetBlobReader(attribute.Value);
+            if (value.ReadUInt16() == 1)
+            {
+                entries.Add(new(value.ReadSerializedString(), value.ReadSerializedString()));
+            }
+        }
+
+        return entries;
     }
 
     private static IEnumerable<string> ProductAssemblies() =>

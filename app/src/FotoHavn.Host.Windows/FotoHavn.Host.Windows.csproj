@@ -28,9 +28,14 @@
     <InternalsVisibleTo Include="FotoHavn.Host.Windows.Tests" />
   </ItemGroup>
 
-  <!-- The built React UI (ui/dist) ships as wwwroot/ beside FOTOHAVN.exe when it exists. -->
+  <!--
+    The built React UI ships as wwwroot/ beside FOTOHAVN.exe when it exists: ui/dist for field builds, and ui/dist-e2e
+    (written by `npm run build:e2e`) for hook builds. Only the E2E UI build writes e2e-build.txt.
+  -->
   <PropertyGroup>
-    <FotoHavnUiDist>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\ui\dist'))</FotoHavnUiDist>
+    <FotoHavnUiDist Condition="'$(FotoHavnE2EHooks)' == 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\ui\dist-e2e'))</FotoHavnUiDist>
+    <FotoHavnUiDist Condition="'$(FotoHavnE2EHooks)' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\ui\dist'))</FotoHavnUiDist>
+    <FotoHavnE2EUiMarker>e2e-build.txt</FotoHavnE2EUiMarker>
   </PropertyGroup>
   <ItemGroup Condition="Exists('$(FotoHavnUiDist)')">
     <Content Include="$(FotoHavnUiDist)\**\*"
@@ -39,9 +44,17 @@
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- A field build refuses a ui/dist that holds an E2E UI build. -->
+  <Target Name="FotoHavnRefuseE2EUi"
+          BeforeTargets="CopyFilesToOutputDirectory"
+          Condition="'$(FotoHavnE2EHooks)' != 'true' and Exists('$(FotoHavnUiDist)\$(FotoHavnE2EUiMarker)')">
+    <Error Code="FOTOHAVN0003"
+           Text="$(FotoHavnPublishGuardText) $(FotoHavnUiDist) holds an E2E UI build ($(FotoHavnE2EUiMarker)). Run `npm run build` in ui/." />
+  </Target>
+
   <!--
     Vite names assets by content hash, so each UI build leaves the previous copy's files behind in wwwroot/.
-    Before copying, delete every file in <OutDir>/wwwroot that ui/dist no longer has (all of them when ui/dist is missing).
+    Before copying, delete every file in <OutDir>/wwwroot that the UI folder no longer has (all of them when it's missing).
   -->
   <Target Name="FotoHavnRemoveStaleWwwroot" BeforeTargets="CopyFilesToOutputDirectory">
     <ItemGroup>
@@ -52,21 +65,5 @@
     <Delete Files="@(_FotoHavnStaleWwwrootFile)" />
   </Target>
 
-  <!--
-    Publish guard: a field build must never contain the E2E test hooks.
-    `dotnet publish` sets _IsPublishing, so the guard fails before anything builds; PrepareForPublish covers msbuild -t:Publish.
-  -->
-  <PropertyGroup>
-    <FotoHavnPublishGuardMessage>FOTOHAVN field builds must not include E2E hooks. Remove -p:FotoHavnE2E=true before publishing; E2E builds are for local end-to-end runs only.</FotoHavnPublishGuardMessage>
-  </PropertyGroup>
-  <Target Name="FotoHavnRefuseE2EPublishEarly"
-          BeforeTargets="PrepareForBuild"
-          Condition="'$(FotoHavnE2E)' == 'true' and '$(_IsPublishing)' == 'true'">
-    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
-  </Target>
-  <Target Name="FotoHavnRefuseE2EPublish"
-          BeforeTargets="PrepareForPublish"
-          Condition="'$(FotoHavnE2E)' == 'true'">
-    <Error Code="FOTOHAVN0001" Text="$(FotoHavnPublishGuardMessage)" />
-  </Target>
+  <!-- The publish guard for every project is in Directory.Build.targets. -->
 </Project>

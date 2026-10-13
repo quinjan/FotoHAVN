@@ -909,8 +909,8 @@ app/e2e/
 
 ### E2E build and test hooks
 
-- **Build switch.** `dotnet build -p:FotoHavnE2E=true` defines `E2E_HOOKS`. Only then are the hooks compiled into the brain, host, and UI (the UI build reads `VITE_E2E=true`).
-- **Publish guard.** `publish-field-test.ps1` and an MSBuild target refuse to publish a field build with `FotoHavnE2E=true`. A unit test checks by reflection that a field build's assemblies contain no hook types.
+- **Build switch.** `dotnet build -p:FotoHavnE2E=true` defines `E2E_HOOKS`. Only then are the hooks compiled into the brain, host, and UI (the UI build reads `VITE_E2E=true`). Hook builds compile into separate `obj/e2e/` and `bin/e2e/` folders, mark every assembly with `[assembly: AssemblyMetadata("FotoHavnE2E", "true")]`, and copy the E2E UI from `ui/dist-e2e` (marked `e2e-build.txt`), never `ui/dist`.
+- **Publish guard.** `publish-field-test.ps1` and MSBuild targets refuse to publish a field build with `FotoHavnE2E=true` or `E2E_HOOKS`, and refuse any publish (including `--no-build`) whose FotoHavn assemblies carry the marker or an `.E2E` namespace, or whose UI carries the E2E marker. The script checks its publish output again. Unit tests check by reflection that a field build's assemblies contain no hook types or marker.
 - **Channel.** Hooks travel as `test.*` messages over the same bridge. The brain rejects them unless compiled with `E2E_HOOKS`.
 
 | Hook | Purpose |
@@ -988,7 +988,7 @@ ADR numbers continue the repository-wide sequence (0001 was the deleted desktop 
 | [`brand/voice.md`](../../brand/voice.md) | Remove the `FotoHAVN` desktop exception row |
 | [`brand/accessibility.md`](../../brand/accessibility.md) | Verification example: Playwright fixture gallery instead of the desktop UI verification host |
 | [`docs/agents/domain.md`](../../docs/agents/domain.md) | Check the desktop context reference still holds |
-| [`.gitignore`](../../.gitignore) | Replace old app entries with `app/**/bin`, `obj`, `ui/node_modules`, `ui/dist`, `e2e/node_modules`, `output/`, `Data/` |
+| [`.gitignore`](../../.gitignore) | Replace old app entries with `app/**/bin`, `obj`, `ui/node_modules`, `ui/dist`, `ui/dist-e2e`, `e2e/node_modules`, `output/`, `Data/` |
 | [`agent-documentation.yml`](../../.github/workflows/agent-documentation.yml) | Path filters for the new app documents |
 | [`agent-documentation-contract.test.mjs`](../../scripts/agent-documentation-contract.test.mjs) | Required app files (new ADR paths, `DESIGN.md`), solution project paths, and the `working-directory: app` workflow assertion now pointing to `desktop.yml` |
 
