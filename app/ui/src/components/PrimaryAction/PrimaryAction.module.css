@@ -1,0 +1,42 @@
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  min-width: var(--app-target);
+  min-height: var(--app-target);
+  padding: var(--app-action-padding-block) var(--app-action-padding-inline);
+  border: var(--stroke-hairline) solid var(--app-tone-action-fill);
+  border-radius: var(--radius-control);
+  background-color: var(--app-tone-action-fill);
+  color: var(--app-tone-action-label);
+  font-family: var(--typography-action-font-family);
+  font-size: var(--app-text-action);
+  font-weight: var(--typography-action-font-weight);
+  letter-spacing: var(--typography-action-letter-spacing);
+  line-height: var(--typography-action-line-height);
+  text-align: center;
+  text-transform: var(--typography-action-text-transform);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    border-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+@media (hover: hover) {
+  .action:hover {
+    border-color: var(--app-tone-action-fill-emphasis);
+    background-color: var(--app-tone-action-fill-emphasis);
+  }
+}
+
+.action:active {
+  border-color: var(--app-tone-action-fill-emphasis);
+  background-color: var(--app-tone-action-fill-emphasis);
+}
+
+.action[aria-disabled="true"] {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}

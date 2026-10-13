@@ -1,0 +1,9 @@
+.eyebrow {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-eyebrow-font-family);
+  font-size: var(--app-text-eyebrow);
+  font-weight: var(--typography-eyebrow-font-weight);
+  letter-spacing: var(--typography-eyebrow-letter-spacing);
+  line-height: var(--typography-eyebrow-line-height);
+  text-transform: var(--typography-eyebrow-text-transform);
+}

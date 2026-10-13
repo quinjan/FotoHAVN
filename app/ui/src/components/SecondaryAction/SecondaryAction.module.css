@@ -1,0 +1,38 @@
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  min-width: var(--app-target);
+  min-height: var(--app-target);
+  padding: var(--app-action-padding-block) var(--app-action-padding-inline);
+  border: var(--stroke-hairline) solid currentcolor;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--app-tone-ink);
+  font-family: var(--typography-action-font-family);
+  font-size: var(--app-text-action);
+  font-weight: var(--typography-action-font-weight);
+  letter-spacing: var(--typography-action-letter-spacing);
+  line-height: var(--typography-action-line-height);
+  text-align: center;
+  text-transform: var(--typography-action-text-transform);
+  transition: background-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+@media (hover: hover) {
+  .action:hover {
+    background-color: var(--app-tone-wash);
+  }
+}
+
+.action:active {
+  background-color: var(--app-tone-wash);
+}
+
+.action[aria-disabled="true"] {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}

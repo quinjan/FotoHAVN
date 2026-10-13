@@ -1,0 +1,40 @@
+.arrow {
+  display: inline-flex;
+  flex: none;
+  font-size: var(--app-icon-action);
+  line-height: 1;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .arrow {
+    transition: transform var(--motion-duration-fast) var(--motion-easing-editorial);
+  }
+
+  :hover > .arrow[data-direction="right"] {
+    transform: translateX(var(--app-motion-nudge));
+  }
+
+  :hover > .arrow[data-direction="left"] {
+    transform: translateX(calc(-1 * var(--app-motion-nudge)));
+  }
+
+  :hover > .arrow[data-direction="up"] {
+    transform: translateY(calc(-1 * var(--app-motion-nudge)));
+  }
+
+  :hover > .arrow[data-direction="down"] {
+    transform: translateY(var(--app-motion-nudge));
+  }
+
+  :hover > .arrow[data-direction="up-right"] {
+    transform: translate(var(--app-motion-nudge), calc(-1 * var(--app-motion-nudge)));
+  }
+
+  :hover > .arrow[data-direction="down-right"] {
+    transform: translate(var(--app-motion-nudge), var(--app-motion-nudge));
+  }
+
+  [aria-disabled="true"]:hover > .arrow {
+    transform: none;
+  }
+}

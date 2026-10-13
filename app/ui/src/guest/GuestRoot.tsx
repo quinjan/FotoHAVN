@@ -1,16 +1,24 @@
 import type { GuestPresentation, StartView } from "../protocol/generated.ts";
+import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
 
-/** M2 placeholder for Start: the statement and the wordmark. `STEP INSIDE →` arrives with the Guest Cycle (M8). */
+/**
+ * M2 placeholder for Start: the wordmark at the top, the centered statement, and its supporting line. `STEP INSIDE →`
+ * and `SEE THE GOOD COMPANY →` arrive with the Guest Cycle (M8).
+ */
 function StartPlaceholder({ start }: { readonly start: StartView | null }) {
   return (
-    <div className={screen.screen} data-guest-gallery-available={start?.guestGalleryAvailable ?? false}>
+    <div className={screen.start} data-guest-gallery-available={start?.guestGalleryAvailable ?? false}>
       <p className={screen.wordmark}>FOTOHAVN</p>
-      <h1 className={screen.statement}>
-        Small room. <em>Whole other world.</em>
-      </h1>
-      <p className={screen.line}>Come a little closer.</p>
+      <StatementHeading
+        level={1}
+        size="display"
+        align="center"
+        lead="Small room."
+        turn="Whole other world."
+        supporting="Come a little closer."
+      />
     </div>
   );
 }
@@ -18,10 +26,14 @@ function StartPlaceholder({ start }: { readonly start: StartView | null }) {
 function GuestFatal() {
   return (
     <div className={screen.screen}>
-      <h1 className={screen.statement}>
-        A little <em>interruption.</em>
-      </h1>
-      <p className={screen.line}>Please ask the FOTOHAVN team for help.</p>
+      <StatementHeading
+        level={1}
+        size="heading-lg"
+        align="center"
+        lead="A little"
+        turn="interruption."
+        supporting="Please ask the FOTOHAVN team for help."
+      />
     </div>
   );
 }

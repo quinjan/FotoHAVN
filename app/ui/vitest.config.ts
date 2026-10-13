@@ -26,6 +26,10 @@ export default mergeConfig(
           // Tests and their setup are not product code.
           "src/**/*.test.{ts,tsx}",
           "src/test/**",
+          // Component fixture states: data rendered by the gallery (src/gallery/fixtures.test.tsx renders every one)
+          // and checked by the fixture lane, not product logic. src/styles/brand-tokens.css is CSS, which coverage
+          // never measures; its drift test is scripts/brand-tokens.test.ts.
+          "src/components/**/*.fixtures.tsx",
         ],
         thresholds: {
           lines: 80,

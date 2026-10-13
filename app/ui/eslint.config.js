@@ -34,6 +34,25 @@ export default tseslint.config(
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
     extends: [reactHooks.configs.flat["recommended-latest"], jsxA11y.flatConfigs.strict],
+    rules: {
+      // app/DESIGN.md's token rule for TSX, matching stylelint's for CSS: no hex colors, and no raw easings or durations
+      // in inline styles. Colors and motion come from tokens (var(--…)). scripts/lint-rules.test.ts proves it fires.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+          message: "Hex colors belong only in the token files; use a var(--…) color token.",
+        },
+        {
+          selector: "JSXAttribute[name.name='style'] Literal[value=/#[0-9a-fA-F]{3,8}\\b|cubic-bezier|\\d(?:ms|s)\\b/]",
+          message: "Inline styles take no hex colors, cubic-bezier(), or raw durations; use var(--…) tokens.",
+        },
+        {
+          selector: "JSXAttribute[name.name='style'] TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b|cubic-bezier|\\d(?:ms|s)\\b/]",
+          message: "Inline styles take no hex colors, cubic-bezier(), or raw durations; use var(--…) tokens.",
+        },
+      ],
+    },
   },
   {
     files: ["*.config.ts", "tests/**/*.ts", "scripts/**/*.ts"],

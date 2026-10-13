@@ -1,0 +1,158 @@
+/*
+ * App-only tokens for the desktop booth, declared in app/DESIGN.md ("App tokens"). Brand values live in
+ * brand-tokens.css (generated); nothing here redefines a brand value. Component CSS reads tokens only.
+ *
+ * Fluid sizes interpolate linearly by viewport width from the 1280 px reference to 2560 px and stop growing there:
+ *   clamp(A, calc(A + (100vw - 1280px) * (B - A) / 1280), B)
+ * The Guest Screen's WebView2 zoom makes 1 CSS px = 1 physical px, so 100vw is the display's physical width.
+ */
+:root {
+  /* Scale */
+  --app-reference-width: 1280px;
+  --app-max-width: 2560px;
+
+  /* Guest type sizes (kiosk scale), by brand role. Eyebrow and Meta are labels; every reading role is >= 20px. */
+  --app-type-eyebrow: clamp(15px, calc(15px + (100vw - 1280px) * 5 / 1280), 20px);
+  --app-type-meta: clamp(14px, calc(14px + (100vw - 1280px) * 4 / 1280), 18px);
+  --app-type-action: clamp(16px, calc(16px + (100vw - 1280px) * 6 / 1280), 22px);
+  --app-type-supporting: clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px);
+  --app-type-body: clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px);
+  --app-type-body-lg: clamp(24px, calc(24px + (100vw - 1280px) * 8 / 1280), 32px);
+  --app-type-subheading: clamp(32px, calc(32px + (100vw - 1280px) * 12 / 1280), 44px);
+  --app-type-heading-sm: clamp(44px, calc(44px + (100vw - 1280px) * 20 / 1280), 64px);
+  --app-type-heading: clamp(56px, calc(56px + (100vw - 1280px) * 28 / 1280), 84px);
+  --app-type-heading-lg: clamp(72px, calc(72px + (100vw - 1280px) * 36 / 1280), 108px);
+  --app-type-display: clamp(88px, calc(88px + (100vw - 1280px) * 44 / 1280), 132px);
+
+  /* Guest icon sizes: beside action labels, and primary camera controls (brand: 18-20 beside text, 28-36 camera) */
+  --app-icon-action-guest: clamp(24px, calc(24px + (100vw - 1280px) * 8 / 1280), 32px);
+  --app-icon-control-guest: clamp(36px, calc(36px + (100vw - 1280px) * 12 / 1280), 48px);
+
+  /* Fluid space: brand scale steps that grow 1.5x by 2560, for guest compositions */
+  --app-space-fluid-16: clamp(16px, calc(16px + (100vw - 1280px) * 8 / 1280), 24px);
+  --app-space-fluid-24: clamp(24px, calc(24px + (100vw - 1280px) * 12 / 1280), 36px);
+  --app-space-fluid-32: clamp(32px, calc(32px + (100vw - 1280px) * 16 / 1280), 48px);
+  --app-space-fluid-48: clamp(48px, calc(48px + (100vw - 1280px) * 24 / 1280), 72px);
+  --app-space-fluid-64: clamp(64px, calc(64px + (100vw - 1280px) * 32 / 1280), 96px);
+  --app-space-fluid-96: clamp(96px, calc(96px + (100vw - 1280px) * 48 / 1280), 144px);
+
+  /* Targets (minimums; a target may grow with the scale, never shrink below these) */
+  --app-target-guest: 64px;
+  --app-target-shutter: 112px;
+  --app-target-operator: 48px;
+
+  /* Layout regions */
+  --app-gutter: clamp(24px, 5vw, 80px);
+  --app-grid-columns: 12;
+  --app-split-print: 5;
+  --app-split-options: 7;
+  --app-region-top: clamp(96px, calc(96px + (100vw - 1280px) * 32 / 1280), 128px);
+  --app-region-stage: calc(100vh - var(--app-region-top));
+  --app-measure-prose: 65ch;
+  --app-measure-supporting: 42ch;
+
+  /* Z-order, bottom to top. Components never set a raw z-index. */
+  --app-z-base: 0;
+  --app-z-stage-overlay: 10;
+  --app-z-flash: 20;
+  --app-z-chrome: 30;
+  --app-z-timer-warning: 40;
+  --app-z-dialog: 50;
+  --app-z-exit-hold: 60;
+
+  /* Motion helpers */
+  --app-motion-nudge: 2px; /* An action arrow's hover nudge (brand motion.md) */
+  --app-duration-instant: 1ms; /* Reduced motion: state changes become near-instant (brand motion.md) */
+
+  /* The wordmark set as type (brand logo.md: Cormorant Garamond 500, uppercase, tracking -0.05em) */
+  --app-wordmark-tracking: -0.05em;
+
+  /* Derived tints (brand color.md "Derived inks and tints") */
+  --app-scrim: color-mix(in srgb, var(--color-ebony) 32%, transparent);
+  --app-selection: color-mix(in srgb, var(--color-muted-brass) 24%, transparent);
+
+  /* Role-resolved sizes. Operator (and status screens before a role arrives) use the brand reference sizes. */
+  --app-target: var(--app-target-operator);
+  --app-text-eyebrow: var(--typography-eyebrow-font-size);
+  --app-text-meta: var(--typography-meta-font-size);
+  --app-text-action: var(--typography-action-font-size);
+  --app-text-supporting: var(--typography-supporting-font-size);
+  --app-text-body: var(--typography-body-font-size);
+  --app-text-body-lg: var(--typography-body-lg-font-size);
+  --app-text-subheading: var(--typography-subheading-font-size);
+  --app-text-heading-sm: var(--typography-heading-sm-font-size);
+  --app-text-heading: var(--typography-heading-font-size);
+  --app-text-heading-lg: var(--typography-heading-lg-font-size);
+  --app-text-display: var(--typography-display-font-size);
+  --app-icon-action: 20px;
+  --app-icon-control: 28px;
+  --app-action-padding-block: 14px;
+  --app-action-padding-inline: 22px;
+  --app-stack-gap: var(--space-24); /* Eyebrow to heading to supporting to action */
+}
+
+/* The Guest Screen: kiosk scale and guest targets. Set on <html> by the App, or on a fixture wrapper by the gallery. */
+[data-fotohavn-role="guest"] {
+  --app-target: var(--app-target-guest);
+  --app-text-eyebrow: var(--app-type-eyebrow);
+  --app-text-meta: var(--app-type-meta);
+  --app-text-action: var(--app-type-action);
+  --app-text-supporting: var(--app-type-supporting);
+  --app-text-body: var(--app-type-body);
+  --app-text-body-lg: var(--app-type-body-lg);
+  --app-text-subheading: var(--app-type-subheading);
+  --app-text-heading-sm: var(--app-type-heading-sm);
+  --app-text-heading: var(--app-type-heading);
+  --app-text-heading-lg: var(--app-type-heading-lg);
+  --app-text-display: var(--app-type-display);
+  --app-icon-action: var(--app-icon-action-guest);
+  --app-icon-control: var(--app-icon-control-guest);
+  --app-action-padding-block: clamp(18px, calc(18px + (100vw - 1280px) * 6 / 1280), 24px);
+  --app-action-padding-inline: clamp(32px, calc(32px + (100vw - 1280px) * 16 / 1280), 48px);
+  --app-stack-gap: var(--app-space-fluid-24);
+}
+
+/*
+ * Tones: the inks a surface implies. Light is the default (Off-white and Warm Ivory); `data-tone="paper"` is Cream
+ * Paper, where Soft Brown fails for small text; `data-tone="dark"` is Dark Walnut or Ebony. A surface sets the tone,
+ * and every component reads the --app-tone-* inks, so actions invert on dark without a prop.
+ */
+:root,
+[data-tone="light"] {
+  --app-tone-surface: var(--semantic-surface-canvas);
+  --app-tone-ink: var(--semantic-text-primary);
+  --app-tone-ink-secondary: var(--semantic-text-secondary);
+  --app-tone-rule: var(--semantic-border-default);
+  --app-tone-accent: var(--semantic-accent-rule);
+  --app-tone-focus: var(--semantic-border-focus);
+  --app-tone-action-fill: var(--semantic-action-primary);
+  --app-tone-action-fill-emphasis: var(--semantic-action-primary-emphasis);
+  --app-tone-action-label: var(--semantic-action-on-primary);
+  --app-tone-wash: color-mix(in srgb, var(--color-ebony) 4%, transparent);
+}
+
+[data-tone="paper"] {
+  --app-tone-surface: var(--semantic-surface-paper);
+  --app-tone-ink: var(--semantic-text-primary);
+  --app-tone-ink-secondary: var(--semantic-text-secondary-on-photo);
+  --app-tone-rule: var(--semantic-border-default);
+  --app-tone-accent: var(--semantic-accent-rule);
+  --app-tone-focus: var(--semantic-border-focus);
+  --app-tone-action-fill: var(--semantic-action-primary);
+  --app-tone-action-fill-emphasis: var(--semantic-action-primary-emphasis);
+  --app-tone-action-label: var(--semantic-action-on-primary);
+  --app-tone-wash: color-mix(in srgb, var(--color-ebony) 4%, transparent);
+}
+
+[data-tone="dark"] {
+  --app-tone-surface: var(--semantic-surface-dark);
+  --app-tone-ink: var(--semantic-text-inverse);
+  --app-tone-ink-secondary: var(--semantic-text-inverse-muted);
+  --app-tone-rule: color-mix(in srgb, var(--color-off-white) 28%, transparent);
+  --app-tone-accent: var(--semantic-accent-on-dark);
+  --app-tone-focus: var(--semantic-border-focus-on-dark);
+  --app-tone-action-fill: var(--color-off-white);
+  --app-tone-action-fill-emphasis: var(--color-warm-ivory);
+  --app-tone-action-label: var(--color-ebony);
+  --app-tone-wash: color-mix(in srgb, var(--color-off-white) 11%, transparent);
+}

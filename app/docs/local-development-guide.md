@@ -30,7 +30,7 @@ Packages restore from the locked files: `packages.lock.json` in every .NET proje
 | `tests/` | xUnit v3 test projects, one per project above (`FotoHavn.Host.Headless.Tests` runs the headless host on a random loopback port) |
 | `ui/` | The React UI; see [`../ui/README.md`](../ui/README.md) |
 | `e2e/` | The Playwright end-to-end framework that drives the real app |
-| `scripts/` | `publish-field-test.ps1` |
+| `scripts/` | `publish-field-test.ps1`, `generate-protocol.ps1`, and `generate-tokens.mjs` (brand tokens to `ui/src/styles/brand-tokens.css`) |
 | `output/` | Every build, test, and run output (git-ignored); see [Outputs](#outputs) |
 
 ## Verification commands
@@ -86,9 +86,9 @@ npm run build
 npm run test:fixtures
 ```
 
-`test:coverage` fails below 80% lines, branches, functions, or statements. `test:fixtures` builds the E2E bundle (`vite build --mode e2e` to `dist-e2e/`, never `dist/`), serves it with `vite preview`, and runs two Chromium projects:
+`test:coverage` fails below 80% lines, branches, functions, or statements. `lint` runs ESLint and then stylelint, which rejects hex colors, raw `cubic-bezier()` and durations, and raw `z-index` outside `src/styles/brand-tokens.css` and `src/styles/app-tokens.css` (see [`../DESIGN.md`](../DESIGN.md#tokens-and-implementation-files)). After a change to [`../../brand/tokens/tokens.json`](../../brand/tokens/tokens.json), run `npm run generate:tokens` and commit `src/styles/brand-tokens.css`; `scripts/brand-tokens.test.ts` fails while it is stale. `test:fixtures` builds the E2E bundle (`vite build --mode e2e` to `dist-e2e/`, never `dist/`), serves it with `vite preview`, and runs two Chromium projects:
 
-- `fixtures`: the fixture lane (`?fixture=<name>`) renders every brain-generated presentation fixture, plus the hand-written Event list with rows, at 1280×720, 1366×768, 1920×1080, and 2560×1440, with no scrolling and no axe violations.
+- `fixtures`: the component fixture lane renders every fixture the gallery discovers (`ui/src/components/**/*.fixtures.tsx`, at `?gallery=<id>`) at 1280×720, 1366×768, 1920×1080, and 2560×1440, plus reduced motion and forced colors at 1280×720, with screenshots in `output/fixtures/components/<id>/`, axe, overflow, target-size, and one-primary-action checks; and the fixture lane (`?fixture=<name>`) renders every brain-generated presentation fixture, plus the hand-written Event list with rows, at the same four resolutions, with no scrolling and no axe violations.
 - `headless`: the integration lane starts the real [headless host](#headless-host) with `dotnet run --project src/FotoHavn.Host.Headless --no-build -- --ui ui/dist-e2e --data output/ui-headless/<run>/Data`, parses its listening line, and drives one operator and one guest page over the WebSocket bridge with the UI's own client. It needs the .NET build from step 1.
 
 Install Chromium once with `npx playwright install chromium`.
@@ -226,6 +226,8 @@ The UI picks one transport at startup (`ui/src/brain/createBrainClient.ts`; deta
 
 Otherwise the page shows "Not connected." (with fixture links in development and E2E builds). E2E builds also honor `?e2eProtocolVersion=<n>`, the version sent in `hello`, which makes the brain answer `protocolMismatch`. Field builds contain no fixture code: `main.tsx` loads the fixture lane with a dynamic import behind a build-time guard.
 
+Development and E2E builds also serve the component fixture gallery, with no brain: `?gallery` lists and renders every component fixture, `?gallery=<fixture id>` renders one alone in the full viewport, and `?gallery=manifest` publishes the list the fixture lane reads. `vite.config.ts` fails a field build that bundles the gallery, the fixture lane, or a fixture file. Component conventions are in [`../ui/src/components/README.md`](../ui/src/components/README.md).
+
 ## Headless dev loop
 
 For fast UI work without the WPF host, run the headless host and the Vite dev server together:
@@ -235,7 +237,7 @@ dotnet run --project src/FotoHavn.Host.Headless -- --data output/scratch/Data --
 cd ui; npm run dev
 ```
 
-Then open `http://localhost:5173/?token=<operator token>&brain=ws://127.0.0.1:5180/bridge` (and the guest token in a second tab) for hot reload against real presentations. For a surface without a brain, open `http://localhost:5173/?fixture=<name>`. Playwright can also attach to the E2E build through its debugging port (see [E2E build](#e2e-build-test-hooks-and-the-publish-guard)).
+Then open `http://localhost:5173/?token=<operator token>&brain=ws://127.0.0.1:5180/bridge` (and the guest token in a second tab) for hot reload against real presentations. For a surface without a brain, open `http://localhost:5173/?fixture=<name>`; for components, open `http://localhost:5173/?gallery` or `?gallery=<fixture id>`. Playwright can also attach to the E2E build through its debugging port (see [E2E build](#e2e-build-test-hooks-and-the-publish-guard)).
 
 ## Publishing
 

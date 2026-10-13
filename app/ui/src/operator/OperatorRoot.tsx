@@ -1,4 +1,5 @@
 import type { OperatorPresentation } from "../protocol/generated.ts";
+import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
 import { EventList } from "./EventList.tsx";
@@ -7,10 +8,14 @@ import styles from "./Operator.module.css";
 function OperatorFatal({ reason }: { readonly reason: string | null }) {
   return (
     <div className={screen.screen}>
-      <h1 className={screen.statement}>
-        Something needs <em>attention.</em>
-      </h1>
-      {reason !== null && <p className={screen.line}>{reason}</p>}
+      <StatementHeading
+        level={1}
+        size="heading-lg"
+        align="center"
+        lead="Something needs"
+        turn="attention."
+        {...(reason === null ? {} : { supporting: reason })}
+      />
     </div>
   );
 }

@@ -40,7 +40,9 @@ describe("EventList", () => {
     renderList(stubClient(vi.fn()), []);
     expect(screen.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
     expect(screen.getByText("No Events yet.")).toBeVisible();
-    expect(screen.getByRole("button", { name: "NEW EVENT" })).toHaveTextContent("NEW EVENT →");
+    expect(screen.getByRole("button", { name: "NEW EVENT" })).toHaveTextContent(/^NEW EVENT$/);
+    expect(screen.getByRole("button", { name: "NEW EVENT" })).toHaveAttribute("data-fotohavn-action", "primary");
+    expect(screen.getByRole("button", { name: "NEW EVENT" }).querySelector("[data-direction='right'] svg")).not.toBeNull();
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 

@@ -1,0 +1,80 @@
+.statement {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--app-stack-gap);
+  color: var(--app-tone-ink);
+  text-align: start;
+}
+
+.statement[data-align="center"] {
+  align-items: center;
+  text-align: center;
+}
+
+.heading {
+  font-family: var(--typography-heading-font-family);
+  font-size: var(--app-text-heading);
+  font-weight: var(--typography-heading-font-weight);
+  letter-spacing: var(--typography-heading-letter-spacing);
+  line-height: var(--typography-heading-line-height);
+  text-wrap: balance;
+}
+
+.heading[data-size="display"] {
+  font-size: var(--app-text-display);
+  letter-spacing: var(--typography-display-letter-spacing);
+  line-height: var(--typography-display-line-height);
+}
+
+.heading[data-size="heading-lg"] {
+  font-size: var(--app-text-heading-lg);
+  letter-spacing: var(--typography-heading-lg-letter-spacing);
+  line-height: var(--typography-heading-lg-line-height);
+}
+
+.heading[data-size="heading-sm"] {
+  font-size: var(--app-text-heading-sm);
+  letter-spacing: var(--typography-heading-sm-letter-spacing);
+  line-height: var(--typography-heading-sm-line-height);
+}
+
+.heading[data-size="subheading"] {
+  font-size: var(--app-text-subheading);
+  letter-spacing: var(--typography-subheading-letter-spacing);
+  line-height: var(--typography-subheading-line-height);
+}
+
+.turn {
+  font-family: var(--typography-emphasis-font-family);
+  font-style: var(--typography-emphasis-font-style);
+  font-weight: var(--typography-emphasis-font-weight);
+}
+
+.turn[data-own-line] {
+  display: block;
+  font-size: 0.86em;
+  line-height: var(--typography-emphasis-line-height);
+}
+
+.supporting {
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+/* The heading's gap already separates it; consecutive supporting lines sit together. */
+.supporting + .supporting {
+  margin-block-start: calc(-1 * var(--app-stack-gap));
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16) var(--space-32);
+  margin-block-start: var(--space-8);
+}

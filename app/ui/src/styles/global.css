@@ -1,29 +1,158 @@
-/* Placeholder base styles until brand-tokens.css and app-tokens.css arrive in M3. Neutral values only. */
-:root {
-  --placeholder-canvas: #ffffff;
-  --placeholder-ink: #1a1a1a;
-  --placeholder-muted: #595959;
-  --placeholder-rule: #d6d6d6;
+/*
+ * Global styles for every window. Tokens first: the self-hosted fonts, the generated brand tokens, then the app-only
+ * tokens. Below: the reset, the focus ring, tones, the Guest Screen's touch rules, reduced motion, and forced colors.
+ * See app/DESIGN.md ("Tokens and implementation files").
+ */
+@import url("./fonts.css");
+@import url("./brand-tokens.css");
+@import url("./app-tokens.css");
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-synthesis: none; /* Never faux bold or faux italic (brand typography.md) */
+  text-size-adjust: 100%;
+  touch-action: manipulation; /* No double-tap zoom anywhere */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
 body,
 #root {
   height: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
   margin: 0;
 }
 
-body {
-  background: var(--placeholder-canvas);
-  color: var(--placeholder-ink);
-  font-family: system-ui, sans-serif;
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+video,
+canvas,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 
 button {
-  min-width: 48px;
-  min-height: 48px;
-  padding: 0 24px;
-  font: inherit;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+body {
+  background-color: var(--semantic-surface-canvas);
+  color: var(--semantic-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--app-text-body);
+  font-weight: var(--typography-body-font-weight);
+  line-height: var(--typography-body-line-height);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+}
+
+::selection {
+  background-color: var(--app-selection);
+  color: var(--semantic-text-primary);
+}
+
+/* A surface sets its tone (app-tokens.css); zero specificity so any component surface can override the fill. */
+:where([data-tone]) {
+  background-color: var(--app-tone-surface);
+  color: var(--app-tone-ink);
+}
+
+/* Focus: a 2 px outline at a 5 px offset, Ebony on light and Off-white on dark (brand accessibility.md) */
+:focus-visible {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/*
+ * The Guest Screen: no page scrolling, no text selection, no callouts or image drags, and no pinch or double-tap zoom.
+ * The guest gallery's strip row is the one scrolling region; it marks itself with data-fotohavn-scroll-region and
+ * sets its own touch-action.
+ */
+[data-fotohavn-role="guest"] {
+  touch-action: pan-x pan-y;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+[data-fotohavn-role="guest"] img {
+  -webkit-user-drag: none;
+}
+
+html[data-fotohavn-role="guest"],
+html[data-fotohavn-role="guest"] body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Reduced motion: state changes become near-instant. Components keep motion transforms inside a no-preference query. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-delay: var(--app-duration-instant) !important;
+    transition-duration: var(--app-duration-instant) !important;
+    animation-delay: var(--app-duration-instant) !important;
+    animation-duration: var(--app-duration-instant) !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Windows High Contrast: system colors keep every control, focus ring, and state visible. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+
+  [aria-disabled="true"] {
+    color: GrayText;
+  }
 }

@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "app/**"
+      - "brand/tokens/**"
       - ".github/workflows/desktop.yml"
   pull_request:
     paths:
       - "app/**"
+      - "brand/tokens/**"
       - ".github/workflows/desktop.yml"
 
 permissions:

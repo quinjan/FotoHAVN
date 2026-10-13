@@ -1,0 +1,79 @@
+/* The fixture gallery (development and E2E builds only). */
+.single {
+  display: grid;
+  min-height: 100vh;
+}
+
+.single[data-layout="centered"] {
+  place-items: center;
+  padding: var(--app-gutter);
+}
+
+.single[data-layout="fill"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.index {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+  padding: var(--space-48) var(--app-gutter);
+}
+
+.title {
+  font-family: var(--typography-heading-font-family);
+  font-size: var(--app-text-heading);
+  font-weight: var(--typography-heading-font-weight);
+  letter-spacing: var(--typography-heading-letter-spacing);
+  line-height: var(--typography-heading-line-height);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding-block-start: var(--space-24);
+  border-block-start: var(--stroke-hairline) solid var(--semantic-border-default);
+}
+
+.component {
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--typography-subheading-font-weight);
+  line-height: var(--typography-subheading-line-height);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: var(--space-32);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.caption {
+  color: var(--semantic-text-secondary);
+  font-size: var(--app-text-supporting);
+}
+
+.preview {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  min-height: 200px;
+  padding: var(--space-32);
+  border: var(--stroke-hairline) solid var(--semantic-border-default);
+  border-radius: var(--radius-hairline);
+  overflow: auto;
+}
+
+.manifest {
+  font-size: var(--app-text-supporting);
+  white-space: pre-wrap;
+}

@@ -1,4 +1,6 @@
 import type { ProtocolMismatch } from "../brain/types.ts";
+import { StatementHeading } from "../components/StatementHeading/index.ts";
+import { TextLink } from "../components/TextLink/index.ts";
 import styles from "./Screen.module.css";
 
 /** Before the first `welcome`. */
@@ -15,16 +17,22 @@ export function ConnectingScreen() {
 export function NotConnectedScreen({ fixtureNames }: { readonly fixtureNames: readonly string[] }) {
   return (
     <main className={styles.screen} data-fotohavn-screen="notConnected">
-      <h1 className={styles.statement}>
-        Not <em>connected.</em>
-      </h1>
-      <p className={styles.line}>This screen can&apos;t reach the booth. Open FOTOHAVN to use it.</p>
+      <StatementHeading
+        level={1}
+        size="heading-lg"
+        align="center"
+        lead="Not"
+        turn="connected."
+        supporting="This screen can't reach the booth. Open FOTOHAVN to use it."
+      />
       {fixtureNames.length > 0 && (
         <nav aria-label="Fixtures">
           <ul className={styles.links}>
             {fixtureNames.map((name) => (
               <li key={name}>
-                <a href={`?fixture=${encodeURIComponent(name)}`}>{name}</a>
+                <TextLink size="meta" href={`?fixture=${encodeURIComponent(name)}`}>
+                  {name}
+                </TextLink>
               </li>
             ))}
           </ul>
@@ -38,12 +46,16 @@ export function NotConnectedScreen({ fixtureNames }: { readonly fixtureNames: re
 export function ProtocolMismatchScreen({ mismatch }: { readonly mismatch: ProtocolMismatch | null }) {
   return (
     <main className={styles.screen} data-fotohavn-screen="protocolMismatch">
-      <h1 className={styles.statement}>
-        A little <em>mix-up.</em>
-      </h1>
-      <p className={styles.line}>This screen and the booth are out of step. Restart FOTOHAVN to fix it.</p>
+      <StatementHeading
+        level={1}
+        size="heading-lg"
+        align="center"
+        lead="A little"
+        turn="mix-up."
+        supporting="This screen and the booth are out of step. Restart FOTOHAVN to fix it."
+      />
       {mismatch !== null && (
-        <p className={styles.meta}>
+        <p className={styles.line}>
           Booth version {mismatch.brainVersion} · Screen version {mismatch.uiVersion}
         </p>
       )}

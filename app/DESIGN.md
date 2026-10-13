@@ -54,12 +54,14 @@ These are not departures. They record how the booth meets a brand rule where the
 
 | File | Role |
 | --- | --- |
-| `scripts/generate-tokens.mjs` | Reads [`brand/tokens/tokens.json`](../brand/tokens/tokens.json) and writes `ui/src/styles/brand-tokens.css`. |
-| `ui/src/styles/brand-tokens.css` | Generated. CSS custom properties for colors, semantic roles, type roles, space, radius, stroke, shadow, and motion, named after their `tokens.json` paths. Never edit it by hand; a test fails when it's stale. |
+| `scripts/generate-tokens.mjs` | Reads [`brand/tokens/tokens.json`](../brand/tokens/tokens.json) and writes `ui/src/styles/brand-tokens.css` (`npm run generate:tokens` in `ui/`). An unknown token `$type` fails the generator. |
+| `ui/src/styles/brand-tokens.css` | Generated. CSS custom properties for colors, semantic roles, type roles, space, radius, stroke, shadow, and motion, named after their `tokens.json` paths (`semantic.text.primary` → `--semantic-text-primary`; a typography role expands to `--typography-<role>-font-family`, `-font-size`, `-font-weight`, `-letter-spacing`, `-line-height`, `-font-style`, `-text-transform`, and a `-font` shorthand). Never edit it by hand; `ui/scripts/brand-tokens.test.ts` fails when it's stale. |
 | `ui/src/styles/app-tokens.css` | App-only values declared in [App tokens](#app-tokens). Nothing here may redefine a brand value. |
-| Self-hosted fonts | Cormorant Garamond and Manrope load from the UI bundle with `font-display: block` and a preload, never from the network. |
-| Global styles | Reset, focus ring, reduced motion, `forced-colors`, `touch-action` rules, no double-tap zoom, and no text selection or callouts on guest screens. |
-| Lint rule | Rejects hex colors and raw `cubic-bezier` or duration values outside the two token files. |
+| `ui/src/styles/fonts.css` | Self-hosted fonts: Cormorant Garamond 400, 400 italic, and 500 (wordmark), and Manrope 400 and 600, latin and latin-ext, from the exact-pinned `@fontsource/cormorant-garamond` and `@fontsource/manrope` 5.3.0 packages, with `font-display: block`. `vite.config.ts` preloads the five latin files from `index.html`; nothing loads from the network. The SIL Open Font License texts ship as `/licenses/OFL.txt` (`ui/public/licenses/OFL.txt`). |
+| `ui/src/styles/global.css` | Imports the three files above, then the reset (including `font-synthesis: none`), the focus ring, tones, the Guest Screen rules (`[data-fotohavn-role="guest"]`: no page scrolling, no text selection, callouts, or image drags, `touch-action: pan-x pan-y`), `touch-action: manipulation` and a transparent tap highlight everywhere, reduced motion (every transition and animation at `--app-duration-instant`), and `forced-colors`. |
+| Lint rule | `npm run lint` runs ESLint, then stylelint (`ui/stylelint.config.js`), which rejects hex and named colors, `rgb()`/`hsl()`, raw `cubic-bezier()`, raw `ms`/`s` durations, and raw `z-index` outside the two token files. ESLint rejects hex colors, and raw easings or durations in inline styles, in TSX. `ui/scripts/lint-rules.test.ts` proves both fire. |
+| `ui/src/components/` | The components, one folder each, with the conventions in [`ui/src/components/README.md`](ui/src/components/README.md). |
+| Fixture gallery | `index.html?gallery` (every component fixture), `?gallery=<fixture id>` (one, full viewport), and `?gallery=manifest`, in development and E2E builds only; a field build that bundles it fails. |
 
 Use semantic roles before primitives, as [`brand/tokens/README.md`](../brand/tokens/README.md) asks. The Photo Strip itself is composed by the brain, not the UI; its paper, signature, and fonts follow [ADR 0006](docs/adr/0006-brain-side-composition-with-an-app-owned-catalog.md).
 
@@ -73,11 +75,28 @@ These live only in `ui/src/styles/app-tokens.css`.
 | --- | --- | --- |
 | `--app-reference-width` | 1280px | Reference frame width (1280 × 720 physical pixels on the Guest Screen) |
 | `--app-max-width` | 2560px | Width at which fluid sizes stop growing |
+| `--app-type-eyebrow` | 15px → 20px | Guest eyebrows (a label, not reading text) |
+| `--app-type-meta` | 14px → 18px | Guest step numbers and meta labels (a label, not reading text) |
+| `--app-type-action` | 16px → 22px | Guest action labels |
+| `--app-type-supporting` | 20px → 26px | Guest supporting lines; held at Body because a guest reads them to finish a step |
 | `--app-type-body` | 20px → 26px | Guest reading text |
+| `--app-type-body-lg` | 24px → 32px | Guest lead lines |
+| `--app-type-subheading` | 32px → 44px | Guest option titles and the wordmark set as type |
+| `--app-type-heading-sm` | 44px → 64px | Guest small headings |
 | `--app-type-heading` | 56px → 84px | Guest step headings |
+| `--app-type-heading-lg` | 72px → 108px | Guest single moments: Keepsake, Operator Assistance, fatal |
 | `--app-type-display` | 88px → 132px | Start statement and countdown numerals |
+| `--app-icon-action-guest` / `--app-icon-control-guest` | 24px → 32px / 36px → 48px | Guest icons beside action labels / on primary camera controls (operator: 20px / 28px) |
+| `--app-space-fluid-16` … `-96` | 16 → 24, 24 → 36, 32 → 48, 48 → 72, 64 → 96, 96 → 144 | Brand space steps that grow 1.5× by 2560, for guest compositions |
+| `--app-action-padding-block` / `-inline` | 14px / 22px (operator); 18px → 24px / 32px → 48px (guest) | Action padding |
 
-Fluid values interpolate linearly by viewport width between the two widths, for example `clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px)`. The remaining roles scale the same way from their brand reference sizes, keeping their relationships to Body, and are recorded here when they are set.
+Fluid values interpolate linearly by viewport width between the two widths, for example `clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px)`. Each guest role grows from 1280 to 2560 by about the factor of its neighbours in the brand scale, keeping the brand's order of roles: labels grow about 1.3×, reading text 1.3×, and headings 1.5×. Supporting is held at Body so no guest reading text falls under 20px.
+
+**Role-resolved tokens.** Components size through `--app-text-<role>` (one per brand type role), `--app-target`, `--app-icon-action`, `--app-icon-control`, `--app-action-padding-*`, and `--app-stack-gap`. They resolve to the brand reference sizes and `--app-target-operator` by default (the Operator Screen, and status screens before a role arrives), and to the guest values above under `[data-fotohavn-role="guest"]`, which the App sets on `<html>` from the brain's `welcome`. So one component is right on both screens.
+
+**Tones.** A surface sets `data-tone="light"` (Off-white, Warm Ivory; the default), `"paper"` (Cream Paper), or `"dark"` (Dark Walnut, Ebony). Components read the inks from `--app-tone-ink`, `-ink-secondary`, `-rule`, `-accent`, `-focus`, `-action-fill`, `-action-fill-emphasis`, `-action-label`, `-wash`, and `-surface`, so they invert on dark without a prop and keep the contrast pairs: on paper the secondary ink is the derived `#52463D`, never Soft Brown; on dark it is Antique Metal, the rule is Off-white at 28%, and the primary action is Off-white with an Ebony label, Warm Ivory on hover.
+
+**Other app values.** `--app-wordmark-tracking` (−0.05em, the wordmark set as type), `--app-motion-nudge` (2px), `--app-duration-instant` (1ms, reduced motion), `--app-scrim` (Ebony 32%), `--app-selection` (Muted Brass 24%), `--app-measure-prose` (65ch), and `--app-measure-supporting` (42ch).
 
 ### Targets
 
@@ -87,30 +106,31 @@ Fluid values interpolate linearly by viewport width between the two widths, for 
 | `--app-target-shutter` | 112 × 112 | The circular shutter |
 | `--app-target-operator` | 48 × 48 | Every target on the Operator Screen |
 
-Targets may grow with the scale; they never shrink below these values.
+Targets may grow with the scale; they never shrink below these values. The fixture lane fails any control in a fixture smaller than its role's minimum.
 
 ### Layout regions
 
-| Token | Region |
-| --- | --- |
-| `--app-gutter` | Page gutters, fluid from 24 to 80 ([layout.md](../brand/layout.md#width-and-gutters)) |
-| `--app-region-top` | The guest top band: step progress, `START OVER` (Template, Photographs, and Filters only), and the exit hold in the top-right corner |
-| `--app-region-stage` | The rest of the guest viewport, which holds the step's composition |
-| `--app-split-print` / `--app-split-options` | The 5 / 7 column split of the 12-column grid used by Template and Filters |
+| Token | Value | Region |
+| --- | --- | --- |
+| `--app-gutter` | `clamp(24px, 5vw, 80px)` | Page gutters, fluid from 24 to 80 ([layout.md](../brand/layout.md#width-and-gutters)) |
+| `--app-grid-columns` | 12 | The landscape grid |
+| `--app-region-top` | 96px → 128px | The guest top band: step progress, `START OVER` (Template, Photographs, and Filters only), and the exit hold in the top-right corner. It holds a 64 target with 16 to 32 above and below. |
+| `--app-region-stage` | `100vh` minus the top band | The rest of the guest viewport, which holds the step's composition |
+| `--app-split-print` / `--app-split-options` | 5 / 7 | The 5 / 7 column split of the 12-column grid used by Template and Filters (`grid-column: span var(--app-split-print)`) |
 
 ### Z-order
 
-From bottom to top. Each layer is a named token; components never set raw `z-index` values.
+From bottom to top. Each layer is a named token; components never set raw `z-index` values, and the lint rule rejects one.
 
-| Token | Layer |
-| --- | --- |
-| `--app-z-base` | Surfaces and the step composition |
-| `--app-z-stage-overlay` | Crop guide and countdown numerals over the live preview |
-| `--app-z-flash` | The capture flash |
-| `--app-z-chrome` | Step progress, `START OVER`, the running-Event panel when pinned |
-| `--app-z-timer-warning` | The Phase Timer warning |
-| `--app-z-dialog` | Scrim and dialogs: Start Over confirmation, PIN, operator confirmations |
-| `--app-z-exit-hold` | The exit hold, which stays reachable above every guest view and is hidden only while the PIN dialog is open |
+| Token | Value | Layer |
+| --- | --- | --- |
+| `--app-z-base` | 0 | Surfaces and the step composition |
+| `--app-z-stage-overlay` | 10 | Crop guide and countdown numerals over the live preview |
+| `--app-z-flash` | 20 | The capture flash |
+| `--app-z-chrome` | 30 | Step progress, `START OVER`, the running-Event panel when pinned |
+| `--app-z-timer-warning` | 40 | The Phase Timer warning |
+| `--app-z-dialog` | 50 | Scrim and dialogs: Start Over confirmation, PIN, operator confirmations |
+| `--app-z-exit-hold` | 60 | The exit hold, which stays reachable above every guest view and is hidden only while the PIN dialog is open |
 
 ## Scaling
 
@@ -197,8 +217,8 @@ Static copy lives in the UI; strings with domain meaning, such as Template and L
 
 | Component | Notes |
 | --- | --- |
-| `PrimaryAction`, `TextLink`, `SecondaryAction` | From the brand actions; arrow glyph after the label; inverted on dark; one primary action per view |
-| `Eyebrow`, `StatementHeading` | The italic turn through `<em>`, one per heading, at the end |
+| `PrimaryAction`, `TextLink`, `SecondaryAction` | From the brand actions; an optional Phosphor Light arrow after the label (`arrow` prop), nudging 2 px on hover except under reduced motion; inverted on dark through the tone; one primary action per view (`data-fotohavn-action`, checked by the fixture lane). Unavailable actions keep focus with `aria-disabled` and ignore activation. Their disabled look is the interpretation's one functional value: no fill, a border in the tone's rule color, and the label in the tone's secondary ink (Soft Brown on light, Antique Metal on dark), with text nearby giving the reason. `TextLink` takes the Action role, or Meta for row actions. |
+| `Eyebrow`, `StatementHeading` | The italic turn through `<em>`, one per heading, at the end: `StatementHeading` takes `lead` and `turn`, so the turn can't land elsewhere, and composes eyebrow, heading, one or two supporting lines, and an optional action |
 | `StepProgress` | Numbered `01 Template` to `04 Keepsake`; `aria-current="step"`; going back is allowed, as on the website |
 | `OptionList` | Radio and checkbox variants with thumbnail, title, description, and meta. The selected row has Warm Ivory, a 2 px Muted Brass left rule, and a checked state, never color alone. Arrow keys move between rows. |
 | `PrintObject` | A Photo Strip as a physical print: Off-white border, `print-contact` or `print` shadow, one shadow per object |
@@ -247,7 +267,7 @@ These apply [`brand/accessibility.md`](../brand/accessibility.md) to the booth:
 
 Run the commands named in [`AGENTS.md`](AGENTS.md). For UI changes, the lanes are:
 
-- **Fixture gallery:** brain-generated presentation fixtures rendered in Chromium at 1280 × 720, 1366 × 768, 1920 × 1080, and 2560 × 1440, with screenshots, axe with no violations, no overflow or page scroll on guest views (only the guest gallery's strip row scrolls, horizontally), reduced-motion and forced-colors emulation, and the token drift check.
+- **Fixture gallery:** every component fixture (`?gallery=<id>`) and the brain-generated presentation fixtures (`?fixture=<name>`) rendered in Chromium at 1280 × 720, 1366 × 768, 1920 × 1080, and 2560 × 1440, with screenshots, axe with no violations, no overflow or page scroll on guest views (only the guest gallery's strip row scrolls, horizontally), minimum targets, at most one primary action, reduced-motion and forced-colors emulation, and the token drift check.
 - **Real host:** end-to-end suites that size the real WebView2 windows to the four resolutions and compare screenshots with the fixture baselines, and check fonts, computed token colors, tab order, focus, and touch on 64 × 64 targets.
 - **Manual:** 125% and 150% Windows display scaling; a full Guest Cycle on the booth touch screen at standing distance; countdown legibility from 1.5 m; flash comfort; and one review of brand fidelity against `brand/` and the website.
 
@@ -258,5 +278,5 @@ Report which lanes ran, their results, and what stays unproven.
 These are gaps between the implementation plan, `brand/`, and this document. Resolve each deliberately and update this document. Items closed during M0 are listed in [section 18 of the implementation plan](docs/implementation-plan.md#18-open-questions) (Q9–Q17).
 
 - **Missing copy and placement (M8).** The Start unavailable view, the fatal and protocol-mismatch view, the labels for stopping a capture sequence, reviewing from the Camera tab, accepting a Retake, and cancelling a Move, and the placement of `START OVER` and the Phase Timer warning in the guest top band are written from [`brand/voice.md`](../brand/voice.md) during M8 and recorded here. The exit hold stays in the top-right corner.
-- **Unset values (M3).** Type role sizes other than Body, Heading, and Display, and the region sizes, are set in `app-tokens.css` during the brand foundation milestone and recorded here.
+- **Unset values (M3, resolved).** The guest sizes of every type role, the icon sizes, the fluid space steps, the region sizes, and the z-order values were set in `app-tokens.css` during M3 and are recorded in [App tokens](#app-tokens). Change them there and here together.
 - **Operator Assistance link label (M6).** The label of the text link from an Operator Assistance alert on Event setup or a gallery back to the running-Event panel is written from [`brand/voice.md`](../brand/voice.md) during M6 and recorded here.

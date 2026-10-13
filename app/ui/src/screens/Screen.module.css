@@ -1,78 +1,71 @@
-/* A centered single moment: status screens, the guest start placeholder, and fatal views. */
+/* A role root: the surface fills the window; notices sit beneath it and take no space while empty. */
+.root {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 100%;
+}
+
+/* A centered single moment: status screens, the guest Start placeholder, and fatal views (DESIGN.md compositions). */
 .screen {
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  height: 100%;
-  padding: 24px;
+  gap: var(--app-stack-gap);
+  padding: var(--app-space-fluid-48) var(--app-gutter);
   overflow: hidden;
   text-align: center;
 }
 
-.statement {
-  margin: 0;
-  font-size: clamp(56px, 4.375vw, 84px);
-  font-weight: 400;
-  line-height: 1.1;
+/* Start: the wordmark at the top, the statement centered in the space below it. */
+.start {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  justify-items: center;
+  padding: var(--app-space-fluid-48) var(--app-gutter);
+  overflow: hidden;
+  text-align: center;
 }
 
+.start > :first-child {
+  align-self: start;
+}
+
+/* The FOTOHAVN wordmark set as type: Cormorant Garamond 500, uppercase, tracking -0.05em (brand logo.md). */
 .wordmark {
-  margin: 0;
-  font-size: clamp(20px, 1.5625vw, 26px);
-  font-weight: 600;
-  letter-spacing: 0.24em;
+  font-family: var(--font-family-display);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--app-wordmark-tracking);
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .line {
-  margin: 0;
-  font-size: clamp(20px, 1.5625vw, 26px);
-}
-
-.meta {
-  margin: 0;
-  color: var(--placeholder-muted);
-  font-size: 16px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
 }
 
 .links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 24px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.links a {
-  display: inline-block;
-  padding: 12px 0;
-  color: inherit;
-}
-
-.notice {
-  margin: 0;
-  font-size: clamp(20px, 1.5625vw, 26px);
-}
-
-/* A role root: the surface fills the window; notices sit beneath it and take no space while empty. */
-.root {
-  box-sizing: border-box;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  min-height: 100%;
+  gap: 0 var(--space-24);
+  max-inline-size: var(--app-measure-prose);
 }
 
 .notices {
-  padding: 0 clamp(24px, 4vw, 80px);
+  padding: 0 var(--app-gutter);
   text-align: center;
 }
 
 .notices:has(> :not(:empty)) {
-  padding-bottom: 24px;
+  padding-block-end: var(--space-24);
+}
+
+.notice {
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
 }

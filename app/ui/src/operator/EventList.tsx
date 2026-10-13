@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useBrainClient } from "../brain/BrainClientContext.ts";
+import { PrimaryAction } from "../components/PrimaryAction/index.ts";
+import { StatementHeading } from "../components/StatementHeading/index.ts";
 import type { EventListRow } from "../protocol/generated.ts";
 import { commandNotice, formatEventDate, formatGuestCycles, formatLastUsed } from "./format.ts";
 import styles from "./Operator.module.css";
@@ -51,16 +53,16 @@ export function EventList({ events }: { readonly events: readonly EventListRow[]
   return (
     <div className={styles.view}>
       <header className={styles.header}>
-        <h1 className={styles.heading}>Events</h1>
-        <button
-          type="button"
-          aria-disabled={pending}
+        <StatementHeading level={1} lead="Events" />
+        <PrimaryAction
+          arrow="right"
+          disabled={pending}
           onClick={() => {
             void openNewEvent();
           }}
         >
-          NEW EVENT <span aria-hidden="true">→</span>
-        </button>
+          NEW EVENT
+        </PrimaryAction>
       </header>
       {events.length === 0 ? (
         <p className={styles.empty}>No Events yet.</p>
