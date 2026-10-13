@@ -7,6 +7,7 @@
   <ItemGroup Label="Product">
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="[10.0.12]" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="[10.0.12]" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.12]" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="[1.0.4258.31]" />
     <PackageVersion Include="SkiaSharp" Version="[3.119.4]" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="[3.119.4]" />

@@ -1,0 +1,4229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.fotohavn/protocol.schema.json",
+  "title": "FotoHavnProtocol",
+  "description": "The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.",
+  "type": "object",
+  "properties": {
+    "protocolVersion": {
+      "const": 1
+    },
+    "clientMessage": {
+      "$ref": "#/$defs/ClientMessage"
+    },
+    "serverMessage": {
+      "$ref": "#/$defs/ServerMessage"
+    },
+    "commandPayloads": {
+      "$ref": "#/$defs/CommandPayloadMap"
+    },
+    "testHooks": {
+      "$ref": "#/$defs/TestHookMap"
+    }
+  },
+  "required": [
+    "protocolVersion",
+    "clientMessage",
+    "serverMessage",
+    "commandPayloads",
+    "testHooks"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "AcceptRetakeCommand": {
+      "title": "AcceptRetakeCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "AcceptRetake"
+        },
+        "payload": {
+          "$ref": "#/$defs/AcceptRetakePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "AcceptRetakePayload": {
+      "title": "AcceptRetakePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "BackToStartCommand": {
+      "title": "BackToStartCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "BackToStart"
+        },
+        "payload": {
+          "$ref": "#/$defs/BackToStartPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "BackToStartPayload": {
+      "title": "BackToStartPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "BeginExitHoldCommand": {
+      "title": "BeginExitHoldCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "BeginExitHold"
+        },
+        "payload": {
+          "$ref": "#/$defs/BeginExitHoldPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "BeginExitHoldPayload": {
+      "title": "BeginExitHoldPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "BeginGuestCycleCommand": {
+      "title": "BeginGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "BeginGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/BeginGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "BeginGuestCyclePayload": {
+      "title": "BeginGuestCyclePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "BeginMoveCommand": {
+      "title": "BeginMoveCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "BeginMove"
+        },
+        "payload": {
+          "$ref": "#/$defs/BeginMovePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "BeginMovePayload": {
+      "title": "BeginMovePayload",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "BeginRetakeCommand": {
+      "title": "BeginRetakeCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "BeginRetake"
+        },
+        "payload": {
+          "$ref": "#/$defs/BeginRetakePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "BeginRetakePayload": {
+      "title": "BeginRetakePayload",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "CancelDeleteEventCommand": {
+      "title": "CancelDeleteEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CancelDeleteEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/CancelDeleteEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CancelDeleteEventPayload": {
+      "title": "CancelDeleteEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CancelDeleteGuestCycleCommand": {
+      "title": "CancelDeleteGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CancelDeleteGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/CancelDeleteGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CancelDeleteGuestCyclePayload": {
+      "title": "CancelDeleteGuestCyclePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CancelExitCommand": {
+      "title": "CancelExitCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CancelExit"
+        },
+        "payload": {
+          "$ref": "#/$defs/CancelExitPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CancelExitPayload": {
+      "title": "CancelExitPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CancelMoveCommand": {
+      "title": "CancelMoveCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CancelMove"
+        },
+        "payload": {
+          "$ref": "#/$defs/CancelMovePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CancelMovePayload": {
+      "title": "CancelMovePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ChangeEventFieldCommand": {
+      "title": "ChangeEventFieldCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ChangeEventField"
+        },
+        "payload": {
+          "$ref": "#/$defs/ChangeEventFieldPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ChangeEventFieldPayload": {
+      "title": "ChangeEventFieldPayload",
+      "type": "object",
+      "properties": {
+        "field": {
+          "$ref": "#/$defs/EventField"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ClientMessage": {
+      "title": "ClientMessage",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HelloMessage"
+        },
+        {
+          "$ref": "#/$defs/Command"
+        },
+        {
+          "$ref": "#/$defs/TestMessage"
+        }
+      ]
+    },
+    "CloseGalleryCommand": {
+      "title": "CloseGalleryCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CloseGallery"
+        },
+        "payload": {
+          "$ref": "#/$defs/CloseGalleryPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CloseGalleryPayload": {
+      "title": "CloseGalleryPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CloseGuestCycleCommand": {
+      "title": "CloseGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CloseGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/CloseGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CloseGuestCyclePayload": {
+      "title": "CloseGuestCyclePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CloseGuestStripCommand": {
+      "title": "CloseGuestStripCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CloseGuestStrip"
+        },
+        "payload": {
+          "$ref": "#/$defs/CloseGuestStripPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CloseGuestStripPayload": {
+      "title": "CloseGuestStripPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Command": {
+      "title": "Command",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OpenNewEventCommand"
+        },
+        {
+          "$ref": "#/$defs/EditEventCommand"
+        },
+        {
+          "$ref": "#/$defs/StartEventCommand"
+        },
+        {
+          "$ref": "#/$defs/DeleteEventCommand"
+        },
+        {
+          "$ref": "#/$defs/ConfirmDeleteEventCommand"
+        },
+        {
+          "$ref": "#/$defs/CancelDeleteEventCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenEventFolderCommand"
+        },
+        {
+          "$ref": "#/$defs/ChangeEventFieldCommand"
+        },
+        {
+          "$ref": "#/$defs/SelectCameraCommand"
+        },
+        {
+          "$ref": "#/$defs/SelectGuestDisplayCommand"
+        },
+        {
+          "$ref": "#/$defs/IdentifyDisplaysCommand"
+        },
+        {
+          "$ref": "#/$defs/SetMirrorCommand"
+        },
+        {
+          "$ref": "#/$defs/SetCountdownCommand"
+        },
+        {
+          "$ref": "#/$defs/SetOfferedTemplatesCommand"
+        },
+        {
+          "$ref": "#/$defs/SetDefaultTemplateCommand"
+        },
+        {
+          "$ref": "#/$defs/SetOfferedLooksCommand"
+        },
+        {
+          "$ref": "#/$defs/SetDefaultLookCommand"
+        },
+        {
+          "$ref": "#/$defs/SetPhaseTimerCommand"
+        },
+        {
+          "$ref": "#/$defs/SetGuestGalleryCommand"
+        },
+        {
+          "$ref": "#/$defs/SetPinCommand"
+        },
+        {
+          "$ref": "#/$defs/SaveEventCommand"
+        },
+        {
+          "$ref": "#/$defs/SaveAndStartEventCommand"
+        },
+        {
+          "$ref": "#/$defs/LeaveEventSetupCommand"
+        },
+        {
+          "$ref": "#/$defs/ConfirmLeaveCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenGalleryCommand"
+        },
+        {
+          "$ref": "#/$defs/LoadMoreGuestCyclesCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/CloseGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenGuestCycleFolderCommand"
+        },
+        {
+          "$ref": "#/$defs/DeleteGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/ConfirmDeleteGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/CancelDeleteGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/CloseGalleryCommand"
+        },
+        {
+          "$ref": "#/$defs/EndEventCommand"
+        },
+        {
+          "$ref": "#/$defs/ConfirmEndEventCommand"
+        },
+        {
+          "$ref": "#/$defs/KeepRunningCommand"
+        },
+        {
+          "$ref": "#/$defs/RetryAssistanceCommand"
+        },
+        {
+          "$ref": "#/$defs/BeginGuestCycleCommand"
+        },
+        {
+          "$ref": "#/$defs/SelectTemplateCommand"
+        },
+        {
+          "$ref": "#/$defs/GoToStepCommand"
+        },
+        {
+          "$ref": "#/$defs/ShowCameraTabCommand"
+        },
+        {
+          "$ref": "#/$defs/ShowArrangeTabCommand"
+        },
+        {
+          "$ref": "#/$defs/TakePhotographsCommand"
+        },
+        {
+          "$ref": "#/$defs/StopCaptureCommand"
+        },
+        {
+          "$ref": "#/$defs/SelectPositionCommand"
+        },
+        {
+          "$ref": "#/$defs/BeginRetakeCommand"
+        },
+        {
+          "$ref": "#/$defs/AcceptRetakeCommand"
+        },
+        {
+          "$ref": "#/$defs/TryAgainCommand"
+        },
+        {
+          "$ref": "#/$defs/KeepOriginalCommand"
+        },
+        {
+          "$ref": "#/$defs/BeginMoveCommand"
+        },
+        {
+          "$ref": "#/$defs/MoveToCommand"
+        },
+        {
+          "$ref": "#/$defs/CancelMoveCommand"
+        },
+        {
+          "$ref": "#/$defs/DragPlaceCommand"
+        },
+        {
+          "$ref": "#/$defs/SelectLookCommand"
+        },
+        {
+          "$ref": "#/$defs/FinishStripCommand"
+        },
+        {
+          "$ref": "#/$defs/MoreTimeCommand"
+        },
+        {
+          "$ref": "#/$defs/StartOverCommand"
+        },
+        {
+          "$ref": "#/$defs/ConfirmStartOverCommand"
+        },
+        {
+          "$ref": "#/$defs/KeepGoingCommand"
+        },
+        {
+          "$ref": "#/$defs/BeginExitHoldCommand"
+        },
+        {
+          "$ref": "#/$defs/CompleteExitHoldCommand"
+        },
+        {
+          "$ref": "#/$defs/SubmitPinCommand"
+        },
+        {
+          "$ref": "#/$defs/CancelExitCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenGuestGalleryCommand"
+        },
+        {
+          "$ref": "#/$defs/LoadMoreGuestStripsCommand"
+        },
+        {
+          "$ref": "#/$defs/OpenGuestStripCommand"
+        },
+        {
+          "$ref": "#/$defs/CloseGuestStripCommand"
+        },
+        {
+          "$ref": "#/$defs/BackToStartCommand"
+        }
+      ]
+    },
+    "CommandPayloadMap": {
+      "title": "CommandPayloadMap",
+      "type": "object",
+      "properties": {
+        "OpenNewEvent": {
+          "$ref": "#/$defs/OpenNewEventPayload"
+        },
+        "EditEvent": {
+          "$ref": "#/$defs/EditEventPayload"
+        },
+        "StartEvent": {
+          "$ref": "#/$defs/StartEventPayload"
+        },
+        "DeleteEvent": {
+          "$ref": "#/$defs/DeleteEventPayload"
+        },
+        "ConfirmDeleteEvent": {
+          "$ref": "#/$defs/ConfirmDeleteEventPayload"
+        },
+        "CancelDeleteEvent": {
+          "$ref": "#/$defs/CancelDeleteEventPayload"
+        },
+        "OpenEventFolder": {
+          "$ref": "#/$defs/OpenEventFolderPayload"
+        },
+        "ChangeEventField": {
+          "$ref": "#/$defs/ChangeEventFieldPayload"
+        },
+        "SelectCamera": {
+          "$ref": "#/$defs/SelectCameraPayload"
+        },
+        "SelectGuestDisplay": {
+          "$ref": "#/$defs/SelectGuestDisplayPayload"
+        },
+        "IdentifyDisplays": {
+          "$ref": "#/$defs/IdentifyDisplaysPayload"
+        },
+        "SetMirror": {
+          "$ref": "#/$defs/SetMirrorPayload"
+        },
+        "SetCountdown": {
+          "$ref": "#/$defs/SetCountdownPayload"
+        },
+        "SetOfferedTemplates": {
+          "$ref": "#/$defs/SetOfferedTemplatesPayload"
+        },
+        "SetDefaultTemplate": {
+          "$ref": "#/$defs/SetDefaultTemplatePayload"
+        },
+        "SetOfferedLooks": {
+          "$ref": "#/$defs/SetOfferedLooksPayload"
+        },
+        "SetDefaultLook": {
+          "$ref": "#/$defs/SetDefaultLookPayload"
+        },
+        "SetPhaseTimer": {
+          "$ref": "#/$defs/SetPhaseTimerPayload"
+        },
+        "SetGuestGallery": {
+          "$ref": "#/$defs/SetGuestGalleryPayload"
+        },
+        "SetPin": {
+          "$ref": "#/$defs/SetPinPayload"
+        },
+        "SaveEvent": {
+          "$ref": "#/$defs/SaveEventPayload"
+        },
+        "SaveAndStartEvent": {
+          "$ref": "#/$defs/SaveAndStartEventPayload"
+        },
+        "LeaveEventSetup": {
+          "$ref": "#/$defs/LeaveEventSetupPayload"
+        },
+        "ConfirmLeave": {
+          "$ref": "#/$defs/ConfirmLeavePayload"
+        },
+        "OpenGallery": {
+          "$ref": "#/$defs/OpenGalleryPayload"
+        },
+        "LoadMoreGuestCycles": {
+          "$ref": "#/$defs/LoadMoreGuestCyclesPayload"
+        },
+        "OpenGuestCycle": {
+          "$ref": "#/$defs/OpenGuestCyclePayload"
+        },
+        "CloseGuestCycle": {
+          "$ref": "#/$defs/CloseGuestCyclePayload"
+        },
+        "OpenGuestCycleFolder": {
+          "$ref": "#/$defs/OpenGuestCycleFolderPayload"
+        },
+        "DeleteGuestCycle": {
+          "$ref": "#/$defs/DeleteGuestCyclePayload"
+        },
+        "ConfirmDeleteGuestCycle": {
+          "$ref": "#/$defs/ConfirmDeleteGuestCyclePayload"
+        },
+        "CancelDeleteGuestCycle": {
+          "$ref": "#/$defs/CancelDeleteGuestCyclePayload"
+        },
+        "CloseGallery": {
+          "$ref": "#/$defs/CloseGalleryPayload"
+        },
+        "EndEvent": {
+          "$ref": "#/$defs/EndEventPayload"
+        },
+        "ConfirmEndEvent": {
+          "$ref": "#/$defs/ConfirmEndEventPayload"
+        },
+        "KeepRunning": {
+          "$ref": "#/$defs/KeepRunningPayload"
+        },
+        "RetryAssistance": {
+          "$ref": "#/$defs/RetryAssistancePayload"
+        },
+        "BeginGuestCycle": {
+          "$ref": "#/$defs/BeginGuestCyclePayload"
+        },
+        "SelectTemplate": {
+          "$ref": "#/$defs/SelectTemplatePayload"
+        },
+        "GoToStep": {
+          "$ref": "#/$defs/GoToStepPayload"
+        },
+        "ShowCameraTab": {
+          "$ref": "#/$defs/ShowCameraTabPayload"
+        },
+        "ShowArrangeTab": {
+          "$ref": "#/$defs/ShowArrangeTabPayload"
+        },
+        "TakePhotographs": {
+          "$ref": "#/$defs/TakePhotographsPayload"
+        },
+        "StopCapture": {
+          "$ref": "#/$defs/StopCapturePayload"
+        },
+        "SelectPosition": {
+          "$ref": "#/$defs/SelectPositionPayload"
+        },
+        "BeginRetake": {
+          "$ref": "#/$defs/BeginRetakePayload"
+        },
+        "AcceptRetake": {
+          "$ref": "#/$defs/AcceptRetakePayload"
+        },
+        "TryAgain": {
+          "$ref": "#/$defs/TryAgainPayload"
+        },
+        "KeepOriginal": {
+          "$ref": "#/$defs/KeepOriginalPayload"
+        },
+        "BeginMove": {
+          "$ref": "#/$defs/BeginMovePayload"
+        },
+        "MoveTo": {
+          "$ref": "#/$defs/MoveToPayload"
+        },
+        "CancelMove": {
+          "$ref": "#/$defs/CancelMovePayload"
+        },
+        "DragPlace": {
+          "$ref": "#/$defs/DragPlacePayload"
+        },
+        "SelectLook": {
+          "$ref": "#/$defs/SelectLookPayload"
+        },
+        "FinishStrip": {
+          "$ref": "#/$defs/FinishStripPayload"
+        },
+        "MoreTime": {
+          "$ref": "#/$defs/MoreTimePayload"
+        },
+        "StartOver": {
+          "$ref": "#/$defs/StartOverPayload"
+        },
+        "ConfirmStartOver": {
+          "$ref": "#/$defs/ConfirmStartOverPayload"
+        },
+        "KeepGoing": {
+          "$ref": "#/$defs/KeepGoingPayload"
+        },
+        "BeginExitHold": {
+          "$ref": "#/$defs/BeginExitHoldPayload"
+        },
+        "CompleteExitHold": {
+          "$ref": "#/$defs/CompleteExitHoldPayload"
+        },
+        "SubmitPin": {
+          "$ref": "#/$defs/SubmitPinPayload"
+        },
+        "CancelExit": {
+          "$ref": "#/$defs/CancelExitPayload"
+        },
+        "OpenGuestGallery": {
+          "$ref": "#/$defs/OpenGuestGalleryPayload"
+        },
+        "LoadMoreGuestStrips": {
+          "$ref": "#/$defs/LoadMoreGuestStripsPayload"
+        },
+        "OpenGuestStrip": {
+          "$ref": "#/$defs/OpenGuestStripPayload"
+        },
+        "CloseGuestStrip": {
+          "$ref": "#/$defs/CloseGuestStripPayload"
+        },
+        "BackToStart": {
+          "$ref": "#/$defs/BackToStartPayload"
+        }
+      },
+      "required": [
+        "OpenNewEvent",
+        "EditEvent",
+        "StartEvent",
+        "DeleteEvent",
+        "ConfirmDeleteEvent",
+        "CancelDeleteEvent",
+        "OpenEventFolder",
+        "ChangeEventField",
+        "SelectCamera",
+        "SelectGuestDisplay",
+        "IdentifyDisplays",
+        "SetMirror",
+        "SetCountdown",
+        "SetOfferedTemplates",
+        "SetDefaultTemplate",
+        "SetOfferedLooks",
+        "SetDefaultLook",
+        "SetPhaseTimer",
+        "SetGuestGallery",
+        "SetPin",
+        "SaveEvent",
+        "SaveAndStartEvent",
+        "LeaveEventSetup",
+        "ConfirmLeave",
+        "OpenGallery",
+        "LoadMoreGuestCycles",
+        "OpenGuestCycle",
+        "CloseGuestCycle",
+        "OpenGuestCycleFolder",
+        "DeleteGuestCycle",
+        "ConfirmDeleteGuestCycle",
+        "CancelDeleteGuestCycle",
+        "CloseGallery",
+        "EndEvent",
+        "ConfirmEndEvent",
+        "KeepRunning",
+        "RetryAssistance",
+        "BeginGuestCycle",
+        "SelectTemplate",
+        "GoToStep",
+        "ShowCameraTab",
+        "ShowArrangeTab",
+        "TakePhotographs",
+        "StopCapture",
+        "SelectPosition",
+        "BeginRetake",
+        "AcceptRetake",
+        "TryAgain",
+        "KeepOriginal",
+        "BeginMove",
+        "MoveTo",
+        "CancelMove",
+        "DragPlace",
+        "SelectLook",
+        "FinishStrip",
+        "MoreTime",
+        "StartOver",
+        "ConfirmStartOver",
+        "KeepGoing",
+        "BeginExitHold",
+        "CompleteExitHold",
+        "SubmitPin",
+        "CancelExit",
+        "OpenGuestGallery",
+        "LoadMoreGuestStrips",
+        "OpenGuestStrip",
+        "CloseGuestStrip",
+        "BackToStart"
+      ],
+      "additionalProperties": false
+    },
+    "CommandResultDiagnostics": {
+      "title": "CommandResultDiagnostics",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "status": {
+          "$ref": "#/$defs/CommandStatus"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RejectReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role",
+        "status",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "CommandResultMessage": {
+      "title": "CommandResultMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "commandResult"
+        },
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CommandStatus"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RejectReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "status",
+        "reason"
+      ]
+    },
+    "CommandStatus": {
+      "title": "CommandStatus",
+      "enum": [
+        "accepted",
+        "rejected"
+      ]
+    },
+    "CompleteExitHoldCommand": {
+      "title": "CompleteExitHoldCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CompleteExitHold"
+        },
+        "payload": {
+          "$ref": "#/$defs/CompleteExitHoldPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CompleteExitHoldPayload": {
+      "title": "CompleteExitHoldPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConfirmDeleteEventCommand": {
+      "title": "ConfirmDeleteEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmDeleteEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmDeleteEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmDeleteEventPayload": {
+      "title": "ConfirmDeleteEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConfirmDeleteGuestCycleCommand": {
+      "title": "ConfirmDeleteGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmDeleteGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmDeleteGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmDeleteGuestCyclePayload": {
+      "title": "ConfirmDeleteGuestCyclePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConfirmEndEventCommand": {
+      "title": "ConfirmEndEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmEndEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmEndEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmEndEventPayload": {
+      "title": "ConfirmEndEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConfirmLeaveCommand": {
+      "title": "ConfirmLeaveCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmLeave"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmLeavePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmLeavePayload": {
+      "title": "ConfirmLeavePayload",
+      "type": "object",
+      "properties": {
+        "choice": {
+          "$ref": "#/$defs/LeaveChoice"
+        }
+      },
+      "required": [
+        "choice"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmStartOverCommand": {
+      "title": "ConfirmStartOverCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmStartOver"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmStartOverPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmStartOverPayload": {
+      "title": "ConfirmStartOverPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConfirmationOverlay": {
+      "title": "ConfirmationOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ConnectDisplayArgs": {
+      "title": "ConnectDisplayArgs",
+      "type": "object",
+      "properties": {
+        "displayId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayId"
+      ],
+      "additionalProperties": false
+    },
+    "CrashUiArgs": {
+      "title": "CrashUiArgs",
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteEventCommand": {
+      "title": "DeleteEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "DeleteEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/DeleteEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteEventPayload": {
+      "title": "DeleteEventPayload",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventId"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteGuestCycleCommand": {
+      "title": "DeleteGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "DeleteGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/DeleteGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteGuestCyclePayload": {
+      "title": "DeleteGuestCyclePayload",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guestCycleId"
+      ],
+      "additionalProperties": false
+    },
+    "DiagnosticsResult": {
+      "title": "DiagnosticsResult",
+      "type": "object",
+      "properties": {
+        "protocolVersion": {
+          "type": "integer"
+        },
+        "connectedRoles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Role"
+          }
+        },
+        "presentations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PresentationDiagnostics"
+          }
+        },
+        "lastCommandResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandResultDiagnostics"
+          }
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestWindow"
+          }
+        },
+        "displays": {
+          "$ref": "#/$defs/DisplayDiagnostics"
+        },
+        "guestScreenOpen": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "protocolVersion",
+        "connectedRoles",
+        "presentations",
+        "lastCommandResults",
+        "windows",
+        "displays",
+        "guestScreenOpen"
+      ],
+      "additionalProperties": false
+    },
+    "DisconnectDisplayArgs": {
+      "title": "DisconnectDisplayArgs",
+      "type": "object",
+      "properties": {
+        "displayId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayId"
+      ],
+      "additionalProperties": false
+    },
+    "DisplayDiagnostics": {
+      "title": "DisplayDiagnostics",
+      "type": "object",
+      "properties": {
+        "virtual": {
+          "type": "boolean"
+        },
+        "displays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestDisplay"
+          }
+        }
+      },
+      "required": [
+        "virtual",
+        "displays"
+      ],
+      "additionalProperties": false
+    },
+    "DragPlaceCommand": {
+      "title": "DragPlaceCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "DragPlace"
+        },
+        "payload": {
+          "$ref": "#/$defs/DragPlacePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "DragPlacePayload": {
+      "title": "DragPlacePayload",
+      "type": "object",
+      "properties": {
+        "sourceIndex": {
+          "type": "integer"
+        },
+        "captureId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "targetIndex": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sourceIndex",
+        "captureId",
+        "revision",
+        "targetIndex"
+      ],
+      "additionalProperties": false
+    },
+    "EditEventCommand": {
+      "title": "EditEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "EditEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/EditEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "EditEventPayload": {
+      "title": "EditEventPayload",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventId"
+      ],
+      "additionalProperties": false
+    },
+    "EmptyHookResult": {
+      "title": "EmptyHookResult",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EndEventCommand": {
+      "title": "EndEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "EndEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/EndEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "EndEventPayload": {
+      "title": "EndEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EnvelopeError": {
+      "title": "EnvelopeError",
+      "enum": [
+        "invalidJson",
+        "invalidEnvelope",
+        "unknownType",
+        "invalidId",
+        "payloadTooLarge"
+      ]
+    },
+    "ErrorMessage": {
+      "title": "ErrorMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/EnvelopeError"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "reason"
+      ]
+    },
+    "EventField": {
+      "title": "EventField",
+      "enum": [
+        "name",
+        "date",
+        "venue",
+        "customer",
+        "notes"
+      ]
+    },
+    "EventListRow": {
+      "title": "EventListRow",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "venue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completedGuestCycles": {
+          "type": "integer"
+        },
+        "lastUsed": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "running": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "date",
+        "venue",
+        "completedGuestCycles",
+        "lastUsed",
+        "running"
+      ],
+      "additionalProperties": false
+    },
+    "EventListView": {
+      "title": "EventListView",
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventListRow"
+          }
+        }
+      },
+      "required": [
+        "events"
+      ],
+      "additionalProperties": false
+    },
+    "ExitHoldOverlay": {
+      "title": "ExitHoldOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FatalView": {
+      "title": "FatalView",
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "FinishStripCommand": {
+      "title": "FinishStripCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "FinishStrip"
+        },
+        "payload": {
+          "$ref": "#/$defs/FinishStripPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "FinishStripPayload": {
+      "title": "FinishStripPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GoToStepCommand": {
+      "title": "GoToStepCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "GoToStep"
+        },
+        "payload": {
+          "$ref": "#/$defs/GoToStepPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "GoToStepPayload": {
+      "title": "GoToStepPayload",
+      "type": "object",
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/GuestStep"
+        }
+      },
+      "required": [
+        "step"
+      ],
+      "additionalProperties": false
+    },
+    "GuestOverlays": {
+      "title": "GuestOverlays",
+      "type": "object",
+      "properties": {
+        "exitHold": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExitHoldOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pinDialog": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PinDialogOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phaseTimerWarning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhaseTimerWarningOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startOverConfirmation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartOverConfirmationOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NoticeOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "exitHold",
+        "pinDialog",
+        "phaseTimerWarning",
+        "startOverConfirmation",
+        "notice"
+      ],
+      "additionalProperties": false
+    },
+    "GuestPresentation": {
+      "title": "GuestPresentation",
+      "type": "object",
+      "properties": {
+        "surface": {
+          "$ref": "#/$defs/GuestSurface"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overlays": {
+          "$ref": "#/$defs/GuestOverlays"
+        },
+        "fatal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FatalView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "surface",
+        "start",
+        "overlays",
+        "fatal"
+      ],
+      "additionalProperties": false
+    },
+    "GuestPresentationMessage": {
+      "title": "GuestPresentationMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "presentation"
+        },
+        "role": {
+          "const": "guest"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "presentation": {
+          "$ref": "#/$defs/GuestPresentation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "role",
+        "revision",
+        "presentation"
+      ]
+    },
+    "GuestStep": {
+      "title": "GuestStep",
+      "enum": [
+        "template",
+        "photographs",
+        "filters"
+      ]
+    },
+    "GuestSurface": {
+      "title": "GuestSurface",
+      "enum": [
+        "start",
+        "startUnavailable",
+        "guestGallery",
+        "guestStripDetail",
+        "template",
+        "photographs",
+        "filters",
+        "keepsake",
+        "operatorAssistance",
+        "fatal"
+      ]
+    },
+    "GuestWelcomeMessage": {
+      "title": "GuestWelcomeMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "welcome"
+        },
+        "role": {
+          "const": "guest"
+        },
+        "protocolVersion": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "presentation": {
+          "$ref": "#/$defs/GuestPresentation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "role",
+        "protocolVersion",
+        "revision",
+        "presentation"
+      ]
+    },
+    "HelloMessage": {
+      "title": "HelloMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "hello"
+        },
+        "protocolVersion": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion"
+      ]
+    },
+    "IdentifyDisplaysCommand": {
+      "title": "IdentifyDisplaysCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "IdentifyDisplays"
+        },
+        "payload": {
+          "$ref": "#/$defs/IdentifyDisplaysPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "IdentifyDisplaysOverlay": {
+      "title": "IdentifyDisplaysOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "IdentifyDisplaysPayload": {
+      "title": "IdentifyDisplaysPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KeepGoingCommand": {
+      "title": "KeepGoingCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "KeepGoing"
+        },
+        "payload": {
+          "$ref": "#/$defs/KeepGoingPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "KeepGoingPayload": {
+      "title": "KeepGoingPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KeepOriginalCommand": {
+      "title": "KeepOriginalCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "KeepOriginal"
+        },
+        "payload": {
+          "$ref": "#/$defs/KeepOriginalPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "KeepOriginalPayload": {
+      "title": "KeepOriginalPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KeepRunningCommand": {
+      "title": "KeepRunningCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "KeepRunning"
+        },
+        "payload": {
+          "$ref": "#/$defs/KeepRunningPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "KeepRunningPayload": {
+      "title": "KeepRunningPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "LeaveChoice": {
+      "title": "LeaveChoice",
+      "enum": [
+        "save",
+        "discardChanges",
+        "keepEditing"
+      ]
+    },
+    "LeaveEventSetupCommand": {
+      "title": "LeaveEventSetupCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "LeaveEventSetup"
+        },
+        "payload": {
+          "$ref": "#/$defs/LeaveEventSetupPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "LeaveEventSetupPayload": {
+      "title": "LeaveEventSetupPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ListCamerasResult": {
+      "title": "ListCamerasResult",
+      "type": "object",
+      "properties": {
+        "cameras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestCamera"
+          }
+        }
+      },
+      "required": [
+        "cameras"
+      ],
+      "additionalProperties": false
+    },
+    "LoadMoreGuestCyclesCommand": {
+      "title": "LoadMoreGuestCyclesCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "LoadMoreGuestCycles"
+        },
+        "payload": {
+          "$ref": "#/$defs/LoadMoreGuestCyclesPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "LoadMoreGuestCyclesPayload": {
+      "title": "LoadMoreGuestCyclesPayload",
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cursor"
+      ],
+      "additionalProperties": false
+    },
+    "LoadMoreGuestStripsCommand": {
+      "title": "LoadMoreGuestStripsCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "LoadMoreGuestStrips"
+        },
+        "payload": {
+          "$ref": "#/$defs/LoadMoreGuestStripsPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "LoadMoreGuestStripsPayload": {
+      "title": "LoadMoreGuestStripsPayload",
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cursor"
+      ],
+      "additionalProperties": false
+    },
+    "MoreTimeCommand": {
+      "title": "MoreTimeCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "MoreTime"
+        },
+        "payload": {
+          "$ref": "#/$defs/MoreTimePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "MoreTimePayload": {
+      "title": "MoreTimePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "MoveToCommand": {
+      "title": "MoveToCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "MoveTo"
+        },
+        "payload": {
+          "$ref": "#/$defs/MoveToPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "MoveToPayload": {
+      "title": "MoveToPayload",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "NoticeOverlay": {
+      "title": "NoticeOverlay",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "OpenEventFolderCommand": {
+      "title": "OpenEventFolderCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenEventFolder"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenEventFolderPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenEventFolderPayload": {
+      "title": "OpenEventFolderPayload",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGalleryCommand": {
+      "title": "OpenGalleryCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenGallery"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenGalleryPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGalleryPayload": {
+      "title": "OpenGalleryPayload",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestCycleCommand": {
+      "title": "OpenGuestCycleCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenGuestCycle"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenGuestCyclePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestCycleFolderCommand": {
+      "title": "OpenGuestCycleFolderCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenGuestCycleFolder"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenGuestCycleFolderPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestCycleFolderPayload": {
+      "title": "OpenGuestCycleFolderPayload",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guestCycleId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestCyclePayload": {
+      "title": "OpenGuestCyclePayload",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guestCycleId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestGalleryCommand": {
+      "title": "OpenGuestGalleryCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenGuestGallery"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenGuestGalleryPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestGalleryPayload": {
+      "title": "OpenGuestGalleryPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "OpenGuestScreenArgs": {
+      "title": "OpenGuestScreenArgs",
+      "type": "object",
+      "properties": {
+        "displayId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestStripCommand": {
+      "title": "OpenGuestStripCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenGuestStrip"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenGuestStripPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenGuestStripPayload": {
+      "title": "OpenGuestStripPayload",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guestCycleId"
+      ],
+      "additionalProperties": false
+    },
+    "OpenNewEventCommand": {
+      "title": "OpenNewEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "OpenNewEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/OpenNewEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "OpenNewEventPayload": {
+      "title": "OpenNewEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "OperatorOverlays": {
+      "title": "OperatorOverlays",
+      "type": "object",
+      "properties": {
+        "confirmation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfirmationOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identifyDisplays": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdentifyDisplaysOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NoticeOverlay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "confirmation",
+        "identifyDisplays",
+        "notice"
+      ],
+      "additionalProperties": false
+    },
+    "OperatorPresentation": {
+      "title": "OperatorPresentation",
+      "type": "object",
+      "properties": {
+        "surface": {
+          "$ref": "#/$defs/OperatorSurface"
+        },
+        "eventList": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EventListView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runningEvent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunningEventPanel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overlays": {
+          "$ref": "#/$defs/OperatorOverlays"
+        },
+        "fatal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FatalView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "surface",
+        "eventList",
+        "runningEvent",
+        "overlays",
+        "fatal"
+      ],
+      "additionalProperties": false
+    },
+    "OperatorPresentationMessage": {
+      "title": "OperatorPresentationMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "presentation"
+        },
+        "role": {
+          "const": "operator"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "presentation": {
+          "$ref": "#/$defs/OperatorPresentation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "role",
+        "revision",
+        "presentation"
+      ]
+    },
+    "OperatorSurface": {
+      "title": "OperatorSurface",
+      "enum": [
+        "eventList",
+        "eventSetup",
+        "eventGallery",
+        "guestCycleDetail",
+        "guestScreenActive",
+        "fatal"
+      ]
+    },
+    "OperatorWelcomeMessage": {
+      "title": "OperatorWelcomeMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "welcome"
+        },
+        "role": {
+          "const": "operator"
+        },
+        "protocolVersion": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "presentation": {
+          "$ref": "#/$defs/OperatorPresentation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "role",
+        "protocolVersion",
+        "revision",
+        "presentation"
+      ]
+    },
+    "PhaseTimer": {
+      "title": "PhaseTimer",
+      "enum": [
+        "template",
+        "photographsCapture",
+        "photographsReview",
+        "filters",
+        "keepsake",
+        "guestGallery"
+      ]
+    },
+    "PhaseTimerWarningOverlay": {
+      "title": "PhaseTimerWarningOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PinDialogOverlay": {
+      "title": "PinDialogOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PixelRect": {
+      "title": "PixelRect",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "PresentationDiagnostics": {
+      "title": "PresentationDiagnostics",
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "surface": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "revision",
+        "surface"
+      ],
+      "additionalProperties": false
+    },
+    "ProtocolMismatchMessage": {
+      "title": "ProtocolMismatchMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "protocolMismatch"
+        },
+        "brainVersion": {
+          "type": "integer"
+        },
+        "uiVersion": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "brainVersion",
+        "uiVersion"
+      ]
+    },
+    "RejectReason": {
+      "title": "RejectReason",
+      "enum": [
+        "unknownCommand",
+        "wrongRole",
+        "invalidPayload",
+        "notAvailable",
+        "eventRunning",
+        "protocolMismatch",
+        "payloadTooLarge"
+      ]
+    },
+    "RetryAssistanceCommand": {
+      "title": "RetryAssistanceCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "RetryAssistance"
+        },
+        "payload": {
+          "$ref": "#/$defs/RetryAssistancePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "RetryAssistancePayload": {
+      "title": "RetryAssistancePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Role": {
+      "title": "Role",
+      "enum": [
+        "operator",
+        "guest"
+      ]
+    },
+    "RunningEventPanel": {
+      "title": "RunningEventPanel",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SaveAndStartEventCommand": {
+      "title": "SaveAndStartEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SaveAndStartEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/SaveAndStartEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SaveAndStartEventPayload": {
+      "title": "SaveAndStartEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SaveEventCommand": {
+      "title": "SaveEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SaveEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/SaveEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SaveEventPayload": {
+      "title": "SaveEventPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SelectCameraCommand": {
+      "title": "SelectCameraCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SelectCamera"
+        },
+        "payload": {
+          "$ref": "#/$defs/SelectCameraPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SelectCameraPayload": {
+      "title": "SelectCameraPayload",
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deviceId"
+      ],
+      "additionalProperties": false
+    },
+    "SelectGuestDisplayCommand": {
+      "title": "SelectGuestDisplayCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SelectGuestDisplay"
+        },
+        "payload": {
+          "$ref": "#/$defs/SelectGuestDisplayPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SelectGuestDisplayPayload": {
+      "title": "SelectGuestDisplayPayload",
+      "type": "object",
+      "properties": {
+        "displayId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayId"
+      ],
+      "additionalProperties": false
+    },
+    "SelectLookCommand": {
+      "title": "SelectLookCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SelectLook"
+        },
+        "payload": {
+          "$ref": "#/$defs/SelectLookPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SelectLookPayload": {
+      "title": "SelectLookPayload",
+      "type": "object",
+      "properties": {
+        "lookId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "lookId"
+      ],
+      "additionalProperties": false
+    },
+    "SelectPositionCommand": {
+      "title": "SelectPositionCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SelectPosition"
+        },
+        "payload": {
+          "$ref": "#/$defs/SelectPositionPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SelectPositionPayload": {
+      "title": "SelectPositionPayload",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "additionalProperties": false
+    },
+    "SelectTemplateCommand": {
+      "title": "SelectTemplateCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SelectTemplate"
+        },
+        "payload": {
+          "$ref": "#/$defs/SelectTemplatePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SelectTemplatePayload": {
+      "title": "SelectTemplatePayload",
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false
+    },
+    "ServerMessage": {
+      "title": "ServerMessage",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OperatorWelcomeMessage"
+        },
+        {
+          "$ref": "#/$defs/GuestWelcomeMessage"
+        },
+        {
+          "$ref": "#/$defs/OperatorPresentationMessage"
+        },
+        {
+          "$ref": "#/$defs/GuestPresentationMessage"
+        },
+        {
+          "$ref": "#/$defs/CommandResultMessage"
+        },
+        {
+          "$ref": "#/$defs/ProtocolMismatchMessage"
+        },
+        {
+          "$ref": "#/$defs/ErrorMessage"
+        },
+        {
+          "$ref": "#/$defs/TestResultMessage"
+        }
+      ]
+    },
+    "SetCountdownCommand": {
+      "title": "SetCountdownCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetCountdown"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetCountdownPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetCountdownPayload": {
+      "title": "SetCountdownPayload",
+      "type": "object",
+      "properties": {
+        "seconds": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seconds"
+      ],
+      "additionalProperties": false
+    },
+    "SetDefaultLookCommand": {
+      "title": "SetDefaultLookCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetDefaultLook"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetDefaultLookPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetDefaultLookPayload": {
+      "title": "SetDefaultLookPayload",
+      "type": "object",
+      "properties": {
+        "lookId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "lookId"
+      ],
+      "additionalProperties": false
+    },
+    "SetDefaultTemplateCommand": {
+      "title": "SetDefaultTemplateCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetDefaultTemplate"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetDefaultTemplatePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetDefaultTemplatePayload": {
+      "title": "SetDefaultTemplatePayload",
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false
+    },
+    "SetGuestGalleryCommand": {
+      "title": "SetGuestGalleryCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetGuestGallery"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetGuestGalleryPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetGuestGalleryPayload": {
+      "title": "SetGuestGalleryPayload",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "SetMirrorCommand": {
+      "title": "SetMirrorCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetMirror"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetMirrorPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetMirrorPayload": {
+      "title": "SetMirrorPayload",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "SetOfferedLooksCommand": {
+      "title": "SetOfferedLooksCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetOfferedLooks"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetOfferedLooksPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetOfferedLooksPayload": {
+      "title": "SetOfferedLooksPayload",
+      "type": "object",
+      "properties": {
+        "lookIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "lookIds"
+      ],
+      "additionalProperties": false
+    },
+    "SetOfferedTemplatesCommand": {
+      "title": "SetOfferedTemplatesCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetOfferedTemplates"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetOfferedTemplatesPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetOfferedTemplatesPayload": {
+      "title": "SetOfferedTemplatesPayload",
+      "type": "object",
+      "properties": {
+        "templateIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "templateIds"
+      ],
+      "additionalProperties": false
+    },
+    "SetPhaseTimerCommand": {
+      "title": "SetPhaseTimerCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetPhaseTimer"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetPhaseTimerPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetPhaseTimerPayload": {
+      "title": "SetPhaseTimerPayload",
+      "type": "object",
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/PhaseTimer"
+        },
+        "seconds": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "phase",
+        "seconds"
+      ],
+      "additionalProperties": false
+    },
+    "SetPinCommand": {
+      "title": "SetPinCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetPin"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetPinPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetPinPayload": {
+      "title": "SetPinPayload",
+      "type": "object",
+      "properties": {
+        "pin": {
+          "type": "string"
+        },
+        "confirmation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pin",
+        "confirmation"
+      ],
+      "additionalProperties": false
+    },
+    "SetWindowBoundsArgs": {
+      "title": "SetWindowBoundsArgs",
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "role",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "ShowArrangeTabCommand": {
+      "title": "ShowArrangeTabCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ShowArrangeTab"
+        },
+        "payload": {
+          "$ref": "#/$defs/ShowArrangeTabPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ShowArrangeTabPayload": {
+      "title": "ShowArrangeTabPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ShowCameraTabCommand": {
+      "title": "ShowCameraTabCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ShowCameraTab"
+        },
+        "payload": {
+          "$ref": "#/$defs/ShowCameraTabPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ShowCameraTabPayload": {
+      "title": "ShowCameraTabPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StartEventCommand": {
+      "title": "StartEventCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "StartEvent"
+        },
+        "payload": {
+          "$ref": "#/$defs/StartEventPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "StartEventPayload": {
+      "title": "StartEventPayload",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventId"
+      ],
+      "additionalProperties": false
+    },
+    "StartOverCommand": {
+      "title": "StartOverCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "StartOver"
+        },
+        "payload": {
+          "$ref": "#/$defs/StartOverPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "StartOverConfirmationOverlay": {
+      "title": "StartOverConfirmationOverlay",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StartOverPayload": {
+      "title": "StartOverPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StartView": {
+      "title": "StartView",
+      "type": "object",
+      "properties": {
+        "guestGalleryAvailable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "guestGalleryAvailable"
+      ],
+      "additionalProperties": false
+    },
+    "StopCaptureCommand": {
+      "title": "StopCaptureCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "StopCapture"
+        },
+        "payload": {
+          "$ref": "#/$defs/StopCapturePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "StopCapturePayload": {
+      "title": "StopCapturePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SubmitPinCommand": {
+      "title": "SubmitPinCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SubmitPin"
+        },
+        "payload": {
+          "$ref": "#/$defs/SubmitPinPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SubmitPinPayload": {
+      "title": "SubmitPinPayload",
+      "type": "object",
+      "properties": {
+        "digits": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "digits"
+      ],
+      "additionalProperties": false
+    },
+    "TakePhotographsCommand": {
+      "title": "TakePhotographsCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "TakePhotographs"
+        },
+        "payload": {
+          "$ref": "#/$defs/TakePhotographsPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "TakePhotographsPayload": {
+      "title": "TakePhotographsPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TestCamera": {
+      "title": "TestCamera",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "TestDisplay": {
+      "title": "TestDisplay",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PixelRect"
+        },
+        "workArea": {
+          "$ref": "#/$defs/PixelRect"
+        },
+        "scale": {
+          "type": "number"
+        },
+        "isPrimary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "bounds",
+        "workArea",
+        "scale",
+        "isPrimary"
+      ],
+      "additionalProperties": false
+    },
+    "TestHookError": {
+      "title": "TestHookError",
+      "enum": [
+        "hooksUnavailable",
+        "unknownHook",
+        "invalidArgs",
+        "hookFailed",
+        "notSupported",
+        "unknownDisplay"
+      ]
+    },
+    "TestHookMap": {
+      "title": "TestHookMap",
+      "type": "object",
+      "properties": {
+        "test.getDiagnostics": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/DiagnosticsResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.useVirtualDisplays": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/UseVirtualDisplaysArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/UseVirtualDisplaysResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.disconnectDisplay": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/DisconnectDisplayArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.connectDisplay": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/ConnectDisplayArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.openGuestScreen": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/OpenGuestScreenArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.closeGuestScreen": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.setWindowBounds": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/SetWindowBoundsArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/TestWindow"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.crashUi": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/CrashUiArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.listCameras": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/ListCamerasResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.exit": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "test.getDiagnostics",
+        "test.useVirtualDisplays",
+        "test.disconnectDisplay",
+        "test.connectDisplay",
+        "test.openGuestScreen",
+        "test.closeGuestScreen",
+        "test.setWindowBounds",
+        "test.crashUi",
+        "test.listCameras",
+        "test.exit"
+      ],
+      "additionalProperties": false
+    },
+    "TestMessage": {
+      "title": "TestMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "test"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "args": true
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "name"
+      ]
+    },
+    "TestResultMessage": {
+      "title": "TestResultMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "testResult"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "result": true,
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TestHookError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "ok",
+        "result",
+        "error"
+      ]
+    },
+    "TestWindow": {
+      "title": "TestWindow",
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PixelRect"
+        },
+        "displayId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "bounds",
+        "displayId"
+      ],
+      "additionalProperties": false
+    },
+    "TryAgainCommand": {
+      "title": "TryAgainCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "TryAgain"
+        },
+        "payload": {
+          "$ref": "#/$defs/TryAgainPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "TryAgainPayload": {
+      "title": "TryAgainPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UseVirtualDisplaysArgs": {
+      "title": "UseVirtualDisplaysArgs",
+      "type": "object",
+      "properties": {
+        "displays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VirtualDisplaySpec"
+          }
+        }
+      },
+      "required": [
+        "displays"
+      ],
+      "additionalProperties": false
+    },
+    "UseVirtualDisplaysResult": {
+      "title": "UseVirtualDisplaysResult",
+      "type": "object",
+      "properties": {
+        "displays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestDisplay"
+          }
+        }
+      },
+      "required": [
+        "displays"
+      ],
+      "additionalProperties": false
+    },
+    "VirtualDisplaySpec": {
+      "title": "VirtualDisplaySpec",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PixelRect"
+        },
+        "isPrimary": {
+          "type": "boolean"
+        },
+        "scale": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "bounds",
+        "isPrimary"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

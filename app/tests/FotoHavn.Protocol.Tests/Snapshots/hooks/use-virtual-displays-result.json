@@ -1,0 +1,1 @@
+{"displays":[{"id":"virtual-operator","name":"Virtual operator","bounds":{"x":0,"y":0,"width":960,"height":1080},"workArea":{"x":0,"y":0,"width":960,"height":1080},"scale":1.25,"isPrimary":true},{"id":"virtual-guest","name":"Virtual guest","bounds":{"x":960,"y":0,"width":960,"height":1080},"workArea":{"x":960,"y":0,"width":960,"height":1080},"scale":1.25,"isPrimary":false}]}

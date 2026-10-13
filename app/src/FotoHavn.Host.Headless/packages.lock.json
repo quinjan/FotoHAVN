@@ -3,10 +3,20 @@
   "dependencies": {
     "net10.0": {
       "fotohavn.core": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "FotoHavn.Protocol": "[1.0.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, 10.0.12]"
+        }
       },
       "fotohavn.protocol": {
         "type": "Project"
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.12, 10.0.12]",
+        "resolved": "10.0.12",
+        "contentHash": "+24lC4plfbEDNfLAdTV/SWKS7dW+16X4HdydO3R++134kSNTzcbYA4KpR1Hdh6uWisB8Za3AzwyOn+K+NxWIug=="
       }
     }
   }

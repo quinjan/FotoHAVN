@@ -153,6 +153,19 @@ dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:
 
 To attach Playwright or DevTools by hand, start `output/e2e-build/FOTOHAVN.exe --data output/scratch/Data --remote-debugging-port 9222` and connect to `http://127.0.0.1:9222`.
 
+## Protocol schema and types
+
+The C# records in `src/FotoHavn.Protocol` are the source of the UI and brain protocol. After changing any command, presentation, envelope, or hook record (and bumping `ProtocolVersion.Current` for an incompatible change), run from `app/`:
+
+```powershell
+./scripts/generate-protocol.ps1                     # schema + ui/src/protocol/generated.ts
+./scripts/generate-protocol.ps1 -UpdateSnapshots    # also rewrites tests/FotoHavn.Protocol.Tests/Snapshots
+```
+
+- It exports `src/FotoHavn.Protocol/schema/protocol.schema.json` with `JsonSchemaExporter` (by running the schema drift test with `FOTOHAVN_UPDATE_PROTOCOL=1`), then runs `npm run generate:protocol` in `ui/`, which generates `ui/src/protocol/generated.ts` with `json-schema-to-typescript`. Run `npm ci` in `ui/` once first.
+- Commit the schema, `generated.ts`, and any snapshot changes with the record change. Review snapshot diffs: they are the wire format.
+- Drift fails the normal verification: `SchemaDriftTests` in `dotnet test` when the schema is stale, `scripts/protocol-types.test.ts` in `npm run test:coverage` when `generated.ts` is stale, and `SnapshotTests` when a serialization changed.
+
 ## Headless dev loop
 
 For fast UI work without the WPF host:
