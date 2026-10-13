@@ -1,0 +1,37 @@
+/* Fixture-only boxes for PrintObject fixtures: the parent's definite box that a `contain` print fits. */
+.tall {
+  inline-size: min(100%, 360px);
+  block-size: 64vh;
+}
+
+.wide {
+  inline-size: min(100%, 720px);
+  block-size: 40vh;
+}
+
+.mat {
+  display: grid;
+  place-items: center;
+  inline-size: min(100%, 480px);
+  block-size: 72vh;
+  padding: var(--space-48);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-paper);
+}
+
+.table {
+  --print-scale: 18vh;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-32);
+}
+
+.editorial {
+  display: grid;
+  place-items: center;
+  inline-size: min(100%, 520px);
+  block-size: 76vh;
+  background-color: var(--semantic-surface-editorial);
+}

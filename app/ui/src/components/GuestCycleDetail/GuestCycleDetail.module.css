@@ -1,0 +1,164 @@
+/*
+ * The pair: the Photo Strip and its Captures, sized together from the stage (a size container). The strip is as tall
+ * as the stage; the Captures share the rest, in rows of two, as large as both the stage's height and the remaining
+ * width allow. --strip-border matches PrintObject's border.
+ */
+.stage {
+  min-block-size: 0;
+  container-type: size;
+}
+
+.pair {
+  --strip-border: var(--space-8);
+  --frame-padding: var(--space-16);
+  --capture-gap: var(--space-12);
+  --pair-gap: var(--space-32);
+  --capture-share: 1;
+  --strip-width: min((100cqh - 2 * var(--strip-border)) * var(--strip-ratio) + 2 * var(--strip-border), 100cqw * 0.4);
+  --capture-height: min(
+    (100cqh * var(--capture-share) - 2 * var(--frame-padding) - (var(--capture-rows) - 1) * var(--capture-gap)) / var(--capture-rows),
+    (100cqw - var(--strip-width) - var(--pair-gap) - 2 * var(--frame-padding) - (var(--capture-columns) - 1) * var(--capture-gap)) /
+      var(--capture-columns) / var(--capture-ratio)
+  );
+
+  display: grid;
+  grid-template-columns: var(--strip-width) auto;
+  justify-content: start;
+  align-items: center;
+  column-gap: var(--pair-gap);
+  block-size: 100%;
+}
+
+.stripCell {
+  block-size: 100%;
+  min-inline-size: 0;
+}
+
+/* The media frame: Captures in arrangement order on Cream Paper, each in a 2 radius. */
+.frame {
+  display: grid;
+  padding: var(--frame-padding);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-paper);
+}
+
+.frame[data-count="0"] {
+  place-items: center;
+  align-self: stretch;
+  inline-size: calc(var(--space-80) * 3);
+}
+
+.captures {
+  display: grid;
+  grid-template-columns: repeat(var(--capture-columns), auto);
+  gap: var(--capture-gap);
+}
+
+.capture {
+  inline-size: auto;
+  max-inline-size: none;
+  block-size: var(--capture-height);
+  border-radius: var(--radius-hairline);
+}
+
+.note,
+.missing {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+/* A Guest Cycle with no Photo Strip: an empty strip-shaped mat says so. */
+.missing {
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  padding: var(--space-8);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-paper);
+  text-align: center;
+}
+
+/* Operator: a fixed stage for the pair, then the facts and actions below. The Operator Screen may scroll. */
+.operator {
+  --detail-stage: 52vh;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  inline-size: 100%;
+}
+
+.operator .stage {
+  block-size: var(--detail-stage);
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16) var(--space-40);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fact dt {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+.fact dd {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-32);
+}
+
+.actions > [data-fotohavn-action] {
+  justify-content: flex-start;
+}
+
+/* Guest: the strip lifted beside its Captures on Warm Ivory, centered, filling the Guest Screen without scrolling. */
+.guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-fluid-24);
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-48) var(--app-gutter) var(--app-space-fluid-32);
+  background-color: var(--semantic-surface-editorial);
+}
+
+.guest .stage {
+  flex: 1 1 0;
+  align-self: stretch;
+}
+
+.guest .pair {
+  --frame-padding: var(--app-space-fluid-24);
+  --pair-gap: var(--app-space-fluid-48);
+  --capture-share: 0.76; /* The lifted strip stays the subject; its Captures sit a little smaller beside it. */
+
+  justify-content: center;
+}

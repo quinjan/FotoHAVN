@@ -1,0 +1,79 @@
+/*
+ * The preview fills its parent's box on Dark Walnut. The frame box keeps the camera frame's proportion, contained and
+ * centered (cq units of the preview), so the crop guide is placed in fractions of the frame with no measuring.
+ */
+.preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  background-color: var(--semantic-surface-dark);
+  container-type: size;
+}
+
+.frame {
+  --frame-ratio: 16 / 9;
+
+  position: relative;
+  grid-area: 1 / 1;
+  inline-size: min(100cqw, 100cqh * (var(--frame-ratio)));
+  aspect-ratio: var(--frame-ratio);
+  overflow: hidden;
+}
+
+.picture,
+.canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.picture[hidden] {
+  display: none;
+}
+
+/* Mirroring is the picture's orientation, not motion: it applies under reduced motion too. */
+.canvas[data-mirrored] {
+  transform: scaleX(-1);
+}
+
+/* The window's crop: a hairline in Off-white, with the area outside it dimmed by the Ebony scrim. */
+.guide {
+  position: absolute;
+  z-index: var(--app-z-stage-overlay);
+  border: var(--stroke-hairline) solid color-mix(in srgb, var(--app-tone-ink) 85%, transparent);
+  box-shadow: 0 0 0 100vmax var(--app-scrim);
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--app-z-stage-overlay);
+  display: grid;
+  place-items: center;
+}
+
+.waiting {
+  grid-area: 1 / 1;
+  max-inline-size: var(--app-measure-supporting);
+  padding: var(--space-24);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+  text-align: center;
+}
+
+/* High Contrast: the guide keeps a system-colored edge; the dimming shadow is dropped by the browser. */
+@media (forced-colors: active) {
+  .guide {
+    border-color: CanvasText;
+  }
+}
