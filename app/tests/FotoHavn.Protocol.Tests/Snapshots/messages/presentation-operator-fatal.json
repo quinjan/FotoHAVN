@@ -1,1 +1,1 @@
-{"type":"presentation","role":"operator","revision":4,"presentation":{"surface":"fatal","eventList":null,"runningEvent":null,"overlays":{"confirmation":null,"identifyDisplays":null,"notice":null},"fatal":{"reason":"The Data folder can't be written."},"storageError":null}}
+{"type":"presentation","role":"operator","revision":4,"presentation":{"surface":"fatal","eventList":null,"runningEvent":null,"overlays":{"confirmation":null,"identifyDisplays":null,"notice":null},"fatal":{"reason":"The Data folder can't be written."},"storageError":null,"cameraDiagnostics":null}}

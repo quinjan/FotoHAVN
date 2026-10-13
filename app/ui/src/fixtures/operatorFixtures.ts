@@ -53,6 +53,7 @@ export function operatorStorageError(kind: StorageErrorReason, dataPath: string)
       overlays: { confirmation: null, identifyDisplays: null, notice: null },
       fatal: null,
       storageError: { kind, dataPath },
+      cameraDiagnostics: null,
     },
   };
 }

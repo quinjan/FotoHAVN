@@ -1,7 +1,9 @@
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 using Microsoft.Extensions.Logging;
@@ -30,7 +32,7 @@ public sealed class HookTests
     {
         var executor = new ManualBrainExecutor();
         var host = new RecordingHostServices("fake-primary");
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), host, new InMemoryEventStore()));
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), host, new InMemoryEventStore()));
         var received = new List<string>();
         var connection = brain.Connect(Role.Guest, received.Add);
         var client = new TestClient(Role.Guest) { Connection = connection };
@@ -396,9 +398,24 @@ public sealed class HookTests
     }
 
     [Fact]
-    public void List_cameras_is_forwarded_to_the_host()
+    public void List_cameras_comes_from_the_camera_adapter()
     {
         using var harness = BrainHarness.WithHooks();
+        harness.Camera.AddCamera(new AvailableCamera("second-camera", "Second camera"));
+        var client = harness.Connect(Role.Operator);
+
+        var id = client.Test(TestHookNames.ListCameras);
+        harness.Run();
+        harness.Run();
+
+        client.AssertReceived(TestResultMessage.Success(id, new ListCamerasResult([new TestCamera("fake-camera", "Fake camera"), new TestCamera("second-camera", "Second camera")])));
+        Assert.Empty(harness.HostHooks!.Calls);
+    }
+
+    [Fact]
+    public void List_cameras_works_without_host_hooks()
+    {
+        using var harness = new BrainHarness(hooks: true);
         var client = harness.Connect(Role.Operator);
 
         var id = client.Test(TestHookNames.ListCameras);
@@ -406,6 +423,74 @@ public sealed class HookTests
         harness.Run();
 
         client.AssertReceived(TestResultMessage.Success(id, new ListCamerasResult([new TestCamera("fake-camera", "Fake camera")])));
+    }
+
+    [Fact]
+    public void A_failing_camera_list_is_a_hook_failure()
+    {
+        var cameras = new FaultingCameras();
+        var executor = new ManualBrainExecutor();
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), cameras, new RecordingHostServices("fake-primary"), new InMemoryEventStore()), hooksEnabled: true, hostHooks: null);
+        var client = new TestClient(Role.Operator);
+        client.Connection = brain.Connect(Role.Operator, client.Receive);
+
+        cameras.Failure = () => throw new InvalidOperationException("No cameras.");
+        var thrown = client.Test(TestHookNames.ListCameras);
+        executor.RunPending();
+        cameras.Failure = () => Task.FromException<IReadOnlyList<AvailableCamera>>(new InvalidOperationException("No cameras."));
+        var faulted = client.Test(TestHookNames.ListCameras);
+        executor.RunPending();
+        executor.RunPending();
+
+        Assert.Equal(
+            [TestResultMessage.Failure(thrown, TestHookError.HookFailed), TestResultMessage.Failure(faulted, TestHookError.HookFailed)],
+            client.Messages);
+    }
+
+    [Theory]
+    [InlineData(TestHookNames.OpenCameraDiagnostics, null)]
+    [InlineData(TestHookNames.SelectDiagnosticsCamera, """{"deviceId":"fake-camera"}""")]
+    [InlineData(TestHookNames.SetDiagnosticsMirror, """{"mirrored":true}""")]
+    [InlineData(TestHookNames.CaptureDiagnostics, null)]
+    [InlineData(TestHookNames.InjectCameraFault, """{"kind":"exclusiveLost"}""")]
+    [InlineData(TestHookNames.ClearCameraFault, null)]
+    public void Camera_hooks_are_not_supported_until_the_brain_implements_them(string name, string? args)
+    {
+        using var harness = BrainHarness.WithHooks();
+        var client = harness.Connect(Role.Operator);
+
+        var id = client.Test(name, args);
+        harness.Run();
+
+        Assert.Equal(TestResultMessage.Failure(id, TestHookError.NotSupported), client.Single());
+    }
+
+    [Fact]
+    public void Camera_hooks_reject_arguments_that_do_not_match()
+    {
+        using var harness = BrainHarness.WithHooks();
+        var client = harness.Connect(Role.Operator);
+
+        var unknownKind = client.Test(TestHookNames.InjectCameraFault, """{"kind":"melted"}""");
+        var missingId = client.Test(TestHookNames.SelectDiagnosticsCamera);
+        harness.Run();
+
+        Assert.Equal(
+            [TestResultMessage.Failure(unknownKind, TestHookError.InvalidArgs), TestResultMessage.Failure(missingId, TestHookError.InvalidArgs)],
+            client.Messages);
+    }
+
+    [Fact]
+    public void Diagnostics_report_an_idle_camera_until_the_brain_opens_one()
+    {
+        using var harness = BrainHarness.WithHooks();
+        var client = harness.Connect(Role.Operator);
+
+        client.Test(TestHookNames.GetDiagnostics);
+        harness.Run();
+        harness.Run();
+
+        Assert.Equal(new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None), Diagnostics(client).Camera);
     }
 
     [Fact]
@@ -421,8 +506,6 @@ public sealed class HookTests
         harness.Run();
         hooks.SetBounds = (_, _, _) => throw new HookFailure(TestHookError.HookFailed);
         var thrown = client.Test(TestHookNames.SetWindowBounds, """{"role":"guest","width":1280,"height":720}""");
-        hooks.Cameras = () => Task.FromException<IReadOnlyList<TestCamera>>(new InvalidOperationException("No cameras."));
-        var faulted = client.Test(TestHookNames.ListCameras);
         harness.Run();
         harness.Run();
         hooks.Windows = () => Task.FromCanceled<IReadOnlyList<TestWindow>>(new CancellationToken(canceled: true));
@@ -434,7 +517,6 @@ public sealed class HookTests
             [
                 TestResultMessage.Failure(notSupported, TestHookError.NotSupported),
                 TestResultMessage.Failure(thrown, TestHookError.HookFailed),
-                TestResultMessage.Failure(faulted, TestHookError.HookFailed),
                 TestResultMessage.Failure(canceled, TestHookError.HookFailed),
             ],
             client.Messages);
@@ -496,7 +578,6 @@ public sealed class HookTests
     [Theory]
     [InlineData(TestHookNames.SetWindowBounds, """{"role":"guest","width":1280,"height":720}""")]
     [InlineData(TestHookNames.CrashUi, """{"role":"guest"}""")]
-    [InlineData(TestHookNames.ListCameras, null)]
     [InlineData(TestHookNames.Exit, null)]
     public void Host_hooks_without_host_hooks_are_not_supported(string name, string? args)
     {
@@ -528,4 +609,20 @@ public sealed class HookTests
 
     private static DiagnosticsResult Diagnostics(TestClient client) =>
         ProtocolJson.Deserialize<DiagnosticsResult>(Assert.IsType<TestResultMessage>(client.Messages[^1]).Result!.Value);
+
+    private sealed class FaultingCameras : ICameraAdapter
+    {
+        public Func<Task<IReadOnlyList<AvailableCamera>>>? Failure { get; set; }
+
+        public event EventHandler? CamerasChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public Task<IReadOnlyList<AvailableCamera>> ListAsync(CancellationToken cancellationToken) =>
+            Failure?.Invoke() ?? Task.FromResult<IReadOnlyList<AvailableCamera>>([]);
+
+        public Task<ICameraSession> OpenAsync(string deviceId, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
 }

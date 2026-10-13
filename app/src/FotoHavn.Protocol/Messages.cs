@@ -10,6 +10,12 @@ public static class MessageTypes
     public const string Hello = "hello";
     public const string Command = "command";
     public const string Test = "test";
+
+    /// <summary>The page's ack of a preview frame (UI to host; the brain ignores it).</summary>
+    public const string FrameAck = "frameAck";
+
+    /// <summary>The additional data of a posted preview frame (host to page; never on the bridge).</summary>
+    public const string PreviewFrame = "previewFrame";
     public const string Welcome = "welcome";
     public const string Presentation = "presentation";
     public const string CommandResult = "commandResult";
@@ -31,7 +37,7 @@ public abstract record ProtocolMessage
     protected abstract string MessageType { get; }
 }
 
-/// <summary>A message from the UI to the brain: <c>hello</c>, <c>command</c>, or <c>test</c>.</summary>
+/// <summary>A message from the UI: <c>hello</c>, <c>command</c>, or <c>test</c> to the brain, or <c>frameAck</c> to the host.</summary>
 public abstract record ClientMessage : ProtocolMessage;
 
 /// <summary>A message from the brain to the UI.</summary>
@@ -172,7 +178,7 @@ public enum EnvelopeError
     /// <summary>The message isn't an object with a string <c>type</c>, or a field is missing, of the wrong kind, or unknown.</summary>
     InvalidEnvelope,
 
-    /// <summary>The <c>type</c> isn't <c>hello</c>, <c>command</c>, or <c>test</c>.</summary>
+    /// <summary>The <c>type</c> isn't <c>hello</c>, <c>command</c>, <c>test</c>, or <c>frameAck</c>.</summary>
     UnknownType,
 
     /// <summary>The <c>id</c> is missing or isn't a UUID.</summary>
@@ -225,4 +231,7 @@ public enum TestHookError
 
     /// <summary>The display ID isn't in the current display list (or, for connect and disconnect, the virtual list).</summary>
     UnknownDisplay,
+
+    /// <summary>The camera ID isn't in the current camera list.</summary>
+    UnknownCamera,
 }

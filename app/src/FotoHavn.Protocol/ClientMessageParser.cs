@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using FotoHavn.Protocol.Cameras;
 
 namespace FotoHavn.Protocol;
 
@@ -21,6 +22,9 @@ public sealed record RejectedCommand(string Id, string Name, RejectReason Reason
 /// <summary>A well-formed <c>test</c> message. Its name starts with <c>test.</c> but may be unknown; its args aren't read yet.</summary>
 public sealed record ParsedTest(TestMessage Message) : ClientParseResult;
 
+/// <summary>A well-formed <c>frameAck</c>. Hosts handle it before the brain; the brain ignores it.</summary>
+public sealed record ParsedFrameAck(FrameAckMessage Message) : ClientParseResult;
+
 /// <summary>An envelope the brain couldn't read: answer with <see cref="Reply"/>.</summary>
 public sealed record InvalidMessage(ErrorMessage Reply) : ClientParseResult;
 
@@ -29,7 +33,7 @@ public sealed record InvalidMessage(ErrorMessage Reply) : ClientParseResult;
 /// <list type="number">
 /// <item>Size: over <see cref="ProtocolLimits.MaxMessageBytes"/> UTF-8 bytes is <see cref="EnvelopeError.PayloadTooLarge"/>.</item>
 /// <item>JSON: unreadable is <see cref="EnvelopeError.InvalidJson"/>; not an object with a string <c>type</c> is <see cref="EnvelopeError.InvalidEnvelope"/>.</item>
-/// <item>Type: anything but <c>hello</c>, <c>command</c>, or <c>test</c> is <see cref="EnvelopeError.UnknownType"/>.</item>
+/// <item>Type: anything but <c>hello</c>, <c>command</c>, <c>test</c>, or <c>frameAck</c> is <see cref="EnvelopeError.UnknownType"/>.</item>
 /// <item>ID (commands and tests): missing or not a UUID is <see cref="EnvelopeError.InvalidId"/>.</item>
 /// <item>Fields: a missing, mistyped, or unknown field (a page sending its own <c>role</c>, say) is <see cref="EnvelopeError.InvalidEnvelope"/>.</item>
 /// <item>Commands: an unknown name, a role that may not send it, or a payload that doesn't match its record is a <see cref="RejectedCommand"/>.</item>
@@ -79,8 +83,23 @@ public static class ClientMessageParser
             MessageTypes.Hello => ParseHello(message),
             MessageTypes.Command => ParseCommand(message, sender),
             MessageTypes.Test => ParseTest(message),
+            MessageTypes.FrameAck => ParseFrameAck(message),
             _ => Invalid(ReadableId(message), EnvelopeError.UnknownType),
         };
+    }
+
+    private static ClientParseResult ParseFrameAck(JsonElement message)
+    {
+        if (!HasOnly(message, "type", "seq")
+            || !message.TryGetProperty("seq", out var seq)
+            || seq.ValueKind != JsonValueKind.Number
+            || !seq.TryGetInt64(out var value)
+            || value is < 0 or > uint.MaxValue)
+        {
+            return Invalid(null, EnvelopeError.InvalidEnvelope);
+        }
+
+        return new ParsedFrameAck(new FrameAckMessage(value));
     }
 
     private static ClientParseResult ParseHello(JsonElement message)

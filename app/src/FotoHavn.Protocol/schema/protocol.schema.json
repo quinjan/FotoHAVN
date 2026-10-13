@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 3
+      "const": 4
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -232,6 +232,226 @@
       ],
       "additionalProperties": false
     },
+    "CameraCaptureView": {
+      "title": "CameraCaptureView",
+      "type": "object",
+      "properties": {
+        "fileName": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "byteLength": {
+          "type": "integer"
+        },
+        "mirrored": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fileName",
+        "width",
+        "height",
+        "byteLength",
+        "mirrored"
+      ],
+      "additionalProperties": false
+    },
+    "CameraDiagnostics": {
+      "title": "CameraDiagnostics",
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/CameraState"
+        },
+        "deviceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFormatView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "frameAgeMs": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "deliveredFps": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "droppedFrames": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "previewTarget": {
+          "$ref": "#/$defs/PreviewTarget"
+        }
+      },
+      "required": [
+        "state",
+        "deviceId",
+        "format",
+        "frameAgeMs",
+        "deliveredFps",
+        "droppedFrames",
+        "previewTarget"
+      ],
+      "additionalProperties": false
+    },
+    "CameraDiagnosticsView": {
+      "title": "CameraDiagnosticsView",
+      "type": "object",
+      "properties": {
+        "cameras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CameraOption"
+          }
+        },
+        "selectedDeviceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/CameraState"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFailureKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFormatView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mirrored": {
+          "type": "boolean"
+        },
+        "lastCapture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraCaptureView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cameras",
+        "selectedDeviceId",
+        "state",
+        "reason",
+        "format",
+        "mirrored",
+        "lastCapture"
+      ],
+      "additionalProperties": false
+    },
+    "CameraFailureKind": {
+      "title": "CameraFailureKind",
+      "enum": [
+        "stale",
+        "failed",
+        "removed",
+        "exclusiveLost",
+        "inUseByAnotherApp",
+        "privacyDenied",
+        "noSupportedFormat",
+        "notFound",
+        "unknown"
+      ]
+    },
+    "CameraFaultKind": {
+      "title": "CameraFaultKind",
+      "enum": [
+        "stale",
+        "failed",
+        "removed",
+        "exclusiveLost"
+      ]
+    },
+    "CameraFormatView": {
+      "title": "CameraFormatView",
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "fps": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "fps"
+      ],
+      "additionalProperties": false
+    },
+    "CameraOption": {
+      "title": "CameraOption",
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deviceId",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "CameraState": {
+      "title": "CameraState",
+      "enum": [
+        "idle",
+        "checking",
+        "ready",
+        "notAvailable",
+        "inUseByAnotherApp"
+      ]
+    },
     "CancelDeleteEventCommand": {
       "title": "CancelDeleteEventCommand",
       "type": "object",
@@ -410,6 +630,9 @@
         },
         {
           "$ref": "#/$defs/TestMessage"
+        },
+        {
+          "$ref": "#/$defs/FrameAckMessage"
         }
       ]
     },
@@ -1420,6 +1643,9 @@
         },
         "storage": {
           "$ref": "#/$defs/StorageDiagnostics"
+        },
+        "camera": {
+          "$ref": "#/$defs/CameraDiagnostics"
         }
       },
       "required": [
@@ -1430,7 +1656,8 @@
         "windows",
         "displays",
         "guestScreenOpen",
-        "storage"
+        "storage",
+        "camera"
       ],
       "additionalProperties": false
     },
@@ -1747,6 +1974,23 @@
       "type": "object",
       "additionalProperties": false
     },
+    "FrameAckMessage": {
+      "title": "FrameAckMessage",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "frameAck"
+        },
+        "seq": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "seq"
+      ]
+    },
     "GoToStepCommand": {
       "title": "GoToStepCommand",
       "type": "object",
@@ -2017,6 +2261,19 @@
     "IdentifyDisplaysPayload": {
       "title": "IdentifyDisplaysPayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "InjectCameraFaultArgs": {
+      "title": "InjectCameraFaultArgs",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/CameraFaultKind"
+        }
+      },
+      "required": [
+        "kind"
+      ],
       "additionalProperties": false
     },
     "InjectStorageFaultArgs": {
@@ -2706,6 +2963,16 @@
               "type": "null"
             }
           ]
+        },
+        "cameraDiagnostics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraDiagnosticsView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2714,7 +2981,8 @@
         "runningEvent",
         "overlays",
         "fatal",
-        "storageError"
+        "storageError",
+        "cameraDiagnostics"
       ],
       "additionalProperties": false
     },
@@ -2753,7 +3021,8 @@
         "guestScreenActive",
         "fatal",
         "storageError",
-        "starting"
+        "starting",
+        "cameraDiagnostics"
       ]
     },
     "OperatorWelcomeMessage": {
@@ -2851,6 +3120,53 @@
         "surface"
       ],
       "additionalProperties": false
+    },
+    "PreviewFrameMetadata": {
+      "title": "PreviewFrameMetadata",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "previewFrame"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "format": {
+          "$ref": "#/$defs/PreviewPixelFormat"
+        },
+        "timestampMs": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "seq",
+        "width",
+        "height",
+        "format",
+        "timestampMs"
+      ]
+    },
+    "PreviewPixelFormat": {
+      "title": "PreviewPixelFormat",
+      "enum": [
+        "rgba"
+      ]
+    },
+    "PreviewTarget": {
+      "title": "PreviewTarget",
+      "enum": [
+        "none",
+        "operator",
+        "guest"
+      ]
     },
     "ProtocolMismatchMessage": {
       "title": "ProtocolMismatchMessage",
@@ -3098,6 +3414,19 @@
     },
     "SelectCameraPayload": {
       "title": "SelectCameraPayload",
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deviceId"
+      ],
+      "additionalProperties": false
+    },
+    "SelectDiagnosticsCameraArgs": {
+      "title": "SelectDiagnosticsCameraArgs",
       "type": "object",
       "properties": {
         "deviceId": {
@@ -3408,6 +3737,19 @@
       },
       "required": [
         "templateId"
+      ],
+      "additionalProperties": false
+    },
+    "SetDiagnosticsMirrorArgs": {
+      "title": "SetDiagnosticsMirrorArgs",
+      "type": "object",
+      "properties": {
+        "mirrored": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mirrored"
       ],
       "additionalProperties": false
     },
@@ -4085,7 +4427,8 @@
         "invalidArgs",
         "hookFailed",
         "notSupported",
-        "unknownDisplay"
+        "unknownDisplay",
+        "unknownCamera"
       ]
     },
     "TestHookMap": {
@@ -4283,6 +4626,102 @@
             "result"
           ],
           "additionalProperties": false
+        },
+        "test.openCameraDiagnostics": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.selectDiagnosticsCamera": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/SelectDiagnosticsCameraArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.setDiagnosticsMirror": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/SetDiagnosticsMirrorArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.captureDiagnostics": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/CameraCaptureView"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.injectCameraFault": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/InjectCameraFaultArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.clearCameraFault": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -4297,7 +4736,13 @@
         "test.listCameras",
         "test.exit",
         "test.injectStorageFault",
-        "test.clearStorageFault"
+        "test.clearStorageFault",
+        "test.openCameraDiagnostics",
+        "test.selectDiagnosticsCamera",
+        "test.setDiagnosticsMirror",
+        "test.captureDiagnostics",
+        "test.injectCameraFault",
+        "test.clearCameraFault"
       ],
       "additionalProperties": false
     },

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Protocol.Tests;
@@ -302,6 +303,34 @@ public sealed class ClientMessageParserTests
     public void Requires_a_message()
     {
         Assert.Throws<ArgumentNullException>(() => ClientMessageParser.Parse(null!, Role.Operator));
+    }
+
+    [Theory]
+    [InlineData(0L)]
+    [InlineData(42L)]
+    [InlineData(4_294_967_295L)]
+    public void Reads_a_frame_ack_from_either_role(long seq)
+    {
+        foreach (var role in new[] { Role.Operator, Role.Guest })
+        {
+            var result = ClientMessageParser.Parse($$$"""{"type":"frameAck","seq":{{{seq}}}}""", role);
+
+            Assert.Equal(new ParsedFrameAck(new FrameAckMessage(seq)), result);
+        }
+    }
+
+    [Theory]
+    [InlineData("""{"type":"frameAck"}""")]
+    [InlineData("""{"type":"frameAck","seq":-1}""")]
+    [InlineData("""{"type":"frameAck","seq":4294967296}""")]
+    [InlineData("""{"type":"frameAck","seq":1.5}""")]
+    [InlineData("""{"type":"frameAck","seq":"7"}""")]
+    [InlineData("""{"type":"frameAck","seq":null}""")]
+    [InlineData("""{"type":"frameAck","seq":7,"id":"6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b"}""")]
+    [InlineData("""{"type":"frameAck","seq":7,"seq":7}""")]
+    public void Rejects_a_frame_ack_that_is_not_exactly_a_sequence_number(string json)
+    {
+        AssertInvalid(json, null, EnvelopeError.InvalidEnvelope);
     }
 
     private static void AssertInvalid(string json, string? echoedId, EnvelopeError reason)

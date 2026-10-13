@@ -61,6 +61,20 @@ describe("createFixtureTransport", () => {
     await expect(client.sendTest("test.getDiagnostics", null)).resolves.toEqual({ ok: false, error: "hooksUnavailable" });
   });
 
+  it("records a frame ack and answers it with nothing", async () => {
+    const transport = createFixtureTransport(operatorEventListEmpty);
+    const client = new ProtocolBrainClient(transport);
+    client.connect();
+    await flush();
+    const revision = client.getState().session?.revision;
+
+    expect(transport.send({ type: "frameAck", seq: 7 })).toBe(true);
+    await flush();
+
+    expect(transport.sent.at(-1)).toEqual({ type: "frameAck", seq: 7 });
+    expect(client.getState().session?.revision).toBe(revision);
+  });
+
   it("delivers pushed messages and nothing after stop", async () => {
     const transport = createFixtureTransport(operatorEventListEmpty);
     const client = new ProtocolBrainClient(transport);

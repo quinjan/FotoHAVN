@@ -3,6 +3,8 @@ using FotoHavn.Core.Storage;
 using FotoHavn.Core.Tests.Brains;
 using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
+using FotoHavn.Protocol.Presentations;
 
 namespace FotoHavn.Core.Tests;
 
@@ -26,6 +28,21 @@ public sealed class PresentationFixtureTests
         ["operator-fatal"] = () => Task.FromResult(FatalPresentation(Role.Operator)),
         ["guest-fatal"] = () => Task.FromResult(FatalPresentation(Role.Guest)),
         ["protocol-mismatch"] = () => Task.FromResult(ProtocolMismatch()),
+        ["operator-camera-diagnostics-ready"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
+            [new CameraOption(@"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL", "Integrated Webcam"), new CameraOption("fake-camera", "Fake camera")],
+            @"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL",
+            CameraState.Ready,
+            null,
+            new CameraFormatView(1920, 1080, 30),
+            true,
+            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true)))),
+        ["operator-camera-diagnostics-checking"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.Checking, null, null, false, null))),
+        ["operator-camera-diagnostics-privacy-denied"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.NotAvailable, CameraFailureKind.PrivacyDenied, null, false, null))),
+        ["operator-camera-diagnostics-in-use"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null))),
+        ["operator-camera-diagnostics-no-cameras"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView([], null, CameraState.Idle, null, null, false, null))),
     };
 
     public static TheoryData<string> Names => [.. Fixtures.Keys];
@@ -100,6 +117,15 @@ public sealed class PresentationFixtureTests
         using var harness = new BrainHarness();
         var client = harness.Handshake(role);
         harness.Brain.ShowFatal(FatalReason);
+        harness.Run();
+        return Assert.Single(client.Raw);
+    }
+
+    private static string CameraDiagnostics(CameraDiagnosticsView view)
+    {
+        using var harness = new BrainHarness();
+        var client = harness.Handshake(Role.Operator);
+        harness.Brain.ShowCameraDiagnostics(view);
         harness.Run();
         return Assert.Single(client.Raw);
     }

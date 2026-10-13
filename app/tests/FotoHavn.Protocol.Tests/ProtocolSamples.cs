@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
@@ -55,7 +56,7 @@ internal static class ProtocolSamples
             : (ICommandPayload)Activator.CreateInstance(command.PayloadType)!;
 
     public static OperatorPresentation EmptyEventList { get; } =
-        new(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null);
+        new(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null, null);
 
     public static OperatorPresentation EventListWithOverlays { get; } = new(
         OperatorSurface.EventList,
@@ -67,16 +68,42 @@ internal static class ProtocolSamples
         new RunningEventPanel(),
         new OperatorOverlays(new ConfirmationOverlay(), new IdentifyDisplaysOverlay(), new NoticeOverlay("The chosen guest display isn't connected.")),
         null,
+        null,
         null);
 
     public static OperatorPresentation OperatorFatal { get; } =
-        new(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."), null);
+        new(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."), null, null);
 
     public static OperatorPresentation OperatorStorageError { get; } =
-        new(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"));
+        new(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"), null);
 
     public static OperatorPresentation OperatorStarting { get; } =
-        new(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null);
+        new(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null);
+
+    public static OperatorPresentation OperatorCameraDiagnostics { get; } = new(
+        OperatorSurface.CameraDiagnostics,
+        null,
+        null,
+        OperatorOverlays.None,
+        null,
+        null,
+        new CameraDiagnosticsView(
+            [new CameraOption(@"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL", "Integrated Webcam"), new CameraOption("fake-camera", "Fake camera")],
+            @"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL",
+            CameraState.Ready,
+            null,
+            new CameraFormatView(1920, 1080, 30),
+            true,
+            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true)));
+
+    public static OperatorPresentation OperatorCameraDiagnosticsInUse { get; } = new(
+        OperatorSurface.CameraDiagnostics,
+        null,
+        null,
+        OperatorOverlays.None,
+        null,
+        null,
+        new CameraDiagnosticsView([new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null));
 
     public static GuestPresentation GuestStart { get; } =
         new(GuestSurface.Start, new StartView(false), GuestOverlays.None, null);
@@ -103,6 +130,8 @@ internal static class ProtocolSamples
         ("presentation-operator-fatal", new OperatorPresentationMessage(4, OperatorFatal)),
         ("presentation-operator-storage-error", new OperatorPresentationMessage(5, OperatorStorageError)),
         ("presentation-operator-starting", new OperatorPresentationMessage(6, OperatorStarting)),
+        ("presentation-operator-camera-diagnostics", new OperatorPresentationMessage(7, OperatorCameraDiagnostics)),
+        ("presentation-operator-camera-diagnostics-in-use", new OperatorPresentationMessage(8, OperatorCameraDiagnosticsInUse)),
         ("presentation-guest-start", new GuestPresentationMessage(2, GuestStart)),
         ("presentation-guest-start-with-overlays", new GuestPresentationMessage(3, GuestStartWithOverlays)),
         ("presentation-guest-fatal", new GuestPresentationMessage(4, GuestFatal)),
@@ -113,6 +142,10 @@ internal static class ProtocolSamples
         ("error-without-id", new ErrorMessage(null, EnvelopeError.PayloadTooLarge)),
         ("test-result-success", TestResultMessage.Success(Id, EmptyHookResult.Instance)),
         ("test-result-failure", TestResultMessage.Failure(Id, TestHookError.HooksUnavailable)),
+        ("test-result-failure-unknown-camera", TestResultMessage.Failure(Id, TestHookError.UnknownCamera)),
+        ("frame-ack", new FrameAckMessage(4_294_967_295)),
+        ("preview-frame-metadata", new PreviewFrameMetadata(42, 1280, 720, PreviewPixelFormat.Rgba, 18_304)),
+        ("test-with-camera-args", new TestMessage(Id, TestHookNames.InjectCameraFault, ProtocolJson.ToElement(new InjectCameraFaultArgs(CameraFaultKind.ExclusiveLost)))),
     ];
 
     private static readonly PixelRect PrimaryBounds = new(0, 0, 1920, 1080);
@@ -138,7 +171,13 @@ internal static class ProtocolSamples
                 StorageDiagnosticsState.Error,
                 StorageErrorReason.DiskFull,
                 1,
-                new ReconcileDiagnostics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))),
+                new ReconcileDiagnostics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
+            new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 41, 29.5, 3, PreviewTarget.Operator))),
+        ("camera-diagnostics-idle", new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None)),
+        ("select-diagnostics-camera-args", new SelectDiagnosticsCameraArgs("fake-camera")),
+        ("set-diagnostics-mirror-args", new SetDiagnosticsMirrorArgs(true)),
+        ("inject-camera-fault-args", new InjectCameraFaultArgs(CameraFaultKind.Stale)),
+        ("capture-diagnostics-result", new CameraCaptureView("capture-20261014-071910-123.jpg", 1280, 720, 98_304, false)),
         ("storage-diagnostics-ready", new StorageDiagnostics(StorageDiagnosticsState.Ready, null, 1, null)),
         ("inject-storage-fault-args", new InjectStorageFaultArgs(StorageFaultKind.DiskFull, StorageFaultScope.AllWrites)),
         ("use-virtual-displays-args", new UseVirtualDisplaysArgs(

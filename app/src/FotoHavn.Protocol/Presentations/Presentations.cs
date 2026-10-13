@@ -1,3 +1,5 @@
+using FotoHavn.Protocol.Cameras;
+
 namespace FotoHavn.Protocol.Presentations;
 
 // Presentation roots (plan section 9, Presentation). A presentation is a complete snapshot of everything one role's UI
@@ -22,6 +24,12 @@ public enum OperatorSurface
 
     /// <summary>The brain is opening the Event store for the first time; the operator sees a loading state, never an empty Event list.</summary>
     Starting,
+
+    /// <summary>
+    /// The E2E-only camera diagnostics screen (camera list, live preview, frame age, frame rate, capture). Only
+    /// <c>test.openCameraDiagnostics</c> shows it, until M6's Event setup exists; the surface exists in every build.
+    /// </summary>
+    CameraDiagnostics,
 }
 
 /// <summary>The operator role's presentation.</summary>
@@ -31,13 +39,43 @@ public enum OperatorSurface
 /// <param name="Overlays">Overlays on top of the surface; each is null when not shown.</param>
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.Fatal"/>.</param>
 /// <param name="StorageError">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.StorageError"/>.</param>
+/// <param name="CameraDiagnostics">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.CameraDiagnostics"/>.</param>
 public sealed record OperatorPresentation(
     OperatorSurface Surface,
     EventListView? EventList,
     RunningEventPanel? RunningEvent,
     OperatorOverlays Overlays,
     FatalView? Fatal,
-    StorageErrorView? StorageError);
+    StorageErrorView? StorageError,
+    CameraDiagnosticsView? CameraDiagnostics);
+
+/// <summary>
+/// The camera diagnostics screen (plan section 14, E2E-only until M6). Frame age and frame rate are not here: they change
+/// at frame rate, and presentations must not, so the page reads them from <c>test.getDiagnostics</c>.
+/// </summary>
+/// <param name="Cameras">The Available Cameras, in the order the camera adapter lists them.</param>
+/// <param name="SelectedDeviceId">The selected camera's device ID, or null when none is selected.</param>
+/// <param name="State">The selected camera's state.</param>
+/// <param name="Reason">Why <paramref name="State"/> is <see cref="CameraState.NotAvailable"/> or <see cref="CameraState.InUseByAnotherApp"/>; null otherwise.</param>
+/// <param name="Format">The format of the open camera, or null when none is open.</param>
+/// <param name="Mirrored">Whether preview and diagnostic captures are mirrored.</param>
+/// <param name="LastCapture">The last diagnostic capture, or null before one.</param>
+public sealed record CameraDiagnosticsView(
+    IReadOnlyList<CameraOption> Cameras,
+    string? SelectedDeviceId,
+    CameraState State,
+    CameraFailureKind? Reason,
+    CameraFormatView? Format,
+    bool Mirrored,
+    CameraCaptureView? LastCapture);
+
+/// <summary>A diagnostic capture: a JPEG the host wrote under its <c>diagnostics/</c> folder (never Event data).</summary>
+/// <param name="FileName">The file's name inside the host's diagnostics folder.</param>
+/// <param name="Width">The image width in pixels.</param>
+/// <param name="Height">The image height in pixels.</param>
+/// <param name="ByteLength">The file's size in bytes.</param>
+/// <param name="Mirrored">Whether the image is mirrored.</param>
+public sealed record CameraCaptureView(string FileName, int Width, int Height, int ByteLength, bool Mirrored);
 
 /// <summary>What went wrong with storage, in the terms the operator screen can act on. The UI owns the copy for each.</summary>
 public enum StorageErrorReason

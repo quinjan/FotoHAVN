@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
@@ -23,7 +24,10 @@ public static class ProtocolSchema
 
     private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true, NewLine = "\n", IndentSize = 2 };
 
-    private static readonly Type[] ClientMessageTypes = [typeof(HelloMessage), typeof(TestMessage)];
+    private static readonly Type[] ClientMessageTypes = [typeof(HelloMessage), typeof(TestMessage), typeof(FrameAckMessage)];
+
+    /// <summary>Messages that never travel on the bridge but whose shape the UI and the hosts share.</summary>
+    private static readonly Type[] HostMessageTypes = [typeof(PreviewFrameMetadata)];
 
     private static readonly Type[] ServerMessageTypes =
     [
@@ -54,7 +58,7 @@ public static class ProtocolSchema
             }
         }
 
-        foreach (var type in ClientMessageTypes.Concat(ServerMessageTypes))
+        foreach (var type in ClientMessageTypes.Concat(ServerMessageTypes).Concat(HostMessageTypes))
         {
             Include(type);
         }
@@ -87,7 +91,7 @@ public static class ProtocolSchema
         }
 
         definitions["Command"] = Union("Command", CommandRegistry.All.Select(CommandDefinitionName));
-        definitions["ClientMessage"] = Union("ClientMessage", [nameof(HelloMessage), "Command", nameof(TestMessage)]);
+        definitions["ClientMessage"] = Union("ClientMessage", [nameof(HelloMessage), "Command", nameof(TestMessage), nameof(FrameAckMessage)]);
         definitions["ServerMessage"] = Union("ServerMessage", ServerMessageTypes.Select(type => type.Name));
         definitions["CommandPayloadMap"] = Map(
             "CommandPayloadMap",

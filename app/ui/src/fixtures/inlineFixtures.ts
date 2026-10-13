@@ -18,6 +18,7 @@ export const operatorEventListEmpty: OperatorWelcomeMessage = {
     overlays: { confirmation: null, identifyDisplays: null, notice: null },
     fatal: null,
     storageError: null,
+    cameraDiagnostics: null,
   },
 };
 

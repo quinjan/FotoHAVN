@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using FotoHavn.Core;
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Fakes;
@@ -38,6 +39,9 @@ internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int
     public IPreviewSource Previews { get; init; } = EmptyPreviewSource.Instance;
 
     public IDisplayAdapter? Displays { get; init; }
+
+    /// <summary>The camera adapter; the default is a <see cref="FakeCameraAdapter"/> with one camera on the real clock.</summary>
+    public ICameraAdapter? Camera { get; init; }
 
     public Action<ILoggingBuilder>? ConfigureLogging { get; init; }
 
@@ -124,7 +128,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         }
 #endif
         var store = new SqliteEventStore(settings.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
-        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, hostServices, store)
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, settings.Camera ?? new FakeCameraAdapter(SystemClock.Instance), hostServices, store)
         {
             Logger = brainLogger,
 #if E2E_HOOKS

@@ -1,6 +1,7 @@
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Hooks;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core;
@@ -69,7 +70,12 @@ public sealed partial class Brain
                 Reply(connection, id, CrashUi(((CrashUiArgs)args!).Role));
                 break;
             case TestHookNames.ListCameras:
-                RunHostHook(connection, id, hooks => hooks.ListCamerasAsync(), cameras => new ListCamerasResult(cameras));
+                RunTask(
+                    connection,
+                    id,
+                    () => _dependencies.Camera.ListAsync(CancellationToken.None),
+                    cameras => new ListCamerasResult([.. cameras.Select(camera => new TestCamera(camera.DeviceId, camera.Name))]),
+                    _ => TestHookError.HookFailed);
                 break;
             case TestHookNames.Exit:
                 Exit(connection, id);
@@ -80,6 +86,15 @@ public sealed partial class Brain
                 break;
             case TestHookNames.ClearStorageFault:
                 Reply(connection, id, RunStorageHook(hooks => hooks.ClearFault()));
+                break;
+            case TestHookNames.OpenCameraDiagnostics:
+            case TestHookNames.SelectDiagnosticsCamera:
+            case TestHookNames.SetDiagnosticsMirror:
+            case TestHookNames.CaptureDiagnostics:
+            case TestHookNames.InjectCameraFault:
+            case TestHookNames.ClearCameraFault:
+                // M5 wave B2 implements the camera hooks; until then they are not supported.
+                Reply(connection, id, HookOutcome.Fail(TestHookError.NotSupported));
                 break;
             default:
                 throw new InvalidOperationException($"The test hook {name} has no brain handler.");
@@ -108,7 +123,8 @@ public sealed partial class Brain
         windows,
         new DisplayDiagnostics(_virtualDisplays is not null, [.. CurrentDisplays.Select(VirtualDisplaySet.ToTestDisplay)]),
         _guestScreenDisplay is not null,
-        StorageDiagnosticsNow());
+        StorageDiagnosticsNow(),
+        new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None));
 
     private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
     {
@@ -229,23 +245,32 @@ public sealed partial class Brain
             return;
         }
 
+        RunTask(connection, id, () => start(hooks), result, hooks.Classify);
+    }
+
+    /// <summary>
+    /// Starts a task and answers when it completes, back on the executor: the continuation (run on whichever thread
+    /// completes the task) only posts the reply as a new work item.
+    /// </summary>
+    private void RunTask<T>(Connection connection, string id, Func<Task<T>> start, Func<T, object> result, Func<Exception, TestHookError> classify)
+    {
         Task<T> task;
         try
         {
-            task = start(hooks);
+            task = start();
         }
-#pragma warning disable CA1031 // Any host failure becomes the hook's error (contract section 8).
+#pragma warning disable CA1031 // Any failure becomes the hook's error (contract section 8).
         catch (Exception exception)
 #pragma warning restore CA1031
         {
-            Reply(connection, id, HookOutcome.Fail(hooks.Classify(exception)));
+            Reply(connection, id, HookOutcome.Fail(classify(exception)));
             return;
         }
 
         task.ContinueWith(
             completed => Post(() => Reply(connection, id, completed.IsCompletedSuccessfully
                 ? HookOutcome.Ok(result(completed.Result))
-                : HookOutcome.Fail(completed.Exception?.InnerException is { } exception ? hooks.Classify(exception) : TestHookError.HookFailed))),
+                : HookOutcome.Fail(completed.Exception?.InnerException is { } exception ? classify(exception) : TestHookError.HookFailed))),
             CancellationToken.None,
             TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);

@@ -15,7 +15,7 @@ test.describe("protocol mismatch", { tag: ["@m2"] }, () => {
       await expect(operatorPage.locator("html")).not.toHaveAttribute("data-fotohavn-role", /.+/);
       await expect(screen.heading).toBeVisible();
       await expect(screen.main.getByText("This screen and the booth are out of step. Restart FOTOHAVN to fix it.")).toBeVisible();
-      await expect(screen.versions).toHaveText("Booth version 3 · Screen version 0");
+      await expect(screen.versions).toHaveText("Booth version 4 · Screen version 0");
       await expect(operatorPage.getByText("No Events yet.")).toHaveCount(0);
     });
 

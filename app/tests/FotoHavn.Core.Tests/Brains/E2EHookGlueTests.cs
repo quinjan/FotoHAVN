@@ -1,8 +1,10 @@
 #if E2E_HOOKS
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.E2E;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.Tests.Brains;
@@ -18,7 +20,7 @@ public sealed class E2EHookGlueTests
     {
         var hooks = new Hooks();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices("fake-primary"), new InMemoryEventStore())
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices("fake-primary"), new InMemoryEventStore())
         {
             HostTestHooks = hooks,
         });
@@ -33,7 +35,7 @@ public sealed class E2EHookGlueTests
         executor.RunPending();
 
         Assert.Equal(5, client.Raw.Count);
-        Assert.Contains(Wire.Json(TestResultMessage.Success(cameras, new ListCamerasResult([new TestCamera("camera", "Camera")]))), client.Raw);
+        Assert.Contains(Wire.Json(TestResultMessage.Success(cameras, new ListCamerasResult([new TestCamera("fake-camera", "Fake camera")]))), client.Raw);
         Assert.Contains(Wire.Json(TestResultMessage.Failure(bounds, TestHookError.NotSupported)), client.Raw);
         Assert.Contains(Wire.Json(TestResultMessage.Failure(crash, TestHookError.HookFailed)), client.Raw);
         Assert.Contains(Wire.Json(TestResultMessage.Success(exit, EmptyHookResult.Instance)), client.Raw);
@@ -45,7 +47,7 @@ public sealed class E2EHookGlueTests
     public void Without_host_hooks_the_brain_hooks_still_run()
     {
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore()));
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 
@@ -61,7 +63,7 @@ public sealed class E2EHookGlueTests
     {
         var hooks = new StorageHooks();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore())
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore())
         {
             StorageTestHooks = hooks,
         });
@@ -80,7 +82,7 @@ public sealed class E2EHookGlueTests
     public void Without_storage_hooks_the_fault_hooks_are_not_supported()
     {
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new RecordingHostServices(), new InMemoryEventStore()));
+        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 
@@ -88,6 +90,18 @@ public sealed class E2EHookGlueTests
         executor.RunPending();
 
         client.AssertReceived(TestResultMessage.Failure(inject, TestHookError.NotSupported));
+    }
+
+    [Fact]
+    public async Task The_host_hook_port_forwards_the_diagnostics_capture_to_the_host()
+    {
+        var hooks = new Hooks();
+        var port = new HostTestHooksPort(hooks);
+        var frame = new CapturedFrame(new byte[16], 2, 2, 8, TimeSpan.Zero);
+
+        var saved = await port.SaveDiagnosticsCaptureAsync(frame, mirrored: true);
+
+        Assert.Equal(new CameraCaptureView("capture.jpg", 2, 2, 99, true), saved);
     }
 
     private sealed class StorageHooks : IStorageTestHooks
@@ -110,7 +124,8 @@ public sealed class E2EHookGlueTests
 
         public bool ScheduleCrashUi(Role role) => throw new InvalidOperationException("No browser process.");
 
-        public Task<IReadOnlyList<TestCamera>> ListCamerasAsync() => Task.FromResult<IReadOnlyList<TestCamera>>([new("camera", "Camera")]);
+        public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored) =>
+            Task.FromResult(new CameraCaptureView("capture.jpg", frame.Width, frame.Height, 99, mirrored));
 
         public void ScheduleExit() => Exited = true;
     }

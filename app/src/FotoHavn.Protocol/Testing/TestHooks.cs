@@ -1,4 +1,6 @@
 using System.Text.Json;
+using FotoHavn.Protocol.Cameras;
+using FotoHavn.Protocol.Presentations;
 
 namespace FotoHavn.Protocol.Testing;
 
@@ -39,6 +41,24 @@ public static class TestHookNames
 
     /// <summary>Removes any fault <see cref="InjectStorageFault"/> set.</summary>
     public const string ClearStorageFault = "test.clearStorageFault";
+
+    /// <summary>Development-only stand-in for Event setup until M6: shows the camera diagnostics surface on the Operator Screen.</summary>
+    public const string OpenCameraDiagnostics = "test.openCameraDiagnostics";
+
+    /// <summary>Selects a camera on the diagnostics surface: the brain opens it, checks for a fresh frame, and previews it to the Operator Screen.</summary>
+    public const string SelectDiagnosticsCamera = "test.selectDiagnosticsCamera";
+
+    /// <summary>Sets the diagnostics surface's mirror setting, for the preview and for diagnostic captures.</summary>
+    public const string SetDiagnosticsMirror = "test.setDiagnosticsMirror";
+
+    /// <summary>Takes a Capture from the selected camera and has the host write it as a JPEG under its <c>diagnostics/</c> folder.</summary>
+    public const string CaptureDiagnostics = "test.captureDiagnostics";
+
+    /// <summary>Makes the selected camera fail on top of the real or fake camera (<c>stale</c>, <c>failed</c>, <c>removed</c>, <c>exclusiveLost</c>).</summary>
+    public const string InjectCameraFault = "test.injectCameraFault";
+
+    /// <summary>Removes the fault <see cref="InjectCameraFault"/> set; the brain then reopens the camera.</summary>
+    public const string ClearCameraFault = "test.clearCameraFault";
 }
 
 /// <summary>One hook: its name, where it runs, its arguments record (null when it takes none), and its result record.</summary>
@@ -57,10 +77,16 @@ public static class TestHookRegistry
         new(TestHookNames.CloseGuestScreen, TestHookSide.Brain, null, typeof(EmptyHookResult)),
         new(TestHookNames.SetWindowBounds, TestHookSide.Host, typeof(SetWindowBoundsArgs), typeof(TestWindow)),
         new(TestHookNames.CrashUi, TestHookSide.Host, typeof(CrashUiArgs), typeof(EmptyHookResult)),
-        new(TestHookNames.ListCameras, TestHookSide.Host, null, typeof(ListCamerasResult)),
+        new(TestHookNames.ListCameras, TestHookSide.Brain, null, typeof(ListCamerasResult)),
         new(TestHookNames.Exit, TestHookSide.Host, null, typeof(EmptyHookResult)),
         new(TestHookNames.InjectStorageFault, TestHookSide.Brain, typeof(InjectStorageFaultArgs), typeof(EmptyHookResult)),
         new(TestHookNames.ClearStorageFault, TestHookSide.Brain, null, typeof(EmptyHookResult)),
+        new(TestHookNames.OpenCameraDiagnostics, TestHookSide.Brain, null, typeof(EmptyHookResult)),
+        new(TestHookNames.SelectDiagnosticsCamera, TestHookSide.Brain, typeof(SelectDiagnosticsCameraArgs), typeof(EmptyHookResult)),
+        new(TestHookNames.SetDiagnosticsMirror, TestHookSide.Brain, typeof(SetDiagnosticsMirrorArgs), typeof(EmptyHookResult)),
+        new(TestHookNames.CaptureDiagnostics, TestHookSide.Brain, null, typeof(CameraCaptureView)),
+        new(TestHookNames.InjectCameraFault, TestHookSide.Brain, typeof(InjectCameraFaultArgs), typeof(EmptyHookResult)),
+        new(TestHookNames.ClearCameraFault, TestHookSide.Brain, null, typeof(EmptyHookResult)),
     ];
 
     public static bool TryGet(string name, out TestHookDescriptor hook)
@@ -181,6 +207,15 @@ public sealed record TestCamera(string Id, string Name);
 
 public sealed record ListCamerasResult(IReadOnlyList<TestCamera> Cameras);
 
+/// <summary>Selects the camera with <paramref name="DeviceId"/> on the diagnostics surface. An ID not in the camera list fails with <c>unknownCamera</c>.</summary>
+public sealed record SelectDiagnosticsCameraArgs(string DeviceId);
+
+/// <summary>Turns mirroring of the diagnostics preview and diagnostic captures on or off.</summary>
+public sealed record SetDiagnosticsMirrorArgs(bool Mirrored);
+
+/// <summary>Makes the selected camera fail the way <paramref name="Kind"/> says.</summary>
+public sealed record InjectCameraFaultArgs(CameraFaultKind Kind);
+
 /// <summary>One open host window.</summary>
 /// <param name="Role">The role of the window's WebView2.</param>
 /// <param name="Bounds">The window's outer bounds, in physical pixels.</param>
@@ -231,6 +266,26 @@ public sealed record StorageDiagnostics(
     int? SchemaVersion,
     ReconcileDiagnostics? Reconcile);
 
+/// <summary>
+/// The camera as the brain sees it, for <c>test.getDiagnostics</c>. The frame figures come from the camera session and the
+/// preview channel's counters, not from presentations (which must not change at frame rate).
+/// </summary>
+/// <param name="State">The selected camera's state.</param>
+/// <param name="DeviceId">The selected camera's device ID, or null when none is selected.</param>
+/// <param name="Format">The open camera's format, or null when none is open.</param>
+/// <param name="FrameAgeMs">How old the latest camera frame is in milliseconds, or null when no frame has arrived.</param>
+/// <param name="DeliveredFps">Preview frames the page drew per second over the last two seconds, or null with no preview channel.</param>
+/// <param name="DroppedFrames">Preview frames dropped because one was in flight since the app started, or null with no preview channel.</param>
+/// <param name="PreviewTarget">Which page receives preview frames now.</param>
+public sealed record CameraDiagnostics(
+    CameraState State,
+    string? DeviceId,
+    CameraFormatView? Format,
+    int? FrameAgeMs,
+    double? DeliveredFps,
+    long? DroppedFrames,
+    PreviewTarget PreviewTarget);
+
 /// <summary>The result of <c>test.getDiagnostics</c>.</summary>
 /// <param name="ProtocolVersion">The brain's protocol version.</param>
 /// <param name="ConnectedRoles">Roles with at least one connection that completed the handshake, operator first.</param>
@@ -240,6 +295,7 @@ public sealed record StorageDiagnostics(
 /// <param name="Displays">The display list the brain uses.</param>
 /// <param name="GuestScreenOpen">Whether the brain has asked the host to show the Guest Screen.</param>
 /// <param name="Storage">The Event store's state.</param>
+/// <param name="Camera">The camera's state and frame statistics.</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -248,7 +304,8 @@ public sealed record DiagnosticsResult(
     IReadOnlyList<TestWindow> Windows,
     DisplayDiagnostics Displays,
     bool GuestScreenOpen,
-    StorageDiagnostics Storage)
+    StorageDiagnostics Storage,
+    CameraDiagnostics Camera)
 {
     public const int MaxCommandResults = 20;
 }

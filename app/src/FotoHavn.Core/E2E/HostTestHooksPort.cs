@@ -1,6 +1,8 @@
 #if E2E_HOOKS
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Hooks;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.E2E;
@@ -18,7 +20,7 @@ internal sealed class HostTestHooksPort(IHostTestHooks hooks) : IHostHookPort
 
     public bool ScheduleCrashUi(Role role) => hooks.ScheduleCrashUi(role);
 
-    public Task<IReadOnlyList<TestCamera>> ListCamerasAsync() => hooks.ListCamerasAsync();
+    public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored) => hooks.SaveDiagnosticsCaptureAsync(frame, mirrored);
 
     public void ScheduleExit() => hooks.ScheduleExit();
 

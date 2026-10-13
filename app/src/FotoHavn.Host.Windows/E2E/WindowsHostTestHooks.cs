@@ -1,12 +1,13 @@
 #if E2E_HOOKS
 using System.Windows;
 using System.Windows.Threading;
-using FotoHavn.Camera.Windows;
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.E2E;
 using FotoHavn.Host.Windows.Logging;
 using FotoHavn.Host.Windows.Screens;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,6 @@ namespace FotoHavn.Host.Windows.E2E;
 internal sealed class WindowsHostTestHooks(
     Dispatcher dispatcher,
     ScreenWindows windows,
-    Func<Task<IReadOnlyList<VideoCaptureDevice>>> listCameras,
     ILogger logger) : IHostTestHooks
 {
     /// <summary>Hooks that end something wait this long, so the brain's reply reaches the page first.</summary>
@@ -57,11 +57,9 @@ internal sealed class WindowsHostTestHooks(
         return true;
     }
 
-    public async Task<IReadOnlyList<TestCamera>> ListCamerasAsync()
-    {
-        var cameras = await listCameras();
-        return [.. cameras.Select(camera => new TestCamera(camera.Id, camera.Name))];
-    }
+    public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored) =>
+        // M5 wave B4 implements it (JPEG encoding and the diagnostics folder).
+        Task.FromException<CameraCaptureView>(new TestHookException(TestHookError.NotSupported));
 
     public void ScheduleExit()
     {

@@ -8,7 +8,7 @@
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ClientMessage".
  */
-export type ClientMessage = HelloMessage | Command | TestMessage;
+export type ClientMessage = HelloMessage | Command | TestMessage | FrameAckMessage;
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "Command".
@@ -129,7 +129,8 @@ export type OperatorSurface =
   | "guestScreenActive"
   | "fatal"
   | "storageError"
-  | "starting";
+  | "starting"
+  | "cameraDiagnostics";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "StorageErrorReason".
@@ -143,6 +144,25 @@ export type StorageErrorReason =
   | "notWritable"
   | "integrityFailed"
   | "corrupt"
+  | "unknown";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraState".
+ */
+export type CameraState = "idle" | "checking" | "ready" | "notAvailable" | "inUseByAnotherApp";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraFailureKind".
+ */
+export type CameraFailureKind =
+  | "stale"
+  | "failed"
+  | "removed"
+  | "exclusiveLost"
+  | "inUseByAnotherApp"
+  | "privacyDenied"
+  | "noSupportedFormat"
+  | "notFound"
   | "unknown";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -186,7 +206,13 @@ export type EnvelopeError = "invalidJson" | "invalidEnvelope" | "unknownType" | 
  * via the `definition` "TestHookError".
  */
 export type TestHookError =
-  "hooksUnavailable" | "unknownHook" | "invalidArgs" | "hookFailed" | "notSupported" | "unknownDisplay";
+  | "hooksUnavailable"
+  | "unknownHook"
+  | "invalidArgs"
+  | "hookFailed"
+  | "notSupported"
+  | "unknownDisplay"
+  | "unknownCamera";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "Role".
@@ -199,6 +225,11 @@ export type Role = "operator" | "guest";
 export type StorageDiagnosticsState = "opening" | "ready" | "error";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PreviewTarget".
+ */
+export type PreviewTarget = "none" | "operator" | "guest";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "StorageFaultKind".
  */
 export type StorageFaultKind = "diskFull" | "accessDenied" | "locked";
@@ -207,12 +238,22 @@ export type StorageFaultKind = "diskFull" | "accessDenied" | "locked";
  * via the `definition` "StorageFaultScope".
  */
 export type StorageFaultScope = "nextWrite" | "allWrites";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraFaultKind".
+ */
+export type CameraFaultKind = "stale" | "failed" | "removed" | "exclusiveLost";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PreviewPixelFormat".
+ */
+export type PreviewPixelFormat = "rgba";
 
 /**
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 3;
+  protocolVersion: 4;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1345,6 +1386,14 @@ export interface TestMessage {
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "FrameAckMessage".
+ */
+export interface FrameAckMessage {
+  type: "frameAck";
+  seq: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "OperatorWelcomeMessage".
  */
 export interface OperatorWelcomeMessage {
@@ -1365,6 +1414,7 @@ export interface OperatorPresentation {
   overlays: OperatorOverlays;
   fatal: FatalView | null;
   storageError: StorageErrorView | null;
+  cameraDiagnostics: CameraDiagnosticsView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1431,6 +1481,47 @@ export interface FatalView {
 export interface StorageErrorView {
   kind: StorageErrorReason;
   dataPath: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraDiagnosticsView".
+ */
+export interface CameraDiagnosticsView {
+  cameras: CameraOption[];
+  selectedDeviceId: string | null;
+  state: CameraState;
+  reason: CameraFailureKind | null;
+  format: CameraFormatView | null;
+  mirrored: boolean;
+  lastCapture: CameraCaptureView | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraOption".
+ */
+export interface CameraOption {
+  deviceId: string;
+  name: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraFormatView".
+ */
+export interface CameraFormatView {
+  width: number;
+  height: number;
+  fps: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraCaptureView".
+ */
+export interface CameraCaptureView {
+  fileName: string;
+  width: number;
+  height: number;
+  byteLength: number;
+  mirrored: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1678,6 +1769,30 @@ export interface TestHookMap {
     args: null;
     result: EmptyHookResult;
   };
+  "test.openCameraDiagnostics": {
+    args: null;
+    result: EmptyHookResult;
+  };
+  "test.selectDiagnosticsCamera": {
+    args: SelectDiagnosticsCameraArgs;
+    result: EmptyHookResult;
+  };
+  "test.setDiagnosticsMirror": {
+    args: SetDiagnosticsMirrorArgs;
+    result: EmptyHookResult;
+  };
+  "test.captureDiagnostics": {
+    args: null;
+    result: CameraCaptureView;
+  };
+  "test.injectCameraFault": {
+    args: InjectCameraFaultArgs;
+    result: EmptyHookResult;
+  };
+  "test.clearCameraFault": {
+    args: null;
+    result: EmptyHookResult;
+  };
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1692,6 +1807,7 @@ export interface DiagnosticsResult {
   displays: DisplayDiagnostics;
   guestScreenOpen: boolean;
   storage: StorageDiagnostics;
+  camera: CameraDiagnostics;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1777,6 +1893,19 @@ export interface ReconcileDiagnostics {
   discardedFilesDeleted: number;
   orphanThumbnailsDeleted: number;
   problems: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraDiagnostics".
+ */
+export interface CameraDiagnostics {
+  state: CameraState;
+  deviceId: string | null;
+  format: CameraFormatView | null;
+  frameAgeMs: number | null;
+  deliveredFps: number | null;
+  droppedFrames: number | null;
+  previewTarget: PreviewTarget;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1868,6 +1997,39 @@ export interface InjectStorageFaultArgs {
   kind: StorageFaultKind;
   scope: StorageFaultScope;
 }
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "SelectDiagnosticsCameraArgs".
+ */
+export interface SelectDiagnosticsCameraArgs {
+  deviceId: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "SetDiagnosticsMirrorArgs".
+ */
+export interface SetDiagnosticsMirrorArgs {
+  mirrored: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "InjectCameraFaultArgs".
+ */
+export interface InjectCameraFaultArgs {
+  kind: CameraFaultKind;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PreviewFrameMetadata".
+ */
+export interface PreviewFrameMetadata {
+  type: "previewFrame";
+  seq: number;
+  width: number;
+  height: number;
+  format: PreviewPixelFormat;
+  timestampMs: number;
+}
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 3;
+export const PROTOCOL_VERSION = 4;

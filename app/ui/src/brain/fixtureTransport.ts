@@ -44,7 +44,7 @@ export function createFixtureTransport(snapshot: FixtureSnapshot, options: Fixtu
     });
   }
 
-  function answer(message: ClientMessage): ServerMessage {
+  function answer(message: ClientMessage): ServerMessage | null {
     switch (message.type) {
       case "hello":
         if (snapshot.type === "protocolMismatch") {
@@ -57,6 +57,9 @@ export function createFixtureTransport(snapshot: FixtureSnapshot, options: Fixtu
         return { type: "commandResult", id: message.id, ...answerCommand(message) };
       case "test":
         return { type: "testResult", id: message.id, ok: false, result: null, error: "hooksUnavailable" };
+      case "frameAck":
+        // The host consumes frame acks; nothing answers them.
+        return null;
     }
   }
 
@@ -77,7 +80,10 @@ export function createFixtureTransport(snapshot: FixtureSnapshot, options: Fixtu
         return false;
       }
       sent.push(message);
-      deliver(answer(message));
+      const reply = answer(message);
+      if (reply !== null) {
+        deliver(reply);
+      }
       return true;
     },
     push(message: ServerMessage) {

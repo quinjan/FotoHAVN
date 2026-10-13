@@ -1,24 +1,27 @@
 using System.Text.Json;
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Hooks;
 using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using Microsoft.Extensions.Logging;
 
 namespace FotoHavn.Core.Tests.Support;
 
-/// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, and clock; deterministic.</summary>
+/// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, camera, and clock; deterministic.</summary>
 internal sealed class BrainHarness : IDisposable
 {
-    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null)
+    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null)
     {
         Displays = displays ?? FakeDisplayAdapter.CreateDefault();
+        Camera = camera ?? new FakeCameraAdapter(Clock);
         Host = new RecordingHostServices(Displays.PrimaryDisplayId);
         HostHooks = hostHooks;
         Store = store ?? new InMemoryEventStore();
         StorageHooks = storageHooks;
-        Dependencies = new BrainDependencies(Executor, Clock, Displays, Host, Store) { Logger = Logger };
+        Dependencies = new BrainDependencies(Executor, Clock, Displays, Camera, Host, Store) { Logger = Logger };
         Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks);
         Run();
     }
@@ -28,6 +31,8 @@ internal sealed class BrainHarness : IDisposable
     public FakeClock Clock { get; } = new();
 
     public FakeDisplayAdapter Displays { get; }
+
+    public FakeCameraAdapter Camera { get; }
 
     public RecordingHostServices Host { get; }
 
@@ -155,8 +160,8 @@ internal sealed class FakeHostHookPort : IHostHookPort
 
     public Func<Role, bool> CrashUi { get; set; } = _ => true;
 
-    public Func<Task<IReadOnlyList<Protocol.Testing.TestCamera>>> Cameras { get; set; } =
-        () => Task.FromResult<IReadOnlyList<Protocol.Testing.TestCamera>>([new("fake-camera", "Fake camera")]);
+    public Func<CapturedFrame, bool, Task<CameraCaptureView>> SaveCapture { get; set; } =
+        (frame, mirrored) => Task.FromResult(new CameraCaptureView("capture.jpg", frame.Width, frame.Height, 1234, mirrored));
 
     public Action Exit { get; set; } = () => { };
 
@@ -178,10 +183,10 @@ internal sealed class FakeHostHookPort : IHostHookPort
         return CrashUi(role);
     }
 
-    public Task<IReadOnlyList<Protocol.Testing.TestCamera>> ListCamerasAsync()
+    public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored)
     {
-        Calls.Add("ListCameras");
-        return Cameras();
+        Calls.Add($"SaveDiagnosticsCapture({mirrored})");
+        return SaveCapture(frame, mirrored);
     }
 
     public void ScheduleExit()

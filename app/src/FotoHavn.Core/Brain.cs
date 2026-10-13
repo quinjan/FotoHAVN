@@ -1,7 +1,9 @@
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Hooks;
 using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 using Microsoft.Extensions.Logging;
@@ -9,15 +11,19 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FotoHavn.Core;
 
-/// <summary>Everything the brain needs from its host. Later milestones add the camera and compositor.</summary>
+/// <summary>Everything the brain needs from its host. Later milestones add the compositor.</summary>
 /// <param name="Executor">The single-threaded executor the brain runs on. The host owns and disposes it.</param>
 /// <param name="Clock">Time and timers.</param>
 /// <param name="Displays">Display enumeration and change notifications.</param>
+/// <param name="Camera">Camera discovery and opening. The host owns it; it was constructed with the host's preview channel, so frames never pass through the brain.</param>
 /// <param name="Host">What the brain asks the host to do.</param>
 /// <param name="Store">The Event store. The brain opens it at startup; the host owns and disposes it.</param>
-public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, IDisplayAdapter Displays, IHostServices Host, IEventStore Store)
+public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, IDisplayAdapter Displays, ICameraAdapter Camera, IHostServices Host, IEventStore Store)
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
+
+    /// <summary>The preview channel's frame counters, for diagnostics only. Null reads as no preview channel.</summary>
+    public IPreviewStats? PreviewStats { get; init; }
 
 #if E2E_HOOKS
     /// <summary>The host side of the test hooks. Null makes every host hook fail with <c>notSupported</c>.</summary>
@@ -51,6 +57,7 @@ public sealed partial class Brain : IBrain
     private readonly List<Connection> _connections = [];
     private readonly PresentationChannel<OperatorPresentation> _operator;
     private readonly PresentationChannel<GuestPresentation> _guest;
+    private CameraDiagnosticsView? _cameraDiagnostics;
     private IReadOnlyList<DisplayInfo> _realDisplays = [];
     private DisplayInfo? _guestScreenDisplay;
     private string? _fatalReason;
@@ -66,6 +73,7 @@ public sealed partial class Brain : IBrain
     {
         ArgumentNullException.ThrowIfNull(dependencies);
         ArgumentNullException.ThrowIfNull(dependencies.Store);
+        ArgumentNullException.ThrowIfNull(dependencies.Camera);
         _dependencies = dependencies;
         _logger = dependencies.Logger;
         _hooksEnabled = hooksEnabled;
@@ -117,6 +125,18 @@ public sealed partial class Brain : IBrain
         _dependencies.Displays.DisplaysChanged -= OnDisplaysChanged;
         _storageCancellation.Cancel();
     }
+
+    /// <summary>
+    /// Shows (or, with null, hides) the camera diagnostics surface with <paramref name="view"/>. M5 wave A's stand-in so the
+    /// UI's fixtures come from a real brain; wave B2 drives the view from the camera's real state and
+    /// <c>test.openCameraDiagnostics</c>.
+    /// </summary>
+    internal void ShowCameraDiagnostics(CameraDiagnosticsView? view) =>
+        Post(() =>
+        {
+            _cameraDiagnostics = view;
+            PublishChanges();
+        });
 
     /// <summary>
     /// Switches both roles to their fatal surface with <paramref name="reason"/> (brain copy), for failures the brain can't
@@ -196,6 +216,9 @@ public sealed partial class Brain : IBrain
                         ? RetryStorage(command.Id)
                         : CommandResultMessage.Rejected(command.Id, RejectReason.NotAvailable));
                 break;
+            case ParsedFrameAck:
+                // The hosts ack preview frames themselves and never forward one; if one arrives it changes nothing.
+                break;
             default:
                 HandleTest(connection, ((ParsedTest)parsed).Message);
                 break;
@@ -230,12 +253,14 @@ public sealed partial class Brain : IBrain
     }
 
     private OperatorPresentation RenderOperator() => _fatalReason is { } reason
-        ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null)
-        : !_storageResolved
-            ? new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null)
-            : _storageError is { } storageError
-                ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot))
-                : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null);
+        ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null, null)
+        : _cameraDiagnostics is { } diagnostics
+            ? new OperatorPresentation(OperatorSurface.CameraDiagnostics, null, null, OperatorOverlays.None, null, null, diagnostics)
+            : !_storageResolved
+                ? new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null)
+                : _storageError is { } storageError
+                    ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot), null)
+                    : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null, null);
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
         ? new GuestPresentation(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView(reason))

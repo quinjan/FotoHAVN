@@ -52,8 +52,8 @@ export class ManualTransport implements Transport {
   /** The id of the last command or test message sent. */
   lastId(): string {
     const message = this.last();
-    if (message.type === "hello") {
-      throw new Error("The last message was hello.");
+    if (message.type === "hello" || message.type === "frameAck") {
+      throw new Error(`The last message was ${message.type}.`);
     }
     return message.id;
   }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
@@ -9,9 +10,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_is_three()
+    public void Protocol_version_is_four()
     {
-        Assert.Equal(3, ProtocolVersion.Current);
+        Assert.Equal(4, ProtocolVersion.Current);
     }
 
     [Fact]
@@ -37,7 +38,7 @@ public sealed class MessageTests
             new[]
             {
                 MessageTypes.Hello, MessageTypes.Test, MessageTypes.Welcome, MessageTypes.Presentation, MessageTypes.CommandResult,
-                MessageTypes.ProtocolMismatch, MessageTypes.Error, MessageTypes.TestResult,
+                MessageTypes.ProtocolMismatch, MessageTypes.Error, MessageTypes.TestResult, MessageTypes.FrameAck, MessageTypes.PreviewFrame,
             }.Order(StringComparer.Ordinal),
             types.Order(StringComparer.Ordinal));
         Assert.Equal(MessageTypes.Command, CommandMessage.Create(Id, new OpenNewEventPayload()).Type);
@@ -170,10 +171,30 @@ public sealed class TestHookRegistryTests
         [
             TestHookNames.GetDiagnostics, TestHookNames.UseVirtualDisplays, TestHookNames.DisconnectDisplay,
             TestHookNames.ConnectDisplay, TestHookNames.OpenGuestScreen, TestHookNames.CloseGuestScreen,
-            TestHookNames.InjectStorageFault, TestHookNames.ClearStorageFault,
+            TestHookNames.InjectStorageFault, TestHookNames.ClearStorageFault, TestHookNames.ListCameras,
+            TestHookNames.OpenCameraDiagnostics, TestHookNames.SelectDiagnosticsCamera, TestHookNames.SetDiagnosticsMirror,
+            TestHookNames.CaptureDiagnostics, TestHookNames.InjectCameraFault, TestHookNames.ClearCameraFault,
         ];
 
         Assert.All(TestHookRegistry.All, hook => Assert.Equal(brain.Contains(hook.Name) ? TestHookSide.Brain : TestHookSide.Host, hook.Side));
+    }
+
+    [Fact]
+    public void Reads_camera_hook_arguments_and_rejects_unknown_fault_kinds()
+    {
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.InjectCameraFault, out var inject));
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.SelectDiagnosticsCamera, out var select));
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.SetDiagnosticsMirror, out var mirror));
+
+        Assert.True(TestHookRegistry.TryReadArgs(inject, Element("""{"kind":"exclusiveLost"}"""), out var fault));
+        Assert.Equal(new InjectCameraFaultArgs(CameraFaultKind.ExclusiveLost), fault);
+        Assert.False(TestHookRegistry.TryReadArgs(inject, Element("""{"kind":"melted"}"""), out _));
+        Assert.True(TestHookRegistry.TryReadArgs(select, Element("""{"deviceId":"fake-camera"}"""), out var selected));
+        Assert.Equal(new SelectDiagnosticsCameraArgs("fake-camera"), selected);
+        Assert.False(TestHookRegistry.TryReadArgs(select, Element("""{}"""), out _));
+        Assert.True(TestHookRegistry.TryReadArgs(mirror, Element("""{"mirrored":true}"""), out var mirrored));
+        Assert.Equal(new SetDiagnosticsMirrorArgs(true), mirrored);
+        Assert.False(TestHookRegistry.TryReadArgs(mirror, Element("""{"mirrored":"yes"}"""), out _));
     }
 
     [Fact]

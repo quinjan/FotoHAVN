@@ -76,14 +76,13 @@ public partial class App : Application
         }
 #endif
         _store = new SqliteEventStore(paths.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
-                var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, _windows, _store)
+                var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, new Cameras.TemporaryCameraAdapter(), _windows, _store)
                 {
                     Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
 #if E2E_HOOKS
             HostTestHooks = new E2E.WindowsHostTestHooks(
                 Dispatcher,
                 _windows,
-                FotoHavn.Camera.Windows.VideoCaptureDeviceList.ListAsync,
                 _loggerFactory.CreateLogger("FotoHavn.Host.Windows.E2E")),
             StorageTestHooks = storageHooks,
 #endif

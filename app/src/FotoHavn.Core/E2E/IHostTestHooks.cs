@@ -1,5 +1,7 @@
 #if E2E_HOOKS
+using FotoHavn.Core.Camera;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.E2E;
@@ -31,8 +33,13 @@ public interface IHostTestHooks
     /// </summary>
     bool ScheduleCrashUi(Role role);
 
-    /// <summary><c>test.listCameras</c>: the Available Cameras. The headless host lists its fake camera.</summary>
-    Task<IReadOnlyList<TestCamera>> ListCamerasAsync();
+    /// <summary>
+    /// <c>test.captureDiagnostics</c>: encodes <paramref name="frame"/> as a JPEG (<c>JpegEncodingSpec</c>: quality 92, sRGB,
+    /// no metadata) and writes it under the host's <c>&lt;data&gt;/diagnostics/</c> folder, an E2E-only folder that is not
+    /// Event data, as <c>capture-&lt;yyyyMMdd-HHmmss-fff&gt;.jpg</c>. The brain has already mirrored the frame when
+    /// <paramref name="mirrored"/> is true; the host only records the flag. Returns the file's name, size, and the frame's dimensions.
+    /// </summary>
+    Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored);
 
     /// <summary><c>test.exit</c>: shuts the app down with exit code 0 at least 250 ms later, after the brain's reply.</summary>
     void ScheduleExit();

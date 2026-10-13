@@ -1,4 +1,6 @@
+using FotoHavn.Core.Camera;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.Hooks;
@@ -16,7 +18,7 @@ internal interface IHostHookPort
 
     bool ScheduleCrashUi(Role role);
 
-    Task<IReadOnlyList<TestCamera>> ListCamerasAsync();
+    Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored);
 
     void ScheduleExit();
 

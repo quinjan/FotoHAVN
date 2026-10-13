@@ -1,3 +1,4 @@
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Protocol;
@@ -10,9 +11,10 @@ public sealed class BrainContractTests
     [Fact]
     public void Dependencies_default_to_a_null_logger()
     {
-        var dependencies = new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoHost(), new InMemoryEventStore());
+        var dependencies = new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore());
 
         Assert.Same(NullLogger.Instance, dependencies.Logger);
+        Assert.Null(dependencies.PreviewStats);
     }
 
     [Fact]
@@ -25,7 +27,7 @@ public sealed class BrainContractTests
     public void Brain_posts_its_first_display_read_and_connections_to_the_executor()
     {
         var executor = new QueueExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoHost(), new InMemoryEventStore()));
+        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore()));
 
         var connection = brain.Connect(Role.Guest, _ => { });
 
@@ -76,6 +78,19 @@ public sealed class BrainContractTests
         }
 
         public IReadOnlyList<DisplayInfo> GetDisplays() => [];
+    }
+
+    private sealed class NoCamera : ICameraAdapter
+    {
+        public event EventHandler? CamerasChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public Task<IReadOnlyList<AvailableCamera>> ListAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<ICameraSession> OpenAsync(string deviceId, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class NoHost : IHostServices

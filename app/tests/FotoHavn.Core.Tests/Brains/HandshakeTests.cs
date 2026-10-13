@@ -65,7 +65,7 @@ public sealed class HandshakeTests
         harness.Run();
 
         Assert.Equal(
-            """{"type":"welcome","role":"guest","protocolVersion":3,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
+            """{"type":"welcome","role":"guest","protocolVersion":4,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
             Assert.Single(client.Raw));
     }
 
