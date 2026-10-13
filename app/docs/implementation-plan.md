@@ -1085,16 +1085,16 @@ Verification record (M0):
 ### M1: teardown, scaffold, and test harness (M)
 
 Tasks:
-- [ ] Delete the old app per [Repository changes](#15-repository-changes), keeping research and this plan.
-- [ ] Update every file in the Update table, including the agent-documentation contract test.
-- [ ] Create the solution, all projects and test projects, `Directory.Build.props` (nullable on, warnings as errors, analyzers), `Directory.Packages.props` with pinned versions, `global.json`, and `NuGet.Config`.
-- [ ] Create `ui/` with Vite, React, TypeScript strict mode, ESLint, Vitest with v8 coverage, and Playwright for the fixture gallery.
-- [ ] Create `e2e/` per [End-to-end framework](#end-to-end-framework): launch fixture, Playwright global setup (E2E build and camera precondition), hooks client, data reader, evidence collection, and reporters.
-- [ ] Add the `FotoHavnE2E` build switch, the `test.listCameras` hook (a thin Windows enumeration until M5), and the publish guard.
-- [ ] A placeholder host window that loads the UI and signals ready.
-- [ ] Pin ReportGenerator as a local .NET tool; add the `ui/` and `e2e/` npm scripts named in the verification procedure; write `.github/workflows/desktop.yml` to run those commands directly.
-- [ ] Record the exact verification commands and flags in `app/AGENTS.md`.
-- [ ] Write the new `docs/local-development-guide.md`: prerequisites, commands, the camera requirement for end-to-end, the headless dev loop, publishing, and the hardware checklist.
+- [x] Delete the old app per [Repository changes](#15-repository-changes), keeping research and this plan.
+- [x] Update every file in the Update table, including the agent-documentation contract test.
+- [x] Create the solution, all projects and test projects, `Directory.Build.props` (nullable on, warnings as errors, analyzers), `Directory.Packages.props` with pinned versions, `global.json`, and `NuGet.Config`.
+- [x] Create `ui/` with Vite, React, TypeScript strict mode, ESLint, Vitest with v8 coverage, and Playwright for the fixture gallery.
+- [x] Create `e2e/` per [End-to-end framework](#end-to-end-framework): launch fixture, Playwright global setup (E2E build and camera precondition), hooks client, data reader, evidence collection, and reporters.
+- [x] Add the `FotoHavnE2E` build switch, the `test.listCameras` hook (a thin Windows enumeration until M5), and the publish guard.
+- [x] A placeholder host window that loads the UI and signals ready.
+- [x] Pin ReportGenerator as a local .NET tool; add the `ui/` and `e2e/` npm scripts named in the verification procedure; write `.github/workflows/desktop.yml` to run those commands directly.
+- [x] Record the exact verification commands and flags in `app/AGENTS.md`.
+- [x] Write the new `docs/local-development-guide.md`: prerequisites, commands, the camera requirement for end-to-end, the headless dev loop, publishing, and the hardware checklist.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:** the publish-guard reflection test; placeholder tests in every test project, so coverage is collected and reported for every gated project.
@@ -1106,6 +1106,34 @@ Verification. The implementing agent writes and runs these through the [verifica
 - **Manual:** none.
 - **Also:** `scripts/verify-agent-docs.ps1` passes, and no references to the deleted app remain outside history, `.handoffs`, and research documents.
 
+Verification record (M1):
+- **Date and commits:** 2026-10-13. Teardown `9dd0a39`, scaffold merges `a295f09`, integration `7e940a3`, review fixes `eb0d2ba`.
+- **Machine and camera:** developer laptop with Windows 11, .NET SDK 10.0.401, Node 24.20.0, and one display. Camera: `Integrated Webcam (\\?\USB#VID_0BDA&PID_5596&MI_00#6&339f1394&0&0000#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL)`. Windows doesn't list the IR webcam as a video-capture device.
+- **Steps 1–5 and 8:** run in an independent clean clone at `7e940a3` and again after the review fixes at `eb0d2ba`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | `dotnet restore --locked-mode`, `dotnet build` | 13 projects; 0 warnings and 0 errors |
+  | 2 | `dotnet test` with Cobertura coverage | 45 passed, 0 failed, 0 skipped (the camera test ran on the real camera) |
+  | 2 | ReportGenerator | Collection only; the per-assembly gate loop also exits 0 |
+  | 3 | UI `npm ci`, `lint`, `typecheck`, `build`, `build:e2e` | All pass |
+  | 3 | UI `test:coverage` | 11 passed |
+  | 3 | UI `test:fixtures` | 4 passed, at 1280×720, 1366×768, 1920×1080, and 2560×1440 |
+  | 4 | End-to-end `npm ci`, `typecheck` | Pass |
+  | 5 | `--project=regression --grep "@m1"` | 9 passed |
+  | 5 | `--project=smoke` | 1 passed |
+  | 5 | `FOTOHAVN_E2E_CAMERA=missing-device` | Fails with `End-to-end tests require at least one connected camera. FOTOHAVN_E2E_CAMERA="missing-device" matched none of: Integrated Webcam.` |
+  | 8 | `scripts/verify-agent-docs.ps1` | 21 passed |
+- **Coverage (collected and reported only in M1):** `FotoHavn.Core`, `FotoHavn.Protocol`, `FotoHavn.Storage`, and `FotoHavn.Catalog` are each 100% line coverage of placeholder code with no branches. UI: 100% statements, branches, functions, and lines.
+- **GitHub CI:** `Desktop app` runs 38402543467 (`7e940a3`) and 38405750103 (`eb0d2ba`) both succeeded.
+- **Review:**
+  - The code review found three issues: a publish-guard bypass through the shared `obj/` folder, the E2E UI bundle being able to ship in field builds, and the camera-precondition test never running global setup.
+  - All three are fixed. E2E builds now use `obj/e2e` and `bin/e2e`, and E2E assemblies carry a `FotoHavnE2E` marker. Publishing fails with guards FOTOHAVN0001–0003. The E2E UI builds to `ui/dist-e2e` with a marker file. A child-process test now runs global setup itself.
+  - The original bypass now publishes a field build with no E2E types.
+- **Manual:** none for M1.
+- **Not proven:**
+  - The "not run: no camera" path of `FotoHavn.Camera.Windows.Tests`, because a camera was connected. It is covered only by an in-process test.
+  - `website/docs/research/photohavn-branding-website-benchmark.md` still links to the deleted `app/docs/design-system/`. It is website research, so it's allowed, but the link is broken.
 ### M2: host, two screens, bridge, and protocol (M)
 
 Tasks:
