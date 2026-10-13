@@ -1,7 +1,7 @@
 namespace FotoHavn.Core;
 
 /// <summary>
-/// Placeholder until M2 brings the application state machine. The brain never calls Windows APIs.
+/// Names the brain assembly. The brain never calls Windows APIs.
 /// </summary>
 public static class CoreAssembly
 {
