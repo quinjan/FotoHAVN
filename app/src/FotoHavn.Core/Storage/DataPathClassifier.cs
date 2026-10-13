@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace FotoHavn.Core.Storage;
 
 /// <summary>What the data-path probe observed about the Data folder's location (plan section 10, Rules).</summary>
@@ -44,14 +42,50 @@ public sealed record DataPathVerdict(DataPathStatus Status, string Reason)
 }
 
 /// <summary>
-/// Turns <see cref="DataPathFacts"/> into a <see cref="DataPathVerdict"/>. Pure, so Core's tests cover it. Wave B2
-/// implements it: network (UNC or <see cref="DriveType.Network"/>) refuses with <see cref="DataPathStatus.NotLocalDisk"/>;
-/// a cloud sync root or cloud-file attributes refuse with <see cref="DataPathStatus.CloudSynced"/>; a folder that can't be
-/// written refuses with <see cref="DataPathStatus.NotWritable"/>; checks run in that order.
+/// Turns <see cref="DataPathFacts"/> into a <see cref="DataPathVerdict"/>. Pure, so Core's tests cover it. Network (UNC or
+/// <see cref="DriveType.Network"/>) refuses with <see cref="DataPathStatus.NotLocalDisk"/>; a cloud sync root or cloud-file
+/// attributes refuse with <see cref="DataPathStatus.CloudSynced"/>; a folder that can't be written refuses with
+/// <see cref="DataPathStatus.NotWritable"/>; checks run in that order. A removable drive (the portable field build run from
+/// USB) is allowed.
 /// </summary>
 public static class DataPathClassifier
 {
-    [ExcludeFromCodeCoverage(Justification = "Contract stub: wave B2 implements the classifier with its tests and removes this attribute.")]
-    public static DataPathVerdict Classify(DataPathFacts facts) =>
-        throw new NotImplementedException("Implemented by wave B2.");
+    public const string NotLocalDiskReason = "The Data folder is on a network drive. Move FOTOHAVN to this computer's own disk.";
+
+    public const string NotWritableReason = "FOTOHAVN can't write to the Data folder. Check that the folder isn't read-only and that this Windows account can change it.";
+
+    public const string RemovableReason = "The Data folder is on a removable drive. FOTOHAVN runs from it as long as the drive stays connected.";
+
+    public const string LocalDiskReason = "The Data folder is on this computer's own disk.";
+
+    public static DataPathVerdict Classify(DataPathFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+
+        if (facts.IsUnc || facts.DriveType == DriveType.Network)
+        {
+            return new DataPathVerdict(DataPathStatus.NotLocalDisk, NotLocalDiskReason);
+        }
+
+        if (facts.IsUnderKnownCloudSyncRoot || facts.HasCloudFileAttributes)
+        {
+            return new DataPathVerdict(DataPathStatus.CloudSynced, CloudSyncedReason(facts.IsUnderKnownCloudSyncRoot ? facts.CloudSyncProvider : null));
+        }
+
+        if (!facts.CanWrite)
+        {
+            return new DataPathVerdict(DataPathStatus.NotWritable, NotWritableReason);
+        }
+
+        return new DataPathVerdict(
+            DataPathStatus.Ok,
+            facts.DriveType == DriveType.Removable ? RemovableReason : LocalDiskReason);
+    }
+
+    private static string CloudSyncedReason(string? provider)
+    {
+        var name = string.IsNullOrWhiteSpace(provider) ? "cloud-synced" : provider.Trim();
+        var article = name[0] is 'i' or 'I' ? "an" : "a";
+        return $"The Data folder is inside {article} {name} folder, which can change files while the booth runs. Move FOTOHAVN outside it.";
+    }
 }
