@@ -5,11 +5,15 @@ import {
   type CommandResultMessage,
   type GuestWelcomeMessage,
   type OperatorWelcomeMessage,
+  type ProtocolMismatchMessage,
   type ServerMessage,
 } from "../protocol/generated.ts";
 import type { Transport, TransportListener } from "./types.ts";
 
 export type WelcomeMessage = OperatorWelcomeMessage | GuestWelcomeMessage;
+
+/** What a fixture brain answers `hello` with: a welcome, or a fixed `protocolMismatch` (the mismatch fixture). */
+export type FixtureSnapshot = WelcomeMessage | ProtocolMismatchMessage;
 
 export interface FixtureTransport extends Transport {
   /** Delivers a brain message as if the brain had sent it (tests and the fixture gallery). */
@@ -25,10 +29,11 @@ export interface FixtureTransportOptions {
 
 /**
  * A stand-in brain with one static snapshot: answers `hello` with the welcome (or `protocolMismatch` for another
- * version), each command with a `commandResult`, and each test hook with `hooksUnavailable`, as a field build would.
+ * version, and always when the snapshot itself is a `protocolMismatch`), each command with a `commandResult`, and
+ * each test hook with `hooksUnavailable`, as a field build would.
  * Messages arrive asynchronously, like a real bridge.
  */
-export function createFixtureTransport(welcome: WelcomeMessage, options: FixtureTransportOptions = {}): FixtureTransport {
+export function createFixtureTransport(snapshot: FixtureSnapshot, options: FixtureTransportOptions = {}): FixtureTransport {
   const answerCommand = options.answerCommand ?? (() => ({ status: "rejected", reason: "notAvailable" }) as const);
   const sent: ClientMessage[] = [];
   let listener: TransportListener | null = null;
@@ -42,8 +47,11 @@ export function createFixtureTransport(welcome: WelcomeMessage, options: Fixture
   function answer(message: ClientMessage): ServerMessage {
     switch (message.type) {
       case "hello":
+        if (snapshot.type === "protocolMismatch") {
+          return snapshot;
+        }
         return message.protocolVersion === PROTOCOL_VERSION
-          ? welcome
+          ? snapshot
           : { type: "protocolMismatch", brainVersion: PROTOCOL_VERSION, uiVersion: message.protocolVersion };
       case "command":
         return { type: "commandResult", id: message.id, ...answerCommand(message) };

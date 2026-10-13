@@ -22,10 +22,13 @@ internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILo
         LogGuestScreenOpened(logger, display.Id);
     }
 
+    /// <summary>Closes the Guest Screen; a no-op when none is open.</summary>
     public void CloseGuestScreen()
     {
-        Volatile.Write(ref _guestScreen, null);
-        LogGuestScreenClosed(logger);
+        if (Interlocked.Exchange(ref _guestScreen, null) is not null)
+        {
+            LogGuestScreenClosed(logger);
+        }
     }
 
     public void OpenFolder(string path)

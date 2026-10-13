@@ -124,7 +124,10 @@ internal sealed class ScreenWindows : IHostServices
         return facts;
     }
 
-    /// <summary>Resizes a role's window to <paramref name="width"/> × <paramref name="height"/> physical pixels, keeping its top-left (UI thread).</summary>
+    /// <summary>
+    /// Sizes a role's window so its client area (the page viewport) is <paramref name="width"/> × <paramref name="height"/>
+    /// physical pixels, keeping its outer top-left (UI thread). Returns the window's new outer bounds.
+    /// </summary>
     public WindowFacts? SetWindowSize(Role role, int width, int height)
     {
         if (WindowFor(role) is not { } window || window.Handle == IntPtr.Zero)
@@ -132,8 +135,7 @@ internal sealed class ScreenWindows : IHostServices
             return null;
         }
 
-        var current = window.GetPhysicalBounds();
-        window.SetPhysicalBounds(current with { Width = width, Height = height });
+        window.SetClientSize(width, height);
         return new WindowFacts(role, window.GetPhysicalBounds(), DisplayIdOf(window));
     }
 

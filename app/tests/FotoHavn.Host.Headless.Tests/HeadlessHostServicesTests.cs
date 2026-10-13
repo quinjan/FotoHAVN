@@ -28,6 +28,10 @@ public sealed class HeadlessHostServicesTests
         services.CloseGuestScreen();
         Assert.Null(services.GuestScreen);
 
+        // Closing again, with no Guest Screen open, is a no-op.
+        services.CloseGuestScreen();
+        Assert.Null(services.GuestScreen);
+
         services.OpenFolder(@"C:\Data\Events\event-1");
         Assert.Throws<ArgumentNullException>(() => services.OpenGuestScreen(null!));
         Assert.Throws<ArgumentNullException>(() => services.OpenFolder(null!));

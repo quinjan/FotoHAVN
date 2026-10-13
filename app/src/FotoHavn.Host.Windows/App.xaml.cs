@@ -21,7 +21,7 @@ public partial class App : Application
     private ILogger? _logger;
     private WindowsDisplayAdapter? _displays;
     private ScreenWindows? _windows;
-    private HostBrainExecutor? _executor;
+    private DedicatedThreadBrainExecutor? _executor;
     private Brain? _brain;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -55,9 +55,9 @@ public partial class App : Application
 
         _displays = new WindowsDisplayAdapter(_loggerFactory.CreateLogger("FotoHavn.Host.Windows.Displays"));
         _windows = new ScreenWindows(Dispatcher, _displays, _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Screens"));
-        _executor = CoreRuntime.CreateExecutor(exception => HostLog.BrainWorkFailed(logger, exception));
+        _executor = new DedicatedThreadBrainExecutor(exception => HostLog.BrainWorkFailed(logger, exception));
 
-        var dependencies = new BrainDependencies(_executor, CoreRuntime.CreateClock(), _displays, _windows)
+        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, _windows)
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
 #if E2E_HOOKS

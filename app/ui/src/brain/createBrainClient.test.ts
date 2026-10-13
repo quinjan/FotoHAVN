@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../env.ts";
+import { createFixtureLaneTransport } from "../fixtures/fixtureLane.ts";
 import { PROTOCOL_VERSION } from "../protocol/generated.ts";
 import { createBrainClient, exposeE2EHandle, readStartupParams, type E2EHandle } from "./createBrainClient.ts";
 import { ProtocolBrainClient } from "./protocolClient.ts";
@@ -105,17 +106,19 @@ describe("createBrainClient", () => {
     expect(created).toEqual(["ws://127.0.0.1:5123/bridge?token=abc"]);
   });
 
-  it("uses a known fixture in development and E2E builds", () => {
-    expect(createBrainClient({ target: target("?fixture=operator-event-list"), env: e2e }).kind).toBe("fixture");
-    expect(createBrainClient({ target: target("?fixture=guest-start"), env: dev }).kind).toBe("fixture");
+  it("uses a known fixture from the fixture lane in development and E2E builds", () => {
+    const fixtures = createFixtureLaneTransport;
+    expect(createBrainClient({ target: target("?fixture=operator-event-list"), env: e2e, fixtures }).kind).toBe("fixture");
+    expect(createBrainClient({ target: target("?fixture=guest-start"), env: dev, fixtures }).kind).toBe("fixture");
   });
 
   it("is notConnected for an unknown fixture, a field build without a bridge, or no parameters", () => {
     for (const client of [
-      createBrainClient({ target: target("?fixture=nope"), env: dev }),
-      createBrainClient({ target: target("?fixture="), env: dev }),
-      createBrainClient({ target: target("?fixture=hasOwnProperty"), env: dev }),
-      createBrainClient({ target: target("?fixture=guest-start"), env: field }),
+      createBrainClient({ target: target("?fixture=nope"), env: dev, fixtures: createFixtureLaneTransport }),
+      createBrainClient({ target: target("?fixture="), env: dev, fixtures: createFixtureLaneTransport }),
+      createBrainClient({ target: target("?fixture=hasOwnProperty"), env: dev, fixtures: createFixtureLaneTransport }),
+      createBrainClient({ target: target("?fixture=guest-start"), env: field, fixtures: createFixtureLaneTransport }),
+      createBrainClient({ target: target("?fixture=guest-start"), env: dev }),
       createBrainClient({ target: target(""), env: e2e }),
     ]) {
       expect(client.kind).toBe("none");

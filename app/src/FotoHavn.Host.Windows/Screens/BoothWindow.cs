@@ -71,20 +71,45 @@ internal sealed class BoothWindow : Window
         ApplyBounds(bounds);
     }
 
-    /// <summary>Restores the window if maximized and moves it to <paramref name="bounds"/> (physical pixels).</summary>
-    public void SetPhysicalBounds(DisplayRect bounds)
+    /// <summary>
+    /// Restores the window if maximized and sizes its client area, which the WebView2 fills (the page viewport), to
+    /// <paramref name="width"/> × <paramref name="height"/> physical pixels, keeping the window's outer top-left.
+    /// </summary>
+    public void SetClientSize(int width, int height)
     {
+        var origin = GetPhysicalBounds();
         if (WindowState != WindowState.Normal)
         {
             WindowState = WindowState.Normal;
         }
 
-        if (_pinnedBounds is not null)
+        // The frame can change size after a restore, so measure, place, and measure again.
+        for (var attempt = 0; attempt < 3; attempt++)
         {
-            _pinnedBounds = bounds;
-        }
+            var outer = GetPhysicalBounds();
+            var client = GetClientSize();
+            if (client == (width, height) && outer.X == origin.X && outer.Y == origin.Y)
+            {
+                break;
+            }
 
-        ApplyBounds(bounds);
+            var bounds = new DisplayRect(origin.X, origin.Y, width + outer.Width - client.Width, height + outer.Height - client.Height);
+            if (_pinnedBounds is not null)
+            {
+                _pinnedBounds = bounds;
+            }
+
+            ApplyBounds(bounds);
+        }
+    }
+
+    /// <summary>The client area's size in physical pixels.</summary>
+    public (int Width, int Height) GetClientSize()
+    {
+        var handle = Handle;
+        return handle != IntPtr.Zero && NativeMethods.GetClientRect(handle, out var rect)
+            ? (rect.Right - rect.Left, rect.Bottom - rect.Top)
+            : default;
     }
 
     /// <summary>The window's outer bounds in physical pixels.</summary>

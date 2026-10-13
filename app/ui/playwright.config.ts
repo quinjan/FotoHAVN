@@ -2,15 +2,17 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
 
-// Fixture lane: renders the UI in Chromium through the fixture transport (`?fixture=`), which only development and
-// E2E builds honor, so the web server builds the E2E bundle (dist-e2e/) and previews it; the field build in dist/ is
-// left alone. The browser comes from `npx playwright install chromium`.
+// `npm run test:fixtures` runs two Chromium projects against the E2E bundle (dist-e2e/), which the web server builds and
+// previews; the field build in dist/ is left alone. The browser comes from `npx playwright install chromium`.
+// - `fixtures`: the fixture lane (`?fixture=`, honored only in development and E2E builds) at four resolutions.
+// - `headless`: the integration lane, the real headless host (`dotnet run --no-build`, so build .NET first) serving
+//   dist-e2e/ to an operator and a guest page over its WebSocket bridge.
 const uiDir = dirname(fileURLToPath(import.meta.url));
 const resultsDir = resolve(uiDir, "../output/ui-fixtures");
 const port = 4173;
 
 export default defineConfig({
-  testDir: "tests/fixtures",
+  testDir: "tests",
   outputDir: resolve(resultsDir, "test-results"),
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -27,7 +29,13 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "chromium",
+      name: "fixtures",
+      testDir: "tests/fixtures",
+      use: { ...devices["Desktop Chrome"], deviceScaleFactor: 1 },
+    },
+    {
+      name: "headless",
+      testDir: "tests/headless",
       use: { ...devices["Desktop Chrome"], deviceScaleFactor: 1 },
     },
   ],

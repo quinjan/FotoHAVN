@@ -52,7 +52,8 @@ public sealed class HeadlessOptionsTests
             var dist = Directory.CreateDirectory(Path.Combine(root, "ui", "dist")).FullName;
             var nested = Directory.CreateDirectory(Path.Combine(root, "src", "project")).FullName;
 
-            Assert.Null(HeadlessOptions.Default.ResolveUiFolder(nested));
+            // A ui/dist without index.html isn't a built UI. (The walk may still find one further up, such as the repo's own.)
+            Assert.NotEqual(dist, HeadlessOptions.Default.ResolveUiFolder(nested));
             File.WriteAllText(Path.Combine(dist, "index.html"), "<!doctype html>");
             Assert.Equal(dist, HeadlessOptions.Default.ResolveUiFolder(nested));
             Assert.Equal(nested, (HeadlessOptions.Default with { UiFolder = nested }).ResolveUiFolder(root));

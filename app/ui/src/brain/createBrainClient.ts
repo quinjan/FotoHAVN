@@ -1,6 +1,4 @@
 import type { AppEnv } from "../env.ts";
-import { findInlineFixture } from "../fixtures/inlineFixtures.ts";
-import { createFixtureTransport } from "./fixtureTransport.ts";
 import { ProtocolBrainClient, type ProtocolClientOptions } from "./protocolClient.ts";
 import type { BrainClient, Transport } from "./types.ts";
 import { bridgeUrl, createWebSocketTransport, type SocketLike } from "./webSocketTransport.ts";
@@ -37,6 +35,11 @@ export interface BrainClientStartup {
   readonly env: AppEnv;
   readonly createSocket?: (url: string) => SocketLike;
   readonly clientOptions?: Omit<ProtocolClientOptions, "protocolVersion">;
+  /**
+   * The fixture lane's transport for a `?fixture=` name (null when unknown). Only development and E2E builds pass it
+   * (`main.tsx` loads the lane with a guarded dynamic import), so field builds contain no fixture code.
+   */
+  readonly fixtures?: (name: string) => Transport | null;
 }
 
 /**
@@ -60,8 +63,7 @@ export function selectTransport(startup: BrainClientStartup, params: StartupPara
     return createWebSocketTransport(startup.createSocket === undefined ? { url } : { url, createSocket: startup.createSocket });
   }
   if (params.fixture !== null) {
-    const welcome = findInlineFixture(params.fixture);
-    return welcome === undefined ? null : createFixtureTransport(welcome);
+    return startup.fixtures?.(params.fixture) ?? null;
   }
   return null;
 }

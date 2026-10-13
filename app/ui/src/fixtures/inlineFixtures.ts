@@ -1,8 +1,9 @@
 import { PROTOCOL_VERSION, type GuestWelcomeMessage, type OperatorWelcomeMessage } from "../protocol/generated.ts";
 
 /**
- * Hand-written snapshots for the fixture transport and unit tests, typed against the generated protocol. Wave C
- * replaces the gallery's use of these with the brain-generated files in `fixtures/presentations/` (contract §14).
+ * Hand-written snapshots for unit tests, typed against the generated protocol. The fixture lane serves the
+ * brain-generated files in `presentations/` instead (`fixtureLane.ts`), plus `operatorEventListWithRows` until the
+ * brain can generate Event rows (M4).
  */
 
 export const operatorEventListEmpty: OperatorWelcomeMessage = {
@@ -60,18 +61,3 @@ export const guestStart: GuestWelcomeMessage = {
     fatal: null,
   },
 };
-
-/** The fixtures the fixture transport serves, by their `?fixture=` name. */
-export const inlineFixtures = {
-  "operator-event-list-empty": operatorEventListEmpty,
-  "operator-event-list": operatorEventListWithRows,
-  "guest-start": guestStart,
-} as const satisfies Record<string, OperatorWelcomeMessage | GuestWelcomeMessage>;
-
-export type InlineFixtureName = keyof typeof inlineFixtures;
-
-export const inlineFixtureNames = Object.keys(inlineFixtures) as InlineFixtureName[];
-
-export function findInlineFixture(name: string): OperatorWelcomeMessage | GuestWelcomeMessage | undefined {
-  return Object.hasOwn(inlineFixtures, name) ? inlineFixtures[name as InlineFixtureName] : undefined;
-}

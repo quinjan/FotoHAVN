@@ -4,7 +4,7 @@ using System.Text.Json;
 using FotoHavn.Core;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
-using FotoHavn.Host.Headless.Interim;
+using FotoHavn.Core.Fakes;
 using FotoHavn.Protocol;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,11 +24,7 @@ namespace FotoHavn.Host.Headless;
 internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int Port)
 {
     /// <summary>The default fake displays: a primary and a guest display side by side, both 1920×1080 at 100%.</summary>
-    public static IReadOnlyList<DisplayInfo> DefaultDisplays { get; } =
-    [
-        new("fake-primary", "Fake primary display", new DisplayRect(0, 0, 1920, 1080), new DisplayRect(0, 0, 1920, 1040), 1.0, true),
-        new("fake-guest", "Fake guest display", new DisplayRect(1920, 0, 1920, 1080), new DisplayRect(1920, 0, 1920, 1080), 1.0, false),
-    ];
+    public static IReadOnlyList<DisplayInfo> DefaultDisplays { get; } = [FakeDisplayAdapter.DefaultPrimary, FakeDisplayAdapter.DefaultGuest];
 
     public RoleTokens? Tokens { get; init; }
 
@@ -52,12 +48,12 @@ internal sealed record HeadlessEndpoints(int Port, Uri BaseUrl, Uri BridgeUrl, U
 /// </summary>
 internal sealed partial class HeadlessApp : IAsyncDisposable
 {
-    private readonly InterimBrainExecutor _executor;
+    private readonly DedicatedThreadBrainExecutor _executor;
     private PhysicalFileProvider? _ui;
     private bool _started;
     private bool _disposed;
 
-    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, InterimBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions)
+    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions)
     {
         App = app;
         Settings = settings;
@@ -100,12 +96,12 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var loggers = app.Services.GetRequiredService<ILoggerFactory>();
         var hostLogger = loggers.CreateLogger("FotoHavn.Host.Headless");
         var tokens = settings.Tokens ?? RoleTokens.Create();
-        var displays = settings.Displays ?? new InterimDisplayAdapter([.. HeadlessSettings.DefaultDisplays]);
+        var displays = settings.Displays ?? new FakeDisplayAdapter([.. HeadlessSettings.DefaultDisplays]);
         var hostServices = new HeadlessHostServices(displays, hostLogger);
         var sessions = new BridgeSessions();
         var brainLogger = loggers.CreateLogger("FotoHavn.Brain");
-        var executor = new InterimBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
-        var dependencies = new BrainDependencies(executor, new InterimSystemClock(), displays, hostServices)
+        var executor = new DedicatedThreadBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, hostServices)
         {
             Logger = brainLogger,
 #if E2E_HOOKS

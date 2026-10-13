@@ -3,9 +3,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { resolutionName, resolutions, screenshotDir } from "./resolutions.ts";
 
-// M2 surfaces through the fixture transport (`?fixture=`, honored in development and E2E builds only). The inline
-// fixtures in src/fixtures/inlineFixtures.ts stand in until wave C points this lane at the brain-generated files; the
-// fixture gallery route arrives in M3.
+// M2 surfaces through the fixture lane (`?fixture=<name>`, honored in development and E2E builds only): the
+// brain-generated messages in src/fixtures/presentations/ by file name, plus the hand-written `operator-event-list`
+// with rows (src/fixtures/fixtureLane.ts). The fixture gallery route arrives in M3.
 
 async function expectNoScrolling(page: Page): Promise<void> {
   const overflow = await page.evaluate(() => {
@@ -74,23 +74,63 @@ for (const resolution of resolutions) {
       await expectAccessible(page);
     });
 
+    test("operator fatal surface", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-fatal");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "2");
+
+      await expect(page.locator('[data-fotohavn-surface="fatal"]')).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Something needs attention." })).toBeVisible();
+      await expect(page.getByText("FOTOHAVN stopped. Close it and open it again.")).toBeVisible();
+      await expectNoScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-fatal-${name}.png`) });
+      await expectAccessible(page);
+    });
+
+    test("guest fatal surface", async ({ page }) => {
+      await page.goto("/index.html?fixture=guest-fatal");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "guest");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "2");
+
+      await expect(page.locator('[data-fotohavn-surface="fatal"]')).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "A little interruption." })).toBeVisible();
+      await expect(page.getByText("FOTOHAVN stopped.")).toHaveCount(0);
+      await expectNoScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `guest-fatal-${name}.png`) });
+      await expectAccessible(page);
+    });
+
     test("protocol mismatch screen", async ({ page }) => {
-      await page.goto("/index.html?fixture=guest-start&e2eProtocolVersion=0");
+      await page.goto("/index.html?fixture=protocol-mismatch");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-status", "protocolMismatch");
       await expect(page.locator("html")).not.toHaveAttribute("data-fotohavn-role", /.+/);
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
+      await expect(page.getByText("Booth version 1 · Screen version 0")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);
+    });
+
+    test("protocol mismatch from the E2E version override", async ({ page }) => {
+      await page.goto("/index.html?fixture=guest-start&e2eProtocolVersion=0");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-status", "protocolMismatch");
+      await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
     });
 
     test("not connected screen", async ({ page }) => {
       await page.goto("/index.html");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-status", "notConnected");
       await expect(page.getByRole("heading", { level: 1, name: "Not connected." })).toBeVisible();
-      await expect(page.getByRole("navigation", { name: "Fixtures" }).getByRole("link")).toHaveCount(3);
+      await expect(page.getByRole("navigation", { name: "Fixtures" }).getByRole("link")).toHaveText([
+        "guest-fatal",
+        "guest-start",
+        "operator-event-list",
+        "operator-event-list-empty",
+        "operator-fatal",
+        "protocol-mismatch",
+      ]);
       await expectNoScrolling(page);
       await expectAccessible(page);
     });
