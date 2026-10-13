@@ -160,6 +160,36 @@ describe("Operator surfaces", () => {
     expect(screen.getByText("No Events yet.")).toBeVisible();
   });
 
+  it("renders the storage error surface from the presentation and sends RetryStorage from TRY AGAIN", async () => {
+    const { transport, deliver } = renderApp();
+    act(() => {
+      transport.open();
+    });
+    deliver({
+      ...operatorEventListEmpty,
+      presentation: {
+        ...operatorEventListEmpty.presentation,
+        surface: "storageError",
+        eventList: null,
+        storageError: { kind: "accessDenied", dataPath: "D:\\FOTOHAVN\\Data" },
+      },
+    });
+    expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "storageError");
+    expect(screen.getByRole("heading", { level: 1, name: "The Data folder needs attention." })).toBeVisible();
+    expect(await screen.findByText("FOTOHAVN can't write to the Data folder. Check its permissions, then try again.")).toBeVisible();
+    expect(screen.getByText("D:\\FOTOHAVN\\Data")).toBeVisible();
+
+    act(() => {
+      screen.getByRole("button", { name: "TRY AGAIN" }).click();
+    });
+    expect(transport.sent).toContainEqual(expect.objectContaining({ type: "command", name: "RetryStorage", payload: {} }));
+  });
+
+  it("falls back to the placeholder when a storage error surface carries no error", () => {
+    operator({ surface: "storageError", eventList: null, storageError: null });
+    expect(screen.getByText("This view isn't ready yet.")).toBeVisible();
+  });
+
   it("shows the brain's notice", () => {
     operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { message: "The guest display is disconnected." } } });
     expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The guest display is disconnected.");

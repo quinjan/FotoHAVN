@@ -11,15 +11,25 @@ async function flush(): Promise<void> {
 }
 
 describe("fixture lane", () => {
-  it("serves every brain-generated file by name, plus the hand-written Event rows", () => {
-    expect(fixtureNames).toEqual([
-      "guest-fatal",
-      "guest-start",
-      "operator-event-list",
-      "operator-event-list-empty",
-      "operator-fatal",
-      "protocol-mismatch",
-    ]);
+  it("serves every brain-generated file by name, plus the hand-written Event rows and storage errors", () => {
+    expect(fixtureNames).toEqual(
+      expect.arrayContaining([
+        "guest-fatal",
+        "guest-start",
+        "operator-event-list",
+        "operator-event-list-empty",
+        "operator-event-list-1",
+        "operator-event-list-5",
+        "operator-event-list-30",
+        "operator-event-list-long",
+        "operator-fatal",
+        "operator-storage-error-disk-full",
+        "operator-storage-error-integrity-failed",
+        "operator-storage-error-unknown",
+        "protocol-mismatch",
+      ]),
+    );
+    expect([...fixtureNames]).toEqual([...fixtureNames].sort());
   });
 
   it("serves the generated welcomes unchanged", () => {

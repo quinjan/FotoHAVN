@@ -55,10 +55,77 @@ for (const resolution of resolutions) {
       const rows = page.getByRole("list", { name: "Events" }).getByRole("listitem");
       await expect(rows).toHaveCount(2);
       await expect(rows.first()).toContainText("Santos and Reyes wedding");
+      await expect(rows.first()).toContainText("Sat 21 Nov 2026");
       await expect(rows.first()).toContainText("RUNNING");
       await expect(rows.last()).toContainText("42 Guest Cycles");
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `operator-event-list-${name}.png`) });
+      await expectAccessible(page);
+    });
+
+    // The Operator Screen may scroll, so only the shorter lists are held to the no-scrolling check.
+    for (const [fixture, count, scrolls] of [
+      ["operator-event-list-1", 1, false],
+      ["operator-event-list-5", 5, true],
+      ["operator-event-list-30", 30, true],
+    ] as const) {
+      test(`operator Event list, ${String(count)} row${count === 1 ? "" : "s"}`, async ({ page }) => {
+        await page.goto(`/index.html?fixture=${fixture}`);
+        await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
+        await expect(page.getByRole("list", { name: "Events" }).getByRole("listitem")).toHaveCount(count);
+        await expect(page.getByRole("button", { name: "NEW EVENT" })).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
+        if (!scrolls) {
+          await expectNoScrolling(page);
+        }
+        await page.screenshot({ path: resolve(screenshotDir, `${fixture}-${name}.png`) });
+        await expectAccessible(page);
+      });
+    }
+
+    test("operator Event list, long name and venue", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-event-list-long");
+      const rows = page.getByRole("list", { name: "Events" }).getByRole("listitem");
+      await expect(rows).toHaveCount(2);
+      await expect(rows.first()).toContainText("Alcantara-Villanueva and de los Reyes 50th anniversary celebration, Manila Hotel");
+      await expect(rows.first()).toContainText("The Grand Ballroom of the Manila Hotel");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-event-list-long-${name}.png`) });
+      await expectAccessible(page);
+    });
+
+    for (const [fixture, kind, line] of [
+      ["operator-storage-error-disk-full", "diskFull", "The disk is full. Free some space, then try again."],
+      ["operator-storage-error-access-denied", "accessDenied", "FOTOHAVN can't write to the Data folder. Check its permissions, then try again."],
+      ["operator-storage-error-locked", "locked", "Another program is using a FOTOHAVN file. Close it, then try again."],
+      ["operator-storage-error-not-local-disk", "notLocalDisk", "The Data folder is on a network drive. Move FOTOHAVN to this computer's own disk."],
+      ["operator-storage-error-cloud-synced", "cloudSynced", "The Data folder is inside a cloud-synced folder, which can change files while the booth runs. Move FOTOHAVN outside it."],
+      ["operator-storage-error-not-writable", "notWritable", "The Data folder can't be written to. Choose a folder FOTOHAVN can write to."],
+      ["operator-storage-error-integrity-failed", "integrityFailed", "The Event database didn't pass its check. Copy the Data folder somewhere safe and contact the FOTOHAVN team."],
+      ["operator-storage-error-corrupt", "corrupt", "The Event database didn't pass its check. Copy the Data folder somewhere safe and contact the FOTOHAVN team."],
+      ["operator-storage-error-unknown", "unknown", "Something went wrong with the Data folder. Try again."],
+    ] as const) {
+      test(`operator storage error, ${kind}`, async ({ page }) => {
+        await page.goto(`/index.html?fixture=${fixture}`);
+        await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
+        await expect(page.locator('[data-fotohavn-surface="storageError"]')).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1, name: "The Data folder needs attention." })).toBeVisible();
+        await expect(page.getByText(line)).toBeVisible();
+        await expect(page.getByText("Data folder", { exact: true })).toBeVisible();
+        await expect(page.getByRole("button", { name: "TRY AGAIN" })).toBeVisible();
+        await expectNoScrolling(page);
+        await page.screenshot({ path: resolve(screenshotDir, `${fixture}-${name}.png`) });
+        await expectAccessible(page);
+      });
+    }
+
+    test("operator storage error, TRY AGAIN that the brain rejects", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-storage-error-locked");
+      await page.getByRole("button", { name: "TRY AGAIN" }).click();
+      await expect(page.getByRole("status").filter({ hasText: "That isn't ready yet." })).toBeVisible();
+      await expect(page.getByRole("button", { name: "TRY AGAIN" })).toHaveAttribute("aria-disabled", "false");
+      await expectNoScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-storage-error-rejected-${name}.png`) });
       await expectAccessible(page);
     });
 
@@ -107,7 +174,7 @@ for (const resolution of resolutions) {
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
-      await expect(page.getByText("Booth version 1 · Screen version 0")).toBeVisible();
+      await expect(page.getByText("Booth version 2 · Screen version 1")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);
@@ -123,14 +190,20 @@ for (const resolution of resolutions) {
       await page.goto("/index.html");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-status", "notConnected");
       await expect(page.getByRole("heading", { level: 1, name: "Not connected." })).toBeVisible();
-      await expect(page.getByRole("navigation", { name: "Fixtures" }).getByRole("link")).toHaveText([
-        "guest-fatal",
-        "guest-start",
-        "operator-event-list",
-        "operator-event-list-empty",
-        "operator-fatal",
-        "protocol-mismatch",
-      ]);
+      const links = await page.getByRole("navigation", { name: "Fixtures" }).getByRole("link").allTextContents();
+      expect(links).toEqual([...links].sort());
+      expect(links).toEqual(
+        expect.arrayContaining([
+          "guest-fatal",
+          "guest-start",
+          "operator-event-list",
+          "operator-event-list-empty",
+          "operator-event-list-30",
+          "operator-fatal",
+          "operator-storage-error-disk-full",
+          "protocol-mismatch",
+        ]),
+      );
       await expectNoScrolling(page);
       await expectAccessible(page);
     });

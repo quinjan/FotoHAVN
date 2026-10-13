@@ -25,14 +25,31 @@
 }
 
 .row {
+  /* M6 adds a second, auto-width column for the row's text actions. */
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-12) var(--space-32);
   padding-block: var(--space-24);
   border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
 }
 
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  min-inline-size: 0;
+}
+
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-24);
+}
+
 .name {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   font-family: var(--typography-subheading-font-family);
   font-size: var(--app-text-subheading);
   font-weight: var(--typography-subheading-font-weight);
@@ -41,7 +58,6 @@
 }
 
 .running {
-  align-self: center;
   padding-inline-start: var(--space-12);
   border-inline-start: var(--stroke-focus) solid var(--app-tone-accent);
   font-family: var(--typography-meta-font-family);
@@ -55,29 +71,19 @@
 .facts {
   display: flex;
   flex-wrap: wrap;
-  grid-column: 1 / -1;
-  gap: var(--space-8) var(--space-40);
-}
-
-.fact {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-8);
-}
-
-.fact dt {
+  gap: var(--space-8) var(--space-32);
   color: var(--app-tone-ink-secondary);
-  font-family: var(--typography-meta-font-family);
-  font-size: var(--app-text-meta);
-  font-weight: var(--typography-meta-font-weight);
-  letter-spacing: var(--typography-meta-letter-spacing);
-  line-height: var(--typography-meta-line-height);
-  text-transform: var(--typography-meta-text-transform);
-}
-
-.fact dd {
   font-size: var(--app-text-supporting);
   line-height: var(--typography-supporting-line-height);
+}
+
+.facts > span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.venue {
+  color: var(--app-tone-ink);
 }
 
 .notice {

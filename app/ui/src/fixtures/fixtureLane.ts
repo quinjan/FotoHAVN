@@ -2,6 +2,7 @@ import { createFixtureTransport, type FixtureSnapshot } from "../brain/fixtureTr
 import type { Transport } from "../brain/types.ts";
 import { PROTOCOL_VERSION, type ServerMessage } from "../protocol/generated.ts";
 import { operatorEventListWithRows } from "./inlineFixtures.ts";
+import { operatorFixtures } from "./operatorFixtures.ts";
 
 /**
  * The fixture lane: `?fixture=<name>` in development and E2E builds. `main.tsx` imports this module only in those
@@ -9,8 +10,8 @@ import { operatorEventListWithRows } from "./inlineFixtures.ts";
  *
  * The fixtures are the brain-generated messages in `presentations/` (written by FotoHavn.Core tests, contract §14),
  * by file name. A `presentation` message is served as the `welcome` a page would get at that revision; the
- * `protocol-mismatch` message makes the stand-in brain answer every `hello` with it. `operator-event-list` is
- * hand-written: until storage lands (M4) the brain has no Events to generate rows from.
+ * `protocol-mismatch` message makes the stand-in brain answer every `hello` with it. The operator Event lists with rows
+ * and the storage error for every kind are hand-written (`operatorFixtures.ts`), for states the brain tests don't write.
  */
 
 export type FixtureMessages = Readonly<Record<string, ServerMessage>>;
@@ -23,6 +24,7 @@ const generated: FixtureMessages = Object.fromEntries(
 
 const handWritten: FixtureMessages = {
   "operator-event-list": operatorEventListWithRows,
+  ...operatorFixtures(),
 };
 
 function fileStem(file: string): string {

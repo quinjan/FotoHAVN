@@ -3,14 +3,15 @@ import { commandNotice, formatEventDate, formatGuestCycles, formatLastUsed } fro
 
 describe("operator formatting", () => {
   it("formats an Event date as a calendar day, whatever the time zone", () => {
-    expect(formatEventDate("2026-01-01")).toBe("Jan 1, 2026");
-    expect(formatEventDate("2026-12-31")).toBe("Dec 31, 2026");
+    expect(formatEventDate("2026-01-01")).toBe("Thu 1 Jan 2026");
+    expect(formatEventDate("2026-11-14")).toBe("Sat 14 Nov 2026");
+    expect(formatEventDate("2026-12-31")).toBe("Thu 31 Dec 2026");
     expect(formatEventDate("not a date")).toBe("not a date");
   });
 
   it("formats last used, or says the Event was never used", () => {
     expect(formatLastUsed(null)).toBe("Not used yet");
-    expect(formatLastUsed("2026-10-03T12:00:00Z")).toBe("Oct 3, 2026");
+    expect(formatLastUsed("2026-10-03T12:00:00Z")).toBe("Last used Sat 3 Oct 2026");
     expect(formatLastUsed("yesterday")).toBe("yesterday");
   });
 
