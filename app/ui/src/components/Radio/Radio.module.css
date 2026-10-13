@@ -1,0 +1,4 @@
+/* The row and mark come from shared/choice.module.css. When focus scrolls a radio into view, keep room around it. */
+.radio {
+  scroll-margin-block: var(--app-target);
+}

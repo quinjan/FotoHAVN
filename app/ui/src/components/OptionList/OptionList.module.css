@@ -1,0 +1,183 @@
+/* The brand option list: Hairline-separated rows; the selected row in Warm Ivory with a 2 px Muted Brass left rule. */
+.root {
+  --option-rule: calc(var(--stroke-hairline) * 2);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  border-block-start: var(--stroke-hairline) solid var(--app-tone-rule);
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-inline-start: var(--option-rule) solid transparent;
+  transition: background-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+.row[data-selected="true"] {
+  border-inline-start-color: var(--semantic-accent-rule);
+  background-color: var(--semantic-surface-editorial);
+}
+
+/* The main choice: thumbnail, text, then the mark at the end; its native input covers the whole area. */
+.choice {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-16);
+  min-inline-size: 0;
+  min-block-size: var(--app-target);
+  padding: var(--space-8) var(--space-16);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .row:not([data-selected="true"], [data-disabled="true"]):hover {
+    background-color: var(--app-tone-wash);
+  }
+}
+
+.thumbnail {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--app-target);
+  block-size: var(--app-target);
+  padding: var(--space-4);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-paper);
+  color: var(--semantic-text-primary);
+  font-size: calc(var(--app-target) * 0.5);
+  overflow: hidden;
+}
+
+.thumbnail > :where(img, svg, picture, canvas) {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.titleLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-4) var(--space-12);
+}
+
+.title {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--typography-subheading-font-weight);
+  letter-spacing: var(--typography-subheading-letter-spacing);
+  line-height: var(--typography-subheading-line-height);
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-8);
+  border: var(--stroke-hairline) solid var(--app-tone-ink-secondary);
+  border-radius: var(--radius-control);
+  color: var(--app-tone-ink);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+  white-space: nowrap;
+}
+
+.description {
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.meta {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+.mark {
+  margin-inline-start: auto;
+}
+
+/* The checkbox variant's "Default" radio, in its own column after a Hairline rule. */
+.default {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-8);
+  min-inline-size: var(--app-target);
+  min-block-size: var(--app-target);
+  padding-inline: var(--space-16);
+  border-inline-start: var(--stroke-hairline) solid var(--app-tone-rule);
+  cursor: pointer;
+}
+
+.choice:has(> input:focus-visible),
+.default:has(> input:focus-visible) {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}
+
+.defaultLabel {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+.default:has(> input:disabled) {
+  cursor: not-allowed;
+}
+
+.default:has(> input:disabled) .defaultLabel {
+  color: var(--app-tone-ink-secondary);
+}
+
+/* An unavailable row: the secondary ink, with the reason in its description or badge. */
+.row[data-disabled="true"] .choice {
+  cursor: not-allowed;
+}
+
+.row[data-disabled="true"] .title {
+  color: var(--app-tone-ink-secondary);
+}
+
+@media (forced-colors: active) {
+  .row[data-selected="true"] {
+    border-inline-start-color: Highlight;
+  }
+
+  .row[data-disabled="true"] .title,
+  .default:has(> input:disabled) .defaultLabel {
+    color: GrayText;
+  }
+}

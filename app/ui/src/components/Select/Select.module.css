@@ -1,0 +1,39 @@
+/* The box, label, and messages come from shared/field.module.css; the native arrow is replaced by a Phosphor chevron. */
+.box {
+  position: relative;
+  inline-size: 100%;
+}
+
+.select {
+  padding-inline-end: calc(var(--space-16) * 2 + var(--app-icon-action));
+  appearance: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+}
+
+.chevron {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: var(--space-16);
+  display: flex;
+  align-items: center;
+  color: var(--app-tone-ink);
+  font-size: var(--app-icon-action);
+  pointer-events: none;
+}
+
+.select:disabled + .chevron {
+  color: var(--app-tone-ink-secondary);
+}
+
+@media (forced-colors: active) {
+  .select:disabled + .chevron {
+    color: GrayText;
+  }
+}

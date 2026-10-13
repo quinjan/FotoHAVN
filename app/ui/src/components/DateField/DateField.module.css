@@ -1,0 +1,16 @@
+/* The box, label, and messages come from shared/field.module.css. A date is short, so the field doesn't stretch. */
+.date {
+  max-inline-size: calc(var(--app-target) * 5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The native picker icon follows the surface's tone. */
+:global([data-tone="dark"]) .date {
+  color-scheme: dark;
+}
+
+.date::-webkit-calendar-picker-indicator {
+  inline-size: var(--app-icon-action);
+  block-size: var(--app-icon-action);
+  cursor: pointer;
+}

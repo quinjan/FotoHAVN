@@ -1,0 +1,4 @@
+/* The row and mark come from shared/choice.module.css; messages sit close under the row. */
+.root {
+  gap: var(--space-4);
+}

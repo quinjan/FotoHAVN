@@ -1,0 +1,97 @@
+/* Separate 4 radius segments, each a native radio stretched over it; the chosen one fills with the ink. */
+.segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-inline-size: calc(var(--app-target) * 1.5);
+  min-block-size: var(--app-target);
+  padding-inline: var(--space-16);
+  --segment-border: var(--stroke-hairline);
+
+  border: var(--segment-border) solid var(--app-tone-ink-secondary);
+  border-radius: var(--radius-control);
+  background-color: var(--app-tone-surface);
+  color: var(--app-tone-ink);
+  font-family: var(--typography-action-font-family);
+  font-size: var(--app-text-body);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--typography-action-font-weight);
+  line-height: var(--typography-body-line-height);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    border-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+.check {
+  display: inline-flex;
+  visibility: hidden;
+  font-size: calc(var(--app-icon-action) * 0.8);
+}
+
+/* The native radio covers the segment's border box, so the target is the whole segment. */
+.segment > input {
+  inset: calc(var(--segment-border) * -1);
+  inline-size: calc(100% + var(--segment-border) * 2);
+  block-size: calc(100% + var(--segment-border) * 2);
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.segment:has(> input:focus-visible) {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}
+
+/* Chosen: the ink fills the segment and a check shows before the label. */
+.segment:has(> input:checked) {
+  border-color: var(--app-tone-ink);
+  background-color: var(--app-tone-ink);
+  color: var(--app-tone-surface);
+}
+
+.segment:has(> input:checked) .check {
+  visibility: visible;
+}
+
+.segment:has(> input:disabled) {
+  border-color: var(--app-tone-rule);
+  background-color: transparent;
+  color: var(--app-tone-ink-secondary);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .segment:hover:not(:has(> input:disabled, > input:checked)) {
+    border-color: var(--app-tone-ink);
+    background-color: var(--app-tone-wash);
+  }
+}
+
+.segment:active:not(:has(> input:disabled, > input:checked)) {
+  background-color: var(--app-tone-wash);
+}
+
+@media (forced-colors: active) {
+  .segment:has(> input:checked) {
+    --segment-border: calc(var(--stroke-hairline) * 2);
+
+    border-color: Highlight;
+  }
+
+  .segment:has(> input:disabled) {
+    border-color: GrayText;
+    color: GrayText;
+  }
+}
