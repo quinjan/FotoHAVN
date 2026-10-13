@@ -1,0 +1,119 @@
+name: Desktop app
+
+on:
+  push:
+    paths:
+      - "app/**"
+      - ".github/workflows/desktop.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/desktop.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify desktop app
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: app
+        shell: pwsh
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: app/global.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: |
+            app/ui/package-lock.json
+            app/e2e/package-lock.json
+
+      # Verification step 1: build .NET (warnings are errors).
+      - name: Build .NET
+        run: |
+          dotnet restore FotoHAVN.slnx --locked-mode
+          dotnet build FotoHAVN.slnx --no-restore
+
+      # Verification step 2: .NET tests with Cobertura coverage, then ReportGenerator.
+      # M1 checks that coverage is collected only (no minimumCoverageThresholds); gates start in M2.
+      - name: Test .NET with coverage
+        run: |
+          dotnet tool restore
+          # exact flags: see app/AGENTS.md
+          dotnet test --solution FotoHAVN.slnx --no-build -- --coverage --coverage-output-format cobertura
+          # exact flags: see app/AGENTS.md
+          dotnet tool run reportgenerator "-reports:**/TestResults/**/*.cobertura.xml" "-targetdir:output/coverage" "-reporttypes:TextSummary;Cobertura" "-assemblyfilters:+FotoHavn.Core;+FotoHavn.Protocol;+FotoHavn.Storage;+FotoHavn.Catalog"
+          Get-Content output/coverage/Summary.txt
+
+      # Verification step 3: UI.
+      - name: Install UI dependencies
+        working-directory: app/ui
+        run: npm ci
+
+      - name: Lint UI
+        working-directory: app/ui
+        run: npm run lint
+
+      - name: Typecheck UI
+        working-directory: app/ui
+        run: npm run typecheck
+
+      - name: Test UI with coverage
+        working-directory: app/ui
+        run: npm run test:coverage
+
+      - name: Build UI
+        working-directory: app/ui
+        run: npm run build
+
+      - name: Install Playwright Chromium for the fixture gallery
+        working-directory: app/ui
+        run: npx playwright install --with-deps chromium
+
+      - name: Test UI fixture gallery
+        working-directory: app/ui
+        run: npm run test:fixtures
+
+      # Verification step 4: end-to-end project. CI never runs end-to-end tests: hosted runners have no camera.
+      - name: Install end-to-end dependencies
+        working-directory: app/e2e
+        run: npm ci
+
+      - name: Typecheck end-to-end project
+        working-directory: app/e2e
+        run: npm run typecheck
+
+      # Verification step 8: agent documentation contract.
+      - name: Verify agent documentation
+        working-directory: .
+        run: ./scripts/verify-agent-docs.ps1
+
+      - name: Upload app output
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-app-output
+          path: app/output/
+          if-no-files-found: ignore
+          retention-days: 14
