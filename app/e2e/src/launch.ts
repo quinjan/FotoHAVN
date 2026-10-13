@@ -21,6 +21,10 @@ export interface LaunchOptions {
   camera?: Camera | undefined;
   /** Defaults to a fresh `Data` folder (not yet created) in the run folder. */
   dataDir?: string;
+  /** Extra command-line arguments after the harness's own, such as `["--e2e-storage-fault", "diskFull"]`. */
+  args?: readonly string[];
+  /** Runs before the app starts, with the Data folder's path, to seed it (see seed.ts). */
+  seed?: (dataDir: string) => void | Promise<void>;
   startupTimeoutMs?: number;
 }
 
@@ -82,7 +86,8 @@ export async function launchApp(options: LaunchOptions): Promise<AppSession> {
   if (options.camera !== undefined) {
     args.push("--e2e-camera", options.camera.id);
   }
-
+  args.push(...(options.args ?? []));
+  await options.seed?.(dataDir);
   const run: RunRecord = {
     name: options.name,
     runDir,

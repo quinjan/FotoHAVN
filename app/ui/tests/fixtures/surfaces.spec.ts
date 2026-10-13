@@ -32,7 +32,7 @@ for (const resolution of resolutions) {
     test("operator Event list, empty", async ({ page }) => {
       await page.goto("/index.html?fixture=operator-event-list-empty");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
-      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "1");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "2");
 
       await expect(page).toHaveTitle("FOTOHAVN");
       await expect(page.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
@@ -45,6 +45,18 @@ for (const resolution of resolutions) {
 
       await newEvent.click();
       await expect(page.getByRole("status").filter({ hasText: "That isn't ready yet." })).toBeVisible();
+      await expectAccessible(page);
+    });
+
+    test("operator starting", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-starting");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
+      await expect(page.locator('[data-fotohavn-surface="starting"]')).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
+      await expect(page.getByRole("status").filter({ hasText: "Opening the Data folder…" })).toBeVisible();
+      await expect(page.getByRole("button")).toHaveCount(0);
+      await expectNoScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-starting-${name}.png`) });
       await expectAccessible(page);
     });
 
@@ -144,7 +156,7 @@ for (const resolution of resolutions) {
     test("operator fatal surface", async ({ page }) => {
       await page.goto("/index.html?fixture=operator-fatal");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
-      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "2");
+      await expect(page.locator("html")).toHaveAttribute("data-fotohavn-revision", "3");
 
       await expect(page.locator('[data-fotohavn-surface="fatal"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "Something needs attention." })).toBeVisible();
@@ -174,7 +186,7 @@ for (const resolution of resolutions) {
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
-      await expect(page.getByText("Booth version 2 · Screen version 1")).toBeVisible();
+      await expect(page.getByText("Booth version 3 · Screen version 2")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);

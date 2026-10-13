@@ -3,6 +3,8 @@ import type {
   CommandPayloadMap,
   DiagnosticsResult,
   Role,
+  StorageFaultKind,
+  StorageFaultScope,
   TestCamera,
   TestDisplay,
   TestHookMap,
@@ -19,7 +21,17 @@ export type HookName = keyof TestHookMap;
 export type HookArgs<K extends HookName> = TestHookMap[K]["args"];
 export type HookResult<K extends HookName> = TestHookMap[K]["result"];
 
-export type { CommandPayloadMap, DiagnosticsResult, Role, TestCamera, TestDisplay, TestWindow, VirtualDisplaySpec };
+export type {
+  CommandPayloadMap,
+  DiagnosticsResult,
+  Role,
+  StorageFaultKind,
+  StorageFaultScope,
+  TestCamera,
+  TestDisplay,
+  TestWindow,
+  VirtualDisplaySpec,
+};
 
 /** What the UI's `window.fotohavnE2E.sendTest` resolves with (it never rejects). */
 export type HookReply<K extends HookName> = { ok: true; result: HookResult<K> } | { ok: false; error: string };
@@ -116,6 +128,14 @@ export class HookClient {
 
   async crashUi(role: Role): Promise<void> {
     await this.call("test.crashUi", { role });
+  }
+
+  async injectStorageFault(kind: StorageFaultKind, scope: StorageFaultScope): Promise<void> {
+    await this.call("test.injectStorageFault", { kind, scope });
+  }
+
+  async clearStorageFault(): Promise<void> {
+    await this.call("test.clearStorageFault", null);
   }
 
   /**

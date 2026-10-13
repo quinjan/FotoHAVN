@@ -1,4 +1,5 @@
 import type { OperatorPresentation } from "../protocol/generated.ts";
+import { StartingScreen } from "../components/StartingScreen/index.ts";
 import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
@@ -33,6 +34,8 @@ function OperatorPending() {
 
 function OperatorSurface({ presentation }: { readonly presentation: OperatorPresentation }) {
   switch (presentation.surface) {
+    case "starting":
+      return <StartingScreen />;
     case "eventList":
       return <EventList events={presentation.eventList?.events ?? []} />;
     case "fatal":

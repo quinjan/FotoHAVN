@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 
@@ -92,4 +93,37 @@ export function listDataFolder(dataDir: string): DataEntry[] {
   };
   walk(dataDir, "");
   return entries;
+}
+
+/** The SQLite `PRAGMA user_version` of a Data folder's database. */
+export function readUserVersion(dataDir: string): number {
+  const row = queryOne<{ user_version: number }>(path.join(dataDir, databaseFileName), "PRAGMA user_version");
+  return row?.user_version ?? 0;
+}
+
+export function fileExists(file: string): boolean {
+  return existsSync(file) && statSync(file).isFile();
+}
+
+export function directoryExists(dir: string): boolean {
+  return existsSync(dir) && statSync(dir).isDirectory();
+}
+
+export function sha256OfFile(file: string): string {
+  return createHash("sha256").update(readFileSync(file)).digest("hex");
+}
+
+/** A file's size and SHA-256, or undefined when it doesn't exist: what a row's `byte_length` and `sha256` must match. */
+export function fingerprint(file: string): { bytes: number; sha256: string } | undefined {
+  return fileExists(file) ? { bytes: statSync(file).size, sha256: sha256OfFile(file) } : undefined;
+}
+
+/** The names of the files directly inside a folder (none when the folder doesn't exist), sorted. */
+export function listFileNames(dir: string): string[] {
+  return directoryExists(dir)
+    ? readdirSync(dir, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
+        .sort()
+    : [];
 }

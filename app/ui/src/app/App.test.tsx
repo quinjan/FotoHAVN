@@ -155,6 +155,14 @@ describe("Operator surfaces", () => {
     expect(screen.getByText("This view isn't ready yet.")).toBeVisible();
   });
 
+  it("renders the starting surface until the brain answers, with no placeholder", async () => {
+    operator({ surface: "starting", eventList: null });
+    expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "starting");
+    expect(screen.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
+    expect(await screen.findByText("Opening the Data folder…")).toBeVisible();
+    expect(screen.queryByText("This view isn't ready yet.")).not.toBeInTheDocument();
+  });
+
   it("treats a missing event list as empty", () => {
     operator({ eventList: null });
     expect(screen.getByText("No Events yet.")).toBeVisible();

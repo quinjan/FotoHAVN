@@ -1,0 +1,8 @@
+/* The same canvas and gutters as the Event list, so the list appears in place of this view. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-32);
+  padding: var(--space-48) var(--app-gutter);
+}

@@ -167,6 +167,8 @@ Panorama Four's preview is rotated a quarter turn counterclockwise, as on the we
 
 | View | Composition | Brand components |
 | --- | --- | --- |
+| Starting | Off-white canvas with the left-aligned Events heading the list keeps and one neutral status line; no action, spinner, or motion, so the list appears in place. | Statement heading, inline status |
+| Storage error | Off-white canvas, left-aligned statement heading, the problem as an alert status line, the Data folder's path under a Meta label, and `TRY AGAIN` as the view's one primary action. | Statement heading, inline status, primary action |
 | Event list | Off-white canvas, left-aligned heading, rows separated by Hairline rules, not cards. `NEW EVENT →` is the view's one primary action, whether or not an Event runs, except during Operator Assistance (see the running-Event panel); row actions are text actions. | Statement heading, option-list rows, primary action |
 | Running-Event panel | A Warm Ivory band pinned above the Event list, and only there, with a 2 px Muted Brass left rule, the Event name in the Subheading role, facts as Meta labels with values, and `OPEN GALLERY` (the running Event's live operator gallery, with no hold or PIN), `RETRY`, and `END EVENT`. Its actions are secondary or text actions, and `NEW EVENT →` stays the one primary action. During Operator Assistance it adds an alert line in Ebony with the reason, never color alone; `RETRY` becomes the single primary action and `NEW EVENT` drops to a secondary action, so the Operator Screen still has one primary action. `RETRY` is the primary action only here, on the panel. | Eyebrow, inline status, primary, secondary, and text actions |
 | Operator Assistance alert elsewhere | On every other Operator Screen view (Event setup, Event Galleries, Guest Cycle detail), an Operator Assistance alert appears as an inline status line in Ebony with the reason, never color alone, and a text link back to the running-Event panel. It doesn't change the view's primary action. | Inline status, text link |
@@ -215,6 +217,18 @@ Static copy lives in the UI; strings with domain meaning, such as Template and L
 | End Event | "End this Event? Anyone using the booth will be stopped. Their photographs are kept." · `END EVENT` · `KEEP RUNNING` |
 | Event Gallery | Completed · Started over · Ended by operator · App closed · Unrecoverable · "No Photo Strip" · `OPEN FOLDER` · `DELETE` · empty state "No photographs yet." · *interim copy confirmed in M3:* paging `SHOW MORE ↓` with "Loading more photographs."; row action `OPEN`; Guest Cycle detail fact labels Time, Outcome, Template, Look, and Captures, with "No Captures" when there are none. Operator views keep every Photo Strip in native orientation, Panorama Four included. |
 | Single-screen placeholder | "The booth is running on this screen." |
+
+#### Storage
+
+The copy for opening, reading, and recovering the Data folder. The UI owns it (`StartingScreen`, `StorageErrorScreen`, `format.ts`); the brain sends only the error kind and the folder's path. The data-path classifier's verdict reasons in `DataPathClassifier` are for logs, and the lines below are what the operator sees.
+
+| Where | Copy |
+| --- | --- |
+| Starting | Events heading · "Opening the Data folder…" in a polite status line, announced once; no action and no motion. It shows until the Event store opens, then the Event list or the storage error takes its place. |
+| Storage error | "The Data folder needs *attention.*" · `DATA FOLDER` Meta label above the full path, as selectable text · `TRY AGAIN` (the view's one primary action) |
+| Storage error, per kind | Disk full: "The disk is full. Free some space, then try again." · Access denied: "FOTOHAVN can't write to the Data folder. Check its permissions, then try again." · Locked: "Another program is using a FOTOHAVN file. Close it, then try again." · Network drive: "The Data folder is on a network drive. Move FOTOHAVN to this computer's own disk." · Cloud-synced: "The Data folder is inside a cloud-synced folder, which can change files while the booth runs. Move FOTOHAVN outside it." · Not writable: "The Data folder can't be written to. Choose a folder FOTOHAVN can write to." · Integrity check failed and corrupt database (one line): "The Event database didn't pass its check. Copy the Data folder somewhere safe and contact the FOTOHAVN team." · Unknown: "Something went wrong with the Data folder. Try again." |
+| Storage error, outcomes | While trying: "Trying again…" · when the folder still can't be used: "The Data folder still needs attention." · when the booth doesn't answer: "The booth didn't answer. Try again." · when the retry isn't available: "That isn't ready yet." · any other failure: "That didn't work. Try again." |
+| Event list facts | A date reads "Sat 14 Nov 2026" (fixed English weekday and month names, whatever the machine's language) · the last use reads "Last used Sat 3 Oct 2026", in the machine's local day, or "Not used yet" when the Event never ran · "1 Guest Cycle" or "N Guest Cycles" |
 
 ## Components
 

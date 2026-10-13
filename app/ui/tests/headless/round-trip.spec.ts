@@ -67,7 +67,8 @@ async function expectHandshake(page: Page, role: "operator" | "guest"): Promise<
   const root = page.locator("html");
   await expect(root).toHaveAttribute("data-fotohavn-status", "connected");
   await expect(root).toHaveAttribute("data-fotohavn-role", role);
-  await expect(root).toHaveAttribute("data-fotohavn-revision", "1");
+  // The Operator Screen shows Starting (revision 1) until the Event store opens, then the Event list (revision 2).
+  await expect(root).toHaveAttribute("data-fotohavn-revision", role === "operator" ? "2" : "1");
 }
 
 function sendCommand(page: Page, name: string): Promise<unknown> {
