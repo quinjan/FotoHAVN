@@ -120,6 +120,8 @@ Tests run one at a time (the camera is opened exclusively). Each test file gets 
 
 On a failure, open the HTML report with `npx playwright show-report ../output/e2e/html`, read the trace, and check the run folder under `output/e2e/runs/` for the app's stdout, stderr, `fotohavn.jsonl` log, Data folder listing, and final screenshot.
 
+The `@m3` visual regression (`regression/visual/fixture-gallery-webview2`) compares the real WebView2's fixture screenshots with the Chromium fixture lane's baselines in `output/fixtures/components/`, so run `npm run test:fixtures` in `ui/` first (step 3); a missing baseline fails with that instruction. It allows at most 1% of pixels to differ per screenshot (pixelmatch threshold 0.1) and writes the maximum, mean, and worst ratios to `output/e2e/visual-summary.json`. A run takes about 7 minutes for the four resolutions.
+
 ### 8. Agent docs
 
 From the repository root:
