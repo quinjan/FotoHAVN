@@ -9,26 +9,18 @@ import styles from "./Operator.module.css";
 function EventRow({ row }: { readonly row: EventListRow }) {
   return (
     <li className={styles.row} data-event-id={row.id}>
-      <h2 className={styles.name}>{row.name}</h2>
-      {row.running && <p className={styles.running}>RUNNING</p>}
-      <dl className={styles.facts}>
-        <div className={styles.fact}>
-          <dt>Date</dt>
-          <dd>{formatEventDate(row.date)}</dd>
+      <div className={styles.body}>
+        <div className={styles.title}>
+          <h2 className={styles.name}>{row.name}</h2>
+          {row.running && <p className={styles.running}>RUNNING</p>}
         </div>
-        <div className={styles.fact}>
-          <dt>Venue</dt>
-          <dd>{row.venue ?? "No venue"}</dd>
-        </div>
-        <div className={styles.fact}>
-          <dt>Completed</dt>
-          <dd>{formatGuestCycles(row.completedGuestCycles)}</dd>
-        </div>
-        <div className={styles.fact}>
-          <dt>Last used</dt>
-          <dd>{formatLastUsed(row.lastUsed)}</dd>
-        </div>
-      </dl>
+        <p className={styles.facts}>
+          <span>{formatEventDate(row.date)}</span>
+          {row.venue !== null && <span className={styles.venue}>{row.venue}</span>}
+          <span>{formatGuestCycles(row.completedGuestCycles)}</span>
+          <span>{formatLastUsed(row.lastUsed)}</span>
+        </p>
+      </div>
     </li>
   );
 }

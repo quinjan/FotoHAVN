@@ -1,0 +1,40 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-32);
+  padding: var(--space-48) var(--app-gutter);
+}
+
+.path {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-inline-size: 100%;
+}
+
+.label {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+/* The one selectable text on the screen: the operator copies the path to open or move the folder. */
+.value {
+  overflow-wrap: anywhere;
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
+  user-select: text;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16) var(--space-24);
+}

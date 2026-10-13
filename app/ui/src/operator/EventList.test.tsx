@@ -1,8 +1,9 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { BrainClientContext, useBrainClient } from "../brain/BrainClientContext.ts";
 import type { BrainClient, CommandResult } from "../brain/types.ts";
 import { operatorEventListWithRows } from "../fixtures/inlineFixtures.ts";
+import { eventRows, longEventName, longEventVenue, operatorFixtures } from "../fixtures/operatorFixtures.ts";
 import { EventList } from "./EventList.tsx";
 
 function stubClient(sendCommand: BrainClient["sendCommand"]): BrainClient {
@@ -54,18 +55,41 @@ describe("EventList", () => {
     const [wedding, birthday] = items as [HTMLElement, HTMLElement];
     expect(within(wedding).getByRole("heading", { level: 2 })).toHaveTextContent("Santos and Reyes wedding");
     expect(wedding).toHaveTextContent("RUNNING");
-    expect(wedding).toHaveTextContent("DateNov 21, 2026");
-    expect(wedding).toHaveTextContent("VenueThe Glasshouse, Tagaytay");
-    expect(wedding).toHaveTextContent("Completed1 Guest Cycle");
-    expect(wedding).toHaveTextContent("Last usedNot used yet");
+    expect(wedding).toHaveTextContent("Sat 21 Nov 2026");
+    expect(wedding).toHaveTextContent("The Glasshouse, Tagaytay");
+    expect(wedding).toHaveTextContent("1 Guest Cycle");
+    expect(wedding).toHaveTextContent("Not used yet");
     expect(wedding).toHaveAttribute("data-event-id", "event-2");
 
     expect(within(birthday).getByRole("heading", { level: 2 })).toHaveTextContent("Mara's 30th");
     expect(birthday).not.toHaveTextContent("RUNNING");
-    expect(birthday).toHaveTextContent("VenueNo venue");
-    expect(birthday).toHaveTextContent("Completed42 Guest Cycles");
-    expect(birthday).toHaveTextContent("Last usedOct 3, 2026");
+    expect(birthday).toHaveTextContent("Sat 3 Oct 2026");
+    expect(birthday).toHaveTextContent("42 Guest Cycles");
+    expect(birthday).toHaveTextContent("Last used Sat 3 Oct 2026");
+    expect(birthday).not.toHaveTextContent("No venue");
     expect(screen.queryByText("No Events yet.")).not.toBeInTheDocument();
+  });
+
+  it("keeps the order the brain sent, whatever the dates say", () => {
+    const sent = [eventRows(3)[2], eventRows(3)[0], eventRows(3)[1]].filter((row) => row !== undefined);
+    renderList(stubClient(vi.fn()), sent);
+    const names = within(screen.getByRole("list", { name: "Events" }))
+      .getAllByRole("heading", { level: 2 })
+      .map((heading) => heading.textContent);
+    expect(names).toEqual(sent.map((row) => row.name));
+  });
+
+  it("renders a long list with one row per Event and wraps very long text in place", () => {
+    const events = eventRows(30);
+    renderList(stubClient(vi.fn()), events);
+    expect(within(screen.getByRole("list", { name: "Events" })).getAllByRole("listitem")).toHaveLength(30);
+
+    const long = operatorFixtures()["operator-event-list-long"]?.presentation.eventList?.events ?? [];
+    cleanup();
+    renderList(stubClient(vi.fn()), long);
+    const [first] = within(screen.getByRole("list", { name: "Events" })).getAllByRole("listitem");
+    expect(first).toHaveTextContent(longEventName);
+    expect(first).toHaveTextContent(longEventVenue);
   });
 
   it("sends OpenNewEvent and politely shows a rejection", async () => {

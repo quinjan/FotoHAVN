@@ -4,6 +4,7 @@ import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
 import { EventList } from "./EventList.tsx";
 import styles from "./Operator.module.css";
+import { StorageErrorSurface } from "./StorageErrorSurface.tsx";
 
 function OperatorFatal({ reason }: { readonly reason: string | null }) {
   return (
@@ -36,6 +37,8 @@ function OperatorSurface({ presentation }: { readonly presentation: OperatorPres
       return <EventList events={presentation.eventList?.events ?? []} />;
     case "fatal":
       return <OperatorFatal reason={presentation.fatal?.reason ?? null} />;
+    case "storageError":
+      return presentation.storageError === null ? <OperatorPending /> : <StorageErrorSurface view={presentation.storageError} />;
     default:
       return <OperatorPending />;
   }
