@@ -15,6 +15,9 @@ public sealed partial class Brain
     private StorageDiagnosticsState _storageState = StorageDiagnosticsState.Opening;
     private StorageErrorReason? _storageError;
     private bool _storageOpenInFlight;
+
+    // False from construction until the first open answers: the operator shows the Starting surface, never an empty Event list.
+    private bool _storageResolved;
     private IReadOnlyList<EventListRow> _eventRows = [];
     private StorageOpenResult? _storageOpened;
 
@@ -33,6 +36,7 @@ public sealed partial class Brain
     private void CompleteStorageOpen(StorageLoad load)
     {
         _storageOpenInFlight = false;
+        _storageResolved = true;
         if (load.Error is { } error)
         {
             _storageState = StorageDiagnosticsState.Error;

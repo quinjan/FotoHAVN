@@ -24,7 +24,7 @@ public sealed class PresentationTests
         foreach (var client in new[] { operatorA, operatorB })
         {
             var presentation = client.Single<OperatorPresentationMessage>();
-            Assert.Equal(2, presentation.Revision);
+            Assert.Equal(3, presentation.Revision);
             Assert.Equal(OperatorSurface.Fatal, presentation.Presentation.Surface);
             Assert.Equal(new FatalView("FOTOHAVN stopped."), presentation.Presentation.Fatal);
             Assert.Null(presentation.Presentation.EventList);
@@ -137,7 +137,7 @@ public sealed class PresentationTests
             (Count: 0, Last: (string?)null),
             (state, reason) => reason == state.Last ? state : (state.Count + 1, reason)).Count;
 
-        return (operatorRevisions.SequenceEqual(Enumerable.Range(2, distinctChanges).Select(revision => (long)revision))
+        return (operatorRevisions.SequenceEqual(Enumerable.Range(3, distinctChanges).Select(revision => (long)revision))
                 && guestRevisions.Zip(guestRevisions.Skip(1)).All(pair => pair.Second >= pair.First)
                 && guestRevisions.All(revision => revision >= 1)
                 && (guestRevisions.Count == 0 || guestRevisions[^1] == distinctChanges + 1))

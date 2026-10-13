@@ -27,6 +27,7 @@ Packages restore from the locked files: `packages.lock.json` in every .NET proje
 | `src/FotoHavn.Camera.Windows` | The webcam adapter (a thin device list in M1) |
 | `src/FotoHavn.Host.Windows` | The WPF host; builds `FOTOHAVN.exe` |
 | `src/FotoHavn.Host.Headless` | The headless dev host: the real brain over a WebSocket bridge (see [Headless host](#headless-host)) |
+| `tests/FotoHavn.Storage.CrashHarness` | Test infrastructure: a console program the crash tests run as a child process (see [Event storage](#event-storage-the-data-folder-faults-and-crash-tests)) |
 | `tests/` | xUnit v3 test projects, one per project above (`FotoHavn.Host.Headless.Tests` runs the headless host on a random loopback port) |
 | `ui/` | The React UI; see [`../ui/README.md`](../ui/README.md) |
 | `e2e/` | The Playwright end-to-end framework that drives the real app |
@@ -154,7 +155,7 @@ dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:
 - `-p:FotoHavnE2E=true` defines `E2E_HOOKS` in every project. Only then are the `test.*` hooks compiled; other builds answer every `test.*` message with `hooksUnavailable`.
 - A hook build (`FotoHavnE2E=true`, or `E2E_HOOKS` defined any other way) restores and compiles into each project's own `obj/e2e/` and `bin/e2e/`, never the `obj/Debug/` or `bin/Debug/` of normal builds, so a later build, test run, or `dotnet publish --no-build` can't pick up a hook assembly. Every hook assembly also carries `[assembly: AssemblyMetadata("FotoHavnE2E", "true")]`.
 - `npm run build:e2e` writes the E2E UI (`VITE_E2E=true`) to `ui/dist-e2e/` with an `e2e-build.txt` marker; `npm run build` writes the field UI to `ui/dist/`. The E2E build of the host copies `ui/dist-e2e` into `wwwroot/` beside `FOTOHAVN.exe`, every other build copies `ui/dist`, and each removes files a previous copy left there. A field build fails if `ui/dist` holds the marker. Without the UI folder, the app shows "The FOTOHAVN UI is not built."
-- `FOTOHAVN.exe` takes `--data <folder>` (default `Data` beside the exe, created if missing) and, in E2E builds only, `--remote-debugging-port <port>` and `--e2e-camera <name or device id>`. Field builds never open a debugging port.
+- `FOTOHAVN.exe` takes `--data <folder>` (default `Data` beside the exe, created if missing) and, in E2E builds only, `--remote-debugging-port <port>`, `--e2e-camera <name or device id>`, and `--e2e-storage-fault <diskFull|accessDenied|locked>` (see [Event storage](#event-storage-the-data-folder-faults-and-crash-tests)). A field build reads the E2E flags and ignores them. Field builds never open a debugging port.
 - M2 hooks travel as protocol `test` messages over each page's own brain connection and come back as `testResult` (`hooksUnavailable` in other builds). The E2E UI exposes `window.fotohavnE2E` (`kind`, `getState()`, `sendCommand(name, payload)`, `sendTest(name, args)`), which `e2e/src/hooks.ts` uses with the generated `TestHookMap` types. Hooks: `test.getDiagnostics`, `test.useVirtualDisplays`, `test.disconnectDisplay`, `test.connectDisplay`, `test.openGuestScreen` and `test.closeGuestScreen` (development stand-ins for starting and ending an Event until M6), `test.setWindowBounds` (sizes a window's client area, the page viewport, to the given physical pixels, even beyond the screen), `test.crashUi`, `test.listCameras`, and `test.exit`. Later milestones add the rest listed in [the plan](implementation-plan.md#e2e-build-and-test-hooks).
 - **Publish guard.** It fails a publish of any project with `FOTOHAVN field builds must not include E2E hooks` when:
   - the publish asks for hooks (`-p:FotoHavnE2E=true` or `E2E_HOOKS` in `DefineConstants`);
@@ -164,6 +165,26 @@ dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:
   `scripts/publish-field-test.ps1` refuses requests for hooks with the same text, and after publishing it checks the output's assemblies and `wwwroot/` again. Unit tests in `FotoHavn.Host.Windows.Tests` check that normally built assemblies have no `.E2E` types and no marker, and the `@m1` regression suite checks every refusal, including a `--no-build` publish right after an E2E build.
 
 To attach Playwright or DevTools by hand, start `output/e2e-build/FOTOHAVN.exe --data output/scratch/Data --remote-debugging-port 9222` and connect to `http://127.0.0.1:9222`.
+
+## Event storage: the Data folder, faults, and crash tests
+
+- **The Data folder.** Both hosts open one `SqliteEventStore` on the Data folder (`--data <dir>`, default `Data` beside the exe; the headless host takes the same `--data`). It holds `fotohavn.db` (SQLite, WAL), `Events/<event>/GuestCycles/<cycle>/` (Captures and Photo Strips), and `Cache/thumbnails/`; the host adds `logs/` and `webview2-user-data/`. Only the store writes the first three. Run it on the computer's own disk: a network drive, a OneDrive, Dropbox, Google Drive, or iCloud folder, or a read-only folder is refused. Opening runs the startup reconciler, which hashes every kept Capture and Photo Strip, so a large Data folder starts more slowly (about 0.8 s for 300 cycles and 534 MiB on the development laptop; the timing test fails above 10 s).
+- **Starting and the storage error screen.** The brain opens the store on its executor and the operator surface is `starting` (protocol version 3) until the first open answers, then `eventList` or `storageError`. The storage error screen names the cause (disk full, access denied, locked, not a local disk, cloud-synced folder, not writable, integrity check failed, corrupt, or unknown) and the Data folder path; `RETRY` sends `RetryStorage`, which opens the store again. While a retry runs, the screen stays up.
+- **Fault flag (E2E builds only).** `--e2e-storage-fault <diskFull|accessDenied|locked>` fails every file write from before the store opens, so `OpenAsync` fails at its first write and the operator sees the storage error screen. The `test.injectStorageFault(kind, scope)` and `test.clearStorageFault` hooks do the same at run time (scope `nextWrite` or `allWrites`). Clear the fault with the hook, then `RetryStorage`. Try it:
+
+  ``powershell
+  dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build
+  output/e2e-build/FOTOHAVN.exe --data output/scratch/Data --e2e-storage-fault diskFull
+  ``
+
+  In E2E runs, wait for `test.getDiagnostics` `storage.state` to be `ready` or `error` (wire `opening`, `ready`, `error`) before asserting a screen.
+- **Crash tests.** `tests/FotoHavn.Storage.Tests/Crash` seeds a Data folder through the real store, runs `FotoHavn.Storage.CrashHarness` as a child process (`dotnet crash-harness/FotoHavn.Storage.CrashHarness.dll --data <dir> --scenario <capture|strip|eventDelete|cycleDelete> --crash-at <step|none>`) that kills itself right after each named step (`CrashPoint.All`), then opens a fresh store on the folder and checks the invariants. They run in the normal `dotnet test --solution` run and in CI. The test project's build copies the harness beside the test assembly. Run only them with:
+
+  ``powershell
+  dotnet test --project tests/FotoHavn.Storage.Tests --no-build --filter-class FotoHavn.Storage.Tests.Crash.CrashRecoveryTests
+  ``
+
+  The real fault tests (`Faults/RealFaultTests`) use a read-only file and a handle opened with `FileShare.None`; the 300-cycle start-up timing test (`Reconciliation/StartupTimingTests`) writes about 540 MiB under the test output folder and runs alone.
 
 ## Protocol schema and types
 

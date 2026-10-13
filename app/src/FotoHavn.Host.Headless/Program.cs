@@ -17,7 +17,10 @@ catch (HeadlessOptionsException exception)
 var settings = new HeadlessSettings(
     options.ResolveDataFolder(AppContext.BaseDirectory),
     options.ResolveUiFolder(Directory.GetCurrentDirectory()),
-    options.Port);
+    options.Port)
+{
+    StorageFault = options.E2EStorageFault,
+};
 
 await using var host = HeadlessApp.Create(settings);
 var endpoints = await host.StartAsync();

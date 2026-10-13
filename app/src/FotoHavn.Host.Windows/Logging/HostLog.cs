@@ -86,4 +86,7 @@ internal static partial class HostLog
 
     [LoggerMessage(EventId = 27, EventName = "guestOpenFailed", Level = LogLevel.Error, Message = "The Guest Screen failed to open")]
     public static partial void GuestOpenFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 28, EventName = "storeDisposeTimedOut", Level = LogLevel.Warning, Message = "The Event store was still finishing background deletion at exit; the next start completes it")]
+    public static partial void StoreDisposeTimedOut(ILogger logger);
 }

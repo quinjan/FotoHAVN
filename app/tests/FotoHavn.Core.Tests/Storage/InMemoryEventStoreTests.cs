@@ -642,6 +642,21 @@ public sealed class InMemoryEventStoreTests
     }
 
     [Fact]
+    public async Task A_discarded_Capture_has_no_thumbnail_even_while_its_cycle_is_open()
+    {
+        var (store, record) = await StoreWithEventAsync();
+        var cycle = await store.StartGuestCycleAsync(record.Id, Ct);
+        var capture = await store.CommitCaptureAsync(StorageSamples.CaptureCommit(cycle.Id, 1), Ct);
+        await store.GetThumbnailPathAsync(capture.Id, 320, Ct);
+
+        await store.SetCaptureStateAsync(capture.Id, CaptureState.Discarded, Ct);
+
+        Assert.Equal(StorageErrorKind.NotFound, (await FailureAsync(store.GetThumbnailPathAsync(capture.Id, 320, Ct))).Kind);
+        await store.SetCaptureStateAsync(capture.Id, CaptureState.Kept, Ct);
+        Assert.StartsWith("Cache/thumbnails/", await store.GetThumbnailPathAsync(capture.Id, 320, Ct), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Supplied_id_generators_and_default_ids_are_used()
     {
         var counter = 0;

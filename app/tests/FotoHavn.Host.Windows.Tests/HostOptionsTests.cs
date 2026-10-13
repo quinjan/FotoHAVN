@@ -1,3 +1,5 @@
+using FotoHavn.Protocol.Testing;
+
 namespace FotoHavn.Host.Windows.Tests;
 
 public sealed class HostOptionsTests
@@ -22,6 +24,28 @@ public sealed class HostOptionsTests
         var options = HostOptions.Parse(["--data=D", "--remote-debugging-port=1", "--e2e-camera=cam=1", "--webview2-runtime=R"]);
 
         Assert.Equal(new HostOptions("D", 1, "cam=1", "R"), options);
+    }
+
+    [Theory]
+    [InlineData("diskFull", StorageFaultKind.DiskFull)]
+    [InlineData("accessDenied", StorageFaultKind.AccessDenied)]
+    [InlineData("locked", StorageFaultKind.Locked)]
+    [InlineData("Locked", StorageFaultKind.Locked)]
+    public void Reads_the_e2e_storage_fault_in_every_build(string value, StorageFaultKind expected)
+    {
+        Assert.Equal(expected, HostOptions.Parse(["--e2e-storage-fault", value]).E2EStorageFault);
+        Assert.Equal(expected, HostOptions.Parse([$"--e2e-storage-fault={value}"]).E2EStorageFault);
+        Assert.Null(HostOptions.Default.E2EStorageFault);
+    }
+
+    [Theory]
+    [InlineData("--e2e-storage-fault")]
+    [InlineData("--e2e-storage-fault", "full")]
+    [InlineData("--e2e-storage-fault", "1")]
+    [InlineData("--e2e-storage-fault", "9")]
+    public void Rejects_a_bad_e2e_storage_fault(params string[] args)
+    {
+        Assert.Throws<HostOptionsException>(() => HostOptions.Parse(args));
     }
 
     [Theory]

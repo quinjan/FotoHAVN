@@ -1,14 +1,16 @@
 using System.Globalization;
+using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Host.Windows;
 
 /// <summary>
-/// The host command line. <c>--remote-debugging-port</c> and <c>--e2e-camera</c> are read in every build so the
+/// The host command line. <c>--remote-debugging-port</c>, <c>--e2e-camera</c>, and
+/// <c>--e2e-storage-fault &lt;diskFull|accessDenied|locked&gt;</c> are read in every build so the
 /// command line stays the same, but only E2E builds act on them. <c>--webview2-runtime</c> names a Fixed Version
 /// WebView2 runtime folder; without it the host uses <c>runtime/webview2</c> beside the executable when present, and
 /// the Evergreen runtime otherwise.
 /// </summary>
-internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera, string? WebView2RuntimeFolder = null)
+internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera, string? WebView2RuntimeFolder = null, StorageFaultKind? E2EStorageFault = null)
 {
     public static HostOptions Default { get; } = new(null, null, null);
 
@@ -33,6 +35,9 @@ internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort,
                     break;
                 case "--webview2-runtime":
                     options = options with { WebView2RuntimeFolder = ReadValue(args, ref index, name, inlineValue) };
+                    break;
+                case "--e2e-storage-fault":
+                    options = options with { E2EStorageFault = ParseFault(ReadValue(args, ref index, name, inlineValue)) };
                     break;
                 default:
                     throw new HostOptionsException($"Unknown option '{args[index]}'.");
@@ -70,6 +75,11 @@ internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort,
 
         return value;
     }
+
+    private static StorageFaultKind ParseFault(string value) =>
+        Enum.TryParse<StorageFaultKind>(value, ignoreCase: true, out var kind) && Enum.IsDefined(kind) && !int.TryParse(value, out _)
+            ? kind
+            : throw new HostOptionsException($"'{value}' is not a storage fault for --e2e-storage-fault (diskFull, accessDenied, or locked).");
 
     private static int ParsePort(string value) =>
         int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var port) && port is > 0 and <= 65535

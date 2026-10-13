@@ -6,6 +6,10 @@ using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Protocol;
+using FotoHavn.Storage;
+using FotoHavn.Storage.DataPath;
+using FotoHavn.Storage.FileSystem;
+using FotoHavn.Storage.Reconciliation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -36,6 +40,9 @@ internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int
     public IDisplayAdapter? Displays { get; init; }
 
     public Action<ILoggingBuilder>? ConfigureLogging { get; init; }
+
+    /// <summary>The storage fault to inject before the brain opens the store (E2E builds only; a field build ignores it).</summary>
+    public FotoHavn.Protocol.Testing.StorageFaultKind? StorageFault { get; init; }
 }
 
 /// <summary>Where a started headless host listens.</summary>
@@ -48,17 +55,21 @@ internal sealed record HeadlessEndpoints(int Port, Uri BaseUrl, Uri BridgeUrl, U
 /// </summary>
 internal sealed partial class HeadlessApp : IAsyncDisposable
 {
+    private static readonly TimeSpan StoreDisposeTimeout = TimeSpan.FromSeconds(2);
+
     private readonly DedicatedThreadBrainExecutor _executor;
+    private readonly SqliteEventStore _store;
     private PhysicalFileProvider? _ui;
     private bool _started;
     private bool _disposed;
 
-    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions)
+    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions, SqliteEventStore store)
     {
         App = app;
         Settings = settings;
         Tokens = tokens;
         _executor = executor;
+        _store = store;
         Brain = brain;
         HostServices = hostServices;
         Sessions = sessions;
@@ -101,11 +112,24 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var sessions = new BridgeSessions();
         var brainLogger = loggers.CreateLogger("FotoHavn.Brain");
         var executor = new DedicatedThreadBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
-        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, hostServices)
+        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem();
+#if E2E_HOOKS
+        var faults = new FaultInjectingStorageFileSystem(fileSystem);
+        fileSystem = faults;
+        var storageHooks = new E2E.HeadlessStorageTestHooks(faults);
+        if (settings.StorageFault is { } startupFault)
+        {
+            // Before the brain exists, so the store's first write (OpenAsync) fails.
+            storageHooks.InjectAtStartup(startupFault);
+        }
+#endif
+        var store = new SqliteEventStore(settings.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, hostServices, store)
         {
             Logger = brainLogger,
 #if E2E_HOOKS
             HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime),
+            StorageTestHooks = storageHooks,
 #endif
         };
 
@@ -117,10 +141,11 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         catch
         {
             executor.Dispose();
+            store.DisposeAsync().AsTask().GetAwaiter().GetResult();
             throw;
         }
 
-        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions);
+        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions, store);
         host.MapRoutes(hostLogger);
         return host;
     }
@@ -191,8 +216,22 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
 
         Brain.Dispose();
         _executor.Dispose();
+        await DisposeStoreAsync().ConfigureAwait(false);
         _ui?.Dispose();
         await App.DisposeAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>Disposes the store after the brain; its background deletion gets a bounded moment to finish (the reconciler completes the rest at the next start).</summary>
+    private async Task DisposeStoreAsync()
+    {
+        try
+        {
+            await _store.DisposeAsync().AsTask().WaitAsync(StoreDisposeTimeout).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            // Unfinished deletion is invisible and the next start's reconciler finishes it.
+        }
     }
 
     private void MapRoutes(ILogger logger)

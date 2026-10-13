@@ -84,7 +84,7 @@ public sealed class StorageTests
     }
 
     [Fact]
-    public void The_operator_welcome_before_the_store_answers_is_the_empty_Event_list_at_revision_1()
+    public void The_operator_welcome_before_the_store_answers_is_the_Starting_surface_at_revision_1()
     {
         var store = new ScriptedStore();
         using var harness = new BrainHarness(store: store);
@@ -95,7 +95,65 @@ public sealed class StorageTests
 
         var welcome = client.Single<OperatorWelcomeMessage>();
         Assert.Equal(1, welcome.Revision);
-        Assert.Empty(welcome.Presentation.EventList!.Events);
+        Assert.Equal(OperatorSurface.Starting, welcome.Presentation.Surface);
+        Assert.Null(welcome.Presentation.EventList);
+        Assert.Null(welcome.Presentation.StorageError);
+        Assert.Equal(1, store.OpenCalls);
+    }
+
+    [Fact]
+    public void The_operator_sees_Starting_first_and_then_the_Event_list_when_the_store_opens()
+    {
+        var store = new ScriptedStore();
+        using var harness = new BrainHarness(store: store);
+        var client = harness.Connect(Role.Operator);
+        client.Hello();
+        harness.Run();
+
+        store.Open.SetResult(new StorageOpenResult(1, ReconcileReport.Empty));
+        store.Events.SetResult([]);
+        harness.Run();
+
+        var surfaces = client.Messages.Select(message => message switch
+        {
+            OperatorWelcomeMessage welcome => (welcome.Revision, welcome.Presentation.Surface),
+            OperatorPresentationMessage presentation => (presentation.Revision, presentation.Presentation.Surface),
+            _ => throw new InvalidOperationException("Unexpected message."),
+        });
+        Assert.Equal([(1L, OperatorSurface.Starting), (2L, OperatorSurface.EventList)], surfaces);
+    }
+
+    [Fact]
+    public void The_operator_sees_Starting_first_and_then_the_storage_error_when_the_store_cannot_open()
+    {
+        var store = new ScriptedStore();
+        using var harness = new BrainHarness(store: store);
+        var client = harness.Connect(Role.Operator);
+        client.Hello();
+        harness.Run();
+
+        store.Open.SetException(new StorageException(StorageErrorKind.AccessDenied, "No access."));
+        harness.Run();
+
+        var presentation = client.Messages.OfType<OperatorPresentationMessage>().Single();
+        Assert.Equal(2, presentation.Revision);
+        Assert.Equal(OperatorSurface.StorageError, presentation.Presentation.Surface);
+        Assert.Equal(StorageErrorReason.AccessDenied, presentation.Presentation.StorageError!.Kind);
+    }
+
+    [Fact]
+    public void The_Starting_surface_carries_no_content_and_a_retry_is_not_available_there()
+    {
+        var store = new ScriptedStore();
+        using var harness = new BrainHarness(store: store);
+        var client = harness.Connect(Role.Operator);
+        client.Hello();
+        var id = client.Command("RetryStorage");
+        harness.Run();
+
+        var welcome = client.Messages.OfType<OperatorWelcomeMessage>().Single();
+        Assert.Equal(new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null), welcome.Presentation);
+        Assert.Contains(CommandResultMessage.Rejected(id, RejectReason.NotAvailable), client.Messages);
         Assert.Equal(1, store.OpenCalls);
     }
 
@@ -473,7 +531,7 @@ public sealed class StorageTests
     }
 
     /// <summary>A store whose open and list calls finish when the test says so.</summary>
-    private sealed class ScriptedStore : IEventStore
+    internal sealed class ScriptedStore : IEventStore
     {
         public TaskCompletionSource<StorageOpenResult> Open { get; private set; } = new();
 

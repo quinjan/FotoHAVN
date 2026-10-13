@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Test infrastructure, not product code: a console program the crash tests start as a child process. It opens a real
+    SqliteEventStore on a Data folder, runs one storage operation, and kills its own process at a chosen crash point
+    (FotoHavn.Storage.CrashPoint), so the tests can open the folder afterwards and check what the reconciler repairs.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FotoHavn.Core\FotoHavn.Core.csproj" />
+    <ProjectReference Include="..\..\src\FotoHavn.Storage\FotoHavn.Storage.csproj" />
+  </ItemGroup>
+</Project>

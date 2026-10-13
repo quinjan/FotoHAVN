@@ -1,4 +1,5 @@
 using System.Globalization;
+using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Host.Headless;
 
@@ -6,9 +7,10 @@ namespace FotoHavn.Host.Headless;
 /// The headless host command line: <c>--data &lt;dir&gt;</c> (the Data folder; default <c>Data</c> beside the
 /// executable), <c>--port &lt;n&gt;</c> (default 0, a random free port), and <c>--ui &lt;dir&gt;</c> (the built UI;
 /// default the nearest <c>ui/dist</c> above the working directory; <c>--ui-dist</c> is the M1 spelling). Values may also
-/// be written as <c>--name=value</c>.
+/// be written as <c>--name=value</c>. <c>--e2e-storage-fault &lt;diskFull|accessDenied|locked&gt;</c> is read in every build, but
+/// only E2E builds act on it (every storage write fails from the start); a field build ignores it.
 /// </summary>
-internal sealed record HeadlessOptions(string? DataFolder, int Port, string? UiFolder)
+internal sealed record HeadlessOptions(string? DataFolder, int Port, string? UiFolder, StorageFaultKind? E2EStorageFault = null)
 {
     public static HeadlessOptions Default { get; } = new(null, 0, null);
 
@@ -31,6 +33,9 @@ internal sealed record HeadlessOptions(string? DataFolder, int Port, string? UiF
                 case "--ui":
                 case "--ui-dist":
                     options = options with { UiFolder = ReadValue(args, ref index, name, inlineValue) };
+                    break;
+                case "--e2e-storage-fault":
+                    options = options with { E2EStorageFault = ParseFault(ReadValue(args, ref index, name, inlineValue)) };
                     break;
                 default:
                     throw new HeadlessOptionsException($"Unknown option '{args[index]}'.");
@@ -95,6 +100,11 @@ internal sealed record HeadlessOptions(string? DataFolder, int Port, string? UiF
 
         return value;
     }
+
+    private static StorageFaultKind ParseFault(string value) =>
+        Enum.TryParse<StorageFaultKind>(value, ignoreCase: true, out var kind) && Enum.IsDefined(kind) && !int.TryParse(value, out _)
+            ? kind
+            : throw new HeadlessOptionsException($"'{value}' is not a storage fault for --e2e-storage-fault (diskFull, accessDenied, or locked).");
 
     private static int ParsePort(string value) =>
         int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var port) && port is >= 0 and <= 65535

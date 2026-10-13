@@ -104,7 +104,7 @@ public sealed class HookTests
         Assert.Equal(ProtocolVersion.Current, diagnostics.ProtocolVersion);
         Assert.Equal([Role.Guest], diagnostics.ConnectedRoles);
         Assert.Equal(
-            [new PresentationDiagnostics(Role.Operator, 2, "fatal"), new PresentationDiagnostics(Role.Guest, 2, "fatal")],
+            [new PresentationDiagnostics(Role.Operator, 3, "fatal"), new PresentationDiagnostics(Role.Guest, 2, "fatal")],
             diagnostics.Presentations);
         Assert.Equal(new CommandResultDiagnostics(rejected, "OpenNewEvent", Role.Guest, CommandStatus.Rejected, RejectReason.WrongRole), Assert.Single(diagnostics.LastCommandResults));
         Assert.Equal([window], diagnostics.Windows);
@@ -126,7 +126,7 @@ public sealed class HookTests
         var diagnostics = Diagnostics(client);
         Assert.Equal([Role.Operator, Role.Guest], diagnostics.ConnectedRoles);
         Assert.Equal(["eventList", "start"], diagnostics.Presentations.Select(presentation => presentation.Surface));
-        Assert.Equal([1L, 1L], diagnostics.Presentations.Select(presentation => presentation.Revision));
+        Assert.Equal([2L, 1L], diagnostics.Presentations.Select(presentation => presentation.Revision));
         Assert.False(diagnostics.GuestScreenOpen);
     }
 

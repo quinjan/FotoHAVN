@@ -6,4 +6,26 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\FotoHavn.Storage\FotoHavn.Storage.csproj" />
   </ItemGroup>
+
+  <!--
+    The crash tests start FotoHavn.Storage.CrashHarness as a child process. It is built with this project (the reference
+    orders the build) and copied, with its dependencies, to crash-harness/ beside the test assembly.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\FotoHavn.Storage.CrashHarness\FotoHavn.Storage.CrashHarness.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="CrashHarnessOutput" />
+  </ItemGroup>
+
+  <Target Name="CopyCrashHarness" AfterTargets="Build">
+    <PropertyGroup>
+      <CrashHarnessFolder>@(CrashHarnessOutput->'%(RootDir)%(Directory)')</CrashHarnessFolder>
+    </PropertyGroup>
+    <ItemGroup>
+      <CrashHarnessFile Include="$(CrashHarnessFolder)**\*" Exclude="$(CrashHarnessFolder)**\*.pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CrashHarnessFile)"
+          DestinationFiles="@(CrashHarnessFile->'$(OutDir)crash-harness\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

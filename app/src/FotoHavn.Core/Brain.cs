@@ -35,8 +35,8 @@ public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, ID
 /// </summary>
 /// <remarks>
 /// M4 implements one command, <c>RetryStorage</c>; every other valid command from an allowed role is answered
-/// <c>rejected notAvailable</c>. At startup the brain opens the Event store: the operator sees the Event list (empty
-/// until storage answers) or, when the store can't open, the storage error. The guest sees the Start placeholder.
+/// <c>rejected notAvailable</c>. At startup the brain opens the Event store: the operator sees the Starting surface until
+/// storage answers, then the Event list or, when the store can't open, the storage error. The guest sees the Start placeholder.
 /// </remarks>
 public sealed partial class Brain : IBrain
 {
@@ -231,9 +231,11 @@ public sealed partial class Brain : IBrain
 
     private OperatorPresentation RenderOperator() => _fatalReason is { } reason
         ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null)
-        : _storageError is { } storageError
-            ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot))
-            : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null);
+        : !_storageResolved
+            ? new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null)
+            : _storageError is { } storageError
+                ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot))
+                : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null);
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
         ? new GuestPresentation(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView(reason))

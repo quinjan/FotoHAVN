@@ -23,6 +23,7 @@ describe("fixture lane", () => {
         "operator-event-list-30",
         "operator-event-list-long",
         "operator-fatal",
+        "operator-starting",
         "operator-storage-error-disk-full",
         "operator-storage-error-integrity-failed",
         "operator-storage-error-unknown",
@@ -34,7 +35,8 @@ describe("fixture lane", () => {
 
   it("serves the generated welcomes unchanged", () => {
     const snapshots = fixtureSnapshots();
-    expect(snapshots["operator-event-list-empty"]).toEqual(operatorEventListEmpty);
+    // The brain's empty list follows the Starting surface (revision 1), so it is revision 2; the inline snapshot stays at 1.
+    expect(snapshots["operator-event-list-empty"]).toEqual({ ...operatorEventListEmpty, revision: 2 });
     expect(snapshots["guest-start"]).toEqual(guestStart);
   });
 
@@ -44,7 +46,7 @@ describe("fixture lane", () => {
       type: "welcome",
       role: "operator",
       protocolVersion: PROTOCOL_VERSION,
-      revision: 2,
+      revision: 3,
       presentation: { surface: "fatal" },
     });
     expect(snapshots["guest-fatal"]).toMatchObject({ type: "welcome", role: "guest", revision: 2, presentation: { surface: "fatal" } });
@@ -67,7 +69,7 @@ describe("fixture lane", () => {
     const client = new ProtocolBrainClient(createFixtureLaneTransport("operator-fatal"));
     client.connect();
     await flush();
-    expect(client.getState()).toMatchObject({ status: "connected", session: { role: "operator", revision: 2 } });
+    expect(client.getState()).toMatchObject({ status: "connected", session: { role: "operator", revision: 3 } });
   });
 
   it("answers hello with the mismatch for the protocol-mismatch fixture", async () => {

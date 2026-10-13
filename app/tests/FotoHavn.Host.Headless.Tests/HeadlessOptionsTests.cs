@@ -1,3 +1,5 @@
+using FotoHavn.Protocol.Testing;
+
 namespace FotoHavn.Host.Headless.Tests;
 
 public sealed class HeadlessOptionsTests
@@ -20,6 +22,28 @@ public sealed class HeadlessOptionsTests
     public void Reads_inline_values_and_the_m1_ui_dist_spelling()
     {
         Assert.Equal(new HeadlessOptions("D=1", 0, "U"), HeadlessOptions.Parse(["--data=D=1", "--port=0", "--ui-dist=U"]));
+    }
+
+    [Theory]
+    [InlineData("diskFull", StorageFaultKind.DiskFull)]
+    [InlineData("accessDenied", StorageFaultKind.AccessDenied)]
+    [InlineData("locked", StorageFaultKind.Locked)]
+    [InlineData("DISKFULL", StorageFaultKind.DiskFull)]
+    public void Reads_the_e2e_storage_fault_in_every_build(string value, StorageFaultKind expected)
+    {
+        Assert.Equal(expected, HeadlessOptions.Parse(["--e2e-storage-fault", value]).E2EStorageFault);
+        Assert.Equal(expected, HeadlessOptions.Parse([$"--e2e-storage-fault={value}"]).E2EStorageFault);
+        Assert.Null(HeadlessOptions.Default.E2EStorageFault);
+    }
+
+    [Theory]
+    [InlineData("--e2e-storage-fault")]
+    [InlineData("--e2e-storage-fault", "full")]
+    [InlineData("--e2e-storage-fault", "1")]
+    [InlineData("--e2e-storage-fault", "9")]
+    public void Rejects_a_bad_e2e_storage_fault(params string[] args)
+    {
+        Assert.Throws<HeadlessOptionsException>(() => HeadlessOptions.Parse(args));
     }
 
     [Theory]

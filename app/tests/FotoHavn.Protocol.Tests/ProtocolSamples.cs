@@ -75,6 +75,9 @@ internal static class ProtocolSamples
     public static OperatorPresentation OperatorStorageError { get; } =
         new(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"));
 
+    public static OperatorPresentation OperatorStarting { get; } =
+        new(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null);
+
     public static GuestPresentation GuestStart { get; } =
         new(GuestSurface.Start, new StartView(false), GuestOverlays.None, null);
 
@@ -99,6 +102,7 @@ internal static class ProtocolSamples
         ("presentation-operator-event-list-with-overlays", new OperatorPresentationMessage(3, EventListWithOverlays)),
         ("presentation-operator-fatal", new OperatorPresentationMessage(4, OperatorFatal)),
         ("presentation-operator-storage-error", new OperatorPresentationMessage(5, OperatorStorageError)),
+        ("presentation-operator-starting", new OperatorPresentationMessage(6, OperatorStarting)),
         ("presentation-guest-start", new GuestPresentationMessage(2, GuestStart)),
         ("presentation-guest-start-with-overlays", new GuestPresentationMessage(3, GuestStartWithOverlays)),
         ("presentation-guest-fatal", new GuestPresentationMessage(4, GuestFatal)),

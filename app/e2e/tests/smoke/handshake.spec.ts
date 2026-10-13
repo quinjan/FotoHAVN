@@ -2,15 +2,16 @@ import { expect, test } from "../../src/fixtures";
 import { EventListScreen } from "../../src/screens/screens";
 
 test("the operator handshake completes and the empty Event list renders", { tag: ["@m2"] }, async ({ app, operatorPage, hooks }) => {
-  await test.step("the Operator page completed its handshake as operator at revision 1", async () => {
+  await test.step("the Operator page completed its handshake as operator once storage opened (Starting is revision 1, the Event list revision 2)", async () => {
     const root = operatorPage.locator("html");
     await expect(root).toHaveAttribute("data-fotohavn-status", "connected");
     await expect(root).toHaveAttribute("data-fotohavn-role", "operator");
-    await expect(root).toHaveAttribute("data-fotohavn-revision", "1");
+    await expect.poll(async () => (await hooks.getDiagnostics()).storage.state).toBe("ready");
+    await expect(root).toHaveAttribute("data-fotohavn-revision", "2");
 
     const diagnostics = await hooks.getDiagnostics();
     expect(diagnostics.connectedRoles).toEqual(["operator"]);
-    expect(diagnostics.presentations).toContainEqual({ role: "operator", revision: 1, surface: "eventList" });
+    expect(diagnostics.presentations).toContainEqual({ role: "operator", revision: 2, surface: "eventList" });
     expect(diagnostics.guestScreenOpen).toBe(false);
   });
 

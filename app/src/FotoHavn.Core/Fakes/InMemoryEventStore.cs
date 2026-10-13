@@ -364,7 +364,7 @@ public sealed class InMemoryEventStore : IEventStore
         Run(ct, () =>
         {
             StorageValidation.ValidateThumbnailRequest(sourceId, width);
-            if (_captures.TryGetValue(sourceId, out var capture) && capture.File is not null && !CycleOf(capture).Deleting && !EventIsDeleting(CycleOf(capture)))
+            if (_captures.TryGetValue(sourceId, out var capture) && capture.File is not null && capture.Record.State == CaptureState.Kept && !CycleOf(capture).Deleting && !EventIsDeleting(CycleOf(capture)))
             {
                 return ThumbnailName.RelativePath(sourceId, capture.Record.Sha256, width);
             }

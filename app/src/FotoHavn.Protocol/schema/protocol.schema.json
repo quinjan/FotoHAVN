@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 2
+      "const": 3
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -2752,7 +2752,8 @@
         "guestCycleDetail",
         "guestScreenActive",
         "fatal",
-        "storageError"
+        "storageError",
+        "starting"
       ]
     },
     "OperatorWelcomeMessage": {

@@ -22,7 +22,7 @@ test.describe("role isolation", { tag: ["@m2"] }, () => {
       await expect(guest.page.locator("html")).toHaveAttribute("data-fotohavn-revision", "1");
       const diagnostics = await hooks.getDiagnostics();
       expect(diagnostics.presentations).toEqual([
-        { role: "operator", revision: 1, surface: "eventList" },
+        { role: "operator", revision: 2, surface: "eventList" },
         { role: "guest", revision: 1, surface: "start" },
       ]);
     });

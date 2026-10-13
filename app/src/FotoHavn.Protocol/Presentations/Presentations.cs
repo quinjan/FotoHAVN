@@ -19,6 +19,9 @@ public enum OperatorSurface
 
     /// <summary>Storage couldn't open or failed outside a Guest Cycle; the operator sees the cause and <c>RetryStorage</c>.</summary>
     StorageError,
+
+    /// <summary>The brain is opening the Event store for the first time; the operator sees a loading state, never an empty Event list.</summary>
+    Starting,
 }
 
 /// <summary>The operator role's presentation.</summary>

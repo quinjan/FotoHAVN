@@ -39,7 +39,7 @@ internal sealed class TestHost : IAsyncDisposable
         return folder;
     }
 
-    public static async Task<TestHost> StartAsync(bool withUi = true, bool failConnect = false, IPreviewSource? previews = null)
+    public static async Task<TestHost> StartAsync(bool withUi = true, bool failConnect = false, IPreviewSource? previews = null, bool realBrain = false, FotoHavn.Protocol.Testing.StorageFaultKind? storageFault = null)
     {
         var root = NewScratchFolder();
         string? ui = null;
@@ -54,7 +54,8 @@ internal sealed class TestHost : IAsyncDisposable
         var brain = new FakeBrain { FailConnect = failConnect };
         var settings = new HeadlessSettings(Path.Combine(root, "Data"), ui, 0)
         {
-            BrainFactory = _ => brain,
+            BrainFactory = realBrain ? null : _ => brain,
+            StorageFault = storageFault,
             Previews = previews ?? EmptyPreviewSource.Instance,
             ConfigureLogging = logging => logging.ClearProviders(),
         };

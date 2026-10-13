@@ -542,7 +542,8 @@ The brain rejects operator commands that would change the running Event (edit, d
 
 **Operator presentation**
 
-- `surface`: `eventList`, `eventSetup`, `eventGallery`, `guestCycleDetail`, `guestScreenActive` (single-screen placeholder), `storageError`, or `fatal`.
+- `surface`: `eventList`, `eventSetup`, `eventGallery`, `guestCycleDetail`, `guestScreenActive` (single-screen placeholder), `storageError`, `starting`, or `fatal`.
+- The `starting` surface (protocol version 3) carries no content. The brain shows it from construction until the first storage open answers, so the operator never sees an empty Event list before the store is open; a Retry from `storageError` doesn't return to it.
 - A `storageError` surface carries `{ kind, dataPath }`: `kind` is `diskFull`, `accessDenied`, `locked`, `notLocalDisk`, `cloudSynced`, `notWritable`, `integrityFailed`, `corrupt`, or `unknown`, and `dataPath` is the Data folder shown to the operator. Its only action is `RetryStorage`.
 - An optional `runningEvent` panel.
 - Overlays: `confirmation`, `identifyDisplays`, and `notice`.
@@ -891,6 +892,7 @@ app/e2e/
   - its own WebView2 user-data folder
   - a free debugging port (`--remote-debugging-port`)
   - optionally `--e2e-camera "<name or device id>"`
+  - optionally `--e2e-storage-fault <diskFull|accessDenied|locked>` (E2E builds only; a field build ignores it): injects `allWrites` before the brain constructs the store, so `OpenAsync` fails at its first write and the operator sees the storage error screen. `test.clearStorageFault` plus `RetryStorage` recovers
 
   The fixture waits for the `hello` handshake before the test starts. On teardown, it collects the app log, the Data folder snapshot, and screenshots.
 - **Two screens in every test.** Both WebView2 controls share one browser process, so one CDP connection exposes both pages. The fixture provides `operatorPage` and, once an Event starts, `guestPage`, identified by the role the host assigns.
@@ -920,7 +922,7 @@ app/e2e/
 | `test.listCameras` | Camera precondition and selection |
 | `test.setClockScale(factor)` | Speeds up brain timers (countdown, phase timers, Keepsake, lockout) for long scenarios; camera frames stay real-time |
 | `test.injectCameraFault(kind)` / `test.clearCameraFault` | Simulates `stale`, `failed`, `removed`, or `exclusiveLost` on top of the real camera |
-| `test.injectStorageFault(kind, scope)` / `test.clearStorageFault` | Simulates `diskFull`, `accessDenied`, or `locked` for the next write or for all writes |
+| `test.injectStorageFault(kind, scope)` / `test.clearStorageFault` | Fails the Event store's file writes: `kind` is `diskFull`, `accessDenied`, or `locked`, and `scope` is `nextWrite` (the next write only, then the fault clears) or `allWrites` (every write until `test.clearStorageFault`). Database-level faults aren't injected. The host maps both onto the store's fault-injecting file system |
 | `test.getDiagnostics` | Presentation revision, frame age, measured frame rate, last command results |
 | `test.setWindowBounds(role, width, height)` | Places the Operator or Guest window at 1280×720, 1366×768, 1920×1080, or 2560×1440 for layout checks without changing the monitor |
 | `test.useVirtualDisplays(displays)` / `test.disconnectDisplay(id)` / `test.connectDisplay(id)` | Replaces real display enumeration with virtual displays mapped onto the real monitor, and simulates connects and disconnects |
@@ -928,7 +930,7 @@ app/e2e/
 
 ### Integration tests
 
-- **Storage.** Crash tests kill a child process at every step of a commit, then restart and assert the reconciler result. Fault tests inject disk-full, access-denied, and locked-file errors.
+- **Storage.** Crash tests (`FotoHavn.Storage.Tests/Crash`) run `FotoHavn.Storage.CrashHarness` as a child process that kills itself at every crash point of a Capture commit, Photo Strip commit, Event delete, and Guest Cycle delete, then open the folder with a fresh store and assert the reconciler result and the data invariants. Fault tests inject disk-full errors through the fault-injecting file system and use real access-denied (read-only file) and locked-file (an open handle with no sharing) errors. A 300-cycle start-up timing test (about 540 MiB, hashed in full) must finish under 10 seconds.
 - **Headless host.** Real brain + fake camera + WebSocket. Playwright in Chromium covers protocol behavior quickly for CI and agents.
 - **Fixture gallery.** Brain-generated presentation fixtures rendered in Chromium at four resolutions with axe, reduced motion, and forced colors.
 - **Camera adapter.** `FotoHavn.Camera.Windows.Tests` opens a real webcam. These tests run where a camera exists and are reported as "not run" (not passed) elsewhere.
@@ -1341,7 +1343,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 - **End-to-end `@m4`:**
   - `smoke/storage-startup`: the app starts with an empty Data folder and creates `fotohavn.db` with the current schema version.
   - `regression/storage/reconcile-seeded-data`: the app starts on a seeded Data folder containing staging files, an orphan file, an unfinished Guest Cycle, a half-deleted Event, and a discarded Capture. After launch, `data.ts` confirms each repair and the Event list shows only live Events.
-  - `regression/storage/startup-fault`: a storage fault injected at startup shows the storage error screen, and clearing it plus Retry recovers.
+  - `regression/storage/startup-fault`: a storage fault injected at startup (`--e2e-storage-fault`) shows the storage error screen, and clearing it plus Retry recovers.
 - **Manual:** run the app from a USB drive and from a OneDrive-synced folder, and confirm the refusal message where detection applies.
 
 ### M5: webcam adapter (M)

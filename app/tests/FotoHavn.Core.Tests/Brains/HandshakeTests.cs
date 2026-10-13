@@ -18,7 +18,7 @@ public sealed class HandshakeTests
     }
 
     [Fact]
-    public void Operator_hello_is_answered_with_the_empty_event_list_at_revision_1()
+    public void Operator_hello_is_answered_with_the_empty_event_list_once_storage_opened_at_revision_2()
     {
         using var harness = new BrainHarness();
         var client = harness.Connect(Role.Operator);
@@ -29,7 +29,7 @@ public sealed class HandshakeTests
         var welcome = client.Single<OperatorWelcomeMessage>();
         Assert.Equal(Role.Operator, welcome.Role);
         Assert.Equal(ProtocolVersion.Current, welcome.ProtocolVersion);
-        Assert.Equal(1, welcome.Revision);
+        Assert.Equal(2, welcome.Revision);
         Assert.Equal(OperatorSurface.EventList, welcome.Presentation.Surface);
         Assert.Empty(welcome.Presentation.EventList!.Events);
         Assert.Null(welcome.Presentation.RunningEvent);
@@ -65,7 +65,7 @@ public sealed class HandshakeTests
         harness.Run();
 
         Assert.Equal(
-            """{"type":"welcome","role":"guest","protocolVersion":2,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
+            """{"type":"welcome","role":"guest","protocolVersion":3,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
             Assert.Single(client.Raw));
     }
 
@@ -78,12 +78,12 @@ public sealed class HandshakeTests
         client.Hello();
         harness.Run();
 
-        Assert.Equal(1, client.Single<OperatorWelcomeMessage>().Revision);
+        Assert.Equal(2, client.Single<OperatorWelcomeMessage>().Revision);
     }
 
     [Theory]
     [InlineData(0)]
-    [InlineData(3)]
+    [InlineData(2)]
     [InlineData(-1)]
     public void A_different_protocol_version_is_answered_with_protocol_mismatch(int uiVersion)
     {

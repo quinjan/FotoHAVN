@@ -6,6 +6,10 @@ using FotoHavn.Host.Windows.Logging;
 using FotoHavn.Host.Windows.Screens;
 using FotoHavn.Host.Windows.TestHooks;
 using FotoHavn.Host.Windows.WebView;
+using FotoHavn.Storage;
+using FotoHavn.Storage.DataPath;
+using FotoHavn.Storage.FileSystem;
+using FotoHavn.Storage.Reconciliation;
 using Microsoft.Extensions.Logging;
 
 namespace FotoHavn.Host.Windows;
@@ -17,12 +21,15 @@ namespace FotoHavn.Host.Windows;
 #pragma warning disable CA1001 // The App disposes its runtime in OnExit, the end of the WPF application's life.
 public partial class App : Application
 {
+    private static readonly TimeSpan StoreDisposeTimeout = TimeSpan.FromSeconds(2);
+
     private ILoggerFactory? _loggerFactory;
     private ILogger? _logger;
     private WindowsDisplayAdapter? _displays;
     private ScreenWindows? _windows;
     private DedicatedThreadBrainExecutor? _executor;
     private Brain? _brain;
+    private SqliteEventStore? _store;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -57,15 +64,28 @@ public partial class App : Application
         _windows = new ScreenWindows(Dispatcher, _displays, _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Screens"));
         _executor = new DedicatedThreadBrainExecutor(exception => HostLog.BrainWorkFailed(logger, exception));
 
-        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, _windows)
+        IStorageFileSystem fileSystem = new PhysicalStorageFileSystem();
+#if E2E_HOOKS
+        var faults = new FaultInjectingStorageFileSystem(fileSystem);
+        fileSystem = faults;
+        var storageHooks = new E2E.WindowsStorageTestHooks(faults);
+        if (options.E2EStorageFault is { } startupFault)
         {
-            Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
+            // Before the brain exists, so the store's first write (OpenAsync) fails.
+            storageHooks.InjectAtStartup(startupFault);
+        }
+#endif
+        _store = new SqliteEventStore(paths.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
+                var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, _windows, _store)
+                {
+                    Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
 #if E2E_HOOKS
             HostTestHooks = new E2E.WindowsHostTestHooks(
                 Dispatcher,
                 _windows,
                 FotoHavn.Camera.Windows.VideoCaptureDeviceList.ListAsync,
                 _loggerFactory.CreateLogger("FotoHavn.Host.Windows.E2E")),
+            StorageTestHooks = storageHooks,
 #endif
         };
         _brain = new Brain(dependencies);
@@ -98,6 +118,7 @@ public partial class App : Application
         _windows?.CloseGuest();
         _brain?.Dispose();
         _executor?.Dispose();
+        DisposeStore();
         _displays?.Dispose();
 
         if (_logger is not null)
@@ -107,6 +128,21 @@ public partial class App : Application
 
         _loggerFactory?.Dispose();
         base.OnExit(e);
+    }
+
+    /// <summary>Disposes the store after the brain; its background deletion gets a bounded moment to finish (the reconciler completes the rest at the next start).</summary>
+    private void DisposeStore()
+    {
+        if (_store is null)
+        {
+            return;
+        }
+
+        var disposing = Task.Run(() => _store.DisposeAsync().AsTask());
+        if (!disposing.Wait(StoreDisposeTimeout) && _logger is not null)
+        {
+            HostLog.StoreDisposeTimedOut(_logger);
+        }
     }
 }
 #pragma warning restore CA1001

@@ -122,7 +122,14 @@ export type ServerMessage =
  * via the `definition` "OperatorSurface".
  */
 export type OperatorSurface =
-  "eventList" | "eventSetup" | "eventGallery" | "guestCycleDetail" | "guestScreenActive" | "fatal" | "storageError";
+  | "eventList"
+  | "eventSetup"
+  | "eventGallery"
+  | "guestCycleDetail"
+  | "guestScreenActive"
+  | "fatal"
+  | "storageError"
+  | "starting";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "StorageErrorReason".
@@ -205,7 +212,7 @@ export type StorageFaultScope = "nextWrite" | "allWrites";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 2;
+  protocolVersion: 3;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1863,4 +1870,4 @@ export interface InjectStorageFaultArgs {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 2;
+export const PROTOCOL_VERSION = 3;

@@ -87,7 +87,7 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
             return new ReconcileReport(staging, orphans, artifactProblems, unrecoverable, appClosed, cycles, events, discarded, thumbnails, _problems.ToArray());
         }
 
-        // Step 1: every .staging file.
+        // Step 1: every .staging file, under Events/ and the thumbnail staging folder Cache/thumbnails/.staging.
         private int DeleteStagingFiles()
         {
             var deleted = 0;
@@ -100,6 +100,13 @@ public sealed class StartupReconciler(IClock clock) : IStartupReconciler
                     fs.Delete(file);
                     deleted++;
                 }
+            }
+
+            foreach (var file in fs.EnumerateFiles(Path.Combine(_thumbnailsDir, ".staging"), recursive: true))
+            {
+                ct.ThrowIfCancellationRequested();
+                fs.Delete(file);
+                deleted++;
             }
 
             return deleted;

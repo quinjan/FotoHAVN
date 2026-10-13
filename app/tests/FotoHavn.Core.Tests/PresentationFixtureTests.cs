@@ -18,6 +18,7 @@ public sealed class PresentationFixtureTests
 
     private static readonly IReadOnlyDictionary<string, Func<Task<string>>> Fixtures = new Dictionary<string, Func<Task<string>>>(StringComparer.Ordinal)
     {
+        ["operator-starting"] = () => Task.FromResult(Starting()),
         ["operator-event-list-empty"] = () => Task.FromResult(Welcome(Role.Operator)),
         ["operator-event-list-with-events"] = EventListWithEvents,
         ["operator-storage-error-disk-full"] = () => Task.FromResult(StorageError(StorageErrorKind.DiskFull)),
@@ -54,6 +55,15 @@ public sealed class PresentationFixtureTests
             : [];
 
         Assert.Equal(Fixtures.Keys.Select(name => name + ".json").Order(StringComparer.Ordinal), files);
+    }
+
+    private static string Starting()
+    {
+        using var harness = new BrainHarness(store: new StorageTests.ScriptedStore());
+        var client = harness.Connect(Role.Operator);
+        client.Hello();
+        harness.Run();
+        return Assert.Single(client.Raw);
     }
 
     private static string Welcome(Role role)

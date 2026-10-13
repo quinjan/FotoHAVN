@@ -52,7 +52,7 @@ test.describe("UI crash recovery", { tag: ["@m2"] }, () => {
 
     const operatorRevision = await revision(operatorPage);
     const guestRevision = await revision(guestPage);
-    expect(operatorRevision).toBe("1");
+    expect(operatorRevision).toBe("2");
     expect(guestRevision).toBe("1");
 
     await test.step("test.crashUi('guest'): the guest UI returns at the same revision; the operator page is untouched", async () => {
@@ -87,7 +87,7 @@ test.describe("UI crash recovery", { tag: ["@m2"] }, () => {
       const diagnostics = await app.hooks.getDiagnostics();
       expect(diagnostics.connectedRoles).toEqual(["operator", "guest"]);
       expect(diagnostics.presentations).toEqual([
-        { role: "operator", revision: 1, surface: "eventList" },
+        { role: "operator", revision: 2, surface: "eventList" },
         { role: "guest", revision: 1, surface: "start" },
       ]);
     });

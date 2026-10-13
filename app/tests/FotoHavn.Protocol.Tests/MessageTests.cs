@@ -9,9 +9,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_starts_at_one()
+    public void Protocol_version_is_three()
     {
-        Assert.Equal(2, ProtocolVersion.Current);
+        Assert.Equal(3, ProtocolVersion.Current);
     }
 
     [Fact]

@@ -65,6 +65,27 @@ public sealed class ReconcilerStagingAndOrphanTests
     }
 
     [Fact]
+    public async Task Step_1_deletes_the_thumbnail_staging_files_too_and_keeps_finished_thumbnails()
+    {
+        using var folder = new SeededDataFolder();
+        var cycle = Cycle(folder, out _);
+        var capture = folder.AddCapture(cycle, 1);
+        var thumbnail = folder.AddThumbnail(capture.Id, capture.Sha256);
+        var staged = new[]
+        {
+            folder.AddFile(Path.Combine(folder.ThumbnailsDir, ".staging", "half-written.tmp")),
+            folder.AddFile(Path.Combine(folder.ThumbnailsDir, ".staging", "nested", "other.tmp")),
+        };
+
+        var report = await ReconcilerKit.RunAsync(folder);
+
+        Assert.Equal(2, report.StagingFilesDeleted);
+        Assert.Equal(0, report.OrphanThumbnailsDeleted);
+        Assert.All(staged, path => Assert.False(File.Exists(path)));
+        Assert.True(File.Exists(thumbnail));
+    }
+
+    [Fact]
     public async Task Step_1_is_idempotent()
     {
         using var folder = new SeededDataFolder();
