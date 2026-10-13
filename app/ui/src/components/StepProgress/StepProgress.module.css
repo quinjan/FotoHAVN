@@ -1,0 +1,92 @@
+.progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0 var(--app-stack-gap);
+  border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
+}
+
+.item {
+  display: flex;
+}
+
+/* Every step reserves the 2 px underline, so the current step never shifts the row. */
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: var(--app-target);
+  min-height: var(--app-target);
+  padding-block: 0 calc(var(--stroke-hairline) * 2);
+  padding-inline: var(--space-4);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  letter-spacing: var(--typography-supporting-letter-spacing);
+  line-height: var(--typography-body-line-height);
+  text-align: start;
+  transition: color var(--motion-duration-standard) var(--motion-easing-editorial);
+}
+
+.step[data-state="current"] {
+  padding-block-end: 0;
+  border-block-end: calc(var(--stroke-hairline) * 2) solid var(--app-tone-ink);
+  color: var(--app-tone-ink);
+}
+
+.number {
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A step the guest can return to reads as a text action: Hairline underline at rest, the ink on hover or press. */
+.step[data-revisit="true"] .label {
+  text-decoration-line: underline;
+  text-decoration-color: var(--app-tone-rule);
+  text-decoration-thickness: var(--stroke-hairline);
+  text-underline-offset: var(--stroke-link-underline-offset);
+  transition: text-decoration-color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+@media (hover: hover) {
+  .step[data-revisit="true"]:hover {
+    color: var(--app-tone-ink);
+  }
+
+  .step[data-revisit="true"]:hover .label {
+    text-decoration-color: currentcolor;
+  }
+}
+
+.step[data-revisit="true"]:active {
+  color: var(--app-tone-ink);
+}
+
+.step[data-revisit="true"]:active .label {
+  text-decoration-color: currentcolor;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .step[data-state="current"] {
+    border-block-end-color: CanvasText;
+  }
+
+  .step[data-revisit="true"] .label {
+    text-decoration-color: currentcolor;
+  }
+}

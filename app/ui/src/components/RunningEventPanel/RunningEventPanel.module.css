@@ -1,0 +1,72 @@
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-24) var(--space-48);
+  inline-size: 100%;
+  padding: var(--space-24) var(--space-32);
+  border-inline-start: calc(var(--stroke-hairline) * 2) solid var(--app-tone-accent);
+  background-color: var(--semantic-surface-editorial);
+  color: var(--app-tone-ink);
+}
+
+.summary {
+  display: flex;
+  flex: 1 1 calc(var(--space-144) * 3);
+  flex-direction: column;
+  gap: var(--space-16);
+  min-inline-size: 0;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--typography-subheading-font-weight);
+  letter-spacing: var(--typography-subheading-letter-spacing);
+  line-height: var(--typography-subheading-line-height);
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16) var(--space-40);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.label {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+.value {
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  font-weight: var(--typography-body-font-weight);
+  line-height: var(--typography-meta-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16) var(--space-24);
+}
