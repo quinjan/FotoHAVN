@@ -28,7 +28,7 @@ export interface SelectProps
 
 /**
  * An operator choice from a list, as a native `<select>` (keyboard, type-ahead, and the Windows list come free): the
- * label above, a 4 radius Hairline box with a Phosphor Light chevron, help under it, and the error in text with
+ * label above, a 4 radius Soft Brown-bordered box with a Phosphor Light chevron, help under it, and the error in text with
  * `aria-invalid`. Use `OptionList` instead when the choices need thumbnails or descriptions.
  */
 export function Select({
@@ -62,7 +62,7 @@ export function Select({
           aria-describedby={describedBy(ids, { help, error }, external)}
         >
           {placeholder !== undefined && (
-            <option value="" disabled>
+            <option value="" disabled data-placeholder="">
               {placeholder}
             </option>
           )}

@@ -7,7 +7,7 @@
   min-block-size: 1em;
   color: var(--app-tone-ink);
   font-family: var(--typography-display-font-family);
-  font-size: var(--app-text-display);
+  font-size: var(--app-type-countdown);
   font-weight: var(--typography-display-font-weight);
   letter-spacing: var(--typography-display-letter-spacing);
   line-height: var(--typography-display-line-height);

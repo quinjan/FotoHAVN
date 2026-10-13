@@ -1,5 +1,6 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { fixturePort } from "./scripts/fixture-port.ts";
 
 /** Written into the E2E UI build only; the host and the publish guard refuse a field build that contains it. */
 const e2eBuildMarker = "e2e-build.txt";
@@ -124,7 +125,7 @@ export default defineConfig({
   },
   preview: {
     host: "127.0.0.1",
-    port: 4173,
+    port: fixturePort(),
     strictPort: true,
   },
 });

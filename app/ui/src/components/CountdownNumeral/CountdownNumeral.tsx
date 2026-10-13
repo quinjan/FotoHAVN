@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../shared/cx.ts";
+import { secondsText } from "../shared/secondsText.ts";
 import styles from "./CountdownNumeral.module.css";
-
-function secondsText(seconds: number): string {
-  return seconds === 1 ? "1 second" : `${String(seconds)} seconds`;
-}
 
 export interface CountdownNumeralProps {
   /** Whole seconds left before the next Capture, pushed by the brain every second. 0 or less shows nothing. */

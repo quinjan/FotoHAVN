@@ -3,13 +3,10 @@ import { useEffect, useId, useRef, useState } from "react";
 import { PrimaryAction } from "../PrimaryAction/index.ts";
 import { SecondaryAction } from "../SecondaryAction/index.ts";
 import { cx } from "../shared/cx.ts";
+import { secondsText } from "../shared/secondsText.ts";
 import styles from "./PinPad.module.css";
 
 const digitKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
-
-function secondsText(seconds: number): string {
-  return seconds === 1 ? "1 second" : `${String(seconds)} seconds`;
-}
 
 function digitsText(count: number): string {
   return count === 1 ? "1 digit" : `${String(count)} digits`;

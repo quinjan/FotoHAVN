@@ -17,7 +17,7 @@
   gap: var(--space-12);
   min-width: var(--app-target);
   min-height: var(--app-target);
-  padding-block: 0 calc(var(--stroke-hairline) * 2);
+  padding-block: 0 var(--app-stroke-rule-accent);
   padding-inline: var(--space-4);
   color: var(--app-tone-ink-secondary);
   font-family: var(--typography-supporting-font-family);
@@ -31,7 +31,7 @@
 
 .step[data-state="current"] {
   padding-block-end: 0;
-  border-block-end: calc(var(--stroke-hairline) * 2) solid var(--app-tone-ink);
+  border-block-end: var(--app-stroke-rule-accent) solid var(--app-tone-ink);
   color: var(--app-tone-ink);
 }
 

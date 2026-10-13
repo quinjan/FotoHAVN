@@ -17,6 +17,19 @@
   cursor: not-allowed;
 }
 
+/* While the placeholder is the shown choice it reads in the secondary ink; the open list keeps the primary ink. */
+.select:has(option[data-placeholder]:checked) {
+  color: var(--app-tone-ink-secondary);
+}
+
+.select option {
+  color: var(--app-tone-ink);
+}
+
+.select option[data-placeholder] {
+  color: var(--app-tone-ink-secondary);
+}
+
 .chevron {
   position: absolute;
   inset-block: 0;
