@@ -256,7 +256,7 @@ public sealed class CompositionHookTests
     }
 
     [Fact]
-    public void A_composition_of_an_outdated_arrangement_still_answers_but_is_not_shown()
+    public void A_composition_of_an_outdated_arrangement_is_dropped_with_a_composition_failed_answer_and_not_cached()
     {
         var gated = new GatedCompositor();
         using var rig = ReadyRig(compositor: gated);
@@ -266,7 +266,60 @@ public sealed class CompositionHookTests
         Capture(rig, 1);
         gated.Complete(Signature, 600, 1800);
 
-        Assert.True(rig.Await(id).Ok);
+        Assert.Equal(TestHookError.CompositionFailed, rig.Await(id).Error);
+        Assert.Null(rig.View.LastComposition);
+        Assert.Equal(0, rig.Harness.Previews.Count);
+        Assert.Contains(rig.Harness.Logger.Entries, entry => entry.Message.Contains("was dropped", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_composition_still_running_when_the_surface_is_released_is_not_cached()
+    {
+        var gated = new GatedCompositor();
+        using var rig = ReadyRig(compositor: gated);
+        Capture(rig, 1);
+        var id = rig.Operator.Test(TestHookNames.ComposeDiagnostics, """{"templateId":"signature-strip","lookId":"naturale-v1"}""");
+        WaitUntil(() => gated.Pending.Count == 1, rig);
+
+        rig.OpenDiagnostics();
+        gated.Complete(Signature, 600, 1800);
+
+        Assert.Equal(TestHookError.CompositionFailed, rig.Await(id).Error);
+        Assert.Null(rig.View.LastComposition);
+        Assert.Equal(0, rig.Harness.Previews.Count);
+    }
+
+    [Fact]
+    public void Releasing_the_surface_removes_every_cached_preview_of_it_and_leaves_other_entries()
+    {
+        using var rig = ReadyRig();
+        Capture(rig, 1);
+        var first = Key(Compose(rig, Signature, Naturale));
+        var otherLook = Key(Compose(rig, Signature, "classic-v1"));
+        Capture(rig, 1);
+        var nextArrangement = Key(Compose(rig, "panorama-four", "sepia-v1"));
+        Assert.True(rig.Harness.Previews.Put("guest.cycle.r1", FakeCompositor.SolidPng(4, 4)));
+
+        rig.OpenDiagnostics();
+
+        Assert.All(new[] { first, otherLook, nextArrangement }, key => Assert.False(rig.Harness.Previews.TryGet(key, out _), key));
+        Assert.True(rig.Harness.Previews.TryGet("guest.cycle.r1", out _));
+        Assert.Equal(1, rig.Harness.Previews.Count);
+    }
+
+    [Fact]
+    public void Releasing_the_surface_removes_blank_previews_too_even_with_no_captures()
+    {
+        using var rig = ReadyRig();
+        var blank = Key(rig.Call(TestHookNames.ComposeBlankPreview, """{"templateId":"polka-keepsake"}"""));
+        var otherBlank = Key(rig.Call(TestHookNames.ComposeBlankPreview, """{"templateId":"signature-strip"}"""));
+        Assert.Equal(2, rig.Harness.Previews.Count);
+
+        rig.OpenDiagnostics();
+
+        Assert.False(rig.Harness.Previews.TryGet(blank, out _));
+        Assert.False(rig.Harness.Previews.TryGet(otherBlank, out _));
+        Assert.Equal(0, rig.Harness.Previews.Count);
         Assert.Null(rig.View.LastComposition);
     }
 

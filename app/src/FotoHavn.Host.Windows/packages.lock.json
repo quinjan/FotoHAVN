@@ -19,6 +19,14 @@
         "resolved": "1.0.4258.31",
         "contentHash": "sHVZ2MQrHT1J3q5/6csn0fIP27rzpTO/RRC+wPQDrZheB7T4t2n+vVbY6SdCKr4WRV9s/gmBM3PPMWWJtoDzMg=="
       },
+      "HarfBuzzSharp": {
+        "type": "Transitive",
+        "resolved": "8.3.1.5",
+        "contentHash": "K0+U7592Ne10BCuHZrZYIbaYUQy20CsYM9A3+Xjz3UpLPjs6nosbQtDYp2PueWJ7AQ5/htbyO8WqnUe+uf8AAQ==",
+        "dependencies": {
+          "HarfBuzzSharp.NativeAssets.Win32": "8.3.1.5"
+        }
+      },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
         "resolved": "10.0.12",
@@ -95,7 +103,9 @@
         "type": "Project",
         "dependencies": {
           "FotoHavn.Core": "[1.0.0, )",
+          "HarfBuzzSharp.NativeAssets.Win32": "[8.3.1.5, 8.3.1.5]",
           "SkiaSharp": "[3.119.4, 3.119.4]",
+          "SkiaSharp.HarfBuzz": "[3.119.4, 3.119.4]",
           "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
         }
       },
@@ -117,6 +127,12 @@
           "SkiaSharp": "[3.119.4, 3.119.4]",
           "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
         }
+      },
+      "HarfBuzzSharp.NativeAssets.Win32": {
+        "type": "CentralTransitive",
+        "requested": "[8.3.1.5, 8.3.1.5]",
+        "resolved": "8.3.1.5",
+        "contentHash": "p95FW4SwP50qD4cq6e2/P5DP7As6c6aQU5qHvsdCKorX5GFLHUMIx/zQgiLvB871xQrhdN24sZyMbCufnTHvsQ=="
       },
       "Microsoft.Data.Sqlite": {
         "type": "CentralTransitive",
@@ -147,6 +163,16 @@
           "SkiaSharp.NativeAssets.Win32": "3.119.4"
         }
       },
+      "SkiaSharp.HarfBuzz": {
+        "type": "CentralTransitive",
+        "requested": "[3.119.4, 3.119.4]",
+        "resolved": "3.119.4",
+        "contentHash": "YkN+X5fW9hXFlkoYaxDfYHuSE7SzIHlYMdWarmk03WOad1Rur8zJqGp1dkYp69FGpFxBVgnd/euiJnDPfr3WZQ==",
+        "dependencies": {
+          "HarfBuzzSharp": "8.3.1.5",
+          "SkiaSharp": "3.119.4"
+        }
+      },
       "SkiaSharp.NativeAssets.Win32": {
         "type": "CentralTransitive",
         "requested": "[3.119.4, 3.119.4]",
@@ -165,6 +191,12 @@
         "type": "Transitive",
         "resolved": "2.1.12",
         "contentHash": "fWi8Dbknuhgg72fWinIdjXVaqO1hHL4YBBwVLnr7e1c9TAZwJ0QE38j9syW1hwx6HaqEVTwI+O07WPdZn8Rp0w=="
+      },
+      "HarfBuzzSharp.NativeAssets.Win32": {
+        "type": "CentralTransitive",
+        "requested": "[8.3.1.5, 8.3.1.5]",
+        "resolved": "8.3.1.5",
+        "contentHash": "p95FW4SwP50qD4cq6e2/P5DP7As6c6aQU5qHvsdCKorX5GFLHUMIx/zQgiLvB871xQrhdN24sZyMbCufnTHvsQ=="
       },
       "SkiaSharp.NativeAssets.Win32": {
         "type": "CentralTransitive",

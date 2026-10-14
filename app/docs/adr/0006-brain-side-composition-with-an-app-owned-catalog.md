@@ -37,7 +37,7 @@ Replaces: the corresponding part of the deleted WinUI 3 app, whose Win2D composi
 
 - Inputs: a Template, a Look, and the arranged Capture files. Output: a lossless, opaque PNG at the Template's native size.
 - Steps: fill the paper with Warm Ivory `#F3EBDD`; draw the artwork; center-cover crop each Capture to its window with high-quality sampling; apply the Look to that window only; draw the signature on artwork-free Templates.
-- Signature: `FOTOHAVN` in Cormorant Garamond 500, white, 58 px centered on Signature Strip and 48 px right-aligned on Panorama Four, as the website draws it. Inside a Photo Strip, the Event's design takes priority over the interface palette ([`brand/mediums.md`](../../../brand/mediums.md)).
+- Signature: `FOTOHAVN` in Cormorant Garamond 500, white, 58 px centered on Signature Strip and 48 px right-aligned on Panorama Four, as the website draws it, shaped with HarfBuzz so the font's kerning applies as in the browser canvas. Inside a Photo Strip, the Event's design takes priority over the interface palette ([`brand/mediums.md`](../../../brand/mediums.md)).
 - Fonts: Cormorant Garamond and Manrope ship as OFL font files inside the app and load from embedded resources, never from the system.
 - **Look kernels** port the website's `applyLook` operation for operation. JavaScript's `Math.round` rounds halves up, so the C# port uses `MidpointRounding.AwayFromZero` on non-negative values, never the default banker's rounding.
 - Panorama Four keeps its native landscape orientation in the saved PNG; only the UI rotates its preview a quarter turn counterclockwise, as the website does.

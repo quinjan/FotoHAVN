@@ -9,11 +9,13 @@ import { paths } from "../../../src/paths";
 
 /** The four Templates with the size of their saved PNG (native orientation) and the Looks, by id and display name. */
 const templates = [
-  { id: "signature-strip", name: "Signature Strip", width: 600, height: 1800 },
-  { id: "panorama-four", name: "Panorama Four", width: 1800, height: 600 },
-  { id: "butter-gingham", name: "Butter Gingham", width: 600, height: 1800 },
-  { id: "polka-keepsake", name: "Polka Keepsake", width: 600, height: 1800 },
+  { id: "signature-strip", name: "Signature Strip", width: 600, height: 1800, firstWindow: { x: 0, y: 0, width: 600, height: 450 } },
+  { id: "panorama-four", name: "Panorama Four", width: 1800, height: 600, firstWindow: { x: 0, y: 0, width: 450, height: 600 } },
+  { id: "butter-gingham", name: "Butter Gingham", width: 600, height: 1800, firstWindow: { x: 27, y: 32, width: 547, height: 522 } },
+  { id: "polka-keepsake", name: "Polka Keepsake", width: 600, height: 1800, firstWindow: { x: 42, y: 39, width: 513, height: 390 } },
 ] as const;
+/** The colour of an empty window (#E5E0D7). A window that received a capture is not this colour. */
+const blankWindow = [0xe5, 0xe0, 0xd7] as const;
 const looks = [
   { id: "monochrome-v1", name: "Monochrome" },
   { id: "naturale-v1", name: "Naturale" },
@@ -47,6 +49,22 @@ async function fetchPreview(page: Page, previewKey: string): Promise<Fetched> {
       base64: btoa(binary),
     };
   }, `https://preview.fotohavn/${previewKey}.png`);
+}
+
+/** The share of a sampled grid of the window that is within 3 per channel of the blank colour. */
+function blankShare(png: PNG, window: { x: number; y: number; width: number; height: number }): number {
+  let sampled = 0;
+  let blank = 0;
+  for (let y = window.y; y < window.y + window.height; y += 6) {
+    for (let x = window.x; x < window.x + window.width; x += 6) {
+      const at = (y * png.width + x) * 4;
+      sampled++;
+      if (blankWindow.every((channel, offset) => Math.abs(png.data[at + offset]! - channel) <= 3)) {
+        blank++;
+      }
+    }
+  }
+  return blank / sampled;
 }
 
 function median(values: number[]): number {
@@ -105,6 +123,10 @@ test(
             }
           }
           expect(translucent, `${label}: every pixel is opaque`).toBe(0);
+          if (look.id === "naturale-v1") {
+            // A capture reached the window: the blank colour is #E5E0D7, and even the privacy-shutter placeholder (black with an icon) isn't it.
+            expect(blankShare(png, template.firstWindow), `${label}: the first photograph window shows a capture, not the blank colour`).toBeLessThan(0.5);
+          }
 
           if (look.id === "classic-v1" && (template.id === "signature-strip" || template.id === "panorama-four")) {
             writeFileSync(path.join(outputFolder, `${template.id}.${look.id}.png`), bytes);

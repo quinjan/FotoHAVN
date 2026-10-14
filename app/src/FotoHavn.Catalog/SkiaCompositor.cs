@@ -2,6 +2,7 @@ using System.Runtime.ExceptionServices;
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.Catalog;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 
 namespace FotoHavn.Catalog;
 
@@ -15,6 +16,8 @@ namespace FotoHavn.Catalog;
 /// mipmaps (<see cref="SKFilterMode.Linear"/> + <see cref="SKMipmapMode.Linear"/>) so camera frames don't alias. Both are
 /// plain CPU raster operations, so the output is deterministic. An encoded photograph is decoded as stored: EXIF orientation is
 /// not applied (saved captures are written from raw frames and carry none).
+/// Signature shaping: the signature is shaped with HarfBuzz (<see cref="SKShaper"/>) so the font's GPOS kerning applies, as Chrome's
+/// canvas <c>fillText</c> does; the shaped advance drives alignment and max-width scaling. Each call owns and disposes its shaper.
 /// Signature placement: <c>textBaseline = "middle"</c> puts the middle of the font's ascent-to-descent box on the anchor y, so the
 /// baseline is <c>y - (ascent + descent) / 2</c> with Skia's ascent (negative) and descent (positive) metrics. A signature wider
 /// than its max width is scaled horizontally around the anchor, as canvas <c>fillText</c> does with <c>maxWidth</c>.
@@ -316,7 +319,9 @@ public sealed class SkiaCompositor : ICompositor
             Hinting = SKFontHinting.None,
         };
         using var paint = new SKPaint { Color = SKColors.White, IsAntialias = true };
-        var measured = font.MeasureText(Signature);
+        // HarfBuzz shaping applies the font's GPOS kerning, as Chrome's canvas fillText does; a bare SKFont measures and draws unkerned.
+        using var shaper = new SKShaper(CatalogAssets.CormorantGaramondMedium);
+        var measured = shaper.Shape(Signature, font).Width;
         var scale = measured > maxWidth ? maxWidth / measured : 1f;
         var metrics = font.Metrics;
         var baseline = anchorY - ((metrics.Ascent + metrics.Descent) / 2);
@@ -324,7 +329,7 @@ public sealed class SkiaCompositor : ICompositor
         canvas.Save();
         canvas.Translate(anchorX, baseline);
         canvas.Scale(scale, 1);
-        canvas.DrawText(Signature, -alignment * measured, 0, font, paint);
+        canvas.DrawShapedText(shaper, Signature, -alignment * measured, 0, font, paint);
         canvas.Restore();
     }
 

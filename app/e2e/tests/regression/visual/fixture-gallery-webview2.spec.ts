@@ -13,6 +13,7 @@ import {
   returnToApp,
   type ManifestFixture,
 } from "../../../src/gallery";
+import { moveOsCursor } from "../../../src/os-cursor";
 import { fromApp, paths } from "../../../src/paths";
 import { contentRegion, regionDiff, type Region } from "../../../src/visual";
 
@@ -74,10 +75,14 @@ for (const resolution of resolutions) {
     const measured: Measurement[] = [];
 
     try {
+      let windowBounds = { x: 0, y: 0 };
       await test.step(`size the Operator window's page viewport to ${name}`, async () => {
         const window = await hooks.setWindowBounds("operator", resolution.width, resolution.height);
         expect(window.role).toBe("operator");
+        windowBounds = window.bounds;
       });
+      // The real cursor, not only the page's pointer, must not rest over a control (see parkPointer).
+      moveOsCursor(windowBounds.x + 1, windowBounds.y + 1);
       const manifest = await readManifest(page);
       expect(manifest.length, "the gallery manifest lists fixtures").toBeGreaterThan(0);
 
@@ -109,6 +114,38 @@ for (const resolution of resolutions) {
   });
 }
 
+/**
+ * Leaves no control hovered. The window sits under the real OS cursor, which WebView2 keeps hovering whatever control it rests on
+ * (the text area's border, the guest-cycle image's scale), and which the test moves out of the way once per resolution; the page's
+ * own pointer is parked in the top-left corner too, where no fixture has a control. The hover state is then verified, so a
+ * hovered control fails here instead of showing up as a pixel difference, and the transitions that un-hovering starts are awaited.
+ */
+async function parkPointer(page: Page): Promise<void> {
+  await page.mouse.move(0, 0);
+  await expect
+    .poll(
+      async () => {
+        const hoveredAwayFromTheCorner = await page.evaluate(() => {
+          const corner = document.elementFromPoint(0, 0);
+          return Array.from(document.querySelectorAll(":hover")).filter((element) => !corner || !element.contains(corner)).map((element) => element.tagName);
+        });
+        if (hoveredAwayFromTheCorner.length > 0) {
+          await page.mouse.move(1, 1);
+          await page.mouse.move(0, 0);
+        }
+        return hoveredAwayFromTheCorner;
+      },
+      { message: "no control is hovered once the pointer is parked", timeout: 5_000 },
+    )
+    .toEqual([]);
+  // Un-hovering starts a CSS transition back (the guest-cycle image's scale); wait until none is running, or the screenshot would
+  // catch the control part-way. Infinite animations are not transitions and are left alone.
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    await Promise.all(document.getAnimations().filter((animation) => animation instanceof CSSTransition).map((animation) => animation.finished.catch(() => undefined)));
+  });
+}
+
 async function compareFixture(
   page: Page,
   fixture: ManifestFixture,
@@ -126,7 +163,7 @@ async function compareFixture(
   // The real window sits under the real OS cursor, so a control it happens to rest on takes its :hover state (the text area's
   // border, the guest-cycle image's hover scale) and the screenshot would depend on where the cursor was left. Park the page's
   // pointer in the top-left corner, where no fixture has a control; Chromium's hover state follows the latest pointer position.
-  await page.mouse.move(0, 0);
+  await parkPointer(page);
   // Playwright's headless Chromium (the baselines' engine) launches with --hide-scrollbars; WebView2 draws its Fluent overlay
   // scrollbar indicator. Hide it so the comparison covers what the app renders, not the engine's scrollbar chrome. Overlay
   // scrollbars take no layout space, so nothing moves.

@@ -46,7 +46,9 @@ foreach ($assembly in 'FotoHavn.Core','FotoHavn.Protocol','FotoHavn.Storage','Fo
 }
 #    The Core tests again in the E2E build (obj/e2e, bin/e2e; no coverage), which cover the E2E_HOOKS glue
 dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:FotoHavnE2E=true
-
+#    The compositor speed budget (spike S3), without coverage, which would slow it 3-4x: median per strip under 150 ms
+#    (FOTOHAVN_S3_BUDGET_MS overrides the budget; the default 150 ms is the booth budget)
+dotnet test --project tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj --filter-method "*Composing_a_strip_takes_under_150_ms_median*"
 # 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures,
 #    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET)
 npm ci; npm run lint; npm run typecheck; npm run test:coverage; npm run build; npm run test:fixtures

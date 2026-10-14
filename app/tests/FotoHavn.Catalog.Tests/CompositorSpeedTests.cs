@@ -7,7 +7,7 @@ namespace FotoHavn.Catalog.Tests;
 /// <summary>
 /// Spike S3, the compositor speed check. Composes every Template with Classic and Monochrome from four 1920×1080 JPEG
 /// photographs (what a saved Capture is) 20 times after 3 warm-ups, writes median, p95, and the peak working-set growth to the
-/// test output and to <c>app/output/speed/s3-compositor-speed.txt</c>, and asserts the plan's target: median under 150 ms (a case that misses is re-measured, up to three rounds, to ride out CPU contention from parallel test processes). The
+/// test output and to <c>app/output/speed/s3-compositor-speed.txt</c>, and asserts the plan's target: median under 150 ms (override with <c>FOTOHAVN_S3_BUDGET_MS</c>; a case that misses is re-measured, up to three rounds, to ride out CPU contention from parallel test processes). The
 /// target is for the booth laptop, so this machine's numbers are a first look, to be re-measured there.
 /// </summary>
 [CollectionDefinition(Name, DisableParallelization = true)]
@@ -20,13 +20,23 @@ public sealed class CompositorSpeedTests(ITestOutputHelper output)
     private const int Warmups = 3;
     private const int Runs = 20;
     private const int MaxRounds = 3;
-    private const double MedianTargetMs = 150;
+    private const double DefaultMedianTargetMs = 150;
     private const double ProfiledCeilingMs = 500;
+    private const string BudgetVariable = "FOTOHAVN_S3_BUDGET_MS";
+
+    // The booth budget is 150 ms and is judged by the dedicated non-coverage run in app/AGENTS.md. FOTOHAVN_S3_BUDGET_MS overrides
+    // it where the machine is slower than the booth laptop (CI sets 500).
+    private static readonly double MedianTargetMs = ReadBudget();
 
     // Code coverage instruments the managed code (the Look kernels especially) and slows a strip 3-4x, so under the coverage run
-    // the 150 ms target can't be judged; there the test still composes everything and reports, and asserts only a sanity ceiling.
+    // the budget can't be judged; there the test still composes everything and reports, and asserts only a sanity ceiling.
     private static readonly bool Profiled = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING") == "1";
-    private static readonly double TargetMs = Profiled ? ProfiledCeilingMs : MedianTargetMs;
+    private static readonly double TargetMs = Profiled ? Math.Max(ProfiledCeilingMs, MedianTargetMs) : MedianTargetMs;
+
+    private static double ReadBudget() =>
+        double.TryParse(Environment.GetEnvironmentVariable(BudgetVariable), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
+            ? value
+            : DefaultMedianTargetMs;
 
     [Fact]
     [Trait("Category", "Integration")]

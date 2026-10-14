@@ -28,6 +28,10 @@ public sealed partial class Brain
     private int _compositionRequest;
     private CompositionView? _lastComposition;
 
+    // Every preview key this surface has put in the shared preview store (arrangements and blank previews), so a release removes
+    // them all and nothing outlives the surface. The store is shared with later features, so it is never cleared wholesale.
+    private readonly HashSet<string> _diagnosticsPreviewKeys = new(StringComparer.Ordinal);
+
     /// <summary>Adds a capture as the newest (dropping the oldest beyond the limit) and starts a new arrangement.</summary>
     private void AddDiagnosticsCapture(CapturedFrame frame)
     {
@@ -41,23 +45,26 @@ public sealed partial class Brain
     }
 
     /// <summary>
-    /// Drops the captures and the composition made from them (and its cached image), so a later composition is a new
-    /// arrangement. A composition still being made is no longer shown when it arrives.
+    /// Drops the captures, the composition made from them, and every preview this surface cached (arrangements and blank
+    /// previews), so a later composition is a new arrangement. A composition of the dropped arrangement still being made is
+    /// neither cached nor shown when it arrives; its caller gets a <c>compositionFailed</c> answer.
     /// </summary>
     private void ReleaseDiagnosticsCaptures()
     {
-        if (_diagnosticsCaptures.Count == 0 && _lastComposition is null)
+        if (_diagnosticsCaptures.Count == 0 && _lastComposition is null && _diagnosticsPreviewKeys.Count == 0)
         {
             return;
         }
 
         _diagnosticsCaptures.Clear();
         _arrangementRevision++;
-        if (_lastComposition is { } last)
+        foreach (var key in _diagnosticsPreviewKeys)
         {
-            _dependencies.Previews.Remove(last.PreviewKey);
-            _lastComposition = null;
+            _dependencies.Previews.Remove(key);
         }
+
+        _diagnosticsPreviewKeys.Clear();
+        _lastComposition = null;
     }
 
     /// <summary>
@@ -102,18 +109,27 @@ public sealed partial class Brain
 
         // Task.Run: the compositor does its work off the executor even when its own first steps run synchronously.
         Task.Run(() => compositor.ComposeAsync(composition, CancellationToken.None)).ContinueWith(
-            completed => Post(() => CompleteComposition(connection, id, completed, template.Id, lookId, keyRevision, request, arrangement)),
+            completed => Post(() => CompleteComposition(connection, id, completed, template.Id, lookId, keyRevision, request, arrangement, blank)),
             CancellationToken.None,
             TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
     }
 
-    private void CompleteComposition(Connection connection, string id, Task<CompositionResult> completed, string templateId, string lookId, long keyRevision, int request, long arrangement)
+    private void CompleteComposition(Connection connection, string id, Task<CompositionResult> completed, string templateId, string lookId, long keyRevision, int request, long arrangement, bool blank)
     {
         if (!completed.IsCompletedSuccessfully)
         {
             var exception = completed.Exception?.GetBaseException();
             BrainLog.CompositionFailed(_logger, exception, templateId, lookId, (exception as CompositionException)?.Kind ?? CompositionErrorKind.Unknown);
+            Reply(connection, id, HookOutcome.Fail(TestHookError.CompositionFailed));
+            return;
+        }
+
+        // The arrangement changed or was released while composing: the image shows captures that are gone, so it is not cached (a
+        // cached entry nobody would remove) and the caller is told rather than handed a key that would answer 404.
+        if (!blank && arrangement != _arrangementRevision)
+        {
+            BrainLog.CompositionStale(_logger, templateId, lookId);
             Reply(connection, id, HookOutcome.Fail(TestHookError.CompositionFailed));
             return;
         }
@@ -127,8 +143,10 @@ public sealed partial class Brain
             return;
         }
 
-        // Only the newest request of the current arrangement is the one shown; an older or outdated one still answers its caller.
-        if (request == _compositionRequest && arrangement == _arrangementRevision)
+        _diagnosticsPreviewKeys.Add(key);
+
+        // Only the newest request is the one shown; an older one still answers its caller and stays cached for its key.
+        if (request == _compositionRequest)
         {
             _lastComposition = new CompositionView(key, templateId, lookId, result.Width, result.Height);
             PublishChanges();
@@ -155,4 +173,7 @@ internal static partial class BrainLog
 {
     [LoggerMessage(Level = LogLevel.Warning, Message = "Composing Template {TemplateId} with Look {LookId} failed ({Kind}).")]
     public static partial void CompositionFailed(ILogger logger, Exception? exception, string templateId, string lookId, CompositionErrorKind kind);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Composing Template {TemplateId} with Look {LookId} was dropped: its arrangement of captures changed while composing.")]
+    public static partial void CompositionStale(ILogger logger, string templateId, string lookId);
 }

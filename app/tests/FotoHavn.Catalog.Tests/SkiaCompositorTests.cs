@@ -1,5 +1,6 @@
 using FotoHavn.Core.Catalog;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 
 namespace FotoHavn.Catalog.Tests;
 
@@ -369,6 +370,52 @@ public sealed class SkiaCompositorTests
         // Whichever way a face measures, the drawn text never exceeds maxWidth, and is within a side bearing of the scaled advance.
         Assert.InRange(panoramaBounds.MaxX - panoramaBounds.MinX, Math.Min(panorama.MeasureText("FOTOHAVN"), 300) - 14, 302);
         Assert.InRange(stripBounds.MaxX - stripBounds.MinX, Math.Min(strip.MeasureText("FOTOHAVN"), 390) - 14, 392);
+    }
+
+    [Fact]
+    public void The_shaped_signature_is_narrower_than_the_unshaped_one_by_the_font_kerning()
+    {
+        using var font = new SKFont(CatalogAssets.CormorantGaramondMedium, 58) { Subpixel = true, Hinting = SKFontHinting.None };
+        using var shaper = new SKShaper(CatalogAssets.CormorantGaramondMedium);
+
+        var shaped = shaper.Shape("FOTOHAVN", font).Width;
+        var unshaped = font.MeasureText("FOTOHAVN");
+
+        // A-V -81, T-O -15, O-T -23 per 1000 em is 6.9 px at 58 px.
+        Assert.InRange(unshaped - shaped, 5, 9);
+    }
+
+    [Fact]
+    public void The_A_and_V_of_the_shaped_signature_are_closer_than_unkerned()
+    {
+        using var font = new SKFont(CatalogAssets.CormorantGaramondMedium, 58) { Subpixel = true, Hinting = SKFontHinting.None };
+        using var shaper = new SKShaper(CatalogAssets.CormorantGaramondMedium);
+
+        var shaped = shaper.Shape("FOTOHAVN", font);
+        var advanceOfA = font.GetGlyphWidths(font.GetGlyphs("A"))[0];
+        var distanceAToV = shaped.Points[6].X - shaped.Points[5].X;
+
+        Assert.InRange(advanceOfA - distanceAToV, 3.5, 6);
+    }
+
+    [Fact]
+    public void The_drawn_signature_is_narrower_than_unkerned_text_by_the_kerning()
+    {
+        var drawn = WhiteBounds(Compose(CatalogData.SignatureStripId, CatalogData.NaturaleId, null, null, null, null), 0, 800, 600, 1000)!.Value;
+        using var font = new SKFont(CatalogAssets.CormorantGaramondMedium, 58) { Edging = SKFontEdging.Antialias, Subpixel = true, Hinting = SKFontHinting.None };
+        using var bitmap = new SKBitmap(600, 200);
+        using (var canvas = new SKCanvas(bitmap))
+        using (var paint = new SKPaint { Color = SKColors.White, IsAntialias = true })
+        {
+            canvas.Clear(new SKColor(0xE5, 0xE0, 0xD7));
+            canvas.DrawText("FOTOHAVN", 300 - (font.MeasureText("FOTOHAVN") / 2), 100, font, paint);
+        }
+
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        var unkerned = WhiteBounds(PixelImage.Decode(png.ToArray()), 0, 0, 600, 200)!.Value;
+
+        Assert.InRange((unkerned.MaxX - unkerned.MinX) - (drawn.MaxX - drawn.MinX), 5, 9);
     }
 
     [Fact]

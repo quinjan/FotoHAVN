@@ -12,8 +12,8 @@ namespace FotoHavn.Catalog.Tests;
 /// <list type="number">
 /// <item>set <c>FOTOHAVN_UPDATE_GOLDEN=1</c> and run the Catalog tests (<c>dotnet test --project tests/FotoHavn.Catalog.Tests</c>);</item>
 /// <item>that rewrites <c>tests/FotoHavn.Catalog.Tests/Golden/composition-hashes.json</c> and writes all 32 PNGs to
-/// <c>app/output/golden/</c> for visual review;</item>
-/// <item>open the PNGs, confirm the change is the intended one, unset the variable, and commit the JSON.</item>
+/// <c>app/output/golden/</c> for visual review, then <b>fails the golden tests on purpose</b> (and is refused outright when <c>CI</c> is set);</item>
+/// <item>open the PNGs, confirm the change is the intended one, unset the variable, rerun to see the tests pass, and commit the JSON.</item>
 /// </list>
 /// </remarks>
 internal static class GoldenStore
@@ -56,11 +56,19 @@ internal static class GoldenStore
     public static byte[] Compose(string templateId, string lookId, CompositionPhoto?[] photos) =>
         new SkiaCompositor().ComposeAsync(new CompositionRequest(templateId, lookId, photos), CancellationToken.None).GetAwaiter().GetResult().Png.ToArray();
 
-    private static IReadOnlyDictionary<string, string> Load()
+    private static Dictionary<string, string> Load()
     {
         if (Environment.GetEnvironmentVariable(UpdateVariable) == "1")
         {
-            return Regenerate();
+            // Update mode never passes: it rewrites the baselines and fails, so a rewrite is reviewed and committed on purpose
+            // and a stray FOTOHAVN_UPDATE_GOLDEN can't turn a regression green.
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")))
+            {
+                throw new InvalidOperationException($"{UpdateVariable}=1 is refused when CI is set; golden baselines are only rewritten on a developer machine.");
+            }
+
+            Regenerate();
+            throw new InvalidOperationException($"Golden baselines were rewritten; review app/output/golden and rerun without {UpdateVariable}.");
         }
 
         return File.Exists(HashesPath)

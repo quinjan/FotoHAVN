@@ -108,7 +108,7 @@ test.describe("visual comparison helpers", { tag: ["@m3"] }, () => {
     expect(() => regionDiff(image(11, 10), expected, { x: 0, y: 0, width: 10, height: 10 }, { threshold })).toThrow("Image sizes differ");
   });
 
-  test.describe("1-pixel displacement tolerance", () => {
+  test.describe("strictness: no displacement is forgiven", () => {
     const ebony: Color = [38, 32, 30];
     const softBrown: Color = [140, 110, 90];
     const fill: Color = [236, 228, 216];
@@ -127,26 +127,40 @@ test.describe("visual comparison helpers", { tag: ["@m3"] }, () => {
       return regionDiff(actual, expected, region!, { threshold });
     }
 
-    test("a rectangle edge drawn 1 px to the side passes, in every direction", () => {
+    test("a rectangle edge drawn 1 px to the side fails", () => {
       const expected = box(600, 320);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1]] as const) {
         const result = compare(box(600 + dx, 320 + dy), expected);
-        expect(result, `shifted by ${String(dx)},${String(dy)}`).toMatchObject({ insidePixels: 0, outsidePixels: 0 });
+        expect(result.insidePixels + result.outsidePixels, `shifted by ${String(dx)},${String(dy)}`).toBeGreaterThan(0);
       }
     });
 
-    test("a 1-px line drawn 1 px away passes", () => {
-      const expected = image(300, 200);
-      fillRect(expected, 100, 80, 60, 40, fill);
-      fillRect(expected, 100, 80, 1, 40, ebony);
-      const actual = image(300, 200);
-      fillRect(actual, 100, 80, 60, 40, fill);
-      fillRect(actual, 101, 80, 1, 40, ebony);
-      const result = regionDiff(actual, expected, contentRegion(expected)!, { threshold });
-      expect(result.insidePixels).toBe(0);
+    test("a border that grows from 1 px to 2 px fails", () => {
+      const thick = image(1280, 720);
+      fillRect(thick, 600, 320, 64, 64, ebony);
+      fillRect(thick, 602, 322, 60, 60, fill);
+      const result = compare(thick, box(600, 320));
+      expect(result.insidePixels).toBeGreaterThan(0);
+      expect(result.ratio).toBeGreaterThan(limit);
     });
 
-    test("a 1-px line that is missing fails even though the pixel beside it looks like the background", () => {
+    test("an inverted 1-px checkerboard fails", () => {
+      const pattern = (invert: boolean): PNG => {
+        const png = image(1280, 720);
+        for (let row = 0; row < 32; row++) {
+          for (let column = 0; column < 32; column++) {
+            fillRect(png, 600 + column, 320 + row, 1, 1, (row + column) % 2 === (invert ? 1 : 0) ? ebony : fill);
+          }
+        }
+        return png;
+      };
+      const result = compare(pattern(true), pattern(false));
+      // pixelmatch excuses the pattern's outer ring as anti-aliasing, never its interior.
+      expect(result.insidePixels).toBeGreaterThanOrEqual(30 * 30);
+      expect(result.ratio).toBeGreaterThan(limit);
+    });
+
+    test("a missing 1-px line is counted pixel for pixel", () => {
       const expected = image(300, 200);
       fillRect(expected, 100, 80, 60, 40, fill);
       fillRect(expected, 100, 80, 1, 40, ebony);
@@ -163,7 +177,7 @@ test.describe("visual comparison helpers", { tag: ["@m3"] }, () => {
       expect(result.ratio).toBeGreaterThan(limit);
     });
 
-    test("a border that is missing entirely fails", () => {
+    test("a 1-px border that is missing entirely fails", () => {
       const result = compare(box(600, 320, false), box(600, 320));
       // The 252 border pixels have no Ebony anywhere around them in the other image.
       expect(result.insidePixels).toBe(252);
@@ -226,17 +240,17 @@ test.describe("visual comparison helpers", { tag: ["@m3"] }, () => {
       expect(compare(actual, expected)).toMatchObject({ insidePixels: 0, outsidePixels: 1 });
     });
 
-    test("a 1-px shift does not hide a wrong pixel next to it", () => {
+    test("a wrong block of pixels is counted exactly", () => {
       const expected = box(600, 320);
-      const actual = box(601, 320);
+      const actual = box(600, 320);
       fillRect(actual, 620, 340, 3, 3, softBrown);
       const result = compare(actual, expected);
       expect(result.insidePixels).toBe(9);
     });
 
-    test("the diff image marks only the pixels that still differ", () => {
+    test("the diff image marks the pixels that differ", () => {
       const expected = box(600, 320);
-      const actual = box(601, 320);
+      const actual = box(600, 320);
       fillRect(actual, 620, 340, 1, 1, softBrown);
       const diff = new PNG({ width: 1280, height: 720 });
       const result = regionDiff(actual, expected, contentRegion(expected)!, { threshold, diff });

@@ -77,6 +77,13 @@ jobs:
           }
           dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:FotoHavnE2E=true
 
+      # The compositor speed check (spike S3) runs without coverage, which would slow it 3-4x. The booth budget is a median under
+      # 150 ms per strip, verified on the developer machine (app/AGENTS.md); hosted runners are slower, so CI asserts 500 ms.
+      - name: Check compositor speed
+        env:
+          FOTOHAVN_S3_BUDGET_MS: "500"
+        run: dotnet test --project tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj --filter-method "*Composing_a_strip_takes_under_150_ms_median*"
+
       # Verification step 3: UI. test:fixtures also runs the headless integration lane, which starts the headless host
       # with `dotnet run --no-build`, so it relies on the .NET build in step 1.
       - name: Install UI dependencies

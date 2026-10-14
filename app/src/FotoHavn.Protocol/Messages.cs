@@ -235,6 +235,6 @@ public enum TestHookError
     /// <summary>The camera ID isn't in the current camera list.</summary>
     UnknownCamera,
 
-    /// <summary>The compositor failed (unknown Template or Look, no usable photographs, or composing itself failed).</summary>
+    /// <summary>The compositor failed (unknown Template or Look, no usable photographs, or composing itself failed), or the arrangement of captures changed while composing so the result was dropped.</summary>
     CompositionFailed,
 }
