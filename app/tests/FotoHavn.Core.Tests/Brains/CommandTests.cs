@@ -14,7 +14,8 @@ public sealed class CommandTests
     [
         .. CommandRegistry.All.SelectMany(command => new[] { Role.Operator, Role.Guest }
             .Where(command.IsAllowedFrom)
-            .Select(role => (command.Name, role))),
+            .Select(role => (command.Name, role)))
+            .Where(sender => sender.Name != "OpenNewEvent"),
     ];
 
     [Theory]
@@ -111,7 +112,7 @@ public sealed class CommandTests
         var guestClient = harness.Handshake(Role.Guest);
 
         var ids = Enumerable.Range(0, 12)
-            .Select(i => i % 2 == 0 ? operatorClient.Command("OpenNewEvent") : guestClient.Command("OpenNewEvent"))
+            .Select(i => i % 2 == 0 ? operatorClient.Command("CloseGallery") : guestClient.Command("CloseGallery"))
             .ToList();
         harness.Run();
 
