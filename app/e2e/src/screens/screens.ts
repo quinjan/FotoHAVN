@@ -92,6 +92,11 @@ export class CameraDiagnosticsScreen {
   readonly capture: Locator;
   readonly mirror: Locator;
   readonly statusLine: Locator;
+  readonly composition: Locator;
+  readonly compositionImage: Locator;
+  readonly templateSelect: Locator;
+  readonly lookSelect: Locator;
+  readonly compose: Locator;
 
   constructor(readonly page: Page) {
     this.root = page.locator("[data-camera-state]");
@@ -102,6 +107,11 @@ export class CameraDiagnosticsScreen {
     this.capture = page.getByRole("button", { name: "CAPTURE" });
     this.mirror = page.getByRole("switch", { name: "Mirror" });
     this.statusLine = page.locator("[data-status-tone]").filter({ hasText: /\S/ });
+    this.composition = page.locator("[data-composition-key]");
+    this.compositionImage = this.composition.locator("img");
+    this.templateSelect = page.getByLabel("Template", { exact: true });
+    this.lookSelect = page.getByLabel("Look", { exact: true });
+    this.compose = page.getByRole("button", { name: "COMPOSE", exact: true });
   }
 
   /** The camera rows as rendered: the radio's value is the device id, its accessible name the camera name. */

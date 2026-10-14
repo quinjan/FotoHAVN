@@ -5,6 +5,7 @@ import type {
   CameraFaultKind,
   CameraState,
   CommandPayloadMap,
+  ComposePreviewResult,
   DiagnosticsResult,
   Role,
   StorageFaultKind,
@@ -31,6 +32,7 @@ export type {
   CameraFaultKind,
   CameraState,
   CommandPayloadMap,
+  ComposePreviewResult,
   DiagnosticsResult,
   Role,
   StorageFaultKind,
@@ -160,6 +162,14 @@ export class HookClient {
 
   captureDiagnostics(): Promise<CameraCaptureView> {
     return this.call("test.captureDiagnostics", null);
+  }
+
+  composeDiagnostics(templateId: string, lookId: string): Promise<ComposePreviewResult> {
+    return this.call("test.composeDiagnostics", { templateId, lookId });
+  }
+
+  composeBlankPreview(templateId: string): Promise<ComposePreviewResult> {
+    return this.call("test.composeBlankPreview", { templateId });
   }
 
   async injectCameraFault(kind: CameraFaultKind): Promise<void> {

@@ -64,3 +64,23 @@ Replaces: the corresponding part of the deleted WinUI 3 app, whose Win2D composi
 - If Template and Look become shared language, they are promoted to the root `CONTEXT.md` in a later change (D25).
 - Golden-image tests pin a PNG hash for every Template × Look from fixture photographs, and kernel tests cover the 0, 127.5, and 255 edge values and alpha preservation.
 - The catalog carries its own copy of the artwork and its provenance note, which must be updated by hand if the website's artwork changes.
+
+## Spike S3 result
+
+Spike S3 measured the compositor against the 150 ms target. It passed on the development machine; the booth-laptop re-measure is still pending.
+
+- **Machine.** The development laptop: Intel Core Ultra 7 265H (16 cores), Windows 11 (10.0.26200), a `Debug` .NET 10 test run with no coverage.
+- **Method.** `FotoHavn.Catalog.Tests` `Composing_a_strip_takes_under_150_ms_median`: every Template with the Classic and the Monochrome Look (the most and least expensive of the kernels measured), each window a 1920×1080 JPEG photograph decoded and cover-cropped by the compositor. Each combination runs 3 warm-up compositions, then 20 timed ones; the test reports the median, p95, and minimum, and the peak working-set growth, and writes `app/output/speed/s3-compositor-speed.txt`. It fails above a 150 ms median (a case that misses is re-measured up to three rounds to ride out CPU contention); under coverage it judges only a 500 ms ceiling.
+- **Result** (median / p95, ms):
+
+  | Template | Classic | Monochrome |
+  | --- | --- | --- |
+  | Signature Strip | 42.9 / 78.2 | 34.8 / 40.0 |
+  | Panorama Four | 38.1 / 45.0 | 33.5 / 35.1 |
+  | Butter Gingham | 42.1 / 47.1 | 39.5 / 46.4 |
+  | Polka Keepsake | 35.4 / 37.6 | 32.8 / 36.0 |
+
+  Every median is under 45 ms, about a third of the budget. Peak working-set growth was 19 MiB over a 73 MiB baseline.
+- **PNG encoder settings.** The strip is encoded as a lossless PNG with the Sub filter at zlib level 1. Skia's default encoding is about 5× slower and produces files about 30% smaller; the speed matters more here, and the file is local. The surface is `Bgra8888` with every alpha at 255, so the PNG is opaque RGBA.
+- **Parallel window rendering.** Windows render in parallel (`Parallel.For`, up to `Environment.ProcessorCount`) and the output is deterministic, so the golden pixel hashes don't depend on the core count. On a single core a four-window strip is estimated at about 100 ms, still inside the target.
+- **Pending.** Re-measure on the booth laptop with the same command and record the numbers here. If the median exceeds 150 ms there, optimise before M10 rather than relaxing the target.

@@ -97,7 +97,7 @@ public partial class App : Application
         camera = cameraFaults;
 #endif
         var previewCache = new PreviewCache();
-        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store, new CatalogData(), new NotYetComposingCompositor(), previewCache)
+        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store, new CatalogData(), new SkiaCompositor(), previewCache)
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
             PreviewStats = frames,

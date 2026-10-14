@@ -60,7 +60,10 @@ public sealed partial class Brain
         }
     }
 
-    /// <summary><c>test.composeDiagnostics</c>: the captures, oldest first, fill the Template's windows in order; the rest stay empty.</summary>
+    /// <summary>
+    /// <c>test.composeDiagnostics</c>: the newest captures that fit, oldest of them first, fill the Template's windows in order;
+    /// with fewer captures than windows, the rest stay empty.
+    /// </summary>
     private void ComposeDiagnosticsHook(Connection connection, string id, string? templateId, string? lookId) =>
         StartComposition(connection, id, templateId, lookId, blank: false);
 
@@ -83,9 +86,12 @@ public sealed partial class Brain
         var photos = new CompositionPhoto?[template.WindowCount];
         if (!blank)
         {
-            for (var window = 0; window < Math.Min(photos.Length, _diagnosticsCaptures.Count); window++)
+            // The newest captures that fit, in capture order: with more captures than windows the oldest ones are left out.
+            var used = Math.Min(photos.Length, _diagnosticsCaptures.Count);
+            var first = _diagnosticsCaptures.Count - used;
+            for (var window = 0; window < used; window++)
             {
-                photos[window] = new CompositionPhoto.Bgra(_diagnosticsCaptures[window]);
+                photos[window] = new CompositionPhoto.Bgra(_diagnosticsCaptures[first + window]);
             }
         }
 

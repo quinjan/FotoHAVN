@@ -104,7 +104,7 @@ public sealed class CompositionHookTests
     }
 
     [Fact]
-    public void A_three_window_template_takes_the_first_three_captures_of_the_ring()
+    public void A_three_window_template_takes_the_newest_three_captures_in_capture_order()
     {
         using var rig = ReadyRig();
         var stamps = Capture(rig, 5);
@@ -115,7 +115,7 @@ public sealed class CompositionHookTests
         var request = Assert.Single(rig.Harness.FakeCompositor.Requests);
         Assert.Equal(3, request.Photos.Count);
         Assert.Equal(
-            stamps.TakeLast(4).Take(3).ToList(),
+            stamps.TakeLast(3).ToList(),
             request.Photos.Select(photo => ((CompositionPhoto.Bgra)photo!).Frame.Timestamp).ToList());
     }
 

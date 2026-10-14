@@ -37,20 +37,4 @@ public sealed class CompositionContractTests
         Assert.Equal(new CompositionPhoto.Bgra(frame), raw);
         Assert.NotEqual(encoded, raw);
     }
-
-    [Fact]
-    public async Task The_placeholder_compositor_fails_every_call_as_unknown()
-    {
-        var compositor = new NotYetComposingCompositor();
-        var request = new CompositionRequest("signature-strip", "naturale-v1", [null, null, null, null]);
-        var photo = new CompositionPhoto.Encoded(new byte[] { 1 });
-
-        var compose = await Assert.ThrowsAsync<CompositionException>(() => compositor.ComposeAsync(request, TestContext.Current.CancellationToken));
-        var thumbnail = await Assert.ThrowsAsync<CompositionException>(() => compositor.ComposeLookThumbnailAsync(photo, 1, "naturale-v1", 100, TestContext.Current.CancellationToken));
-
-        Assert.Equal(CompositionErrorKind.Unknown, compose.Kind);
-        Assert.Equal(CompositionErrorKind.Unknown, thumbnail.Kind);
-        Assert.Throws<ArgumentNullException>(() => { _ = compositor.ComposeAsync(null!, CancellationToken.None); });
-        Assert.Throws<ArgumentNullException>(() => { _ = compositor.ComposeLookThumbnailAsync(null!, 1, "naturale-v1", 100, CancellationToken.None); });
-    }
 }
