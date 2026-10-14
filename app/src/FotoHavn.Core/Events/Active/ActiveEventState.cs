@@ -32,6 +32,39 @@ internal sealed class ActiveEventState(EventRecord eventRecord, DateTimeOffset s
 
     /// <summary>The Operator Assistance alert, or null; M8 sets it.</summary>
     public RunningEventAssistance? Assistance { get; set; }
+
+    /// <summary>When the exit hold began on the brain's clock; null while no hold is in progress.</summary>
+    public DateTimeOffset? ExitHoldBegan { get; set; }
+
+    /// <summary>Whether the Guest Screen shows the PIN dialog.</summary>
+    public bool PinDialogOpen { get; set; }
+
+    /// <summary>Whether the last PIN attempt in this dialog was wrong (the dialog shows its error until the lockout ends).</summary>
+    public bool LastPinWrong { get; set; }
+
+    /// <summary>Whether a PIN check is running off the executor (one at a time).</summary>
+    public bool PinCheckInFlight { get; set; }
+
+    /// <summary>The wrong-PIN lockout. It outlives the dialog: closing the dialog doesn't end a lockout.</summary>
+    public PinLockout Lockout { get; } = new();
+
+    /// <summary>The once-a-second tick that keeps the locked countdown current; running only while the dialog is open and locked.</summary>
+    public IDisposable? LockoutTick { get; set; }
+
+    /// <summary>The timer that reopens the camera while it isn't available, so Start unavailable recovers by itself.</summary>
+    public IDisposable? CameraRecovery { get; set; }
+
+    /// <summary>Whether storage stopped being usable while the Event runs (M8 and the tests report it; Start unavailable shows it).</summary>
+    public bool StorageFailed { get; set; }
+
+    /// <summary>Stops every timer this Event owns. The Event is ending or its start failed.</summary>
+    public void StopTimers()
+    {
+        LockoutTick?.Dispose();
+        LockoutTick = null;
+        CameraRecovery?.Dispose();
+        CameraRecovery = null;
+    }
 }
 
 /// <summary>

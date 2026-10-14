@@ -476,17 +476,12 @@ public sealed class OperatorScaffoldTests
     // The Start Event entry point
 
     [Fact]
-    public async Task The_wave_A_Start_Event_stub_reports_an_invalid_setup()
+    public void A_start_result_says_what_failed_and_why()
     {
-        using var harness = new BrainHarness();
-
-        var result = await harness.Brain.TryStartEventAsync(RunningId);
-
-        Assert.Equal(StartEventResult.Failed(StartFailureCode.InvalidSetup), result);
-        Assert.False(result.Succeeded);
+        Assert.False(StartEventResult.Failed(StartFailureCode.InvalidSetup).Succeeded);
         Assert.True(StartEventResult.Started.Succeeded);
         Assert.Null(StartEventResult.Started.CameraReason);
-        Assert.Throws<ArgumentException>(() => { _ = harness.Brain.TryStartEventAsync(string.Empty); });
+        Assert.Equal(CameraFailureKind.NotFound, StartEventResult.Failed(StartFailureCode.CameraNotEligible, CameraFailureKind.NotFound).CameraReason);
     }
 
     [Fact]
