@@ -31,9 +31,9 @@ public sealed class ThreadingTests
         using var harness = new BrainHarness();
         var client = harness.Connect(Role.Operator);
 
-        var early = client.Command("OpenNewEvent");
+        var early = client.Command("CloseGallery");
         client.Hello();
-        var late = client.Command("OpenNewEvent");
+        var late = client.Command("CloseGallery");
         harness.Run();
 
         Assert.Equal(CommandResultMessage.Rejected(early, RejectReason.ProtocolMismatch), client.Messages[0]);
