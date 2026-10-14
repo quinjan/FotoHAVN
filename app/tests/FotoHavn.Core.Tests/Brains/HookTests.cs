@@ -447,24 +447,6 @@ public sealed class HookTests
             client.Messages);
     }
 
-    [Theory]
-    [InlineData(TestHookNames.OpenCameraDiagnostics, null)]
-    [InlineData(TestHookNames.SelectDiagnosticsCamera, """{"deviceId":"fake-camera"}""")]
-    [InlineData(TestHookNames.SetDiagnosticsMirror, """{"mirrored":true}""")]
-    [InlineData(TestHookNames.CaptureDiagnostics, null)]
-    [InlineData(TestHookNames.InjectCameraFault, """{"kind":"exclusiveLost"}""")]
-    [InlineData(TestHookNames.ClearCameraFault, null)]
-    public void Camera_hooks_are_not_supported_until_the_brain_implements_them(string name, string? args)
-    {
-        using var harness = BrainHarness.WithHooks();
-        var client = harness.Connect(Role.Operator);
-
-        var id = client.Test(name, args);
-        harness.Run();
-
-        Assert.Equal(TestResultMessage.Failure(id, TestHookError.NotSupported), client.Single());
-    }
-
     [Fact]
     public void Camera_hooks_reject_arguments_that_do_not_match()
     {

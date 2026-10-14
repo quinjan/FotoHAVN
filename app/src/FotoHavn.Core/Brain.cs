@@ -31,6 +31,12 @@ public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, ID
 
     /// <summary>The host side of the storage fault hooks. Null makes them fail with <c>notSupported</c>.</summary>
     public E2E.IStorageTestHooks? StorageTestHooks { get; init; }
+
+    /// <summary>
+    /// The handle on the host's <see cref="FaultInjectingCameraAdapter"/>, which the host also passes as <see cref="Camera"/>.
+    /// Null makes <c>test.injectCameraFault</c> and <c>test.clearCameraFault</c> fail with <c>notSupported</c>.
+    /// </summary>
+    public ICameraFaultControl? CameraFaults { get; init; }
 #endif
 }
 
@@ -57,19 +63,19 @@ public sealed partial class Brain : IBrain
     private readonly List<Connection> _connections = [];
     private readonly PresentationChannel<OperatorPresentation> _operator;
     private readonly PresentationChannel<GuestPresentation> _guest;
-    private CameraDiagnosticsView? _cameraDiagnostics;
+    private CameraDiagnosticsView? _cameraDiagnosticsOverride;
     private IReadOnlyList<DisplayInfo> _realDisplays = [];
     private DisplayInfo? _guestScreenDisplay;
     private string? _fatalReason;
     private int _disposed;
 
     public Brain(BrainDependencies dependencies)
-        : this(dependencies, HooksCompiled, CreateHostHookPort(dependencies), CreateStorageHookPort(dependencies))
+        : this(dependencies, HooksCompiled, CreateHostHookPort(dependencies), CreateStorageHookPort(dependencies), CreateCameraFaultControl(dependencies))
     {
     }
 
     /// <summary>The brain with its hook dispatcher switched on or off explicitly, so tests reach it in every build.</summary>
-    internal Brain(BrainDependencies dependencies, bool hooksEnabled, IHostHookPort? hostHooks, IStorageHookPort? storageHooks = null)
+    internal Brain(BrainDependencies dependencies, bool hooksEnabled, IHostHookPort? hostHooks, IStorageHookPort? storageHooks = null, ICameraFaultControl? cameraFaults = null)
     {
         ArgumentNullException.ThrowIfNull(dependencies);
         ArgumentNullException.ThrowIfNull(dependencies.Store);
@@ -79,6 +85,7 @@ public sealed partial class Brain : IBrain
         _hooksEnabled = hooksEnabled;
         _hostHooks = hostHooks;
         _storageHooks = storageHooks;
+        _cameraFaults = cameraFaults;
         _operator = new PresentationChannel<OperatorPresentation>(
             Role.Operator,
             RenderOperator(),
@@ -94,6 +101,7 @@ public sealed partial class Brain : IBrain
 
         dependencies.Displays.DisplaysChanged += OnDisplaysChanged;
         Post(ReadRealDisplays);
+        StartCameraRuntime();
         Post(StartStorageOpen);
     }
 
@@ -124,6 +132,7 @@ public sealed partial class Brain : IBrain
 
         _dependencies.Displays.DisplaysChanged -= OnDisplaysChanged;
         _storageCancellation.Cancel();
+        ShutdownCamera();
     }
 
     /// <summary>
@@ -134,7 +143,7 @@ public sealed partial class Brain : IBrain
     internal void ShowCameraDiagnostics(CameraDiagnosticsView? view) =>
         Post(() =>
         {
-            _cameraDiagnostics = view;
+            _cameraDiagnosticsOverride = view;
             PublishChanges();
         });
 
@@ -159,6 +168,18 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies);
 #if E2E_HOOKS
         return dependencies.HostTestHooks is { } hooks ? new E2E.HostTestHooksPort(hooks) : null;
+#else
+        return null;
+#endif
+    }
+
+#pragma warning disable CA1859 // The field build of this method has no E2E type to read from.
+    private static ICameraFaultControl? CreateCameraFaultControl(BrainDependencies dependencies)
+#pragma warning restore CA1859
+    {
+        ArgumentNullException.ThrowIfNull(dependencies);
+#if E2E_HOOKS
+        return dependencies.CameraFaults;
 #else
         return null;
 #endif
@@ -254,7 +275,7 @@ public sealed partial class Brain : IBrain
 
     private OperatorPresentation RenderOperator() => _fatalReason is { } reason
         ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null, null)
-        : _cameraDiagnostics is { } diagnostics
+        : RenderCameraDiagnostics() is { } diagnostics
             ? new OperatorPresentation(OperatorSurface.CameraDiagnostics, null, null, OperatorOverlays.None, null, null, diagnostics)
             : !_storageResolved
                 ? new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null)

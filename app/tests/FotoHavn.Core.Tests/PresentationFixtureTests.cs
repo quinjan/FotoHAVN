@@ -43,6 +43,7 @@ public sealed class PresentationFixtureTests
         ["operator-camera-diagnostics-in-use"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
             [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null))),
         ["operator-camera-diagnostics-no-cameras"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView([], null, CameraState.Idle, null, null, false, null))),
+        ["operator-camera-diagnostics-not-available"] = () => Task.FromResult(NotAvailableFromTheBrain()),
     };
 
     public static TheoryData<string> Names => [.. Fixtures.Keys];
@@ -128,6 +129,17 @@ public sealed class PresentationFixtureTests
         harness.Brain.ShowCameraDiagnostics(view);
         harness.Run();
         return Assert.Single(client.Raw);
+    }
+
+    /// <summary>A real brain: the fake camera stalls after it opened, the freshness timer finds it stale, and the operator is sent that.</summary>
+    private static string NotAvailableFromTheBrain()
+    {
+        using var rig = new CameraRig();
+        rig.SelectAndWaitUntilReady();
+        rig.Fake.Stall();
+        rig.Run(TimeSpan.FromSeconds(3));
+        Assert.Equal(CameraState.NotAvailable, rig.View.State);
+        return ProtocolJson.Serialize(Assert.IsType<OperatorPresentationMessage>(rig.Operator.Messages[^1]));
     }
 
     private static string ProtocolMismatch()

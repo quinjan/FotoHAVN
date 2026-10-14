@@ -93,8 +93,7 @@ public sealed partial class Brain
             case TestHookNames.CaptureDiagnostics:
             case TestHookNames.InjectCameraFault:
             case TestHookNames.ClearCameraFault:
-                // M5 wave B2 implements the camera hooks; until then they are not supported.
-                Reply(connection, id, HookOutcome.Fail(TestHookError.NotSupported));
+                RunCameraHook(connection, id, name, args);
                 break;
             default:
                 throw new InvalidOperationException($"The test hook {name} has no brain handler.");
@@ -124,7 +123,7 @@ public sealed partial class Brain
         new DisplayDiagnostics(_virtualDisplays is not null, [.. CurrentDisplays.Select(VirtualDisplaySet.ToTestDisplay)]),
         _guestScreenDisplay is not null,
         StorageDiagnosticsNow(),
-        new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None));
+        CameraDiagnosticsNow());
 
     private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
     {

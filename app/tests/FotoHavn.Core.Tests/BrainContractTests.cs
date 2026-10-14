@@ -24,7 +24,7 @@ public sealed class BrainContractTests
     }
 
     [Fact]
-    public void Brain_posts_its_first_display_read_and_connections_to_the_executor()
+    public void Brain_posts_its_first_display_read_camera_list_storage_open_and_connections_to_the_executor()
     {
         var executor = new QueueExecutor();
         using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore()));
@@ -32,7 +32,7 @@ public sealed class BrainContractTests
         var connection = brain.Connect(Role.Guest, _ => { });
 
         Assert.Equal(Role.Guest, connection.Role);
-        Assert.Equal(3, executor.Posted);
+        Assert.Equal(4, executor.Posted);
     }
 
     [Fact]
