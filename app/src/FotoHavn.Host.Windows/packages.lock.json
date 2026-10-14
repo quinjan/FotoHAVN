@@ -82,7 +82,14 @@
         }
       },
       "fotohavn.camera.windows": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "FotoHavn.Core": "[1.0.0, )",
+          "FotoHavn.Protocol": "[1.0.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, 10.0.12]",
+          "SkiaSharp": "[3.119.4, 3.119.4]",
+          "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
+        }
       },
       "fotohavn.catalog": {
         "type": "Project",
