@@ -1304,6 +1304,7 @@ Verification record (M3):
   - 740 comparisons, measured over each fixture's content area with a 1% limit and nothing allowed outside that area.
   - Maximum 0.517% (`countdown-numeral-10` at 2560×1440), mean 0.0187%.
   - Both windows use Fluent overlay scrollbars, and the comparison hides scrollbar chrome. Headless Chromium hides scrollbars, so this keeps the two engines comparable.
+  - Later refinement (see [local development guide](local-development-guide.md)): a differing pixel is forgiven when a 1-pixel displacement explains it in both directions, because the GPU-composited WebView2 and the software-rastered Chromium baseline place anti-aliased edges up to a pixel apart. The 1% limit and the zero-outside-region rule are unchanged. The page's pointer is also parked in the top-left corner before each screenshot: the real OS cursor can rest on a control, and its `:hover` state (the text area's border, the guest-cycle image's hover scale) made the 1920×1080 comparison fail from run to run.
 - **Touch:** touch from the end-to-end tests (CDP `Input.dispatchTouchEvent`) reaches the page in WebView2 with `pointerType: "touch"`. PinPad keys measure 64×64, the shutter 112×112, and guest OptionList rows at least 64 px tall.
 - **GitHub CI:** `Desktop app` runs 38442817628 (`9f0fffd`) and 38454098728 (`8fe2232`) both succeeded.
 - **Review:** the code review found four issues, all fixed:

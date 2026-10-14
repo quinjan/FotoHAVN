@@ -123,6 +123,10 @@ async function compareFixture(
   }
 
   await openFixture(page, fixture.id, fixture.role);
+  // The real window sits under the real OS cursor, so a control it happens to rest on takes its :hover state (the text area's
+  // border, the guest-cycle image's hover scale) and the screenshot would depend on where the cursor was left. Park the page's
+  // pointer in the top-left corner, where no fixture has a control; Chromium's hover state follows the latest pointer position.
+  await page.mouse.move(0, 0);
   // Playwright's headless Chromium (the baselines' engine) launches with --hide-scrollbars; WebView2 draws its Fluent overlay
   // scrollbar indicator. Hide it so the comparison covers what the app renders, not the engine's scrollbar chrome. Overlay
   // scrollbars take no layout space, so nothing moves.
