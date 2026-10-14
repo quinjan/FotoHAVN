@@ -53,8 +53,11 @@ internal sealed class FakeSurface : IPreviewSurface
 
     public Exception? PostFailure { get; set; }
 
+    public int CreateAttempts { get; private set; }
+
     public ISharedFrameBuffer CreateBuffer(long size)
     {
+        CreateAttempts++;
         if (CreateFailure is { } failure)
         {
             throw failure;

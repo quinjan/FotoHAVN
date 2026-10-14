@@ -92,4 +92,7 @@ internal static partial class HostLog
 
     [LoggerMessage(EventId = 29, EventName = "previewBufferFailed", Level = LogLevel.Warning, Message = "The {Role} preview frame surface failed; the frame is dropped")]
     public static partial void PreviewBufferFailed(ILogger logger, Role role, Exception exception);
+
+    [LoggerMessage(EventId = 30, EventName = "previewSurfaceRecovered", Level = LogLevel.Information, Message = "The {Role} preview frame surface works again")]
+    public static partial void PreviewSurfaceRecovered(ILogger logger, Role role);
 }

@@ -286,6 +286,9 @@ public sealed class SharedBufferPreviewChannelTests
         Assert.False(_operatorSurface.Buffers[0].Disposed);
         Assert.Contains(_logger.Entries, entry => entry.EventId.Name == "previewBufferFailed");
         _operatorSurface.CreateFailure = null;
+        Assert.False(_channel.TryPost(PreviewTarget.Operator, large), "the retry waits out the rate limit");
+        _time.Advance(SharedBufferPreviewChannel.RetryInterval);
+        Assert.False(_channel.TryPost(PreviewTarget.Operator, large));
         RunUi();
         Assert.True(_channel.TryPost(PreviewTarget.Operator, large));
     }
@@ -299,6 +302,112 @@ public sealed class SharedBufferPreviewChannelTests
 
         Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(1, fill: 1)));
         Assert.Contains(_logger.Entries, entry => entry.EventId.Name == "previewBufferFailed");
+        Assert.Equal(1, _channel.TransportFailures);
+    }
+
+    [Fact]
+    public void A_buffer_that_failed_at_attach_is_created_on_a_later_frame_and_frames_then_flow()
+    {
+        _operatorSurface.CreateFailure = Com("no shared buffers");
+        _channel.Attach(Role.Operator, _operatorSurface);
+
+        // Inside the rate limit: no attempt, nothing queued, however many frames arrive.
+        for (var sequence = 1; sequence <= 5; sequence++)
+        {
+            Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(sequence, fill: 1)));
+        }
+
+        Assert.Empty(_ui);
+        Assert.Equal(1, _operatorSurface.CreateAttempts);
+
+        // Two more attempts, one per second, fail as well.
+        for (var retry = 2; retry <= 3; retry++)
+        {
+            _time.Advance(TimeSpan.FromMilliseconds(999));
+            Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(10, fill: 1)));
+            Assert.Empty(_ui);
+            _time.Advance(TimeSpan.FromMilliseconds(1));
+            Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(11, fill: 1)));
+            Assert.Single(_ui);
+            Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(12, fill: 1)), "one creation at a time");
+            Assert.Single(_ui);
+            RunUi();
+            Assert.Equal(retry, _operatorSurface.CreateAttempts);
+        }
+
+        Assert.Equal(3, _channel.TransportFailures);
+        Assert.Single(_logger.Entries, entry => entry.EventId.Name == "previewBufferFailed");
+
+        _operatorSurface.CreateFailure = null;
+        _time.Advance(SharedBufferPreviewChannel.RetryInterval);
+        Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(20, fill: 1)));
+        RunUi();
+        Assert.Equal(4, _operatorSurface.CreateAttempts);
+
+        Assert.True(_channel.TryPost(PreviewTarget.Operator, Frame(21, fill: 0x33)));
+        RunUi();
+        var post = Assert.Single(_operatorSurface.Posts);
+        Assert.Same(Assert.Single(_operatorSurface.Buffers), post.Buffer);
+        Assert.Equal(Enumerable.Repeat((byte)0x33, 32), post.Pixels.Take(32));
+        Assert.Contains(_logger.Entries, entry => entry.EventId.Name == "previewSurfaceRecovered");
+        Assert.Equal(3, _channel.TransportFailures);
+    }
+
+    [Fact]
+    public void Detaching_a_surface_without_a_buffer_stops_its_retries()
+    {
+        _operatorSurface.CreateFailure = Com("no shared buffers");
+        _channel.Attach(Role.Operator, _operatorSurface);
+
+        _channel.Detach(Role.Operator, _operatorSurface);
+        _time.Advance(SharedBufferPreviewChannel.RetryInterval);
+
+        Assert.False(_channel.TryPost(PreviewTarget.Operator, Frame(1, fill: 1)));
+        Assert.Empty(_ui);
+    }
+
+    [Fact]
+    public void A_retry_that_finishes_after_the_surface_was_replaced_is_discarded()
+    {
+        var replacement = new FakeSurface();
+        _operatorSurface.CreateFailure = Com("no shared buffers");
+        _channel.Attach(Role.Operator, _operatorSurface);
+        _time.Advance(SharedBufferPreviewChannel.RetryInterval);
+        _operatorSurface.CreateFailure = null;
+        _channel.TryPost(PreviewTarget.Operator, Frame(1, fill: 1));
+
+        _channel.Attach(Role.Operator, replacement);
+        RunUi();
+
+        Assert.Single(replacement.Buffers);
+        Assert.True(_operatorSurface.Buffers[0].Disposed);
+        Assert.True(_channel.TryPost(PreviewTarget.Operator, Frame(2, fill: 2)));
+        RunUi();
+        Assert.Single(replacement.Posts);
+    }
+
+    [Fact]
+    public void Repeated_post_failures_are_counted_and_logged_once_until_a_post_works()
+    {
+        _channel.Attach(Role.Operator, _operatorSurface);
+        _operatorSurface.PostFailure = Com("page gone");
+
+        for (var sequence = 1; sequence <= 3; sequence++)
+        {
+            Assert.True(_channel.TryPost(PreviewTarget.Operator, Frame(sequence, fill: 1)));
+            RunUi();
+        }
+
+        Assert.Equal(3, _channel.TransportFailures);
+        Assert.Single(_logger.Entries, entry => entry.EventId.Name == "previewBufferFailed");
+
+        _operatorSurface.PostFailure = null;
+        Assert.True(_channel.TryPost(PreviewTarget.Operator, Frame(4, fill: 1)));
+        RunUi();
+
+        Assert.Single(_operatorSurface.Posts);
+        Assert.Single(_logger.Entries, entry => entry.EventId.Name == "previewSurfaceRecovered");
+        Assert.Equal(3, _channel.TransportFailures);
     }
 
     [Theory]

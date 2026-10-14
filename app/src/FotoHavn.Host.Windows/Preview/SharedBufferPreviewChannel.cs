@@ -44,11 +44,15 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
     /// <summary>A <c>frameAck</c> message is about 40 characters; anything much longer is not one.</summary>
     private const int MaxAckTextLength = 128;
 
+    /// <summary>The least time between two attempts to create a buffer after one failed.</summary>
+    public static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(1);
+
     private readonly Action<Action> _postToUi;
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
     private readonly RoleSlot _operator = new(Role.Operator);
     private readonly RoleSlot _guest = new(Role.Guest);
+    private long _transportFailures;
 
     /// <param name="postToUi">Queues work on the UI thread (<c>Dispatcher.InvokeAsync</c>).</param>
     /// <param name="time">The clock for the in-flight timeout and the rates.</param>
@@ -62,6 +66,9 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         _time = time;
         _logger = logger;
     }
+
+    /// <summary>Buffer creations and posts the surface has failed since the app started: the preview transport's health, logged but not in diagnostics.</summary>
+    public long TransportFailures => Interlocked.Read(ref _transportFailures);
 
     /// <summary>
     /// Makes <paramref name="surface"/> the target of <paramref name="role"/>'s frames (UI thread), with a new buffer: for a
@@ -78,18 +85,28 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         }
         catch (Exception exception) when (IsSurfaceFailure(exception))
         {
-            HostLog.PreviewBufferFailed(_logger, role, exception);
+            RecordFailure(slot, exception);
         }
 
         ISharedFrameBuffer? replaced;
         lock (slot.Gate)
         {
             replaced = slot.Buffer;
-            slot.Surface = created is null ? null : surface;
+            // The surface stays the target even without a buffer: a later frame retries the creation (RetryInterval).
+            slot.Surface = surface;
             slot.Buffer = created;
             slot.Generation++;
             slot.Resizing = false;
             slot.BackPressure.Reset();
+            if (created is null)
+            {
+                slot.RetryAt = _time.GetUtcNow() + RetryInterval;
+            }
+            else
+            {
+                slot.RetryAt = null;
+                MarkHealthy(slot);
+            }
         }
 
         replaced?.Dispose();
@@ -113,6 +130,7 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
             slot.Buffer = null;
             slot.Generation++;
             slot.Resizing = false;
+            slot.RetryAt = null;
             slot.BackPressure.Reset();
         }
 
@@ -169,7 +187,19 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         int generation;
         lock (slot.Gate)
         {
-            if (slot.Surface is null || slot.Buffer is null || slot.Resizing || !slot.BackPressure.TryBegin(frame.Sequence, _time.GetUtcNow()))
+            if (slot.Surface is null || slot.Resizing)
+            {
+                return false;
+            }
+
+            if (slot.Buffer is null)
+            {
+                // The surface couldn't make a buffer earlier: try again, at most once per RetryInterval.
+                ScheduleBuffer(slot, InitialBufferBytes);
+                return false;
+            }
+
+            if (!slot.BackPressure.TryBegin(frame.Sequence, _time.GetUtcNow()))
             {
                 return false;
             }
@@ -178,10 +208,7 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
             {
                 // The slot is free (the page is done with the buffer), so the UI thread can swap in a bigger one.
                 slot.BackPressure.Reset();
-                slot.Resizing = true;
-                var surface = slot.Surface;
-                var pending = slot.Generation;
-                _postToUi(() => Grow(slot, surface, pending, byteCount));
+                ScheduleBuffer(slot, byteCount);
                 return false;
             }
 
@@ -238,14 +265,61 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         }
         catch (Exception exception) when (IsSurfaceFailure(exception))
         {
-            // The page is gone; no ack will come.
+            // The page is gone; no ack will come. The next frame posts again.
             slot.BackPressure.Reset();
+            RecordFailure(slot, exception);
+            return;
+        }
+
+        lock (slot.Gate)
+        {
+            MarkHealthy(slot);
+        }
+    }
+
+    /// <summary>Holds the gate: asks the UI thread for a buffer of <paramref name="byteCount"/> bytes unless a failed attempt is still cooling down.</summary>
+    private void ScheduleBuffer(RoleSlot slot, long byteCount)
+    {
+        if (slot.RetryAt is { } retryAt && _time.GetUtcNow() < retryAt)
+        {
+            return;
+        }
+
+        slot.Resizing = true;
+        var surface = slot.Surface!;
+        var pending = slot.Generation;
+        _postToUi(() => Grow(slot, surface, pending, byteCount));
+    }
+
+    /// <summary>Counts a surface failure and logs only the first of a streak.</summary>
+    private void RecordFailure(RoleSlot slot, Exception exception)
+    {
+        bool first;
+        lock (slot.Gate)
+        {
+            first = !slot.Failing;
+            slot.Failing = true;
+        }
+
+        Interlocked.Increment(ref _transportFailures);
+        if (first)
+        {
             HostLog.PreviewBufferFailed(_logger, slot.Role, exception);
         }
     }
 
+    /// <summary>Holds the gate: a surface call worked, so the failure streak, if any, is over.</summary>
+    private void MarkHealthy(RoleSlot slot)
+    {
+        if (slot.Failing)
+        {
+            slot.Failing = false;
+            HostLog.PreviewSurfaceRecovered(_logger, slot.Role);
+        }
+    }
+
     /// <summary>UI thread: replaces the role's buffer with one of <paramref name="byteCount"/> bytes.</summary>
-    private void Grow(RoleSlot slot, IPreviewSurface surface, int generation, int byteCount)
+    private void Grow(RoleSlot slot, IPreviewSurface surface, int generation, long byteCount)
     {
         ISharedFrameBuffer? created = null;
         try
@@ -254,7 +328,7 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         }
         catch (Exception exception) when (IsSurfaceFailure(exception))
         {
-            HostLog.PreviewBufferFailed(_logger, slot.Role, exception);
+            RecordFailure(slot, exception);
         }
 
         ISharedFrameBuffer? replaced = null;
@@ -267,7 +341,13 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
                 {
                     replaced = slot.Buffer;
                     slot.Buffer = created;
+                    slot.RetryAt = null;
                     created = null;
+                    MarkHealthy(slot);
+                }
+                else
+                {
+                    slot.RetryAt = _time.GetUtcNow() + RetryInterval;
                 }
             }
         }
@@ -291,5 +371,11 @@ internal sealed class SharedBufferPreviewChannel : IPreviewChannel
         public int Generation { get; set; }
 
         public bool Resizing { get; set; }
+
+        /// <summary>When a failed buffer creation may be tried again, or null when none is cooling down.</summary>
+        public DateTimeOffset? RetryAt { get; set; }
+
+        /// <summary>True from the first surface failure until a surface call works again.</summary>
+        public bool Failing { get; set; }
     }
 }

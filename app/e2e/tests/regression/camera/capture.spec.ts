@@ -8,6 +8,12 @@ import { openDiagnostics, waitForFreshFrames } from "../../../src/camera-diagnos
 const blankThreshold = 2.0;
 /** A mean absolute luminance difference above this makes the mirror comparison conclusive (JPEG noise between two frames of one scene is far below it). */
 const meaningfulDifference = 0.1;
+/**
+ * When the comparison is conclusive, the mirrored capture must be at least this many times closer to the flipped plain capture than
+ * to the plain capture itself. Measured on the placeholder frames: D_direct 0.379 against D_flip 0.0055 (about 69×), so 4× leaves a
+ * wide margin for JPEG noise and a moving scene while still failing a mirror that doesn't happen or happens only in part.
+ */
+const mirrorFlipRatio = 4;
 
 interface Picture {
   width: number;
@@ -90,26 +96,28 @@ test(
       });
     }
 
-    await test.step("the mirrored capture is the unmirrored one flipped left to right", () => {
-      const direct = meanAbsoluteDifference(pictures.mirrored, pictures.plain);
-      const flipped = meanAbsoluteDifference(pictures.mirrored, flipHorizontally(pictures.plain));
-      console.log(`D_direct ${direct.toFixed(4)}, D_flip ${flipped.toFixed(4)}`);
-      testInfo.annotations.push({ type: "D_direct", description: direct.toFixed(4) }, { type: "D_flip", description: flipped.toFixed(4) });
-      if (direct > meaningfulDifference) {
-        expect(flipped, "D_flip < D_direct").toBeLessThan(direct);
-      } else {
-        // A horizontally symmetric scene (or the placeholder's centred icon) can't tell a mirror from a plain picture.
-        testInfo.annotations.push({ type: "inconclusive", description: "symmetric scene" });
-        console.log("inconclusive: symmetric scene");
-        expect(Math.abs(flipped - direct), "a symmetric scene differs the same either way").toBeLessThanOrEqual(meaningfulDifference);
-      }
-    });
-
     await test.step("the screen shows the last capture's facts", async () => {
       await expect(screen.measure("capture")).toContainText(plainFile);
       await expect(screen.measure("capture")).toContainText("Not mirrored");
     });
 
     expect((await app.close()).code).toBe(0);
+
+    const direct = meanAbsoluteDifference(pictures.mirrored, pictures.plain);
+    const flipped = meanAbsoluteDifference(pictures.mirrored, flipHorizontally(pictures.plain));
+    console.log(`D_direct ${direct.toFixed(4)}, D_flip ${flipped.toFixed(4)}`);
+    testInfo.annotations.push({ type: "D_direct", description: direct.toFixed(4) }, { type: "D_flip", description: flipped.toFixed(4) });
+    // A symmetric or static scene can't tell a mirror from a plain picture: report the check as skipped, never as passed.
+    // The deterministic proof of the mirror is CameraHookTests (a full-size asymmetric pattern through the brain's capture path).
+    test.skip(
+      direct <= meaningfulDifference,
+      `not run: symmetric scene — mirror direction can't be decided (D_direct=${direct.toFixed(4)})`,
+    );
+
+    await test.step("the mirrored capture is the unmirrored one flipped left to right", () => {
+      expect(flipped, "D_flip < D_direct").toBeLessThan(direct);
+      // Measured here: D_direct 0.379, D_flip 0.0055 (a factor of about 69). A flip that only half worked would sit near D_direct / 2.
+      expect(flipped, "D_flip is small next to D_direct").toBeLessThan(direct / mirrorFlipRatio);
+    });
   },
 );

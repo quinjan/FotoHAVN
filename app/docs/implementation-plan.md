@@ -568,7 +568,7 @@ Guest gallery view models carry only image URLs and alt text, never metadata, so
 - **Channel.** A dedicated frames channel, separate from presentation messages. During an Active Event, the bound camera's frames go only to the guest connection. The operator connection gets frames only for the camera previewed in Event setup.
 - **WebView2 host.** The camera adapter downsizes preview frames (target 1280 px wide) into a reused `CoreWebView2SharedBuffer` and posts it with `PostSharedBufferToScript`. The UI draws it on a canvas, mirrored by CSS when the Event says so.
 - **Headless host.** The same frames go as binary WebSocket messages.
-- **Format.** Spike S1 decides between raw BGRA and JPEG frames. The UI draws whatever the brain sends and never reaches the camera directly.
+- **Format.** Raw RGBA at 1280 px wide in a shared buffer (WebView2) or as binary WebSocket messages (headless), per [ADR 0004, Spike S1 result](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md#spike-s1-result). The UI draws whatever the brain sends and never reaches the camera directly.
 - **Back-pressure.** The brain keeps at most one frame in flight and drops the rest, so preview can never queue memory.
 
 ### Schema and types
@@ -1430,7 +1430,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 - **End-to-end `@m5`:**
   - `smoke/camera-live`: on the diagnostics screen, the selected camera shows a live preview; frame age stays under 500 ms; the frame rate meets the S1 floor for 10 s.
   - `regression/camera/capture`: a capture produces a decodable JPEG of at least 1280×720 that isn't blank, mirrored when requested (compared with an unmirrored capture taken right after).
-  - `regression/camera/faults`: each injected fault (`stale`, `failed`, `removed`, `exclusiveLost`) moves the state to Not available within 2 s; clearing it and retrying brings back fresh frames.
+  - `regression/camera/faults`: each injected fault (`stale`, `failed`, `removed`, `exclusiveLost`) moves the state to Not available; clearing it and retrying brings back fresh frames. Budgets from the injection: `failed`, `removed`, and `exclusiveLost` within 500 ms (they act at once); `stale` within 2 s of the last frame plus one check interval (2.4 s with the hook round trip), because staleness is defined as 2 s without frames ([ADR 0004](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md)).
   - `regression/camera/watcher`: the camera list from `test.listCameras` matches the diagnostics screen.
 - **Manual:**
   - Unplug and replug a USB webcam.
@@ -1590,7 +1590,7 @@ Tasks:
 - [ ] Logging with Event and Guest Cycle IDs; no personal metadata or images in logs.
 - [ ] `scripts/publish-field-test.ps1`: UI build, self-contained `dotnet publish`, `wwwroot` copy, a pinned Fixed Version WebView2 runtime verified by SHA-256, and a versioned zip.
 - [ ] The portable-launch and soak scenarios in the end-to-end project.
-- [ ] Spike S2 (Windows touch keyboard) and the hardware checklist on the booth laptop.
+- [ ] Spike S2 (Windows touch keyboard) and the hardware checklist on the booth laptop, including the S1-booth re-measure of the raw preview path (ADR 0004; the JPEG fallback is built only if it fails the floor).
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:** single-instance decision logic, wake-lock acquire and release around the Active Event (fake OS seam), the log redaction policy, and the publish script's argument and guard checks (Pester).
@@ -1614,7 +1614,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 | ID | Risk or question | Spike or mitigation | When |
 | --- | --- | --- | --- |
-| S1 | WebView2 shared-buffer preview may not hold 30 fps at 1080p on the booth laptop | **Done (M5).** Measured raw BGRA vs JPEG frames at 960, 1280, and 1920 widths; raw RGBA at 1280 px in a shared buffer with one frame in flight holds the floor, which is 15 fps over at least 5 s of steady state with at most 10% of arrived frames dropped. Result and numbers: [ADR 0004, Spike S1 result](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md#spike-s1-result). Fall back to JPEG over a virtual-host stream only if a booth laptop fails the floor. | Start of M5 |
+| S1 | WebView2 shared-buffer preview may not hold 30 fps at 1080p on the booth laptop | **Done (M5).** Measured raw BGRA vs JPEG frames at 960, 1280, and 1920 widths; raw RGBA at 1280 px in a shared buffer with one frame in flight holds the floor, which is 15 fps over at least 5 s of steady state with at most 10% of arrived frames dropped. Result and numbers: [ADR 0004, Spike S1 result](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md#spike-s1-result). Fall back to JPEG over a virtual-host stream (and step the width down to 960 px) only if the booth-laptop re-measure fails the floor: **deferred**, not implemented in v1, and tracked as M10 risk S1-booth. Until then, a preview transport failure (`CreateSharedBuffer` or `PostSharedBufferToScript` throws) is retried with the same raw path, logged once per failure streak, and counted. | Start of M5 |
 | S2 | The Windows touch keyboard may not appear for WebView2 inputs in a borderless full-screen WPF window | Test on the booth touch screen with Windows 11; fall back to an in-app keyboard for Event setup if needed | M10, or earlier if the booth is touch-only |
 | S3 | SkiaSharp composition speed and memory per strip | Benchmark the largest Template × Look on the booth laptop | M7 |
 | S4 | Fixed Version WebView2 runtime size and update policy | Pin a version, record size and SHA-256, document the update procedure | M10 |

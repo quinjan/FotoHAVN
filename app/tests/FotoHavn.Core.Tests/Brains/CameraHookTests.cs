@@ -113,6 +113,52 @@ public sealed class CameraHookTests
     }
 
     [Fact]
+    public void A_full_size_asymmetric_pattern_is_captured_as_its_exact_left_to_right_mirror_when_the_mirror_is_on()
+    {
+        const int width = 1280;
+        const int height = 720;
+        var pattern = new byte[width * height * 4];
+        FakeTestPattern.Render(pattern, width, height, sequence: 7, rgba: false);
+        var expectedMirror = FlipRows(pattern, width, height);
+        Assert.NotEqual(pattern, expectedMirror);
+
+        using var rig = new CameraRig(photographs: [new FixturePhotograph(pattern, width, height)]);
+        rig.SelectAndWaitUntilReady();
+        var frames = new List<byte[]>();
+        rig.Host.SaveCapture = (frame, mirrored) =>
+        {
+            frames.Add(frame.Bgra.ToArray());
+            return Task.FromResult(new CameraCaptureView("c.jpg", frame.Width, frame.Height, 1, mirrored));
+        };
+
+        CaptureWithFrames(rig);
+        rig.Call(TestHookNames.SetDiagnosticsMirror, """{"mirrored":true}""");
+        CaptureWithFrames(rig);
+        CaptureWithFrames(rig);
+        rig.Call(TestHookNames.SetDiagnosticsMirror, """{"mirrored":false}""");
+        CaptureWithFrames(rig);
+
+        Assert.Equal(pattern, frames[0]);
+        Assert.Equal(expectedMirror, frames[1]);
+        Assert.Equal(expectedMirror, frames[2]);
+        Assert.Equal(pattern, frames[3]);
+    }
+
+    private static byte[] FlipRows(byte[] bgra, int width, int height)
+    {
+        var flipped = new byte[bgra.Length];
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                Array.Copy(bgra, (y * width + x) * 4, flipped, (y * width + (width - 1 - x)) * 4, 4);
+            }
+        }
+
+        return flipped;
+    }
+
+    [Fact]
     public void Capture_fails_when_no_camera_is_ready()
     {
         using var rig = new CameraRig();
