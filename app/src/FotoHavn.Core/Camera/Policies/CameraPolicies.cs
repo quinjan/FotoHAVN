@@ -1,11 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using FotoHavn.Protocol.Cameras;
 
 namespace FotoHavn.Core.Camera.Policies;
 
 // The camera policies (ADR 0004: "Policies in the brain"). Every rule that isn't hardware or OS I/O lives here as pure,
-// unit-tested code that adapters and the brain share. M5 wave A fixed these signatures; wave B1 implements the members
-// marked as stubs (they throw NotImplementedException and carry a coverage exclusion that B1 removes with the stub).
+// unit-tested code that adapters and the brain share.
 
 /// <summary>Chooses the stream format: 1920×1080 at 30 fps first, a bounded fallback down to 1280×720 at 15 fps, no probing.</summary>
 public static class CameraFormatPolicy
@@ -29,9 +28,87 @@ public static class CameraFormatPolicy
     /// 1280×720 at 15 or more. Within a rung, the subtype preference is NV12, YUY2, MJPG, any other subtype in ordinal
     /// order, then the higher frame rate. Nothing below 1280×720, below 15 fps, or of another size is ever chosen.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static CameraFormat? Choose(IReadOnlyList<CameraFormat> formats) =>
-        throw new NotImplementedException("M5 wave B1 implements CameraFormatPolicy.Choose.");
+    public static CameraFormat? Choose(IReadOnlyList<CameraFormat> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+
+        foreach (var (width, height, exactRate) in Ladder)
+        {
+            CameraFormat? best = null;
+            foreach (var format in formats)
+            {
+                if (format is null
+                    || format.Width != width
+                    || format.Height != height
+                    || !RateQualifies(format.FramesPerSecond, exactRate))
+                {
+                    continue;
+                }
+
+                if (best is null || IsBetter(format, best))
+                {
+                    best = format;
+                }
+            }
+
+            if (best is not null)
+            {
+                return best;
+            }
+        }
+
+        return null;
+    }
+
+    private const double RateTolerance = 0.5;
+    private const double TargetRate = 30;
+    private const double MinimumRate = 15;
+
+    // Rung order, first with a match wins: the exact-30 rung of each size comes before its any-rate-from-15 rung.
+    private static readonly (int Width, int Height, bool ExactRate)[] Ladder =
+    [
+        (PreferredWidth, PreferredHeight, true),
+        (PreferredWidth, PreferredHeight, false),
+        (MinimumWidth, MinimumHeight, true),
+        (MinimumWidth, MinimumHeight, false),
+    ];
+
+    private static bool RateQualifies(double framesPerSecond, bool exactRate) =>
+        exactRate
+            ? Math.Abs(framesPerSecond - TargetRate) <= RateTolerance
+            : framesPerSecond >= MinimumRate - RateTolerance;
+
+    // A candidate replaces the current best only when strictly better, so the camera's own order breaks a full tie.
+    private static bool IsBetter(CameraFormat candidate, CameraFormat current)
+    {
+        var bySubtype = SubtypeRank(candidate.Subtype).CompareTo(SubtypeRank(current.Subtype));
+        if (bySubtype != 0)
+        {
+            return bySubtype < 0;
+        }
+
+        if (SubtypeRank(candidate.Subtype) == OtherSubtypeRank)
+        {
+            var byName = string.CompareOrdinal(candidate.Subtype, current.Subtype);
+            if (byName != 0)
+            {
+                return byName < 0;
+            }
+        }
+
+        return candidate.FramesPerSecond > current.FramesPerSecond;
+    }
+
+    private const int OtherSubtypeRank = 3;
+
+    private static int SubtypeRank(string? subtype) =>
+        subtype switch
+        {
+            _ when string.Equals(subtype, "NV12", StringComparison.OrdinalIgnoreCase) => 0,
+            _ when string.Equals(subtype, "YUY2", StringComparison.OrdinalIgnoreCase) => 1,
+            _ when string.Equals(subtype, "MJPG", StringComparison.OrdinalIgnoreCase) => 2,
+            _ => OtherSubtypeRank,
+        };
 }
 
 /// <summary>Decides whether a camera is delivering frames: the readiness proof, and the staleness limit during an Active Event.</summary>
@@ -47,27 +124,48 @@ public static class FrameFreshness
     /// True when <paramref name="latest"/> exists and its age, <paramref name="now"/> minus its timestamp, is at most
     /// <paramref name="maxAge"/>. No frame is never fresh. A frame stamped after <paramref name="now"/> (clock jitter) has age zero.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static bool IsFresh(TimeSpan now, CameraFrameInfo? latest, TimeSpan maxAge) =>
-        throw new NotImplementedException("M5 wave B1 implements FrameFreshness.IsFresh.");
+    public static bool IsFresh(TimeSpan now, CameraFrameInfo? latest, TimeSpan maxAge)
+    {
+        if (latest is null)
+        {
+            return false;
+        }
+
+        var age = now - latest.Timestamp;
+        if (age < TimeSpan.Zero)
+        {
+            age = TimeSpan.Zero;
+        }
+
+        return age <= maxAge;
+    }
 }
 
 /// <summary>The pure rule adapters use to pick the frame for a Capture: the first one stamped at or after the countdown's end.</summary>
 public static class CaptureFrameSelector
 {
     /// <summary>True when a frame stamped <paramref name="frameTimestamp"/> may be the Capture: it is at or after <paramref name="notBefore"/>.</summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static bool IsEligible(TimeSpan frameTimestamp, TimeSpan notBefore) =>
-        throw new NotImplementedException("M5 wave B1 implements CaptureFrameSelector.IsEligible.");
+    public static bool IsEligible(TimeSpan frameTimestamp, TimeSpan notBefore) => frameTimestamp >= notBefore;
 
     /// <summary>
     /// The index of the first frame in <paramref name="timestampsInArrivalOrder"/> that is eligible, or null when none is
     /// (the adapter waits for the next frame). A frame stamped before <paramref name="notBefore"/> is never selected,
     /// however late it arrived or however many frames follow it.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static int? Select(IReadOnlyList<TimeSpan> timestampsInArrivalOrder, TimeSpan notBefore) =>
-        throw new NotImplementedException("M5 wave B1 implements CaptureFrameSelector.Select.");
+    public static int? Select(IReadOnlyList<TimeSpan> timestampsInArrivalOrder, TimeSpan notBefore)
+    {
+        ArgumentNullException.ThrowIfNull(timestampsInArrivalOrder);
+
+        for (var index = 0; index < timestampsInArrivalOrder.Count; index++)
+        {
+            if (IsEligible(timestampsInArrivalOrder[index], notBefore))
+            {
+                return index;
+            }
+        }
+
+        return null;
+    }
 }
 
 /// <summary>Where a failure happened, because the same HRESULT means different things when opening and when streaming.</summary>
@@ -143,18 +241,58 @@ public static class CameraFailureClassifier
     /// <item>Open: <see cref="CameraHResults.InvalidMediaType"/>, <see cref="CameraHResults.NoMoreTypes"/>, <see cref="CameraHResults.UnsupportedFormat"/> → <see cref="CameraFailureKind.NoSupportedFormat"/>.</item>
     /// </list>
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
     public static CameraFailureKind Classify(int hresult, CameraOperation operation) =>
-        throw new NotImplementedException("M5 wave B1 implements CameraFailureClassifier.Classify(int).");
+        operation == CameraOperation.Open ? ClassifyOpen(hresult) : ClassifyStreaming(hresult);
+
+    private static CameraFailureKind ClassifyOpen(int hresult) =>
+        hresult switch
+        {
+            CameraHResults.AccessDenied => CameraFailureKind.PrivacyDenied,
+            CameraHResults.SharingViolation
+                or CameraHResults.HwMftFailedStartStreaming
+                or CameraHResults.VideoDeviceLocked
+                or CameraHResults.VideoRecordingDevicePreempted => CameraFailureKind.InUseByAnotherApp,
+            CameraHResults.VideoRecordingDeviceInvalidated
+                or CameraHResults.DeviceNotConnected
+                or CameraHResults.DeviceRemoved
+                or CameraHResults.FileNotFound
+                or CameraHResults.NotFound
+                or CameraHResults.MediaFoundationNotFound => CameraFailureKind.NotFound,
+            CameraHResults.InvalidMediaType
+                or CameraHResults.NoMoreTypes
+                or CameraHResults.UnsupportedFormat => CameraFailureKind.NoSupportedFormat,
+            _ => CameraFailureKind.Unknown,
+        };
+
+    private static CameraFailureKind ClassifyStreaming(int hresult) =>
+        hresult switch
+        {
+            CameraHResults.AccessDenied => CameraFailureKind.PrivacyDenied,
+            CameraHResults.VideoRecordingDevicePreempted
+                or CameraHResults.SharingViolation
+                or CameraHResults.VideoDeviceLocked => CameraFailureKind.ExclusiveLost,
+            CameraHResults.VideoRecordingDeviceInvalidated
+                or CameraHResults.DeviceNotConnected
+                or CameraHResults.DeviceRemoved => CameraFailureKind.Removed,
+            _ => CameraFailureKind.Failed,
+        };
 
     /// <summary>
     /// Classifies an exception: a <see cref="CameraException"/> keeps its kind; an <see cref="UnauthorizedAccessException"/>
     /// (WinRT's <c>E_ACCESSDENIED</c>) is <see cref="CameraFailureKind.PrivacyDenied"/>; any other exception goes through
     /// <see cref="Classify(int, CameraOperation)"/> with its <see cref="Exception.HResult"/>.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static CameraFailureKind Classify(Exception exception, CameraOperation operation) =>
-        throw new NotImplementedException("M5 wave B1 implements CameraFailureClassifier.Classify(Exception).");
+    public static CameraFailureKind Classify(Exception exception, CameraOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+
+        return exception switch
+        {
+            CameraException camera => camera.Kind,
+            UnauthorizedAccessException => CameraFailureKind.PrivacyDenied,
+            _ => Classify(exception.HResult, operation),
+        };
+    }
 }
 
 /// <summary>Which failures the brain's Retry may try again.</summary>
@@ -164,9 +302,7 @@ public static class CameraRetryPolicy
     /// True for every kind except <see cref="CameraFailureKind.NoSupportedFormat"/>, which the same camera will repeat.
     /// A retry always opens a new session: Windows doesn't promise that a failed <c>MediaCapture</c> revives.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static bool IsRetryable(CameraFailureKind kind) =>
-        throw new NotImplementedException("M5 wave B1 implements CameraRetryPolicy.IsRetryable.");
+    public static bool IsRetryable(CameraFailureKind kind) => kind != CameraFailureKind.NoSupportedFormat;
 }
 
 /// <summary>The one-frame-in-flight rule for one preview target, shared by both hosts' channels. Thread-safe.</summary>
@@ -178,38 +314,110 @@ public sealed class PreviewBackPressure
     /// <summary>A frame still unacked after this long is treated as lost (the page crashed or never acked) and stops blocking.</summary>
     public static readonly TimeSpan InFlightTimeout = TimeSpan.FromSeconds(1);
 
+    private readonly object gate = new();
+    private readonly Queue<DateTimeOffset> deliveries = new();
+    private bool inFlight;
+    private long inFlightSequence;
+    private DateTimeOffset inFlightSince;
+    private long delivered;
+    private long dropped;
+    private DateTimeOffset? lastDeliveredAt;
+
     /// <summary>Whether a frame is in flight and not yet timed out.</summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public bool IsInFlight(DateTimeOffset now) =>
-        throw new NotImplementedException("M5 wave B1 implements PreviewBackPressure.IsInFlight.");
+    public bool IsInFlight(DateTimeOffset now)
+    {
+        lock (gate)
+        {
+            return inFlight && !TimedOut(now);
+        }
+    }
 
     /// <summary>
     /// Claims the one in-flight slot for <paramref name="sequence"/> and returns true, or returns false and counts a dropped
     /// frame when a frame is in flight. A frame that has been in flight for <see cref="InFlightTimeout"/> or longer is
     /// replaced (and counted as dropped).
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public bool TryBegin(long sequence, DateTimeOffset now) =>
-        throw new NotImplementedException("M5 wave B1 implements PreviewBackPressure.TryBegin.");
+    public bool TryBegin(long sequence, DateTimeOffset now)
+    {
+        lock (gate)
+        {
+            if (inFlight)
+            {
+                dropped++;
+                if (!TimedOut(now))
+                {
+                    return false;
+                }
+            }
+
+            inFlight = true;
+            inFlightSequence = sequence;
+            inFlightSince = now;
+            return true;
+        }
+    }
+
+    private bool TimedOut(DateTimeOffset now) => now - inFlightSince >= InFlightTimeout;
 
     /// <summary>
     /// Handles the page's ack. When <paramref name="wireSequence"/> equals the in-flight frame's wire sequence
     /// (<see cref="PreviewFrameHeader.ToWireSequence"/>), frees the slot, counts a delivered frame, and returns true.
     /// Any other ack (late, duplicate, unknown) changes nothing and returns false.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public bool Acknowledge(uint wireSequence, DateTimeOffset now) =>
-        throw new NotImplementedException("M5 wave B1 implements PreviewBackPressure.Acknowledge.");
+    public bool Acknowledge(uint wireSequence, DateTimeOffset now)
+    {
+        lock (gate)
+        {
+            if (!inFlight || PreviewFrameHeader.ToWireSequence(inFlightSequence) != wireSequence)
+            {
+                return false;
+            }
+
+            inFlight = false;
+            delivered++;
+            lastDeliveredAt = now;
+            deliveries.Enqueue(now);
+            Prune(now);
+            return true;
+        }
+    }
+
+    private void Prune(DateTimeOffset now)
+    {
+        var cutoff = now - RateWindow;
+        while (deliveries.Count > 0 && deliveries.Peek() <= cutoff)
+        {
+            deliveries.Dequeue();
+        }
+    }
 
     /// <summary>Frees the slot without counting a frame, for when the page disconnects or reloads. Counters keep their values.</summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public void Reset() =>
-        throw new NotImplementedException("M5 wave B1 implements PreviewBackPressure.Reset.");
+    public void Reset()
+    {
+        lock (gate)
+        {
+            inFlight = false;
+        }
+    }
 
     /// <summary>The counters, with <see cref="PreviewFrameStats.DeliveredPerSecond"/> measured over the last <see cref="RateWindow"/> ending at <paramref name="now"/>.</summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public PreviewFrameStats Snapshot(DateTimeOffset now) =>
-        throw new NotImplementedException("M5 wave B1 implements PreviewBackPressure.Snapshot.");
+    public PreviewFrameStats Snapshot(DateTimeOffset now)
+    {
+        lock (gate)
+        {
+            var cutoff = now - RateWindow;
+            var inWindow = 0;
+            foreach (var at in deliveries)
+            {
+                if (at > cutoff && at <= now)
+                {
+                    inWindow++;
+                }
+            }
+
+            return new PreviewFrameStats(delivered, dropped, lastDeliveredAt, inWindow / RateWindow.TotalSeconds);
+        }
+    }
 }
 
 /// <summary>Mirrors a frame left to right (the Event's mirror setting applies to preview and saved Captures, D22).</summary>
@@ -221,9 +429,26 @@ public static class MirrorTransform
     /// non-positive size or a stride below <c>width × 4</c>, and <see cref="ArgumentException"/> when
     /// <paramref name="bgra"/> is shorter than <c>stride × (height − 1) + width × 4</c>.
     /// </summary>
-    [ExcludeFromCodeCoverage(Justification = "Contract stub until M5 wave B1 implements the policy.")]
-    public static void MirrorBgraInPlace(Span<byte> bgra, int width, int height, int stride) =>
-        throw new NotImplementedException("M5 wave B1 implements MirrorTransform.MirrorBgraInPlace.");
+    public static void MirrorBgraInPlace(Span<byte> bgra, int width, int height, int stride)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(width, 0);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(height, 0);
+        var rowBytes = (long)width * 4;
+        if (stride < rowBytes)
+        {
+            throw new ArgumentOutOfRangeException(nameof(stride), stride, "The stride must hold a whole row of pixels.");
+        }
+
+        if (bgra.Length < (long)stride * (height - 1) + rowBytes)
+        {
+            throw new ArgumentException("The buffer is shorter than the frame it describes.", nameof(bgra));
+        }
+
+        for (var y = 0; y < height; y++)
+        {
+            MemoryMarshal.Cast<byte, uint>(bgra.Slice(y * stride, (int)rowBytes)).Reverse();
+        }
+    }
 }
 
 /// <summary>
