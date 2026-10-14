@@ -23,6 +23,10 @@ internal sealed class ScreenWindows : IHostServices
     private readonly Dispatcher _dispatcher;
     private readonly WindowsDisplayAdapter _displays;
     private readonly ILogger _logger;
+    private readonly FolderOpener _folders;
+    private readonly string _fontsFolder;
+    private readonly List<IdentifyOverlayWindow> _overlays = [];
+    private OverlayFonts? _fonts;
     private BoothWindowServices? _services;
     private BoothWindow? _operator;
     private BoothWindow? _guest;
@@ -30,14 +34,17 @@ internal sealed class ScreenWindows : IHostServices
     private volatile bool _operatorOpen;
     private volatile bool _guestOpen;
 
-    public ScreenWindows(Dispatcher dispatcher, WindowsDisplayAdapter displays, ILogger logger)
+    public ScreenWindows(Dispatcher dispatcher, WindowsDisplayAdapter displays, ILogger logger, FolderOpener folders, string? fontsFolder = null)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
         ArgumentNullException.ThrowIfNull(displays);
         ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(folders);
         _dispatcher = dispatcher;
         _displays = displays;
         _logger = logger;
+        _folders = folders;
+        _fontsFolder = fontsFolder ?? OverlayFonts.DefaultFolder;
         _displays.SnapshotUpdated += (_, _) => UpdateOperatorDisplayId();
     }
 
@@ -78,6 +85,7 @@ internal sealed class ScreenWindows : IHostServices
         {
             _operatorOpen = false;
             _operatorDisplayId = null;
+            CloseOverlays();
         };
 
         _operator = window;
@@ -105,19 +113,73 @@ internal sealed class ScreenWindows : IHostServices
         _dispatcher.InvokeAsync(CloseGuest);
     }
 
-    public void OpenFolder(string path) => HostLog.OpenFolderRequested(_logger, path);
+    public void OpenFolder(string path)
+    {
+        ArgumentNullException.ThrowIfNull(path);
+        // Starting Explorer can take a moment; the brain's call returns at once.
+        _ = Task.Run(() => _folders.Open(path));
+    }
 
     public string? GetOperatorDisplayId() => _operatorDisplayId;
 
-    // TODO(M6 wave B host agent): draw the borderless, non-activating number overlays; the brain owns the 3-second timer.
     public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays)
     {
         ArgumentNullException.ThrowIfNull(overlays);
-        HostLog.IdentifyOverlaysRequested(_logger, overlays.Count);
+        IReadOnlyList<IdentifyOverlaySpec> specs = [.. overlays];
+        HostLog.IdentifyOverlaysRequested(_logger, specs.Count);
+        _dispatcher.InvokeAsync(() => ShowOverlays(specs));
     }
 
-    // TODO(M6 wave B host agent)
-    public void HideIdentifyOverlays() => HostLog.IdentifyOverlaysHideRequested(_logger);
+    public void HideIdentifyOverlays()
+    {
+        HostLog.IdentifyOverlaysHideRequested(_logger);
+        _dispatcher.InvokeAsync(CloseOverlays);
+    }
+
+    /// <summary>The identify overlays showing now (UI thread).</summary>
+    public IReadOnlyList<IdentifyOverlayWindow> Overlays => _overlays;
+
+    /// <summary>Closes every identify overlay (UI thread; also used at shutdown).</summary>
+    public void CloseOverlays()
+    {
+        var showing = _overlays.ToArray();
+        _overlays.Clear();
+        foreach (var overlay in showing)
+        {
+            overlay.Close();
+        }
+    }
+
+    private void ShowOverlays(IReadOnlyList<IdentifyOverlaySpec> specs)
+    {
+        // A new Show replaces the overlays already showing.
+        CloseOverlays();
+        OverlayFonts fonts;
+        try
+        {
+            fonts = _fonts ??= OverlayFonts.Load(_fontsFolder);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            HostLog.IdentifyOverlayFailed(_logger, "fonts", exception);
+            return;
+        }
+
+        foreach (var spec in specs)
+        {
+            var overlay = new IdentifyOverlayWindow(spec, fonts);
+            try
+            {
+                overlay.Present();
+                _overlays.Add(overlay);
+            }
+            catch (Exception exception) when (exception is not OutOfMemoryException)
+            {
+                HostLog.IdentifyOverlayFailed(_logger, spec.Display.Id, exception);
+                overlay.Close();
+            }
+        }
+    }
 
     /// <summary>Facts about each open window (UI thread).</summary>
     public IReadOnlyList<WindowFacts> DescribeWindows()

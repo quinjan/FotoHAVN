@@ -91,6 +91,14 @@ internal static partial class NativeMethods
     public const int WmGetMinMaxInfo = 0x0024;
     public const int WmNcDestroy = 0x0082;
     public const int GwlpWndProc = -4;
+    public const int GwlExStyle = -20;
+    public const long WsExToolWindow = 0x00000080;
+    public const long WsExNoActivate = 0x08000000;
+    public const int WmMouseActivate = 0x0021;
+    public const int MaNoActivate = 3;
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
+    public static extern IntPtr GetWindowLongPtr(IntPtr hwnd, int index);
 
     public delegate IntPtr WindowProcedure(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
 

@@ -66,14 +66,23 @@ internal static partial class HostLog
     [LoggerMessage(EventId = 20, EventName = "displayConfigFailed", Level = LogLevel.Warning, Message = "QueryDisplayConfig failed")]
     public static partial void DisplayConfigFailed(ILogger logger, Exception exception);
 
-    [LoggerMessage(EventId = 21, EventName = "openFolder", Level = LogLevel.Information, Message = "Open folder requested (not implemented until M6): {Path}")]
-    public static partial void OpenFolderRequested(ILogger logger, string path);
+    [LoggerMessage(EventId = 21, EventName = "openFolder", Level = LogLevel.Information, Message = "Open folder requested: {Path}; File Explorer {Outcome}")]
+    public static partial void OpenFolderRequested(ILogger logger, string path, string outcome);
 
-    [LoggerMessage(EventId = 31, EventName = "identifyOverlays", Level = LogLevel.Information, Message = "Identify overlays requested on {Count} displays (not implemented until M6 wave B2)")]
+    [LoggerMessage(EventId = 33, EventName = "openFolderRefused", Level = LogLevel.Warning, Message = "Refused to open a folder outside the Data folder: {Path}")]
+    public static partial void OpenFolderRefused(ILogger logger, string path);
+
+    [LoggerMessage(EventId = 34, EventName = "openFolderFailed", Level = LogLevel.Warning, Message = "File Explorer could not open {Path}")]
+    public static partial void OpenFolderFailed(ILogger logger, string path, Exception exception);
+
+    [LoggerMessage(EventId = 31, EventName = "identifyOverlays", Level = LogLevel.Information, Message = "Identify overlays shown on {Count} displays")]
     public static partial void IdentifyOverlaysRequested(ILogger logger, int count);
 
-    [LoggerMessage(EventId = 32, EventName = "identifyOverlaysHidden", Level = LogLevel.Information, Message = "Identify overlays hide requested (not implemented until M6 wave B2)")]
+    [LoggerMessage(EventId = 32, EventName = "identifyOverlaysHidden", Level = LogLevel.Information, Message = "Identify overlays hidden")]
     public static partial void IdentifyOverlaysHideRequested(ILogger logger);
+
+    [LoggerMessage(EventId = 35, EventName = "identifyOverlayFailed", Level = LogLevel.Warning, Message = "An identify overlay could not be shown on {DisplayId}")]
+    public static partial void IdentifyOverlayFailed(ILogger logger, string displayId, Exception exception);
 
     [LoggerMessage(EventId = 22, EventName = "brainWorkFailed", Level = LogLevel.Critical, Message = "A brain work item threw")]
     public static partial void BrainWorkFailed(ILogger logger, Exception exception);

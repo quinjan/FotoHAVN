@@ -21,4 +21,7 @@ internal static class HostBuild
 
     /// <summary>The Guest window stays topmost in field builds; E2E builds leave it in the normal z-order.</summary>
     public static bool GuestWindowTopmost => !IsE2E;
+
+    /// <summary>Field builds start File Explorer for Open folder; E2E builds only record the request (no windows spawn mid-run).</summary>
+    public static bool LaunchesExplorer => !IsE2E;
 }

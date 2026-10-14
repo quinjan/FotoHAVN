@@ -41,7 +41,7 @@ internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILo
     /// <summary>The overlays of the last <see cref="ShowIdentifyOverlays"/> not followed by <see cref="HideIdentifyOverlays"/>; empty when none show.</summary>
     public IReadOnlyList<IdentifyOverlaySpec> IdentifyOverlays => Volatile.Read(ref _identifyOverlays);
 
-    // TODO(M6 wave B host agent): the headless host only records; there are no displays to draw on.
+    /// <summary>Records only: there are no displays to draw on. The brain's diagnostics carry the E2E check (<c>identifyOverlays</c>).</summary>
     public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays)
     {
         ArgumentNullException.ThrowIfNull(overlays);
@@ -49,7 +49,6 @@ internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILo
         LogIdentifyShown(logger, overlays.Count);
     }
 
-    // TODO(M6 wave B host agent)
     public void HideIdentifyOverlays()
     {
         Volatile.Write(ref _identifyOverlays, []);
