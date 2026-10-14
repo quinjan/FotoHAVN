@@ -1,5 +1,5 @@
 import type { RejectReason } from "../protocol/generated.ts";
-import type { CommandResult } from "../brain/types.ts";
+import type { CommandResult, TestHookName, TestResult } from "../brain/types.ts";
 
 // Fixed English names, so the Event list reads the same whatever the operator machine's language or region.
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -37,16 +37,27 @@ const rejectionCopy: Partial<Record<RejectReason, string>> = {
   eventRunning: "End the running Event to start another.",
 };
 
+const didntWork = "That didn't work. Try again.";
+
+function localFailureNotice(error: string): string {
+  return error === "timeout" || error === "notConnected" || error === "disconnected"
+    ? "The booth didn't answer. Try again."
+    : didntWork;
+}
+
 /** The polite line shown when a command doesn't go through; null when it was accepted. */
 export function commandNotice(result: CommandResult): string | null {
   switch (result.status) {
     case "accepted":
       return null;
     case "rejected":
-      return (result.reason === null ? undefined : rejectionCopy[result.reason]) ?? "That didn't work. Try again.";
+      return (result.reason === null ? undefined : rejectionCopy[result.reason]) ?? didntWork;
     case "failed":
-      return result.error === "timeout" || result.error === "notConnected" || result.error === "disconnected"
-        ? "The booth didn't answer. Try again."
-        : "That didn't work. Try again.";
+      return localFailureNotice(result.error);
   }
+}
+
+/** The polite line shown when an E2E test hook doesn't go through; null when it did. */
+export function hookNotice(result: TestResult<TestHookName>): string | null {
+  return result.ok ? null : localFailureNotice(result.error);
 }

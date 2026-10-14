@@ -17,7 +17,12 @@ function target(search: string, webview?: WebView2Bridge): Pick<Window, "chrome"
 
 function fakeWebView() {
   const postMessage = vi.fn<(message: unknown) => void>();
-  const webview: WebView2Bridge = { postMessage, addEventListener: vi.fn(), removeEventListener: vi.fn() };
+  const webview: WebView2Bridge = {
+    postMessage,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    releaseBuffer: vi.fn(),
+  };
   return { webview, postMessage };
 }
 

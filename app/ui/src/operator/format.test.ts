@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commandNotice, formatEventDate, formatGuestCycles, formatLastUsed } from "./format.ts";
+import { commandNotice, formatEventDate, formatGuestCycles, formatLastUsed, hookNotice } from "./format.ts";
 
 describe("operator formatting", () => {
   it("formats an Event date as a calendar day, whatever the time zone", () => {
@@ -31,5 +31,13 @@ describe("operator formatting", () => {
     expect(commandNotice({ status: "failed", error: "notConnected" })).toBe("The booth didn't answer. Try again.");
     expect(commandNotice({ status: "failed", error: "disconnected" })).toBe("The booth didn't answer. Try again.");
     expect(commandNotice({ status: "failed", error: "invalidEnvelope" })).toBe("That didn't work. Try again.");
+  });
+
+  it("explains each test hook outcome politely", () => {
+    expect(hookNotice({ ok: true, result: {} })).toBeNull();
+    expect(hookNotice({ ok: false, error: "hookFailed" })).toBe("That didn't work. Try again.");
+    expect(hookNotice({ ok: false, error: "unknownCamera" })).toBe("That didn't work. Try again.");
+    expect(hookNotice({ ok: false, error: "timeout" })).toBe("The booth didn't answer. Try again.");
+    expect(hookNotice({ ok: false, error: "disconnected" })).toBe("The booth didn't answer. Try again.");
   });
 });

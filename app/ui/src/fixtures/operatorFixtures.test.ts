@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { eventRows, longEventName, longEventVenue, operatorEventList, operatorFixtures, operatorStorageError, storageErrorKinds } from "./operatorFixtures.ts";
+import {
+  cameraReasonsWithFixtures,
+  eventRows,
+  longEventName,
+  longEventVenue,
+  operatorEventList,
+  operatorFixtures,
+  operatorStorageError,
+  storageErrorKinds,
+} from "./operatorFixtures.ts";
 
 describe("operator fixtures", () => {
   it("builds the requested number of Event rows, with unique ids and one running Event first", () => {
@@ -35,5 +44,28 @@ describe("operator fixtures", () => {
     expect(names).toHaveLength(storageErrorKinds.length);
     expect(names).toContain("operator-storage-error-not-local-disk");
     expect(names).toContain("operator-storage-error-cloud-synced");
+  });
+
+  it("writes a camera diagnostics fixture for the reasons the brain's fixtures don't cover, and one with no camera chosen", () => {
+    const fixtures = operatorFixtures();
+    const names = Object.keys(fixtures).filter((name) => name.startsWith("operator-camera-diagnostics-"));
+    expect(names).toEqual([
+      "operator-camera-diagnostics-choose-camera",
+      ...cameraReasonsWithFixtures.map((reason) => `operator-camera-diagnostics-reason-${reason.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`),
+    ]);
+    expect(fixtures["operator-camera-diagnostics-reason-exclusive-lost"]?.presentation).toMatchObject({
+      surface: "cameraDiagnostics",
+      eventList: null,
+      cameraDiagnostics: { state: "notAvailable", reason: "exclusiveLost", selectedDeviceId: "fake-camera" },
+    });
+    expect(fixtures["operator-camera-diagnostics-choose-camera"]?.presentation.cameraDiagnostics).toMatchObject({
+      state: "idle",
+      selectedDeviceId: null,
+    });
+  });
+
+  it("leaves privacy denied and in use to the brain's generated fixtures", () => {
+    expect(cameraReasonsWithFixtures).not.toContain("privacyDenied");
+    expect(cameraReasonsWithFixtures).not.toContain("inUseByAnotherApp");
   });
 });

@@ -29,3 +29,6 @@ export interface FrameSource {
 export function isDrawableFrame(frame: PreviewFrame): frame is DrawableFrame {
   return "draw" in frame && typeof frame.draw === "function";
 }
+
+/** A camera that has delivered nothing: for a preview with no picture to show, and a screen with no camera yet. */
+export const silentFrameSource: FrameSource = { subscribe: () => () => undefined };

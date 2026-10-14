@@ -1,3 +1,4 @@
+import type { FrameSource } from "../components/LivePreview/index.ts";
 import {
   PROTOCOL_VERSION,
   type Command,
@@ -43,6 +44,7 @@ function isServerMessage(value: unknown): value is ServerMessage {
  */
 export class ProtocolBrainClient implements BrainClient {
   readonly kind: BrainClient["kind"];
+  readonly frames: FrameSource | undefined;
 
   private readonly transport: Transport | null;
   private readonly protocolVersion: number;
@@ -60,6 +62,7 @@ export class ProtocolBrainClient implements BrainClient {
   constructor(transport: Transport | null, options: ProtocolClientOptions = {}) {
     this.transport = transport;
     this.kind = transport?.kind ?? "none";
+    this.frames = transport?.frames;
     this.protocolVersion = options.protocolVersion ?? PROTOCOL_VERSION;
     this.commandTimeoutMs = options.commandTimeoutMs ?? defaultCommandTimeoutMs;
     this.testTimeoutMs = options.testTimeoutMs ?? defaultTestTimeoutMs;

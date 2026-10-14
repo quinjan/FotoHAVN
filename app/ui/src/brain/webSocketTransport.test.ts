@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { operatorEventListEmpty, operatorEventListWithRows } from "../fixtures/inlineFixtures.ts";
 import { PROTOCOL_VERSION } from "../protocol/generated.ts";
+import { stubImageData } from "../test/fakeImageData.ts";
 import { ProtocolBrainClient } from "./protocolClient.ts";
 import { bridgeUrl, createWebSocketTransport, defaultBackoffMs, type SocketLike } from "./webSocketTransport.ts";
 
 class FakeSocket implements SocketLike {
   readyState = 0;
+  binaryType?: "arraybuffer" | "blob";
   onopen: ((event: Event) => void) | null = null;
   onmessage: ((event: MessageEvent) => void) | null = null;
   onclose: ((event: CloseEvent) => void) | null = null;
@@ -90,7 +92,7 @@ describe("createWebSocketTransport", () => {
     const { client, latest } = setup();
     latest().open();
     latest().message("{not json");
-    latest().message(new ArrayBuffer(4));
+    latest().message(new Blob(["x"]));
     expect(client.getState().status).toBe("connecting");
     expect(warn).toHaveBeenCalledOnce();
   });
@@ -145,6 +147,49 @@ describe("createWebSocketTransport", () => {
     const { client, latest } = setup();
     await expect(client.sendCommand("OpenNewEvent", {})).resolves.toEqual({ status: "failed", error: "notConnected" });
     expect(latest().sent).toEqual([]);
+  });
+
+  describe("live preview frames", () => {
+    beforeEach(() => {
+      stubImageData();
+    });
+
+    function frameMessage(seq: number, width: number, height: number): ArrayBuffer {
+      const message = new ArrayBuffer(24 + width * height * 4);
+      const view = new DataView(message);
+      new Uint8Array(message).set([0x46, 0x48, 0x50, 0x46]);
+      view.setUint16(4, 1, true);
+      view.setUint32(8, seq, true);
+      view.setUint16(12, width, true);
+      view.setUint16(14, height, true);
+      return message;
+    }
+
+    it("asks for binary messages as ArrayBuffers on every new socket", () => {
+      const { latest } = setup();
+      expect(latest().binaryType).toBe("arraybuffer");
+    });
+
+    it("hands binary messages to the frame source and acknowledges each as a JSON text message", () => {
+      const { transport, latest } = setup();
+      const frames = vi.fn();
+      transport.frames?.subscribe(frames);
+      latest().open();
+
+      latest().message(frameMessage(5, 2, 1));
+
+      expect(frames).toHaveBeenCalledOnce();
+      expect(latest().sent).toEqual([
+        { type: "hello", protocolVersion: PROTOCOL_VERSION },
+        { type: "frameAck", seq: 5 },
+      ]);
+    });
+
+    it("does not acknowledge while the socket isn't open", () => {
+      const { latest } = setup();
+      latest().message(frameMessage(5, 2, 1));
+      expect(latest().sent).toEqual([]);
+    });
   });
 
   it("stops without reconnecting and ignores the old socket's late close", () => {
