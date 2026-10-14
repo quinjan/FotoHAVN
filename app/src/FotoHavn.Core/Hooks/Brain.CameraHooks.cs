@@ -16,6 +16,7 @@ public sealed partial class Brain
         switch (name)
         {
             case TestHookNames.OpenCameraDiagnostics:
+                ReleaseDiagnosticsCaptures();
                 _cameraDiagnosticsOpen = true;
                 StartCameraList();
                 Reply(connection, id, HookOutcome.Ok(EmptyHookResult.Instance));

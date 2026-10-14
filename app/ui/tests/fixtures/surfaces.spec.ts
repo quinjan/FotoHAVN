@@ -193,6 +193,30 @@ for (const resolution of resolutions) {
       });
     }
 
+    // The last composition (M7): a print from the lane's placeholder image, turned a quarter turn for the landscape Template.
+    for (const [fixture, alt, rotated, size] of [
+      ["operator-camera-diagnostics-composed", "Signature Strip, Sepia", false, "600 × 1800"],
+      ["operator-camera-diagnostics-composed-landscape", "Panorama Four, Classic", true, "1800 × 600"],
+    ] as const) {
+      test(`operator camera diagnostics, ${fixture.replace("operator-camera-diagnostics-", "")}`, async ({ page }) => {
+        await page.goto(`/index.html?fixture=${fixture}`);
+        await expect(page.locator('[data-fotohavn-surface="cameraDiagnostics"]')).toBeVisible();
+        const image = page.getByRole("img", { name: alt });
+        await expect(image).toBeVisible();
+        await expect(image).toHaveAttribute("src", /^data:image\/svg\+xml,/);
+        await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
+        if (rotated) {
+          await expect(image.locator("..")).toHaveAttribute("data-rotated", "true");
+        } else {
+          await expect(image.locator("..")).not.toHaveAttribute("data-rotated", /.*/);
+        }
+        await expect(page.getByText(size, { exact: true })).toBeVisible();
+        await expectNoHorizontalScrolling(page);
+        await page.screenshot({ path: resolve(screenshotDir, `${fixture}-${name}.png`) });
+        await expectAccessible(page);
+      });
+    }
+
     test("operator camera diagnostics, no cameras", async ({ page }) => {
       await page.goto("/index.html?fixture=operator-camera-diagnostics-no-cameras");
       await expect(page.locator('[data-fotohavn-surface="cameraDiagnostics"]')).toBeVisible();
@@ -261,7 +285,7 @@ for (const resolution of resolutions) {
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
-      await expect(page.getByText("Booth version 4 · Screen version 3")).toBeVisible();
+      await expect(page.getByText("Booth version 5 · Screen version 4")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);

@@ -61,6 +61,28 @@ describe("readStartupParams", () => {
 });
 
 describe("createBrainClient", () => {
+  it("serves previews at the WebView2 virtual host in the WPF host", () => {
+    const { webview } = fakeWebView();
+    const client = createBrainClient({ target: target("?token=abc", webview), env: field });
+    expect(client.previewUrl?.("signature-strip.naturale-v1.r1")).toBe("https://preview.fotohavn/signature-strip.naturale-v1.r1.png");
+  });
+
+  it("serves previews at /preview/ on the page's own origin for the headless host, or on the ?brain= host's origin", () => {
+    const own = createBrainClient({ target: target("?token=abc"), env: field, createSocket: recordingSocket([]) });
+    expect(own.previewUrl?.("panorama-four.classic-v1.r4")).toBe("/preview/panorama-four.classic-v1.r4.png");
+
+    const other = createBrainClient({
+      target: target("?token=abc&brain=ws%3A%2F%2F127.0.0.1%3A6000%2Fbridge"),
+      env: dev,
+      createSocket: recordingSocket([]),
+    });
+    expect(other.previewUrl?.("panorama-four.classic-v1.r4")).toBe("http://127.0.0.1:6000/preview/panorama-four.classic-v1.r4.png");
+  });
+
+  it("has no preview URL without a transport", () => {
+    expect(createBrainClient({ target: target(""), env: field }).previewUrl).toBeUndefined();
+  });
+
   it("prefers the WebView2 bridge over a token or fixture", () => {
     const { webview, postMessage } = fakeWebView();
     const client = createBrainClient({ target: target("?token=abc&fixture=guest-start", webview), env: dev });

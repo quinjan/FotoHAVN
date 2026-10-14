@@ -3,6 +3,7 @@ import type { Transport } from "../brain/types.ts";
 import { PROTOCOL_VERSION, type ServerMessage } from "../protocol/generated.ts";
 import { operatorEventListWithRows } from "./inlineFixtures.ts";
 import { operatorFixtures } from "./operatorFixtures.ts";
+import { fixturePreviewUrl } from "./previewImages.ts";
 
 /**
  * The fixture lane: `?fixture=<name>` in development and E2E builds. `main.tsx` imports this module only in those
@@ -66,5 +67,5 @@ export const fixtureNames: readonly string[] = Object.keys(snapshots).sort();
 /** A fixture transport for `name`, or null when there is no such fixture. */
 export function createFixtureLaneTransport(name: string): Transport | null {
   const snapshot = Object.hasOwn(snapshots, name) ? snapshots[name] : undefined;
-  return snapshot === undefined ? null : createFixtureTransport(snapshot);
+  return snapshot === undefined ? null : createFixtureTransport(snapshot, { previewUrl: fixturePreviewUrl });
 }

@@ -71,28 +71,52 @@ public sealed class VirtualHostResponderTests
     [Fact]
     public void Preview_serves_png_from_the_preview_source()
     {
-        var source = new DictionaryPreviewSource(new() { ["strip-7"] = [1, 2, 3] });
+        var source = new DictionaryPreviewSource(new() { ["signature-strip.naturale-v1.r7"] = [1, 2, 3] });
 
-        var response = VirtualHostResponder.Preview("GET", "https://preview.fotohavn/strip-7.png?rev=3", source);
+        var response = VirtualHostResponder.Preview("GET", "https://preview.fotohavn/signature-strip.naturale-v1.r7.png?rev=3", source);
 
         var content = Assert.IsType<ContentResponse>(response);
         Assert.Equal("image/png", content.ContentType);
         Assert.Equal([1, 2, 3], content.Content.ToArray());
         Assert.True(content.IncludeBody);
-        Assert.Equal(["strip-7"], source.Requested);
+        Assert.Equal("no-store", content.CacheControl);
+        Assert.Equal(["signature-strip.naturale-v1.r7"], source.Requested);
+    }
+
+    [Fact]
+    public void Preview_answers_head_without_a_body()
+    {
+        var source = new DictionaryPreviewSource(new() { ["signature-strip.naturale-v1.r7"] = [1, 2, 3] });
+
+        var content = Assert.IsType<ContentResponse>(VirtualHostResponder.Preview("HEAD", "https://preview.fotohavn/signature-strip.naturale-v1.r7.png", source));
+
+        Assert.False(content.IncludeBody);
+    }
+
+    [Theory]
+    [InlineData("https://preview.fotohavn/strip-7.png")]
+    [InlineData("https://preview.fotohavn/Signature-Strip.naturale-v1.r7.png")]
+    [InlineData("https://preview.fotohavn/signature-strip.naturale-v1.png")]
+    [InlineData("https://preview.fotohavn/signature-strip.naturale-v1.r-7.png")]
+    public void Preview_answers_404_for_a_key_that_is_not_a_preview_key_without_looking_it_up(string uri)
+    {
+        var source = new DictionaryPreviewSource(new() { ["strip-7"] = [1], ["Signature-Strip.naturale-v1.r7"] = [1], ["signature-strip.naturale-v1"] = [1] });
+
+        Assert.Same(VirtualHostResponse.NotFound, VirtualHostResponder.Preview("GET", uri, source));
+        Assert.Empty(source.Requested);
     }
 
     [Theory]
     [InlineData("https://preview.fotohavn/missing.png")]
-    [InlineData("https://preview.fotohavn/strip-7.jpg")]
-    [InlineData("https://preview.fotohavn/strip-7.PNG")]
+    [InlineData("https://preview.fotohavn/signature-strip.naturale-v1.r7.jpg")]
+    [InlineData("https://preview.fotohavn/signature-strip.naturale-v1.r7.PNG")]
     [InlineData("https://preview.fotohavn/.png")]
-    [InlineData("https://preview.fotohavn/a/strip-7.png")]
+    [InlineData("https://preview.fotohavn/a/signature-strip.naturale-v1.r7.png")]
     [InlineData("https://preview.fotohavn/")]
-    [InlineData("https://media.fotohavn/strip-7.png")]
+    [InlineData("https://media.fotohavn/signature-strip.naturale-v1.r7.png")]
     public void Preview_answers_404_for_anything_else(string uri)
     {
-        var source = new DictionaryPreviewSource(new() { ["strip-7"] = [1] });
+        var source = new DictionaryPreviewSource(new() { ["signature-strip.naturale-v1.r7"] = [1] });
 
         Assert.Same(VirtualHostResponse.NotFound, VirtualHostResponder.Preview("GET", uri, source));
     }
@@ -100,8 +124,8 @@ public sealed class VirtualHostResponderTests
     [Fact]
     public void Preview_until_M7_is_always_404()
     {
-        Assert.Same(VirtualHostResponse.NotFound, VirtualHostResponder.Preview("GET", "https://preview.fotohavn/strip-7.png", EmptyPreviewSource.Instance));
-        Assert.Same(VirtualHostResponse.MethodNotAllowed, VirtualHostResponder.Preview("POST", "https://preview.fotohavn/strip-7.png", EmptyPreviewSource.Instance));
+        Assert.Same(VirtualHostResponse.NotFound, VirtualHostResponder.Preview("GET", "https://preview.fotohavn/signature-strip.naturale-v1.r7.png", EmptyPreviewSource.Instance));
+        Assert.Same(VirtualHostResponse.MethodNotAllowed, VirtualHostResponder.Preview("POST", "https://preview.fotohavn/signature-strip.naturale-v1.r7.png", EmptyPreviewSource.Instance));
     }
 
     [Theory]
@@ -130,6 +154,7 @@ public sealed class VirtualHostResponderTests
             "Content-Type: image/png\r\nContent-Length: 1234\r\nX-Content-Type-Options: nosniff\r\nAccess-Control-Allow-Origin: https://app.fotohavn\r\nCache-Control: no-cache",
             headers);
         Assert.Equal("X-Content-Type-Options: nosniff\r\nAccess-Control-Allow-Origin: https://app.fotohavn", VirtualHostResponder.StatusHeaders);
+        Assert.EndsWith("\r\nCache-Control: no-store", VirtualHostResponder.Headers("image/png", 1234, VirtualHostResponder.NoStore), StringComparison.Ordinal);
     }
 
     [Theory]

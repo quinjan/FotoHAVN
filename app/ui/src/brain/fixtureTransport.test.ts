@@ -11,6 +11,11 @@ async function flush(): Promise<void> {
 }
 
 describe("createFixtureTransport", () => {
+  it("serves previews at the WebView2 address unless the lane gives it images", () => {
+    expect(createFixtureTransport(guestStart).previewUrl?.("a.b.r1")).toBe("https://preview.fotohavn/a.b.r1.png");
+    expect(createFixtureTransport(guestStart, { previewUrl: (key) => `data:,${key}` }).previewUrl?.("a.b.r1")).toBe("data:,a.b.r1");
+    expect(new ProtocolBrainClient(createFixtureTransport(guestStart, { previewUrl: (key) => `data:,${key}` })).previewUrl?.("k")).toBe("data:,k");
+  });
   it("offers the pattern as its live preview, and takes frame acks without answering", async () => {
     const transport = createFixtureTransport(guestStart);
     const client = new ProtocolBrainClient(transport);

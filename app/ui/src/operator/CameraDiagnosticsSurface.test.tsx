@@ -53,10 +53,11 @@ function manualSource() {
   };
 }
 
-function stubClient(sendTest: ReturnType<typeof vi.fn>, frames?: FrameSource): BrainClient {
+function stubClient(sendTest: ReturnType<typeof vi.fn>, frames?: FrameSource, previewUrl?: (key: string) => string): BrainClient {
   return {
     kind: "fixture",
     ...(frames === undefined ? {} : { frames }),
+    ...(previewUrl === undefined ? {} : { previewUrl }),
     connect: vi.fn(),
     getState: () => ({ status: "connected", session: null, mismatch: null }),
     subscribe: () => () => undefined,
@@ -333,5 +334,94 @@ describe("CameraDiagnosticsSurface booth report", () => {
       await vi.advanceTimersByTimeAsync(hostReportIntervalMs * 3);
     });
     expect(sendTest).toHaveBeenCalledOnce();
+  });
+});
+
+const composed: CameraDiagnosticsView = {
+  ...ready,
+  lastComposition: { previewKey: "signature-strip.sepia-v1.r3", templateId: "signature-strip", lookId: "sepia-v1", width: 600, height: 1800 },
+};
+
+describe("CameraDiagnosticsSurface compositions", () => {
+  it("shows the last composition from the connection's preview host in a field build, with no composition controls", () => {
+    const sendTest = vi.fn<Hook>();
+    renderSurface(stubClient(sendTest, undefined, (key) => `/preview/${key}.png`), false, composed);
+
+    expect(screen.getByRole("img", { name: "Signature Strip, Sepia" })).toHaveAttribute("src", "/preview/signature-strip.sepia-v1.r3.png");
+    expect(screen.queryByRole("button", { name: "COMPOSE" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "BLANK PREVIEW" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Template" })).not.toBeInTheDocument();
+    expect(sendTest).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the WebView2 host's address for a connection that has none", () => {
+    renderSurface(stubClient(vi.fn<Hook>()), false, composed);
+
+    expect(screen.getByRole("img", { name: "Signature Strip, Sepia" })).toHaveAttribute(
+      "src",
+      "https://preview.fotohavn/signature-strip.sepia-v1.r3.png",
+    );
+  });
+
+  it("composes the chosen Template and Look with test.composeDiagnostics, Signature Strip and Naturale to begin with", async () => {
+    const sendTest = vi.fn<Hook>((name) => (name === "test.getDiagnostics" ? okResult() : Promise.resolve({ ok: true, result: {} })) as never);
+    renderSurface(stubClient(sendTest), true);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "COMPOSE" }));
+      await Promise.resolve();
+    });
+    expect(sendTest).toHaveBeenLastCalledWith("test.composeDiagnostics", { templateId: "signature-strip", lookId: "naturale-v1" });
+
+    await act(async () => {
+      fireEvent.change(screen.getByRole("combobox", { name: "Template" }), { target: { value: "panorama-four" } });
+      fireEvent.change(screen.getByRole("combobox", { name: "Look" }), { target: { value: "classic-v1" } });
+      await Promise.resolve();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "COMPOSE" }));
+      await Promise.resolve();
+    });
+    expect(sendTest).toHaveBeenLastCalledWith("test.composeDiagnostics", { templateId: "panorama-four", lookId: "classic-v1" });
+  });
+
+  it("asks for a blank preview of the chosen Template with test.composeBlankPreview", async () => {
+    const sendTest = vi.fn<Hook>((name) => (name === "test.getDiagnostics" ? okResult() : Promise.resolve({ ok: true, result: {} })) as never);
+    renderSurface(stubClient(sendTest), true);
+
+    await act(async () => {
+      fireEvent.change(screen.getByRole("combobox", { name: "Template" }), { target: { value: "polka-keepsake" } });
+      await Promise.resolve();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "BLANK PREVIEW" }));
+      await Promise.resolve();
+    });
+
+    expect(sendTest).toHaveBeenLastCalledWith("test.composeBlankPreview", { templateId: "polka-keepsake" });
+  });
+
+  it("composes once at a time, unavailable while it runs, and says when it didn't go through", async () => {
+    let finish: (result: unknown) => void = () => undefined;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    const sendTest = vi.fn<Hook>((name) => (name === "test.composeDiagnostics" ? pending : okResult()) as never);
+    renderSurface(stubClient(sendTest), true);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "COMPOSE" }));
+      fireEvent.click(screen.getByRole("button", { name: "COMPOSE" }));
+    });
+    expect(hooksCalled(sendTest).filter((name) => name === "test.composeDiagnostics")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "COMPOSE" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "BLANK PREVIEW" })).toHaveAttribute("aria-disabled", "true");
+
+    await act(async () => {
+      finish({ ok: false, error: "compositionFailed" });
+      await pending;
+    });
+    expect(screen.getByRole("button", { name: "COMPOSE" })).toHaveAttribute("aria-disabled", "false");
+    expect(screen.getByText("That didn't work. Try again.")).toBeVisible();
   });
 });

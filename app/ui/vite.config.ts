@@ -63,9 +63,16 @@ function fontPreload(): Plugin {
 /** Module paths that exist only for development and E2E builds: the fixture lane, the gallery, and fixtures. */
 const devOnlyModule = /\/src\/(?:fixtures|gallery)\/|\.fixtures\.tsx$|\/components\/shared\/fixture/;
 
+/** The module that sends test hooks from the camera diagnostics screen (E2E builds load it lazily). */
+const e2eOnlyModule = "/src/operator/CameraDiagnosticsHooks.tsx";
+
+/** A test hook's wire name as a string literal (`"test.composeDiagnostics"`): only E2E builds send hooks. */
+const testHookName = /["'`]test\.[a-z][A-Za-z]+["'`]/;
+
 /**
  * Fails a field build (any mode other than `e2e`) that bundles a development-only module, backing up the build-time
- * guards in main.tsx: `dist/` must hold no fixture lane, gallery, or component fixture code.
+ * guards in main.tsx: `dist/` must hold no fixture lane, gallery, or component fixture code, no E2E hook controls, and
+ * no test hook name.
  */
 function fieldBuildGuard(): Plugin {
   let isE2E = false;
@@ -83,9 +90,16 @@ function fieldBuildGuard(): Plugin {
         if (output.type !== "chunk") {
           continue;
         }
-        const leaked = output.moduleIds.find((id) => devOnlyModule.test(id.replaceAll("\\", "/")));
+        const leaked = output.moduleIds.find((id) => {
+          const path = id.replaceAll("\\", "/");
+          return devOnlyModule.test(path) || path.endsWith(e2eOnlyModule);
+        });
         if (leaked !== undefined) {
           this.error(`A field build must not bundle ${leaked} (chunk ${output.fileName}); keep it behind the DEV/E2E guard.`);
+        }
+        const hook = testHookName.exec(output.code);
+        if (hook !== null) {
+          this.error(`A field build must not contain the test hook name ${hook[0]} (chunk ${output.fileName}).`);
         }
       }
     },

@@ -1,4 +1,5 @@
 using System.Text;
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Media;
 
 namespace FotoHavn.Host.Windows.WebView;
@@ -17,8 +18,8 @@ internal sealed record StatusResponse(int StatusCode, string ReasonPhrase) : Vir
 /// <summary>A file to serve read-only; the host answers 404 when it doesn't exist.</summary>
 internal sealed record FileResponse(string Path, string ContentType, bool IncludeBody) : VirtualHostResponse(200, "OK");
 
-/// <summary>In-memory content to serve.</summary>
-internal sealed record ContentResponse(ReadOnlyMemory<byte> Content, string ContentType, bool IncludeBody) : VirtualHostResponse(200, "OK");
+/// <summary>In-memory content to serve, with the <c>Cache-Control</c> value to answer it with.</summary>
+internal sealed record ContentResponse(ReadOnlyMemory<byte> Content, string ContentType, bool IncludeBody, string CacheControl = VirtualHostResponder.DefaultCacheControl) : VirtualHostResponse(200, "OK");
 
 /// <summary>
 /// The pure part of the <c>media.fotohavn</c>, <c>preview.fotohavn</c>, and fallback <c>app.fotohavn</c> virtual hosts:
@@ -27,6 +28,12 @@ internal sealed record ContentResponse(ReadOnlyMemory<byte> Content, string Cont
 /// </summary>
 internal static class VirtualHostResponder
 {
+    /// <summary>The <c>Cache-Control</c> of media and the fallback page.</summary>
+    public const string DefaultCacheControl = "no-cache";
+
+    /// <summary>The <c>Cache-Control</c> of composed previews: a key is never reused for other pixels, but the page must not keep them.</summary>
+    public const string NoStore = "no-store";
+
     /// <summary><c>https://media.fotohavn/&lt;path&gt;</c>: GET or HEAD a file the media policy accepts.</summary>
     public static VirtualHostResponse Media(string method, string requestUri, string dataRoot)
     {
@@ -57,13 +64,13 @@ internal static class VirtualHostResponder
         }
 
         var key = path[1..^suffix.Length];
-        if (key.Length == 0 || key.Contains('/', StringComparison.Ordinal))
+        if (!PreviewKey.IsValid(key))
         {
             return VirtualHostResponse.NotFound;
         }
 
         return previews.TryGet(key, out var png)
-            ? new ContentResponse(png, ContentTypes.Png, includeBody)
+            ? new ContentResponse(png, ContentTypes.Png, includeBody, NoStore)
             : VirtualHostResponse.NotFound;
     }
 
@@ -84,11 +91,11 @@ internal static class VirtualHostResponder
     }
 
     /// <summary>The response headers for a 200 response.</summary>
-    public static string Headers(string contentType, long contentLength) =>
+    public static string Headers(string contentType, long contentLength, string cacheControl = DefaultCacheControl) =>
         $"Content-Type: {contentType}\r\n"
         + $"Content-Length: {contentLength.ToString(System.Globalization.CultureInfo.InvariantCulture)}\r\n"
         + StatusHeaders
-        + "\r\nCache-Control: no-cache";
+        + $"\r\nCache-Control: {cacheControl}";
 
     /// <summary>
     /// The headers on every response, errors included: without the CORS header a page's <c>fetch</c> of a missing media

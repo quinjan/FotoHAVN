@@ -5,6 +5,7 @@ using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
+using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.Tests;
 
@@ -45,6 +46,16 @@ public sealed class PresentationFixtureTests
             [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null, null))),
         ["operator-camera-diagnostics-no-cameras"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView([], null, CameraState.Idle, null, null, false, null, null))),
         ["operator-camera-diagnostics-not-available"] = () => Task.FromResult(NotAvailableFromTheBrain()),
+        ["operator-camera-diagnostics-composed"] = () => Task.FromResult(ComposedFromTheBrain()),
+        ["operator-camera-diagnostics-composed-landscape"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
+            [new CameraOption("fake-camera", "Fake camera")],
+            "fake-camera",
+            CameraState.Ready,
+            null,
+            new CameraFormatView(1920, 1080, 30),
+            false,
+            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, false),
+            new CompositionView("panorama-four.classic-v1.r4", "panorama-four", "classic-v1", 1800, 600)))),
     };
 
     public static TheoryData<string> Names => [.. Fixtures.Keys];
@@ -141,6 +152,20 @@ public sealed class PresentationFixtureTests
         rig.Run(TimeSpan.FromSeconds(3));
         Assert.Equal(CameraState.NotAvailable, rig.View.State);
         return ProtocolJson.Serialize(Assert.IsType<OperatorPresentationMessage>(rig.Operator.Messages[^1]));
+    }
+
+    /// <summary>A real brain: one capture, then <c>test.composeDiagnostics</c>; the operator is sent the presentation that shows the composition.</summary>
+    private static string ComposedFromTheBrain()
+    {
+        using var rig = new CameraRig();
+        rig.SelectAndWaitUntilReady();
+        var capture = rig.Operator.Test(TestHookNames.CaptureDiagnostics);
+        rig.Harness.Run();
+        rig.Advance(CameraRig.Frame * 2);
+        Assert.True(rig.Await(capture).Ok);
+        Assert.True(rig.Call(TestHookNames.ComposeDiagnostics, """{"templateId":"signature-strip","lookId":"sepia-v1"}""").Ok);
+        Assert.Equal("signature-strip.sepia-v1.r1", rig.View.LastComposition!.PreviewKey);
+        return ProtocolJson.Serialize(Assert.IsType<OperatorPresentationMessage>(rig.Operator.Messages.Last(message => message is OperatorPresentationMessage)));
     }
 
     private static string ProtocolMismatch()

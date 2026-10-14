@@ -10,6 +10,7 @@ import {
   type ServerMessage,
 } from "../protocol/generated.ts";
 import type { Transport, TransportListener } from "./types.ts";
+import { webViewPreviewUrl } from "./previewUrl.ts";
 
 export type WelcomeMessage = OperatorWelcomeMessage | GuestWelcomeMessage;
 
@@ -26,6 +27,8 @@ export interface FixtureTransport extends Transport {
 export interface FixtureTransportOptions {
   /** Decides each command's answer; by default every command is `rejected notAvailable`, as the M2 brain answers. */
   readonly answerCommand?: (command: Command) => Pick<CommandResultMessage, "status" | "reason">;
+  /** The image for a preview key; the fixture lane passes data URLs, since no host serves `preview.fotohavn` there. */
+  readonly previewUrl?: (key: string) => string;
 }
 
 /**
@@ -69,6 +72,7 @@ export function createFixtureTransport(snapshot: FixtureSnapshot, options: Fixtu
   return {
     kind: "fixture",
     frames,
+    previewUrl: options.previewUrl ?? webViewPreviewUrl,
     sent,
     start(next: TransportListener) {
       if (listener !== null) {

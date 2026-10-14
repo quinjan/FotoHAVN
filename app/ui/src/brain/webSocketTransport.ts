@@ -1,5 +1,6 @@
 import type { ClientMessage } from "../protocol/generated.ts";
 import { WebSocketFrameSource } from "../preview/webSocketFrameSource.ts";
+import { headlessPreviewUrl } from "./previewUrl.ts";
 import type { Transport, TransportListener } from "./types.ts";
 
 /** The part of the browser `WebSocket` the transport uses, so tests can substitute a fake. */
@@ -21,6 +22,8 @@ export interface WebSocketTransportOptions {
   readonly createSocket?: (url: string) => SocketLike;
   /** Delays before each reconnect attempt; the last one repeats. A successful open starts again from the first. */
   readonly backoffMs?: readonly number[];
+  /** Where the host serves previews (`headlessPreviewBase`); the page's own `/preview/` by default. */
+  readonly previewBase?: string;
 }
 
 export const defaultBackoffMs: readonly number[] = [250, 500, 1_000, 2_000, 4_000, 5_000];
@@ -105,6 +108,7 @@ export function createWebSocketTransport(options: WebSocketTransportOptions): Tr
   return {
     kind: "websocket",
     frames,
+    previewUrl: (key: string) => headlessPreviewUrl(key, options.previewBase),
     start(next: TransportListener) {
       if (listener !== null || stopped) {
         return;

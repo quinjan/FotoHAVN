@@ -11,10 +11,13 @@
   gap: var(--space-8);
 }
 
-/* The picture and its controls take the wider column; the camera, its state, and the facts sit beside them. */
+/*
+ * The picture and its controls take the wider column; the camera, its state, and the facts sit beside them. The split
+ * leaves the picture and both control rows, and the last composition beside the facts, inside a 1280 x 720 window.
+ */
 .body {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
   align-items: start;
   gap: var(--space-24) var(--space-48);
 }
@@ -109,4 +112,24 @@
   grid-template-columns: max-content max-content minmax(0, 1fr);
   align-items: end;
   gap: var(--space-16) var(--space-32);
+}
+
+/* The last composition as a print beside its caption; the print takes a fixed box and fits itself inside it. */
+.composition {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-16);
+  margin: 0;
+}
+
+.compositionPrint {
+  inline-size: 4.5rem;
+  block-size: 9rem;
+}
+
+.compositionCaption {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
 }

@@ -161,6 +161,11 @@ public sealed partial class Brain : IBrain
         Post(() =>
         {
             _cameraDiagnosticsOverride = view;
+            if (view is null)
+            {
+                ReleaseDiagnosticsCaptures();
+            }
+
             PublishChanges();
         });
 

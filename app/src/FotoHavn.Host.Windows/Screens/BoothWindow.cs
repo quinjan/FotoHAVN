@@ -279,7 +279,7 @@ internal sealed class BoothWindow : Window
         switch (response)
         {
             case ContentResponse content:
-                e.Response = Respond(environment, content.Content, content.ContentType, content.IncludeBody);
+                e.Response = Respond(environment, content.Content, content.ContentType, content.IncludeBody, content.CacheControl);
                 break;
             case FileResponse file:
                 using (e.GetDeferral())
@@ -318,10 +318,11 @@ internal sealed class BoothWindow : Window
         CoreWebView2Environment environment,
         ReadOnlyMemory<byte> content,
         string contentType,
-        bool includeBody)
+        bool includeBody,
+        string cacheControl = VirtualHostResponder.DefaultCacheControl)
     {
         var body = includeBody ? new MemoryStream(content.ToArray(), writable: false) : null;
-        return environment.CreateWebResourceResponse(body, 200, "OK", VirtualHostResponder.Headers(contentType, content.Length));
+        return environment.CreateWebResourceResponse(body, 200, "OK", VirtualHostResponder.Headers(contentType, content.Length, cacheControl));
     }
 
     private void OnProcessFailed(int generation, CoreWebView2Environment environment, CoreWebView2ProcessFailedEventArgs e)
