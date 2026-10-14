@@ -1,0 +1,98 @@
+/* Event setup (DESIGN.md, Event setup): one screen of left-aligned sections, each opened by an eyebrow and set on a Hairline rule. */
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+  padding: var(--space-48) var(--app-gutter);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+}
+
+/* The status lines take no space while empty; each is a live region that stays mounted. */
+.statuses {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-inline-size: calc(var(--app-measure-prose) + var(--space-144));
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-48);
+  max-inline-size: calc(var(--app-measure-prose) + var(--space-144));
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding-block-start: var(--space-32);
+  border-block-start: var(--stroke-hairline) solid var(--app-tone-rule);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+.cameraField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+/* The live preview keeps the camera's own proportion inside a box of a sensible size. */
+.preview {
+  inline-size: 100%;
+  max-inline-size: calc(var(--space-144) * 4);
+  aspect-ratio: 16 / 9;
+}
+
+/* Template rows carry their blank preview, so the thumbnail slot grows beyond the target size. */
+.templatePicker {
+  --app-target: calc(var(--app-target-operator) * 2);
+}
+
+.pinSet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-32);
+}
+
+.pinFields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-24);
+  max-inline-size: calc(var(--app-measure-supporting) + var(--space-48));
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16) var(--space-24);
+  padding-block-start: var(--space-32);
+  border-block-start: var(--stroke-hairline) solid var(--app-tone-rule);
+  max-inline-size: calc(var(--app-measure-prose) + var(--space-144));
+}
+
+.reason {
+  flex-basis: 100%;
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+/* A timer is a number of seconds: the box is as wide as a few digits need, and its notes keep the full measure. */
+.timer input {
+  max-inline-size: calc(var(--space-48) * 3);
+}

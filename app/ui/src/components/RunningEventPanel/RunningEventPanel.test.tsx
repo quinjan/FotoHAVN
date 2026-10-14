@@ -73,6 +73,11 @@ describe("RunningEventPanel", () => {
     });
   });
 
+  it("says the camera is being checked, neutrally, until it has delivered a fresh frame", () => {
+    render(<RunningEventPanel {...props({ camera: "checking" })} />);
+    expect(facts().CAMERA).toBe("Checking");
+  });
+
   it("normally offers OPEN GALLERY and END EVENT, with no primary action and no RETRY", () => {
     const onOpenGallery = vi.fn();
     const onEndEvent = vi.fn();

@@ -1,0 +1,72 @@
+import type { AssistanceReason, OperatorNoticeCode, RunningEventStep as ProtocolStep } from "../protocol/generated.ts";
+import type { RunningEventStep } from "../components/RunningEventPanel/index.ts";
+import { formatDeletionCounts } from "./format.ts";
+
+/** Operator copy that is not a form field: notices, confirmations, and the Operator Assistance lines (DESIGN.md, Copy). */
+
+/** The brain sends the code; the words live here. */
+export const noticeCopy: Readonly<Record<OperatorNoticeCode, string>> = {
+  saveFailed: "The Event couldn't be saved. Check the Data folder, then try again.",
+  deleteFailed: "The Event couldn't be deleted. Try again in a moment.",
+  eventNotFound: "That Event isn't there any more.",
+};
+
+export const eventRunningCopy = "End the running Event to start another.";
+
+/** The reason for Operator Assistance, as one sentence in text. M8 sends the reasons; the words are written now. */
+export const assistanceCopy: Readonly<Record<AssistanceReason, string>> = {
+  camera: "The camera needs attention.",
+  storage: "The Data folder needs attention.",
+  guestDisplay: "The guest display isn't connected.",
+};
+
+/** The text link back to the running-Event panel, on every view but the Event list. */
+export const returnToRunningEventLabel = "GO TO THE RUNNING EVENT";
+
+export const singleScreenCopy = "The booth is running on this screen.";
+
+const stepForPanel: Readonly<Record<ProtocolStep, RunningEventStep>> = {
+  start: "start",
+  template: "template",
+  photographs: "photographs",
+  filters: "filters",
+  keepsake: "keepsake",
+  guestGallery: "guest-gallery",
+  operatorAssistance: "operator-assistance",
+};
+
+export function panelStep(step: ProtocolStep): RunningEventStep {
+  return stepForPanel[step];
+}
+
+export const endEventDialog = {
+  title: "End this Event?",
+  body: "Anyone using the booth will be stopped. Their photographs are kept.",
+  confirmLabel: "END EVENT",
+  cancelLabel: "KEEP RUNNING",
+} as const;
+
+export const leaveDialog = {
+  title: "Save your changes?",
+  body: "If you leave now, what you changed is lost unless you save it.",
+  save: "SAVE",
+  discard: "DISCARD CHANGES",
+  keepEditing: "KEEP EDITING",
+} as const;
+
+/** The delete confirmation's sentence: the Event's name and what goes with it. */
+export function deleteDialogBody(
+  eventName: string,
+  counts: { readonly guestCycles: number; readonly photoStrips: number; readonly captures: number } | null,
+): string {
+  const removed = counts === null ? null : formatDeletionCounts(counts);
+  return removed === null
+    ? `“${eventName}” will be removed. It has no photographs yet. This can't be undone.`
+    : `“${eventName}” will be removed with ${removed}. This can't be undone.`;
+}
+
+export const deleteDialog = {
+  title: "Delete this Event?",
+  confirmLabel: "DELETE EVENT",
+  cancelLabel: "KEEP EVENT",
+} as const;

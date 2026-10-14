@@ -19,7 +19,8 @@ export type RunningEventStep =
 
 export type GuestDisplayState = "connected" | "disconnected";
 
-export type RunningCameraState = "ready" | "not-available";
+/** `checking` is the neutral state while the camera has not yet delivered a fresh frame. */
+export type RunningCameraState = "ready" | "checking" | "not-available";
 
 const stepText: Record<RunningEventStep, string> = {
   start: "Start",
@@ -33,7 +34,7 @@ const stepText: Record<RunningEventStep, string> = {
 
 const displayText: Record<GuestDisplayState, string> = { connected: "Connected", disconnected: "Disconnected" };
 
-const cameraText: Record<RunningCameraState, string> = { ready: "Ready", "not-available": "Not available" };
+const cameraText: Record<RunningCameraState, string> = { ready: "Ready", checking: "Checking", "not-available": "Not available" };
 
 export interface RunningEventPanelProps {
   /** The running Event's name, in the Subheading role. */

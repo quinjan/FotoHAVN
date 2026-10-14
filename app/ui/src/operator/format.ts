@@ -32,9 +32,55 @@ export function formatGuestCycles(count: number): string {
   return count === 1 ? "1 Guest Cycle" : `${String(count)} Guest Cycles`;
 }
 
+const minuteMs = 60_000;
+
+/**
+ * How long an Event has been running, e.g. "Just started", "12 min", "1 h 12 min", or "2 d 3 h". `startedAt` is the
+ * brain's ISO instant and `now` is the page's clock in epoch milliseconds; an instant in the future counts as now.
+ */
+export function formatTimeSinceStart(startedAt: string, now: number): string {
+  const started = new Date(startedAt).getTime();
+  if (Number.isNaN(started)) {
+    return "—";
+  }
+  const minutes = Math.floor(Math.max(0, now - started) / minuteMs);
+  if (minutes < 1) {
+    return "Just started";
+  }
+  if (minutes < 60) {
+    return `${String(minutes)} min`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    const rest = minutes % 60;
+    return rest === 0 ? `${String(hours)} h` : `${String(hours)} h ${String(rest)} min`;
+  }
+  const days = Math.floor(hours / 24);
+  const restHours = hours % 24;
+  return restHours === 0 ? `${String(days)} d` : `${String(days)} d ${String(restHours)} h`;
+}
+
+function countText(count: number, one: string, many: string): string {
+  return count === 1 ? `1 ${one}` : `${String(count)} ${many}`;
+}
+
+/** What deleting an Event removes, e.g. "12 Guest Cycles, 11 Photo Strips, and 41 photographs"; null when it has nothing yet. */
+export function formatDeletionCounts(counts: { readonly guestCycles: number; readonly photoStrips: number; readonly captures: number }): string | null {
+  if (counts.guestCycles === 0 && counts.photoStrips === 0 && counts.captures === 0) {
+    return null;
+  }
+  const parts = [
+    countText(counts.guestCycles, "Guest Cycle", "Guest Cycles"),
+    countText(counts.photoStrips, "Photo Strip", "Photo Strips"),
+    countText(counts.captures, "photograph", "photographs"),
+  ];
+  return `${parts[0] ?? ""}, ${parts[1] ?? ""}, and ${parts[2] ?? ""}`;
+}
+
 const rejectionCopy: Partial<Record<RejectReason, string>> = {
   notAvailable: "That isn't ready yet.",
   eventRunning: "End the running Event to start another.",
+  validationFailed: "Some details need attention.",
 };
 
 const didntWork = "That didn't work. Try again.";

@@ -30,6 +30,13 @@ export const fixtures: readonly ComponentFixture[] = [
     render: () => <RunningEventPanel {...running} step="start" camera="not-available" completedGuestCycles={0} timeSinceStart="4 min" />,
   },
   {
+    id: "running-event-panel-camera-checking",
+    title: "Running-Event panel, camera still being checked",
+    surface: "light",
+    role: "operator",
+    render: () => <RunningEventPanel {...running} step="start" camera="checking" completedGuestCycles={0} timeSinceStart="Just started" />,
+  },
+  {
     id: "running-event-panel-assistance",
     title: "Running-Event panel, Operator Assistance with RETRY as the primary action",
     surface: "light",

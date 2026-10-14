@@ -226,6 +226,6 @@ describe("Operator surfaces", () => {
 
   it("shows the brain's notice", () => {
     operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { code: "saveFailed" } } });
-    expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The Event couldn't be saved.");
+    expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The Event couldn't be saved. Check the Data folder, then try again.");
   });
 });
