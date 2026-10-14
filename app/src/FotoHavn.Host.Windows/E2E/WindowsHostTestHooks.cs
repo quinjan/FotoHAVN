@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.E2E;
+using FotoHavn.Host.Diagnostics;
 using FotoHavn.Host.Windows.Logging;
 using FotoHavn.Host.Windows.Screens;
 using FotoHavn.Protocol;
@@ -21,10 +22,13 @@ namespace FotoHavn.Host.Windows.E2E;
 internal sealed class WindowsHostTestHooks(
     Dispatcher dispatcher,
     ScreenWindows windows,
+    string dataFolder,
     ILogger logger) : IHostTestHooks
 {
     /// <summary>Hooks that end something wait this long, so the brain's reply reaches the page first.</summary>
     private static readonly TimeSpan ReplyDeliveryDelay = TimeSpan.FromMilliseconds(250);
+
+    private readonly DiagnosticsCaptureWriter _captures = new(dataFolder, TimeProvider.System);
 
     public Task<IReadOnlyList<TestWindow>> GetWindowsAsync() =>
         dispatcher.InvokeAsync<IReadOnlyList<TestWindow>>(() => [.. windows.DescribeWindows().Select(ToTestWindow)]).Task;
@@ -58,8 +62,7 @@ internal sealed class WindowsHostTestHooks(
     }
 
     public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored) =>
-        // M5 wave B4 implements it (JPEG encoding and the diagnostics folder).
-        Task.FromException<CameraCaptureView>(new TestHookException(TestHookError.NotSupported));
+        _captures.SaveAsync(frame, mirrored);
 
     public void ScheduleExit()
     {

@@ -6,6 +6,7 @@ using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Fakes;
+using FotoHavn.Host.Headless.Preview;
 using FotoHavn.Protocol;
 using FotoHavn.Storage;
 using FotoHavn.Storage.DataPath;
@@ -43,6 +44,12 @@ internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int
     /// <summary>The camera adapter; the default is a <see cref="FakeCameraAdapter"/> with one camera on the real clock.</summary>
     public ICameraAdapter? Camera { get; init; }
 
+    /// <summary>
+    /// Builds the camera adapter from the host's preview channel, so a test's adapter delivers frames to the sockets.
+    /// Ignored when <see cref="Camera"/> is set.
+    /// </summary>
+    public Func<IPreviewChannel, ICameraAdapter>? CameraFactory { get; init; }
+
     public Action<ILoggingBuilder>? ConfigureLogging { get; init; }
 
     /// <summary>The storage fault to inject before the brain opens the store (E2E builds only; a field build ignores it).</summary>
@@ -67,7 +74,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
     private bool _started;
     private bool _disposed;
 
-    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions, SqliteEventStore store)
+    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions, WebSocketPreviewChannel previews, SqliteEventStore store)
     {
         App = app;
         Settings = settings;
@@ -77,6 +84,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         Brain = brain;
         HostServices = hostServices;
         Sessions = sessions;
+        Previews = previews;
     }
 
     public WebApplication App { get; }
@@ -90,6 +98,9 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
     public HeadlessHostServices HostServices { get; }
 
     public BridgeSessions Sessions { get; }
+
+    /// <summary>The frame channel: the camera adapter posts preview frames to it; it sends them to the role's socket.</summary>
+    public WebSocketPreviewChannel Previews { get; }
 
     public static HeadlessApp Create(HeadlessSettings settings)
     {
@@ -114,6 +125,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var displays = settings.Displays ?? new FakeDisplayAdapter([.. HeadlessSettings.DefaultDisplays]);
         var hostServices = new HeadlessHostServices(displays, hostLogger);
         var sessions = new BridgeSessions();
+        var previews = new WebSocketPreviewChannel(TimeProvider.System);
         var brainLogger = loggers.CreateLogger("FotoHavn.Brain");
         var executor = new DedicatedThreadBrainExecutor(exception => LogBrainWorkFailed(brainLogger, exception));
         IStorageFileSystem fileSystem = new PhysicalStorageFileSystem(settings.DataFolder);
@@ -128,11 +140,15 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         }
 #endif
         var store = new SqliteEventStore(settings.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
-        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, settings.Camera ?? new FakeCameraAdapter(SystemClock.Instance), hostServices, store)
+        var camera = settings.Camera
+            ?? settings.CameraFactory?.Invoke(previews)
+            ?? new FakeCameraAdapter(SystemClock.Instance, previews);
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store)
         {
             Logger = brainLogger,
+            PreviewStats = previews,
 #if E2E_HOOKS
-            HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime),
+            HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime, settings.DataFolder),
             StorageTestHooks = storageHooks,
 #endif
         };
@@ -149,7 +165,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
             throw;
         }
 
-        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions, store);
+        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions, previews, store);
         host.MapRoutes(hostLogger);
         return host;
     }
@@ -280,7 +296,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         }
 
         using var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
-        var session = new BridgeSession(socket, role, logger);
+        var session = new BridgeSession(socket, role, logger, Previews);
         Sessions.Add(session);
         LogClientConnected(logger, role);
         try

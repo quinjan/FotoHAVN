@@ -1,8 +1,10 @@
 using System.Windows;
 using FotoHavn.Core;
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Media;
 using FotoHavn.Host.Windows.Displays;
 using FotoHavn.Host.Windows.Logging;
+using FotoHavn.Host.Windows.Preview;
 using FotoHavn.Host.Windows.Screens;
 using FotoHavn.Host.Windows.TestHooks;
 using FotoHavn.Host.Windows.WebView;
@@ -76,13 +78,22 @@ public partial class App : Application
         }
 #endif
         _store = new SqliteEventStore(paths.DataFolder, SystemClock.Instance, fileSystem, new WindowsDataPathProbe(), new StartupReconciler(SystemClock.Instance));
-                var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, new Cameras.TemporaryCameraAdapter(), _windows, _store)
-                {
-                    Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
+        var frames = new SharedBufferPreviewChannel(
+            work => Dispatcher.InvokeAsync(work),
+            TimeProvider.System,
+            _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Preview"));
+        // TODO(wave C): compose `new WindowsCameraAdapter(frames, ...)` here (wrapped in `FaultInjectingCameraAdapter` in E2E
+        // builds) and delete Cameras/TemporaryCameraAdapter.cs. `frames` is both the adapter's IPreviewChannel and the brain's IPreviewStats.
+        ICameraAdapter camera = new Cameras.TemporaryCameraAdapter();
+        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store)
+        {
+            Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
+            PreviewStats = frames,
 #if E2E_HOOKS
             HostTestHooks = new E2E.WindowsHostTestHooks(
                 Dispatcher,
                 _windows,
+                paths.DataFolder,
                 _loggerFactory.CreateLogger("FotoHavn.Host.Windows.E2E")),
             StorageTestHooks = storageHooks,
 #endif
@@ -98,6 +109,7 @@ public partial class App : Application
             environments,
             paths,
             EmptyPreviewSource.Instance,
+            frames,
             TimeProvider.System,
             _loggerFactory.CreateLogger("FotoHavn.Host.Windows.WebView"));
 

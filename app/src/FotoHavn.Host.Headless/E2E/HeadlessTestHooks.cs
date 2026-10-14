@@ -1,6 +1,7 @@
 #if E2E_HOOKS
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.E2E;
+using FotoHavn.Host.Diagnostics;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
@@ -12,9 +13,11 @@ namespace FotoHavn.Host.Headless.E2E;
 /// The headless host's side of the test hooks (E2E builds only). There are no windows: <c>windows</c> is empty and
 /// <c>test.setWindowBounds</c> is <c>notSupported</c>; <c>test.crashUi</c> aborts that role's sockets; <c>test.exit</c> stops the host.
 /// </summary>
-internal sealed class HeadlessTestHooks(BridgeSessions sessions, IHostApplicationLifetime lifetime) : IHostTestHooks
+internal sealed class HeadlessTestHooks(BridgeSessions sessions, IHostApplicationLifetime lifetime, string dataFolder) : IHostTestHooks
 {
     private static readonly TimeSpan Delay = TimeSpan.FromMilliseconds(250);
+
+    private readonly DiagnosticsCaptureWriter _captures = new(dataFolder, TimeProvider.System);
 
     public Task<IReadOnlyList<TestWindow>> GetWindowsAsync() => Task.FromResult<IReadOnlyList<TestWindow>>([]);
 
@@ -33,8 +36,7 @@ internal sealed class HeadlessTestHooks(BridgeSessions sessions, IHostApplicatio
     }
 
     public Task<CameraCaptureView> SaveDiagnosticsCaptureAsync(CapturedFrame frame, bool mirrored) =>
-        // M5 wave B4 implements it (JPEG encoding and the diagnostics folder).
-        Task.FromException<CameraCaptureView>(new TestHookException(TestHookError.NotSupported));
+        _captures.SaveAsync(frame, mirrored);
 
     public void ScheduleExit() =>
         _ = Task.Delay(Delay).ContinueWith(_ => lifetime.StopApplication(), TaskScheduler.Default);
