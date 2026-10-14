@@ -57,6 +57,8 @@ export interface BrainClient {
   readonly kind: TransportKind | "none";
   /** The live preview frames this connection delivers (contract §6); absent when the transport carries none. */
   readonly frames?: FrameSource | undefined;
+  /** The URL a composed preview is fetched from, by its key; absent when the transport has no host to serve it. */
+  readonly previewUrl?: ((key: string) => string) | undefined;
   /** Starts the transport; `hello` goes out whenever it opens. Calling it again does nothing. */
   connect(): void;
   /** The current state. The same object is returned until it changes. Bound, so `useSyncExternalStore` can take it. */
@@ -85,6 +87,8 @@ export interface Transport {
   readonly kind: TransportKind;
   /** The live preview frames this bridge carries next to the envelopes; absent when it carries none. */
   readonly frames?: FrameSource | undefined;
+  /** The URL this bridge's host serves a composed preview at, by its key (`preview.fotohavn`, or `/preview/` headless). */
+  readonly previewUrl?: ((key: string) => string) | undefined;
   start(listener: TransportListener): void;
   /** Returns false when the message couldn't be sent (not open). */
   send(message: ClientMessage): boolean;

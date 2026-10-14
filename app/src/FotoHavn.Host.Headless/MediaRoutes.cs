@@ -1,3 +1,4 @@
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Media;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -40,7 +41,10 @@ internal static class MediaRoutes
         return Results.File(fullPath, contentType, enableRangeProcessing: true);
     }
 
-    /// <summary>GET/HEAD <c>/preview/&lt;key&gt;.png</c>: the preview from <paramref name="previews"/>, or 404.</summary>
+    /// <summary>
+    /// GET/HEAD <c>/preview/&lt;key&gt;.png</c>: the preview from <paramref name="previews"/>, or 404. A key that is not
+    /// a <see cref="PreviewKey"/> is 404 without a lookup.
+    /// </summary>
     public static IResult Preview(HttpContext context, IPreviewSource previews)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -53,7 +57,7 @@ internal static class MediaRoutes
         }
 
         var key = target[PreviewPrefix.Length..^PngSuffix.Length];
-        if (key.Length == 0 || key.Contains('/', StringComparison.Ordinal) || !previews.TryGet(key, out var png))
+        if (!PreviewKey.IsValid(key) || !previews.TryGet(key, out var png))
         {
             return Results.NotFound();
         }

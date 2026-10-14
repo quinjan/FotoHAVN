@@ -1,5 +1,6 @@
 import type { ClientMessage } from "../protocol/generated.ts";
 import { WebView2FrameSource } from "../preview/webView2FrameSource.ts";
+import { webViewPreviewUrl } from "./previewUrl.ts";
 import type { Transport, TransportListener } from "./types.ts";
 
 /**
@@ -19,6 +20,7 @@ export function createWebView2Transport(webview: WebView2Bridge): Transport {
   return {
     kind: "webview2",
     frames,
+    previewUrl: webViewPreviewUrl,
     start(listener: TransportListener) {
       if (handler !== null) {
         return;

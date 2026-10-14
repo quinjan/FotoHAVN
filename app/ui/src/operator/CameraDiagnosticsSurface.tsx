@@ -28,7 +28,7 @@ export function CameraDiagnosticsSurface({ view }: CameraDiagnosticsSurfaceProps
   const client = useBrainClient();
   const source = client.frames ?? silentFrameSource;
   const measured = useFrameStats(source, view.state === "ready");
-  const readOnly = <CameraDiagnosticsScreen view={view} source={source} measured={measured} />;
+  const readOnly = <CameraDiagnosticsScreen view={view} source={source} measured={measured} previewUrl={client.previewUrl} />;
   return HookedScreen === null ? (
     readOnly
   ) : (

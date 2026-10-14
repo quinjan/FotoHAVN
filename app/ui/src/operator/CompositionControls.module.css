@@ -1,0 +1,7 @@
+/* The E2E composition controls: two choices and two actions in one row. */
+.compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content max-content;
+  align-items: end;
+  gap: var(--space-16);
+}

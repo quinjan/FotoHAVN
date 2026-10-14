@@ -45,7 +45,7 @@ function isServerMessage(value: unknown): value is ServerMessage {
 export class ProtocolBrainClient implements BrainClient {
   readonly kind: BrainClient["kind"];
   readonly frames: FrameSource | undefined;
-
+  readonly previewUrl: ((key: string) => string) | undefined;
   private readonly transport: Transport | null;
   private readonly protocolVersion: number;
   private readonly commandTimeoutMs: number;
@@ -63,6 +63,7 @@ export class ProtocolBrainClient implements BrainClient {
     this.transport = transport;
     this.kind = transport?.kind ?? "none";
     this.frames = transport?.frames;
+    this.previewUrl = transport?.previewUrl;
     this.protocolVersion = options.protocolVersion ?? PROTOCOL_VERSION;
     this.commandTimeoutMs = options.commandTimeoutMs ?? defaultCommandTimeoutMs;
     this.testTimeoutMs = options.testTimeoutMs ?? defaultTestTimeoutMs;

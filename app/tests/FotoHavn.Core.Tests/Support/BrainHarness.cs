@@ -1,8 +1,10 @@
 using System.Text.Json;
 using FotoHavn.Core.Camera;
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Hooks;
+using FotoHavn.Core.Media;
 using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Presentations;
@@ -13,7 +15,7 @@ namespace FotoHavn.Core.Tests.Support;
 /// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, camera, and clock; deterministic.</summary>
 internal sealed class BrainHarness : IDisposable
 {
-    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null, ICameraAdapter? cameraOverride = null, ICameraFaultControl? cameraFaults = null, IPreviewStats? previewStats = null, FakeClock? clock = null)
+    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null, ICameraAdapter? cameraOverride = null, ICameraFaultControl? cameraFaults = null, IPreviewStats? previewStats = null, FakeClock? clock = null, PreviewCache? previews = null, ICompositor? compositor = null)
     {
         Clock = clock ?? new FakeClock();
         Displays = displays ?? FakeDisplayAdapter.CreateDefault();
@@ -23,7 +25,8 @@ internal sealed class BrainHarness : IDisposable
         HostHooks = hostHooks;
         Store = store ?? new InMemoryEventStore();
         StorageHooks = storageHooks;
-        Dependencies = TestDependencies.Create(Executor, Clock, Displays, CameraPort, Host, Store) with { Logger = Logger, PreviewStats = previewStats };
+        var dependencies = TestDependencies.Create(Executor, Clock, Displays, CameraPort, Host, Store) with { Logger = Logger, PreviewStats = previewStats };
+        Dependencies = dependencies with { Compositor = compositor ?? dependencies.Compositor, Previews = previews ?? dependencies.Previews };
         Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks, cameraFaults);
         Run();
     }
@@ -50,6 +53,12 @@ internal sealed class BrainHarness : IDisposable
     public RecordingLogger Logger { get; } = new();
 
     public BrainDependencies Dependencies { get; }
+
+    /// <summary>The brain's compositor when it is the default <see cref="FakeCompositor"/>.</summary>
+    public FakeCompositor FakeCompositor => (FakeCompositor)Dependencies.Compositor;
+
+    /// <summary>The brain's preview cache.</summary>
+    public PreviewCache Previews => (PreviewCache)Dependencies.Previews;
 
     public Brain Brain { get; }
 

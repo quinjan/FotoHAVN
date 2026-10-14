@@ -75,6 +75,14 @@ describe("createWebSocketTransport", () => {
     vi.useRealTimers();
   });
 
+  it("serves previews at /preview/ on the page's origin, or under the base it is given", () => {
+    const { transport } = setup();
+    expect(transport.previewUrl?.("signature-strip.naturale-v1.r7")).toBe("/preview/signature-strip.naturale-v1.r7.png");
+
+    const based = createWebSocketTransport({ url: "ws://h/bridge", previewBase: "http://h:9/preview/", createSocket: (url) => new FakeSocket(url) });
+    expect(based.previewUrl?.("k.l.r1")).toBe("http://h:9/preview/k.l.r1.png");
+  });
+
   it("opens the bridge URL, sends hello as a JSON text frame, and decodes frames", () => {
     const { client, latest } = setup();
     expect(client.kind).toBe("websocket");

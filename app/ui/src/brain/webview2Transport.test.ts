@@ -7,6 +7,12 @@ import { ProtocolBrainClient } from "./protocolClient.ts";
 import { createWebView2Transport } from "./webview2Transport.ts";
 
 describe("createWebView2Transport", () => {
+  it("serves previews at the preview.fotohavn virtual host", () => {
+    const { webview } = fakeWebView();
+    expect(createWebView2Transport(webview).previewUrl?.("signature-strip.naturale-v1.r7")).toBe(
+      "https://preview.fotohavn/signature-strip.naturale-v1.r7.png",
+    );
+  });
   it("posts hello as an object on start and delivers the host's decoded messages", () => {
     const { webview, postMessage, post } = fakeWebView();
     const client = new ProtocolBrainClient(createWebView2Transport(webview));

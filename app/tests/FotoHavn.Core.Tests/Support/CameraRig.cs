@@ -1,6 +1,8 @@
 using FotoHavn.Core.Camera;
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Hooks;
+using FotoHavn.Core.Media;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
@@ -100,7 +102,7 @@ internal sealed class CameraRig : IDisposable
     /// <summary>One frame of the fake camera at 30 fps.</summary>
     public static readonly TimeSpan Frame = TimeSpan.FromSeconds(1.0 / 30);
 
-    public CameraRig(IEnumerable<AvailableCamera>? cameras = null, IEnumerable<FixturePhotograph>? photographs = null, bool withFaults = true, bool withHostHooks = true)
+    public CameraRig(IEnumerable<AvailableCamera>? cameras = null, IEnumerable<FixturePhotograph>? photographs = null, bool withFaults = true, bool withHostHooks = true, PreviewCache? previews = null, ICompositor? compositor = null)
     {
         var clock = new FakeClock();
         Epoch = clock.UtcNow;
@@ -114,7 +116,9 @@ internal sealed class CameraRig : IDisposable
             cameraFaults: withFaults ? Faults : null,
             previewStats: Preview,
             clock: clock,
-            camera: Fake);
+            camera: Fake,
+            previews: previews,
+            compositor: compositor);
         Operator = Harness.Connect(Role.Operator);
         Operator.Hello();
         Harness.Run();

@@ -77,7 +77,7 @@ public sealed partial class Brain
             format,
             _mirrored,
             _lastCapture,
-            null); // TODO(M7 wave B2): the last diagnostic composition.
+            _lastComposition);
     }
 
     private static CameraFormatView ToFormatView(CameraFormat format) => new(format.Width, format.Height, format.FramesPerSecond);
@@ -179,6 +179,11 @@ public sealed partial class Brain
     /// <summary>Selects <paramref name="deviceId"/>: any open session is closed, the camera is opened, and it is checking until a fresh frame arrives.</summary>
     private void StartCameraOpen(string deviceId)
     {
+        if (!string.Equals(_selectedCameraId, deviceId, StringComparison.Ordinal))
+        {
+            ReleaseDiagnosticsCaptures();
+        }
+
         _selectedCameraId = deviceId;
         ReleaseCameraSession();
         _cameraState = CameraState.Checking;
@@ -537,6 +542,7 @@ public sealed partial class Brain
             saved =>
             {
                 _lastCapture = saved;
+                AddDiagnosticsCapture(frame);
                 PublishChanges();
                 return saved;
             },

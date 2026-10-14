@@ -1,4 +1,5 @@
 import type { CameraDiagnosticsView, CameraFailureKind, CameraState } from "../../protocol/generated.ts";
+import { lookName, templateName } from "./catalogNames.ts";
 
 /**
  * Why a camera isn't available, in plain words for the operator (DESIGN.md, Copy: Camera field). The privacy line is
@@ -79,4 +80,16 @@ export function formatCaptureFacts(capture: NonNullable<CameraDiagnosticsView["l
     formatByteLength(capture.byteLength),
     capture.mirrored ? "Mirrored" : "Not mirrored",
   ].join(" · ");
+}
+
+type Composition = NonNullable<CameraDiagnosticsView["lastComposition"]>;
+
+/** The last composition's Template and Look by name, e.g. "Signature Strip · Naturale". */
+export function formatCompositionTitle(composition: Composition): string {
+  return `${templateName(composition.templateId)} · ${lookName(composition.lookId)}`;
+}
+
+/** The composition's native size, e.g. "600 × 1800", whatever way the screen turns the print. */
+export function formatCompositionSize(composition: Composition): string {
+  return `${String(composition.width)} × ${String(composition.height)}`;
 }

@@ -1,5 +1,7 @@
 import type { CameraDiagnosticsView, CameraFailureKind } from "../../protocol/generated.ts";
 import type { ComponentFixture } from "../fixture.ts";
+import { fixturePreviewUrl } from "../../fixtures/previewImages.ts";
+import { CompositionControls } from "../../operator/CompositionControls.tsx";
 import { createPatternFrameSource } from "../LivePreview/index.ts";
 import { noop } from "../shared/fixtureHelpers.tsx";
 import { CameraDiagnosticsScreen, type CameraDiagnosticsControls } from "./CameraDiagnosticsScreen.tsx";
@@ -21,6 +23,16 @@ const ready: CameraDiagnosticsView = {
 const source = createPatternFrameSource(1280, 720);
 const steady = { fps: 30, ageMs: 40 };
 const controls: CameraDiagnosticsControls = { onSelect: noop, onMirrorChange: noop, onCapture: noop };
+const compositionControls = (
+  <CompositionControls
+    templateId="signature-strip"
+    lookId="naturale-v1"
+    onTemplateChange={noop}
+    onLookChange={noop}
+    onCompose={noop}
+    onBlankPreview={noop}
+  />
+);
 
 function fixture(
   id: string,
@@ -57,6 +69,25 @@ export const fixtures: readonly ComponentFixture[] = [
       lastCapture: { fileName: "capture-20261014-071910-123.jpg", width: 1920, height: 1080, byteLength: 412_345, mirrored: true },
     },
     { controls, host: { deliveredFps: 29.6, droppedFrames: 2, frameAgeMs: 31 } },
+  ),
+  fixture(
+    "composition-portrait",
+    "ready, with the composition controls and a Signature Strip composed",
+    {
+      ...ready,
+      lastCapture: { fileName: "capture-20261014-071910-123.jpg", width: 1920, height: 1080, byteLength: 412_345, mirrored: false },
+      lastComposition: { previewKey: "signature-strip.sepia-v1.r2", templateId: "signature-strip", lookId: "sepia-v1", width: 600, height: 1800 },
+    },
+    { controls: { ...controls, extra: compositionControls }, previewUrl: fixturePreviewUrl },
+  ),
+  fixture(
+    "composition-landscape",
+    "ready, Panorama Four composed and turned a quarter counterclockwise, read-only",
+    {
+      ...ready,
+      lastComposition: { previewKey: "panorama-four.classic-v1.r4", templateId: "panorama-four", lookId: "classic-v1", width: 1800, height: 600 },
+    },
+    { previewUrl: fixturePreviewUrl },
   ),
   fixture("checking", "checking", { ...ready, state: "checking", format: null }, { measured: { fps: null, ageMs: null } }),
   fixture("idle", "no camera chosen", { ...ready, selectedDeviceId: null, state: "idle", format: null }, { measured: { fps: null, ageMs: null } }),

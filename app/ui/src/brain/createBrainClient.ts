@@ -1,4 +1,5 @@
 import type { AppEnv } from "../env.ts";
+import { headlessPreviewBase } from "./previewUrl.ts";
 import { ProtocolBrainClient, type ProtocolClientOptions } from "./protocolClient.ts";
 import type { BrainClient, Transport } from "./types.ts";
 import { bridgeUrl, createWebSocketTransport, type SocketLike } from "./webSocketTransport.ts";
@@ -54,13 +55,19 @@ export function selectTransport(startup: BrainClientStartup, params: StartupPara
   }
   if (params.token !== null) {
     let url: string;
+    let previewBase: string;
     try {
       url = bridgeUrl(startup.target.location, params.token, params.brain);
+      previewBase = headlessPreviewBase(params.brain);
     } catch {
       console.warn("FOTOHAVN: ?brain= isn't a valid URL.");
       return null;
     }
-    return createWebSocketTransport(startup.createSocket === undefined ? { url } : { url, createSocket: startup.createSocket });
+    return createWebSocketTransport({
+      url,
+      previewBase,
+      ...(startup.createSocket === undefined ? {} : { createSocket: startup.createSocket }),
+    });
   }
   if (params.fixture !== null) {
     return startup.fixtures?.(params.fixture) ?? null;

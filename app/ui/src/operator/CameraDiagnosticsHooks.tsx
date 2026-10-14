@@ -1,11 +1,9 @@
 import { useRef, useState } from "react";
 import { useBrainClient } from "../brain/BrainClientContext.ts";
 import type { TestHookName, TestResult } from "../brain/types.ts";
-import {
-  CameraDiagnosticsScreen,
-  type CameraDiagnosticsControls,
-  type MeasuredFrames,
-} from "../components/CameraDiagnosticsScreen/index.ts";
+import { CameraDiagnosticsScreen, type CameraDiagnosticsControls, type MeasuredFrames } from "../components/CameraDiagnosticsScreen/index.ts";
+import { defaultLookId, templateChoices } from "../components/CameraDiagnosticsScreen/catalogNames.ts";
+import { CompositionControls } from "./CompositionControls.tsx";
 import type { FrameSource } from "../components/LivePreview/index.ts";
 import type { CameraDiagnosticsView } from "../protocol/generated.ts";
 import { hookNotice } from "./format.ts";
@@ -29,7 +27,11 @@ export function CameraDiagnosticsWithHooks({ view, source, measured }: CameraDia
   const client = useBrainClient();
   const host = useHostReport(client);
   const capturing = useRef(false);
+  const composing = useRef(false);
   const [busy, setBusy] = useState(false);
+  const [composeBusy, setComposeBusy] = useState(false);
+  const [templateId, setTemplateId] = useState(templateChoices[0]?.id ?? "");
+  const [lookId, setLookId] = useState(defaultLookId);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function run(request: Promise<TestResult<TestHookName>>): Promise<void> {
@@ -48,6 +50,18 @@ export function CameraDiagnosticsWithHooks({ view, source, measured }: CameraDia
     setBusy(false);
   }
 
+  async function compose(request: () => Promise<TestResult<TestHookName>>): Promise<void> {
+    if (composing.current) {
+      return;
+    }
+    composing.current = true;
+    setComposeBusy(true);
+    setNotice(null);
+    await run(request());
+    composing.current = false;
+    setComposeBusy(false);
+  }
+
   function select(deviceId: string): void {
     void run(client.sendTest("test.selectDiagnosticsCamera", { deviceId }));
   }
@@ -60,13 +74,41 @@ export function CameraDiagnosticsWithHooks({ view, source, measured }: CameraDia
     void capture();
   }
 
+  function startCompose(): void {
+    void compose(() => client.sendTest("test.composeDiagnostics", { templateId, lookId }));
+  }
+
+  function startBlankPreview(): void {
+    void compose(() => client.sendTest("test.composeBlankPreview", { templateId }));
+  }
+
   const controls: CameraDiagnosticsControls = {
     onSelect: select,
     onMirrorChange: mirror,
     onCapture: startCapture,
     capturing: busy,
     notice,
+    extra: (
+      <CompositionControls
+        templateId={templateId}
+        lookId={lookId}
+        onTemplateChange={setTemplateId}
+        onLookChange={setLookId}
+        onCompose={startCompose}
+        onBlankPreview={startBlankPreview}
+        composing={composeBusy}
+      />
+    ),
   };
 
-  return <CameraDiagnosticsScreen view={view} source={source} measured={measured} host={host} controls={controls} />;
+  return (
+    <CameraDiagnosticsScreen
+      view={view}
+      source={source}
+      measured={measured}
+      host={host}
+      controls={controls}
+      previewUrl={client.previewUrl}
+    />
+  );
 }

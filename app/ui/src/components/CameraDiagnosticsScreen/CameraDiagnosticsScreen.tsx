@@ -1,18 +1,24 @@
+import type { ReactNode } from "react";
+import { webViewPreviewUrl } from "../../brain/previewUrl.ts";
 import type { CameraDiagnosticsView } from "../../protocol/generated.ts";
 import { Eyebrow } from "../Eyebrow/index.ts";
 import { InlineStatus } from "../InlineStatus/index.ts";
 import { LivePreview, silentFrameSource, type FrameSource } from "../LivePreview/index.ts";
 import { OptionList } from "../OptionList/index.ts";
 import { PrimaryAction } from "../PrimaryAction/index.ts";
+import { PrintObject } from "../PrintObject/index.ts";
 import { StatementHeading } from "../StatementHeading/index.ts";
 import { cx } from "../shared/cx.ts";
 import { Switch } from "../Switch/index.ts";
+import { lookName, templateName } from "./catalogNames.ts";
 import {
   cameraStatusIsAlert,
   cameraStatusText,
   chooseCameraCopy,
   formatCameraFormat,
   formatCaptureFacts,
+  formatCompositionSize,
+  formatCompositionTitle,
   formatFps,
   formatMeasuredRate,
   formatPictureAge,
@@ -44,6 +50,8 @@ export interface CameraDiagnosticsControls {
   readonly capturing?: boolean;
   /** The outcome line when a hook didn't go through; null shows nothing. */
   readonly notice?: string | null;
+  /** More controls under the capture row (E2E builds put the composition controls here); the screen only places them. */
+  readonly extra?: ReactNode;
 }
 
 export interface CameraDiagnosticsScreenProps {
@@ -53,6 +61,8 @@ export interface CameraDiagnosticsScreenProps {
   readonly measured: MeasuredFrames;
   readonly host?: HostFrameReport | null;
   readonly controls?: CameraDiagnosticsControls | undefined;
+  /** The URL of a composed preview by its key; the host decides it (`client.previewUrl`). Default: the WebView2 host's. */
+  readonly previewUrl?: ((key: string) => string) | undefined;
   readonly className?: string;
 }
 
@@ -85,9 +95,18 @@ function hostLine(host: HostFrameReport): string {
  * Everything on it is read-only unless `controls` is given; `controls` are for E2E builds, whose hooks pick the camera,
  * flip the mirror, and capture. `CAPTURE` is the view's one primary action.
  */
-export function CameraDiagnosticsScreen({ view, source, measured, host = null, controls, className }: CameraDiagnosticsScreenProps) {
+export function CameraDiagnosticsScreen({
+  view,
+  source,
+  measured,
+  host = null,
+  controls,
+  previewUrl = webViewPreviewUrl,
+  className,
+}: CameraDiagnosticsScreenProps) {
   const ready = view.state === "ready";
   const capture = view.lastCapture;
+  const composition = view.lastComposition;
   const waiting = waitingMessage(view);
   return (
     <div className={cx(styles.screen, className)} data-camera-state={view.state} data-camera-reason={view.reason ?? undefined}>
@@ -113,6 +132,7 @@ export function CameraDiagnosticsScreen({ view, source, measured, host = null, c
               <InlineStatus tone="alert">{controls.notice ?? ""}</InlineStatus>
             </div>
           )}
+          {controls?.extra}
         </div>
         <div className={styles.side}>
           {view.cameras.length === 0 ? (
@@ -171,6 +191,30 @@ export function CameraDiagnosticsScreen({ view, source, measured, host = null, c
                     <span className={styles.file}>{capture.fileName}</span>
                     <span className={styles.detail}>{formatCaptureFacts(capture)}</span>
                   </>
+                )}
+              </dd>
+            </div>
+            <div className={styles.fact}>
+              <dt className={styles.label}>Last composition</dt>
+              <dd className={styles.value} data-camera-measure="composition">
+                {composition === null ? (
+                  "None yet"
+                ) : (
+                  <figure className={styles.composition} data-composition-key={composition.previewKey}>
+                    <div className={styles.compositionPrint}>
+                      <PrintObject
+                        src={previewUrl(composition.previewKey)}
+                        alt={`${templateName(composition.templateId)}, ${lookName(composition.lookId)}`}
+                        width={composition.width}
+                        height={composition.height}
+                        rotated={composition.width > composition.height}
+                      />
+                    </div>
+                    <figcaption className={styles.compositionCaption}>
+                      <span className={styles.file}>{formatCompositionTitle(composition)}</span>
+                      <span className={styles.detail}>{formatCompositionSize(composition)}</span>
+                    </figcaption>
+                  </figure>
                 )}
               </dd>
             </div>
