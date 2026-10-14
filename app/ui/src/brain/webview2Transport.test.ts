@@ -1,32 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { operatorEventListEmpty } from "../fixtures/inlineFixtures.ts";
 import { PROTOCOL_VERSION } from "../protocol/generated.ts";
+import { fakeWebView } from "../test/fakeWebView.ts";
+import { stubImageData } from "../test/fakeImageData.ts";
 import { ProtocolBrainClient } from "./protocolClient.ts";
 import { createWebView2Transport } from "./webview2Transport.ts";
-
-function fakeWebView() {
-  const listeners = new Set<(event: WebView2MessageEvent) => void>();
-  const postMessage = vi.fn<(message: unknown) => void>();
-  const addEventListener = vi.fn((_type: "message", listener: (event: WebView2MessageEvent) => void) => {
-    listeners.add(listener);
-  });
-  const removeEventListener = vi.fn((_type: "message", listener: (event: WebView2MessageEvent) => void) => {
-    listeners.delete(listener);
-  });
-  const webview: WebView2Bridge = { postMessage, addEventListener, removeEventListener };
-  return {
-    webview,
-    postMessage,
-    addEventListener,
-    removeEventListener,
-    listeners,
-    post: (data: unknown) => {
-      for (const listener of listeners) {
-        listener({ data });
-      }
-    },
-  };
-}
 
 describe("createWebView2Transport", () => {
   it("posts hello as an object on start and delivers the host's decoded messages", () => {
@@ -58,20 +36,39 @@ describe("createWebView2Transport", () => {
     await expect(result).resolves.toEqual({ status: "rejected", reason: "notAvailable" });
   });
 
-  it("starts once and removes its listener on stop", () => {
-    const { webview, listeners, addEventListener, removeEventListener } = fakeWebView();
+  it("starts once and removes its listeners on stop", () => {
+    const { webview, listeners, bufferListeners, addEventListener, removeEventListener } = fakeWebView();
     const transport = createWebView2Transport(webview);
     const listener = { onOpen: vi.fn(), onMessage: vi.fn(), onClose: vi.fn() };
 
     transport.start(listener);
     transport.start(listener);
-    expect(addEventListener).toHaveBeenCalledOnce();
+    // The message listener and the frame source's shared-buffer listener.
+    expect(addEventListener).toHaveBeenCalledTimes(2);
     expect(listener.onOpen).toHaveBeenCalledOnce();
     expect(listeners.size).toBe(1);
+    expect(bufferListeners.size).toBe(1);
 
     transport.stop();
     transport.stop();
-    expect(removeEventListener).toHaveBeenCalledOnce();
+    expect(removeEventListener).toHaveBeenCalledTimes(2);
     expect(listeners.size).toBe(0);
+    expect(bufferListeners.size).toBe(0);
+  });
+
+  it("carries the live preview: a shared buffer is drawn, released, and acknowledged through postMessage", () => {
+    stubImageData();
+    const { webview, postMessage, releaseBuffer, postBuffer } = fakeWebView();
+    const transport = createWebView2Transport(webview);
+    transport.start({ onOpen: vi.fn(), onMessage: vi.fn(), onClose: vi.fn() });
+    const frames = vi.fn();
+    transport.frames?.subscribe(frames);
+
+    const buffer = new ArrayBuffer(2 * 2 * 4);
+    postBuffer(buffer, { type: "previewFrame", seq: 7, width: 2, height: 2, format: "rgba", timestampMs: 100 });
+
+    expect(frames).toHaveBeenCalledOnce();
+    expect(releaseBuffer).toHaveBeenCalledExactlyOnceWith(buffer);
+    expect(postMessage).toHaveBeenLastCalledWith({ type: "frameAck", seq: 7 });
   });
 });

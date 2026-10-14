@@ -21,6 +21,14 @@ function handshaken(options: ConstructorParameters<typeof ProtocolBrainClient>[1
 const rowsPresentation: OperatorPresentation = operatorEventListWithRows.presentation;
 
 describe("ProtocolBrainClient handshake", () => {
+  it("exposes its transport's live preview frames, and none without one", () => {
+    const frames = { subscribe: () => () => undefined };
+    const withFrames = new ProtocolBrainClient(Object.assign(new ManualTransport(), { frames }));
+    expect(withFrames.frames).toBe(frames);
+    expect(new ProtocolBrainClient(new ManualTransport()).frames).toBeUndefined();
+    expect(new ProtocolBrainClient(null).frames).toBeUndefined();
+  });
+
   it("starts connecting, sends hello with the generated version when the transport opens, and takes the role from welcome", () => {
     const { transport, client } = setup();
     expect(client.kind).toBe("fixture");

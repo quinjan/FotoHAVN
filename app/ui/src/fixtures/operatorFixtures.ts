@@ -1,5 +1,7 @@
 import {
   PROTOCOL_VERSION,
+  type CameraDiagnosticsView,
+  type CameraFailureKind,
   type EventListRow,
   type OperatorWelcomeMessage,
   type StorageErrorReason,
@@ -72,6 +74,41 @@ export const storageErrorKinds: readonly StorageErrorReason[] = [
 
 const kebab = (kind: string): string => kind.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
+/**
+ * The camera diagnostics view (M5) for a fixture, on the revision the brain-generated ones use. The brain writes the
+ * fixtures for ready, checking, privacy denied, in use, and no cameras; the other not-available reasons are here.
+ */
+export function operatorCameraDiagnostics(view: CameraDiagnosticsView): OperatorWelcomeMessage {
+  return {
+    type: "welcome",
+    role: "operator",
+    protocolVersion: PROTOCOL_VERSION,
+    revision: 3,
+    presentation: {
+      surface: "cameraDiagnostics",
+      eventList: null,
+      runningEvent: null,
+      overlays: { confirmation: null, identifyDisplays: null, notice: null },
+      fatal: null,
+      storageError: null,
+      cameraDiagnostics: view,
+    },
+  };
+}
+
+/** The not-available reasons the brain's fixtures don't cover (privacy denied and in use are generated). */
+export const cameraReasonsWithFixtures: readonly CameraFailureKind[] = [
+  "stale",
+  "failed",
+  "removed",
+  "exclusiveLost",
+  "noSupportedFormat",
+  "notFound",
+  "unknown",
+];
+
+const fixtureCamera = { deviceId: "fake-camera", name: "Fake camera" };
+
 /** Every hand-written operator fixture by name. */
 export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
   const fixtures: Record<string, OperatorWelcomeMessage> = {
@@ -82,7 +119,27 @@ export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
       { ...eventRow(0, 1, true), id: "event-long-1", name: longEventName, venue: longEventVenue },
       { ...eventRow(1, 2, false), id: "event-long-2", name: longEventName, venue: longEventVenue, completedGuestCycles: 1248 },
     ]),
+    "operator-camera-diagnostics-choose-camera": operatorCameraDiagnostics({
+      cameras: [fixtureCamera, { deviceId: "second-camera", name: "USB camera" }],
+      selectedDeviceId: null,
+      state: "idle",
+      reason: null,
+      format: null,
+      mirrored: false,
+      lastCapture: null,
+    }),
   };
+  for (const reason of cameraReasonsWithFixtures) {
+    fixtures[`operator-camera-diagnostics-reason-${kebab(reason)}`] = operatorCameraDiagnostics({
+      cameras: [fixtureCamera],
+      selectedDeviceId: fixtureCamera.deviceId,
+      state: "notAvailable",
+      reason,
+      format: null,
+      mirrored: false,
+      lastCapture: null,
+    });
+  }
   for (const kind of storageErrorKinds) {
     fixtures[`operator-storage-error-${kebab(kind)}`] = operatorStorageError(
       kind,

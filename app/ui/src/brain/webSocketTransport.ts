@@ -1,9 +1,12 @@
 import type { ClientMessage } from "../protocol/generated.ts";
+import { WebSocketFrameSource } from "../preview/webSocketFrameSource.ts";
 import type { Transport, TransportListener } from "./types.ts";
 
 /** The part of the browser `WebSocket` the transport uses, so tests can substitute a fake. */
 export interface SocketLike {
   readonly readyState: number;
+  /** Set to `arraybuffer` on every new socket, so binary preview frames arrive as `ArrayBuffer`s. */
+  binaryType?: "arraybuffer" | "blob";
   onopen: ((event: Event) => void) | null;
   onmessage: ((event: MessageEvent) => void) | null;
   onclose: ((event: CloseEvent) => void) | null;
@@ -27,6 +30,9 @@ const socketOpen = 1;
 /**
  * The headless host's bridge: one JSON text frame per message. When the socket closes, it reconnects with backoff
  * and reports `onOpen` again, so the client re-handshakes on every new socket.
+ *
+ * Binary messages on the same socket are live preview frames (24-byte header, then RGBA; contract §6): `frames` draws
+ * them and sends each `frameAck` back as a JSON text message.
  */
 export function createWebSocketTransport(options: WebSocketTransportOptions): Transport {
   const createSocket = options.createSocket ?? ((url: string) => new WebSocket(url));
@@ -37,15 +43,32 @@ export function createWebSocketTransport(options: WebSocketTransportOptions): Tr
   let attempt = 0;
   let stopped = false;
 
+  function send(message: ClientMessage): boolean {
+    if (socket?.readyState !== socketOpen) {
+      return false;
+    }
+    socket.send(JSON.stringify(message));
+    return true;
+  }
+
+  const frames = new WebSocketFrameSource((seq) => {
+    send({ type: "frameAck", seq });
+  });
+
   function open(): void {
     timer = null;
     const current = createSocket(options.url);
+    current.binaryType = "arraybuffer";
     socket = current;
     current.onopen = () => {
       attempt = 0;
       listener?.onOpen();
     };
     current.onmessage = (event) => {
+      if (event.data instanceof ArrayBuffer) {
+        frames.receive(event.data);
+        return;
+      }
       if (typeof event.data !== "string") {
         return;
       }
@@ -81,6 +104,7 @@ export function createWebSocketTransport(options: WebSocketTransportOptions): Tr
 
   return {
     kind: "websocket",
+    frames,
     start(next: TransportListener) {
       if (listener !== null || stopped) {
         return;
@@ -88,13 +112,7 @@ export function createWebSocketTransport(options: WebSocketTransportOptions): Tr
       listener = next;
       open();
     },
-    send(message: ClientMessage) {
-      if (socket?.readyState !== socketOpen) {
-        return false;
-      }
-      socket.send(JSON.stringify(message));
-      return true;
-    },
+    send,
     stop() {
       stopped = true;
       if (timer !== null) {

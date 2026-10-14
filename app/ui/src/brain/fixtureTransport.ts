@@ -1,3 +1,4 @@
+import { createPatternFrameSource } from "../components/LivePreview/index.ts";
 import {
   PROTOCOL_VERSION,
   type ClientMessage,
@@ -36,6 +37,8 @@ export interface FixtureTransportOptions {
 export function createFixtureTransport(snapshot: FixtureSnapshot, options: FixtureTransportOptions = {}): FixtureTransport {
   const answerCommand = options.answerCommand ?? (() => ({ status: "rejected", reason: "notAvailable" }) as const);
   const sent: ClientMessage[] = [];
+  // The fixture brain has no camera: the diagnostics preview shows the deterministic pattern instead.
+  const frames = createPatternFrameSource(1280, 720);
   let listener: TransportListener | null = null;
 
   function deliver(message: ServerMessage): void {
@@ -65,6 +68,7 @@ export function createFixtureTransport(snapshot: FixtureSnapshot, options: Fixtu
 
   return {
     kind: "fixture",
+    frames,
     sent,
     start(next: TransportListener) {
       if (listener !== null) {

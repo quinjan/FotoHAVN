@@ -11,6 +11,22 @@ async function flush(): Promise<void> {
 }
 
 describe("createFixtureTransport", () => {
+  it("offers the pattern as its live preview, and takes frame acks without answering", async () => {
+    const transport = createFixtureTransport(guestStart);
+    const client = new ProtocolBrainClient(transport);
+    expect(client.frames).toBe(transport.frames);
+    const frames: unknown[] = [];
+    transport.frames?.subscribe((frame) => frames.push(frame));
+    expect(frames).toHaveLength(1);
+
+    client.connect();
+    await flush();
+    transport.send({ type: "frameAck", seq: 3 });
+    await flush();
+    expect(transport.sent.at(-1)).toEqual({ type: "frameAck", seq: 3 });
+    expect(client.getState().status).toBe("connected");
+  });
+
   it("answers hello with its welcome, asynchronously", async () => {
     const transport = createFixtureTransport(guestStart);
     const client = new ProtocolBrainClient(transport);

@@ -3,6 +3,7 @@ import { StartingScreen } from "../components/StartingScreen/index.ts";
 import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
+import { CameraDiagnosticsSurface } from "./CameraDiagnosticsSurface.tsx";
 import { EventList } from "./EventList.tsx";
 import styles from "./Operator.module.css";
 import { StorageErrorSurface } from "./StorageErrorSurface.tsx";
@@ -42,6 +43,12 @@ function OperatorSurface({ presentation }: { readonly presentation: OperatorPres
       return <OperatorFatal reason={presentation.fatal?.reason ?? null} />;
     case "storageError":
       return presentation.storageError === null ? <OperatorPending /> : <StorageErrorSurface view={presentation.storageError} />;
+    case "cameraDiagnostics":
+      return presentation.cameraDiagnostics === null ? (
+        <OperatorPending />
+      ) : (
+        <CameraDiagnosticsSurface view={presentation.cameraDiagnostics} />
+      );
     default:
       return <OperatorPending />;
   }

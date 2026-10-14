@@ -18,6 +18,11 @@ async function expectNoScrolling(page: Page): Promise<void> {
   expect(overflow).toEqual({ horizontal: false, vertical: false });
 }
 
+async function expectNoHorizontalScrolling(page: Page): Promise<void> {
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  expect(overflow).toBe(false);
+}
+
 async function expectAccessible(page: Page): Promise<void> {
   const axe = await new AxeBuilder({ page }).analyze();
   expect(axe.violations).toEqual([]);
@@ -141,6 +146,76 @@ for (const resolution of resolutions) {
       await expectAccessible(page);
     });
 
+    // The camera diagnostics surface (M5): the brain's generated fixtures for ready, checking, privacy denied, in use,
+    // and no cameras, plus hand-written ones for the other reasons. An E2E build shows the controls; the fixture
+    // brain answers every hook `hooksUnavailable`.
+    for (const [fixture, state, reason, line] of [
+      ["operator-camera-diagnostics-ready", "ready", null, "Ready"],
+      ["operator-camera-diagnostics-checking", "checking", null, "Checking"],
+      ["operator-camera-diagnostics-choose-camera", "idle", null, "Choose a camera."],
+      ["operator-camera-diagnostics-privacy-denied", "notAvailable", "privacyDenied", "Not available. Camera access is off in Windows privacy settings."],
+      ["operator-camera-diagnostics-in-use", "inUseByAnotherApp", "inUseByAnotherApp", "In use by another app"],
+      ["operator-camera-diagnostics-reason-stale", "notAvailable", "stale", "Not available. The camera stopped sending pictures."],
+      ["operator-camera-diagnostics-reason-failed", "notAvailable", "failed", "Not available. The camera stopped working."],
+      ["operator-camera-diagnostics-reason-removed", "notAvailable", "removed", "Not available. The camera was disconnected."],
+      ["operator-camera-diagnostics-reason-exclusive-lost", "notAvailable", "exclusiveLost", "Not available. Another app took over the camera."],
+      ["operator-camera-diagnostics-reason-no-supported-format", "notAvailable", "noSupportedFormat", "Not available. This camera has no picture size FOTOHAVN can use."],
+      ["operator-camera-diagnostics-reason-not-found", "notAvailable", "notFound", "Not available. FOTOHAVN can't find this camera."],
+      ["operator-camera-diagnostics-reason-unknown", "notAvailable", "unknown", "Not available. Something went wrong with the camera."],
+    ] as const) {
+      test(`operator camera diagnostics, ${fixture.replace("operator-camera-diagnostics-", "")}`, async ({ page }) => {
+        await page.goto(`/index.html?fixture=${fixture}`);
+        await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
+        const surface = page.locator('[data-fotohavn-surface="cameraDiagnostics"]');
+        await expect(surface).toBeVisible();
+        await expect(page.getByText("CAMERA DIAGNOSTICS")).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1, name: "Check the camera." })).toBeVisible();
+        await expect(page.locator(`[data-camera-state="${state}"]`)).toBeVisible();
+        if (reason !== null) {
+          await expect(page.locator(`[data-camera-reason="${reason}"]`)).toBeVisible();
+        }
+        await expect(page.getByText(line, { exact: true })).toBeVisible();
+
+        // Only a ready camera shows a picture (the fixture brain's pattern); every other state waits, with words.
+        await expect(page.locator("[data-state]")).toHaveAttribute("data-state", state === "ready" ? "live" : "waiting");
+        if (state === "ready") {
+          await expect(page.locator("canvas")).toHaveJSProperty("width", 1280);
+        }
+
+        const capture = page.getByRole("button", { name: "CAPTURE" });
+        await expect(capture).toBeVisible();
+        await expect(capture).toHaveAttribute("aria-disabled", state === "ready" ? "false" : "true");
+        await expect(page.getByRole("switch", { name: "Mirror" })).toBeVisible();
+
+        await expectNoHorizontalScrolling(page);
+        await page.screenshot({ path: resolve(screenshotDir, `${fixture}-${name}.png`) });
+        await expectAccessible(page);
+      });
+    }
+
+    test("operator camera diagnostics, no cameras", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-camera-diagnostics-no-cameras");
+      await expect(page.locator('[data-fotohavn-surface="cameraDiagnostics"]')).toBeVisible();
+      await expect(page.getByText("No camera found.")).toBeVisible();
+      await expect(page.getByText("Connect a camera and it will appear here.")).toBeVisible();
+      await expect(page.getByRole("radio")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "CAPTURE" })).toBeVisible();
+      await expectNoHorizontalScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-camera-diagnostics-no-cameras-${name}.png`) });
+      await expectAccessible(page);
+    });
+
+    test("operator camera diagnostics, a hook the booth won't run says so politely", async ({ page }) => {
+      await page.goto("/index.html?fixture=operator-camera-diagnostics-ready");
+      await page.getByRole("button", { name: "CAPTURE" }).click();
+      await expect(page.getByRole("status").filter({ hasText: "That didn't work. Try again." })).toBeVisible();
+      await page.getByRole("switch", { name: "Mirror" }).click();
+      await expect(page.getByRole("status").filter({ hasText: "That didn't work. Try again." })).toBeVisible();
+      await expectNoHorizontalScrolling(page);
+      await page.screenshot({ path: resolve(screenshotDir, `operator-camera-diagnostics-hook-notice-${name}.png`) });
+      await expectAccessible(page);
+    });
+
     test("guest start placeholder", async ({ page }) => {
       await page.goto("/index.html?fixture=guest-start");
       await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "guest");
@@ -186,7 +261,7 @@ for (const resolution of resolutions) {
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
-      await expect(page.getByText("Booth version 3 · Screen version 2")).toBeVisible();
+      await expect(page.getByText("Booth version 4 · Screen version 3")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);
@@ -216,7 +291,8 @@ for (const resolution of resolutions) {
           "protocol-mismatch",
         ]),
       );
-      await expectNoScrolling(page);
+      // The page lists every fixture, so it grows with each milestone: it may scroll down, never sideways.
+      await expectNoHorizontalScrolling(page);
       await expectAccessible(page);
     });
   });

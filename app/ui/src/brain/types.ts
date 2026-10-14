@@ -1,3 +1,4 @@
+import type { FrameSource } from "../components/LivePreview/index.ts";
 import type {
   ClientMessage,
   CommandPayloadMap,
@@ -54,6 +55,8 @@ export type TransportKind = "webview2" | "websocket" | "fixture";
 export interface BrainClient {
   /** The transport this client uses, or `none` when no bridge exists. */
   readonly kind: TransportKind | "none";
+  /** The live preview frames this connection delivers (contract §6); absent when the transport carries none. */
+  readonly frames?: FrameSource | undefined;
   /** Starts the transport; `hello` goes out whenever it opens. Calling it again does nothing. */
   connect(): void;
   /** The current state. The same object is returned until it changes. Bound, so `useSyncExternalStore` can take it. */
@@ -80,6 +83,8 @@ export interface TransportListener {
 /** Moves envelopes between the page and the brain; holds no protocol state. */
 export interface Transport {
   readonly kind: TransportKind;
+  /** The live preview frames this bridge carries next to the envelopes; absent when it carries none. */
+  readonly frames?: FrameSource | undefined;
   start(listener: TransportListener): void;
   /** Returns false when the message couldn't be sent (not open). */
   send(message: ClientMessage): boolean;

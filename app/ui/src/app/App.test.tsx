@@ -198,6 +198,31 @@ describe("Operator surfaces", () => {
     expect(screen.getByText("This view isn't ready yet.")).toBeVisible();
   });
 
+  it("renders the camera diagnostics surface from the presentation, read-only outside an E2E build", () => {
+    operator({
+      surface: "cameraDiagnostics",
+      eventList: null,
+      cameraDiagnostics: {
+        cameras: [{ deviceId: "fake-camera", name: "Fake camera" }],
+        selectedDeviceId: "fake-camera",
+        state: "notAvailable",
+        reason: "privacyDenied",
+        format: null,
+        mirrored: false,
+        lastCapture: null,
+      },
+    });
+    expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "cameraDiagnostics");
+    expect(screen.getByText("CAMERA DIAGNOSTICS")).toBeVisible();
+    expect(screen.getByText("Not available. Camera access is off in Windows privacy settings.")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "CAPTURE" })).not.toBeInTheDocument();
+  });
+
+  it("falls back to the placeholder when a camera diagnostics surface carries no view", () => {
+    operator({ surface: "cameraDiagnostics", eventList: null, cameraDiagnostics: null });
+    expect(screen.getByText("This view isn't ready yet.")).toBeVisible();
+  });
+
   it("shows the brain's notice", () => {
     operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { message: "The guest display is disconnected." } } });
     expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The guest display is disconnected.");
