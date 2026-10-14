@@ -32,7 +32,7 @@ public sealed class HookTests
     {
         var executor = new ManualBrainExecutor();
         var host = new RecordingHostServices("fake-primary");
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), host, new InMemoryEventStore()));
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), host, new InMemoryEventStore()));
         var received = new List<string>();
         var connection = brain.Connect(Role.Guest, received.Add);
         var client = new TestClient(Role.Guest) { Connection = connection };
@@ -430,7 +430,7 @@ public sealed class HookTests
     {
         var cameras = new FaultingCameras();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), cameras, new RecordingHostServices("fake-primary"), new InMemoryEventStore()), hooksEnabled: true, hostHooks: null);
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), cameras, new RecordingHostServices("fake-primary"), new InMemoryEventStore()), hooksEnabled: true, hostHooks: null);
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 

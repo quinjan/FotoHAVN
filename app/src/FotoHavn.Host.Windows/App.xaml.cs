@@ -1,7 +1,9 @@
 using System.Windows;
 using FotoHavn.Camera.Windows;
+using FotoHavn.Catalog;
 using FotoHavn.Core;
 using FotoHavn.Core.Camera;
+using FotoHavn.Core.Catalog;
 #if E2E_HOOKS
 using FotoHavn.Core.Hooks;
 #endif
@@ -94,7 +96,8 @@ public partial class App : Application
         var cameraFaults = new FaultInjectingCameraAdapter(_cameraAdapter);
         camera = cameraFaults;
 #endif
-        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store)
+        var previewCache = new PreviewCache();
+        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store, new CatalogData(), new NotYetComposingCompositor(), previewCache)
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
             PreviewStats = frames,
@@ -118,7 +121,7 @@ public partial class App : Application
             _brain,
             environments,
             paths,
-            EmptyPreviewSource.Instance,
+            previewCache,
             frames,
             TimeProvider.System,
             _loggerFactory.CreateLogger("FotoHavn.Host.Windows.WebView"));

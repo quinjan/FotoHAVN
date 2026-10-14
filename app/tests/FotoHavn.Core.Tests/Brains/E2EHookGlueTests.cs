@@ -22,7 +22,7 @@ public sealed class E2EHookGlueTests
     {
         var hooks = new Hooks();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices("fake-primary"), new InMemoryEventStore())
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()),         new RecordingHostServices("fake-primary"), new InMemoryEventStore()) with
         {
             HostTestHooks = hooks,
         });
@@ -49,7 +49,7 @@ public sealed class E2EHookGlueTests
     public void Without_host_hooks_the_brain_hooks_still_run()
     {
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 
@@ -65,7 +65,7 @@ public sealed class E2EHookGlueTests
     {
         var hooks = new StorageHooks();
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore())
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(),         new InMemoryEventStore()) with
         {
             StorageTestHooks = hooks,
         });
@@ -84,7 +84,7 @@ public sealed class E2EHookGlueTests
     public void Without_storage_hooks_the_fault_hooks_are_not_supported()
     {
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()));
         var client = new TestClient(Role.Operator);
         client.Connection = brain.Connect(Role.Operator, client.Receive);
 
@@ -112,7 +112,7 @@ public sealed class E2EHookGlueTests
         var clock = new FakeClock();
         var faults = new FaultInjectingCameraAdapter(new FakeCameraAdapter(clock));
         var executor = new ManualBrainExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, clock, FakeDisplayAdapter.CreateDefault(), faults, new RecordingHostServices(), new InMemoryEventStore())
+        using var brain = new Brain(TestDependencies.Create(executor, clock, FakeDisplayAdapter.CreateDefault(), faults, new RecordingHostServices(),         new InMemoryEventStore()) with
         {
             CameraFaults = faults,
         });

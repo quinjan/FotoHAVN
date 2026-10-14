@@ -212,7 +212,8 @@ export type TestHookError =
   | "hookFailed"
   | "notSupported"
   | "unknownDisplay"
-  | "unknownCamera";
+  | "unknownCamera"
+  | "compositionFailed";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "Role".
@@ -253,7 +254,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 4;
+  protocolVersion: 5;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1494,6 +1495,7 @@ export interface CameraDiagnosticsView {
   format: CameraFormatView | null;
   mirrored: boolean;
   lastCapture: CameraCaptureView | null;
+  lastComposition: CompositionView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1522,6 +1524,17 @@ export interface CameraCaptureView {
   height: number;
   byteLength: number;
   mirrored: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CompositionView".
+ */
+export interface CompositionView {
+  previewKey: string;
+  templateId: string;
+  lookId: string;
+  width: number;
+  height: number;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1793,6 +1806,14 @@ export interface TestHookMap {
     args: null;
     result: EmptyHookResult;
   };
+  "test.composeDiagnostics": {
+    args: ComposeDiagnosticsArgs;
+    result: ComposePreviewResult;
+  };
+  "test.composeBlankPreview": {
+    args: ComposeBlankPreviewArgs;
+    result: ComposePreviewResult;
+  };
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2020,6 +2041,31 @@ export interface InjectCameraFaultArgs {
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ComposeDiagnosticsArgs".
+ */
+export interface ComposeDiagnosticsArgs {
+  templateId: string;
+  lookId: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ComposePreviewResult".
+ */
+export interface ComposePreviewResult {
+  previewKey: string;
+  width: number;
+  height: number;
+  byteLength: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ComposeBlankPreviewArgs".
+ */
+export interface ComposeBlankPreviewArgs {
+  templateId: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "PreviewFrameMetadata".
  */
 export interface PreviewFrameMetadata {
@@ -2032,4 +2078,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 4;
+export const PROTOCOL_VERSION = 5;

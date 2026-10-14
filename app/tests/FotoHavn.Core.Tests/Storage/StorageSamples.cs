@@ -19,11 +19,11 @@ internal static class StorageSamples
         EventRecord.NoPrinter,
         true,
         5,
-        "classic-strip",
-        "naturale",
+        "signature-strip",
+        "naturale-v1",
         true,
-        ["classic-strip", "grid-four"],
-        ["naturale", "noir"],
+        ["signature-strip", "panorama-four"],
+        ["naturale-v1", "monochrome-v1"],
         [new PhaseTimerSetting(PhaseTimerPhase.Template, 60), new PhaseTimerSetting(PhaseTimerPhase.Keepsake, 0)]);
 
     public static CaptureCommit CaptureCommit(string guestCycleId, int sequence, byte fill = 7) => new(
@@ -37,8 +37,8 @@ internal static class StorageSamples
 
     public static PhotoStripCommit StripCommit(string guestCycleId, IReadOnlyList<string> arrangement) => new(
         guestCycleId,
-        "classic-strip",
-        "naturale",
+        "signature-strip",
+        "naturale-v1",
         arrangement,
         Enumerable.Repeat((byte)9, 128).ToArray(),
         600,

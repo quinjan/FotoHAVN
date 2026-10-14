@@ -6,4 +6,22 @@
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Win32" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Artwork and fonts ship inside the assembly; the logical names are the contract in CatalogAssets. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Templates\butter-gingham.png" LogicalName="Assets/Templates/butter-gingham.png" />
+    <EmbeddedResource Include="Assets\Templates\polka-keepsake.png" LogicalName="Assets/Templates/polka-keepsake.png" />
+    <EmbeddedResource Include="Assets\Fonts\CormorantGaramond-Medium.ttf" LogicalName="Assets/Fonts/CormorantGaramond-Medium.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\Manrope-Regular.ttf" LogicalName="Assets/Fonts/Manrope-Regular.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\OFL-CormorantGaramond.txt" LogicalName="Assets/Fonts/OFL-CormorantGaramond.txt" />
+    <EmbeddedResource Include="Assets\Fonts\OFL-Manrope.txt" LogicalName="Assets/Fonts/OFL-Manrope.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FotoHavn.Catalog.Tests" />
+  </ItemGroup>
 </Project>

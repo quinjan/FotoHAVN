@@ -48,7 +48,7 @@ public sealed class ThreadingTests
         using var executor = new DedicatedThreadBrainExecutor(errors.Enqueue);
         var displays = new ExecutorCheckingDisplays(executor, FakeDisplayAdapter.DefaultPrimary);
         var host = new RecordingHostServices();
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), displays, new FakeCameraAdapter(new FakeClock()), host, new InMemoryEventStore()));
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), displays, new FakeCameraAdapter(new FakeClock()), host, new InMemoryEventStore()));
 
         const int Clients = 4;
         const int CommandsPerClient = 200;
@@ -141,7 +141,7 @@ public sealed class ThreadingTests
         var hooks = new FakeHostHookPort();
         var windows = new TaskCompletionSource<IReadOnlyList<Protocol.Testing.TestWindow>>(TaskCreationOptions.RunContinuationsAsynchronously);
         hooks.Windows = () => windows.Task;
-        using var brain = new Brain(new BrainDependencies(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()), hooksEnabled: true, hooks);
+        using var brain = new Brain(TestDependencies.Create(executor, new FakeClock(), FakeDisplayAdapter.CreateDefault(), new FakeCameraAdapter(new FakeClock()), new RecordingHostServices(), new InMemoryEventStore()), hooksEnabled: true, hooks);
         var sentOnExecutor = new ConcurrentQueue<bool>();
         using var answered = new ManualResetEventSlim();
         var connection = brain.Connect(Role.Operator, _ =>

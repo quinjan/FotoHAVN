@@ -32,6 +32,7 @@ public sealed class CameraRuntimeTests
                 null,
                 null,
                 false,
+                null,
                 null)),
             ProtocolJson.Serialize(rig.View));
         Assert.Equal(0, rig.Fake.OpenSessionCount);

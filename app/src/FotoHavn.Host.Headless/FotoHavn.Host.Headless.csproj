@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FotoHavn.Catalog\FotoHavn.Catalog.csproj" />
     <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
     <ProjectReference Include="..\FotoHavn.Protocol\FotoHavn.Protocol.csproj" />
     <ProjectReference Include="..\FotoHavn.Storage\FotoHavn.Storage.csproj" />

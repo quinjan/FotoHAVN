@@ -8,6 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FotoHavn.Catalog\FotoHavn.Catalog.csproj" />
     <ProjectReference Include="..\..\src\FotoHavn.Core\FotoHavn.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -284,7 +284,7 @@ export class DataFolderPlan {
     };
     for (const event of this.events) {
       run(
-        "INSERT INTO events (id, name, event_date, venue, default_template_id, default_look_id, created_at, updated_at, deleting_at) VALUES (?, ?, ?, ?, 'classic-strip', 'natural', ?, ?, ?)",
+        "INSERT INTO events (id, name, event_date, venue, default_template_id, default_look_id, created_at, updated_at, deleting_at) VALUES (?, ?, ?, ?, 'signature-strip', 'naturale-v1', ?, ?, ?)",
         event.id,
         event.name,
         event.date,
@@ -293,8 +293,8 @@ export class DataFolderPlan {
         event.createdAt,
         event.deleting ? storageTimestamp(new Date(Date.UTC(2026, 9, 2, 9))) : null,
       );
-      run("INSERT INTO event_templates (event_id, template_id) VALUES (?, 'classic-strip')", event.id);
-      run("INSERT INTO event_looks (event_id, look_id) VALUES (?, 'natural')", event.id);
+      run("INSERT INTO event_templates (event_id, template_id) VALUES (?, 'signature-strip')", event.id);
+      run("INSERT INTO event_looks (event_id, look_id) VALUES (?, 'naturale-v1')", event.id);
       run("INSERT INTO event_phase_timers (event_id, phase, seconds) VALUES (?, 'template', 30)", event.id);
     }
     for (const cycle of this.cycles) {
@@ -325,7 +325,7 @@ export class DataFolderPlan {
     for (const strip of this.strips) {
       const arrangement = this.captures.filter((c) => c.cycleId === strip.cycleId && c.state === "kept").map((c) => c.id);
       run(
-        "INSERT INTO photo_strips (guest_cycle_id, template_id, look_id, arrangement, file_name, byte_length, sha256, width, height, committed_at) VALUES (?, 'classic-strip', 'natural', ?, ?, ?, ?, 600, 1800, ?)",
+        "INSERT INTO photo_strips (guest_cycle_id, template_id, look_id, arrangement, file_name, byte_length, sha256, width, height, committed_at) VALUES (?, 'signature-strip', 'naturale-v1', ?, ?, ?, ?, 600, 1800, ?)",
         strip.cycleId,
         JSON.stringify(arrangement),
         strip.fileName,

@@ -1,3 +1,4 @@
+using FotoHavn.Core.Tests.Support;
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Fakes;
@@ -11,7 +12,7 @@ public sealed class BrainContractTests
     [Fact]
     public void Dependencies_default_to_a_null_logger()
     {
-        var dependencies = new BrainDependencies(new NoExecutor(), new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore());
+        var dependencies = TestDependencies.Create(new NoExecutor(), new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore());
 
         Assert.Same(NullLogger.Instance, dependencies.Logger);
         Assert.Null(dependencies.PreviewStats);
@@ -27,7 +28,7 @@ public sealed class BrainContractTests
     public void Brain_posts_its_first_display_read_camera_list_storage_open_and_connections_to_the_executor()
     {
         var executor = new QueueExecutor();
-        using var brain = new Brain(new BrainDependencies(executor, new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore()));
+        using var brain = new Brain(TestDependencies.Create(executor, new NoClock(), new NoDisplays(), new NoCamera(), new NoHost(), new InMemoryEventStore()));
 
         var connection = brain.Connect(Role.Guest, _ => { });
 

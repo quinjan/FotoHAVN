@@ -188,6 +188,14 @@
           "xunit.v3.runner.common": "[4.0.2]"
         }
       },
+      "fotohavn.catalog": {
+        "type": "Project",
+        "dependencies": {
+          "FotoHavn.Core": "[1.0.0, )",
+          "SkiaSharp": "[3.119.4, 3.119.4]",
+          "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
+        }
+      },
       "fotohavn.core": {
         "type": "Project",
         "dependencies": {
@@ -198,6 +206,7 @@
       "fotohavn.host.headless": {
         "type": "Project",
         "dependencies": {
+          "FotoHavn.Catalog": "[1.0.0, )",
           "FotoHavn.Core": "[1.0.0, )",
           "FotoHavn.Protocol": "[1.0.0, )",
           "FotoHavn.Storage": "[1.0.0, )",

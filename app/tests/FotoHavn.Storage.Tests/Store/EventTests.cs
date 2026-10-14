@@ -135,7 +135,7 @@ public sealed class EventTests
             Mirror = false,
             CountdownSeconds = 3,
             OfferedTemplateIds = ["only"],
-            OfferedLookIds = ["classic", "sepia"],
+            OfferedLookIds = ["classic-v1", "sepia-v1"],
             PhaseTimers = [new(PhaseTimerPhase.GuestGallery, 5)],
             HasPin = false,
         };
@@ -150,7 +150,7 @@ public sealed class EventTests
         Assert.False(read.Mirror);
         Assert.Equal(3, read.CountdownSeconds);
         Assert.Equal(["only"], read.OfferedTemplateIds);
-        Assert.Equal(["classic", "sepia"], read.OfferedLookIds);
+        Assert.Equal(["classic-v1", "sepia-v1"], read.OfferedLookIds);
         Assert.Equal([new PhaseTimerSetting(PhaseTimerPhase.GuestGallery, 5)], read.PhaseTimers);
         Assert.Equal(created, read.CreatedAt);
         Assert.Equal(harness.Clock.UtcNow, read.UpdatedAt);

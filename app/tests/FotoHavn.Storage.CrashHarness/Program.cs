@@ -136,7 +136,7 @@ internal static class HarnessRun
                 var second = await CommitCaptureAsync(store, cycleId, 2);
                 created.AddRange([first.Id, second.Id]);
                 await store.CommitPhotoStripAsync(
-                    new PhotoStripCommit(cycleId, "signature-strip", "naturale", [first.Id, second.Id], Bytes(1_000_000, 9), 600, 1800),
+                    new PhotoStripCommit(cycleId, "signature-strip", "naturale-v1", [first.Id, second.Id], Bytes(1_000_000, 9), 600, 1800),
                     CancellationToken.None);
                 break;
             }

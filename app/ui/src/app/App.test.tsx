@@ -210,6 +210,7 @@ describe("Operator surfaces", () => {
         format: null,
         mirrored: false,
         lastCapture: null,
+        lastComposition: null,
       },
     });
     expect(screen.getByRole("main")).toHaveAttribute("data-fotohavn-surface", "cameraDiagnostics");

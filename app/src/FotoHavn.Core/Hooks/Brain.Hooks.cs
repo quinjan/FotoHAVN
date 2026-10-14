@@ -95,6 +95,11 @@ public sealed partial class Brain
             case TestHookNames.ClearCameraFault:
                 RunCameraHook(connection, id, name, args);
                 break;
+            case TestHookNames.ComposeDiagnostics:
+            case TestHookNames.ComposeBlankPreview:
+                // TODO(M7 wave B2): compose through the compositor into the preview cache. Until then no host supports them.
+                Reply(connection, id, HookOutcome.Fail(TestHookError.NotSupported));
+                break;
             default:
                 throw new InvalidOperationException($"The test hook {name} has no brain handler.");
         }

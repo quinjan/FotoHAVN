@@ -15,6 +15,7 @@ public sealed class CameraSurfaceTests
         null,
         new CameraFormatView(1280, 720, 30),
         false,
+        null,
         null);
 
     [Theory]

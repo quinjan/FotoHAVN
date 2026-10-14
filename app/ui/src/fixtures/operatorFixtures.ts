@@ -127,6 +127,7 @@ export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
       format: null,
       mirrored: false,
       lastCapture: null,
+      lastComposition: null,
     }),
   };
   for (const reason of cameraReasonsWithFixtures) {
@@ -138,6 +139,7 @@ export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
       format: null,
       mirrored: false,
       lastCapture: null,
+      lastComposition: null,
     });
   }
   for (const kind of storageErrorKinds) {

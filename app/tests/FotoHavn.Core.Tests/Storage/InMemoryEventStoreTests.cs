@@ -120,7 +120,7 @@ public sealed class InMemoryEventStoreTests
     public async Task A_saved_event_reads_back_with_store_assigned_times_and_copies_of_its_lists()
     {
         var store = await OpenStoreAsync();
-        var offered = new List<string> { "classic-strip" };
+        var offered = new List<string> { "signature-strip" };
         var record = StorageSamples.Event(StorageIds.NewId()) with { OfferedTemplateIds = offered };
 
         await store.CreateEventAsync(record with { CreatedAt = DateTimeOffset.UnixEpoch }, Ct);
@@ -128,7 +128,7 @@ public sealed class InMemoryEventStoreTests
         var read = await store.GetEventAsync(record.Id, Ct);
 
         Assert.NotNull(read);
-        Assert.Equal(["classic-strip"], read.OfferedTemplateIds);
+        Assert.Equal(["signature-strip"], read.OfferedTemplateIds);
         Assert.Equal(_clock.UtcNow, read.CreatedAt);
         Assert.Equal(_clock.UtcNow, read.UpdatedAt);
         Assert.Equal(record.Name, read.Name);
@@ -160,11 +160,11 @@ public sealed class InMemoryEventStoreTests
         var created = _clock.UtcNow;
         _clock.Advance(TimeSpan.FromMinutes(5));
 
-        await store.UpdateEventAsync(record with { Name = "Renamed", OfferedLookIds = ["noir"], PhaseTimers = [] }, Ct);
+        await store.UpdateEventAsync(record with { Name = "Renamed", OfferedLookIds = ["monochrome-v1"], PhaseTimers = [] }, Ct);
         var read = await store.GetEventAsync(record.Id, Ct);
 
         Assert.Equal("Renamed", read!.Name);
-        Assert.Equal(["noir"], read.OfferedLookIds);
+        Assert.Equal(["monochrome-v1"], read.OfferedLookIds);
         Assert.Empty(read.PhaseTimers);
         Assert.Equal(created, read.CreatedAt);
         Assert.Equal(created.AddMinutes(5), read.UpdatedAt);
@@ -450,7 +450,7 @@ public sealed class InMemoryEventStoreTests
         Assert.Equal([second.Id, first.Id], strip.Arrangement);
         Assert.Equal(128, strip.ByteLength);
         Assert.Equal(Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(commit.Png.Span)), strip.Sha256);
-        Assert.Equal((cycle.Id, "classic-strip", "naturale", 600, 1800, _clock.UtcNow), (strip.GuestCycleId, strip.TemplateId, strip.LookId, strip.Width, strip.Height, strip.CommittedAt));
+        Assert.Equal((cycle.Id, "signature-strip", "naturale-v1", 600, 1800, _clock.UtcNow), (strip.GuestCycleId, strip.TemplateId, strip.LookId, strip.Width, strip.Height, strip.CommittedAt));
         Assert.Equal(GuestCycleEndReason.Completed, detail!.Cycle.EndReason);
         Assert.Equal(strip.CommittedAt, detail.Cycle.EndedAt);
         Assert.Same(strip, detail.PhotoStrip);

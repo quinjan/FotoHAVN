@@ -14,7 +14,7 @@ public interface IPreviewSource
     bool TryGet(string key, out ReadOnlyMemory<byte> png);
 }
 
-/// <summary>The preview source until M7: it has no previews, so every request is a 404.</summary>
+/// <summary>A preview source with no previews, so every request is a 404. The hosts serve a <see cref="PreviewCache"/> instead.</summary>
 public sealed class EmptyPreviewSource : IPreviewSource
 {
     public static EmptyPreviewSource Instance { get; } = new();

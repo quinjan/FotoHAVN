@@ -35,14 +35,15 @@ public sealed class PresentationFixtureTests
             null,
             new CameraFormatView(1920, 1080, 30),
             true,
-            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true)))),
+            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true),
+            new CompositionView("signature-strip.naturale-v1.r1", "signature-strip", "naturale-v1", 600, 1800)))),
         ["operator-camera-diagnostics-checking"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
-            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.Checking, null, null, false, null))),
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.Checking, null, null, false, null, null))),
         ["operator-camera-diagnostics-privacy-denied"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
-            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.NotAvailable, CameraFailureKind.PrivacyDenied, null, false, null))),
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.NotAvailable, CameraFailureKind.PrivacyDenied, null, false, null, null))),
         ["operator-camera-diagnostics-in-use"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView(
-            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null))),
-        ["operator-camera-diagnostics-no-cameras"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView([], null, CameraState.Idle, null, null, false, null))),
+            [new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null, null))),
+        ["operator-camera-diagnostics-no-cameras"] = () => Task.FromResult(CameraDiagnostics(new CameraDiagnosticsView([], null, CameraState.Idle, null, null, false, null, null))),
         ["operator-camera-diagnostics-not-available"] = () => Task.FromResult(NotAvailableFromTheBrain()),
     };
 

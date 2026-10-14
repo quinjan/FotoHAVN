@@ -1,1 +1,1 @@
-{"type":"welcome","role":"operator","protocolVersion":4,"revision":1,"presentation":{"surface":"eventList","eventList":{"events":[]},"runningEvent":null,"overlays":{"confirmation":null,"identifyDisplays":null,"notice":null},"fatal":null,"storageError":null,"cameraDiagnostics":null}}
+{"type":"welcome","role":"operator","protocolVersion":5,"revision":1,"presentation":{"surface":"eventList","eventList":{"events":[]},"runningEvent":null,"overlays":{"confirmation":null,"identifyDisplays":null,"notice":null},"fatal":null,"storageError":null,"cameraDiagnostics":null}}

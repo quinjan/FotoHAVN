@@ -68,7 +68,7 @@ internal sealed class TestHost : IAsyncDisposable
             },
             CameraFactory = cameraFactory,
             StorageFault = storageFault,
-            Previews = previews ?? EmptyPreviewSource.Instance,
+            Previews = previews,
             ConfigureLogging = logging => logging.ClearProviders(),
         };
         var app = HeadlessApp.Create(settings);

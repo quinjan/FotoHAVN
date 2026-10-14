@@ -94,7 +94,8 @@ internal static class ProtocolSamples
             null,
             new CameraFormatView(1920, 1080, 30),
             true,
-            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true)));
+            new CameraCaptureView("capture-20261014-071910-123.jpg", 1920, 1080, 412_345, true),
+            new CompositionView("signature-strip.naturale-v1.r1", "signature-strip", "naturale-v1", 600, 1800)));
 
     public static OperatorPresentation OperatorCameraDiagnosticsInUse { get; } = new(
         OperatorSurface.CameraDiagnostics,
@@ -103,7 +104,7 @@ internal static class ProtocolSamples
         OperatorOverlays.None,
         null,
         null,
-        new CameraDiagnosticsView([new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null));
+        new CameraDiagnosticsView([new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null, null));
 
     public static GuestPresentation GuestStart { get; } =
         new(GuestSurface.Start, new StartView(false), GuestOverlays.None, null);
@@ -178,6 +179,9 @@ internal static class ProtocolSamples
         ("set-diagnostics-mirror-args", new SetDiagnosticsMirrorArgs(true)),
         ("inject-camera-fault-args", new InjectCameraFaultArgs(CameraFaultKind.Stale)),
         ("capture-diagnostics-result", new CameraCaptureView("capture-20261014-071910-123.jpg", 1280, 720, 98_304, false)),
+        ("compose-diagnostics-args", new ComposeDiagnosticsArgs("signature-strip", "naturale-v1")),
+        ("compose-blank-preview-args", new ComposeBlankPreviewArgs("panorama-four")),
+        ("compose-preview-result", new ComposePreviewResult("signature-strip.naturale-v1.r1", 600, 1800, 4_096)),
         ("storage-diagnostics-ready", new StorageDiagnostics(StorageDiagnosticsState.Ready, null, 1, null)),
         ("inject-storage-fault-args", new InjectStorageFaultArgs(StorageFaultKind.DiskFull, StorageFaultScope.AllWrites)),
         ("use-virtual-displays-args", new UseVirtualDisplaysArgs(

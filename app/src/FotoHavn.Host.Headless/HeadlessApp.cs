@@ -2,7 +2,9 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using FotoHavn.Core;
+using FotoHavn.Catalog;
 using FotoHavn.Core.Camera;
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Fakes;
@@ -37,7 +39,14 @@ internal sealed record HeadlessSettings(string DataFolder, string? UiFolder, int
     /// <summary>Builds the brain; the default is the real <see cref="Brain"/>.</summary>
     public Func<BrainDependencies, IBrain>? BrainFactory { get; init; }
 
-    public IPreviewSource Previews { get; init; } = EmptyPreviewSource.Instance;
+    /// <summary>
+    /// Serves <c>preview.fotohavn</c> instead of the shared <see cref="PreviewStore"/> cache, so a test can fix what is found.
+    /// Null serves the cache the brain fills.
+    /// </summary>
+    public IPreviewSource? Previews { get; init; }
+
+    /// <summary>The cache the brain puts composed previews in; null creates one. Served at <c>preview.fotohavn</c> unless <see cref="Previews"/> is set.</summary>
+    public PreviewCache? PreviewStore { get; init; }
 
     public IDisplayAdapter? Displays { get; init; }
 
@@ -74,13 +83,14 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
     private bool _started;
     private bool _disposed;
 
-    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions, WebSocketPreviewChannel previews, SqliteEventStore store)
+    private HeadlessApp(WebApplication app, HeadlessSettings settings, RoleTokens tokens, DedicatedThreadBrainExecutor executor, IBrain brain, HeadlessHostServices hostServices, BridgeSessions sessions, WebSocketPreviewChannel previews, SqliteEventStore store, IPreviewSource previewSource)
     {
         App = app;
         Settings = settings;
         Tokens = tokens;
         _executor = executor;
         _store = store;
+        PreviewSource = previewSource;
         Brain = brain;
         HostServices = hostServices;
         Sessions = sessions;
@@ -88,6 +98,9 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
     }
 
     public WebApplication App { get; }
+
+    /// <summary>What <c>/preview/&lt;key&gt;.png</c> serves: the brain's preview cache unless the settings fix another source.</summary>
+    public IPreviewSource PreviewSource { get; }
 
     public HeadlessSettings Settings { get; }
 
@@ -147,7 +160,8 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var cameraFaults = new FotoHavn.Core.Hooks.FaultInjectingCameraAdapter(camera);
         camera = cameraFaults;
 #endif
-        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store)
+        var previewCache = settings.PreviewStore ?? new PreviewCache();
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store, new CatalogData(), new NotYetComposingCompositor(), previewCache)
         {
             Logger = brainLogger,
             PreviewStats = previews,
@@ -170,7 +184,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
             throw;
         }
 
-        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions, previews, store);
+        var host = new HeadlessApp(app, settings, tokens, executor, brain, hostServices, sessions, previews, store, settings.Previews ?? previewCache);
         host.MapRoutes(hostLogger);
         return host;
     }
@@ -274,7 +288,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
 
         string[] readOnly = [HttpMethods.Get, HttpMethods.Head];
         App.MapMethods("/media/{**path}", readOnly, (HttpContext context) => MediaRoutes.Media(context, Settings.DataFolder));
-        App.MapMethods("/preview/{**key}", readOnly, (HttpContext context) => MediaRoutes.Preview(context, Settings.Previews));
+        App.MapMethods("/preview/{**key}", readOnly, (HttpContext context) => MediaRoutes.Preview(context, PreviewSource));
         App.Map("/bridge", (HttpContext context) => AcceptBridgeAsync(context, logger));
         App.MapFallback((HttpContext context) => Fallback(context, ui));
     }

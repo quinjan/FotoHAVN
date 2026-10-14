@@ -15,6 +15,7 @@ const ready: CameraDiagnosticsView = {
   format: { width: 1920, height: 1080, fps: 30 },
   mirrored: false,
   lastCapture: null,
+  lastComposition: null,
 };
 
 const source = createPatternFrameSource(1280, 720);

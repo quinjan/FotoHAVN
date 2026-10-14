@@ -23,7 +23,7 @@ internal sealed class BrainHarness : IDisposable
         HostHooks = hostHooks;
         Store = store ?? new InMemoryEventStore();
         StorageHooks = storageHooks;
-        Dependencies = new BrainDependencies(Executor, Clock, Displays, CameraPort, Host, Store) { Logger = Logger, PreviewStats = previewStats };
+        Dependencies = TestDependencies.Create(Executor, Clock, Displays, CameraPort, Host, Store) with { Logger = Logger, PreviewStats = previewStats };
         Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks, cameraFaults);
         Run();
     }

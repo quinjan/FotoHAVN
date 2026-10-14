@@ -60,6 +60,7 @@ public sealed record OperatorPresentation(
 /// <param name="Format">The format of the open camera, or null when none is open.</param>
 /// <param name="Mirrored">Whether preview and diagnostic captures are mirrored.</param>
 /// <param name="LastCapture">The last diagnostic capture, or null before one.</param>
+/// <param name="LastComposition">The last diagnostic composition (<c>test.composeDiagnostics</c>), or null before one.</param>
 public sealed record CameraDiagnosticsView(
     IReadOnlyList<CameraOption> Cameras,
     string? SelectedDeviceId,
@@ -67,7 +68,16 @@ public sealed record CameraDiagnosticsView(
     CameraFailureKind? Reason,
     CameraFormatView? Format,
     bool Mirrored,
-    CameraCaptureView? LastCapture);
+    CameraCaptureView? LastCapture,
+    CompositionView? LastComposition);
+
+/// <summary>A composed preview the brain cached: the PNG is served at <c>https://preview.fotohavn/&lt;PreviewKey&gt;.png</c>.</summary>
+/// <param name="PreviewKey">The cache key, one path segment of lowercase letters, digits, <c>.</c>, and <c>-</c>.</param>
+/// <param name="TemplateId">The Template composed.</param>
+/// <param name="LookId">The Look applied.</param>
+/// <param name="Width">The PNG width in pixels (the Template's native width).</param>
+/// <param name="Height">The PNG height in pixels (the Template's native height).</param>
+public sealed record CompositionView(string PreviewKey, string TemplateId, string LookId, int Width, int Height);
 
 /// <summary>A diagnostic capture: a JPEG the host wrote under its <c>diagnostics/</c> folder (never Event data).</summary>
 /// <param name="FileName">The file's name inside the host's diagnostics folder.</param>

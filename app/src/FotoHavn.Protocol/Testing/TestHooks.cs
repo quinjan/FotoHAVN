@@ -59,6 +59,12 @@ public static class TestHookNames
 
     /// <summary>Removes the fault <see cref="InjectCameraFault"/> set; the brain then reopens the camera.</summary>
     public const string ClearCameraFault = "test.clearCameraFault";
+
+    /// <summary>Composes a Template and Look from the last diagnostics captures into the preview cache (E2E only).</summary>
+    public const string ComposeDiagnostics = "test.composeDiagnostics";
+
+    /// <summary>Composes a Template's blank preview (all windows empty, Naturale) into the preview cache (E2E only).</summary>
+    public const string ComposeBlankPreview = "test.composeBlankPreview";
 }
 
 /// <summary>One hook: its name, where it runs, its arguments record (null when it takes none), and its result record.</summary>
@@ -87,6 +93,8 @@ public static class TestHookRegistry
         new(TestHookNames.CaptureDiagnostics, TestHookSide.Brain, null, typeof(CameraCaptureView)),
         new(TestHookNames.InjectCameraFault, TestHookSide.Brain, typeof(InjectCameraFaultArgs), typeof(EmptyHookResult)),
         new(TestHookNames.ClearCameraFault, TestHookSide.Brain, null, typeof(EmptyHookResult)),
+        new(TestHookNames.ComposeDiagnostics, TestHookSide.Brain, typeof(ComposeDiagnosticsArgs), typeof(ComposePreviewResult)),
+        new(TestHookNames.ComposeBlankPreview, TestHookSide.Brain, typeof(ComposeBlankPreviewArgs), typeof(ComposePreviewResult)),
     ];
 
     public static bool TryGet(string name, out TestHookDescriptor hook)
@@ -215,6 +223,22 @@ public sealed record SetDiagnosticsMirrorArgs(bool Mirrored);
 
 /// <summary>Makes the selected camera fail the way <paramref name="Kind"/> says.</summary>
 public sealed record InjectCameraFaultArgs(CameraFaultKind Kind);
+
+/// <summary>
+/// Composes <paramref name="TemplateId"/> with <paramref name="LookId"/> from the last N diagnostics captures (N is the
+/// Template's window count; fewer captures leave the remaining windows empty).
+/// </summary>
+public sealed record ComposeDiagnosticsArgs(string TemplateId, string LookId);
+
+/// <summary>Composes <paramref name="TemplateId"/> with every window empty and the Naturale Look.</summary>
+public sealed record ComposeBlankPreviewArgs(string TemplateId);
+
+/// <summary>A composed PNG now in the preview cache, served at <c>https://preview.fotohavn/&lt;PreviewKey&gt;.png</c>.</summary>
+/// <param name="PreviewKey">The cache key.</param>
+/// <param name="Width">The PNG width in pixels.</param>
+/// <param name="Height">The PNG height in pixels.</param>
+/// <param name="ByteLength">The PNG's size in bytes.</param>
+public sealed record ComposePreviewResult(string PreviewKey, int Width, int Height, int ByteLength);
 
 /// <summary>One open host window.</summary>
 /// <param name="Role">The role of the window's WebView2.</param>

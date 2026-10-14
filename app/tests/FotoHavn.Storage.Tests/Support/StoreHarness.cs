@@ -170,10 +170,10 @@ public static class Sample
         true,
         5,
         "signature-strip",
-        "naturale",
+        "naturale-v1",
         true,
         ["signature-strip", "panorama-four"],
-        ["naturale", "sepia", "classic"],
+        ["naturale-v1", "sepia-v1", "classic-v1"],
         [new PhaseTimerSetting(PhaseTimerPhase.Template, 30), new PhaseTimerSetting(PhaseTimerPhase.Filters, 20)]);
 
     public static byte[] Jpeg(int width = 80, int height = 60, SKColor? color = null) => Encode(SKEncodedImageFormat.Jpeg, width, height, color ?? SKColors.Coral);
@@ -197,5 +197,5 @@ public static class Sample
         new(guestCycleId, sequence, jpeg ?? Jpeg(), 80, 60, true, new DateTimeOffset(2026, 10, 24, 12, 0, 0, TimeSpan.Zero));
 
     public static PhotoStripCommit Strip(string guestCycleId, IReadOnlyList<string> arrangement, byte[]? png = null) =>
-        new(guestCycleId, "signature-strip", "naturale", arrangement, png ?? Png(), 60, 180);
+        new(guestCycleId, "signature-strip", "naturale-v1", arrangement, png ?? Png(), 60, 180);
 }

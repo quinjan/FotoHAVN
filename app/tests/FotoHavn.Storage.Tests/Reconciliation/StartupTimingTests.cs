@@ -102,7 +102,7 @@ public sealed class StartupTimingTests
             Execute(
                 connection,
                 transaction,
-                "INSERT INTO photo_strips (guest_cycle_id, template_id, look_id, arrangement, file_name, byte_length, sha256, width, height, committed_at) VALUES ($cycle, 'signature-strip', 'naturale', $arrangement, 'photo-strip.png', $length, $sha, 600, 1800, $committed)",
+                "INSERT INTO photo_strips (guest_cycle_id, template_id, look_id, arrangement, file_name, byte_length, sha256, width, height, committed_at) VALUES ($cycle, 'signature-strip', 'naturale-v1', $arrangement, 'photo-strip.png', $length, $sha, 600, 1800, $committed)",
                 ("$cycle", cycleId),
                 ("$arrangement", JsonSerializer.Serialize(captureIds)),
                 ("$length", (long)stripBytes.Length),

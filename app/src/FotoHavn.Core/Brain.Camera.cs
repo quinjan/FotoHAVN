@@ -76,7 +76,8 @@ public sealed partial class Brain
             _cameraReason,
             format,
             _mirrored,
-            _lastCapture);
+            _lastCapture,
+            null); // TODO(M7 wave B2): the last diagnostic composition.
     }
 
     private static CameraFormatView ToFormatView(CameraFormat format) => new(format.Width, format.Height, format.FramesPerSecond);

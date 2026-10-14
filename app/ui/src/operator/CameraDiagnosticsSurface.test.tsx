@@ -20,6 +20,7 @@ const ready: CameraDiagnosticsView = {
   format: { width: 1920, height: 1080, fps: 30 },
   mirrored: false,
   lastCapture: null,
+  lastComposition: null,
 };
 
 type Hook = (name: string, args: unknown) => Promise<TestResult<never>>;

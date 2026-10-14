@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 4
+      "const": 5
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -368,6 +368,16 @@
               "type": "null"
             }
           ]
+        },
+        "lastComposition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompositionView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -377,7 +387,8 @@
         "reason",
         "format",
         "mirrored",
-        "lastCapture"
+        "lastCapture",
+        "lastComposition"
       ],
       "additionalProperties": false
     },
@@ -1330,6 +1341,90 @@
     "CompleteExitHoldPayload": {
       "title": "CompleteExitHoldPayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "ComposeBlankPreviewArgs": {
+      "title": "ComposeBlankPreviewArgs",
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false
+    },
+    "ComposeDiagnosticsArgs": {
+      "title": "ComposeDiagnosticsArgs",
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string"
+        },
+        "lookId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateId",
+        "lookId"
+      ],
+      "additionalProperties": false
+    },
+    "ComposePreviewResult": {
+      "title": "ComposePreviewResult",
+      "type": "object",
+      "properties": {
+        "previewKey": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "byteLength": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "previewKey",
+        "width",
+        "height",
+        "byteLength"
+      ],
+      "additionalProperties": false
+    },
+    "CompositionView": {
+      "title": "CompositionView",
+      "type": "object",
+      "properties": {
+        "previewKey": {
+          "type": "string"
+        },
+        "templateId": {
+          "type": "string"
+        },
+        "lookId": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "previewKey",
+        "templateId",
+        "lookId",
+        "width",
+        "height"
+      ],
       "additionalProperties": false
     },
     "ConfirmDeleteEventCommand": {
@@ -4428,7 +4523,8 @@
         "hookFailed",
         "notSupported",
         "unknownDisplay",
-        "unknownCamera"
+        "unknownCamera",
+        "compositionFailed"
       ]
     },
     "TestHookMap": {
@@ -4722,6 +4818,38 @@
             "result"
           ],
           "additionalProperties": false
+        },
+        "test.composeDiagnostics": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/ComposeDiagnosticsArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/ComposePreviewResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "test.composeBlankPreview": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/ComposeBlankPreviewArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/ComposePreviewResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -4742,7 +4870,9 @@
         "test.setDiagnosticsMirror",
         "test.captureDiagnostics",
         "test.injectCameraFault",
-        "test.clearCameraFault"
+        "test.clearCameraFault",
+        "test.composeDiagnostics",
+        "test.composeBlankPreview"
       ],
       "additionalProperties": false
     },

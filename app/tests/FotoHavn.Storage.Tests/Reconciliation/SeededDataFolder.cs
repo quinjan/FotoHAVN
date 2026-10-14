@@ -91,12 +91,12 @@ public sealed class SeededDataFolder : IDisposable
         id ??= StorageIds.NewId();
         Execute(
             "INSERT INTO events (id, name, event_date, default_template_id, default_look_id, created_at, updated_at, deleting_at) " +
-            "VALUES ($id, 'Seeded', '2026-10-24', 'classic-strip', 'natural', $now, $now, $deleting)",
+            "VALUES ($id, 'Seeded', '2026-10-24', 'signature-strip', 'naturale-v1', $now, $now, $deleting)",
             ("$id", id),
             ("$now", StorageTimestamp.Format(new DateTimeOffset(2026, 10, 1, 9, 0, 0, TimeSpan.Zero))),
             ("$deleting", deleting ? StorageTimestamp.Format(new DateTimeOffset(2026, 10, 2, 9, 0, 0, TimeSpan.Zero)) : DBNull.Value));
-        Execute("INSERT INTO event_templates (event_id, template_id) VALUES ($id, 'classic-strip')", ("$id", id));
-        Execute("INSERT INTO event_looks (event_id, look_id) VALUES ($id, 'natural')", ("$id", id));
+        Execute("INSERT INTO event_templates (event_id, template_id) VALUES ($id, 'signature-strip')", ("$id", id));
+        Execute("INSERT INTO event_looks (event_id, look_id) VALUES ($id, 'naturale-v1')", ("$id", id));
         Execute("INSERT INTO event_phase_timers (event_id, phase, seconds) VALUES ($id, 'template', 30)", ("$id", id));
         return id;
     }
@@ -153,7 +153,7 @@ public sealed class SeededDataFolder : IDisposable
         var sha = Convert.ToHexStringLower(SHA256.HashData(bytes));
         Execute(
             "INSERT INTO photo_strips (guest_cycle_id, template_id, look_id, arrangement, file_name, byte_length, sha256, width, height, committed_at) " +
-            "VALUES ($cycle, 'classic-strip', 'natural', $arrangement, 'photo-strip.png', $length, $sha, 600, 1800, $committed)",
+            "VALUES ($cycle, 'signature-strip', 'naturale-v1', $arrangement, 'photo-strip.png', $length, $sha, 600, 1800, $committed)",
             ("$cycle", cycleId),
             ("$arrangement", JsonSerializer.Serialize(arrangement)),
             ("$length", (long)bytes.Length),

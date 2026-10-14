@@ -235,6 +235,7 @@
       "fotohavn.catalog": {
         "type": "Project",
         "dependencies": {
+          "FotoHavn.Core": "[1.0.0, )",
           "SkiaSharp": "[3.119.4, 3.119.4]",
           "SkiaSharp.NativeAssets.Win32": "[3.119.4, 3.119.4]"
         }

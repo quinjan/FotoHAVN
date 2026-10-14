@@ -10,9 +10,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_is_four()
+    public void Protocol_version_is_five()
     {
-        Assert.Equal(4, ProtocolVersion.Current);
+        Assert.Equal(5, ProtocolVersion.Current);
     }
 
     [Fact]
@@ -174,6 +174,7 @@ public sealed class TestHookRegistryTests
             TestHookNames.InjectStorageFault, TestHookNames.ClearStorageFault, TestHookNames.ListCameras,
             TestHookNames.OpenCameraDiagnostics, TestHookNames.SelectDiagnosticsCamera, TestHookNames.SetDiagnosticsMirror,
             TestHookNames.CaptureDiagnostics, TestHookNames.InjectCameraFault, TestHookNames.ClearCameraFault,
+            TestHookNames.ComposeDiagnostics, TestHookNames.ComposeBlankPreview,
         ];
 
         Assert.All(TestHookRegistry.All, hook => Assert.Equal(brain.Contains(hook.Name) ? TestHookSide.Brain : TestHookSide.Host, hook.Side));
@@ -195,6 +196,21 @@ public sealed class TestHookRegistryTests
         Assert.True(TestHookRegistry.TryReadArgs(mirror, Element("""{"mirrored":true}"""), out var mirrored));
         Assert.Equal(new SetDiagnosticsMirrorArgs(true), mirrored);
         Assert.False(TestHookRegistry.TryReadArgs(mirror, Element("""{"mirrored":"yes"}"""), out _));
+    }
+
+    [Fact]
+    public void Reads_composition_hook_arguments()
+    {
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.ComposeDiagnostics, out var diagnostics));
+        Assert.True(TestHookRegistry.TryGet(TestHookNames.ComposeBlankPreview, out var blank));
+
+        Assert.True(TestHookRegistry.TryReadArgs(diagnostics, Element("""{"templateId":"signature-strip","lookId":"sepia-v1"}"""), out var composed));
+        Assert.Equal(new ComposeDiagnosticsArgs("signature-strip", "sepia-v1"), composed);
+        Assert.False(TestHookRegistry.TryReadArgs(diagnostics, Element("""{"templateId":"signature-strip"}"""), out _));
+        Assert.True(TestHookRegistry.TryReadArgs(blank, Element("""{"templateId":"panorama-four"}"""), out var blanked));
+        Assert.Equal(new ComposeBlankPreviewArgs("panorama-four"), blanked);
+        Assert.Equal(typeof(ComposePreviewResult), diagnostics.ResultType);
+        Assert.Equal(typeof(ComposePreviewResult), blank.ResultType);
     }
 
     [Fact]

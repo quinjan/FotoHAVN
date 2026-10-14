@@ -1,6 +1,8 @@
 using FotoHavn.Core.Camera;
+using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Hooks;
+using FotoHavn.Core.Media;
 using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Cameras;
@@ -11,14 +13,26 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FotoHavn.Core;
 
-/// <summary>Everything the brain needs from its host. Later milestones add the compositor.</summary>
+/// <summary>Everything the brain needs from its host.</summary>
 /// <param name="Executor">The single-threaded executor the brain runs on. The host owns and disposes it.</param>
 /// <param name="Clock">Time and timers.</param>
 /// <param name="Displays">Display enumeration and change notifications.</param>
 /// <param name="Camera">Camera discovery and opening. The host owns it; it was constructed with the host's preview channel, so frames never pass through the brain.</param>
 /// <param name="Host">What the brain asks the host to do.</param>
 /// <param name="Store">The Event store. The brain opens it at startup; the host owns and disposes it.</param>
-public sealed record BrainDependencies(IBrainExecutor Executor, IClock Clock, IDisplayAdapter Displays, ICameraAdapter Camera, IHostServices Host, IEventStore Store)
+/// <param name="Catalog">The Templates and Looks.</param>
+/// <param name="Compositor">Composes Photo Strips and Look thumbnails. The brain calls it off the executor and posts the result back.</param>
+/// <param name="Previews">Where the brain puts composed previews; the host serves the same cache at <c>preview.fotohavn</c>.</param>
+public sealed record BrainDependencies(
+    IBrainExecutor Executor,
+    IClock Clock,
+    IDisplayAdapter Displays,
+    ICameraAdapter Camera,
+    IHostServices Host,
+    IEventStore Store,
+    ICatalog Catalog,
+    ICompositor Compositor,
+    IPreviewStore Previews)
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
 
@@ -80,6 +94,9 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies);
         ArgumentNullException.ThrowIfNull(dependencies.Store);
         ArgumentNullException.ThrowIfNull(dependencies.Camera);
+        ArgumentNullException.ThrowIfNull(dependencies.Catalog);
+        ArgumentNullException.ThrowIfNull(dependencies.Compositor);
+        ArgumentNullException.ThrowIfNull(dependencies.Previews);
         _dependencies = dependencies;
         _logger = dependencies.Logger;
         _hooksEnabled = hooksEnabled;
