@@ -1,0 +1,32 @@
+/* The surface fills the space above the notices; the exit hold and dialogs sit over it. */
+.surface {
+  display: grid;
+  min-block-size: 0;
+}
+
+.surface > * {
+  min-block-size: 0;
+}
+
+/* The exit hold: discreet, top-right, on every view, above the surface (and hidden only while the PIN dialog is open). */
+.exitHold {
+  position: fixed;
+  inset-block-start: var(--space-16);
+  inset-inline-end: var(--space-16);
+  z-index: var(--app-z-exit-hold);
+}
+
+/* The gallery link sits beneath the statement, in the Start grid's last row. */
+.gallery {
+  align-self: start;
+  padding-block-start: var(--app-stack-gap);
+}
+
+.notice {
+  margin-inline: auto;
+}
+
+.dialogNotice {
+  margin-block-start: var(--space-16);
+  font-weight: var(--font-weight-semibold);
+}

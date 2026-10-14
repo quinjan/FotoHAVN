@@ -12,6 +12,10 @@ function digitsText(count: number): string {
   return count === 1 ? "1 digit" : `${String(count)} digits`;
 }
 
+function triesLeftText(count: number): string {
+  return count === 1 ? "1 try left." : `${String(count)} tries left.`;
+}
+
 export interface PinPadProps {
   /** A complete entry (`SubmitPin`). The pad clears itself after submitting. */
   readonly onSubmit: (pin: string) => void;
@@ -22,6 +26,8 @@ export interface PinPadProps {
    * wrong attempt announces again.
    */
   readonly wrongAttempts?: number;
+  /** Wrong attempts left before the lockout, from the brain. Said after a wrong PIN ("2 tries left."), never while locked. */
+  readonly attemptsRemaining?: number;
   /** Whole seconds left in the lockout, from the brain (five wrong attempts lock the pad for 30 seconds). Above zero, the pad is locked. */
   readonly lockedSeconds?: number;
   /** The shortest and longest Operator PIN: 4 and 6 digits. */
@@ -46,6 +52,7 @@ export function PinPad({
   onSubmit,
   onCancel,
   wrongAttempts = 0,
+  attemptsRemaining,
   lockedSeconds = 0,
   minLength = 4,
   maxLength = 6,
@@ -144,9 +151,12 @@ export function PinPad({
               <p className={styles.countdown}>Try again in {secondsText(lockedSeconds)}.</p>
             </>
           ) : wrongAttempts > 0 ? (
-            <p key={wrongAttempts} className={styles.alert} role="alert">
-              That PIN isn&apos;t right. Try again.
-            </p>
+            <>
+              <p key={wrongAttempts} className={styles.alert} role="alert">
+                That PIN isn&apos;t right. Try again.
+              </p>
+              {attemptsRemaining !== undefined && <p className={styles.tries}>{triesLeftText(attemptsRemaining)}</p>}
+            </>
           ) : null}
           <p id={hintId} className={styles.hint}>
             {`${String(minLength)} to ${String(maxLength)} digits.`}

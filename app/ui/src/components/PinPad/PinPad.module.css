@@ -50,7 +50,8 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.countdown {
+.countdown,
+.tries {
   color: var(--app-tone-ink);
   font-variant-numeric: tabular-nums;
 }
@@ -60,7 +61,8 @@
 }
 
 .alert ~ .hint,
-.countdown ~ .hint {
+.countdown ~ .hint,
+.tries ~ .hint {
   display: none;
 }
 

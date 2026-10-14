@@ -119,6 +119,23 @@ describe("PinPad", () => {
     expect(second).not.toBe(first);
   });
 
+  it("says how many tries are left after a wrong PIN, and only then", () => {
+    const { rerender } = render(<PinPad onSubmit={vi.fn()} attemptsRemaining={5} />);
+    expect(screen.queryByText(/tries? left/)).toBeNull();
+
+    rerender(<PinPad onSubmit={vi.fn()} wrongAttempts={1} attemptsRemaining={4} />);
+    expect(screen.getByText("4 tries left.")).toBeInTheDocument();
+
+    rerender(<PinPad onSubmit={vi.fn()} wrongAttempts={4} attemptsRemaining={1} />);
+    expect(screen.getByText("1 try left.")).toBeInTheDocument();
+
+    rerender(<PinPad onSubmit={vi.fn()} wrongAttempts={2} />);
+    expect(screen.queryByText(/tries? left/)).toBeNull();
+
+    rerender(<PinPad onSubmit={vi.fn()} wrongAttempts={5} lockedSeconds={30} attemptsRemaining={0} />);
+    expect(screen.queryByText(/tries? left/)).toBeNull();
+  });
+
   it("locks with a visible countdown, ignores every key, and recovers", () => {
     const onSubmit = vi.fn();
     const { container, rerender } = render(<PinPad onSubmit={onSubmit} defaultValue="12" lockedSeconds={30} wrongAttempts={5} />);

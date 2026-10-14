@@ -60,7 +60,7 @@ export const fixtures: readonly ComponentFixture[] = [
     layout: "fill",
     render: () => (
       <PinDialog>
-        <PinPad onSubmit={noop} onCancel={noop} wrongAttempts={2} />
+        <PinPad onSubmit={noop} onCancel={noop} wrongAttempts={2} attemptsRemaining={3} />
       </PinDialog>
     ),
   },
