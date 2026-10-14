@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Channels;
 using FotoHavn.Core;
+using FotoHavn.Host.Headless.Preview;
 using FotoHavn.Protocol;
 using Microsoft.Extensions.Logging;
 
@@ -10,12 +11,13 @@ namespace FotoHavn.Host.Headless;
 
 /// <summary>
 /// One WebSocket client and its brain connection. Text frames in are reassembled into one message each (at most
-/// <see cref="ProtocolLimits.MaxMessageBytes"/> UTF-8 bytes) and handed to <see cref="IBrainConnection.Receive"/>; the
-/// brain's messages go out through an ordered queue with a single writer, which also sends the close frame. A message
-/// over the limit is answered with <c>error payloadTooLarge</c> and the socket stays open. Binary frames and invalid
+/// <see cref="ProtocolLimits.MaxMessageBytes"/> UTF-8 bytes) and handed to <see cref="IBrainConnection.Receive"/>, except
+/// the page's <c>frameAck</c>, which goes to the preview channel; the brain's messages and the preview frames (binary) go
+/// out through an ordered queue with a single writer, which also sends the close frame. A message
+/// over the limit is answered with <c>error payloadTooLarge</c> and the socket stays open. Binary frames from the client and invalid
 /// UTF-8 close the socket; the WebSocket stack itself rejects invalid UTF-8 (see <see cref="LingerAfterProtocolErrorAsync"/>).
 /// </summary>
-internal sealed partial class BridgeSession
+internal sealed partial class BridgeSession : IPreviewSink
 {
     internal static readonly TimeSpan CloseTimeout = TimeSpan.FromSeconds(2);
 
@@ -26,25 +28,34 @@ internal sealed partial class BridgeSession
 
     private readonly WebSocket _socket;
     private readonly ILogger _logger;
-    private readonly Channel<string> _outgoing = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleReader = true });
+    private readonly WebSocketPreviewChannel? _previews;
+    private readonly Channel<Outgoing> _outgoing = Channel.CreateUnbounded<Outgoing>(new UnboundedChannelOptions { SingleReader = true });
     private int _closeRequested;
     private int _abortedByHost;
     private WebSocketCloseStatus _closeStatus;
     private string? _closeDescription;
 
-    public BridgeSession(WebSocket socket, Role role, ILogger logger)
+    /// <param name="socket">The accepted socket.</param>
+    /// <param name="role">The role the token decided.</param>
+    /// <param name="logger">The host logger.</param>
+    /// <param name="previews">The preview channel this socket receives frames from and acks to; null for none.</param>
+    public BridgeSession(WebSocket socket, Role role, ILogger logger, WebSocketPreviewChannel? previews = null)
     {
         ArgumentNullException.ThrowIfNull(socket);
         ArgumentNullException.ThrowIfNull(logger);
         _socket = socket;
         Role = role;
         _logger = logger;
+        _previews = previews;
     }
 
     public Role Role { get; }
 
     /// <summary>Queues one message for the client. Messages queued after the session started closing are dropped.</summary>
-    public void Send(string json) => _outgoing.Writer.TryWrite(json);
+    public void Send(string json) => _outgoing.Writer.TryWrite(new Outgoing(json, null, 0));
+
+    /// <inheritdoc />
+    public bool TrySendFrame(byte[] message, int length) => _outgoing.Writer.TryWrite(new Outgoing(null, message, length));
 
     /// <summary>Ends the connection at once without a close handshake (the headless <c>test.crashUi</c>).</summary>
     public void Abort()
@@ -93,12 +104,14 @@ internal sealed partial class BridgeSession
         using var stoppingRegistration = stopping.Register(
             () => RequestClose(WebSocketCloseStatus.EndpointUnavailable, "The headless host is stopping."));
         using var linger = CancellationTokenSource.CreateLinkedTokenSource(stopping, clientGone);
+        _previews?.Attach(Role, this);
         try
         {
             await ReceiveLoopAsync(connection, linger.Token).ConfigureAwait(false);
         }
         finally
         {
+            _previews?.Detach(Role, this);
             connection?.Dispose();
             _outgoing.Writer.TryComplete();
             await writer.ConfigureAwait(false);
@@ -170,7 +183,10 @@ internal sealed partial class BridgeSession
                 }
                 else if (TryDecode(message.WrittenSpan, out var json))
                 {
-                    connection.Receive(json);
+                    if (_previews is null || !_previews.TryHandleAck(Role, json))
+                    {
+                        connection.Receive(json);
+                    }
                 }
                 else
                 {
@@ -187,19 +203,43 @@ internal sealed partial class BridgeSession
         }
     }
 
+    /// <summary>Sends one queued message (a text message, or a rented preview frame that goes back to the pool afterwards).</summary>
+    private async Task SendOutgoingAsync(Outgoing outgoing)
+    {
+        try
+        {
+            if (_socket.State is not (WebSocketState.Open or WebSocketState.CloseReceived))
+            {
+                return;
+            }
+
+            if (outgoing.Frame is { } frame)
+            {
+                await _socket.SendAsync(frame.AsMemory(0, outgoing.FrameLength), WebSocketMessageType.Binary, true, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await _socket.SendAsync(Encoding.UTF8.GetBytes(outgoing.Text!), WebSocketMessageType.Text, true, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            if (outgoing.Frame is { } rented)
+            {
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+        }
+    }
+
     private async Task WriteLoopAsync()
     {
         try
         {
-            await foreach (var json in _outgoing.Reader.ReadAllAsync().ConfigureAwait(false))
+            await foreach (var outgoing in _outgoing.Reader.ReadAllAsync().ConfigureAwait(false))
             {
-                if (_socket.State is not (WebSocketState.Open or WebSocketState.CloseReceived))
-                {
-                    continue;
-                }
-
-                await _socket.SendAsync(Encoding.UTF8.GetBytes(json), WebSocketMessageType.Text, true, CancellationToken.None)
-                    .ConfigureAwait(false);
+                await SendOutgoingAsync(outgoing).ConfigureAwait(false);
             }
 
             if (IsClosing && _socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
@@ -262,4 +302,7 @@ internal sealed partial class BridgeSession
 
     [LoggerMessage(Level = LogLevel.Error, Message = "The brain refused a {Role} connection.")]
     private static partial void LogConnectFailed(ILogger logger, Exception exception, Role role);
+
+    /// <summary>One queued message: a text message, or a rented binary frame.</summary>
+    private readonly record struct Outgoing(string? Text, byte[]? Frame, int FrameLength);
 }

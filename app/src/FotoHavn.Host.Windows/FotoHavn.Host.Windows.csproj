@@ -9,6 +9,8 @@
     <AssemblyName>FOTOHAVN</AssemblyName>
     <RootNamespace>FotoHavn.Host.Windows</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- NativeCopy writes frames through the shared buffer's cached pointer. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,11 @@
     <ProjectReference Include="..\FotoHavn.Core\FotoHavn.Core.csproj" />
     <ProjectReference Include="..\FotoHavn.Protocol\FotoHavn.Protocol.csproj" />
     <ProjectReference Include="..\FotoHavn.Storage\FotoHavn.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- One diagnostics Capture writer for both hosts (the headless project owns it; see its remarks). -->
+    <Compile Include="..\FotoHavn.Host.Headless\Diagnostics\DiagnosticsCaptureWriter.cs" Link="Diagnostics\DiagnosticsCaptureWriter.cs" />
   </ItemGroup>
 
   <ItemGroup>

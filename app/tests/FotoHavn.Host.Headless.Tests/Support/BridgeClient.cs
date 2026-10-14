@@ -90,6 +90,28 @@ internal sealed class BridgeClient : IDisposable
 
     public async Task<ServerMessage> ReceiveMessageAsync() => ServerMessageReader.Read(await ReceiveAsync());
 
+    /// <summary>Receives the next message, which must be binary (a preview frame), and returns its bytes.</summary>
+    public async Task<byte[]> ReceiveBinaryAsync()
+    {
+        using var timeout = Linked();
+        using var message = new MemoryStream();
+        var buffer = new byte[64 * 1024];
+        while (true)
+        {
+            var result = await Socket.ReceiveAsync(buffer, timeout.Token);
+            if (result.MessageType != WebSocketMessageType.Binary)
+            {
+                throw new InvalidOperationException($"Expected a binary message, got {result.MessageType}.");
+            }
+
+            message.Write(buffer, 0, result.Count);
+            if (result.EndOfMessage)
+            {
+                return message.ToArray();
+            }
+        }
+    }
+
     /// <summary>Receives the next message or close; for a close, returns its type with an empty text.</summary>
     public async Task<(WebSocketMessageType Type, string Text)> ReceiveAnyAsync()
     {

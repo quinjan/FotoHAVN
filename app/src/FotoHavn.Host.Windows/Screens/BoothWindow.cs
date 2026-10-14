@@ -8,6 +8,7 @@ using FotoHavn.Core.Media;
 using FotoHavn.Host.Windows.Bridge;
 using FotoHavn.Host.Windows.Interop;
 using FotoHavn.Host.Windows.Logging;
+using FotoHavn.Host.Windows.Preview;
 using FotoHavn.Host.Windows.WebView;
 using FotoHavn.Protocol;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,7 @@ internal sealed record BoothWindowServices(
     WebViewEnvironmentProvider Environments,
     HostPaths Paths,
     IPreviewSource Previews,
+    SharedBufferPreviewChannel Frames,
     TimeProvider Time,
     ILogger Logger);
 
@@ -36,6 +38,7 @@ internal sealed class BoothWindow : Window
     private readonly RecoveryBudget _recoveries = RecoveryBudget.Default();
     private WebView2? _webView;
     private BridgeSession? _session;
+    private WebView2PreviewSurface? _frameSurface;
     private int _generation;
     private int _failedGeneration = -1;
     private bool _closed;
@@ -169,7 +172,15 @@ internal sealed class BoothWindow : Window
 
         var core = webView.CoreWebView2;
         WebViewGuardrails.Current.Apply(core.Settings);
-        core.NavigationStarting += (_, e) => e.Cancel = !AllowNavigation(e.Uri);
+        core.NavigationStarting += (_, e) =>
+        {
+            e.Cancel = !AllowNavigation(e.Uri);
+            if (!e.Cancel)
+            {
+                // A new document never acks the frame the old one was drawing.
+                _services.Frames.ResetInFlight(Role);
+            }
+        };
         core.FrameNavigationStarting += (_, e) => e.Cancel = !AllowNavigation(e.Uri);
         core.NewWindowRequested += (_, e) =>
         {
@@ -199,9 +210,14 @@ internal sealed class BoothWindow : Window
             Role,
             work => Dispatcher.InvokeAsync(work),
             core.PostWebMessageAsJson,
-            _services.Logger);
+            _services.Logger,
+            text => _services.Frames.TryHandleAck(Role, text));
         _session = session;
         core.WebMessageReceived += (_, e) => session.Receive(e.Source, e.WebMessageAsJson);
+
+        var surface = new WebView2PreviewSurface(core, environment);
+        _frameSurface = surface;
+        _services.Frames.Attach(Role, surface);
 
         ApplyZoom(VisualTreeHelper.GetDpi(this).DpiScaleX);
         core.Navigate(WebViewSettings.StartUri.AbsoluteUri);
@@ -447,6 +463,12 @@ internal sealed class BoothWindow : Window
 
     private void TearDownWebView()
     {
+        if (_frameSurface is { } surface)
+        {
+            _frameSurface = null;
+            _services.Frames.Detach(Role, surface);
+        }
+
         _session?.Dispose();
         _session = null;
         if (_webView is { } webView)

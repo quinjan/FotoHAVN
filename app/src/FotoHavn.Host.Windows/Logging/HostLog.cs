@@ -89,4 +89,7 @@ internal static partial class HostLog
 
     [LoggerMessage(EventId = 28, EventName = "storeDisposeTimedOut", Level = LogLevel.Warning, Message = "The Event store was still finishing background deletion at exit; the next start completes it")]
     public static partial void StoreDisposeTimedOut(ILogger logger);
+
+    [LoggerMessage(EventId = 29, EventName = "previewBufferFailed", Level = LogLevel.Warning, Message = "The {Role} preview frame surface failed; the frame is dropped")]
+    public static partial void PreviewBufferFailed(ILogger logger, Role role, Exception exception);
 }

@@ -1,3 +1,5 @@
+using FotoHavn.Core;
+using FotoHavn.Core.Camera;
 using FotoHavn.Core.Media;
 
 namespace FotoHavn.Host.Headless.Tests.Support;
@@ -13,8 +15,9 @@ internal sealed class TestHost : IAsyncDisposable
 
     private readonly string _root;
 
-    private TestHost(string root, HeadlessApp app, HeadlessEndpoints endpoints, FakeBrain brain)
+    private TestHost(string root, HeadlessApp app, HeadlessEndpoints endpoints, FakeBrain brain, BrainDependencies? dependencies)
     {
+        Dependencies = dependencies;
         _root = root;
         App = app;
         Endpoints = endpoints;
@@ -28,6 +31,9 @@ internal sealed class TestHost : IAsyncDisposable
 
     public FakeBrain Brain { get; }
 
+    /// <summary>What the host gave its brain (null with the real brain).</summary>
+    public BrainDependencies? Dependencies { get; }
+
     public HttpClient Http { get; }
 
     public string DataFolder => App.Settings.DataFolder;
@@ -39,7 +45,7 @@ internal sealed class TestHost : IAsyncDisposable
         return folder;
     }
 
-    public static async Task<TestHost> StartAsync(bool withUi = true, bool failConnect = false, IPreviewSource? previews = null, bool realBrain = false, FotoHavn.Protocol.Testing.StorageFaultKind? storageFault = null)
+    public static async Task<TestHost> StartAsync(bool withUi = true, bool failConnect = false, IPreviewSource? previews = null, bool realBrain = false, FotoHavn.Protocol.Testing.StorageFaultKind? storageFault = null, Func<IPreviewChannel, ICameraAdapter>? cameraFactory = null)
     {
         var root = NewScratchFolder();
         string? ui = null;
@@ -52,16 +58,22 @@ internal sealed class TestHost : IAsyncDisposable
         }
 
         var brain = new FakeBrain { FailConnect = failConnect };
+        BrainDependencies? dependencies = null;
         var settings = new HeadlessSettings(Path.Combine(root, "Data"), ui, 0)
         {
-            BrainFactory = realBrain ? null : _ => brain,
+            BrainFactory = realBrain ? null : given =>
+            {
+                dependencies = given;
+                return brain;
+            },
+            CameraFactory = cameraFactory,
             StorageFault = storageFault,
             Previews = previews ?? EmptyPreviewSource.Instance,
             ConfigureLogging = logging => logging.ClearProviders(),
         };
         var app = HeadlessApp.Create(settings);
         var endpoints = await app.StartAsync(TestContext.Current.CancellationToken);
-        return new TestHost(root, app, endpoints, brain);
+        return new TestHost(root, app, endpoints, brain, dependencies);
     }
 
     public Task<BridgeClient> ConnectAsync(Role role) =>

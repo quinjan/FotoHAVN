@@ -1,5 +1,8 @@
+using FotoHavn.Core.Camera;
 using FotoHavn.Host.Windows.Bridge;
+using FotoHavn.Host.Windows.Preview;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 
 namespace FotoHavn.Host.Windows.Tests;
 
@@ -22,6 +25,71 @@ public sealed class BridgeSessionTests : IDisposable
         var connection = Assert.Single(_brain.Connections);
         Assert.Equal(role, connection.Role);
         Assert.Equal(role, session.Role);
+    }
+
+    [Fact]
+    public void A_frame_ack_goes_to_the_frame_channel_and_never_to_the_brain()
+    {
+        var acks = new List<string>();
+        using var session = CreateSession(Role.Operator, text => text.Contains("frameAck", StringComparison.Ordinal) && Record(acks, text));
+        const string ack = """{"type":"frameAck","seq":42}""";
+
+        session.Receive(AppSource, ack);
+        session.Receive(AppSource, """{"type":"hello","protocolVersion":4}""");
+
+        Assert.Equal([ack], acks);
+        Assert.Equal(["""{"type":"hello","protocolVersion":4}"""], _brain.Connections[0].Received);
+    }
+
+    [Fact]
+    public void A_frame_ack_posted_as_a_string_is_unwrapped_before_the_channel_sees_it()
+    {
+        var seen = new List<string>();
+        using var session = CreateSession(Role.Guest, text => Record(seen, text));
+
+        session.Receive(AppSource, "\"{\\\"type\\\":\\\"frameAck\\\",\\\"seq\\\":1}\"");
+
+        Assert.Equal(["""{"type":"frameAck","seq":1}"""], seen);
+        Assert.Empty(_brain.Connections[0].Received);
+    }
+
+    [Fact]
+    public void A_message_the_channel_declines_reaches_the_brain()
+    {
+        using var session = CreateSession(Role.Operator, _ => false);
+        const string malformed = """{"type":"frameAck","seq":-1}""";
+
+        session.Receive(AppSource, malformed);
+
+        Assert.Equal([malformed], _brain.Connections[0].Received);
+    }
+
+    [Fact]
+    public void A_frame_ack_from_another_origin_is_dropped_before_the_channel()
+    {
+        var seen = new List<string>();
+        using var session = CreateSession(Role.Operator, text => Record(seen, text));
+
+        session.Receive("https://example.com/", """{"type":"frameAck","seq":1}""");
+
+        Assert.Empty(seen);
+        Assert.Empty(_brain.Connections[0].Received);
+    }
+
+    [Fact]
+    public void The_ack_of_a_posted_frame_frees_the_channels_slot_through_the_bridge()
+    {
+        var uiWork = new Queue<Action>();
+        var surface = new FakeSurface();
+        var channel = new SharedBufferPreviewChannel(uiWork.Enqueue, TimeProvider.System, _logger);
+        channel.Attach(Role.Guest, surface);
+        using var session = CreateSession(Role.Guest, text => channel.TryHandleAck(Role.Guest, text));
+        channel.TryPost(PreviewTarget.Guest, new PreviewFrame(5, 2, 2, new byte[16], TimeSpan.Zero));
+
+        session.Receive(AppSource, """{"type":"frameAck","seq":5}""");
+
+        Assert.Equal(1, channel.GetStats(PreviewTarget.Guest).Delivered);
+        Assert.Empty(_brain.Connections[0].Received);
     }
 
     [Fact]
@@ -149,8 +217,14 @@ public sealed class BridgeSessionTests : IDisposable
 
     public void Dispose() => _brain.Dispose();
 
-    private BridgeSession CreateSession(Role role) =>
-        new(_brain, role, _uiQueue.Enqueue, _posted.Add, _logger);
+    private BridgeSession CreateSession(Role role, Func<string, bool>? tryHandleFrameAck = null) =>
+        new(_brain, role, _uiQueue.Enqueue, _posted.Add, _logger, tryHandleFrameAck);
+
+    private static bool Record(List<string> sink, string text)
+    {
+        sink.Add(text);
+        return true;
+    }
 
     private void RunUi()
     {

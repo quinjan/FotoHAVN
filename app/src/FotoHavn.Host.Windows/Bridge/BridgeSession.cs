@@ -25,6 +25,7 @@ internal sealed class BridgeSession : IDisposable
     private readonly Action<string> _postWebMessage;
     private readonly ILogger _logger;
     private readonly IBrainConnection _connection;
+    private readonly Func<string, bool>? _tryHandleFrameAck;
     private volatile bool _closed;
 
     /// <param name="brain">The brain to connect to.</param>
@@ -32,7 +33,11 @@ internal sealed class BridgeSession : IDisposable
     /// <param name="postToUi">Queues work on the window's UI thread (<c>Dispatcher.BeginInvoke</c>).</param>
     /// <param name="postWebMessage">Posts one JSON message to the page (<c>CoreWebView2.PostWebMessageAsJson</c>).</param>
     /// <param name="logger">The host logger.</param>
-    public BridgeSession(IBrain brain, Role role, Action<Action> postToUi, Action<string> postWebMessage, ILogger logger)
+    /// <param name="tryHandleFrameAck">
+    /// Takes a page message that is a <c>frameAck</c> (returns true) before the brain sees it: the frame channel's ack.
+    /// Null passes every message on.
+    /// </param>
+    public BridgeSession(IBrain brain, Role role, Action<Action> postToUi, Action<string> postWebMessage, ILogger logger, Func<string, bool>? tryHandleFrameAck = null)
     {
         ArgumentNullException.ThrowIfNull(brain);
         ArgumentNullException.ThrowIfNull(postToUi);
@@ -42,6 +47,7 @@ internal sealed class BridgeSession : IDisposable
         _postToUi = postToUi;
         _postWebMessage = postWebMessage;
         _logger = logger;
+        _tryHandleFrameAck = tryHandleFrameAck;
         _connection = brain.Connect(role, Send);
     }
 
@@ -66,7 +72,13 @@ internal sealed class BridgeSession : IDisposable
             return;
         }
 
-        _connection.Receive(WebMessageText.ToProtocolText(webMessageAsJson));
+        var text = WebMessageText.ToProtocolText(webMessageAsJson);
+        if (_tryHandleFrameAck?.Invoke(text) == true)
+        {
+            return;
+        }
+
+        _connection.Receive(text);
     }
 
     public void Dispose()
