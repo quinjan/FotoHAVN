@@ -2,8 +2,10 @@
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.E2E;
 using FotoHavn.Core.Fakes;
+using FotoHavn.Core.Hooks;
 using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 using FotoHavn.Protocol.Testing;
 
@@ -102,6 +104,26 @@ public sealed class E2EHookGlueTests
         var saved = await port.SaveDiagnosticsCaptureAsync(frame, mirrored: true);
 
         Assert.Equal(new CameraCaptureView("capture.jpg", 2, 2, 99, true), saved);
+    }
+
+    [Fact]
+    public void The_public_constructor_hands_the_camera_fault_control_to_the_camera_fault_hooks()
+    {
+        var clock = new FakeClock();
+        var faults = new FaultInjectingCameraAdapter(new FakeCameraAdapter(clock));
+        var executor = new ManualBrainExecutor();
+        using var brain = new Brain(new BrainDependencies(executor, clock, FakeDisplayAdapter.CreateDefault(), faults, new RecordingHostServices(), new InMemoryEventStore())
+        {
+            CameraFaults = faults,
+        });
+        var client = new TestClient(Role.Operator);
+        client.Connection = brain.Connect(Role.Operator, client.Receive);
+
+        var inject = client.Test(TestHookNames.InjectCameraFault, """{"kind":"stale"}""");
+        executor.RunPending();
+
+        client.AssertReceived(TestResultMessage.Success(inject, EmptyHookResult.Instance));
+        Assert.Equal(CameraFaultKind.Stale, faults.ActiveFault);
     }
 
     private sealed class StorageHooks : IStorageTestHooks

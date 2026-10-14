@@ -13,26 +13,31 @@ namespace FotoHavn.Core.Tests.Support;
 /// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, camera, and clock; deterministic.</summary>
 internal sealed class BrainHarness : IDisposable
 {
-    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null)
+    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null, ICameraAdapter? cameraOverride = null, ICameraFaultControl? cameraFaults = null, IPreviewStats? previewStats = null, FakeClock? clock = null)
     {
+        Clock = clock ?? new FakeClock();
         Displays = displays ?? FakeDisplayAdapter.CreateDefault();
         Camera = camera ?? new FakeCameraAdapter(Clock);
+        CameraPort = cameraOverride ?? Camera;
         Host = new RecordingHostServices(Displays.PrimaryDisplayId);
         HostHooks = hostHooks;
         Store = store ?? new InMemoryEventStore();
         StorageHooks = storageHooks;
-        Dependencies = new BrainDependencies(Executor, Clock, Displays, Camera, Host, Store) { Logger = Logger };
-        Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks);
+        Dependencies = new BrainDependencies(Executor, Clock, Displays, CameraPort, Host, Store) { Logger = Logger, PreviewStats = previewStats };
+        Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks, cameraFaults);
         Run();
     }
 
     public ManualBrainExecutor Executor { get; } = new();
 
-    public FakeClock Clock { get; } = new();
+    public FakeClock Clock { get; }
 
     public FakeDisplayAdapter Displays { get; }
 
     public FakeCameraAdapter Camera { get; }
+
+    /// <summary>What the brain is given as its camera adapter: the fake, or a decorator or double around it.</summary>
+    public ICameraAdapter CameraPort { get; }
 
     public RecordingHostServices Host { get; }
 
