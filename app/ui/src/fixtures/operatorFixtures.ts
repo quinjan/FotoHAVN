@@ -3,10 +3,13 @@ import {
   type CameraDiagnosticsView,
   type CameraFailureKind,
   type EventListRow,
+  type OperatorPresentation,
   type OperatorWelcomeMessage,
+  type RunningEventPanel,
   type StorageErrorReason,
 } from "../protocol/generated.ts";
 import { operatorEventListEmpty } from "./inlineFixtures.ts";
+import { operatorSetupFixtures, operatorWelcome, overlays, runningEventPanel } from "./operatorSetupFixtures.ts";
 
 /**
  * Hand-written operator snapshots for the fixture lane: Event lists of every size the surface tests need, and the
@@ -114,9 +117,47 @@ export const cameraReasonsWithFixtures: readonly CameraFailureKind[] = [
 
 const fixtureCamera = { deviceId: "fake-camera", name: "Fake camera" };
 
+/** The Event list with the running Event first (its panel above the rows), `panel` overriding the panel's facts. */
+function runningList(panel: Partial<RunningEventPanel> = {}, parts: Partial<OperatorPresentation> = {}): OperatorWelcomeMessage {
+  const events = eventRows(5);
+  return operatorWelcome("eventList", {
+    eventList: { events, newEventAvailable: true },
+    runningEvent: runningEventPanel({ eventId: events[0]?.id ?? "event-5", name: events[0]?.name ?? "Event", ...panel }),
+    ...parts,
+  });
+}
+
+/** The operator fixtures for the running-Event panel, its confirmations, and notices (typed here until the brain writes them). */
+function operatorListFixtures(): Record<string, OperatorWelcomeMessage> {
+  const idle = eventRows(3, false);
+  return {
+    "operator-list-running": runningList(),
+    "operator-list-running-display-disconnected": runningList({ guestDisplay: { name: "DELL P2419H", state: "disconnected" } }),
+    "operator-list-running-camera-not-available": runningList({ camera: { state: "notAvailable", reason: "stale" }, completedGuestCycles: 0 }),
+    "operator-list-running-camera-checking": runningList({ camera: { state: "checking", reason: null }, completedGuestCycles: 0 }),
+    "operator-list-running-assistance": runningList({
+      currentStep: "operatorAssistance",
+      assistance: { reason: "guestDisplay" },
+      guestDisplay: { name: "DELL P2419H", state: "disconnected" },
+    }),
+    "operator-list-confirm-delete": operatorWelcome("eventList", {
+      eventList: { events: idle, newEventAvailable: true },
+      overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: idle[1]?.name ?? "", counts: { guestCycles: 12, photoStrips: 11, captures: 41 } } }),
+    }),
+    "operator-list-confirm-end": runningList({}, { overlays: overlays({ confirmation: { kind: "endEvent", eventName: null, counts: null } }) }),
+    "operator-list-notice": operatorWelcome("eventList", {
+      eventList: { events: idle, newEventAvailable: true },
+      overlays: overlays({ notice: "deleteFailed" }),
+    }),
+    "operator-single-screen": operatorWelcome("guestScreenActive", { runningEvent: runningEventPanel({ singleScreen: true }) }),
+  };
+}
+
 /** Every hand-written operator fixture by name. */
 export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
   const fixtures: Record<string, OperatorWelcomeMessage> = {
+    ...operatorListFixtures(),
+    ...operatorSetupFixtures(),
     "operator-event-list-1": operatorEventList(eventRows(1)),
     "operator-event-list-5": operatorEventList(eventRows(5)),
     "operator-event-list-30": operatorEventList(eventRows(30)),

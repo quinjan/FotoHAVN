@@ -1,11 +1,16 @@
-import type { OperatorNoticeCode, OperatorPresentation } from "../protocol/generated.ts";
+import { Notice } from "../components/Notice/index.ts";
 import { StartingScreen } from "../components/StartingScreen/index.ts";
 import { StatementHeading } from "../components/StatementHeading/index.ts";
+import type { OperatorNoticeCode, OperatorPresentation } from "../protocol/generated.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
 import { CameraDiagnosticsSurface } from "./CameraDiagnosticsSurface.tsx";
+import { noticeCopy, singleScreenCopy } from "./copy.ts";
 import { EventList } from "./EventList.tsx";
 import styles from "./Operator.module.css";
+import { LocalNotice, OperatorNoticeProvider, useSendCommand } from "./OperatorCommands.tsx";
+import { OperatorDialogs } from "./OperatorDialogs.tsx";
+import { EventSetup } from "./setup/EventSetup.tsx";
 import { StorageErrorSurface } from "./StorageErrorSurface.tsx";
 
 function OperatorFatal({ reason }: { readonly reason: string | null }) {
@@ -33,12 +38,33 @@ function OperatorPending() {
   );
 }
 
+/** The Guest Screen covers this window (one display only): the operator is told, and only the hold and PIN end it. */
+function GuestScreenActive() {
+  return (
+    <div className={screen.screen}>
+      <StatementHeading level={1} size="heading-lg" align="center" lead={singleScreenCopy} />
+    </div>
+  );
+}
+
 function OperatorSurface({ presentation }: { readonly presentation: OperatorPresentation }) {
   switch (presentation.surface) {
     case "starting":
       return <StartingScreen />;
     case "eventList":
-      return <EventList events={presentation.eventList?.events ?? []} />;
+      return <EventList events={presentation.eventList?.events ?? []} running={presentation.runningEvent} />;
+    case "eventSetup":
+      return presentation.eventSetup === null ? (
+        <OperatorPending />
+      ) : (
+        <EventSetup
+          view={presentation.eventSetup}
+          identifying={presentation.overlays.identifyDisplays !== null}
+          assistance={presentation.runningEvent?.assistance?.reason ?? null}
+        />
+      );
+    case "guestScreenActive":
+      return <GuestScreenActive />;
     case "fatal":
       return <OperatorFatal reason={presentation.fatal?.reason ?? null} />;
     case "storageError":
@@ -54,14 +80,24 @@ function OperatorSurface({ presentation }: { readonly presentation: OperatorPres
   }
 }
 
-// Interim copy until M6 wave B3 builds the Operator notice (the brain sends the code; the words live in the UI).
-const noticeCopy: Record<OperatorNoticeCode, string> = {
-  saveFailed: "The Event couldn't be saved.",
-  deleteFailed: "The Event couldn't be deleted.",
-  eventNotFound: "That Event isn't there any more.",
-};
+/** The brain's notice (a save or delete that didn't go through): the code is the brain's, the words are here. */
+function BrainNotice({ code }: { readonly code: OperatorNoticeCode | null }) {
+  const send = useSendCommand();
+  return (
+    <Notice
+      onDismiss={() => {
+        void send("DismissNotice", {}, { key: "dismiss-notice" });
+      }}
+    >
+      {code === null ? "" : noticeCopy[code]}
+    </Notice>
+  );
+}
 
-/** Every Operator Screen surface, chosen by the operator presentation. */
+/**
+ * Every Operator Screen surface, chosen by the operator presentation. Notices sit above the surface; a confirmation
+ * opens over it, and while one is open the surface behind is inert, so focus and the keyboard stay in the dialog.
+ */
 export function OperatorRoot({
   presentation,
   reconnecting,
@@ -69,15 +105,22 @@ export function OperatorRoot({
   readonly presentation: OperatorPresentation;
   readonly reconnecting: boolean;
 }) {
+  const { confirmation, notice } = presentation.overlays;
   return (
     <main className={screen.root} data-fotohavn-surface={presentation.surface}>
-      <OperatorSurface presentation={presentation} />
-      <div className={screen.notices}>
-        <p className={styles.notice} role="status">
-          {presentation.overlays.notice === null ? "" : noticeCopy[presentation.overlays.notice.code]}
-        </p>
-        <ConnectionNotice reconnecting={reconnecting} />
-      </div>
+      <OperatorNoticeProvider>
+        <div inert={confirmation !== null}>
+          <div className={styles.notices}>
+            <LocalNotice />
+            <BrainNotice code={notice === null ? null : notice.code} />
+          </div>
+          <OperatorSurface presentation={presentation} />
+        </div>
+        <div className={screen.notices}>
+          <ConnectionNotice reconnecting={reconnecting} />
+        </div>
+        <OperatorDialogs confirmation={confirmation} />
+      </OperatorNoticeProvider>
     </main>
   );
 }
