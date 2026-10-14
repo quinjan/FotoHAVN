@@ -1570,11 +1570,11 @@ Verification. The implementing agent writes and runs these through the [verifica
 ### M7: catalog and compositor (M)
 
 Tasks:
-- [ ] Catalog records, artwork and fonts as embedded resources, and the copied `SOURCES.md`.
-- [ ] Look kernels with exact rounding.
-- [ ] Compositor for blank and captured strips, cover crop, signatures, and hairlines.
-- [ ] Preview cache and `preview.fotohavn` provider.
-- [ ] Golden fixtures (fixed photographs) and hash tests; timing check (spike S3).
+- [x] Catalog records, artwork and fonts as embedded resources, and the copied `SOURCES.md`.
+- [x] Look kernels with exact rounding.
+- [x] Compositor for blank and captured strips, cover crop, signatures, and hairlines.
+- [x] Preview cache and `preview.fotohavn` provider.
+- [x] Golden fixtures (fixed photographs) and hash tests; timing check (spike S3).
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:**
@@ -1592,6 +1592,77 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/catalog/blank-previews`: every offered Template's blank preview loads in Event setup at the right native size, and Panorama Four appears rotated in the UI. Not written with M7; it is part of M6's exit gate (also listed under M6's `@m6` scenarios).
   - `regression/catalog/real-capture-composition` (written with M7 and run against the real camera): on the diagnostics screen, capture four real photographs, then use its compose action for every Template × Look. Each PNG is checked for native size, decodability, and opacity. Pixel content is left to the golden unit tests. It also uses the screen's `COMPOSE` control once (Panorama Four is shown rotated).
 - **Manual:** a visual review of all 28 Template × Look strips composed from real Captures, compared with the website's online booth output for the same Template and Look. This is a reference check, not a parity requirement (D8).
+
+Verification record (M7):
+- **Date and commits:** 2026-10-14/15.
+  - Contracts (protocol v5): `3b1e0ae`.
+  - Parallel merges: `b701700`.
+  - Integration and `@m7` end-to-end: `20643a5`.
+  - Hover root cause in the WebView2 visual spec: `a00406f`.
+  - Review fixes: `8a8dc18`.
+  - Fixture-lane reliability: `82b0a7e`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 runtime 155.0.4283.45, one display, and Integrated Webcam. The camera's privacy shutter was closed, so the end-to-end captures are the camera's "camera off" placeholder frames.
+- **Results:** from an independent clean clone at `a00406f`, plus a full rerun on `82b0a7e` after the review and reliability fixes.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` | Two clean-clone runs of 2367 tests each: 2363 passed and 4 skipped (the 2 symlink and 2 opt-in Windows Camera app tests). After the review fixes: 2373 tests, 2369 passed and 4 skipped. |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 921 passed |
+  | 2 | New spike S3 speed step, without coverage | Medians 38.5–51.4 ms across the eight Template × (Classic, Monochrome) cases; worst p95 115 ms; budget 150 ms |
+  | 3 | UI `test:coverage` | 905 passed |
+  | 3 | UI `test:fixtures` | 384 passed: 5 consecutive local runs, and 2 GitHub runs on the same commit with no flaky tests |
+  | 5 | `@m7` regression | 1 passed |
+  | 5 | `@m5` regression | 3 passed |
+  | 5 | `@m4` regression | 4 passed |
+  | 5 | `@m3` regression | Passed three consecutive times after the fixes (29 with the visual-helper tests): 860 comparisons, maximum 0.517%, mean 0.016% |
+  | 5 | `@m2` regression | 7 passed, 1 skipped (one display) |
+  | 5 | `@m1` regression | 9 passed |
+  | 5 | Smoke | 5 passed |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | `publish-field-test.ps1` | Succeeds. The field build embeds the 2 artworks, 2 fonts, and 2 licences, and includes `libSkiaSharp` and `libHarfBuzzSharp`. |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 98.1% | 93.4% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 99.7% | 95.5% |
+
+  UI: about 99.5% statements.
+- **Golden images:** 32 decoded-pixel hashes, covering 28 Template × Look strips and 4 blank previews. Five were reviewed by eye:
+  - blank Signature Strip with hairlines and a centered signature;
+  - Butter Gingham Sepia with the Look confined to the windows;
+  - Panorama Four Monochrome, 1800×600, with a corner signature;
+  - Polka Keepsake Classic;
+  - the kerned signature after the fix.
+
+  Rewriting the baselines (`FOTOHAVN_UPDATE_GOLDEN=1`) now fails the run on purpose, and is refused when `CI` is set.
+- **`@m7` end-to-end:** 4 real captures, then 28 compositions fetched from `preview.fotohavn`. Each is 200, `image/png`, `no-store`, at the Template's native size, decodable, and fully opaque. Each Template's Naturale strip has a capture in its first window. The UI `COMPOSE` action shows Panorama Four rotated. 28 compositions took 2.7 s (median round trip 46 ms).
+- **GitHub CI:**
+  - `Desktop app` run 38609358498 (`a00406f`) failed on cold-start timeouts in the fixture lane.
+  - Run 38641927888 (`82b0a7e`) succeeded on both attempts.
+- **Review findings, all fixed:**
+  - **Signature kerning (medium):** the signature wasn't kerned like the website's canvas. It is now shaped with HarfBuzz; only the signature pixels changed.
+  - **Visual tolerance (medium):** the 1-pixel tolerance also excused 1→2 px border changes. It was removed. The real cause of the `@m3` failure was the OS pointer's hover state: the spec now parks the system cursor and waits for transitions to finish, and comparison is strict pixelmatch again.
+  - **S3 budget (medium):** the budget was never asserted in a gate run. It now has its own non-coverage step: 150 ms locally, 500 ms on hosted CI.
+  - **Preview retention (low–medium):** composed previews of released diagnostics captures stayed in the preview cache. They're now removed, and stale results are never cached.
+  - **`@m7` assertion (low):** `@m7` didn't prove a capture reached a window. It now checks the first window isn't blank.
+- **Decisions:**
+  - Diagnostics composition uses the newest N captures.
+  - The preview key format lives in Core.
+  - PNG encoding uses the Sub filter at zlib level 1: lossless, about 30% larger, and about 5× faster.
+  - The fixture lane runs on 2 workers with `retries: 1` on CI only, as a visible safety net.
+- **Moved to M6's gate:** `regression/catalog/blank-previews` needs Event setup.
+- **Manual (pending, to be run by the owner):**
+  - Review all 28 Template × Look strips composed from real Captures against the website's online booth. This needs the camera shutter open.
+  - Re-measure spike S3 on the booth laptop.
+- **Not proven:**
+  - Composition of a real scene.
+  - Booth-laptop speed.
+  - `npm audit` still shows the development-only `braces` advisory.
 
 ### M8: Guest Cycle (L)
 
