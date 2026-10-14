@@ -1409,13 +1409,13 @@ Verification record (M4):
 ### M5: webcam adapter (M)
 
 Tasks:
-- [ ] Spike S1 first (preview frame transport); record the result and the frame-rate floor in ADR 0004.
-- [ ] Policies in `FotoHavn.Core`: format selection with fallback, frame freshness and staleness, first-frame-after-timestamp selection, and the failure classification, including Windows camera privacy denial (`E_ACCESSDENIED`) as Not available with "Camera access is off in Windows privacy settings."
-- [ ] Adapter: device discovery and watcher; open with exclusive control; one long-lived frame reader; BGRA conversion; mirroring and JPEG encoding.
-- [ ] Preview frames to the shared buffer (WPF) and WebSocket (headless), with one frame in flight.
-- [ ] Fake camera with failure controls for unit and headless tests.
-- [ ] Replace the M1 enumeration in `test.listCameras` with the adapter; add `test.injectCameraFault` and `test.clearCameraFault`.
-- [ ] An E2E-only diagnostics screen (camera list, live preview, frame age, frame rate, capture, and, once M7 lands, compose) used until Event setup exists in M6.
+- [x] Spike S1 first (preview frame transport); record the result and the frame-rate floor in ADR 0004.
+- [x] Policies in `FotoHavn.Core`: format selection with fallback, frame freshness and staleness, first-frame-after-timestamp selection, and the failure classification, including Windows camera privacy denial (`E_ACCESSDENIED`) as Not available with "Camera access is off in Windows privacy settings."
+- [x] Adapter: device discovery and watcher; open with exclusive control; one long-lived frame reader; BGRA conversion; mirroring and JPEG encoding.
+- [x] Preview frames to the shared buffer (WPF) and WebSocket (headless), with one frame in flight.
+- [x] Fake camera with failure controls for unit and headless tests.
+- [x] Replace the M1 enumeration in `test.listCameras` with the adapter; add `test.injectCameraFault` and `test.clearCameraFault`.
+- [x] An E2E-only diagnostics screen (camera list, live preview, frame age, frame rate, capture, and, once M7 lands, compose) used until Event setup exists in M6.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:**
@@ -1437,6 +1437,80 @@ Verification. The implementing agent writes and runs these through the [verifica
   - Open the Windows Camera app first to confirm the "In use by another app" state.
   - Turn off camera access in Windows privacy settings to confirm Not available with "Camera access is off in Windows privacy settings."
   - Compare the preview frame rate on the booth laptop with the developer machine.
+
+Verification record (M5):
+- **Date and commits:** 2026-10-14.
+  - Spike S1: `dd72942`.
+  - Contracts (protocol v4): `f8d4eab`.
+  - Parallel merges: `8c41322`.
+  - Integration and `@m5` end-to-end: `68501d0`.
+  - Review fixes: `0f2c661`.
+  - Flaky-test fix: `40cad11`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, one display, and WebView2 runtime 155.0.4283.45. The `Integrated Webcam` offers NV12 at 1920×1080, 1280×960, 1280×720, 640×480, and 640×360, all at 30 fps.
+- **Camera frames:** the privacy shutter was closed for the whole milestone. The camera delivered its "camera off" placeholder (a black frame with a crossed-out camera icon) at about 20 fps. Every automated check ran on those frames.
+- **Spike S1 (ADR 0004):**
+  - Decision: raw RGBA at 1280 px in a reused WebView2 shared buffer, with one frame in flight.
+  - Measured: 29.7 fps delivered, p95 latency under 10 ms, and about 3% of machine CPU, from a synthetic 30 fps source.
+  - Two views at once: both held 29.7 fps.
+  - End-to-end floor: 15 fps.
+  - The JPEG and 960 px fallbacks are deferred until the booth re-measure (M10).
+- **Results:** from an independent clean clone at `68501d0`, plus reruns after the fixes at `40cad11`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` | 2016 tests. `ThreadingTests` failed intermittently (2 of 5 runs) because a storage-open broadcast could interleave with command results; it was a test assumption, now fixed. After the fix: 25 of 25 Core runs and 5 of 5 full-solution runs passed (2021 tests, 4 skipped). |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 820 passed |
+  | 2 | Host.Windows tests in an E2E build | 190 passed, 6 skipped. The skipped tests check field-build-only facts. |
+  | 3 | UI `test:coverage` | 872 passed |
+  | 3 | UI `test:fixtures` | 376 passed |
+  | 4 | End-to-end `npm ci`, `typecheck` | Pass |
+  | 5 | `@m5` regression | 3 passed |
+  | 5 | `@m4` regression | 4 passed |
+  | 5 | `@m3` regression | 15 passed |
+  | 5 | `@m2` regression | 7 passed, 1 skipped (one display) |
+  | 5 | `@m1` regression | 9 passed |
+  | 5 | Smoke, including `camera-live` | 5 passed |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | `publish-field-test.ps1` | Succeeds with no E2E hooks and the field UI |
+
+  The four .NET skips are two file-symlink tests (they need a privilege this account lacks; junction tests cover the rule) and two opt-in Windows Camera app collision tests.
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.9% | 92.9% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 100% | No branches |
+
+  UI: 99.71% statements, 99.02% branches, 99.52% functions, and 99.77% lines.
+- **Measured camera values (end-to-end, placeholder frames):**
+  - Live preview: maximum frame age 83 ms; 19.5–20 fps delivered, which is the camera's full rate and above the 15 fps floor; 0% dropped; the canvas is 1280×720.
+  - Captures: 1920×1080 JPEGs about 15 KB, luminance standard deviation 8.55.
+  - Mirror check: D_direct 0.378 against D_flip 0.0001–0.0056, which is conclusive. A deterministic .NET test also proves the mirror on an asymmetric pattern, and it fails when mirroring is skipped or applied twice.
+  - Faults: `failed`, `removed`, and `exclusiveLost` reach Not available in 17–25 ms (budget 500 ms). `stale` takes 2007–2085 ms (budget 2400 ms: 2 s without frames plus one check). After each is cleared, the first fresh frame is 38–72 ms old.
+- **Adapter findings:**
+  - When another app such as the Windows Camera app holds the camera, `MediaFrameReader.StartAsync` returns `ExclusiveControlNotAvailable` and no error code is thrown. The adapter maps that status to "In use by another app".
+  - An unknown device ID gives `0x80070490`, which maps to Not found.
+  - The camera's frame timestamps share a clock with `Stopwatch`.
+- **GitHub CI:** `Desktop app` runs 38494948639 (`68501d0`) and 38498706687 (`40cad11`) both succeeded.
+- **Review:** three medium-severity issues, all fixed:
+  - The mirror check could pass on a symmetric scene. It now skips with a reason when the scene can't decide, and a deterministic test proves the mirror.
+  - The fault timing budgets were too loose. The immediate faults are now held to 500 ms.
+  - The preview had no recovery when the shared buffer failed. Buffer creation now retries at most once per second; the JPEG fallback is deferred to M10 and documented in ADR 0004 and the plan.
+- **Manual (pending, to be run by the owner):**
+  - Open the camera's privacy shutter, then rerun `npx playwright test --project=smoke --grep "@m5"` and `--project=regression --grep "@m5"` on a real scene.
+  - Unplug and replug a USB webcam.
+  - Open the Windows Camera app first to confirm "In use by another app" (or run `FOTOHAVN_CAMERA_APP_TEST=1` with the adapter tests).
+  - Compare the preview frame rate on the booth laptop with the developer machine, including the two-view S5 case, and repeat spike S1 there.
+  - Confirm the "Camera access is off in Windows privacy settings" state by turning off camera access in Windows Settings.
+- **Not proven:**
+  - Any behavior on a real scene.
+  - Booth-laptop performance.
+  - The headless WebSocket frame path with a real camera; unit and integration tests cover it with the fake camera.
+  - Device hot-plug on the real adapter.
 
 ### M6: operator screens, Event setup, and running an Event (L)
 
