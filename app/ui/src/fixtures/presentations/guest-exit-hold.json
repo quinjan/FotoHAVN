@@ -1,0 +1,1 @@
+{"type":"welcome","role":"guest","protocolVersion":6,"revision":4,"presentation":{"surface":"start","start":{"stepInsideAvailable":true,"guestGalleryLinkVisible":false},"startUnavailable":null,"overlays":{"exitHold":{"active":true},"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}
