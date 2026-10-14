@@ -2,6 +2,7 @@ import { useLayoutEffect, useState } from "react";
 import { TextLink } from "../components/TextLink/index.ts";
 import { toManifest, type GalleryEntry } from "./discover.ts";
 import styles from "./Gallery.module.css";
+import { settleFixtureDocument } from "./settle.ts";
 
 /** The `?gallery=` value that publishes the manifest JSON for the fixture lane. */
 export const manifestSelection = "manifest";
@@ -11,15 +12,15 @@ export const manifestElementId = "fotohavn-gallery-manifest";
 
 /**
  * Marks the document for screenshots: the fixture's window role on <html> (so the guest rules and kiosk scale apply
- * exactly as on the Guest Screen), and `data-fotohavn-gallery-ready` once the fonts have loaded.
+ * exactly as on the Guest Screen), and `data-fotohavn-gallery-ready` once the fixture has settled (fonts loaded, painted,
+ * finite animations finished; see settleFixtureDocument).
  */
 function useFixtureDocument(role: string): void {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.fotohavnRole = role;
     let active = true;
-    const fonts = (document as Partial<Document>).fonts;
-    void (fonts?.ready ?? Promise.resolve()).then(() => {
+    void settleFixtureDocument().then(() => {
       if (active) {
         root.dataset.fotohavnGalleryReady = "true";
       }

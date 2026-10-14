@@ -50,7 +50,7 @@ export async function readManifest(page: Page): Promise<readonly ManifestFixture
   return (JSON.parse(text ?? "{}") as { fixtures: ManifestFixture[] }).fixtures;
 }
 
-/** Opens one fixture alone and waits as the Chromium fixture lane does: gallery ready (fonts loaded), role set, fixture visible. */
+/** Opens one fixture alone and waits as the Chromium fixture lane does: gallery ready (fonts loaded, painted, finite animations finished), role set, fixture visible. */
 export async function openFixture(page: Page, fixtureId: string, role: ManifestFixture["role"]): Promise<void> {
   await page.goto(`${galleryUrl}?gallery=${encodeURIComponent(fixtureId)}`);
   await expect(page.locator("html")).toHaveAttribute("data-fotohavn-gallery-ready", "true");

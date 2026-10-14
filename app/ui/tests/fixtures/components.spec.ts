@@ -38,12 +38,23 @@ async function readManifest(page: Page): Promise<readonly ManifestFixture[]> {
   return (JSON.parse(text ?? "{}") as { fixtures: ManifestFixture[] }).fixtures;
 }
 
+/** Each fixture a multi-fixture test walks adds this much to that test's timeout (open, checks, screenshot, axe). */
+const perFixtureTimeoutMs = 8_000;
+/** The manifest read that starts every multi-fixture test (one page load) gets its own allowance on top of the base. */
+const manifestTimeoutMs = 30_000;
+
 async function fixturesFrom(page: Page, source: string): Promise<readonly ManifestFixture[]> {
+  // One test walks every fixture of a component, so its budget is the base plus the manifest read plus a share per
+  // fixture, instead of the same 30 s for one fixture and for fourteen. The manifest allowance is granted before the
+  // read, since a slow machine is slowest on the first page load.
+  test.setTimeout(test.info().timeout + manifestTimeoutMs);
   const fixtures = (await readManifest(page)).filter((fixture) => fixture.source === source);
   expect(fixtures.length, `${source} has fixtures in the gallery manifest`).toBeGreaterThan(0);
+  test.setTimeout(test.info().timeout + fixtures.length * perFixtureTimeoutMs);
   return fixtures;
 }
 
+/** Opens one fixture alone and waits for the gallery's settle marker (fonts loaded, painted, finite animations finished). */
 async function openFixture(page: Page, fixture: ManifestFixture): Promise<void> {
   await page.goto(`/index.html?gallery=${encodeURIComponent(fixture.id)}`);
   await expect(page.locator("html")).toHaveAttribute("data-fotohavn-gallery-ready", "true");

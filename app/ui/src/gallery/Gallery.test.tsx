@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { GalleryEntry } from "./discover.ts";
 import { Gallery, GalleryError, manifestElementId } from "./Gallery.tsx";
@@ -52,10 +52,9 @@ describe("Gallery", () => {
     expect(main).toHaveAttribute("data-fotohavn-fixture", "thing-guest");
     expect(within(main).getByText("Guest thing")).toBeVisible();
     expect(document.documentElement).toHaveAttribute("data-fotohavn-role", "guest");
-    await act(async () => {
-      await Promise.resolve();
+    await waitFor(() => {
+      expect(document.documentElement).toHaveAttribute("data-fotohavn-gallery-ready", "true");
     });
-    expect(document.documentElement).toHaveAttribute("data-fotohavn-gallery-ready", "true");
 
     unmount();
     expect(document.documentElement).not.toHaveAttribute("data-fotohavn-role");

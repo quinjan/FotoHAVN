@@ -39,7 +39,14 @@ const test = base.extend<object, { host: HeadlessHost }>({
         await use(host);
       } finally {
         await host.stop();
-        rmSync(dirname(dataFolder), { recursive: true, force: true });
+        // The host's file handles (the database, the logs) and a virus scanner can hold the folder for a moment after
+        // the process is gone, and Windows answers EPERM or EBUSY; retry, and never fail the run over a git-ignored
+        // scratch folder that the next run's own folder doesn't share.
+        try {
+          rmSync(dirname(dataFolder), { recursive: true, force: true, maxRetries: 20, retryDelay: 250 });
+        } catch (error) {
+          console.warn(`Could not remove ${dirname(dataFolder)}: ${String(error)}`);
+        }
       }
     },
     { scope: "worker", timeout: 90_000 },

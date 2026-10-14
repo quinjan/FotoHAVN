@@ -50,7 +50,10 @@ dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:Fo
 #    (FOTOHAVN_S3_BUDGET_MS overrides the budget; the default 150 ms is the booth budget)
 dotnet test --project tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj --filter-method "*Composing_a_strip_takes_under_150_ms_median*"
 # 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures,
-#    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET)
+#    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET;
+#    the lane warms Chromium and the bundle once in tests/global-setup.ts, a fixture counts as ready when the gallery sets
+#    `data-fotohavn-gallery-ready` (fonts loaded, painted, finite animations finished; the WebView2 spec waits on the same
+#    marker), and FOTOHAVN_FIXTURE_PORT moves the preview server for side-by-side runs)
 npm ci; npm run lint; npm run typecheck; npm run test:coverage; npm run build; npm run test:fixtures
 
 # 4-5. End-to-end (in e2e/; real camera required; global setup runs `npm run build:e2e` in ui/ and the E2E build below)
