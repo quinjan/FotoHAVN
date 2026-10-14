@@ -37,6 +37,38 @@ public sealed class HeadlessHostServicesTests
         Assert.Throws<ArgumentNullException>(() => services.OpenFolder(null!));
     }
 
+    [Fact]
+    public void Identify_overlays_are_only_recorded_and_a_new_show_replaces_them()
+    {
+        var services = Services(Primary, Guest);
+        Assert.Empty(services.IdentifyOverlays);
+
+        services.ShowIdentifyOverlays([new IdentifyOverlaySpec(Primary, 1, Primary.Name), new IdentifyOverlaySpec(Guest, 2, Guest.Name)]);
+        Assert.Equal([1, 2], services.IdentifyOverlays.Select(overlay => overlay.Number));
+
+        services.ShowIdentifyOverlays([new IdentifyOverlaySpec(Guest, 1, Guest.Name)]);
+        Assert.Equal(["fake-guest"], services.IdentifyOverlays.Select(overlay => overlay.Display.Id));
+
+        services.HideIdentifyOverlays();
+        Assert.Empty(services.IdentifyOverlays);
+        Assert.Throws<ArgumentNullException>(() => services.ShowIdentifyOverlays(null!));
+    }
+
+    [Fact]
+    public void Only_an_E2E_build_scales_the_brain_clock()
+    {
+        Assert.Same(SystemClock.Instance, ClockComposition.Compose(SystemClock.Instance, scaled: false));
+        Assert.IsAssignableFrom<IScalableClock>(ClockComposition.Compose(SystemClock.Instance, scaled: true));
+        Assert.Throws<ArgumentNullException>(() => ClockComposition.Compose(null!, scaled: true));
+
+        var clock = ClockComposition.ForBuild(SystemClock.Instance);
+#if E2E_HOOKS
+        Assert.IsAssignableFrom<IScalableClock>(clock);
+#else
+        Assert.Same(SystemClock.Instance, clock);
+#endif
+    }
+
     private static HeadlessHostServices Services(params DisplayInfo[] displays) =>
         new(new FixedDisplays(displays), NullLogger.Instance);
 

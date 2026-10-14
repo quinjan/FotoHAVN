@@ -70,7 +70,11 @@ public partial class App : Application
         HostLog.WebViewEnvironment(logger, paths.WebView2RuntimeFolder ?? "Evergreen", paths.WebViewUserDataFolder);
 
         _displays = new WindowsDisplayAdapter(_loggerFactory.CreateLogger("FotoHavn.Host.Windows.Displays"));
-        _windows = new ScreenWindows(Dispatcher, _displays, _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Screens"));
+        _windows = new ScreenWindows(
+            Dispatcher,
+            _displays,
+            _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Screens"),
+            new FolderOpener(paths.DataFolder, HostBuild.LaunchesExplorer, _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Folders")));
         _executor = new DedicatedThreadBrainExecutor(exception => HostLog.BrainWorkFailed(logger, exception));
 
         IStorageFileSystem fileSystem = new PhysicalStorageFileSystem(paths.DataFolder);
@@ -97,7 +101,7 @@ public partial class App : Application
         camera = cameraFaults;
 #endif
         var previewCache = new PreviewCache();
-        var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store, new CatalogData(), new SkiaCompositor(), previewCache, new NoOpWakeLock())
+        var dependencies = new BrainDependencies(_executor, ClockComposition.ForBuild(SystemClock.Instance), _displays, camera, _windows, _store, new CatalogData(), new SkiaCompositor(), previewCache, new NoOpWakeLock())
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
             PreviewStats = frames,
@@ -139,6 +143,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _windows?.CloseOverlays();
         _windows?.CloseGuest();
         _brain?.Dispose();
         _cameraAdapter?.Dispose();
