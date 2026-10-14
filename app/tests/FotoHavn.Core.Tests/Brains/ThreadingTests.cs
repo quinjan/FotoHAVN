@@ -96,8 +96,25 @@ public sealed class ThreadingTests
         for (var i = 0; i < Clients; i++)
         {
             var messages = received[i].Select(ServerMessageReader.Read).ToList();
-            Assert.IsAssignableFrom<IRoleMessage>(messages[0]);
-            Assert.Equal(ids[i], messages.Skip(1).Cast<CommandResultMessage>().Select(result => result.Id));
+            var role = i % 2 == 0 ? Role.Operator : Role.Guest;
+            Assert.True(messages[0] is OperatorWelcomeMessage or GuestWelcomeMessage, "The welcome comes first.");
+            Assert.Equal(role, ((IRoleMessage)messages[0]).Role);
+
+            // Presentations may interleave with results (the store opening, the camera list arriving), so only
+            // results are ordered and counted; each command still gets exactly one result.
+            Assert.Equal(ids[i], messages.OfType<CommandResultMessage>().Select(result => result.Id));
+
+            // Nothing else may arrive but this role's welcome first, then its presentations with only-increasing revisions.
+            var revisions = messages.Where(message => message is not CommandResultMessage).Select(message => message switch
+            {
+                OperatorWelcomeMessage welcome => (welcome.Role, welcome.Revision),
+                GuestWelcomeMessage welcome => (welcome.Role, welcome.Revision),
+                OperatorPresentationMessage presentation => (presentation.Role, presentation.Revision),
+                GuestPresentationMessage presentation => (presentation.Role, presentation.Revision),
+                _ => throw new Xunit.Sdk.XunitException($"Unexpected message {message.GetType().Name}."),
+            }).ToList();
+            Assert.All(revisions, entry => Assert.Equal(role, entry.Role));
+            Assert.Equal(revisions.Select(entry => entry.Revision).Order().Distinct(), revisions.Select(entry => entry.Revision));
         }
     }
 
