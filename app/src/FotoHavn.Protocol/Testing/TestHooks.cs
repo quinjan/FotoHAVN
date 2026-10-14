@@ -65,6 +65,9 @@ public static class TestHookNames
 
     /// <summary>Composes a Template's blank preview (all windows empty, Naturale) into the preview cache (E2E only).</summary>
     public const string ComposeBlankPreview = "test.composeBlankPreview";
+
+    /// <summary>Speeds up the brain's timers (countdown, Phase Timers, Keepsake, PIN lockout) by a factor for long scenarios; camera frames stay real-time (E2E only).</summary>
+    public const string SetClockScale = "test.setClockScale";
 }
 
 /// <summary>One hook: its name, where it runs, its arguments record (null when it takes none), and its result record.</summary>
@@ -95,6 +98,7 @@ public static class TestHookRegistry
         new(TestHookNames.ClearCameraFault, TestHookSide.Brain, null, typeof(EmptyHookResult)),
         new(TestHookNames.ComposeDiagnostics, TestHookSide.Brain, typeof(ComposeDiagnosticsArgs), typeof(ComposePreviewResult)),
         new(TestHookNames.ComposeBlankPreview, TestHookSide.Brain, typeof(ComposeBlankPreviewArgs), typeof(ComposePreviewResult)),
+        new(TestHookNames.SetClockScale, TestHookSide.Brain, typeof(SetClockScaleArgs), typeof(EmptyHookResult)),
     ];
 
     public static bool TryGet(string name, out TestHookDescriptor hook)
@@ -233,6 +237,12 @@ public sealed record ComposeDiagnosticsArgs(string TemplateId, string LookId);
 /// <summary>Composes <paramref name="TemplateId"/> with every window empty and the Naturale Look.</summary>
 public sealed record ComposeBlankPreviewArgs(string TemplateId);
 
+/// <summary>
+/// Runs the brain's timers <paramref name="Factor"/> times faster from now on: 1 is real time, the range is 1 to 100 (anything
+/// else is <c>invalidArgs</c>). Needs a scalable clock; a host without one answers <c>notSupported</c>.
+/// </summary>
+public sealed record SetClockScaleArgs(double Factor);
+
 /// <summary>A composed PNG now in the preview cache, served at <c>https://preview.fotohavn/&lt;PreviewKey&gt;.png</c>.</summary>
 /// <param name="PreviewKey">The cache key.</param>
 /// <param name="Width">The PNG width in pixels.</param>
@@ -310,6 +320,20 @@ public sealed record CameraDiagnostics(
     long? DroppedFrames,
     PreviewTarget PreviewTarget);
 
+/// <summary>One request to open a folder that the brain made of the host (plan section 8, Open folder).</summary>
+/// <param name="Path">The absolute folder path (an Event's folder; it holds the Event's ID, not its name).</param>
+/// <param name="At">When the brain asked, on the brain's clock.</param>
+public sealed record OpenFolderRequest(string Path, DateTimeOffset At);
+
+/// <summary>One display an <c>IdentifyDisplays</c> asked the host to number.</summary>
+/// <param name="DisplayId">The display's stable identity.</param>
+/// <param name="Number">The number shown on it.</param>
+/// <param name="Visible">True from the request until the brain's 3-second timer asks the host to hide the overlays.</param>
+public sealed record IdentifyOverlayDiagnostics(string DisplayId, int Number, bool Visible);
+
+/// <summary>Whether the brain holds the wake lock (acquired while an Event runs).</summary>
+public sealed record WakeLockDiagnostics(bool Held);
+
 /// <summary>The result of <c>test.getDiagnostics</c>.</summary>
 /// <param name="ProtocolVersion">The brain's protocol version.</param>
 /// <param name="ConnectedRoles">Roles with at least one connection that completed the handshake, operator first.</param>
@@ -320,6 +344,10 @@ public sealed record CameraDiagnostics(
 /// <param name="GuestScreenOpen">Whether the brain has asked the host to show the Guest Screen.</param>
 /// <param name="Storage">The Event store's state.</param>
 /// <param name="Camera">The camera's state and frame statistics.</param>
+/// <param name="OpenFolderRequests">The last <see cref="MaxOpenFolderRequests"/> folders the brain asked the host to open, oldest first.</param>
+/// <param name="IdentifyOverlays">The displays of the last <c>IdentifyDisplays</c>, with whether they are showing now; empty before the first.</param>
+/// <param name="WakeLock">Whether the brain holds the wake lock.</param>
+/// <param name="ClockScale">The clock's speed factor (1 unless <c>test.setClockScale</c> changed it).</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -329,7 +357,13 @@ public sealed record DiagnosticsResult(
     DisplayDiagnostics Displays,
     bool GuestScreenOpen,
     StorageDiagnostics Storage,
-    CameraDiagnostics Camera)
+    CameraDiagnostics Camera,
+    IReadOnlyList<OpenFolderRequest> OpenFolderRequests,
+    IReadOnlyList<IdentifyOverlayDiagnostics> IdentifyOverlays,
+    WakeLockDiagnostics WakeLock,
+    double ClockScale)
 {
     public const int MaxCommandResults = 20;
+
+    public const int MaxOpenFolderRequests = 10;
 }

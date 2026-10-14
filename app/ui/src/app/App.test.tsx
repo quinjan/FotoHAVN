@@ -225,7 +225,7 @@ describe("Operator surfaces", () => {
   });
 
   it("shows the brain's notice", () => {
-    operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { message: "The guest display is disconnected." } } });
-    expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The guest display is disconnected.");
+    operator({ overlays: { confirmation: null, identifyDisplays: null, notice: { code: "saveFailed" } } });
+    expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain("The Event couldn't be saved.");
   });
 });

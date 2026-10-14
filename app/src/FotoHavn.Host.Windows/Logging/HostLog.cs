@@ -69,6 +69,12 @@ internal static partial class HostLog
     [LoggerMessage(EventId = 21, EventName = "openFolder", Level = LogLevel.Information, Message = "Open folder requested (not implemented until M6): {Path}")]
     public static partial void OpenFolderRequested(ILogger logger, string path);
 
+    [LoggerMessage(EventId = 31, EventName = "identifyOverlays", Level = LogLevel.Information, Message = "Identify overlays requested on {Count} displays (not implemented until M6 wave B2)")]
+    public static partial void IdentifyOverlaysRequested(ILogger logger, int count);
+
+    [LoggerMessage(EventId = 32, EventName = "identifyOverlaysHidden", Level = LogLevel.Information, Message = "Identify overlays hide requested (not implemented until M6 wave B2)")]
+    public static partial void IdentifyOverlaysHideRequested(ILogger logger);
+
     [LoggerMessage(EventId = 22, EventName = "brainWorkFailed", Level = LogLevel.Critical, Message = "A brain work item threw")]
     public static partial void BrainWorkFailed(ILogger logger, Exception exception);
 

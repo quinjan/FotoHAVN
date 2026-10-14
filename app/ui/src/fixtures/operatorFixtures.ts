@@ -17,14 +17,17 @@ const venues = ["The Glasshouse, Tagaytay", "Manila Hotel, Ballroom B", null, "C
 
 function eventRow(index: number, count: number, running: boolean): EventListRow {
   const day = 28 - (index % 28);
+  const isRunning = running && index === 0;
   return {
     id: `event-${String(count - index)}`,
     name: `Event ${String(count - index)}: Santos and Reyes celebration`,
     date: `2026-11-${String(day).padStart(2, "0")}`,
     venue: venues[index % venues.length] ?? null,
     completedGuestCycles: (index * 37) % 260,
-    lastUsed: index % 4 === 3 ? null : `2026-10-${String(1 + (index % 28)).padStart(2, "0")}T10:30:00Z`,
-    running: running && index === 0,
+    lastUsedAt: index % 4 === 3 ? null : `2026-10-${String(1 + (index % 28)).padStart(2, "0")}T10:30:00Z`,
+    running: isRunning,
+    actions: { canStart: !running, canEdit: !isRunning, canDelete: !isRunning, canOpenFolder: true, canOpenGallery: true },
+    startDisabledReason: running ? "eventRunning" : null,
   };
 }
 
@@ -39,7 +42,7 @@ export const longEventVenue =
   "The Grand Ballroom of the Manila Hotel, One Rizal Park, Ermita, Metro Manila, Philippines (enter through the south wing)";
 
 export function operatorEventList(events: EventListRow[]): OperatorWelcomeMessage {
-  return { ...operatorEventListEmpty, presentation: { ...operatorEventListEmpty.presentation, eventList: { events } } };
+  return { ...operatorEventListEmpty, presentation: { ...operatorEventListEmpty.presentation, eventList: { events, newEventAvailable: true } } };
 }
 
 export function operatorStorageError(kind: StorageErrorReason, dataPath: string): OperatorWelcomeMessage {
@@ -51,6 +54,7 @@ export function operatorStorageError(kind: StorageErrorReason, dataPath: string)
     presentation: {
       surface: "storageError",
       eventList: null,
+      eventSetup: null,
       runningEvent: null,
       overlays: { confirmation: null, identifyDisplays: null, notice: null },
       fatal: null,
@@ -87,6 +91,7 @@ export function operatorCameraDiagnostics(view: CameraDiagnosticsView): Operator
     presentation: {
       surface: "cameraDiagnostics",
       eventList: null,
+      eventSetup: null,
       runningEvent: null,
       overlays: { confirmation: null, identifyDisplays: null, notice: null },
       fatal: null,

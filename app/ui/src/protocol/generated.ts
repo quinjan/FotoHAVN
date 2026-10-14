@@ -21,6 +21,7 @@ export type Command =
   | ConfirmDeleteEventCommand
   | CancelDeleteEventCommand
   | OpenEventFolderCommand
+  | DismissNoticeCommand
   | ChangeEventFieldCommand
   | SelectCameraCommand
   | SelectGuestDisplayCommand
@@ -133,23 +134,40 @@ export type OperatorSurface =
   | "cameraDiagnostics";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StorageErrorReason".
+ * via the `definition` "StartDisabledReason".
  */
-export type StorageErrorReason =
-  | "diskFull"
-  | "accessDenied"
-  | "locked"
-  | "notLocalDisk"
-  | "cloudSynced"
-  | "notWritable"
-  | "integrityFailed"
-  | "corrupt"
-  | "unknown";
+export type StartDisabledReason = "eventRunning";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "CameraState".
+ * via the `definition` "EventSetupErrorCode".
  */
-export type CameraState = "idle" | "checking" | "ready" | "notAvailable" | "inUseByAnotherApp";
+export type EventSetupErrorCode =
+  | "required"
+  | "tooLong"
+  | "invalidDate"
+  | "atLeastOneTemplate"
+  | "defaultTemplateNotOffered"
+  | "atLeastOneLook"
+  | "defaultLookNotOffered"
+  | "timerOutOfRange"
+  | "pinFormat"
+  | "pinMismatch"
+  | "pinRequired"
+  | "cameraRequired"
+  | "displayRequired";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupCameraState".
+ */
+export type EventSetupCameraState =
+  | "none"
+  | "checking"
+  | "ready"
+  | "notAvailable"
+  | "inUseByAnotherApp"
+  | "inUseByRunningEvent"
+  | "missing"
+  | "notChecked";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "CameraFailureKind".
@@ -163,6 +181,67 @@ export type CameraFailureKind =
   | "privacyDenied"
   | "noSupportedFormat"
   | "notFound"
+  | "unknown";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestDisplayState".
+ */
+export type GuestDisplayState = "none" | "connected" | "missing";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PrinterChoice".
+ */
+export type PrinterChoice = "none";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StartFailureCode".
+ */
+export type StartFailureCode =
+  "eventRunning" | "guestDisplayMissing" | "cameraNotEligible" | "storageNotWritable" | "pinMissing" | "invalidSetup";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RunningDisplayState".
+ */
+export type RunningDisplayState = "connected" | "disconnected";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraState".
+ */
+export type CameraState = "idle" | "checking" | "ready" | "notAvailable" | "inUseByAnotherApp";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RunningEventStep".
+ */
+export type RunningEventStep =
+  "start" | "template" | "photographs" | "filters" | "keepsake" | "guestGallery" | "operatorAssistance";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "AssistanceReason".
+ */
+export type AssistanceReason = "camera" | "storage" | "guestDisplay";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ConfirmationKind".
+ */
+export type ConfirmationKind = "deleteEvent" | "endEvent" | "leaveSetup";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "OperatorNoticeCode".
+ */
+export type OperatorNoticeCode = "saveFailed" | "deleteFailed" | "eventNotFound";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StorageErrorReason".
+ */
+export type StorageErrorReason =
+  | "diskFull"
+  | "accessDenied"
+  | "locked"
+  | "notLocalDisk"
+  | "cloudSynced"
+  | "notWritable"
+  | "integrityFailed"
+  | "corrupt"
   | "unknown";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -181,6 +260,16 @@ export type GuestSurface =
   | "fatal";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StartUnavailableReason".
+ */
+export type StartUnavailableReason = "camera" | "storage";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PinDialogError".
+ */
+export type PinDialogError = "wrongPin";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "CommandStatus".
  */
 export type CommandStatus = "accepted" | "rejected";
@@ -195,7 +284,9 @@ export type RejectReason =
   | "notAvailable"
   | "eventRunning"
   | "protocolMismatch"
-  | "payloadTooLarge";
+  | "payloadTooLarge"
+  | "validationFailed"
+  | "pinLocked";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "EnvelopeError".
@@ -254,7 +345,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 5;
+  protocolVersion: 6;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -381,6 +472,21 @@ export interface OpenEventFolderCommand {
 export interface OpenEventFolderPayload {
   eventId: string;
 }
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "DismissNoticeCommand".
+ */
+export interface DismissNoticeCommand {
+  type: "command";
+  id: string;
+  name: "DismissNotice";
+  payload: DismissNoticePayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "DismissNoticePayload".
+ */
+export interface DismissNoticePayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ChangeEventFieldCommand".
@@ -1411,6 +1517,7 @@ export interface OperatorWelcomeMessage {
 export interface OperatorPresentation {
   surface: OperatorSurface;
   eventList: EventListView | null;
+  eventSetup: EventSetupView | null;
   runningEvent: RunningEventPanel | null;
   overlays: OperatorOverlays;
   fatal: FatalView | null;
@@ -1423,6 +1530,7 @@ export interface OperatorPresentation {
  */
 export interface EventListView {
   events: EventListRow[];
+  newEventAvailable: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1434,14 +1542,205 @@ export interface EventListRow {
   date: string;
   venue: string | null;
   completedGuestCycles: number;
-  lastUsed: string | null;
+  lastUsedAt: string | null;
   running: boolean;
+  actions: EventRowActions;
+  startDisabledReason: StartDisabledReason | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventRowActions".
+ */
+export interface EventRowActions {
+  canStart: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canOpenFolder: boolean;
+  canOpenGallery: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupView".
+ */
+export interface EventSetupView {
+  eventId: string | null;
+  isNew: boolean;
+  dirty: boolean;
+  fields: EventSetupFieldValues;
+  fieldErrors: EventSetupFieldError[];
+  showErrors: boolean;
+  camera: EventSetupCameraView;
+  guestDisplay: EventSetupGuestDisplayView;
+  mirror: boolean;
+  countdownSeconds: number;
+  printer: PrinterChoice;
+  templates: EventSetupTemplateOption[];
+  looks: EventSetupLookOption[];
+  phaseTimers: PhaseTimerOption[];
+  guestGalleryEnabled: boolean;
+  pin: EventSetupPinView;
+  saveAndStartAvailable: boolean;
+  saveAndStartDisabledReason: StartDisabledReason | null;
+  startFailure: EventSetupStartFailure | null;
+  saving: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupFieldValues".
+ */
+export interface EventSetupFieldValues {
+  name: string;
+  date: string;
+  venue: string;
+  customer: string;
+  notes: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupFieldError".
+ */
+export interface EventSetupFieldError {
+  field: string;
+  code: EventSetupErrorCode;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupCameraView".
+ */
+export interface EventSetupCameraView {
+  cameras: CameraOption[];
+  selectedDeviceId: string | null;
+  selectedName: string | null;
+  state: EventSetupCameraState;
+  reason: CameraFailureKind | null;
+  previewActive: boolean;
+  mirrored: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CameraOption".
+ */
+export interface CameraOption {
+  deviceId: string;
+  name: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupGuestDisplayView".
+ */
+export interface EventSetupGuestDisplayView {
+  displays: GuestDisplayOption[];
+  selectedId: string | null;
+  selectedName: string | null;
+  state: GuestDisplayState;
+  coversOperatorScreen: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestDisplayOption".
+ */
+export interface GuestDisplayOption {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  number: number;
+  isOperatorScreen: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupTemplateOption".
+ */
+export interface EventSetupTemplateOption {
+  id: string;
+  name: string;
+  description: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+  offered: boolean;
+  isDefault: boolean;
+  blankPreviewKey: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupLookOption".
+ */
+export interface EventSetupLookOption {
+  id: string;
+  name: string;
+  description: string;
+  offered: boolean;
+  isDefault: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhaseTimerOption".
+ */
+export interface PhaseTimerOption {
+  phase: PhaseTimer;
+  seconds: number;
+  defaultSeconds: number;
+  min: number;
+  max: number;
+  canBeOff: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupPinView".
+ */
+export interface EventSetupPinView {
+  isSet: boolean;
+  changing: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventSetupStartFailure".
+ */
+export interface EventSetupStartFailure {
+  code: StartFailureCode;
+  cameraReason: CameraFailureKind | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "RunningEventPanel".
  */
-export interface RunningEventPanel {}
+export interface RunningEventPanel {
+  eventId: string;
+  name: string;
+  guestDisplay: RunningEventDisplay;
+  camera: RunningEventCamera;
+  currentStep: RunningEventStep;
+  completedGuestCycles: number;
+  startedAt: string;
+  assistance: RunningEventAssistance | null;
+  singleScreen: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RunningEventDisplay".
+ */
+export interface RunningEventDisplay {
+  name: string;
+  state: RunningDisplayState;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RunningEventCamera".
+ */
+export interface RunningEventCamera {
+  state: CameraState;
+  reason: CameraFailureKind | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RunningEventAssistance".
+ */
+export interface RunningEventAssistance {
+  reason: AssistanceReason;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "OperatorOverlays".
@@ -1449,24 +1748,48 @@ export interface RunningEventPanel {}
 export interface OperatorOverlays {
   confirmation: ConfirmationOverlay | null;
   identifyDisplays: IdentifyDisplaysOverlay | null;
-  notice: NoticeOverlay | null;
+  notice: OperatorNoticeOverlay | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ConfirmationOverlay".
  */
-export interface ConfirmationOverlay {}
+export interface ConfirmationOverlay {
+  kind: ConfirmationKind;
+  eventName: string | null;
+  counts: ConfirmationCounts | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ConfirmationCounts".
+ */
+export interface ConfirmationCounts {
+  guestCycles: number;
+  photoStrips: number;
+  captures: number;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "IdentifyDisplaysOverlay".
  */
-export interface IdentifyDisplaysOverlay {}
+export interface IdentifyDisplaysOverlay {
+  displays: IdentifyDisplayEntry[];
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "NoticeOverlay".
+ * via the `definition` "IdentifyDisplayEntry".
  */
-export interface NoticeOverlay {
-  message: string;
+export interface IdentifyDisplayEntry {
+  id: string;
+  number: number;
+  name: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "OperatorNoticeOverlay".
+ */
+export interface OperatorNoticeOverlay {
+  code: OperatorNoticeCode;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1496,14 +1819,6 @@ export interface CameraDiagnosticsView {
   mirrored: boolean;
   lastCapture: CameraCaptureView | null;
   lastComposition: CompositionView | null;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "CameraOption".
- */
-export interface CameraOption {
-  deviceId: string;
-  name: string;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1554,6 +1869,7 @@ export interface GuestWelcomeMessage {
 export interface GuestPresentation {
   surface: GuestSurface;
   start: StartView | null;
+  startUnavailable: StartUnavailableView | null;
   overlays: GuestOverlays;
   fatal: FatalView | null;
 }
@@ -1562,7 +1878,16 @@ export interface GuestPresentation {
  * via the `definition` "StartView".
  */
 export interface StartView {
-  guestGalleryAvailable: boolean;
+  stepInsideAvailable: boolean;
+  guestGalleryLinkVisible: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "StartUnavailableView".
+ */
+export interface StartUnavailableView {
+  reason: StartUnavailableReason;
+  guestGalleryLinkVisible: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1579,12 +1904,18 @@ export interface GuestOverlays {
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ExitHoldOverlay".
  */
-export interface ExitHoldOverlay {}
+export interface ExitHoldOverlay {
+  active: boolean;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "PinDialogOverlay".
  */
-export interface PinDialogOverlay {}
+export interface PinDialogOverlay {
+  error: PinDialogError | null;
+  lockedRemainingSeconds: number | null;
+  attemptsRemaining: number | null;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "PhaseTimerWarningOverlay".
@@ -1595,6 +1926,13 @@ export interface PhaseTimerWarningOverlay {}
  * via the `definition` "StartOverConfirmationOverlay".
  */
 export interface StartOverConfirmationOverlay {}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "NoticeOverlay".
+ */
+export interface NoticeOverlay {
+  message: string;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "OperatorPresentationMessage".
@@ -1666,6 +2004,7 @@ export interface CommandPayloadMap {
   ConfirmDeleteEvent: ConfirmDeleteEventPayload;
   CancelDeleteEvent: CancelDeleteEventPayload;
   OpenEventFolder: OpenEventFolderPayload;
+  DismissNotice: DismissNoticePayload;
   ChangeEventField: ChangeEventFieldPayload;
   SelectCamera: SelectCameraPayload;
   SelectGuestDisplay: SelectGuestDisplayPayload;
@@ -1814,6 +2153,10 @@ export interface TestHookMap {
     args: ComposeBlankPreviewArgs;
     result: ComposePreviewResult;
   };
+  "test.setClockScale": {
+    args: SetClockScaleArgs;
+    result: EmptyHookResult;
+  };
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1829,6 +2172,10 @@ export interface DiagnosticsResult {
   guestScreenOpen: boolean;
   storage: StorageDiagnostics;
   camera: CameraDiagnostics;
+  openFolderRequests: OpenFolderRequest[];
+  identifyOverlays: IdentifyOverlayDiagnostics[];
+  wakeLock: WakeLockDiagnostics;
+  clockScale: number;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1927,6 +2274,30 @@ export interface CameraDiagnostics {
   deliveredFps: number | null;
   droppedFrames: number | null;
   previewTarget: PreviewTarget;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "OpenFolderRequest".
+ */
+export interface OpenFolderRequest {
+  path: string;
+  at: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "IdentifyOverlayDiagnostics".
+ */
+export interface IdentifyOverlayDiagnostics {
+  displayId: string;
+  number: number;
+  visible: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "WakeLockDiagnostics".
+ */
+export interface WakeLockDiagnostics {
+  held: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2066,6 +2437,13 @@ export interface ComposeBlankPreviewArgs {
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "SetClockScaleArgs".
+ */
+export interface SetClockScaleArgs {
+  factor: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "PreviewFrameMetadata".
  */
 export interface PreviewFrameMetadata {
@@ -2078,4 +2456,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 5;
+export const PROTOCOL_VERSION = 6;

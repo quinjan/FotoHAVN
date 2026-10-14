@@ -81,4 +81,18 @@ public sealed class DisplayRulesTests
         Assert.Throws<ArgumentNullException>(() => DisplayRules.IsSingleScreen(null!, "id", null));
         Assert.Throws<ArgumentNullException>(() => DisplayRules.IsSingleScreen([], null!, null));
     }
+
+    [Fact]
+    public void Displays_are_numbered_left_to_right_then_top_to_bottom_then_by_id()
+    {
+        var left = Display("b-left", x: -1920);
+        var topMiddle = Display("c-top", x: 0, y: -1080);
+        var middle = Display("a-middle", x: 0, y: 0);
+        var tie = Display("a-tie", x: 0, y: 0);
+
+        var ordered = DisplayRules.NumberingOrder([middle, topMiddle, Second, left, tie]);
+
+        Assert.Equal(["b-left", "c-top", "a-middle", "a-tie", Second.Id], ordered.Select(display => display.Id));
+        Assert.Throws<ArgumentNullException>(() => DisplayRules.NumberingOrder(null!));
+    }
 }

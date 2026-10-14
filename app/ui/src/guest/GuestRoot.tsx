@@ -9,7 +9,7 @@ import screen from "../screens/Screen.module.css";
  */
 function StartPlaceholder({ start }: { readonly start: StartView | null }) {
   return (
-    <div className={screen.start} data-guest-gallery-available={start?.guestGalleryAvailable ?? false}>
+    <div className={screen.start} data-guest-gallery-available={start?.guestGalleryLinkVisible ?? false}>
       <p className={screen.wordmark}>FOTOHAVN</p>
       <StatementHeading
         level={1}

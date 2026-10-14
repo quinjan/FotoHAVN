@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 5
+      "const": 6
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -60,6 +60,14 @@
       "title": "AcceptRetakePayload",
       "type": "object",
       "additionalProperties": false
+    },
+    "AssistanceReason": {
+      "title": "AssistanceReason",
+      "enum": [
+        "camera",
+        "storage",
+        "guestDisplay"
+      ]
     },
     "BackToStartCommand": {
       "title": "BackToStartCommand",
@@ -765,6 +773,9 @@
           "$ref": "#/$defs/OpenEventFolderCommand"
         },
         {
+          "$ref": "#/$defs/DismissNoticeCommand"
+        },
+        {
           "$ref": "#/$defs/ChangeEventFieldCommand"
         },
         {
@@ -977,6 +988,9 @@
         "OpenEventFolder": {
           "$ref": "#/$defs/OpenEventFolderPayload"
         },
+        "DismissNotice": {
+          "$ref": "#/$defs/DismissNoticePayload"
+        },
         "ChangeEventField": {
           "$ref": "#/$defs/ChangeEventFieldPayload"
         },
@@ -1172,6 +1186,7 @@
         "ConfirmDeleteEvent",
         "CancelDeleteEvent",
         "OpenEventFolder",
+        "DismissNotice",
         "ChangeEventField",
         "SelectCamera",
         "SelectGuestDisplay",
@@ -1590,9 +1605,64 @@
       "type": "object",
       "additionalProperties": false
     },
+    "ConfirmationCounts": {
+      "title": "ConfirmationCounts",
+      "type": "object",
+      "properties": {
+        "guestCycles": {
+          "type": "integer"
+        },
+        "photoStrips": {
+          "type": "integer"
+        },
+        "captures": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "guestCycles",
+        "photoStrips",
+        "captures"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmationKind": {
+      "title": "ConfirmationKind",
+      "enum": [
+        "deleteEvent",
+        "endEvent",
+        "leaveSetup"
+      ]
+    },
     "ConfirmationOverlay": {
       "title": "ConfirmationOverlay",
       "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ConfirmationKind"
+        },
+        "eventName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "counts": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfirmationCounts"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "eventName",
+        "counts"
+      ],
       "additionalProperties": false
     },
     "ConnectDisplayArgs": {
@@ -1741,6 +1811,24 @@
         },
         "camera": {
           "$ref": "#/$defs/CameraDiagnostics"
+        },
+        "openFolderRequests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OpenFolderRequest"
+          }
+        },
+        "identifyOverlays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IdentifyOverlayDiagnostics"
+          }
+        },
+        "wakeLock": {
+          "$ref": "#/$defs/WakeLockDiagnostics"
+        },
+        "clockScale": {
+          "type": "number"
         }
       },
       "required": [
@@ -1752,7 +1840,11 @@
         "displays",
         "guestScreenOpen",
         "storage",
-        "camera"
+        "camera",
+        "openFolderRequests",
+        "identifyOverlays",
+        "wakeLock",
+        "clockScale"
       ],
       "additionalProperties": false
     },
@@ -1767,6 +1859,37 @@
       "required": [
         "displayId"
       ],
+      "additionalProperties": false
+    },
+    "DismissNoticeCommand": {
+      "title": "DismissNoticeCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "DismissNotice"
+        },
+        "payload": {
+          "$ref": "#/$defs/DismissNoticePayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "DismissNoticePayload": {
+      "title": "DismissNoticePayload",
+      "type": "object",
       "additionalProperties": false
     },
     "DisplayDiagnostics": {
@@ -1982,7 +2105,7 @@
         "completedGuestCycles": {
           "type": "integer"
         },
-        "lastUsed": {
+        "lastUsedAt": {
           "type": [
             "string",
             "null"
@@ -1991,6 +2114,19 @@
         },
         "running": {
           "type": "boolean"
+        },
+        "actions": {
+          "$ref": "#/$defs/EventRowActions"
+        },
+        "startDisabledReason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartDisabledReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1999,8 +2135,10 @@
         "date",
         "venue",
         "completedGuestCycles",
-        "lastUsed",
-        "running"
+        "lastUsedAt",
+        "running",
+        "actions",
+        "startDisabledReason"
       ],
       "additionalProperties": false
     },
@@ -2013,16 +2151,461 @@
           "items": {
             "$ref": "#/$defs/EventListRow"
           }
+        },
+        "newEventAvailable": {
+          "type": "boolean"
         }
       },
       "required": [
-        "events"
+        "events",
+        "newEventAvailable"
+      ],
+      "additionalProperties": false
+    },
+    "EventRowActions": {
+      "title": "EventRowActions",
+      "type": "object",
+      "properties": {
+        "canStart": {
+          "type": "boolean"
+        },
+        "canEdit": {
+          "type": "boolean"
+        },
+        "canDelete": {
+          "type": "boolean"
+        },
+        "canOpenFolder": {
+          "type": "boolean"
+        },
+        "canOpenGallery": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "canStart",
+        "canEdit",
+        "canDelete",
+        "canOpenFolder",
+        "canOpenGallery"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupCameraState": {
+      "title": "EventSetupCameraState",
+      "enum": [
+        "none",
+        "checking",
+        "ready",
+        "notAvailable",
+        "inUseByAnotherApp",
+        "inUseByRunningEvent",
+        "missing",
+        "notChecked"
+      ]
+    },
+    "EventSetupCameraView": {
+      "title": "EventSetupCameraView",
+      "type": "object",
+      "properties": {
+        "cameras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CameraOption"
+          }
+        },
+        "selectedDeviceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selectedName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/EventSetupCameraState"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFailureKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previewActive": {
+          "type": "boolean"
+        },
+        "mirrored": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cameras",
+        "selectedDeviceId",
+        "selectedName",
+        "state",
+        "reason",
+        "previewActive",
+        "mirrored"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupErrorCode": {
+      "title": "EventSetupErrorCode",
+      "enum": [
+        "required",
+        "tooLong",
+        "invalidDate",
+        "atLeastOneTemplate",
+        "defaultTemplateNotOffered",
+        "atLeastOneLook",
+        "defaultLookNotOffered",
+        "timerOutOfRange",
+        "pinFormat",
+        "pinMismatch",
+        "pinRequired",
+        "cameraRequired",
+        "displayRequired"
+      ]
+    },
+    "EventSetupFieldError": {
+      "title": "EventSetupFieldError",
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "code": {
+          "$ref": "#/$defs/EventSetupErrorCode"
+        }
+      },
+      "required": [
+        "field",
+        "code"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupFieldValues": {
+      "title": "EventSetupFieldValues",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "customer": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "date",
+        "venue",
+        "customer",
+        "notes"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupGuestDisplayView": {
+      "title": "EventSetupGuestDisplayView",
+      "type": "object",
+      "properties": {
+        "displays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuestDisplayOption"
+          }
+        },
+        "selectedId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selectedName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/GuestDisplayState"
+        },
+        "coversOperatorScreen": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "displays",
+        "selectedId",
+        "selectedName",
+        "state",
+        "coversOperatorScreen"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupLookOption": {
+      "title": "EventSetupLookOption",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "offered": {
+          "type": "boolean"
+        },
+        "isDefault": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "offered",
+        "isDefault"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupPinView": {
+      "title": "EventSetupPinView",
+      "type": "object",
+      "properties": {
+        "isSet": {
+          "type": "boolean"
+        },
+        "changing": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "isSet",
+        "changing"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupStartFailure": {
+      "title": "EventSetupStartFailure",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/StartFailureCode"
+        },
+        "cameraReason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFailureKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "cameraReason"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupTemplateOption": {
+      "title": "EventSetupTemplateOption",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
+        "offered": {
+          "type": "boolean"
+        },
+        "isDefault": {
+          "type": "boolean"
+        },
+        "blankPreviewKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "width",
+        "height",
+        "landscape",
+        "offered",
+        "isDefault",
+        "blankPreviewKey"
+      ],
+      "additionalProperties": false
+    },
+    "EventSetupView": {
+      "title": "EventSetupView",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isNew": {
+          "type": "boolean"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "fields": {
+          "$ref": "#/$defs/EventSetupFieldValues"
+        },
+        "fieldErrors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventSetupFieldError"
+          }
+        },
+        "showErrors": {
+          "type": "boolean"
+        },
+        "camera": {
+          "$ref": "#/$defs/EventSetupCameraView"
+        },
+        "guestDisplay": {
+          "$ref": "#/$defs/EventSetupGuestDisplayView"
+        },
+        "mirror": {
+          "type": "boolean"
+        },
+        "countdownSeconds": {
+          "type": "integer"
+        },
+        "printer": {
+          "$ref": "#/$defs/PrinterChoice"
+        },
+        "templates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventSetupTemplateOption"
+          }
+        },
+        "looks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventSetupLookOption"
+          }
+        },
+        "phaseTimers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PhaseTimerOption"
+          }
+        },
+        "guestGalleryEnabled": {
+          "type": "boolean"
+        },
+        "pin": {
+          "$ref": "#/$defs/EventSetupPinView"
+        },
+        "saveAndStartAvailable": {
+          "type": "boolean"
+        },
+        "saveAndStartDisabledReason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartDisabledReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startFailure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EventSetupStartFailure"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saving": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "eventId",
+        "isNew",
+        "dirty",
+        "fields",
+        "fieldErrors",
+        "showErrors",
+        "camera",
+        "guestDisplay",
+        "mirror",
+        "countdownSeconds",
+        "printer",
+        "templates",
+        "looks",
+        "phaseTimers",
+        "guestGalleryEnabled",
+        "pin",
+        "saveAndStartAvailable",
+        "saveAndStartDisabledReason",
+        "startFailure",
+        "saving"
       ],
       "additionalProperties": false
     },
     "ExitHoldOverlay": {
       "title": "ExitHoldOverlay",
       "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "active"
+      ],
       "additionalProperties": false
     },
     "FatalView": {
@@ -2125,6 +2708,55 @@
       ],
       "additionalProperties": false
     },
+    "GuestDisplayOption": {
+      "title": "GuestDisplayOption",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "number": {
+          "type": "integer"
+        },
+        "isOperatorScreen": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "x",
+        "y",
+        "width",
+        "height",
+        "number",
+        "isOperatorScreen"
+      ],
+      "additionalProperties": false
+    },
+    "GuestDisplayState": {
+      "title": "GuestDisplayState",
+      "enum": [
+        "none",
+        "connected",
+        "missing"
+      ]
+    },
     "GuestOverlays": {
       "title": "GuestOverlays",
       "type": "object",
@@ -2206,6 +2838,16 @@
             }
           ]
         },
+        "startUnavailable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartUnavailableView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "overlays": {
           "$ref": "#/$defs/GuestOverlays"
         },
@@ -2223,6 +2865,7 @@
       "required": [
         "surface",
         "start",
+        "startUnavailable",
         "overlays",
         "fatal"
       ],
@@ -2322,6 +2965,27 @@
         "protocolVersion"
       ]
     },
+    "IdentifyDisplayEntry": {
+      "title": "IdentifyDisplayEntry",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "number": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "number",
+        "name"
+      ],
+      "additionalProperties": false
+    },
     "IdentifyDisplaysCommand": {
       "title": "IdentifyDisplaysCommand",
       "type": "object",
@@ -2351,11 +3015,43 @@
     "IdentifyDisplaysOverlay": {
       "title": "IdentifyDisplaysOverlay",
       "type": "object",
+      "properties": {
+        "displays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IdentifyDisplayEntry"
+          }
+        }
+      },
+      "required": [
+        "displays"
+      ],
       "additionalProperties": false
     },
     "IdentifyDisplaysPayload": {
       "title": "IdentifyDisplaysPayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "IdentifyOverlayDiagnostics": {
+      "title": "IdentifyOverlayDiagnostics",
+      "type": "object",
+      "properties": {
+        "displayId": {
+          "type": "string"
+        },
+        "number": {
+          "type": "integer"
+        },
+        "visible": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "displayId",
+        "number",
+        "visible"
+      ],
       "additionalProperties": false
     },
     "InjectCameraFaultArgs": {
@@ -2736,6 +3432,24 @@
       ],
       "additionalProperties": false
     },
+    "OpenFolderRequest": {
+      "title": "OpenFolderRequest",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "path",
+        "at"
+      ],
+      "additionalProperties": false
+    },
     "OpenGalleryCommand": {
       "title": "OpenGalleryCommand",
       "type": "object",
@@ -2967,6 +3681,27 @@
       "type": "object",
       "additionalProperties": false
     },
+    "OperatorNoticeCode": {
+      "title": "OperatorNoticeCode",
+      "enum": [
+        "saveFailed",
+        "deleteFailed",
+        "eventNotFound"
+      ]
+    },
+    "OperatorNoticeOverlay": {
+      "title": "OperatorNoticeOverlay",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/OperatorNoticeCode"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false
+    },
     "OperatorOverlays": {
       "title": "OperatorOverlays",
       "type": "object",
@@ -2994,7 +3729,7 @@
         "notice": {
           "anyOf": [
             {
-              "$ref": "#/$defs/NoticeOverlay"
+              "$ref": "#/$defs/OperatorNoticeOverlay"
             },
             {
               "type": "null"
@@ -3020,6 +3755,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/EventListView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "eventSetup": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EventSetupView"
             },
             {
               "type": "null"
@@ -3073,6 +3818,7 @@
       "required": [
         "surface",
         "eventList",
+        "eventSetup",
         "runningEvent",
         "overlays",
         "fatal",
@@ -3160,14 +3906,82 @@
         "guestGallery"
       ]
     },
+    "PhaseTimerOption": {
+      "title": "PhaseTimerOption",
+      "type": "object",
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/PhaseTimer"
+        },
+        "seconds": {
+          "type": "integer"
+        },
+        "defaultSeconds": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        },
+        "canBeOff": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "phase",
+        "seconds",
+        "defaultSeconds",
+        "min",
+        "max",
+        "canBeOff"
+      ],
+      "additionalProperties": false
+    },
     "PhaseTimerWarningOverlay": {
       "title": "PhaseTimerWarningOverlay",
       "type": "object",
       "additionalProperties": false
     },
+    "PinDialogError": {
+      "title": "PinDialogError",
+      "enum": [
+        "wrongPin"
+      ]
+    },
     "PinDialogOverlay": {
       "title": "PinDialogOverlay",
       "type": "object",
+      "properties": {
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PinDialogError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lockedRemainingSeconds": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "attemptsRemaining": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "error",
+        "lockedRemainingSeconds",
+        "attemptsRemaining"
+      ],
       "additionalProperties": false
     },
     "PixelRect": {
@@ -3263,6 +4077,12 @@
         "guest"
       ]
     },
+    "PrinterChoice": {
+      "title": "PrinterChoice",
+      "enum": [
+        "none"
+      ]
+    },
     "ProtocolMismatchMessage": {
       "title": "ProtocolMismatchMessage",
       "type": "object",
@@ -3342,7 +4162,9 @@
         "notAvailable",
         "eventRunning",
         "protocolMismatch",
-        "payloadTooLarge"
+        "payloadTooLarge",
+        "validationFailed",
+        "pinLocked"
       ]
     },
     "RetryAssistanceCommand": {
@@ -3414,10 +4236,131 @@
         "guest"
       ]
     },
+    "RunningDisplayState": {
+      "title": "RunningDisplayState",
+      "enum": [
+        "connected",
+        "disconnected"
+      ]
+    },
+    "RunningEventAssistance": {
+      "title": "RunningEventAssistance",
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/AssistanceReason"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "RunningEventCamera": {
+      "title": "RunningEventCamera",
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/CameraState"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CameraFailureKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "RunningEventDisplay": {
+      "title": "RunningEventDisplay",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/RunningDisplayState"
+        }
+      },
+      "required": [
+        "name",
+        "state"
+      ],
+      "additionalProperties": false
+    },
     "RunningEventPanel": {
       "title": "RunningEventPanel",
       "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "guestDisplay": {
+          "$ref": "#/$defs/RunningEventDisplay"
+        },
+        "camera": {
+          "$ref": "#/$defs/RunningEventCamera"
+        },
+        "currentStep": {
+          "$ref": "#/$defs/RunningEventStep"
+        },
+        "completedGuestCycles": {
+          "type": "integer"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assistance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunningEventAssistance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "singleScreen": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "eventId",
+        "name",
+        "guestDisplay",
+        "camera",
+        "currentStep",
+        "completedGuestCycles",
+        "startedAt",
+        "assistance",
+        "singleScreen"
+      ],
       "additionalProperties": false
+    },
+    "RunningEventStep": {
+      "title": "RunningEventStep",
+      "enum": [
+        "start",
+        "template",
+        "photographs",
+        "filters",
+        "keepsake",
+        "guestGallery",
+        "operatorAssistance"
+      ]
     },
     "SaveAndStartEventCommand": {
       "title": "SaveAndStartEventCommand",
@@ -3717,6 +4660,19 @@
           "$ref": "#/$defs/TestResultMessage"
         }
       ]
+    },
+    "SetClockScaleArgs": {
+      "title": "SetClockScaleArgs",
+      "type": "object",
+      "properties": {
+        "factor": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "factor"
+      ],
+      "additionalProperties": false
     },
     "SetCountdownCommand": {
       "title": "SetCountdownCommand",
@@ -4179,6 +5135,12 @@
       "type": "object",
       "additionalProperties": false
     },
+    "StartDisabledReason": {
+      "title": "StartDisabledReason",
+      "enum": [
+        "eventRunning"
+      ]
+    },
     "StartEventCommand": {
       "title": "StartEventCommand",
       "type": "object",
@@ -4218,6 +5180,17 @@
       ],
       "additionalProperties": false
     },
+    "StartFailureCode": {
+      "title": "StartFailureCode",
+      "enum": [
+        "eventRunning",
+        "guestDisplayMissing",
+        "cameraNotEligible",
+        "storageNotWritable",
+        "pinMissing",
+        "invalidSetup"
+      ]
+    },
     "StartOverCommand": {
       "title": "StartOverCommand",
       "type": "object",
@@ -4254,16 +5227,44 @@
       "type": "object",
       "additionalProperties": false
     },
-    "StartView": {
-      "title": "StartView",
+    "StartUnavailableReason": {
+      "title": "StartUnavailableReason",
+      "enum": [
+        "camera",
+        "storage"
+      ]
+    },
+    "StartUnavailableView": {
+      "title": "StartUnavailableView",
       "type": "object",
       "properties": {
-        "guestGalleryAvailable": {
+        "reason": {
+          "$ref": "#/$defs/StartUnavailableReason"
+        },
+        "guestGalleryLinkVisible": {
           "type": "boolean"
         }
       },
       "required": [
-        "guestGalleryAvailable"
+        "reason",
+        "guestGalleryLinkVisible"
+      ],
+      "additionalProperties": false
+    },
+    "StartView": {
+      "title": "StartView",
+      "type": "object",
+      "properties": {
+        "stepInsideAvailable": {
+          "type": "boolean"
+        },
+        "guestGalleryLinkVisible": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stepInsideAvailable",
+        "guestGalleryLinkVisible"
       ],
       "additionalProperties": false
     },
@@ -4850,6 +5851,22 @@
             "result"
           ],
           "additionalProperties": false
+        },
+        "test.setClockScale": {
+          "type": "object",
+          "properties": {
+            "args": {
+              "$ref": "#/$defs/SetClockScaleArgs"
+            },
+            "result": {
+              "$ref": "#/$defs/EmptyHookResult"
+            }
+          },
+          "required": [
+            "args",
+            "result"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -4872,7 +5889,8 @@
         "test.injectCameraFault",
         "test.clearCameraFault",
         "test.composeDiagnostics",
-        "test.composeBlankPreview"
+        "test.composeBlankPreview",
+        "test.setClockScale"
       ],
       "additionalProperties": false
     },
@@ -5048,6 +6066,19 @@
         "name",
         "bounds",
         "isPrimary"
+      ],
+      "additionalProperties": false
+    },
+    "WakeLockDiagnostics": {
+      "title": "WakeLockDiagnostics",
+      "type": "object",
+      "properties": {
+        "held": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "held"
       ],
       "additionalProperties": false
     }

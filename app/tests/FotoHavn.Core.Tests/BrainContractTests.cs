@@ -103,5 +103,9 @@ public sealed class BrainContractTests
         public void OpenFolder(string path) => throw new NotSupportedException();
 
         public string? GetOperatorDisplayId() => throw new NotSupportedException();
+
+        public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays) => throw new NotSupportedException();
+
+        public void HideIdentifyOverlays() => throw new NotSupportedException();
     }
 }

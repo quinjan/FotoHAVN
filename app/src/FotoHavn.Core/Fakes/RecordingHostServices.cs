@@ -11,6 +11,8 @@ public sealed class RecordingHostServices : IHostServices
     private readonly List<string> _calls = [];
     private readonly List<DisplayInfo> _openedGuestScreens = [];
     private readonly List<string> _openedFolders = [];
+    private readonly List<IReadOnlyList<IdentifyOverlaySpec>> _shownIdentifyOverlays = [];
+    private int _hideIdentifyCount;
     private string? _operatorDisplayId;
 
     /// <param name="operatorDisplayId">What <see cref="GetOperatorDisplayId"/> returns; usually the primary display's id.</param>
@@ -39,12 +41,30 @@ public sealed class RecordingHostServices : IHostServices
         }
     }
 
-    /// <summary>Every call in order: <c>OpenGuestScreen(&lt;id&gt;)</c>, <c>CloseGuestScreen</c>, <c>OpenFolder(&lt;path&gt;)</c>.</summary>
+    /// <summary>
+    /// Every call in order: <c>OpenGuestScreen(&lt;id&gt;)</c>, <c>CloseGuestScreen</c>, <c>OpenFolder(&lt;path&gt;)</c>,
+    /// <c>ShowIdentifyOverlays(&lt;id&gt;=&lt;number&gt;,…)</c>, <c>HideIdentifyOverlays</c>.
+    /// </summary>
     public IReadOnlyList<string> Calls => Snapshot(_calls);
 
     public IReadOnlyList<DisplayInfo> OpenedGuestScreens => Snapshot(_openedGuestScreens);
 
     public IReadOnlyList<string> OpenedFolders => Snapshot(_openedFolders);
+
+    /// <summary>Each <see cref="ShowIdentifyOverlays"/> call's overlays, in order.</summary>
+    public IReadOnlyList<IReadOnlyList<IdentifyOverlaySpec>> ShownIdentifyOverlays => Snapshot(_shownIdentifyOverlays);
+
+    /// <summary>How many times <see cref="HideIdentifyOverlays"/> was called.</summary>
+    public int HideIdentifyCount
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _hideIdentifyCount;
+            }
+        }
+    }
 
     public void OpenGuestScreen(DisplayInfo display)
     {
@@ -75,6 +95,25 @@ public sealed class RecordingHostServices : IHostServices
     }
 
     public string? GetOperatorDisplayId() => OperatorDisplayId;
+
+    public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays)
+    {
+        ArgumentNullException.ThrowIfNull(overlays);
+        lock (_gate)
+        {
+            _shownIdentifyOverlays.Add([.. overlays]);
+            _calls.Add($"ShowIdentifyOverlays({string.Join(',', overlays.Select(overlay => $"{overlay.Display.Id}={overlay.Number}"))})");
+        }
+    }
+
+    public void HideIdentifyOverlays()
+    {
+        lock (_gate)
+        {
+            _hideIdentifyCount++;
+            _calls.Add("HideIdentifyOverlays");
+        }
+    }
 
     private T[] Snapshot<T>(List<T> list)
     {

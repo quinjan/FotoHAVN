@@ -13,6 +13,6 @@ internal static class TestDependencies
     public static BrainDependencies Create(IBrainExecutor executor, IClock clock, IDisplayAdapter displays, ICameraAdapter camera, IHostServices host, IEventStore store)
     {
         var catalog = new CatalogData();
-        return new BrainDependencies(executor, clock, displays, camera, host, store, catalog, new FakeCompositor(catalog), new PreviewCache());
+        return new BrainDependencies(executor, clock, displays, camera, host, store, catalog, new FakeCompositor(catalog), new PreviewCache(), new NoOpWakeLock());
     }
 }

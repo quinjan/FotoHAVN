@@ -167,6 +167,57 @@ public sealed partial class Brain
             return false;
         }
     }
+
+    /// <summary>
+    /// The preview cache key of a Template's blank preview (every window empty, Naturale): deterministic, so Event setup and the
+    /// Start Event sequence share the entry. Never add it to the diagnostics surface's key set: that surface removes its keys.
+    /// </summary>
+    internal string BlankPreviewKeyFor(string templateId) =>
+        PreviewKey.For(templateId, _dependencies.Catalog.DefaultLookId, BlankPreviewRevision);
+
+    /// <summary>
+    /// Composes a Template's blank preview off the executor and puts it in the preview cache under <see cref="BlankPreviewKeyFor"/>
+    /// (M6: Event setup shows one per Template; Start Event step 6 composes them once per start). The task completes, on any
+    /// thread, with the key, or with null when the Template is unknown or composing or caching failed (logged). Call it on the
+    /// executor and post whatever follows back to it; never touch brain state from the task.
+    /// </summary>
+    internal Task<string?> ComposeBlankPreviewAsync(string templateId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(templateId) || _dependencies.Catalog.FindTemplate(templateId) is not { } template)
+        {
+            return Task.FromResult<string?>(null);
+        }
+
+        var lookId = _dependencies.Catalog.DefaultLookId;
+        var key = BlankPreviewKeyFor(template.Id);
+        var compositor = _dependencies.Compositor;
+        var previews = _dependencies.Previews;
+        var logger = _logger;
+        var composition = new CompositionRequest(template.Id, lookId, new CompositionPhoto?[template.WindowCount]);
+        return Task.Run(
+            async () =>
+            {
+                try
+                {
+                    var result = await compositor.ComposeAsync(composition, cancellationToken).ConfigureAwait(false);
+                    return previews.Put(key, result.Png) ? key : null;
+                }
+                catch (ArgumentException)
+                {
+                    // An unusable (empty) image: nothing is cached.
+                    BrainLog.CompositionFailed(logger, null, template.Id, lookId, CompositionErrorKind.Unknown);
+                    return null;
+                }
+#pragma warning disable CA1031 // Whatever the compositor throws, the blank preview is simply missing; Event setup and Start Event carry on without it.
+                catch (Exception exception)
+#pragma warning restore CA1031
+                {
+                    BrainLog.CompositionFailed(logger, exception, template.Id, lookId, (exception as CompositionException)?.Kind ?? CompositionErrorKind.Unknown);
+                    return null;
+                }
+            },
+            CancellationToken.None);
+    }
 }
 
 internal static partial class BrainLog

@@ -10,9 +10,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_is_five()
+    public void Protocol_version_is_six()
     {
-        Assert.Equal(5, ProtocolVersion.Current);
+        Assert.Equal(6, ProtocolVersion.Current);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class MessageTests
         var names = Enum.GetValues<RejectReason>().Select(reason => ProtocolJson.Serialize(reason).Trim('"'));
 
         Assert.Equal(
-            ["unknownCommand", "wrongRole", "invalidPayload", "notAvailable", "eventRunning", "protocolMismatch", "payloadTooLarge"],
+            ["unknownCommand", "wrongRole", "invalidPayload", "notAvailable", "eventRunning", "protocolMismatch", "payloadTooLarge", "validationFailed", "pinLocked"],
             names);
     }
 
@@ -174,7 +174,7 @@ public sealed class TestHookRegistryTests
             TestHookNames.InjectStorageFault, TestHookNames.ClearStorageFault, TestHookNames.ListCameras,
             TestHookNames.OpenCameraDiagnostics, TestHookNames.SelectDiagnosticsCamera, TestHookNames.SetDiagnosticsMirror,
             TestHookNames.CaptureDiagnostics, TestHookNames.InjectCameraFault, TestHookNames.ClearCameraFault,
-            TestHookNames.ComposeDiagnostics, TestHookNames.ComposeBlankPreview,
+            TestHookNames.ComposeDiagnostics, TestHookNames.ComposeBlankPreview, TestHookNames.SetClockScale,
         ];
 
         Assert.All(TestHookRegistry.All, hook => Assert.Equal(brain.Contains(hook.Name) ? TestHookSide.Brain : TestHookSide.Host, hook.Side));

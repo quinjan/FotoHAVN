@@ -18,7 +18,7 @@ public sealed partial class Brain
 
     // False from construction until the first open answers: the operator shows the Starting surface, never an empty Event list.
     private bool _storageResolved;
-    private IReadOnlyList<EventListRow> _eventRows = [];
+    private IReadOnlyList<EventSummary> _eventSummaries = [];
     private StorageOpenResult? _storageOpened;
 
     private void StartStorageOpen()
@@ -47,7 +47,7 @@ public sealed partial class Brain
             _storageState = StorageDiagnosticsState.Ready;
             _storageError = null;
             _storageOpened = load.Opened;
-            _eventRows = load.Rows;
+            _eventSummaries = load.Summaries;
         }
 
         PublishChanges();
@@ -62,7 +62,7 @@ public sealed partial class Brain
             var opened = await store.OpenAsync(ct).ConfigureAwait(false);
             var summaries = await store.ListEventsAsync(ct).ConfigureAwait(false);
             BrainLog.StorageOpened(_logger, opened.SchemaVersion, summaries.Count);
-            return new StorageLoad(null, opened, [.. summaries.Select(ToRow)]);
+            return new StorageLoad(null, opened, [.. summaries]);
         }
         catch (StorageException exception)
         {
@@ -108,15 +108,6 @@ public sealed partial class Brain
         report.OrphanThumbnailsDeleted,
         report.Problems.Count);
 
-    private static EventListRow ToRow(EventSummary summary) => new(
-        summary.Id,
-        summary.Name,
-        summary.EventDate,
-        summary.Venue,
-        summary.CompletedGuestCycles,
-        summary.LastUsedAt,
-        Running: false);
-
     /// <summary>Contract section 6: the I/O and environment kinds map one to one; the programming-error kinds become <c>unknown</c>.</summary>
     private static StorageErrorReason ToReason(StorageErrorKind kind) => kind switch
     {
@@ -132,7 +123,7 @@ public sealed partial class Brain
     };
 
     /// <summary>The outcome of one open: the reason to show, or the open result and the Event list rows.</summary>
-    private sealed record StorageLoad(StorageErrorReason? Error, StorageOpenResult? Opened, IReadOnlyList<EventListRow> Rows);
+    private sealed record StorageLoad(StorageErrorReason? Error, StorageOpenResult? Opened, IReadOnlyList<EventSummary> Summaries);
 }
 
 internal static partial class BrainLog

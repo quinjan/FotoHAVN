@@ -11,6 +11,7 @@ namespace FotoHavn.Host.Headless;
 internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILogger logger) : IHostServices
 {
     private DisplayInfo? _guestScreen;
+    private IReadOnlyList<IdentifyOverlaySpec> _identifyOverlays = [];
 
     /// <summary>The display of the last <see cref="OpenGuestScreen"/> not followed by <see cref="CloseGuestScreen"/>.</summary>
     public DisplayInfo? GuestScreen => Volatile.Read(ref _guestScreen);
@@ -37,6 +38,24 @@ internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILo
         LogOpenFolder(logger, path);
     }
 
+    /// <summary>The overlays of the last <see cref="ShowIdentifyOverlays"/> not followed by <see cref="HideIdentifyOverlays"/>; empty when none show.</summary>
+    public IReadOnlyList<IdentifyOverlaySpec> IdentifyOverlays => Volatile.Read(ref _identifyOverlays);
+
+    // TODO(M6 wave B host agent): the headless host only records; there are no displays to draw on.
+    public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays)
+    {
+        ArgumentNullException.ThrowIfNull(overlays);
+        Volatile.Write(ref _identifyOverlays, [.. overlays]);
+        LogIdentifyShown(logger, overlays.Count);
+    }
+
+    // TODO(M6 wave B host agent)
+    public void HideIdentifyOverlays()
+    {
+        Volatile.Write(ref _identifyOverlays, []);
+        LogIdentifyHidden(logger);
+    }
+
     /// <summary>There is no Operator window, so the operator's display is the primary display.</summary>
     public string? GetOperatorDisplayId() => displays.GetDisplays().FirstOrDefault(display => display.IsPrimary)?.Id;
 
@@ -45,6 +64,12 @@ internal sealed partial class HeadlessHostServices(IDisplayAdapter displays, ILo
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Guest Screen closed.")]
     private static partial void LogGuestScreenClosed(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Identify overlays requested on {Count} displays; the headless host only records them.")]
+    private static partial void LogIdentifyShown(ILogger logger, int count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Identify overlays hidden.")]
+    private static partial void LogIdentifyHidden(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Open folder is disabled in the headless host: {Path}")]
     private static partial void LogOpenFolder(ILogger logger, string path);

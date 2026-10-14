@@ -59,8 +59,8 @@ public sealed class StorageTests
         var rows = welcome.Presentation.EventList!.Events;
         Assert.Equal([NewestEventId, MiddleEventId, OlderEventId], rows.Select(row => row.Id));
         Assert.Equal(("Lindqvist wedding", new DateOnly(2026, 10, 24), "Harbour Hall", 1), (rows[0].Name, rows[0].Date, rows[0].Venue, rows[0].CompletedGuestCycles));
-        Assert.NotNull(rows[0].LastUsed);
-        Assert.Null(rows[1].LastUsed);
+        Assert.NotNull(rows[0].LastUsedAt);
+        Assert.Null(rows[1].LastUsedAt);
         Assert.Null(rows[2].Venue);
         Assert.All(rows, row => Assert.False(row.Running));
     }
@@ -152,7 +152,7 @@ public sealed class StorageTests
         harness.Run();
 
         var welcome = client.Messages.OfType<OperatorWelcomeMessage>().Single();
-        Assert.Equal(new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null), welcome.Presentation);
+        Assert.Equal(new OperatorPresentation(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null), welcome.Presentation);
         Assert.Contains(CommandResultMessage.Rejected(id, RejectReason.NotAvailable), client.Messages);
         Assert.Equal(1, store.OpenCalls);
     }

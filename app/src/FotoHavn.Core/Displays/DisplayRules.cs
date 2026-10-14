@@ -68,4 +68,18 @@ public static class DisplayRules
         var operatorId = operatorDisplayId ?? DisplayMatching.FindPrimary(displays)?.Id;
         return string.Equals(guestDisplayId, operatorId, StringComparison.Ordinal);
     }
+
+    /// <summary>
+    /// The displays in the order <c>IDENTIFY DISPLAYS</c> numbers them (1 up): left to right by <see cref="DisplayInfo.Bounds"/>,
+    /// then top to bottom, then by id (ordinal), so the number is stable for a given layout and matches what the guest display
+    /// picker lists. Event setup lists displays in this order and gives each its position plus one as its number.
+    /// </summary>
+    public static IReadOnlyList<DisplayInfo> NumberingOrder(IReadOnlyList<DisplayInfo> displays)
+    {
+        ArgumentNullException.ThrowIfNull(displays);
+        return [.. displays
+            .OrderBy(display => display.Bounds.X)
+            .ThenBy(display => display.Bounds.Y)
+            .ThenBy(display => display.Id, StringComparer.Ordinal)];
+    }
 }

@@ -28,3 +28,9 @@ public interface IDisplayAdapter
     /// <summary>Raised on any thread after the list may have changed. The brain posts a re-read to its executor.</summary>
     event EventHandler? DisplaysChanged;
 }
+
+/// <summary>One display <c>IdentifyDisplays</c> numbers: the host shows <paramref name="Number"/> and <paramref name="Name"/> on <paramref name="Display"/>.</summary>
+/// <param name="Display">The display to cover.</param>
+/// <param name="Number">The number to show, large.</param>
+/// <param name="Name">The friendly name to show with it.</param>
+public sealed record IdentifyOverlaySpec(DisplayInfo Display, int Number, string Name);

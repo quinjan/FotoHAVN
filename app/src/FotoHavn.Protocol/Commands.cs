@@ -65,6 +65,9 @@ public sealed record CancelDeleteEventPayload : ICommandPayload;
 
 public sealed record OpenEventFolderPayload(string EventId) : ICommandPayload;
 
+/// <summary>Operator-only: closes the operator notice (<c>overlays.notice</c>).</summary>
+public sealed record DismissNoticePayload : ICommandPayload;
+
 // Event setup (operator)
 public sealed record ChangeEventFieldPayload(EventField Field, string Value) : ICommandPayload;
 

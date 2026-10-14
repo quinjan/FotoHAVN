@@ -1,4 +1,4 @@
-import type { OperatorPresentation } from "../protocol/generated.ts";
+import type { OperatorNoticeCode, OperatorPresentation } from "../protocol/generated.ts";
 import { StartingScreen } from "../components/StartingScreen/index.ts";
 import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
@@ -54,6 +54,13 @@ function OperatorSurface({ presentation }: { readonly presentation: OperatorPres
   }
 }
 
+// Interim copy until M6 wave B3 builds the Operator notice (the brain sends the code; the words live in the UI).
+const noticeCopy: Record<OperatorNoticeCode, string> = {
+  saveFailed: "The Event couldn't be saved.",
+  deleteFailed: "The Event couldn't be deleted.",
+  eventNotFound: "That Event isn't there any more.",
+};
+
 /** Every Operator Screen surface, chosen by the operator presentation. */
 export function OperatorRoot({
   presentation,
@@ -67,7 +74,7 @@ export function OperatorRoot({
       <OperatorSurface presentation={presentation} />
       <div className={screen.notices}>
         <p className={styles.notice} role="status">
-          {presentation.overlays.notice?.message ?? ""}
+          {presentation.overlays.notice === null ? "" : noticeCopy[presentation.overlays.notice.code]}
         </p>
         <ConnectionNotice reconnecting={reconnecting} />
       </div>

@@ -20,8 +20,22 @@ public interface IHostServices
     /// <summary>Closes the Guest window, if open, and disposes its WebView2 and connection.</summary>
     void CloseGuestScreen();
 
-    /// <summary>Opens a folder in File Explorer (Event and Guest Cycle folders, from M6). The headless host logs it.</summary>
+    /// <summary>
+    /// Opens a folder in File Explorer (Event and Guest Cycle folders). Fire-and-forget: it returns at once, reports nothing
+    /// back, and a failure to open is the host's to log. The brain records what it asked in its diagnostics. The headless host
+    /// records the request and does nothing else.
+    /// </summary>
     void OpenFolder(string path);
+
+    /// <summary>
+    /// Shows <c>IDENTIFY DISPLAYS</c>: a borderless, non-activating overlay on each display in <paramref name="overlays"/>, with
+    /// its number and name in the Display type role. A new call replaces overlays already showing. The brain owns the 3-second
+    /// timer and calls <see cref="HideIdentifyOverlays"/>; the host never hides them itself. The headless host only records it.
+    /// </summary>
+    void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays);
+
+    /// <summary>Closes every identify overlay, if any is showing.</summary>
+    void HideIdentifyOverlays();
 
     /// <summary>
     /// The <see cref="DisplayInfo.Id"/> of the display that currently contains the Operator window, or null when unknown

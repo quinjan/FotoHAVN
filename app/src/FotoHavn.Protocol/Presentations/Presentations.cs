@@ -35,7 +35,8 @@ public enum OperatorSurface
 /// <summary>The operator role's presentation.</summary>
 /// <param name="Surface">The view to render.</param>
 /// <param name="EventList">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.EventList"/>.</param>
-/// <param name="RunningEvent">The running-Event panel; null while no Event runs (always null until M6).</param>
+/// <param name="EventSetup">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.EventSetup"/>.</param>
+/// <param name="RunningEvent">The running-Event panel; null while no Event runs. Present on every surface while one does, so any view can show an Operator Assistance alert (plan section 8).</param>
 /// <param name="Overlays">Overlays on top of the surface; each is null when not shown.</param>
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.Fatal"/>.</param>
 /// <param name="StorageError">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.StorageError"/>.</param>
@@ -43,6 +44,7 @@ public enum OperatorSurface
 public sealed record OperatorPresentation(
     OperatorSurface Surface,
     EventListView? EventList,
+    EventSetupView? EventSetup,
     RunningEventPanel? RunningEvent,
     OperatorOverlays Overlays,
     FatalView? Fatal,
@@ -106,47 +108,6 @@ public enum StorageErrorReason
 /// <param name="DataPath">The absolute Data folder path, shown to the operator. It holds no personal data beyond what the operator already sees.</param>
 public sealed record StorageErrorView(StorageErrorReason Kind, string DataPath);
 
-/// <summary>The Event list, sorted by date, newest first (plan section 8). Empty shows "No Events yet."</summary>
-public sealed record EventListView(IReadOnlyList<EventListRow> Events);
-
-/// <summary>One Event list row (plan section 8, Event list).</summary>
-/// <param name="Id">The Event ID.</param>
-/// <param name="Name">The Event name.</param>
-/// <param name="Date">The Event's local date (<c>yyyy-MM-dd</c>).</param>
-/// <param name="Venue">The venue, or null when not set.</param>
-/// <param name="CompletedGuestCycles">The number of completed Guest Cycles.</param>
-/// <param name="LastUsed">When the Event last ran, or null if it never has.</param>
-/// <param name="Running">Whether this is the Active Event (shown as <c>RUNNING</c>).</param>
-public sealed record EventListRow(
-    string Id,
-    string Name,
-    DateOnly Date,
-    string? Venue,
-    int CompletedGuestCycles,
-    DateTimeOffset? LastUsed,
-    bool Running);
-
-/// <summary>The running-Event panel (plan section 8). Placeholder until M6 adds its facts and actions.</summary>
-public sealed record RunningEventPanel;
-
-/// <summary>Overlays on the Operator Screen; each is null when not shown.</summary>
-public sealed record OperatorOverlays(
-    ConfirmationOverlay? Confirmation,
-    IdentifyDisplaysOverlay? IdentifyDisplays,
-    NoticeOverlay? Notice)
-{
-    public static OperatorOverlays None { get; } = new(null, null, null);
-}
-
-/// <summary>A confirmation dialog (delete, leave with changes, end Event). Placeholder until M6.</summary>
-public sealed record ConfirmationOverlay;
-
-/// <summary>The Identify displays overlay state. Placeholder until M6.</summary>
-public sealed record IdentifyDisplaysOverlay;
-
-/// <summary>A notice whose copy comes from the brain (it has domain meaning; plan section 9, Copy).</summary>
-public sealed record NoticeOverlay(string Message);
-
 /// <summary>The fatal surface: something the UI can't recover from by itself. <paramref name="Reason"/> is brain copy.</summary>
 public sealed record FatalView(string Reason);
 
@@ -167,17 +128,36 @@ public enum GuestSurface
 
 /// <summary>The guest role's presentation. It never contains operator data.</summary>
 /// <param name="Surface">The view to render.</param>
-/// <param name="Start">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Start"/> or <see cref="GuestSurface.StartUnavailable"/>.</param>
+/// <param name="Start">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Start"/>.</param>
+/// <param name="StartUnavailable">Set when <paramref name="Surface"/> is <see cref="GuestSurface.StartUnavailable"/>.</param>
 /// <param name="Overlays">Overlays on top of the surface; each is null when not shown.</param>
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Fatal"/>.</param>
 public sealed record GuestPresentation(
     GuestSurface Surface,
     StartView? Start,
+    StartUnavailableView? StartUnavailable,
     GuestOverlays Overlays,
     FatalView? Fatal);
 
-/// <summary>The Start view. <paramref name="GuestGalleryAvailable"/> shows <c>SEE THE GOOD COMPANY →</c>.</summary>
-public sealed record StartView(bool GuestGalleryAvailable);
+/// <summary>The Start view (plan section 7, Steps).</summary>
+/// <param name="StepInsideAvailable">Whether <c>STEP INSIDE →</c> works: the Camera is eligible and storage is writable. Always true on Start; Start unavailable is its own surface.</param>
+/// <param name="GuestGalleryLinkVisible">Whether <c>SEE THE GOOD COMPANY →</c> shows: the Event enables the guest gallery and has a completed Photo Strip.</param>
+public sealed record StartView(bool StepInsideAvailable, bool GuestGalleryLinkVisible);
+
+/// <summary>Why Start is unavailable (plan section 7, Start unavailable).</summary>
+public enum StartUnavailableReason
+{
+    /// <summary>The Camera isn't eligible; Start recovers by itself when a fresh frame proves it again.</summary>
+    Camera,
+
+    /// <summary>Storage isn't writable; Start recovers by itself when it is again.</summary>
+    Storage,
+}
+
+/// <summary>The Start unavailable view: Start with <c>STEP INSIDE</c> disabled. The guest sees the same neutral copy for both reasons; the reason is for the UI's data attributes and tests.</summary>
+/// <param name="Reason">Why.</param>
+/// <param name="GuestGalleryLinkVisible">Whether <c>SEE THE GOOD COMPANY →</c> still shows (the guest gallery needs no camera).</param>
+public sealed record StartUnavailableView(StartUnavailableReason Reason, bool GuestGalleryLinkVisible);
 
 /// <summary>Overlays on the Guest Screen; each is null when not shown.</summary>
 public sealed record GuestOverlays(
@@ -190,14 +170,34 @@ public sealed record GuestOverlays(
     public static GuestOverlays None { get; } = new(null, null, null, null, null);
 }
 
-/// <summary>The exit hold in progress. Placeholder until M8.</summary>
-public sealed record ExitHoldOverlay;
+/// <summary>
+/// The exit hold in progress: present from <c>BeginExitHold</c> until <c>CompleteExitHold</c> or <c>CancelExit</c>. The UI draws the
+/// 3-second progress itself (a ring, or text with reduced motion); the brain only needs to know a hold began.
+/// </summary>
+/// <param name="Active">Always true while the overlay is present.</param>
+public sealed record ExitHoldOverlay(bool Active);
 
-/// <summary>The Operator PIN dialog. Placeholder until M8.</summary>
-public sealed record PinDialogOverlay;
+/// <summary>Why the PIN dialog is showing an error.</summary>
+public enum PinDialogError
+{
+    /// <summary>The last PIN was wrong.</summary>
+    WrongPin,
+}
+
+/// <summary>
+/// The Operator PIN dialog with its on-screen digit pad. The digits typed live only in the UI until <c>SubmitPin</c>; nothing here
+/// carries a PIN.
+/// </summary>
+/// <param name="Error">The last attempt's error; null before an attempt or after the lockout ends.</param>
+/// <param name="LockedRemainingSeconds">Whole seconds left in the 30-second lockout; null when not locked. The brain updates it once a second while locked.</param>
+/// <param name="AttemptsRemaining">Wrong attempts left before a lockout; null while locked.</param>
+public sealed record PinDialogOverlay(PinDialogError? Error, int? LockedRemainingSeconds, int? AttemptsRemaining);
 
 /// <summary>The Phase Timer warning with <c>MORE TIME</c>. Placeholder until M8.</summary>
 public sealed record PhaseTimerWarningOverlay;
 
 /// <summary>The Start over confirmation. Placeholder until M8.</summary>
 public sealed record StartOverConfirmationOverlay;
+
+/// <summary>A notice whose copy comes from the brain (it has domain meaning; plan section 9, Copy).</summary>
+public sealed record NoticeOverlay(string Message);

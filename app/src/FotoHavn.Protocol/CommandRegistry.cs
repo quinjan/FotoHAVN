@@ -39,6 +39,7 @@ public static class CommandRegistry
         Operator<ConfirmDeleteEventPayload>(),
         Operator<CancelDeleteEventPayload>(),
         Operator<OpenEventFolderPayload>(),
+        Operator<DismissNoticePayload>(),
 
         // Event setup (operator)
         Operator<ChangeEventFieldPayload>(),

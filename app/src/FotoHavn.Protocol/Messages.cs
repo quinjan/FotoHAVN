@@ -151,6 +151,12 @@ public enum RejectReason
 
     /// <summary>The message is larger than <see cref="ProtocolLimits.MaxMessageBytes"/>.</summary>
     PayloadTooLarge,
+
+    /// <summary><c>SaveEvent</c> or <c>SaveAndStartEvent</c> with an invalid draft: nothing was saved, and the Event setup view now shows the errors (<c>showErrors</c>).</summary>
+    ValidationFailed,
+
+    /// <summary><c>SubmitPin</c> while the PIN dialog is locked after too many wrong attempts.</summary>
+    PinLocked,
 }
 
 /// <summary>The brain's answer to one command, correlated by <see cref="Id"/>. <see cref="Reason"/> is null when accepted.</summary>

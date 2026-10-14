@@ -7,7 +7,7 @@ namespace FotoHavn.Protocol;
 /// </summary>
 public static class ProtocolVersion
 {
-    public const int Current = 5;
+    public const int Current = 6;
 }
 
 /// <summary>Limits the brain enforces on every message it receives.</summary>

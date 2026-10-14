@@ -109,6 +109,16 @@ internal sealed class ScreenWindows : IHostServices
 
     public string? GetOperatorDisplayId() => _operatorDisplayId;
 
+    // TODO(M6 wave B host agent): draw the borderless, non-activating number overlays; the brain owns the 3-second timer.
+    public void ShowIdentifyOverlays(IReadOnlyList<IdentifyOverlaySpec> overlays)
+    {
+        ArgumentNullException.ThrowIfNull(overlays);
+        HostLog.IdentifyOverlaysRequested(_logger, overlays.Count);
+    }
+
+    // TODO(M6 wave B host agent)
+    public void HideIdentifyOverlays() => HostLog.IdentifyOverlaysHideRequested(_logger);
+
     /// <summary>Facts about each open window (UI thread).</summary>
     public IReadOnlyList<WindowFacts> DescribeWindows()
     {

@@ -50,7 +50,7 @@ public sealed class HandshakeTests
         Assert.Equal(Role.Guest, welcome.Role);
         Assert.Equal(1, welcome.Revision);
         Assert.Equal(GuestSurface.Start, welcome.Presentation.Surface);
-        Assert.False(welcome.Presentation.Start!.GuestGalleryAvailable);
+        Assert.Equal(new StartView(StepInsideAvailable: false, GuestGalleryLinkVisible: false), welcome.Presentation.Start);
         Assert.Equal(GuestOverlays.None, welcome.Presentation.Overlays);
         Assert.Null(welcome.Presentation.Fatal);
     }
@@ -65,7 +65,7 @@ public sealed class HandshakeTests
         harness.Run();
 
         Assert.Equal(
-            """{"type":"welcome","role":"guest","protocolVersion":5,"revision":1,"presentation":{"surface":"start","start":{"guestGalleryAvailable":false},"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
+            """{"type":"welcome","role":"guest","protocolVersion":6,"revision":1,"presentation":{"surface":"start","start":{"stepInsideAvailable":false,"guestGalleryLinkVisible":false},"startUnavailable":null,"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null}}""",
             Assert.Single(client.Raw));
     }
 

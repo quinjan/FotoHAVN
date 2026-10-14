@@ -15,7 +15,7 @@ namespace FotoHavn.Core.Tests.Support;
 /// <summary>A brain on a <see cref="ManualBrainExecutor"/> with fake displays, host, camera, and clock; deterministic.</summary>
 internal sealed class BrainHarness : IDisposable
 {
-    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null, ICameraAdapter? cameraOverride = null, ICameraFaultControl? cameraFaults = null, IPreviewStats? previewStats = null, FakeClock? clock = null, PreviewCache? previews = null, ICompositor? compositor = null)
+    public BrainHarness(bool hooks = false, FakeHostHookPort? hostHooks = null, FakeDisplayAdapter? displays = null, IEventStore? store = null, FakeStorageHookPort? storageHooks = null, FakeCameraAdapter? camera = null, ICameraAdapter? cameraOverride = null, ICameraFaultControl? cameraFaults = null, IPreviewStats? previewStats = null, FakeClock? clock = null, PreviewCache? previews = null, ICompositor? compositor = null, IClock? brainClock = null, IWakeLock? wakeLock = null)
     {
         Clock = clock ?? new FakeClock();
         Displays = displays ?? FakeDisplayAdapter.CreateDefault();
@@ -26,7 +26,13 @@ internal sealed class BrainHarness : IDisposable
         Store = store ?? new InMemoryEventStore();
         StorageHooks = storageHooks;
         var dependencies = TestDependencies.Create(Executor, Clock, Displays, CameraPort, Host, Store) with { Logger = Logger, PreviewStats = previewStats };
-        Dependencies = dependencies with { Compositor = compositor ?? dependencies.Compositor, Previews = previews ?? dependencies.Previews };
+        Dependencies = dependencies with
+        {
+            Compositor = compositor ?? dependencies.Compositor,
+            Previews = previews ?? dependencies.Previews,
+            Clock = brainClock ?? dependencies.Clock,
+            WakeLock = wakeLock ?? dependencies.WakeLock,
+        };
         Brain = new Brain(Dependencies, hooks, hostHooks, storageHooks, cameraFaults);
         Run();
     }

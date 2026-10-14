@@ -23,12 +23,12 @@ internal sealed class FakeBrain : IBrain
     public static OperatorWelcomeMessage OperatorWelcome { get; } = new(
         ProtocolVersion.Current,
         1,
-        new OperatorPresentation(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null, null));
+        new OperatorPresentation(OperatorSurface.EventList, new EventListView([], NewEventAvailable: true), null, null, OperatorOverlays.None, null, null, null));
 
     public static GuestWelcomeMessage GuestWelcome { get; } = new(
         ProtocolVersion.Current,
         1,
-        new GuestPresentation(GuestSurface.Start, new StartView(false), GuestOverlays.None, null));
+        new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null));
 
     public IBrainConnection Connect(Role role, Action<string> send)
     {

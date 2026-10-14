@@ -23,6 +23,7 @@ namespace FotoHavn.Core;
 /// <param name="Catalog">The Templates and Looks.</param>
 /// <param name="Compositor">Composes Photo Strips and Look thumbnails. The brain calls it off the executor and posts the result back.</param>
 /// <param name="Previews">Where the brain puts composed previews; the host serves the same cache at <c>preview.fotohavn</c>.</param>
+/// <param name="WakeLock">Keeps Windows awake while an Event runs (acquired at Start Event step 7, released when the Event ends). <see cref="NoOpWakeLock"/> until M10.</param>
 public sealed record BrainDependencies(
     IBrainExecutor Executor,
     IClock Clock,
@@ -32,7 +33,8 @@ public sealed record BrainDependencies(
     IEventStore Store,
     ICatalog Catalog,
     ICompositor Compositor,
-    IPreviewStore Previews)
+    IPreviewStore Previews,
+    IWakeLock WakeLock)
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
 
@@ -60,8 +62,9 @@ public sealed record BrainDependencies(
 /// brain state is touched only there, one work item at a time, in the order posted.
 /// </summary>
 /// <remarks>
-/// M4 implements one command, <c>RetryStorage</c>; every other valid command from an allowed role is answered
-/// <c>rejected notAvailable</c>. At startup the brain opens the Event store: the operator sees the Starting surface until
+/// <c>RetryStorage</c> and <c>DismissNotice</c> are implemented; the Event list, Event setup, and running Event commands are routed
+/// to their own files (<c>Brain.Commands.cs</c>) and are stubs until M6 wave B; every other valid command from an allowed role is
+/// answered <c>rejected notAvailable</c>. At startup the brain opens the Event store: the operator sees the Starting surface until
 /// storage answers, then the Event list or, when the store can't open, the storage error. The guest sees the Start placeholder.
 /// </remarks>
 public sealed partial class Brain : IBrain
@@ -79,7 +82,6 @@ public sealed partial class Brain : IBrain
     private readonly PresentationChannel<GuestPresentation> _guest;
     private CameraDiagnosticsView? _cameraDiagnosticsOverride;
     private IReadOnlyList<DisplayInfo> _realDisplays = [];
-    private DisplayInfo? _guestScreenDisplay;
     private string? _fatalReason;
     private int _disposed;
 
@@ -97,6 +99,7 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies.Catalog);
         ArgumentNullException.ThrowIfNull(dependencies.Compositor);
         ArgumentNullException.ThrowIfNull(dependencies.Previews);
+        ArgumentNullException.ThrowIfNull(dependencies.WakeLock);
         _dependencies = dependencies;
         _logger = dependencies.Logger;
         _hooksEnabled = hooksEnabled;
@@ -252,12 +255,10 @@ public sealed partial class Brain : IBrain
                     connection.Handshaken ? rejected.Reason : RejectReason.ProtocolMismatch));
                 break;
             case ParsedCommand command:
-                // Only RetryStorage is implemented so far; every other valid command is not available (contract section 3).
+                // Each command is routed to the method in the file that owns it (Brain.Commands.cs); the ones no milestone has built yet are not available.
                 Answer(connection, command.Command.Name, !connection.Handshaken
                     ? CommandResultMessage.Rejected(command.Id, RejectReason.ProtocolMismatch)
-                    : command.Payload is RetryStoragePayload
-                        ? RetryStorage(command.Id)
-                        : CommandResultMessage.Rejected(command.Id, RejectReason.NotAvailable));
+                    : DispatchCommand(command.Id, command.Payload));
                 break;
             case ParsedFrameAck:
                 // The hosts ack preview frames themselves and never forward one; if one arrives it changes nothing.
@@ -282,6 +283,10 @@ public sealed partial class Brain : IBrain
 
         connection.Handshaken = true;
         connection.Send(Channel(connection.Role).Welcome());
+        if (connection.Role == Role.Guest)
+        {
+            OnGuestScreenReady();
+        }
     }
 
     private void Answer(Connection connection, string name, CommandResultMessage result)
@@ -294,20 +299,6 @@ public sealed partial class Brain : IBrain
 
         connection.Send(result);
     }
-
-    private OperatorPresentation RenderOperator() => _fatalReason is { } reason
-        ? new OperatorPresentation(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView(reason), null, null)
-        : RenderCameraDiagnostics() is { } diagnostics
-            ? new OperatorPresentation(OperatorSurface.CameraDiagnostics, null, null, OperatorOverlays.None, null, null, diagnostics)
-            : !_storageResolved
-                ? new OperatorPresentation(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null)
-                : _storageError is { } storageError
-                    ? new OperatorPresentation(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot), null)
-                    : new OperatorPresentation(OperatorSurface.EventList, new EventListView(_eventRows), null, OperatorOverlays.None, null, null, null);
-
-    private GuestPresentation RenderGuest() => _fatalReason is { } reason
-        ? new GuestPresentation(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView(reason))
-        : new GuestPresentation(GuestSurface.Start, new StartView(GuestGalleryAvailable: false), GuestOverlays.None, null);
 
     /// <summary>Renders both presentations; each one that changed gets the next revision and goes to every handshaken connection of its role.</summary>
     private void PublishChanges()
@@ -348,25 +339,6 @@ public sealed partial class Brain : IBrain
             PublishChanges();
         }
     }
-
-    /// <summary>
-    /// Keeps the brain consistent with the current display list. M2 stand-in for D37 (M6 and M8 complete it): a Guest
-    /// Screen whose display is gone is closed. The caller publishes the presentations afterwards.
-    /// </summary>
-    private void ApplyDisplayChange()
-    {
-        if (_guestScreenDisplay is { } display && DisplayMatching.Find(CurrentDisplays, display.Id) is null)
-        {
-            BrainLog.GuestDisplayLost(_logger, display.Id);
-            _dependencies.Host.CloseGuestScreen();
-            _guestScreenDisplay = null;
-        }
-    }
-
-    /// <summary>The display containing the Operator window, for D38: the virtual primary while displays are virtual.</summary>
-    private string? OperatorDisplayId() => _virtualDisplays is { } virtualDisplays
-        ? virtualDisplays.PrimaryId
-        : _dependencies.Host.GetOperatorDisplayId();
 
     /// <summary>One UI's connection. <see cref="Handshaken"/> is brain state, touched only on the executor.</summary>
     private sealed class Connection(Brain brain, Role role, Action<string> send) : IBrainConnection

@@ -5,7 +5,7 @@ public sealed class CommandRegistryTests
     // Plan section 9, Commands, transcribed by area. RetryAssistance is in both an operator and a guest row.
     private static readonly string[] OperatorRows =
     [
-        "OpenNewEvent", "EditEvent", "StartEvent", "DeleteEvent", "ConfirmDeleteEvent", "CancelDeleteEvent", "OpenEventFolder",
+        "OpenNewEvent", "EditEvent", "StartEvent", "DeleteEvent", "ConfirmDeleteEvent", "CancelDeleteEvent", "OpenEventFolder", "DismissNotice",
         "ChangeEventField", "SelectCamera", "SelectGuestDisplay", "IdentifyDisplays", "SetMirror", "SetCountdown",
         "SetOfferedTemplates", "SetDefaultTemplate", "SetOfferedLooks", "SetDefaultLook", "SetPhaseTimer", "SetGuestGallery",
         "SetPin", "SaveEvent", "SaveAndStartEvent", "LeaveEventSetup", "ConfirmLeave",

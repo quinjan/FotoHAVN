@@ -55,41 +55,190 @@ internal static class ProtocolSamples
             ? payload
             : (ICommandPayload)Activator.CreateInstance(command.PayloadType)!;
 
+    private const string CameraId = @"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL";
+
+    private const string GuestDisplayId = @"\\?\DISPLAY#DEL41A8#5&2a0b1c3d&0&UID4353#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}";
+
+    private static readonly EventRowActions AllActions = new(true, true, true, true, true);
+
     public static OperatorPresentation EmptyEventList { get; } =
-        new(OperatorSurface.EventList, new EventListView([]), null, OperatorOverlays.None, null, null, null);
+        new(OperatorSurface.EventList, new EventListView([], NewEventAvailable: true), null, null, OperatorOverlays.None, null, null, null);
+
+    public static RunningEventPanel RunningPanel { get; } = new(
+        "event-1",
+        "Studio open day",
+        new RunningEventDisplay("DELL P2419H", RunningDisplayState.Connected),
+        new RunningEventCamera(CameraState.Ready, null),
+        RunningEventStep.Start,
+        37,
+        new DateTimeOffset(2026, 10, 13, 9, 30, 0, TimeSpan.FromHours(8)),
+        null,
+        false);
 
     public static OperatorPresentation EventListWithOverlays { get; } = new(
         OperatorSurface.EventList,
         new EventListView(
         [
-            new EventListRow("event-2", "Lindqvist wedding", new DateOnly(2026, 10, 24), "Harbour Hall", 0, null, false),
-            new EventListRow("event-1", "Studio open day", new DateOnly(2026, 10, 13), null, 37, new DateTimeOffset(2026, 10, 13, 18, 5, 0, TimeSpan.FromHours(8)), true),
-        ]),
-        new RunningEventPanel(),
-        new OperatorOverlays(new ConfirmationOverlay(), new IdentifyDisplaysOverlay(), new NoticeOverlay("The chosen guest display isn't connected.")),
+            new EventListRow("event-2", "Lindqvist wedding", new DateOnly(2026, 10, 24), "Harbour Hall", 0, null, false, new EventRowActions(false, true, true, true, true), StartDisabledReason.EventRunning),
+            new EventListRow("event-1", "Studio open day", new DateOnly(2026, 10, 13), null, 37, new DateTimeOffset(2026, 10, 13, 18, 5, 0, TimeSpan.FromHours(8)), true, new EventRowActions(false, false, false, true, true), StartDisabledReason.EventRunning),
+        ],
+        NewEventAvailable: true),
+        null,
+        RunningPanel,
+        new OperatorOverlays(
+            new ConfirmationOverlay(ConfirmationKind.DeleteEvent, "Lindqvist wedding", new ConfirmationCounts(12, 11, 41)),
+            new IdentifyDisplaysOverlay([new IdentifyDisplayEntry("virtual-operator", 1, "Virtual operator"), new IdentifyDisplayEntry("virtual-guest", 2, "Virtual guest")]),
+            new OperatorNoticeOverlay(OperatorNoticeCode.DeleteFailed)),
+        null,
+        null,
+        null);
+
+    public static OperatorPresentation EventListIdle { get; } = new(
+        OperatorSurface.EventList,
+        new EventListView([new EventListRow("event-3", "Harbour gala", new DateOnly(2026, 6, 12), "Harbour Hall", 3, null, false, AllActions, null)], NewEventAvailable: true),
+        null,
+        null,
+        new OperatorOverlays(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null), null, null),
+        null,
+        null,
+        null);
+
+    private static readonly IReadOnlyList<EventSetupTemplateOption> SampleTemplates =
+    [
+        new("signature-strip", "Signature Strip", "Four photographs on a tall strip.", 600, 1800, false, true, true, "signature-strip.naturale-v1.r1"),
+        new("panorama-four", "Panorama Four", "Four photographs across a wide card.", 1800, 600, true, true, false, null),
+        new("butter-gingham", "Butter Gingham", "Gingham frame.", 600, 1800, false, false, false, null),
+        new("polka-keepsake", "Polka Keepsake", "Polka dots.", 600, 1800, false, false, false, null),
+    ];
+
+    private static readonly IReadOnlyList<EventSetupLookOption> SampleLooks =
+    [
+        new("monochrome-v1", "Monochrome", "Black and white.", false, false),
+        new("naturale-v1", "Naturale", "True to the room.", true, true),
+        new("sepia-v1", "Sepia", "Warm and old.", true, false),
+    ];
+
+    private static readonly IReadOnlyList<PhaseTimerOption> SampleTimers =
+    [
+        new(PhaseTimer.Template, 30, 30, 20, 300, true),
+        new(PhaseTimer.PhotographsCapture, 30, 30, 20, 300, true),
+        new(PhaseTimer.PhotographsReview, 0, 45, 20, 300, true),
+        new(PhaseTimer.Filters, 30, 30, 20, 300, true),
+        new(PhaseTimer.Keepsake, 12, 12, 5, 60, false),
+        new(PhaseTimer.GuestGallery, 60, 60, 20, 300, false),
+    ];
+
+    private static readonly IReadOnlyList<GuestDisplayOption> SampleDisplays =
+    [
+        new("virtual-operator", "Virtual operator", 0, 0, 960, 1080, 1, true),
+        new(GuestDisplayId, "DELL P2419H", 960, 0, 960, 1080, 2, false),
+    ];
+
+    /// <summary>A new Event after a save attempt: the errors show, the camera is checking, and no guest display is chosen.</summary>
+    public static OperatorPresentation EventSetupNewWithErrors { get; } = new(
+        OperatorSurface.EventSetup,
+        null,
+        new EventSetupView(
+            null,
+            true,
+            true,
+            new EventSetupFieldValues(string.Empty, "2026-10-13", string.Empty, string.Empty, string.Empty),
+            [
+                new EventSetupFieldError(EventSetupFieldNames.Name, EventSetupErrorCode.Required),
+                new EventSetupFieldError(EventSetupFieldNames.GuestDisplay, EventSetupErrorCode.DisplayRequired),
+                new EventSetupFieldError(EventSetupFieldNames.Timer(PhaseTimer.Keepsake), EventSetupErrorCode.TimerOutOfRange),
+                new EventSetupFieldError(EventSetupFieldNames.Pin, EventSetupErrorCode.PinRequired),
+            ],
+            true,
+            new EventSetupCameraView([new CameraOption(CameraId, "Integrated Webcam")], CameraId, "Integrated Webcam", EventSetupCameraState.Checking, null, true, true),
+            new EventSetupGuestDisplayView(SampleDisplays, null, null, GuestDisplayState.None, false),
+            true,
+            5,
+            PrinterChoice.None,
+            SampleTemplates,
+            SampleLooks,
+            SampleTimers,
+            false,
+            new EventSetupPinView(false, false),
+            true,
+            null,
+            null,
+            false),
+        null,
+        OperatorOverlays.None,
+        null,
+        null,
+        null);
+
+    /// <summary>A saved Event edited while another runs: the camera is held by the running Event, the display is the operator's, and Save and start is disabled.</summary>
+    public static OperatorPresentation EventSetupEditingWhileRunning { get; } = new(
+        OperatorSurface.EventSetup,
+        null,
+        new EventSetupView(
+            "event-3",
+            false,
+            false,
+            new EventSetupFieldValues("Harbour gala", "2026-06-12", "Harbour Hall", "Lindqvist & Co", "Bring the props."),
+            [],
+            false,
+            new EventSetupCameraView([new CameraOption(CameraId, "Integrated Webcam")], CameraId, "Integrated Webcam", EventSetupCameraState.InUseByRunningEvent, null, false, true),
+            new EventSetupGuestDisplayView(SampleDisplays, "virtual-operator", "Virtual operator", GuestDisplayState.Connected, true),
+            true,
+            10,
+            PrinterChoice.None,
+            SampleTemplates,
+            SampleLooks,
+            SampleTimers,
+            true,
+            new EventSetupPinView(true, false),
+            false,
+            StartDisabledReason.EventRunning,
+            new EventSetupStartFailure(StartFailureCode.EventRunning, null),
+            false),
+        RunningPanel,
+        new OperatorOverlays(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Harbour gala", null), null, null),
+        null,
+        null,
+        null);
+
+    /// <summary>The single-screen placeholder: the Guest Screen covers the Operator Screen, and the panel carries an alert.</summary>
+    public static OperatorPresentation OperatorGuestScreenActive { get; } = new(
+        OperatorSurface.GuestScreenActive,
+        null,
+        null,
+        RunningPanel with
+        {
+            GuestDisplay = new RunningEventDisplay("DELL P2419H", RunningDisplayState.Disconnected),
+            Camera = new RunningEventCamera(CameraState.NotAvailable, CameraFailureKind.Removed),
+            CurrentStep = RunningEventStep.OperatorAssistance,
+            Assistance = new RunningEventAssistance(AssistanceReason.Camera),
+            SingleScreen = true,
+        },
+        OperatorOverlays.None,
         null,
         null,
         null);
 
     public static OperatorPresentation OperatorFatal { get; } =
-        new(OperatorSurface.Fatal, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."), null, null);
+        new(OperatorSurface.Fatal, null, null, null, OperatorOverlays.None, new FatalView("The Data folder can't be written."), null, null);
 
     public static OperatorPresentation OperatorStorageError { get; } =
-        new(OperatorSurface.StorageError, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"), null);
+        new(OperatorSurface.StorageError, null, null, null, OperatorOverlays.None, null, new StorageErrorView(StorageErrorReason.CloudSynced, @"C:\Users\Booth\OneDrive\FOTOHAVN\Data"), null);
 
     public static OperatorPresentation OperatorStarting { get; } =
-        new(OperatorSurface.Starting, null, null, OperatorOverlays.None, null, null, null);
+        new(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null);
 
     public static OperatorPresentation OperatorCameraDiagnostics { get; } = new(
         OperatorSurface.CameraDiagnostics,
+        null,
         null,
         null,
         OperatorOverlays.None,
         null,
         null,
         new CameraDiagnosticsView(
-            [new CameraOption(@"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL", "Integrated Webcam"), new CameraOption("fake-camera", "Fake camera")],
-            @"\\?\USB#VID_046D&PID_085E#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL",
+            [new CameraOption(CameraId, "Integrated Webcam"), new CameraOption("fake-camera", "Fake camera")],
+            CameraId,
             CameraState.Ready,
             null,
             new CameraFormatView(1920, 1080, 30),
@@ -101,23 +250,44 @@ internal static class ProtocolSamples
         OperatorSurface.CameraDiagnostics,
         null,
         null,
+        null,
         OperatorOverlays.None,
         null,
         null,
         new CameraDiagnosticsView([new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null, null));
 
     public static GuestPresentation GuestStart { get; } =
-        new(GuestSurface.Start, new StartView(false), GuestOverlays.None, null);
+        new(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null);
+
+    public static GuestPresentation GuestStartReady { get; } =
+        new(GuestSurface.Start, new StartView(true, true), null, new GuestOverlays(new ExitHoldOverlay(true), null, null, null, null), null);
+
+    public static GuestPresentation GuestStartUnavailable { get; } =
+        new(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, true), GuestOverlays.None, null);
+
+    public static GuestPresentation GuestPinDialogWrong { get; } = new(
+        GuestSurface.Start,
+        new StartView(true, false),
+        null,
+        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, null, 3), null, null, null),
+        null);
+
+    public static GuestPresentation GuestPinDialogLocked { get; } = new(
+        GuestSurface.Start,
+        new StartView(true, false),
+        null,
+        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, 27, null), null, null, null),
+        null);
 
     public static GuestPresentation GuestStartWithOverlays { get; } = new(
         GuestSurface.StartUnavailable,
-        new StartView(true),
-        new GuestOverlays(new ExitHoldOverlay(), new PinDialogOverlay(), new PhaseTimerWarningOverlay(), new StartOverConfirmationOverlay(), new NoticeOverlay("One moment.")),
+        null,
+        new StartUnavailableView(StartUnavailableReason.Storage, false),
+        new GuestOverlays(new ExitHoldOverlay(true), new PinDialogOverlay(null, null, 5), new PhaseTimerWarningOverlay(), new StartOverConfirmationOverlay(), new NoticeOverlay("One moment.")),
         null);
 
     public static GuestPresentation GuestFatal { get; } =
-        new(GuestSurface.Fatal, null, GuestOverlays.None, new FatalView("Something went wrong."));
-
+        new(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView("Something went wrong."));
     /// <summary>Every envelope, keyed by snapshot name.</summary>
     public static IReadOnlyList<(string Name, ProtocolMessage Message)> Messages { get; } =
     [
@@ -133,9 +303,17 @@ internal static class ProtocolSamples
         ("presentation-operator-starting", new OperatorPresentationMessage(6, OperatorStarting)),
         ("presentation-operator-camera-diagnostics", new OperatorPresentationMessage(7, OperatorCameraDiagnostics)),
         ("presentation-operator-camera-diagnostics-in-use", new OperatorPresentationMessage(8, OperatorCameraDiagnosticsInUse)),
+        ("presentation-operator-event-list-idle", new OperatorPresentationMessage(9, EventListIdle)),
+        ("presentation-operator-event-setup-new-with-errors", new OperatorPresentationMessage(10, EventSetupNewWithErrors)),
+        ("presentation-operator-event-setup-editing-while-running", new OperatorPresentationMessage(11, EventSetupEditingWhileRunning)),
+        ("presentation-operator-guest-screen-active", new OperatorPresentationMessage(12, OperatorGuestScreenActive)),
         ("presentation-guest-start", new GuestPresentationMessage(2, GuestStart)),
         ("presentation-guest-start-with-overlays", new GuestPresentationMessage(3, GuestStartWithOverlays)),
         ("presentation-guest-fatal", new GuestPresentationMessage(4, GuestFatal)),
+        ("presentation-guest-start-ready", new GuestPresentationMessage(5, GuestStartReady)),
+        ("presentation-guest-start-unavailable", new GuestPresentationMessage(6, GuestStartUnavailable)),
+        ("presentation-guest-pin-dialog-wrong", new GuestPresentationMessage(7, GuestPinDialogWrong)),
+        ("presentation-guest-pin-dialog-locked", new GuestPresentationMessage(8, GuestPinDialogLocked)),
         ("command-result-accepted", CommandResultMessage.Accepted(Id)),
         ("command-result-rejected", CommandResultMessage.Rejected(Id, RejectReason.WrongRole)),
         ("protocol-mismatch", new ProtocolMismatchMessage(ProtocolVersion.Current, 0)),
@@ -173,7 +351,12 @@ internal static class ProtocolSamples
                 StorageErrorReason.DiskFull,
                 1,
                 new ReconcileDiagnostics(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
-            new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 41, 29.5, 3, PreviewTarget.Operator))),
+            new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 41, 29.5, 3, PreviewTarget.Operator),
+            [new OpenFolderRequest(@"C:\FOTOHAVN\Data\Events\6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b", new DateTimeOffset(2026, 10, 13, 9, 45, 0, TimeSpan.Zero))],
+            [new IdentifyOverlayDiagnostics("virtual-operator", 1, false), new IdentifyOverlayDiagnostics("virtual-guest", 2, false)],
+            new WakeLockDiagnostics(true),
+            10)),
+        ("set-clock-scale-args", new SetClockScaleArgs(10)),
         ("camera-diagnostics-idle", new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None)),
         ("select-diagnostics-camera-args", new SelectDiagnosticsCameraArgs("fake-camera")),
         ("set-diagnostics-mirror-args", new SetDiagnosticsMirrorArgs(true)),

@@ -161,7 +161,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         camera = cameraFaults;
 #endif
         var previewCache = settings.PreviewStore ?? new PreviewCache();
-        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store, new CatalogData(), new SkiaCompositor(), previewCache)
+        var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store, new CatalogData(), new SkiaCompositor(), previewCache, new NoOpWakeLock())
         {
             Logger = brainLogger,
             PreviewStats = previews,

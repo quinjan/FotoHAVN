@@ -102,6 +102,9 @@ public sealed partial class Brain
             case TestHookNames.ComposeBlankPreview:
                 ComposeBlankPreviewHook(connection, id, ((ComposeBlankPreviewArgs)args!).TemplateId);
                 break;
+            case TestHookNames.SetClockScale:
+                Reply(connection, id, SetClockScale(((SetClockScaleArgs)args!).Factor));
+                break;
             default:
                 throw new InvalidOperationException($"The test hook {name} has no brain handler.");
         }
@@ -130,7 +133,11 @@ public sealed partial class Brain
         new DisplayDiagnostics(_virtualDisplays is not null, [.. CurrentDisplays.Select(VirtualDisplaySet.ToTestDisplay)]),
         _guestScreenDisplay is not null,
         StorageDiagnosticsNow(),
-        CameraDiagnosticsNow());
+        CameraDiagnosticsNow(),
+        [.. _openFolderRequests],
+        _identifyOverlays,
+        new WakeLockDiagnostics(_dependencies.WakeLock.IsHeld),
+        ClockScaleNow);
 
     private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
     {

@@ -105,6 +105,57 @@ public sealed partial class Brain
         return new CameraDiagnostics(_cameraState, _selectedCameraId, ToFormatView(session.Format), ageMs, fps, dropped, _previewTarget);
     }
 
+    // The camera slot for Event setup and the running Event (M6 contract section 6). The brain keeps one camera session, so
+    // at most one of them owns it: Event setup (preview to the Operator Screen) while no Event runs, the running Event (frames
+    // to the Guest Screen only) while one does. The M6 owners call these four members and never touch the runtime's fields.
+
+    /// <summary>Raised on the executor after every change of the camera's state or reason. The running Event's start sequence waits on it.</summary>
+    internal Action? CameraStateChanged { get; set; }
+
+    /// <summary>The state of the camera the slot holds (<see cref="CameraState.Idle"/> when none).</summary>
+    internal CameraState CameraSlotState => _cameraState;
+
+    /// <summary>Why <see cref="CameraSlotState"/> is not available; null otherwise.</summary>
+    internal CameraFailureKind? CameraSlotReason => _cameraReason;
+
+    /// <summary>The device the slot holds, or null.</summary>
+    internal string? CameraSlotDeviceId => _selectedCameraId;
+
+    /// <summary>The cameras the adapter listed last (refreshed when Windows reports a change).</summary>
+    internal IReadOnlyList<AvailableCamera> CameraSlotCameras => _cameras;
+
+    /// <summary>Closes any open camera, opens <paramref name="deviceId"/> (checking until a fresh frame arrives), and sends preview frames to <paramref name="target"/>.</summary>
+    internal void OpenCameraFor(string deviceId, PreviewTarget target)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(deviceId);
+        SetPreviewTarget(target);
+        StartCameraOpen(deviceId);
+    }
+
+    /// <summary>Chooses which page receives preview frames (<see cref="PreviewTarget.None"/> stops them), also on an open session.</summary>
+    internal void SetPreviewTarget(PreviewTarget target)
+    {
+        _previewTarget = target;
+        _cameraSession?.SetPreviewTarget(target);
+    }
+
+    /// <summary>Releases the camera: any open or opening session is closed in the background, the slot is idle, and preview stops.</summary>
+    internal void ReleaseCamera()
+    {
+        ReleaseCameraSession();
+        _queuedCameraId = null;
+        _selectedCameraId = null;
+        _previewTarget = PreviewTarget.None;
+        SetCameraState(CameraState.Idle, null);
+    }
+
+    private void SetCameraState(CameraState state, CameraFailureKind? reason)
+    {
+        _cameraState = state;
+        _cameraReason = reason;
+        CameraStateChanged?.Invoke();
+    }
+
     // The camera list
 
     private void StartCameraList()
@@ -186,8 +237,7 @@ public sealed partial class Brain
 
         _selectedCameraId = deviceId;
         ReleaseCameraSession();
-        _cameraState = CameraState.Checking;
-        _cameraReason = null;
+        SetCameraState(CameraState.Checking, null);
         if (_cameraOpenInFlight)
         {
             // One open at a time: the running one is cancelled and its session, if it got one, is closed on arrival.
@@ -318,8 +368,8 @@ public sealed partial class Brain
     private void FailCamera(CameraFailureKind kind)
     {
         ReleaseCameraSession();
-        (_cameraState, var reason) = CameraStateMapping.For(kind);
-        _cameraReason = reason;
+        var (state, reason) = CameraStateMapping.For(kind);
+        SetCameraState(state, reason);
         BrainLog.CameraStateChanged(_logger, _cameraState, reason);
     }
 
@@ -431,8 +481,7 @@ public sealed partial class Brain
         {
             if (FrameFreshness.IsFresh(now, latest, FrameFreshness.EligibleMaxAge))
             {
-                _cameraState = CameraState.Ready;
-                _cameraReason = null;
+                SetCameraState(CameraState.Ready, null);
                 BrainLog.CameraStateChanged(_logger, _cameraState, null);
             }
             else if (now - _cameraOpenedAt > FrameFreshness.StaleAfter)

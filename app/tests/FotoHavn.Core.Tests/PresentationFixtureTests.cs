@@ -19,7 +19,7 @@ public sealed class PresentationFixtureTests
 {
     private const string FatalReason = "FOTOHAVN stopped. Close it and open it again.";
 
-    private static readonly IReadOnlyDictionary<string, Func<Task<string>>> Fixtures = new Dictionary<string, Func<Task<string>>>(StringComparer.Ordinal)
+    private static readonly IReadOnlyDictionary<string, Func<Task<string>>> OwnFixtures = new Dictionary<string, Func<Task<string>>>(StringComparer.Ordinal)
     {
         ["operator-starting"] = () => Task.FromResult(Starting()),
         ["operator-event-list-empty"] = () => Task.FromResult(Welcome(Role.Operator)),
@@ -58,6 +58,11 @@ public sealed class PresentationFixtureTests
             new CompositionView("panorama-four.classic-v1.r4", "panorama-four", "classic-v1", 1800, 600)))),
     };
 
+    // Every fixture: this class's own, plus the tables wave B1a and B1b fill in their own files. A duplicate name throws, which fails every test here.
+    private static readonly IReadOnlyDictionary<string, Func<Task<string>>> Fixtures = OwnFixtures
+        .Concat(Events.Setup.SetupFixtures.All)
+        .Concat(Events.Active.ActiveFixtures.All)
+        .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
     public static TheoryData<string> Names => [.. Fixtures.Keys];
 
     [Theory]

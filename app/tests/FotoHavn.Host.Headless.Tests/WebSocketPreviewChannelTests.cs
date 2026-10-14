@@ -199,7 +199,7 @@ public sealed class WebSocketPreviewChannelTests
     [Theory]
     [InlineData("""{"type":"frameAck","seq":1}""", true)]
     [InlineData("""{ "seq": 1, "type": "frameAck" }""", true)]
-    [InlineData("""{"type":"hello","protocolVersion":5}""", false)]
+    [InlineData("""{"type":"hello","protocolVersion":6}""", false)]
     [InlineData("""{"type":"frameAck","seq":-1}""", false)]
     [InlineData("""{"type":"frameAck","seq":1,"role":"guest"}""", false)]
     [InlineData("frameAck without quotes", false)]

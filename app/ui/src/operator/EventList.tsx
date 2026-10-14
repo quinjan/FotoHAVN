@@ -18,7 +18,7 @@ function EventRow({ row }: { readonly row: EventListRow }) {
           <span>{formatEventDate(row.date)}</span>
           {row.venue !== null && <span className={styles.venue}>{row.venue}</span>}
           <span>{formatGuestCycles(row.completedGuestCycles)}</span>
-          <span>{formatLastUsed(row.lastUsed)}</span>
+          <span>{formatLastUsed(row.lastUsedAt)}</span>
         </p>
       </div>
     </li>

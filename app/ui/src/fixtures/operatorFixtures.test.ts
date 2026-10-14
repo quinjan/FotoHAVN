@@ -20,7 +20,7 @@ describe("operator fixtures", () => {
     }
     expect(eventRows(3, false).some((row) => row.running)).toBe(false);
     expect(eventRows(5).map((row) => row.venue)).toContain(null);
-    expect(eventRows(5).map((row) => row.lastUsed)).toContain(null);
+    expect(eventRows(5).map((row) => row.lastUsedAt)).toContain(null);
   });
 
   it("uses an 80-character name and a 120-character venue for the long-text fixture", () => {
