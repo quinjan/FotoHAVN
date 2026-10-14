@@ -5,45 +5,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FotoHavn.Camera.Windows.Tests;
 
-/// <summary>
-/// The real policies, with the stand-in used only for a member that is still a contract stub (it throws
-/// <see cref="NotImplementedException"/>). Once the policies land, nothing falls back and these run on the real thing.
-/// </summary>
-internal sealed class ResilientPolicies : ICameraPolicySet
-{
-    private int _fallbacks;
-
-    public static ResilientPolicies Instance { get; } = new();
-
-    /// <summary>How many calls fell back to the stand-in because the Core member is not implemented yet.</summary>
-    public int Fallbacks => Volatile.Read(ref _fallbacks);
-
-    public CameraFormat? ChooseFormat(IReadOnlyList<CameraFormat> formats) =>
-        Try(() => CoreCameraPolicies.Instance.ChooseFormat(formats), () => TestPolicies.Instance.ChooseFormat(formats));
-
-    public bool IsEligible(TimeSpan frameTimestamp, TimeSpan notBefore) =>
-        Try(() => CoreCameraPolicies.Instance.IsEligible(frameTimestamp, notBefore), () => TestPolicies.Instance.IsEligible(frameTimestamp, notBefore));
-
-    public CameraFailureKind Classify(int hresult, CameraOperation operation) =>
-        Try(() => CoreCameraPolicies.Instance.Classify(hresult, operation), () => TestPolicies.Instance.Classify(hresult, operation));
-
-    public CameraFailureKind Classify(Exception exception, CameraOperation operation) =>
-        Try(() => CoreCameraPolicies.Instance.Classify(exception, operation), () => TestPolicies.Instance.Classify(exception, operation));
-
-    private T Try<T>(Func<T> real, Func<T> standIn)
-    {
-        try
-        {
-            return real();
-        }
-        catch (NotImplementedException)
-        {
-            Interlocked.Increment(ref _fallbacks);
-            return standIn();
-        }
-    }
-}
-
 /// <summary>Helpers for the tests that open the real camera. Only one process can hold it, so collisions are waited out.</summary>
 internal static class CameraHardware
 {
@@ -52,7 +13,7 @@ internal static class CameraHardware
     public static void Log(string message) => TestContext.Current.TestOutputHelper?.WriteLine(message);
 
     public static WindowsCameraAdapter CreateAdapter(IPreviewChannel? channel = null, bool watchDevices = false) =>
-        new(channel ?? new RecordingPreviewChannel(), NullLogger.Instance, ResilientPolicies.Instance, watchDevices);
+        new(channel ?? new RecordingPreviewChannel(), NullLogger.Instance, CoreCameraPolicies.Instance, watchDevices);
 
     public static async Task<AvailableCamera> RequireCameraAsync(ICameraAdapter adapter)
     {

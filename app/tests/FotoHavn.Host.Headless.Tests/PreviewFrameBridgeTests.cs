@@ -136,7 +136,13 @@ public sealed class PreviewFrameBridgeTests
 
         Assert.Same(host.App.Previews, given);
         Assert.Same(host.App.Previews, host.Dependencies!.PreviewStats);
+#if E2E_HOOKS
+        // E2E builds wrap the camera in the fault decorator and hand the same instance to the brain as the fault control.
+        Assert.IsType<FotoHavn.Core.Hooks.FaultInjectingCameraAdapter>(host.Dependencies.Camera);
+        Assert.Same(host.Dependencies.Camera, host.Dependencies.CameraFaults);
+#else
         Assert.IsType<FakeCameraAdapter>(host.Dependencies.Camera);
+#endif
     }
 
     [Fact]

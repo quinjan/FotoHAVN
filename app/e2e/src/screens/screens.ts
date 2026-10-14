@@ -82,3 +82,40 @@ export class EventRows {
     );
   }
 }
+/** The Operator Screen's camera diagnostics view (M5): the live preview, the camera list, the state line, and the measures. */
+export class CameraDiagnosticsScreen {
+  readonly root: Locator;
+  readonly heading: Locator;
+  readonly preview: Locator;
+  readonly canvas: Locator;
+  readonly cameraRows: Locator;
+  readonly capture: Locator;
+  readonly mirror: Locator;
+  readonly statusLine: Locator;
+
+  constructor(readonly page: Page) {
+    this.root = page.locator("[data-camera-state]");
+    this.heading = page.getByRole("heading", { level: 1 });
+    this.preview = page.locator("[data-state]").filter({ has: page.locator("canvas") });
+    this.canvas = page.locator("canvas");
+    this.cameraRows = page.getByRole("radio");
+    this.capture = page.getByRole("button", { name: "CAPTURE" });
+    this.mirror = page.getByRole("switch", { name: "Mirror" });
+    this.statusLine = page.locator("[data-status-tone]").filter({ hasText: /\S/ });
+  }
+
+  /** The camera rows as rendered: the radio's value is the device id, its accessible name the camera name. */
+  async cameraList(): Promise<{ id: string; name: string }[]> {
+    return await this.cameraRows.evaluateAll((inputs) =>
+      inputs.map((input) => {
+        const radio = input as HTMLInputElement;
+        const title = (radio.getAttribute("aria-labelledby") ?? "").split(" ").map((id) => document.getElementById(id)?.textContent ?? "").join(" ");
+        return { id: radio.value, name: title.trim() };
+      }),
+    );
+  }
+
+  measure(name: "fps" | "age" | "host" | "capture"): Locator {
+    return this.page.locator(`[data-camera-measure="${name}"]`);
+  }
+}

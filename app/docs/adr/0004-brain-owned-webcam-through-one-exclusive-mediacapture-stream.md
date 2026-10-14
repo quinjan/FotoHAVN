@@ -93,6 +93,8 @@ Findings. Raw wins at every width: JPEG encode costs 5.7 ms at 960, 10 ms at 128
 
 **S5 (operator and guest previews at once).** Two WebView2 controls in one environment, both receiving the raw 1280 px frame at 30 fps with their own shared buffers and their own in-flight state, with the downsize done once per frame: both delivered 29.7 fps with p95 latency about 9.1 ms, 0.8% dropped, and 55% of one core in total (3.5% of the machine), against 48% for one view. The second view cost about 8 points of one core, and the WebView2 working set barely moved (438 MB), so no frame-rate cap is needed on the operator preview on this machine.
 
+**Verified end to end (M5).** The shipped path (the real adapter into the WPF host's shared buffer, the page's `putImageData`, the ack) was measured by `smoke/camera-live` on the same machine and placeholder frames: the booth delivered 20.0 fps at every sample after the 2 s warm-up (the camera delivers about 20), the page drew 19.8 fps, 0 frames were dropped, and the booth's frame age peaked at 95 ms over 10 s.
+
 **Pending.** This ran on the developer machine, with the camera showing its placeholder frames and a synthetic 30 fps source. Re-measuring on the booth laptop with a real scene is a manual check, listed under the M5 manual checks (plan R6, S1); re-measure S5 there too. If the booth laptop can't hold 29 fps at 1280 raw, drop to 960 first.
 
 ## Considered options

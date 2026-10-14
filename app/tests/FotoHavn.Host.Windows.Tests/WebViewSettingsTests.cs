@@ -10,6 +10,9 @@ public sealed class WebViewSettingsTests
     [Fact]
     public void Field_build_never_opens_a_remote_debugging_port()
     {
+#if E2E_HOOKS
+        Assert.Skip("not run: asserts a field build; an E2E build opens the remote debugging port on purpose.");
+#endif
         Assert.Null(WebViewSettings.AdditionalBrowserArguments(new HostOptions(null, 9333, null)));
     }
 
@@ -104,6 +107,9 @@ public sealed class WebViewSettingsTests
     [Fact]
     public void Guest_window_is_topmost_outside_E2E_builds()
     {
+#if E2E_HOOKS
+        Assert.Skip("not run: asserts a field build; an E2E build leaves the Guest window in the normal z-order on purpose.");
+#endif
         Assert.False(HostBuild.IsE2E);
         Assert.True(HostBuild.GuestWindowTopmost);
     }

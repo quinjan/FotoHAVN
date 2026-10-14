@@ -112,14 +112,7 @@ public sealed class JpegEncoderTests
     {
         var frame = TwoHalves(80, 40);
         var mirrored = frame.Bgra.ToArray();
-        try
-        {
-            MirrorTransform.MirrorBgraInPlace(mirrored, frame.Width, frame.Height, frame.Stride);
-        }
-        catch (NotImplementedException)
-        {
-            Assert.Skip("not run: MirrorTransform is a contract stub until M5 wave B1 lands; wave C re-runs this.");
-        }
+        MirrorTransform.MirrorBgraInPlace(mirrored, frame.Width, frame.Height, frame.Stride);
 
         using var plain = SKBitmap.Decode(JpegEncoder.Encode(frame));
         using var flipped = SKBitmap.Decode(JpegEncoder.Encode(frame with { Bgra = mirrored }));

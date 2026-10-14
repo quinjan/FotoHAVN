@@ -170,6 +170,12 @@ describe("CameraDiagnosticsScreen states", () => {
     expect(screen.queryByText("Choose a camera.")).not.toBeInTheDocument();
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
   });
+
+  it("when the chosen camera is the only one and it was disconnected, says why beside the empty list", () => {
+    renderScreen({ view: { ...ready, cameras: [], state: "notAvailable", reason: "removed", format: null } });
+    expect(screen.getByText("No camera found.")).toBeVisible();
+    expect(status()).toHaveTextContent("Not available. The camera was disconnected.");
+  });
 });
 
 describe("CameraDiagnosticsScreen camera list and controls", () => {

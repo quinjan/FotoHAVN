@@ -1,6 +1,10 @@
 using System.Windows;
+using FotoHavn.Camera.Windows;
 using FotoHavn.Core;
 using FotoHavn.Core.Camera;
+#if E2E_HOOKS
+using FotoHavn.Core.Hooks;
+#endif
 using FotoHavn.Core.Media;
 using FotoHavn.Host.Windows.Displays;
 using FotoHavn.Host.Windows.Logging;
@@ -31,6 +35,7 @@ public partial class App : Application
     private ScreenWindows? _windows;
     private DedicatedThreadBrainExecutor? _executor;
     private Brain? _brain;
+    private WindowsCameraAdapter? _cameraAdapter;
     private SqliteEventStore? _store;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -82,14 +87,19 @@ public partial class App : Application
             work => Dispatcher.InvokeAsync(work),
             TimeProvider.System,
             _loggerFactory.CreateLogger("FotoHavn.Host.Windows.Preview"));
-        // TODO(wave C): compose `new WindowsCameraAdapter(frames, ...)` here (wrapped in `FaultInjectingCameraAdapter` in E2E
-        // builds) and delete Cameras/TemporaryCameraAdapter.cs. `frames` is both the adapter's IPreviewChannel and the brain's IPreviewStats.
-        ICameraAdapter camera = new Cameras.TemporaryCameraAdapter();
+        var cameraLogger = _loggerFactory.CreateLogger("FotoHavn.Camera.Windows");
+        _cameraAdapter = new WindowsCameraAdapter(frames, cameraLogger);
+        ICameraAdapter camera = _cameraAdapter;
+#if E2E_HOOKS
+        var cameraFaults = new FaultInjectingCameraAdapter(_cameraAdapter);
+        camera = cameraFaults;
+#endif
         var dependencies = new BrainDependencies(_executor, SystemClock.Instance, _displays, camera, _windows, _store)
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
             PreviewStats = frames,
 #if E2E_HOOKS
+            CameraFaults = cameraFaults,
             HostTestHooks = new E2E.WindowsHostTestHooks(
                 Dispatcher,
                 _windows,
@@ -128,6 +138,7 @@ public partial class App : Application
     {
         _windows?.CloseGuest();
         _brain?.Dispose();
+        _cameraAdapter?.Dispose();
         _executor?.Dispose();
         DisposeStore();
         _displays?.Dispose();

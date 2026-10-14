@@ -134,7 +134,7 @@ export function CameraDiagnosticsScreen({ view, source, measured, host = null, c
             />
           )}
           <InlineStatus tone={cameraStatusIsAlert(view.state) ? "alert" : "neutral"}>
-            {view.cameras.length === 0 ? "" : cameraStatusText(view)}
+            {view.cameras.length === 0 && view.selectedDeviceId === null ? "" : cameraStatusText(view)}
           </InlineStatus>
           <dl className={styles.facts}>
             <div className={styles.fact}>

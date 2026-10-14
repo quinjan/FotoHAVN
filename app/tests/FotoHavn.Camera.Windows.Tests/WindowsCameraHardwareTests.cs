@@ -242,7 +242,7 @@ public sealed class WindowsCameraHardwareTests
         }
         else
         {
-            var kind = ResilientPolicies.Instance.Classify(failure, CameraOperation.Open);
+            var kind = CoreCameraPolicies.Instance.Classify(failure, CameraOperation.Open);
             CameraHardware.Log($"Second exclusive MediaCapture in-process refused: {failure.GetType().Name} 0x{failure.HResult:X8}: {failure.Message} => {kind}");
             Assert.Equal(CameraFailureKind.InUseByAnotherApp, kind);
         }
@@ -314,20 +314,13 @@ public sealed class WindowsCameraHardwareTests
     }
 
     [Fact]
-    public async Task Works_with_the_real_core_policies_once_they_are_implemented()
+    public async Task Works_with_the_real_core_policies()
     {
-        var before = ResilientPolicies.Instance.Fallbacks;
         using var adapter = CameraHardware.CreateAdapter();
         var camera = await CameraHardware.RequireCameraAsync(adapter);
         await using var session = await CameraHardware.OpenWithRetryAsync(adapter, camera.DeviceId);
         await CameraHardware.WaitForFirstFrameAsync(session, TimeSpan.FromSeconds(10));
         await session.CaptureAsync(session.Now, TestContext.Current.CancellationToken);
-
-        var fallbacks = ResilientPolicies.Instance.Fallbacks - before;
-        if (fallbacks > 0)
-        {
-            Assert.Skip($"not run against the real policies: {fallbacks} call(s) fell back to the stand-in because M5 wave B1 has not landed; wave C re-runs this.");
-        }
 
         Assert.True(session.Format.Width >= 1280);
     }

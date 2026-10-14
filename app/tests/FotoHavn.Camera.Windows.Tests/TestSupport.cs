@@ -5,8 +5,8 @@ using FotoHavn.Protocol.Cameras;
 namespace FotoHavn.Camera.Windows.Tests;
 
 /// <summary>
-/// A stand-in for the Core policies so the adapter's logic is tested on its own, whatever state the policy implementations
-/// are in. It follows the contract's shape (largest usable format wins, ≥ eligibility) but is not the contract.
+/// A stand-in for the Core policies so the adapter's logic is tested on its own, with deterministic choices. It follows
+/// the contract's shape (largest usable format wins, ≥ eligibility) but is not the contract.
 /// </summary>
 internal sealed class TestPolicies : ICameraPolicySet
 {

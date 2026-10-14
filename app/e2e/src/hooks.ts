@@ -1,5 +1,9 @@
 import type { Page } from "@playwright/test";
 import type {
+  CameraCaptureView,
+  CameraDiagnostics,
+  CameraFaultKind,
+  CameraState,
   CommandPayloadMap,
   DiagnosticsResult,
   Role,
@@ -22,6 +26,10 @@ export type HookArgs<K extends HookName> = TestHookMap[K]["args"];
 export type HookResult<K extends HookName> = TestHookMap[K]["result"];
 
 export type {
+  CameraCaptureView,
+  CameraDiagnostics,
+  CameraFaultKind,
+  CameraState,
   CommandPayloadMap,
   DiagnosticsResult,
   Role,
@@ -136,6 +144,30 @@ export class HookClient {
 
   async clearStorageFault(): Promise<void> {
     await this.call("test.clearStorageFault", null);
+  }
+
+  async openCameraDiagnostics(): Promise<void> {
+    await this.call("test.openCameraDiagnostics", null);
+  }
+
+  async selectDiagnosticsCamera(deviceId: string): Promise<void> {
+    await this.call("test.selectDiagnosticsCamera", { deviceId });
+  }
+
+  async setDiagnosticsMirror(mirrored: boolean): Promise<void> {
+    await this.call("test.setDiagnosticsMirror", { mirrored });
+  }
+
+  captureDiagnostics(): Promise<CameraCaptureView> {
+    return this.call("test.captureDiagnostics", null);
+  }
+
+  async injectCameraFault(kind: CameraFaultKind): Promise<void> {
+    await this.call("test.injectCameraFault", { kind });
+  }
+
+  async clearCameraFault(): Promise<void> {
+    await this.call("test.clearCameraFault", null);
   }
 
   /**

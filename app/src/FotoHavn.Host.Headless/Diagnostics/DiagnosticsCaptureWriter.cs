@@ -12,7 +12,8 @@ namespace FotoHavn.Host.Diagnostics;
 /// </summary>
 /// <remarks>
 /// Both hosts compile this one file (the headless project owns it; the WPF host links it). The Windows camera adapter has its
-/// own SkiaSharp encoder for real Captures; wave C may point this class at it instead. A failure is an ordinary exception: the
+/// own SkiaSharp encoder for real Captures (the headless project is plain net10.0 and can't reference it); both encode with the same
+/// <see cref="JpegEncodingSpec"/> settings, and a Host.Windows test pins byte-equal output. A failure is an ordinary exception: the
 /// brain turns any exception from the host hook into <c>hookFailed</c>.
 /// </remarks>
 /// <param name="dataFolder">The host's Data folder.</param>
@@ -47,11 +48,15 @@ internal sealed class DiagnosticsCaptureWriter(string dataFolder, TimeProvider t
             pixels = padded;
         }
 
-        // No colour space on the image: Skia treats it as sRGB and writes no ICC profile (a Capture carries no metadata).
+        // Same Skia settings as FotoHavn.Camera.Windows.JpegEncoder (a Host.Windows test pins byte-equal output). No colour
+        // space on the image: Skia treats it as sRGB and writes no ICC profile (a Capture carries no metadata).
         var info = new SKImageInfo(frame.Width, frame.Height, SKColorType.Bgra8888, SKAlphaType.Opaque);
         using var image = SKImage.FromPixelCopy(info, pixels.Span, rowBytes)
             ?? throw new InvalidOperationException("The frame's pixels could not be read.");
-        using var data = image.Encode(SKEncodedImageFormat.Jpeg, JpegEncodingSpec.Quality)
+        using var pixmap = image.PeekPixels()
+            ?? throw new InvalidOperationException("The frame's pixels could not be read.");
+        var options = new SKJpegEncoderOptions(JpegEncodingSpec.Quality, SKJpegEncoderDownsample.Downsample420, SKJpegEncoderAlphaOption.Ignore);
+        using var data = pixmap.Encode(options)
             ?? throw new InvalidOperationException("The frame could not be encoded as JPEG.");
         return data.ToArray();
     }

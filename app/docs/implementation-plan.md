@@ -919,11 +919,12 @@ app/e2e/
 
 | Hook | Purpose |
 | --- | --- |
-| `test.listCameras` | Camera precondition and selection |
+| `test.listCameras` | Camera precondition and selection: the cameras the adapter lists now, `{ id, name }` each |
 | `test.setClockScale(factor)` | Speeds up brain timers (countdown, phase timers, Keepsake, lockout) for long scenarios; camera frames stay real-time |
-| `test.injectCameraFault(kind)` / `test.clearCameraFault` | Simulates `stale`, `failed`, `removed`, or `exclusiveLost` on top of the real camera |
+| `test.openCameraDiagnostics` / `test.selectDiagnosticsCamera(deviceId)` / `test.setDiagnosticsMirror(mirrored)` / `test.captureDiagnostics` | Drive the E2E-only camera diagnostics screen (M5; M6 adds Event setup). `openCameraDiagnostics` shows the surface and selects nothing; `selectDiagnosticsCamera` re-lists, opens the camera, and answers `unknownCamera` for an id that isn't listed; `captureDiagnostics` takes a Capture of a `ready` camera, mirrored when asked, and the host saves it as `<data>/diagnostics/capture-yyyyMMdd-HHmmss-fff.jpg` (JPEG at the `JpegEncodingSpec` quality, no metadata) and returns `{ fileName, width, height, byteLength, mirrored }` |
+| `test.injectCameraFault(kind)` / `test.clearCameraFault` | Simulates `stale`, `failed`, `removed`, or `exclusiveLost` on top of the real camera, at the session level (the `FaultInjectingCameraAdapter` decorator the E2E hosts wrap around the adapter); clearing re-opens the selected camera when the fault left it Not available |
 | `test.injectStorageFault(kind, scope)` / `test.clearStorageFault` | Fails the Event store's file writes: `kind` is `diskFull`, `accessDenied`, or `locked`, and `scope` is `nextWrite` (the next write only, then the fault clears) or `allWrites` (every write until `test.clearStorageFault`). Database-level faults aren't injected. The host maps both onto the store's fault-injecting file system |
-| `test.getDiagnostics` | Presentation revision, frame age, measured frame rate, last command results |
+| `test.getDiagnostics` | Presentation revision, `camera` (`state`, `deviceId`, `format`, `frameAgeMs`, `deliveredFps`, `droppedFrames`, `previewTarget`), last command results |
 | `test.setWindowBounds(role, width, height)` | Places the Operator or Guest window at 1280×720, 1366×768, 1920×1080, or 2560×1440 for layout checks without changing the monitor |
 | `test.useVirtualDisplays(displays)` / `test.disconnectDisplay(id)` / `test.connectDisplay(id)` | Replaces real display enumeration with virtual displays mapped onto the real monitor, and simulates connects and disconnects |
 | `test.crashUi(role)` | Ends one window's WebView2 process to test recovery |
@@ -1613,7 +1614,7 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 | ID | Risk or question | Spike or mitigation | When |
 | --- | --- | --- | --- |
-| S1 | WebView2 shared-buffer preview may not hold 30 fps at 1080p on the booth laptop | Measure raw BGRA vs JPEG frames at 960, 1280, and 1920 widths; record CPU, latency, and dropped frames. Fall back to JPEG over a virtual-host stream if needed. | Start of M5 |
+| S1 | WebView2 shared-buffer preview may not hold 30 fps at 1080p on the booth laptop | **Done (M5).** Measured raw BGRA vs JPEG frames at 960, 1280, and 1920 widths; raw RGBA at 1280 px in a shared buffer with one frame in flight holds the floor, which is 15 fps over at least 5 s of steady state with at most 10% of arrived frames dropped. Result and numbers: [ADR 0004, Spike S1 result](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md#spike-s1-result). Fall back to JPEG over a virtual-host stream only if a booth laptop fails the floor. | Start of M5 |
 | S2 | The Windows touch keyboard may not appear for WebView2 inputs in a borderless full-screen WPF window | Test on the booth touch screen with Windows 11; fall back to an in-app keyboard for Event setup if needed | M10, or earlier if the booth is touch-only |
 | S3 | SkiaSharp composition speed and memory per strip | Benchmark the largest Template × Look on the booth laptop | M7 |
 | S4 | Fixed Version WebView2 runtime size and update policy | Pin a version, record size and SHA-256, document the update procedure | M10 |

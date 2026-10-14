@@ -35,6 +35,7 @@ public sealed class FieldBuildHasNoE2EHooksTests
     [Fact]
     public void Product_assemblies_contain_no_E2E_namespace()
     {
+        SkipInE2EBuild();
         var offending = new List<string>();
         var hostNamespaceSeen = false;
 
@@ -65,6 +66,7 @@ public sealed class FieldBuildHasNoE2EHooksTests
     [Fact]
     public void Product_assemblies_carry_no_E2E_build_marker()
     {
+        SkipInE2EBuild();
         var marked = ProductAssemblies()
             .Where(path => AssemblyMetadata(path).Any(entry => entry.Key == "FotoHavnE2E"))
             .Select(Path.GetFileName)
@@ -76,6 +78,7 @@ public sealed class FieldBuildHasNoE2EHooksTests
     [Fact]
     public void Copied_UI_is_not_the_E2E_build()
     {
+        SkipInE2EBuild();
         Assert.False(
             File.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot", "e2e-build.txt")),
             "wwwroot/ holds the E2E UI build (ui/dist-e2e); field builds copy ui/dist.");
@@ -84,7 +87,16 @@ public sealed class FieldBuildHasNoE2EHooksTests
     [Fact]
     public void Hook_channel_is_not_compiled_in()
     {
+        SkipInE2EBuild();
         Assert.False(TestHooks.TestHookChannel.IsCompiled);
+    }
+
+    /// <summary>These tests assert facts about field builds; an E2E build contains the hooks by design.</summary>
+    private static void SkipInE2EBuild()
+    {
+#if E2E_HOOKS
+        Assert.Skip("not run: asserts a field build; this is an E2E build (hooks compiled in on purpose).");
+#endif
     }
 
     /// <summary>The <c>[assembly: AssemblyMetadata(key, value)]</c> entries, read without loading the assembly.</summary>

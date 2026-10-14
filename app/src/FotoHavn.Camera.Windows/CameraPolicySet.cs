@@ -5,8 +5,8 @@ using FotoHavn.Protocol.Cameras;
 namespace FotoHavn.Camera.Windows;
 
 /// <summary>
-/// The Core camera policies the adapter calls. An interface so pure tests can run the adapter's logic on stand-ins while
-/// the real policies are implemented elsewhere; production always uses <see cref="CoreCameraPolicies"/>.
+/// The Core camera policies the adapter calls. An interface so pure tests can run the adapter's logic on stand-ins;
+/// production always uses <see cref="CoreCameraPolicies"/>.
 /// </summary>
 internal interface ICameraPolicySet
 {

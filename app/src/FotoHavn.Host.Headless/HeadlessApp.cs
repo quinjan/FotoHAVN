@@ -143,11 +143,16 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var camera = settings.Camera
             ?? settings.CameraFactory?.Invoke(previews)
             ?? new FakeCameraAdapter(SystemClock.Instance, previews);
+#if E2E_HOOKS
+        var cameraFaults = new FotoHavn.Core.Hooks.FaultInjectingCameraAdapter(camera);
+        camera = cameraFaults;
+#endif
         var dependencies = new BrainDependencies(executor, SystemClock.Instance, displays, camera, hostServices, store)
         {
             Logger = brainLogger,
             PreviewStats = previews,
 #if E2E_HOOKS
+            CameraFaults = cameraFaults,
             HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime, settings.DataFolder),
             StorageTestHooks = storageHooks,
 #endif

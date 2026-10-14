@@ -1,3 +1,4 @@
+using FotoHavn.Camera.Windows;
 using FotoHavn.Core.Camera;
 using FotoHavn.Host.Diagnostics;
 
@@ -20,6 +21,24 @@ public sealed class DiagnosticsCaptureWriterTests : IDisposable
         var path = Path.Combine(_data, "diagnostics", view.FileName);
         Assert.Equal(new FileInfo(path).Length, view.ByteLength);
         Assert.Equal([0xFF, 0xD8], (await File.ReadAllBytesAsync(path, TestContext.Current.CancellationToken))[..2]);
+    }
+
+    [Fact]
+    public async Task Encodes_byte_for_byte_like_the_cameras_jpeg_encoder()
+    {
+        var writer = new DiagnosticsCaptureWriter(_data, TimeProvider.System);
+        var bgra = new byte[64 * 48 * 4];
+        for (var i = 0; i < bgra.Length; i++)
+        {
+            bgra[i] = (byte)((i * 31) + (i / 256));
+        }
+
+        var frame = new CapturedFrame(bgra, 64, 48, 256, TimeSpan.Zero);
+
+        var view = await writer.SaveAsync(frame, mirrored: false);
+
+        var written = await File.ReadAllBytesAsync(Path.Combine(_data, "diagnostics", view.FileName), TestContext.Current.CancellationToken);
+        Assert.Equal(JpegEncoder.Encode(frame), written);
     }
 
     public void Dispose()
