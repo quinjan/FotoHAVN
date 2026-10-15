@@ -15,6 +15,9 @@ describe("fixture lane", () => {
     expect(fixtureNames).toEqual(
       expect.arrayContaining([
         "guest-fatal",
+        "guest-shell-pin-dialog-locked",
+        "guest-shell-start-ready",
+        "guest-shell-start-unavailable-camera",
         "guest-start",
         "operator-event-list",
         "operator-event-list-empty",

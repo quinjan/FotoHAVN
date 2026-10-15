@@ -1,4 +1,11 @@
-import { PROTOCOL_VERSION, type GuestWelcomeMessage, type OperatorWelcomeMessage } from "../protocol/generated.ts";
+import {
+  PROTOCOL_VERSION,
+  type GuestOverlays,
+  type GuestPresentation,
+  type GuestWelcomeMessage,
+  type OperatorWelcomeMessage,
+  type PinDialogOverlay,
+} from "../protocol/generated.ts";
 
 /**
  * Hand-written snapshots for unit tests, typed against the generated protocol. The fixture lane serves the
@@ -69,4 +76,49 @@ export const guestStart: GuestWelcomeMessage = {
     overlays: { exitHold: null, pinDialog: null, phaseTimerWarning: null, startOverConfirmation: null, notice: null },
     fatal: null,
   },
+};
+
+const noGuestOverlays: GuestOverlays = {
+  exitHold: null,
+  pinDialog: null,
+  phaseTimerWarning: null,
+  startOverConfirmation: null,
+  notice: null,
+};
+
+function guestWelcome(presentation: Partial<GuestPresentation>): GuestWelcomeMessage {
+  return {
+    ...guestStart,
+    presentation: { ...guestStart.presentation, ...presentation },
+  };
+}
+
+function pinDialogWelcome(pinDialog: PinDialogOverlay): GuestWelcomeMessage {
+  return guestWelcome({
+    start: { stepInsideAvailable: true, guestGalleryLinkVisible: false },
+    overlays: { ...noGuestOverlays, pinDialog },
+  });
+}
+
+/**
+ * Hand-written Guest Screen shell states for the fixture lane (`guest-shell-*`) and unit tests, typed against the
+ * generated protocol. They stand beside the brain-generated `guest-*` files, which the brain's own fixture tests write.
+ */
+export const guestShellFixtures: Readonly<Record<string, GuestWelcomeMessage>> = {
+  "guest-shell-start-ready": guestWelcome({ start: { stepInsideAvailable: true, guestGalleryLinkVisible: false } }),
+  "guest-shell-start-gallery": guestWelcome({ start: { stepInsideAvailable: true, guestGalleryLinkVisible: true } }),
+  "guest-shell-start-not-ready": guestWelcome({ start: { stepInsideAvailable: false, guestGalleryLinkVisible: false } }),
+  "guest-shell-start-unavailable-camera": guestWelcome({
+    surface: "startUnavailable",
+    start: null,
+    startUnavailable: { reason: "camera", guestGalleryLinkVisible: false },
+  }),
+  "guest-shell-start-unavailable-storage": guestWelcome({
+    surface: "startUnavailable",
+    start: null,
+    startUnavailable: { reason: "storage", guestGalleryLinkVisible: true },
+  }),
+  "guest-shell-pin-dialog": pinDialogWelcome({ error: null, lockedRemainingSeconds: null, attemptsRemaining: 5 }),
+  "guest-shell-pin-dialog-wrong": pinDialogWelcome({ error: "wrongPin", lockedRemainingSeconds: null, attemptsRemaining: 3 }),
+  "guest-shell-pin-dialog-locked": pinDialogWelcome({ error: "wrongPin", lockedRemainingSeconds: 27, attemptsRemaining: null }),
 };

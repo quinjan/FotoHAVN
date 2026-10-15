@@ -1,27 +1,16 @@
-import type { GuestPresentation, StartView } from "../protocol/generated.ts";
+import { useState } from "react";
+import { useBrainClient } from "../brain/BrainClientContext.ts";
+import { Notice } from "../components/Notice/index.ts";
+import { cx } from "../components/shared/cx.ts";
 import { StatementHeading } from "../components/StatementHeading/index.ts";
+import type { GuestPresentation } from "../protocol/generated.ts";
 import { ConnectionNotice } from "../screens/StatusScreens.tsx";
 import screen from "../screens/Screen.module.css";
-
-/**
- * M2 placeholder for Start: the wordmark at the top, the centered statement, and its supporting line. `STEP INSIDE →`
- * and `SEE THE GOOD COMPANY →` arrive with the Guest Cycle (M8).
- */
-function StartPlaceholder({ start }: { readonly start: StartView | null }) {
-  return (
-    <div className={screen.start} data-guest-gallery-available={start?.guestGalleryLinkVisible ?? false}>
-      <p className={screen.wordmark}>FOTOHAVN</p>
-      <StatementHeading
-        level={1}
-        size="display"
-        align="center"
-        lead="Small room."
-        turn="Whole other world."
-        supporting="Come a little closer."
-      />
-    </div>
-  );
-}
+import { ExitHold } from "./ExitHold.tsx";
+import { guestCommandNotice } from "./guestCopy.ts";
+import { PinDialog } from "./PinDialog.tsx";
+import { StartSurface, StartUnavailableSurface, type GuestActions } from "./StartSurface.tsx";
+import styles from "./Guest.module.css";
 
 function GuestFatal() {
   return (
@@ -47,10 +36,16 @@ function GuestPending() {
   );
 }
 
-function GuestSurface({ presentation }: { readonly presentation: GuestPresentation }) {
+function GuestSurface({ presentation, actions }: { readonly presentation: GuestPresentation; readonly actions: GuestActions }) {
   switch (presentation.surface) {
     case "start":
-      return <StartPlaceholder start={presentation.start} />;
+      return <StartSurface start={presentation.start} actions={actions} />;
+    case "startUnavailable":
+      return presentation.startUnavailable === null ? (
+        <StartSurface start={null} actions={actions} />
+      ) : (
+        <StartUnavailableSurface unavailable={presentation.startUnavailable} actions={actions} />
+      );
     case "fatal":
       return <GuestFatal />;
     default:
@@ -58,7 +53,7 @@ function GuestSurface({ presentation }: { readonly presentation: GuestPresentati
   }
 }
 
-/** Every Guest Screen surface, chosen by the guest presentation. */
+/** Every Guest Screen surface, chosen by the guest presentation, with the exit hold on all of them. */
 export function GuestRoot({
   presentation,
   reconnecting,
@@ -66,13 +61,45 @@ export function GuestRoot({
   readonly presentation: GuestPresentation;
   readonly reconnecting: boolean;
 }) {
+  const client = useBrainClient();
+  const [localNotice, setLocalNotice] = useState("");
+  const pinDialog = presentation.overlays.pinDialog;
+  const brainNotice = presentation.overlays.notice?.message ?? "";
+  const notice = brainNotice === "" ? localNotice : brainNotice;
+
+  async function send(name: "BeginGuestCycle" | "OpenGuestGallery"): Promise<void> {
+    setLocalNotice("");
+    setLocalNotice(guestCommandNotice(await client.sendCommand(name, {})) ?? "");
+  }
+
+  const actions: GuestActions = {
+    onStepInside: () => {
+      void send("BeginGuestCycle");
+    },
+    onOpenGallery: () => {
+      void send("OpenGuestGallery");
+    },
+  };
+
   return (
     <main className={screen.root} data-fotohavn-surface={presentation.surface}>
-      <GuestSurface presentation={presentation} />
-      <div className={screen.notices}>
-        <p className={screen.notice} role="status">
-          {presentation.overlays.notice?.message ?? ""}
-        </p>
+      <div className={styles.surface} inert={pinDialog !== null}>
+        <GuestSurface presentation={presentation} actions={actions} />
+      </div>
+      {pinDialog === null ? <ExitHold /> : <PinDialog pin={pinDialog} />}
+      <div className={screen.notices} inert={pinDialog !== null}>
+        <Notice
+          className={cx(styles.notice)}
+          {...(brainNotice === "" && localNotice !== ""
+            ? {
+                onDismiss: () => {
+                  setLocalNotice("");
+                },
+              }
+            : {})}
+        >
+          {notice}
+        </Notice>
         <ConnectionNotice reconnecting={reconnecting} />
       </div>
     </main>
