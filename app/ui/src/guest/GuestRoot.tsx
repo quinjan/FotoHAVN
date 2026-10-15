@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBrainClient } from "../brain/BrainClientContext.ts";
 import { Notice } from "../components/Notice/index.ts";
 import { cx } from "../components/shared/cx.ts";
@@ -64,8 +64,19 @@ export function GuestRoot({
   const client = useBrainClient();
   const [localNotice, setLocalNotice] = useState("");
   const pinDialog = presentation.overlays.pinDialog;
+  const dialogOpen = pinDialog !== null;
+  const exitHold = useRef<HTMLDivElement>(null);
+  const dialogWasOpen = useRef(false);
   const brainNotice = presentation.overlays.notice?.message ?? "";
   const notice = brainNotice === "" ? localNotice : brainNotice;
+
+  // The exit hold is unmounted while the PIN dialog is open, so the dialog has no opener to return to: focus goes back to the hold when it closes.
+  useEffect(() => {
+    if (dialogWasOpen.current && !dialogOpen) {
+      exitHold.current?.querySelector("button")?.focus();
+    }
+    dialogWasOpen.current = dialogOpen;
+  }, [dialogOpen]);
 
   async function send(name: "BeginGuestCycle" | "OpenGuestGallery"): Promise<void> {
     setLocalNotice("");
@@ -86,7 +97,7 @@ export function GuestRoot({
       <div className={styles.surface} inert={pinDialog !== null}>
         <GuestSurface presentation={presentation} actions={actions} />
       </div>
-      {pinDialog === null ? <ExitHold /> : <PinDialog pin={pinDialog} />}
+      {pinDialog === null ? <ExitHold ref={exitHold} /> : <PinDialog pin={pinDialog} />}
       <div className={screen.notices} inert={pinDialog !== null}>
         <Notice
           className={cx(styles.notice)}

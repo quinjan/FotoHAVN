@@ -44,7 +44,7 @@ public sealed partial class Brain
             return null;
         }
 
-        var running = _activeEvent is not null;
+        var running = IsCameraHeld;
         return new EventSetupView(
             draft.EventId,
             draft.IsNew,
@@ -112,9 +112,9 @@ public sealed partial class Brain
 
     private (EventSetupCameraState State, CameraFailureKind? Reason, bool PreviewActive) SetupCameraState(string bound, bool listed)
     {
-        if (_activeEvent is not null)
+        if (IsCameraHeld)
         {
-            if (string.Equals(bound, ActiveEventCameraDeviceId, StringComparison.Ordinal))
+            if (string.Equals(bound, HeldEventCameraDeviceId, StringComparison.Ordinal))
             {
                 return (EventSetupCameraState.InUseByRunningEvent, null, false);
             }
@@ -219,10 +219,24 @@ public sealed partial class Brain
         }
 
         HideIdentifyDisplays();
-        if (_activeEvent is null && _selectedCameraId is not null)
+        if (!IsCameraHeld && _selectedCameraId is not null)
         {
             ReleaseCamera();
         }
+
+        OpenPendingStartFailure();
+    }
+
+    // Shows a start failure that waited for the operator to leave another draft: Event setup for the failed Event, with the reason.
+    private void OpenPendingStartFailure()
+    {
+        if (_pendingStartFailure is not { } pending || _setupDraft is not null)
+        {
+            return;
+        }
+
+        _pendingStartFailure = null;
+        BeginLoadSetup(pending.EventId, pending.Failure);
     }
 
     private void CancelSetupWork()
@@ -238,7 +252,7 @@ public sealed partial class Brain
     /// </summary>
     internal void RefreshSetupCamera()
     {
-        if (_setupDraft is not { CameraDeviceId: { } bound } || _activeEvent is not null || _cameraDiagnosticsOpen || _cameraDiagnosticsOverride is not null)
+        if (_setupDraft is not { CameraDeviceId: { } bound } || IsCameraHeld || _cameraDiagnosticsOpen || _cameraDiagnosticsOverride is not null)
         {
             return;
         }
@@ -325,11 +339,29 @@ public sealed partial class Brain
         ArgumentException.ThrowIfNullOrEmpty(eventId);
         ArgumentNullException.ThrowIfNull(failure);
         DropStaleSetup();
-        if (_setupDraft is null)
+        if (_setupDraft is { } open)
         {
-            BeginLoadSetup(eventId, failure);
+            // The operator opened another draft while the start ran. A draft of the same Event shows the failure now. For any other
+            // Event the failure waits (the protocol has no notice code for it) and Event setup for that Event opens with it as soon
+            // as the open draft closes; the operator's work is never replaced.
+            if (string.Equals(open.EventId, eventId, StringComparison.Ordinal))
+            {
+                open.StartFailure = failure;
+                RefreshSetupCamera();
+            }
+            else
+            {
+                _pendingStartFailure = (eventId, failure);
+            }
+
+            return;
         }
+
+        BeginLoadSetup(eventId, failure);
     }
+
+    // A start failure that arrived while another draft was open or loading: shown when that draft closes (see CloseSetup).
+    private (string EventId, EventSetupStartFailure Failure)? _pendingStartFailure;
 
     // Commands that edit the draft
 
@@ -362,7 +394,7 @@ public sealed partial class Brain
             }
 
             draft.BindCamera(camera.DeviceId, camera.Name);
-            if (_activeEvent is null)
+            if (!IsCameraHeld)
             {
                 OpenCameraFor(camera.DeviceId, PreviewTarget.Operator);
             }
@@ -470,7 +502,7 @@ public sealed partial class Brain
     /// <summary><c>SaveAndStartEvent</c>: as save, but a PIN is needed, and the saved Event is then started through <see cref="TryStartEventAsync"/> (B1b).</summary>
     private CommandResultMessage SaveAndStartEvent(string id)
     {
-        if (_activeEvent is not null)
+        if (IsCameraHeld)
         {
             return CommandResultMessage.Rejected(id, RejectReason.EventRunning);
         }
@@ -480,6 +512,11 @@ public sealed partial class Brain
 
     private CommandResultMessage BeginSave(string id, EventSetupDraft draft, bool startAfterSave)
     {
+        if (draft.EventId is { } savedId && IsHeld(savedId))
+        {
+            return CommandResultMessage.Rejected(id, RejectReason.EventRunning);
+        }
+
         draft.ShowErrors = true;
         var errors = EventSetupValidator.Validate(draft);
         if (!(startAfterSave ? EventSetupValidator.CanStart(errors) : EventSetupValidator.CanSave(errors)))
@@ -597,7 +634,13 @@ public sealed partial class Brain
                 {
                     var result = completed.IsCompletedSuccessfully ? completed.Result : StartEventResult.Failed(StartFailureCode.InvalidSetup);
                     draft.Saving = false;
-                    draft.StartFailure = new EventSetupStartFailure(result.Failure ?? StartFailureCode.InvalidSetup, result.CameraReason);
+
+                    // An end by the operator is not a failure: the draft stays as it was, with nothing to report.
+                    if (!result.WasEnded)
+                    {
+                        draft.StartFailure = new EventSetupStartFailure(result.Failure ?? StartFailureCode.InvalidSetup, result.CameraReason);
+                    }
+
                     RefreshSetupCamera();
                 }
 

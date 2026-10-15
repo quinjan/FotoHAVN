@@ -25,13 +25,16 @@ public sealed partial class Brain
     private EventListView RenderEventList()
     {
         var runningId = ActiveEventId;
-        return new EventListView([.. _eventSummaries.Select(summary => ToRow(summary, runningId))], NewEventAvailable: true);
+        var heldId = HeldEventId;
+        return new EventListView([.. _eventSummaries.Select(summary => ToRow(summary, runningId, heldId))], NewEventAvailable: true);
     }
 
-    private static EventListRow ToRow(EventSummary summary, string? runningId)
+    // A starting Event is held like a running one (no Start anywhere, no Edit or Delete on its row), but its row says RUNNING only once it runs.
+    private static EventListRow ToRow(EventSummary summary, string? runningId, string? heldId)
     {
-        var anyRunning = runningId is not null;
-        var running = anyRunning && string.Equals(summary.Id, runningId, StringComparison.Ordinal);
+        var anyHeld = heldId is not null;
+        var held = anyHeld && string.Equals(summary.Id, heldId, StringComparison.Ordinal);
+        var running = runningId is not null && string.Equals(summary.Id, runningId, StringComparison.Ordinal);
         return new EventListRow(
             summary.Id,
             summary.Name,
@@ -41,12 +44,12 @@ public sealed partial class Brain
             summary.LastUsedAt,
             running,
             new EventRowActions(
-                CanStart: !anyRunning,
-                CanEdit: !running,
-                CanDelete: !running,
+                CanStart: !anyHeld,
+                CanEdit: !held,
+                CanDelete: !held,
                 CanOpenFolder: true,
                 CanOpenGallery: true),
-            anyRunning ? StartDisabledReason.EventRunning : null);
+            anyHeld ? StartDisabledReason.EventRunning : null);
     }
 
     /// <summary><c>OpenNewEvent</c>: a new draft with the defaults. Allowed while an Event runs; not while storage is down or a draft is open.</summary>
@@ -65,7 +68,7 @@ public sealed partial class Brain
     /// <summary><c>EditEvent</c>: loads the saved Event off the executor and opens it in Event setup. The running Event can't be edited.</summary>
     private CommandResultMessage EditEvent(string id, EditEventPayload payload)
     {
-        if (IsRunning(payload.EventId))
+        if (IsHeld(payload.EventId))
         {
             return CommandResultMessage.Rejected(id, RejectReason.EventRunning);
         }
@@ -82,7 +85,7 @@ public sealed partial class Brain
     /// <summary><c>DeleteEvent</c>: counts what deleting removes off the executor, then opens the confirmation with the Event's name and the counts.</summary>
     private CommandResultMessage DeleteEvent(string id, DeleteEventPayload payload)
     {
-        if (IsRunning(payload.EventId))
+        if (IsHeld(payload.EventId))
         {
             return CommandResultMessage.Rejected(id, RejectReason.EventRunning);
         }
@@ -106,7 +109,7 @@ public sealed partial class Brain
 
     private void CompleteDeleteCounts(int request, EventSummary summary, Task<ConfirmationCounts> completed)
     {
-        if (request != _deleteRequest || IsRunning(summary.Id))
+        if (request != _deleteRequest || IsHeld(summary.Id))
         {
             _ = completed.Exception;
             return;
@@ -138,7 +141,7 @@ public sealed partial class Brain
 
         _confirmation = null;
         _deleteEventId = null;
-        if (IsRunning(eventId))
+        if (IsHeld(eventId))
         {
             return CommandResultMessage.Rejected(id, RejectReason.EventRunning);
         }
@@ -209,7 +212,7 @@ public sealed partial class Brain
         return CommandResultMessage.Accepted(id);
     }
 
-    private bool IsRunning(string eventId) => ActiveEventId is { } running && string.Equals(running, eventId, StringComparison.Ordinal);
+    private bool IsHeld(string eventId) => HeldEventId is { } held && string.Equals(held, eventId, StringComparison.Ordinal);
 
     private EventSummary? FindSummary(string eventId) =>
         _eventSummaries.FirstOrDefault(summary => string.Equals(summary.Id, eventId, StringComparison.Ordinal));

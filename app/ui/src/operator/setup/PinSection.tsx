@@ -40,6 +40,18 @@ export function PinSection({ pin, pinError, confirmationError, onChange }: PinSe
     }
   }
 
+  // The brain consumed the pending PIN (a save, even one whose start then failed): what is typed here is stale and the PIN is set.
+  // Start over from "PIN set" so the next edit never sends the old pair again.
+  const wasChanging = useRef(pin.changing);
+  useEffect(() => {
+    if (wasChanging.current && !pin.changing && pin.isSet) {
+      cancelTimer();
+      setDigits({ pin: "", confirmation: "" });
+      setEntering(false);
+    }
+    wasChanging.current = pin.changing;
+  }, [pin.changing, pin.isSet]);
+
   function update(next: { pin: string; confirmation: string }): void {
     setDigits(next);
     cancelTimer();

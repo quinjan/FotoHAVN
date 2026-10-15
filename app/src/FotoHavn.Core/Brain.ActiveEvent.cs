@@ -52,6 +52,18 @@ public sealed partial class Brain
     internal string? ActiveEventCameraDeviceId => _activeEvent?.Event.CameraDeviceId;
 
     /// <summary>
+    /// The Event that is held: the running Event, or the one whose Start Event sequence is in progress (steps 1 to 8), else null.
+    /// Every lock reads this, so a starting Event can't be edited, saved, deleted, or started again, exactly like a running one.
+    /// </summary>
+    internal string? HeldEventId => _activeEvent?.Event.Id ?? _start?.EventId;
+
+    /// <summary>The held Event's bound camera device (null before the start has loaded the Event, or while none is held).</summary>
+    internal string? HeldEventCameraDeviceId => _activeEvent?.Event.CameraDeviceId ?? _start?.CameraDeviceId;
+
+    /// <summary>True while an Event runs or is starting: the one camera session belongs to it, and Event setup must not open, replace, or release it.</summary>
+    internal bool IsCameraHeld => _activeEvent is not null || _start is not null;
+
+    /// <summary>
     /// Makes <paramref name="state"/> the running Event (null: none runs) and publishes. M6 wave A's stand-in so the UI's fixtures and
     /// the render tests reach the running states from a real brain; B1b's Start and End Event sequences set it themselves.
     /// </summary>
@@ -159,6 +171,8 @@ public sealed partial class Brain
             return;
         }
 
+        // Ending while the start still waits for the Guest Screen's handshake: the start is over (no failure to report); the releases below are its rollback.
+        _start?.Cancel();
         active.StopTimers();
         _dependencies.Host.CloseGuestScreen();
         _guestScreenDisplay = null;

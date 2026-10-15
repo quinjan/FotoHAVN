@@ -164,13 +164,15 @@ public sealed class PinRulesTests
     [Theory]
     [InlineData(0, false)]
     [InlineData(1, false)]
-    [InlineData(2.4, false)]
-    [InlineData(2.5, true)]
+    [InlineData(2.5, false)]
+    [InlineData(2.84, false)]
+    [InlineData(2.85, true)]
     [InlineData(3, true)]
     [InlineData(10, true)]
-    public void The_exit_hold_needs_about_three_seconds(double seconds, bool complete)
+    public void The_exit_hold_needs_three_seconds_less_a_bridge_allowance(double seconds, bool complete)
     {
         Assert.Equal(TimeSpan.FromSeconds(3), ExitHoldRules.RequiredHold);
+        Assert.Equal(TimeSpan.FromSeconds(2.85), ExitHoldRules.MinimumAccepted);
         Assert.Equal(complete, ExitHoldRules.IsComplete(TimeSpan.FromSeconds(seconds)));
     }
 

@@ -49,11 +49,15 @@ public static class ExitHoldRules
     /// <summary>The hold the guest-facing control asks for.</summary>
     public static readonly TimeSpan RequiredHold = TimeSpan.FromSeconds(3);
 
+    /// <summary>How much earlier than <see cref="RequiredHold"/> the brain may see <c>CompleteExitHold</c> arrive, because the two messages have different delays.</summary>
+    public static readonly TimeSpan BridgeJitterAllowance = TimeSpan.FromMilliseconds(150);
+
     /// <summary>
     /// The shortest hold the brain accepts, measured on its own clock from <c>BeginExitHold</c> to <c>CompleteExitHold</c>.
-    /// Below <see cref="RequiredHold"/> to absorb the bridge's latency; far above a tap.
+    /// The page times the full <see cref="RequiredHold"/> itself, but both messages cross the bridge and the brain only sees their
+    /// arrival times, so the brain allows <see cref="BridgeJitterAllowance"/> (150 ms) of message delay: 2.85 seconds on its clock.
     /// </summary>
-    public static readonly TimeSpan MinimumAccepted = TimeSpan.FromSeconds(2.5);
+    public static readonly TimeSpan MinimumAccepted = RequiredHold - BridgeJitterAllowance;
 
     public static bool IsComplete(TimeSpan held) => held >= MinimumAccepted;
 }

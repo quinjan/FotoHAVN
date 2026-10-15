@@ -44,17 +44,21 @@ public sealed class ExitHoldAndPinTests
     }
 
     [Fact]
-    public async Task The_hold_is_accepted_from_two_and_a_half_seconds_on_the_brains_clock()
+    public async Task The_hold_is_accepted_from_2_85_seconds_on_the_brains_clock()
     {
         using var rig = await RunningAsync();
         rig.GuestCommand("BeginExitHold");
-        rig.Advance(ExitHoldRules.MinimumAccepted - TimeSpan.FromMilliseconds(50));
+        rig.Advance(TimeSpan.FromSeconds(2.5));
 
         var early = rig.GuestCommand("CompleteExitHold");
 
         Assert.Equal(CommandResultMessage.Rejected(early.Id, RejectReason.NotAvailable), early);
         Assert.Null(rig.LatestGuest().Overlays.ExitHold);
         Assert.Null(rig.LatestGuest().Overlays.PinDialog);
+
+        rig.GuestCommand("BeginExitHold");
+        rig.Advance(ExitHoldRules.MinimumAccepted - TimeSpan.FromMilliseconds(10));
+        Assert.Equal(RejectReason.NotAvailable, rig.GuestCommand("CompleteExitHold").Reason);
 
         rig.GuestCommand("BeginExitHold");
         rig.Advance(ExitHoldRules.MinimumAccepted);

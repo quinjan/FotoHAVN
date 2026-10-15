@@ -664,6 +664,34 @@ describe("EventSetup", () => {
       expect(screen.getByRole("button", { name: "KEEP CURRENT PIN" })).toBeVisible();
     });
 
+    it("starts over from 'PIN set' when the brain consumes the pending PIN, so no stale pair is sent again", () => {
+      const { client, update } = setup(editingSetupView({ pin: { isSet: false, changing: false } }));
+      change("PIN", "4821");
+      change("Confirm PIN", "4821");
+      act(() => {
+        vi.advanceTimersByTime(draftIdleMs);
+      });
+      update(editingSetupView({ pin: { isSet: false, changing: true } }));
+      change("PIN", "48219");
+
+      // SAVE AND START saved the Event and its PIN, then the start failed: the brain reports the PIN as set, nothing pending.
+      update(editingSetupView({ pin: { isSet: true, changing: false }, startFailure: { code: "guestDisplayMissing", cameraReason: null } }));
+      act(() => {
+        vi.advanceTimersByTime(draftIdleMs * 2);
+      });
+
+      expect(screen.getByText("PIN set")).toBeVisible();
+      expect(screen.queryByLabelText("New PIN")).toBeNull();
+      expect(sent(client)).toEqual([["SetPin", { pin: "4821", confirmation: "4821" }]]);
+
+      fireEvent.click(screen.getByRole("button", { name: "CHANGE PIN" }));
+      expect(screen.getByLabelText("New PIN")).toHaveValue("");
+      expect(screen.getByLabelText("Confirm new PIN")).toHaveValue("");
+      change("New PIN", "9999");
+      fireEvent.blur(screen.getByLabelText("New PIN"));
+      expect(sent(client)).toEqual([["SetPin", { pin: "4821", confirmation: "4821" }], ["SetPin", { pin: "9999", confirmation: "" }]]);
+    });
+
     it("drops a pending send when the section goes away", () => {
       const { client, unmount } = setup(editingSetupView({ pin: { isSet: false, changing: false } }));
       change("PIN", "1234");

@@ -315,6 +315,26 @@ describe("Exit hold", () => {
     expect(names(sent)).toEqual(["BeginExitHold", "CompleteExitHold", "BeginExitHold", "CancelExit"]);
   });
 
+  it("returns focus to Operator exit when the PIN dialog closes, so the hold works again without tabbing", async () => {
+    const { client, sent } = stubClient();
+    const view = renderRoot(presentationOf("guest-shell-start-ready"), client);
+    exitControl().focus();
+    fireEvent.keyDown(exitControl(), { key: "Enter" });
+    await advance(3100);
+    expect(names(sent)).toEqual(["BeginExitHold", "CompleteExitHold"]);
+
+    view.rerender(presentationOf("guest-shell-pin-dialog"));
+    expect(screen.queryByRole("button", { name: "Operator exit" })).not.toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Operator PIN" }), { key: "Escape" });
+    expect(names(sent)).toEqual(["BeginExitHold", "CompleteExitHold", "CancelExit"]);
+    view.rerender(presentationOf("guest-shell-start-ready"));
+
+    expect(document.activeElement).toBe(exitControl());
+    fireEvent.keyDown(exitControl(), { key: "Enter" });
+    expect(names(sent)).toEqual(["BeginExitHold", "CompleteExitHold", "CancelExit", "BeginExitHold"]);
+    fireEvent.keyUp(exitControl(), { key: "Enter" });
+  });
+
   it("shows the progress as text while held", async () => {
     const { client } = stubClient();
     renderRoot(presentationOf("guest-shell-start-ready"), client);

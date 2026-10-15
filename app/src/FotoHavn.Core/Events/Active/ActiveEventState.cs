@@ -79,7 +79,13 @@ internal sealed record StartEventResult(StartFailureCode? Failure, CameraFailure
     /// <summary>The Event started.</summary>
     public static StartEventResult Started { get; } = new(null, null);
 
-    public bool Succeeded => Failure is null;
+    /// <summary>The operator ended the Event while it was still starting (the Guest Screen's handshake was pending): nothing runs and nothing failed.</summary>
+    public static StartEventResult Ended { get; } = new(null, null) { WasEnded = true };
+
+    /// <summary>True for <see cref="Ended"/>: the start never finished because the operator ended it, which is neither a success nor a failure to report.</summary>
+    public bool WasEnded { get; init; }
+
+    public bool Succeeded => Failure is null && !WasEnded;
 
     public static StartEventResult Failed(StartFailureCode code, CameraFailureKind? cameraReason = null) => new(code, cameraReason);
 }

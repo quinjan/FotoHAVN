@@ -100,6 +100,32 @@ public sealed partial class Brain
 
         public Task<StartEventResult> Result => _completion.Task;
 
+        /// <summary>The Event this sequence starts; it is held from the first step on.</summary>
+        public string EventId => eventId;
+
+        /// <summary>The bound camera device, known once step 2 has loaded the Event.</summary>
+        public string? CameraDeviceId => _record?.CameraDeviceId;
+
+        /// <summary>
+        /// The operator ended the Event while the sequence waited for the Guest Screen (step 8). The caller releases what the steps took,
+        /// exactly once, through the End Event sequence; this only stops the waits and completes the task as ended. Later callbacks
+        /// (a late handshake, the handshake timeout, a slow store answer) find the sequence finished and do nothing.
+        /// </summary>
+        public void Cancel()
+        {
+            if (_finished)
+            {
+                return;
+            }
+
+            _finished = true;
+            _awaitingGuest = false;
+            EndCameraWait();
+            StopTimeout();
+            brain._start = null;
+            _completion.TrySetResult(StartEventResult.Ended);
+        }
+
         /// <summary>Step 2 starts: the saved Event is loaded (step 1, no other Event running, was checked by the caller).</summary>
         public void Begin()
         {
