@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test, type TestInfo } from "@playwright/test";
+import type { TestInfo } from "@playwright/test";
+import { expect, test } from "../../../src/fixtures";
 import { paths } from "../../../src/paths";
 
 const guardText = "FOTOHAVN field builds must not include E2E hooks";
@@ -54,7 +55,7 @@ function outputDir(testInfo: TestInfo, name: string): string {
   return dir;
 }
 
-test.describe("publish guard", { tag: ["@m1"] }, () => {
+test.describe("publish guard", { tag: ["@m1", "@build"] }, () => {
   test.setTimeout(10 * 60_000);
 
   test("publishing with FotoHavnE2E=true is refused by the publish guard", () => {

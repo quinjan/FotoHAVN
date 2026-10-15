@@ -61,6 +61,9 @@ npm ci; npm run typecheck
 $env:FOTOHAVN_E2E_CAMERA = "<camera name or device id>"   # optional; defaults to the first camera
 npx playwright test --project=regression --grep "@m<N>"
 npx playwright test --project=smoke
+#    Each project runs a parallel pool (FOTOHAVN_E2E_WORKERS workers, default 4) and a serial exclusive pool of the specs tagged
+#    @camera, @cursor, or @build; a spec that opens the camera, moves the cursor, or runs dotnet build/publish must carry that tag
+#    (docs/local-development-guide.md, "Parallel runs and resource classes")
 #    The E2E build on its own (in ui/: npm run build:e2e, which writes ui/dist-e2e; then from app/):
 #    dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build
 

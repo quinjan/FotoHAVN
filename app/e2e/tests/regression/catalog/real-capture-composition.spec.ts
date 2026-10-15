@@ -74,7 +74,7 @@ function median(values: number[]): number {
 
 test(
   "four real captures compose into every Template × Look: each PNG has the native size, decodes, is opaque, and the COMPOSE button shows one (Panorama rotated)",
-  { tag: ["@m7"] },
+  { tag: ["@m7", "@camera"] },
   async ({ app, operatorPage, hooks, camera }, testInfo) => {
     test.setTimeout(240_000);
     const screen = await openDiagnostics(operatorPage, hooks, camera);

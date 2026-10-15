@@ -5,7 +5,7 @@ const byId = (a: { id: string }, b: { id: string }) => a.id.localeCompare(b.id);
 
 test(
   "the camera list from test.listCameras matches the diagnostics screen",
-  { tag: ["@m5"] },
+  { tag: ["@m5", "@camera"] },
   async ({ app, operatorPage, hooks, camera }) => {
     const screen = await openDiagnostics(operatorPage, hooks, camera);
     await waitForFreshFrames(hooks);

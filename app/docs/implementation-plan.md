@@ -874,7 +874,7 @@ A standalone Playwright TypeScript project:
 ```text
 app/e2e/
 ├─ package.json, package-lock.json, tsconfig.json
-├─ playwright.config.ts            projects: smoke, regression; workers: 1
+├─ playwright.config.ts            projects: smoke, regression, each a parallel pool and a serial exclusive pool (see "Parallel pools")
 ├─ src/
 │  ├─ launch.ts                    build or reuse the E2E build, start it, connect through CDP, tear down
 │  ├─ fixtures.ts                  test fixtures: app, page, data folder, camera, hooks
@@ -898,7 +898,7 @@ app/e2e/
   The fixture waits for the `hello` handshake before the test starts. On teardown, it collects the app log, the Data folder snapshot, and screenshots.
 - **Two screens in every test.** Both WebView2 controls share one browser process, so one CDP connection exposes both pages. The fixture provides `operatorPage` and, once an Event starts, `guestPage`, identified by the role the host assigns.
 - **Displays.** Most machines have one monitor, so scenarios use `test.useVirtualDisplays` by default. It gives the brain a set of virtual displays mapped to rectangles of the real monitor, so the Guest window opens as a separate window at those bounds. Scenarios tagged `@physical-displays` need two or more real displays. Without them, they are reported "not run: one display" and are covered by the milestone's manual checks.
-- **One worker.** The camera is opened exclusively, so tests run one at a time.
+- **Parallel pools.** The camera is opened exclusively, so tests that open it, move the OS cursor, or run `dotnet build`/`publish` (tagged `@camera`, `@cursor`, `@build`) run one at a time, held to that by a lock. Every other test file runs in its own app instance in up to `FOTOHAVN_E2E_WORKERS` workers (default 4), each with its own debugging port range, Data folder, and WebView2 user-data folder. E2E builds pass WebView2 anti-occlusion and anti-throttling arguments. The classification, the tagging rule, and the commands are in [the local development guide](local-development-guide.md#parallel-runs-and-resource-classes).
 - **Camera precondition.** Global setup launches the app once and asks the E2E hook for Available Cameras. It fails the whole run if there is none. It uses `FOTOHAVN_E2E_CAMERA` when set, otherwise the first listed camera, and prints the chosen camera.
 - **Assertions on real camera frames.** Real frames vary, so tests assert properties, not pixels: frames are fresh (age under 500 ms), the measured frame rate meets the floor set by spike S1, a Capture is a decodable JPEG of at least 1280×720, and its pixel variance shows it isn't blank. Pixel-exact checks stay in the catalog's golden-image unit tests.
 - **Locators.** Role, label, and visible-text locators first, which also checks accessible naming. `data-testid` only where there's no accessible handle, such as photograph windows on a canvas.

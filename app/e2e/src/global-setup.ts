@@ -26,6 +26,7 @@ export default async function globalSetup(): Promise<void> {
 function prepareOutput(): void {
   mkdirSync(paths.e2eOutput, { recursive: true });
   rmSync(paths.cameraFile, { force: true });
+  rmSync(path.join(paths.e2eOutput, "exclusive.lock"), { recursive: true, force: true });
   try {
     rmSync(paths.runs, { recursive: true, force: true });
   } catch (error) {
