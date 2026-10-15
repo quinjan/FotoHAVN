@@ -1,7 +1,7 @@
 import { expect, test } from "../../../src/fixtures";
 import { size, viewport } from "../../../src/displays";
 
-test.describe("physical displays", { tag: ["@m2", "@physical-displays"] }, () => {
+test.describe("physical displays", { tag: ["@m2", "@physical-displays", "@cursor"] }, () => {
   test("with two real displays the Guest window covers the second display's full bounds", async ({ app, hooks }) => {
     const diagnostics = await hooks.getDiagnostics();
     const real = diagnostics.displays.displays;

@@ -69,7 +69,7 @@ function recordMeasurements(resolution: string, measured: readonly Measurement[]
 for (const resolution of resolutions) {
   const name = resolutionName(resolution);
 
-  test(`every component fixture renders in WebView2 like the Chromium lane at ${name}`, { tag: ["@m3"] }, async ({ operatorPage: page, hooks }, testInfo) => {
+  test(`every component fixture renders in WebView2 like the Chromium lane at ${name}`, { tag: ["@m3", "@cursor"] }, async ({ operatorPage: page, hooks }, testInfo) => {
     test.setTimeout(20 * 60_000);
     const failures: string[] = [];
     const measured: Measurement[] = [];

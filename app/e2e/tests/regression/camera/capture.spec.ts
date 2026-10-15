@@ -56,7 +56,7 @@ function flipHorizontally(picture: Picture): Picture {
 
 test(
   "a capture produces a decodable JPEG of at least 1280×720 that isn't blank, mirrored when requested (compared with an unmirrored capture taken right after)",
-  { tag: ["@m5"] },
+  { tag: ["@m5", "@camera"] },
   async ({ app, operatorPage, hooks, camera, dataDir }, testInfo) => {
     const screen = await openDiagnostics(operatorPage, hooks, camera);
     await waitForFreshFrames(hooks);

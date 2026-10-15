@@ -3,6 +3,7 @@ import { test as base, expect, type Page } from "@playwright/test";
 import type { Camera } from "./camera";
 import { readChosenCamera } from "./chosen-camera";
 import { attachRunEvidence, captureTestScreenshot } from "./evidence";
+import { ExclusiveLock, isExclusive } from "./exclusive";
 import type { HookClient } from "./hooks";
 import { launchApp, type AppSession } from "./launch";
 import { fromApp } from "./paths";
@@ -24,11 +25,18 @@ function sameOptions(a: AppOptions, b: AppOptions): boolean {
  * and it is shut down when the next file starts, when a test fails, or when the worker ends.
  * A test whose launch options differ from the running app's (another `test.describe` with its own `appOptions`)
  * gets a fresh app, so each launch sees its own seed and arguments.
+ * An exclusive test (`@camera`, `@cursor`, `@build`) keeps the worker's exclusive lock for as long as its app runs,
+ * because the camera stays open until the app closes.
  */
 class AppManager {
   private current: { file: string; options: AppOptions; session: AppSession } | undefined;
 
-  async sessionFor(file: string, camera: Camera, options: AppOptions): Promise<AppSession> {
+  constructor(private readonly lock: ExclusiveLock) {}
+
+  async sessionFor(file: string, camera: Camera, options: AppOptions, exclusive: boolean): Promise<AppSession> {
+    if (exclusive) {
+      await this.lock.acquire("app", path.basename(file));
+    }
     if (
       this.current !== undefined &&
       this.current.file === file &&
@@ -51,10 +59,13 @@ class AppManager {
   async closeCurrent(): Promise<void> {
     const session = this.current?.session;
     this.current = undefined;
-    if (session === undefined || session.isClosed) {
-      return;
+    try {
+      if (session !== undefined && !session.isClosed) {
+        await closeCleanly(session);
+      }
+    } finally {
+      this.lock.release("app");
     }
-    await closeCleanly(session);
   }
 }
 
@@ -79,11 +90,15 @@ interface TestFixtures {
   hooks: HookClient;
   /** The run's Data folder, passed as `--data`. */
   dataDir: string;
+  /** Automatic: a test tagged `@camera`, `@cursor`, or `@build` waits here for the exclusive lock and holds it. */
+  exclusiveResource: void;
 }
 
 interface WorkerFixtures {
   /** The camera chosen by global setup and passed as `--e2e-camera`. */
   camera: Camera;
+  /** This worker's handle on the lock that keeps exclusive tests from running together. */
+  exclusiveLock: ExclusiveLock;
   appManager: AppManager;
 }
 
@@ -94,17 +109,37 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     },
     { scope: "worker" },
   ],
-  appManager: [
+  exclusiveLock: [
     async ({}, use) => {
-      const manager = new AppManager();
+      await use(new ExclusiveLock());
+    },
+    { scope: "worker" },
+  ],
+  appManager: [
+    async ({ exclusiveLock }, use) => {
+      const manager = new AppManager(exclusiveLock);
       await use(manager);
       await manager.closeCurrent();
     },
     { scope: "worker" },
   ],
   appOptions: [{}, { option: true }],
-  app: async ({ appManager, camera, appOptions }, use, testInfo) => {
-    const session = await appManager.sessionFor(testInfo.file, camera, appOptions);
+  // Waiting for another exclusive test is not part of this test's time budget (timeout 0).
+  exclusiveResource: [
+    async ({ exclusiveLock }, use, testInfo) => {
+      const exclusive = isExclusive(testInfo.tags);
+      if (exclusive) {
+        await exclusiveLock.acquire("test", testInfo.titlePath.join(" > "));
+      }
+      await use();
+      if (exclusive) {
+        exclusiveLock.release("test");
+      }
+    },
+    { auto: true, timeout: 0 },
+  ],
+  app: async ({ appManager, camera, appOptions, exclusiveResource: _exclusiveResource }, use, testInfo) => {
+    const session = await appManager.sessionFor(testInfo.file, camera, appOptions, isExclusive(testInfo.tags));
     await use(session);
     if (!session.isClosed) {
       for (const role of ["operator", "guest"] as const) {

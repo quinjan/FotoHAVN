@@ -13,16 +13,36 @@ internal static class WebViewSettings
     public static Uri StartUri { get; } = new($"https://{AppHostName}/index.html");
 
     /// <summary>
-    /// Browser arguments for the shared WebView2 environment. Only E2E builds open a remote debugging port;
-    /// field builds ignore <c>--remote-debugging-port</c>. One environment means one browser process, so the port
-    /// exposes both windows' pages.
+    /// Chromium switches for E2E builds only: parallel app instances overlap on screen, so a covered or background
+    /// window must keep rendering and running timers instead of being occluded or throttled.
+    /// </summary>
+    public static IReadOnlyList<string> E2EAntiOcclusionArguments { get; } =
+    [
+        "--disable-features=CalculateNativeWinOcclusion",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-background-timer-throttling",
+    ];
+
+    /// <summary>
+    /// Browser arguments for the shared WebView2 environment. Only E2E builds open a remote debugging port
+    /// (field builds ignore <c>--remote-debugging-port</c>) and add <see cref="E2EAntiOcclusionArguments"/>. One environment
+    /// means one browser process, so the port exposes both windows' pages. A field build passes no arguments.
     /// </summary>
     public static string? AdditionalBrowserArguments(HostOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        return HostBuild.IsE2E && options.RemoteDebuggingPort is int port
-            ? string.Create(CultureInfo.InvariantCulture, $"--remote-debugging-port={port}")
-            : null;
+        if (!HostBuild.IsE2E)
+        {
+            return null;
+        }
+        var arguments = new List<string>();
+        if (options.RemoteDebuggingPort is int port)
+        {
+            arguments.Add(string.Create(CultureInfo.InvariantCulture, $"--remote-debugging-port={port}"));
+        }
+        arguments.AddRange(E2EAntiOcclusionArguments);
+        return string.Join(' ', arguments);
     }
 
     /// <summary>Whether a web message's source is the app: <c>https://app.fotohavn</c> on the default port.</summary>

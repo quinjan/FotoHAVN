@@ -77,11 +77,38 @@ export function assertE2EBuildExists(): void {
 /** Starts the E2E build with a fresh Data folder, connects over CDP, and waits for the operator handshake. */
 export async function launchApp(options: LaunchOptions): Promise<AppSession> {
   assertE2EBuildExists();
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await startApp(options);
+    } catch (error) {
+      // A debugging port taken by another process between the probe and the app's bind shows up as a launch that never
+      // answers on the port; a second attempt picks another port. Any later failure is a real failure.
+      if (attempt >= maxLaunchAttempts || !(error instanceof LaunchError) || !error.debuggerStage) {
+        throw error;
+      }
+      console.warn(`Launch attempt ${attempt} failed before the debugging port answered; retrying on another port. ${error.message}`);
+    }
+  }
+}
 
+const maxLaunchAttempts = 2;
+
+/** A failed launch; `debuggerStage` is true when the app never opened a debugging port that Playwright could attach to. */
+class LaunchError extends Error {
+  constructor(
+    message: string,
+    readonly debuggerStage: boolean,
+    options: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
+async function startApp(options: LaunchOptions): Promise<AppSession> {
   const runDir = path.join(paths.runs, `${timestamp()}-${slug(options.name)}-${randomBytes(2).toString("hex")}`);
   mkdirSync(runDir, { recursive: true });
   const dataDir = options.dataDir ?? path.join(runDir, "Data");
-  const port = await freePort();
+  const port = await allocateDebugPort();
   const args = ["--data", dataDir, "--remote-debugging-port", String(port)];
   if (options.camera !== undefined) {
     args.push("--e2e-camera", options.camera.id);
@@ -119,11 +146,13 @@ export async function launchApp(options: LaunchOptions): Promise<AppSession> {
   });
 
   let browser: Browser | undefined;
+  let debuggerStage = true;
   try {
     const startupTimeoutMs = options.startupTimeoutMs ?? defaultStartupTimeoutMs;
     const deadline = Date.now() + startupTimeoutMs;
     await waitForDebugger(port, exited, deadline, run);
     browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: remaining(deadline) });
+    debuggerStage = false;
     // Readiness: the Operator page completed its handshake (the `welcome` set the root's role and status).
     const page = await findRolePage(browser, "operator", deadline, run);
     return createSession(run, child, exited, browser, page, () => {
@@ -139,12 +168,19 @@ export async function launchApp(options: LaunchOptions): Promise<AppSession> {
     await browser?.close().catch(() => undefined);
     run.errors.push(`Launch failed: ${error instanceof Error ? error.message : String(error)}`);
     collectRunEvidence(run);
-    throw new Error(
+    throw new LaunchError(
       `FOTOHAVN failed to start (${error instanceof Error ? error.message : String(error)}). ` +
         `Evidence: ${fromApp(runDir)}${stderrTail(run)}`,
+      // An app that exited on its own (a crash, a bad argument) is not a port problem.
+      debuggerStage && !appExitedByItself(run),
       { cause: error },
     );
   }
+}
+
+/** Whether the app exited before this harness ended it, which a different port wouldn't change. */
+function appExitedByItself(run: RunRecord): boolean {
+  return run.exit !== undefined && !run.exit.killed;
 }
 
 function createSession(
@@ -303,6 +339,41 @@ function killTree(child: ChildProcess): void {
   } else {
     child.kill("SIGKILL");
   }
+}
+
+/** First port of the per-worker debugging port ranges; FOTOHAVN_E2E_PORT_BASE moves them. */
+const portBase = Number(process.env["FOTOHAVN_E2E_PORT_BASE"] ?? "19300");
+const portsPerWorker = 10;
+let launchesInThisProcess = 0;
+
+/**
+ * Picks the remote debugging port for the next launch. Each worker owns the range
+ * `portBase + parallelIndex * 10 .. +9` and walks it round-robin (so a port just freed isn't reused at once), probing that
+ * the port is free. A range port that is taken (a nested Playwright run uses the same indices) is skipped; when the whole range
+ * is taken, the OS hands out a free port.
+ */
+async function allocateDebugPort(): Promise<number> {
+  const workerIndex = Number(process.env["TEST_PARALLEL_INDEX"] ?? "0") || 0;
+  const rangeStart = portBase + workerIndex * portsPerWorker;
+  for (let probe = 0; probe < portsPerWorker; probe += 1) {
+    const port = rangeStart + (launchesInThisProcess % portsPerWorker);
+    launchesInThisProcess += 1;
+    if (await isPortFree(port)) {
+      return port;
+    }
+  }
+  return freePort();
+}
+
+function isPortFree(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", () => resolve(false));
+    server.listen(port, "127.0.0.1", () => {
+      server.close(() => resolve(true));
+    });
+  });
 }
 
 export function freePort(): Promise<number> {

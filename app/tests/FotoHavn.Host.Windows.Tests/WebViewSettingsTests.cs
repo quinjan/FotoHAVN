@@ -17,6 +17,33 @@ public sealed class WebViewSettingsTests
     }
 
     [Fact]
+    public void Field_build_passes_no_browser_arguments_at_all()
+    {
+#if E2E_HOOKS
+        Assert.Skip("not run: asserts a field build; an E2E build adds the debugging port and the anti-occlusion arguments.");
+#endif
+        Assert.Null(WebViewSettings.AdditionalBrowserArguments(new HostOptions(null, null, null)));
+        Assert.Null(WebViewSettings.AdditionalBrowserArguments(new HostOptions(null, 9333, null)));
+    }
+
+    [Fact]
+    public void E2E_build_keeps_covered_and_background_windows_rendering()
+    {
+#if !E2E_HOOKS
+        Assert.Skip("not run: asserts an E2E build; a field build passes no browser arguments.");
+#endif
+        var arguments = WebViewSettings.AdditionalBrowserArguments(new HostOptions(null, 9333, null));
+
+        Assert.NotNull(arguments);
+        Assert.Contains("--remote-debugging-port=9333", arguments, StringComparison.Ordinal);
+        Assert.Contains("--disable-features=CalculateNativeWinOcclusion", arguments, StringComparison.Ordinal);
+        Assert.Contains("--disable-backgrounding-occluded-windows", arguments, StringComparison.Ordinal);
+        Assert.Contains("--disable-renderer-backgrounding", arguments, StringComparison.Ordinal);
+        Assert.Contains("--disable-background-timer-throttling", arguments, StringComparison.Ordinal);
+        Assert.DoesNotContain("--remote-debugging-port", WebViewSettings.AdditionalBrowserArguments(new HostOptions(null, null, null)), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Environment_uses_Fluent_overlay_scrollbars_and_keeps_the_browser_arguments()
     {
         var options = WebViewEnvironmentProvider.BuildOptions("--remote-debugging-port=9333");

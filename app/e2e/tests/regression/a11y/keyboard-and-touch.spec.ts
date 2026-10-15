@@ -160,7 +160,7 @@ async function expectTarget(control: Locator, minimumWidth: number, minimumHeigh
   expect(box?.height ?? 0, `${label} height`).toBeGreaterThanOrEqual(minimumHeight - 0.5);
 }
 
-test.describe("keyboard and touch in the real host", { tag: ["@m3"] }, () => {
+test.describe("keyboard and touch in the real host", { tag: ["@m3", "@cursor"] }, () => {
   test("Tab visits the controls in reading order and each shows the 2 px focus ring at 5 px", async ({ operatorPage: page, hooks }) => {
     const colors = brandColors();
     try {

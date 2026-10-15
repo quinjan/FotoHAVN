@@ -80,7 +80,7 @@ test.describe("camera precondition", { tag: ["@m1"] }, () => {
   });
 });
 
-test.describe("camera precondition in global setup", { tag: ["@m1"] }, () => {
+test.describe("camera precondition in global setup", { tag: ["@m1", "@camera", "@build"] }, () => {
   test.setTimeout(6 * 60_000);
 
   test(`a run with ${cameraEnvVar}=missing-device fails global setup with the exact required-camera message`, async ({

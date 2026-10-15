@@ -26,7 +26,7 @@ const faults: readonly { kind: CameraFaultKind; reason: string; line: string; bu
   { kind: "exclusiveLost", reason: "exclusiveLost", line: "Another app took over the camera.", budgetMs: immediateBudgetMs },
 ];
 
-test.describe("injected camera faults", { tag: ["@m5"] }, () => {
+test.describe("injected camera faults", { tag: ["@m5", "@camera"] }, () => {
   test("each injected fault (stale, failed, removed, exclusiveLost) moves the state to Not available within its budget; clearing it and retrying brings back fresh frames", async ({
     app,
     operatorPage,

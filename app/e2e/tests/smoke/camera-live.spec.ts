@@ -20,7 +20,7 @@ interface Sample {
 
 test(
   "on the diagnostics screen, the selected camera shows a live preview; frame age stays under 500 ms; the frame rate meets the S1 floor for 10 s",
-  { tag: ["@m5"] },
+  { tag: ["@m5", "@camera"] },
   async ({ app, operatorPage, hooks, camera }, testInfo) => {
     const screen = await openDiagnostics(operatorPage, hooks, camera);
 
