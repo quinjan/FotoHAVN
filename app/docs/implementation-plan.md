@@ -1518,15 +1518,15 @@ Verification record (M5):
 ### M6: operator screens, Event setup, and running an Event (L)
 
 Tasks:
-- [ ] Brain: application state machine for the Event list, Event setup draft, validation, save, leave confirmation, delete with confirmation, and open folder.
-- [ ] Brain: Camera Binding and eligibility in Event setup, using the M5 policies, including "In use by the running Event".
-- [ ] Brain: Guest Display Binding in Event setup, `IdentifyDisplays`, and the bound-display check at Start.
-- [ ] Brain: PIN rules, including lockout with the fake clock.
-- [ ] Brain: the Start Event sequence (section 8), opening the Guest Screen on the bound display; the Active Event shell on the Guest Screen (Start with the hold control and PIN exit).
-- [ ] Brain: the Operator Screen during an Active Event: the running-Event panel, the locked running Event (rejecting edit, delete, and start with `eventRunning`), work on other Events, `END EVENT` with confirmation, and single-screen behavior (D38).
-- [ ] UI: Event list with the running row and panel; Event setup (all sections, including the guest display picker, Phase Timers, and the guest gallery control); Template and Look pickers with blank previews from M7; the camera field with live preview; the identify overlay; the confirm dialog; the PIN pad.
-- [ ] Open folder through the host (File Explorer), disabled in the headless host.
-- [ ] Generate presentation fixtures for every operator state, including the running-Event panel states.
+- [x] Brain: application state machine for the Event list, Event setup draft, validation, save, leave confirmation, delete with confirmation, and open folder.
+- [x] Brain: Camera Binding and eligibility in Event setup, using the M5 policies, including "In use by the running Event".
+- [x] Brain: Guest Display Binding in Event setup, `IdentifyDisplays`, and the bound-display check at Start.
+- [x] Brain: PIN rules, including lockout with the fake clock.
+- [x] Brain: the Start Event sequence (section 8), opening the Guest Screen on the bound display; the Active Event shell on the Guest Screen (Start with the hold control and PIN exit).
+- [x] Brain: the Operator Screen during an Active Event: the running-Event panel, the locked running Event (rejecting edit, delete, and start with `eventRunning`), work on other Events, `END EVENT` with confirmation, and single-screen behavior (D38).
+- [x] UI: Event list with the running row and panel; Event setup (all sections, including the guest display picker, Phase Timers, and the guest gallery control); Template and Look pickers with blank previews from M7; the camera field with live preview; the identify overlay; the confirm dialog; the PIN pad.
+- [x] Open folder through the host (File Explorer), disabled in the headless host.
+- [x] Generate presentation fixtures for every operator state, including the running-Event panel states.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
@@ -1567,6 +1567,75 @@ Verification. The implementing agent writes and runs these through the [verifica
   - Map the guest touch screen in Windows and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
   - Type Event metadata with the Windows touch keyboard (spike S2 starts here).
   - Check readability of the Event list at arm's length.
+
+Verification record (M6):
+- **Date and commits:** 2026-10-15.
+  - Contracts (protocol v6): `41752cc`.
+  - Parallel merges: `c72499b`.
+  - Integration (protocol v7, `ProbeWritableAsync`, time-zone-independent fixtures): `3700a43`.
+  - `@m6` end-to-end: `cc866ed9`.
+  - Parallel end-to-end pools: `4e7f3126` and `3d1d2a8c`.
+  - Review fixes: `c9252737`.
+  - Storage timing-test fix: `74969ab`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (two virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
+- **Results:** from an independent clean clone at `c9252737`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test`, run twice | 3006 tests each: 3001 passed, 5 skipped (2 file symlinks, 2 opt-in Windows Camera app tests, and 1 E2E-only host test) |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 1464 passed |
+  | 2 | Spike S3 speed step | Medians 39.6–52.3 ms |
+  | 3 | UI `test:coverage` | 1149 passed |
+  | 3 | UI `test:fixtures` | 564 passed |
+  | 5 | `--project=regression` | 67 passed, 2 skipped (both physical-display scenarios, "not run: one display"), in 13 m 33 s. By milestone: `@m1` 9, `@m2` 7 + 1 skipped, `@m3` 29, `@m4` 4, `@m5` 3, `@m6` 14 + 1 skipped, `@m7` 2. |
+  | 5 | Smoke | 6 passed in 44 s |
+  | 5 | Visual comparison | 864 comparisons, maximum 0.517%, mean 0.016% |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | `publish-field-test.ps1` | Succeeds |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 98.1% | 93.4% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 99.7% | 95.5% |
+
+  UI: 99.77% lines and 98.21% branches.
+- **Load sensitivity:** the gate's first pass ran while an unrelated CPU stress loop held the machine at about 85% CPU. Five tests with tight time budgets failed:
+  - UI `lint-rules` (60 s timeout);
+  - the guest-shell hold fixture;
+  - `ui-crash-recovery` (5185 ms against a 5 s budget);
+  - `identify-displays` (2 s wait);
+  - `camera/faults` (544 ms against 500 ms).
+
+  All passed in isolation and on the quiet rerun. Gate runs must not overlap other heavy work.
+- **End-to-end parallelism:** specs are tagged `@camera`, `@cursor`, or `@build` and run in a serial pool. Everything else runs on 4 workers. The parallel pool alone takes 29 s instead of 60 s. A full regression run takes about the same time either way (895 s on 4 workers, 863 s on 1), because the serial pool (about 13 minutes, mostly the `@m3` visual run) dominates. A cross-pool lock means the camera is never opened twice. A debugging-port clash in the nested camera-precondition run was found and fixed.
+- **GitHub CI:**
+  - `Desktop app` run 38672412693 (`cc866ed9`) succeeded.
+  - Run 38678662316 (`c9252737`) failed: a Storage test waited a fixed 300 ms for the store to close and lost the race on the hosted runner.
+  - Run 38684947760 (`74969ab`) succeeded on two attempts after that test was made deterministic.
+- **Review fixes:**
+  - **(High)** An Event that was still starting wasn't locked. During Start steps 2–7, the Event could be edited, deleted, or saved, and its camera replaced or released. Starting now holds the Event and the camera.
+  - **(High)** `END EVENT` during Start step 8 left the start sequence running. That caused double releases and a false "guest display didn't respond". Ending now cancels the start, and the rollback runs exactly once.
+  - **(Medium)** The exit hold was accepted at 2.5 s. It now takes at least 2.85 s on the brain clock: 3 s minus a 150 ms allowance for message delay.
+  - **(Medium)** Typed PIN digits stayed in the setup form after a save. They're now cleared.
+  - **(Medium)** Focus wasn't returned to the exit control after the PIN dialog closed. It now is.
+- **Product bug found by end-to-end:** the running Event's row showed "End the running Event to start another." although it offers no START.
+- **Decisions:** Q19 (camera sharing during an Active Event), Q20 (a PIN is required only to start), Q21 (a PIN-store failure counts as a wrong attempt), and Q22 (`guestScreenNotReady`) are recorded in section 18. Protocol v7.
+- **Manual (pending, to be run by the owner):**
+  - On two real monitors, choose each display with `IDENTIFY DISPLAYS` and confirm the Guest Screen lands on the right one. This also covers the skipped `physical-displays` scenarios.
+  - Map the guest touch screen and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
+  - Type Event metadata with the Windows touch keyboard (spike S2).
+  - Check readability of the Event list at arm's length.
+- **Not proven:**
+  - Two real displays.
+  - A real mouse press-and-hold on the Guest Screen: the end-to-end tests use touch and the keyboard.
+  - Identify overlays on real hardware: they're checked through diagnostics and a manual screenshot on virtual displays.
+  - Behavior with a real scene.
+  - Note: at 1920 px and wider, the setup form uses only the left column, about 775–860 px. That fits the layout but may merit a design review.
 
 ### M7: catalog and compositor (M)
 
