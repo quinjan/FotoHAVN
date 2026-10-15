@@ -188,6 +188,7 @@ export function startFailureText(failure: EventSetupStartFailure): string {
     storageNotWritable: "The Data folder can't be written to, so the Event can't start. Check the folder, then try again.",
     pinMissing: "Set an Operator PIN to start this Event.",
     invalidSetup: "Some details need attention before this Event can start. Check the fields below.",
+    guestScreenNotReady: "The guest display didn't respond. Check it, then try again.",
   };
   if (failure.code === "cameraNotEligible") {
     return failure.cameraReason === null ? "The camera isn't ready to start." : `The camera isn't ready to start. ${cameraReasonCopy[failure.cameraReason]}`;

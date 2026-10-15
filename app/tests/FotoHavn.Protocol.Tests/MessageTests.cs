@@ -12,7 +12,7 @@ public sealed class MessageTests
     [Fact]
     public void Protocol_version_is_six()
     {
-        Assert.Equal(6, ProtocolVersion.Current);
+        Assert.Equal(7, ProtocolVersion.Current);
     }
 
     [Fact]

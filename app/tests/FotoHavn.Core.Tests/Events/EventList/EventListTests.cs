@@ -2,6 +2,7 @@ using FotoHavn.Core.Fakes;
 using FotoHavn.Core.Storage;
 using FotoHavn.Core.Tests.Events.Setup;
 using FotoHavn.Core.Tests.Storage;
+using FotoHavn.Core.Tests.Support;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Presentations;
 
@@ -378,7 +379,7 @@ public sealed class EventListTests
         rig.OpenNew();
 
         var setup = rig.Setup;
-        var today = DateOnly.FromDateTime(rig.Clock.UtcNow.ToLocalTime().DateTime);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(rig.Clock.UtcNow, TestDependencies.FixedTimeZone).DateTime);
         Assert.Equal(OperatorSurface.EventSetup, rig.Latest.Surface);
         Assert.True(setup.IsNew);
         Assert.Null(setup.EventId);
@@ -395,6 +396,18 @@ public sealed class EventListTests
         Assert.Equal(new EventSetupPinView(false, false), setup.Pin);
         Assert.Null(setup.Camera.SelectedDeviceId);
         Assert.Null(setup.GuestDisplay.SelectedId);
+    }
+
+    [Fact]
+    public async Task The_default_date_follows_the_brains_time_zone_not_the_machines()
+    {
+        using var rig = await RigAsync();
+        rig.Clock.Advance(TimeSpan.FromHours(11));
+
+        rig.OpenNew();
+
+        Assert.Equal(new DateTimeOffset(2026, 10, 13, 23, 0, 0, TimeSpan.Zero), rig.Clock.UtcNow);
+        Assert.Equal("2026-10-14", rig.Setup.Fields.Date);
     }
 
     [Fact]

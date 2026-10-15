@@ -690,6 +690,7 @@ describe("EventSetup", () => {
       [{ code: "storageNotWritable", cameraReason: null }, "The Data folder can't be written to, so the Event can't start. Check the folder, then try again."],
       [{ code: "pinMissing", cameraReason: null }, "Set an Operator PIN to start this Event."],
       [{ code: "invalidSetup", cameraReason: null }, "Some details need attention before this Event can start. Check the fields below."],
+      [{ code: "guestScreenNotReady", cameraReason: null }, "The guest display didn't respond. Check it, then try again."],
     ] as const)("shows the start failure %o at the top in words", (startFailure, text) => {
       setup(editingSetupView({ startFailure }));
       const line = screen.getByText(text, { selector: "span" });

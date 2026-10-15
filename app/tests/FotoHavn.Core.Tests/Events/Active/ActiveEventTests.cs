@@ -369,7 +369,7 @@ public sealed class ActiveEventTests
 
         rig.Advance(Brain.GuestScreenReadyTimeout + TimeSpan.FromSeconds(1));
 
-        Assert.Equal(StartFailureCode.GuestDisplayMissing, (await start).Failure);
+        Assert.Equal(StartFailureCode.GuestScreenNotReady, (await start).Failure);
         Assert.False(rig.Diagnostics().WakeLock.Held);
     }
 

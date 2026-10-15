@@ -165,6 +165,7 @@ public sealed partial class Brain
         ReleaseCamera();
         _dependencies.WakeLock.Release();
         _activeEvent = null;
+        RefreshSetupCamera();
         if (_confirmation?.Kind == ConfirmationKind.EndEvent)
         {
             _confirmation = null;

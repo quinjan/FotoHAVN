@@ -81,6 +81,9 @@ export const storageErrorKinds: readonly StorageErrorReason[] = [
 
 const kebab = (kind: string): string => kind.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
+/** The storage errors the brain's fixture tests write as files, so no hand-written fixture may share their names. */
+export const storageErrorKindsFromBrain: readonly StorageErrorReason[] = ["diskFull"];
+
 /**
  * The camera diagnostics view (M5) for a fixture, on the revision the brain-generated ones use. The brain writes the
  * fixtures for ready, checking, privacy denied, in use, and no cameras; the other not-available reasons are here.
@@ -188,7 +191,7 @@ export function operatorFixtures(): Record<string, OperatorWelcomeMessage> {
       lastComposition: null,
     });
   }
-  for (const kind of storageErrorKinds) {
+  for (const kind of storageErrorKinds.filter((candidate) => !storageErrorKindsFromBrain.includes(candidate))) {
     fixtures[`operator-storage-error-${kebab(kind)}`] = operatorStorageError(
       kind,
       kind === "cloudSynced" ? "C:\\Users\\Booth\\OneDrive\\FOTOHAVN\\Data" : "C:\\FOTOHAVN\\Data",

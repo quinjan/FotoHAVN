@@ -114,6 +114,7 @@ public sealed class EventSetupStartTests
         { StartFailureCode.StorageNotWritable, null },
         { StartFailureCode.PinMissing, null },
         { StartFailureCode.InvalidSetup, null },
+        { StartFailureCode.GuestScreenNotReady, null },
     };
 
     [Theory]

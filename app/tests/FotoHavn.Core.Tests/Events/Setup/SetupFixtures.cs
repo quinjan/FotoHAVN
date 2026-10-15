@@ -109,6 +109,7 @@ internal static class SetupFixtures
             ["operator-event-setup-start-failure-pin-missing"] = () => StartFailure(new EventSetupStartFailure(StartFailureCode.PinMissing, null)),
             ["operator-event-setup-start-failure-invalid-setup"] = () => StartFailure(new EventSetupStartFailure(StartFailureCode.InvalidSetup, null)),
             ["operator-event-setup-start-failure-event-running"] = () => StartFailure(new EventSetupStartFailure(StartFailureCode.EventRunning, null)),
+            ["operator-event-setup-start-failure-guest-screen-not-ready"] = () => StartFailure(new EventSetupStartFailure(StartFailureCode.GuestScreenNotReady, null)),
         };
 
     private static EventRecord Ghost(string name) => SetupSamples.Event(GhostId, name);

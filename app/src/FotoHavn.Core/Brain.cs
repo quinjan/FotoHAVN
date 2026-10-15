@@ -38,6 +38,9 @@ public sealed record BrainDependencies(
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
 
+    /// <summary>The time zone that decides "today" for a new Event's default date. The machine's local zone in the app; tests and fixtures fix it so dates never depend on the machine.</summary>
+    public TimeZoneInfo LocalTimeZone { get; init; } = TimeZoneInfo.Local;
+
     /// <summary>The preview channel's frame counters, for diagnostics only. Null reads as no preview channel.</summary>
     public IPreviewStats? PreviewStats { get; init; }
 

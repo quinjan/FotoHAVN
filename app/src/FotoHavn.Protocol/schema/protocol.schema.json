@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 6
+      "const": 7
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -5188,7 +5188,8 @@
         "cameraNotEligible",
         "storageNotWritable",
         "pinMissing",
-        "invalidSetup"
+        "invalidSetup",
+        "guestScreenNotReady"
       ]
     },
     "StartOverCommand": {

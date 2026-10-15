@@ -240,6 +240,7 @@ public enum StartFailureCode
     StorageNotWritable,
     PinMissing,
     InvalidSetup,
+    GuestScreenNotReady,
 }
 
 /// <summary>The reason the last start attempt stopped. Cleared by the next change to the draft or the next attempt.</summary>

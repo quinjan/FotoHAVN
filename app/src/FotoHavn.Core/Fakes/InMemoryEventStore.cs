@@ -149,6 +149,20 @@ public sealed class InMemoryEventStore : IEventStore
         }
     }
 
+    /// <summary>How many times <see cref="ProbeWritableAsync"/> was called, failed or not.</summary>
+    public int ProbeCalls { get; private set; }
+
+    /// <summary>Succeeds like a writable Data folder; <see cref="FailNext"/> makes it fail like one that isn't.</summary>
+    public Task ProbeWritableAsync(CancellationToken ct)
+    {
+        lock (_gate)
+        {
+            ProbeCalls++;
+        }
+
+        return Run(ct, () => { });
+    }
+
     public Task<IReadOnlyList<EventSummary>> ListEventsAsync(CancellationToken ct) =>
         Run<IReadOnlyList<EventSummary>>(ct, () => [.. _events.Values
             .Where(entry => !entry.Deleting)

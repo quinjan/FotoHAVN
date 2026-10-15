@@ -106,6 +106,32 @@ public sealed class InMemoryEventStoreTests
     }
 
     [Fact]
+    public async Task The_write_probe_succeeds_counts_its_calls_and_fails_once_on_FailNext()
+    {
+        var store = await OpenStoreAsync();
+
+        await store.ProbeWritableAsync(Ct);
+        store.FailNext(StorageErrorKind.NotWritable);
+        var failure = await FailureAsync(store.ProbeWritableAsync(Ct));
+        await store.ProbeWritableAsync(Ct);
+
+        Assert.Equal(StorageErrorKind.NotWritable, failure.Kind);
+        Assert.Equal(3, store.ProbeCalls);
+    }
+
+    [Fact]
+    public async Task The_write_probe_refuses_until_the_store_is_open_and_honours_a_cancelled_token()
+    {
+        var closed = new InMemoryEventStore(_clock);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => closed.ProbeWritableAsync(Ct));
+
+        var store = await OpenStoreAsync();
+        using var cancelled = new CancellationTokenSource();
+        await cancelled.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => store.ProbeWritableAsync(cancelled.Token));
+    }
+
+    [Fact]
     public async Task ClearFailures_clears_a_pending_fail_next()
     {
         var store = await OpenStoreAsync();

@@ -197,7 +197,13 @@ export type PrinterChoice = "none";
  * via the `definition` "StartFailureCode".
  */
 export type StartFailureCode =
-  "eventRunning" | "guestDisplayMissing" | "cameraNotEligible" | "storageNotWritable" | "pinMissing" | "invalidSetup";
+  | "eventRunning"
+  | "guestDisplayMissing"
+  | "cameraNotEligible"
+  | "storageNotWritable"
+  | "pinMissing"
+  | "invalidSetup"
+  | "guestScreenNotReady";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "RunningDisplayState".
@@ -345,7 +351,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 6;
+  protocolVersion: 7;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -2456,4 +2462,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 6;
+export const PROTOCOL_VERSION = 7;

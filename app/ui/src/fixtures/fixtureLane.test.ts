@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ProtocolBrainClient } from "../brain/protocolClient.ts";
 import { PROTOCOL_VERSION } from "../protocol/generated.ts";
-import { createFixtureLaneTransport, fixtureNames, fixtureSnapshots, toFixtureSnapshot } from "./fixtureLane.ts";
+import { createFixtureLaneTransport, fixtureNames, fixtureSnapshots, generatedFixtureNames, handWrittenFixtureNames, toFixtureSnapshot } from "./fixtureLane.ts";
 import { guestStart, operatorEventListEmpty } from "./inlineFixtures.ts";
 
 async function flush(): Promise<void> {
@@ -34,6 +34,19 @@ describe("fixture lane", () => {
       ]),
     );
     expect([...fixtureNames]).toEqual([...fixtureNames].sort());
+  });
+
+  it("serves the operator and guest hand-written sets beside every brain-generated file, with no name shared", () => {
+    expect(generatedFixtureNames.length).toBeGreaterThan(40);
+    expect(handWrittenFixtureNames.filter((name) => generatedFixtureNames.includes(name))).toEqual([]);
+    expect(new Set(fixtureNames).size).toBe(generatedFixtureNames.length + handWrittenFixtureNames.length);
+    for (const prefix of ["operator-list-", "operator-setup-", "guest-shell-"]) {
+      expect(handWrittenFixtureNames.some((name) => name.startsWith(prefix))).toBe(true);
+    }
+    for (const name of ["operator-single-screen", "operator-event-list", "operator-running-normal", "operator-event-setup-new", "guest-start-ready", "guest-pin-dialog"]) {
+      expect(fixtureNames).toContain(name);
+    }
+    expect(generatedFixtureNames.filter((name) => name.startsWith("operator-list-") || name.startsWith("operator-setup-") || name.startsWith("guest-shell-"))).toEqual([]);
   });
 
   it("serves the generated welcomes unchanged", () => {

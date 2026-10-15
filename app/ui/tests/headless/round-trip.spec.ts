@@ -134,7 +134,7 @@ test("a guest page's OpenNewEvent is rejected wrongRole", async ({ browser, host
   await guest.page.context().close();
 });
 
-test("an operator page's OpenNewEvent is rejected notAvailable, from the button and from the client", async ({
+test("an operator page's OpenNewEvent opens Event setup from the button, and a second one from the client is rejected notAvailable", async ({
   browser,
   host,
 }) => {
@@ -142,7 +142,7 @@ test("an operator page's OpenNewEvent is rejected notAvailable, from the button 
   await expectHandshake(operator.page, "operator");
 
   await operator.page.getByRole("button", { name: "NEW EVENT" }).click();
-  await expect(operator.page.getByRole("status").filter({ hasText: "That isn't ready yet." })).toBeVisible();
+  await expect(operator.page.locator('[data-fotohavn-surface="eventSetup"]')).toBeVisible();
   expect(await sendCommand(operator.page, "OpenNewEvent")).toEqual({ status: "rejected", reason: "notAvailable" });
   expect(operator.received.filter((message) => message.type === "commandResult")).toHaveLength(2);
 

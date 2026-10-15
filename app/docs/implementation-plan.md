@@ -478,10 +478,10 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 2. Validate the saved Event Setup.
 3. Check that the bound guest display is connected. If it isn't, stay in Event setup with "The chosen guest display isn't connected." The app never substitutes another display.
 4. Open the bound camera and require a fresh frame. If that fails, stay in Event setup with the reason.
-5. Check that storage is writable.
+5. Check that storage is writable (`IEventStore.ProbeWritableAsync`).
 6. Compose the blank Template previews.
 7. Acquire the wake lock.
-8. Open the Guest Screen full screen on the bound display, wait for its UI handshake, and show Start there.
+8. Open the Guest Screen full screen on the bound display, wait for its UI handshake, and show Start there. If it doesn't answer within 10 seconds, or the host can't open the window, stay in Event setup with "The guest display didn't respond. Check it, then try again." (`guestScreenNotReady`, Q22).
 9. On the Operator Screen, show the Event list with the running-Event panel.
 
 ### Operator Screen while an Event runs (D35)
@@ -587,6 +587,7 @@ Guest gallery view models carry only image URLs and alt text, never metadata, so
 - SQLite runs in WAL mode with full sync, foreign keys on, and a busy timeout. An integrity check runs at startup.
 - Schema versions use `PRAGMA user_version` and ordered SQL migration files embedded in `FotoHavn.Storage`.
 - The Data folder must be on a local disk. Startup refuses network and cloud-synced paths that it can detect and reports why.
+- **Write probe (M6).** `IEventStore.ProbeWritableAsync` writes a small file under `Data/.staging`, flushes it, and deletes it, through `IStorageFileSystem`, mapping failures with `StorageErrorMapper`. Start Event step 5 uses it, so an Event never starts on a Data folder that can't be written. The reconciler doesn't scan `Data/.staging` (it holds only a probe file for the moment of the call).
 
 ### Schema (first migration)
 
@@ -1803,4 +1804,11 @@ D21's wording was clarified during M0: `START OVER` appears on the Template, Pho
 Raised during M4 (2026-10-14):
 
 - **Q18** The M4 unit list names constraint violations for "window numbers", but the schema has no window-number column (the arrangement is JSON). → `captures.sequence` gets `CHECK (sequence >= 1)`, and the store validates that an arrangement is 1–4 distinct kept Capture ids of the cycle. Relied on by M4.
+
+Raised and decided during M6 (2026-10-15):
+
+- **Q19** Camera sharing during an Active Event. → Setup of another Event shows *In use by the running Event* for the same camera and *Not checked while an Event is running* for a different one; the brain keeps one camera session. A second concurrent camera session is deferred to M10 if field testing needs it. Decided in M6.
+- **Q20** Where does `pinRequired` apply? → It appears in the setup's `fieldErrors` (beside the PIN) whenever the Event has no saved PIN and none is pending, but it blocks only `SAVE AND START` and Start, never plain `SAVE`. Decided in M6.
+- **Q21** What does a PIN-store failure at the exit PIN count as? → A wrong attempt: a store that throws or can't find the Event never ends the Event and costs one of the five attempts (and a malformed PIN never reaches the store). Decided in M6.
+- **Q22** What does Start Event report when the Guest Screen doesn't answer (step 8)? → `startFailure: guestScreenNotReady` (protocol 7), shown as "The guest display didn't respond. Check it, then try again."; a host that throws while opening the window reports the same. Decided in M6.
 

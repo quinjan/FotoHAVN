@@ -42,6 +42,7 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-setup-start-failure-display", surface: "eventSetup", text: ["The chosen guest display isn't connected."] },
   { fixture: "operator-setup-start-failure-camera", surface: "eventSetup", text: ["The camera isn't ready to start. The camera stopped sending pictures."] },
   { fixture: "operator-setup-start-failure-pin", surface: "eventSetup", text: ["Set an Operator PIN to start this Event."] },
+  { fixture: "operator-setup-start-failure-guest-screen", surface: "eventSetup", text: ["The guest display didn't respond. Check it, then try again."] },
   { fixture: "operator-setup-assistance", surface: "eventSetup", text: ["The camera needs attention.", "GO TO THE RUNNING EVENT"] },
   { fixture: "operator-setup-saving", surface: "eventSetup", text: ["Saving…"] },
   { fixture: "operator-setup-pin-changing", surface: "eventSetup", text: ["New PIN", "KEEP CURRENT PIN"] },

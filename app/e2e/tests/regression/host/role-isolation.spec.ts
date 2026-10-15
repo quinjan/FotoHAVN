@@ -12,8 +12,8 @@ test.describe("role isolation", { tag: ["@m2"] }, () => {
       expect(last).toMatchObject({ name: "OpenNewEvent", role: "guest", status: "rejected", reason: "wrongRole" });
     });
 
-    await test.step("the same command from the Operator page reaches the brain's rules (notAvailable in M2)", async () => {
-      expect(await sendCommand(operatorPage, "OpenNewEvent", {})).toEqual({ status: "rejected", reason: "notAvailable" });
+    await test.step("an operator command from the Operator page reaches the brain's rules (CloseGallery is notAvailable until M9)", async () => {
+      expect(await sendCommand(operatorPage, "CloseGallery", {})).toEqual({ status: "rejected", reason: "notAvailable" });
     });
 
     await test.step("an operator-only command can't change the guest page's role or presentation", async () => {

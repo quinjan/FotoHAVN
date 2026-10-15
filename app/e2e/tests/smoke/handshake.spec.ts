@@ -22,16 +22,16 @@ test("the operator handshake completes and the empty Event list renders", { tag:
     await expect(screen.newEvent).toBeVisible();
   });
 
-  await test.step("NEW EVENT is answered by the brain (not available until M6)", async () => {
+  await test.step("NEW EVENT opens Event setup (M6), and the brain accepted the command", async () => {
     const screen = new EventListScreen(operatorPage);
     await screen.newEvent.click();
-    await expect(screen.notice).toHaveText("That isn't ready yet.");
+    await expect(operatorPage.locator('main[data-fotohavn-surface="eventSetup"]')).toBeVisible();
+    await expect(operatorPage.getByRole("heading", { level: 1, name: "Set up the Event." })).toBeVisible();
     const diagnostics = await hooks.getDiagnostics();
     expect(diagnostics.lastCommandResults.at(-1)).toMatchObject({
       name: "OpenNewEvent",
       role: "operator",
-      status: "rejected",
-      reason: "notAvailable",
+      status: "accepted",
     });
   });
 

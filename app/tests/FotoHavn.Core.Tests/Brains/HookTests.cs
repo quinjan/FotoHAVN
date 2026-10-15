@@ -137,14 +137,14 @@ public sealed class HookTests
     {
         using var harness = BrainHarness.WithHooks();
         var client = harness.Handshake(Role.Operator);
-        var ids = Enumerable.Range(0, 25).Select(_ => client.Command("OpenNewEvent")).ToList();
+        var ids = Enumerable.Range(0, 25).Select(_ => client.Command("CloseGallery")).ToList();
 
         client.Test(TestHookNames.GetDiagnostics);
         harness.Run();
 
         var results = Diagnostics(client).LastCommandResults;
         Assert.Equal(ids.Skip(5), results.Select(result => result.Id));
-        Assert.All(results, result => Assert.Equal(new CommandResultDiagnostics(result.Id, "OpenNewEvent", Role.Operator, CommandStatus.Rejected, RejectReason.NotAvailable), result));
+        Assert.All(results, result => Assert.Equal(new CommandResultDiagnostics(result.Id, "CloseGallery", Role.Operator, CommandStatus.Rejected, RejectReason.NotAvailable), result));
     }
 
     [Fact]

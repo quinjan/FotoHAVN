@@ -67,6 +67,24 @@ public sealed partial class SqliteEventStore : IEventStore
 
     public string DataRoot { get; }
 
+    public Task ProbeWritableAsync(CancellationToken ct) =>
+        RunAsync(ct, _ =>
+        {
+            var stagingDirectory = Path.Combine(DataRoot, ".staging");
+            var probePath = Path.Combine(stagingDirectory, "write-probe.tmp");
+            try
+            {
+                _fs.CreateDirectory(stagingDirectory);
+                _fs.WriteAllBytesAndFlush(probePath, "FOTOHAVN"u8);
+                _fs.Delete(probePath);
+            }
+            catch
+            {
+                DeleteQuietly([probePath]);
+                throw;
+            }
+        });
+
     public async Task<StorageOpenResult> OpenAsync(CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();

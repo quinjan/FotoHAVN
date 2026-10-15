@@ -552,6 +552,8 @@ public sealed class StorageTests
             return Open.Task;
         }
 
+        public Task ProbeWritableAsync(CancellationToken ct) => Task.CompletedTask;
+
         public Task<IReadOnlyList<EventSummary>> ListEventsAsync(CancellationToken ct) => Events.Task;
 
         public Task DrainAsync(CancellationToken ct) => Task.CompletedTask;
@@ -595,6 +597,8 @@ public sealed class StorageTests
         public string DataRoot => @"C:\FOTOHAVN\Data";
 
         public Task<StorageOpenResult> OpenAsync(CancellationToken ct) => throw new StorageException(StorageErrorKind.Corrupt, "Corrupt.");
+
+        public Task ProbeWritableAsync(CancellationToken ct) => throw new NotSupportedException();
 
         public Task<IReadOnlyList<EventSummary>> ListEventsAsync(CancellationToken ct) => throw new NotSupportedException();
 

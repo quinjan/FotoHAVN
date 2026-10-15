@@ -40,6 +40,14 @@ public interface IEventStore : IBackgroundDeletion, IAsyncDisposable
     Task<StorageOpenResult> OpenAsync(CancellationToken ct);
 
     /// <summary>
+    /// Proves the Data folder accepts writes: writes a small probe file under the Data folder's <c>.staging</c> area, flushes it to
+    /// disk, and deletes it. Start Event step 5 uses it, so an Event never starts on storage that can't write. Throws
+    /// <see cref="StorageException"/> with the I/O kind the failure maps to (for example
+    /// <see cref="StorageErrorKind.NotWritable"/> or <see cref="StorageErrorKind.DiskFull"/>).
+    /// </summary>
+    Task ProbeWritableAsync(CancellationToken ct);
+
+    /// <summary>
     /// The Events that aren't deleting, by <c>event_date</c> descending, then <c>created_at</c> descending.
     /// </summary>
     Task<IReadOnlyList<EventSummary>> ListEventsAsync(CancellationToken ct);

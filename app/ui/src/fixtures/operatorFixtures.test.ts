@@ -8,6 +8,7 @@ import {
   operatorFixtures,
   operatorStorageError,
   storageErrorKinds,
+  storageErrorKindsFromBrain,
 } from "./operatorFixtures.ts";
 import { operatorSetupFixtures, phaseTimers, runningEventPanel, setupView } from "./operatorSetupFixtures.ts";
 
@@ -40,9 +41,10 @@ describe("operator fixtures", () => {
     });
   });
 
-  it("names one storage error fixture per kind, in kebab case", () => {
+  it("names one storage error fixture per kind, in kebab case, leaving the kinds the brain writes to its files", () => {
     const names = Object.keys(operatorFixtures()).filter((name) => name.startsWith("operator-storage-error-"));
-    expect(names).toHaveLength(storageErrorKinds.length);
+    expect(names).toHaveLength(storageErrorKinds.length - storageErrorKindsFromBrain.length);
+    expect(names).not.toContain("operator-storage-error-disk-full");
     expect(names).toContain("operator-storage-error-not-local-disk");
     expect(names).toContain("operator-storage-error-cloud-synced");
   });
@@ -148,6 +150,7 @@ describe("operator fixtures", () => {
         "operator-setup-start-failure-display",
         "operator-setup-start-failure-camera",
         "operator-setup-start-failure-pin",
+        "operator-setup-start-failure-guest-screen",
         "operator-setup-assistance",
         "operator-setup-saving",
         "operator-setup-pin-changing",
@@ -205,6 +208,7 @@ describe("operator fixtures", () => {
       expect(view("operator-setup-start-failure-display").startFailure).toEqual({ code: "guestDisplayMissing", cameraReason: null });
       expect(view("operator-setup-start-failure-camera").startFailure).toEqual({ code: "cameraNotEligible", cameraReason: "stale" });
       expect(view("operator-setup-start-failure-pin")).toMatchObject({ startFailure: { code: "pinMissing" }, pin: { isSet: false } });
+      expect(view("operator-setup-start-failure-guest-screen").startFailure).toEqual({ code: "guestScreenNotReady", cameraReason: null });
       expect(view("operator-setup-saving").saving).toBe(true);
     });
 

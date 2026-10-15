@@ -222,10 +222,34 @@ public sealed partial class Brain
             }
         }
 
-        // Step 5: storage answers. The store has no write probe, so a round trip (the same listing the Event list uses) stands in; it also brings
-        // the completed Guest Cycle count the panel shows and refreshes the list.
+        // Step 5: storage accepts a write. The probe (a flushed write and delete under the Data folder) proves it, then the same listing the
+        // Event list uses brings the completed Guest Cycle count the panel shows and refreshes the list.
         private void CheckStorage()
         {
+            Task probe;
+            try
+            {
+                probe = brain._dependencies.Store.ProbeWritableAsync(CancellationToken.None);
+            }
+#pragma warning disable CA1031 // A store that throws instead of faulting its task is handled like one that faults.
+            catch (Exception exception)
+#pragma warning restore CA1031
+            {
+                probe = Task.FromException(exception);
+            }
+
+            Continue(probe, OnStorageProbed);
+        }
+
+        private void OnStorageProbed(Task probe)
+        {
+            if (!probe.IsCompletedSuccessfully)
+            {
+                BrainLog.StartStorageFailed(brain._logger, probe.Exception?.GetBaseException());
+                Fail(StartFailureCode.StorageNotWritable);
+                return;
+            }
+
             Task<IReadOnlyList<EventSummary>> list;
             try
             {
@@ -312,7 +336,7 @@ public sealed partial class Brain
 #pragma warning restore CA1031
             {
                 BrainLog.StartGuestScreenFailed(brain._logger, exception);
-                Fail(StartFailureCode.GuestDisplayMissing);
+                Fail(StartFailureCode.GuestScreenNotReady);
                 return;
             }
 
@@ -339,7 +363,7 @@ public sealed partial class Brain
             _timeout = null;
             _awaitingGuest = false;
             BrainLog.StartGuestScreenTimedOut(brain._logger);
-            Fail(StartFailureCode.GuestDisplayMissing);
+            Fail(StartFailureCode.GuestScreenNotReady);
         }
 
         // Step 9: the Event is running; the operator shows the Event list with the panel (the presentation follows from the state).
@@ -399,12 +423,13 @@ public sealed partial class Brain
         }
 
         /// <summary>Posts <paramref name="next"/> back to the executor when <paramref name="task"/> completes, unless the sequence has ended meanwhile.</summary>
-        private void Continue<T>(Task<T> task, Action<Task<T>> next) => task.ContinueWith(
+        private void Continue<TTask>(TTask task, Action<TTask> next)
+            where TTask : Task => task.ContinueWith(
             completed => brain.Post(() =>
             {
                 if (!_finished)
                 {
-                    next(completed);
+                    next(task);
                 }
                 else
                 {

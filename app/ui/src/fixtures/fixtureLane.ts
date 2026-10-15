@@ -33,6 +33,10 @@ function fileStem(file: string): string {
   return file.replace(/^.*\//, "").replace(/\.json$/, "");
 }
 
+/** The brain-generated fixture names and the hand-written ones; they must never share a name (a hand-written one would win). */
+export const generatedFixtureNames: readonly string[] = Object.keys(generated).sort();
+export const handWrittenFixtureNames: readonly string[] = Object.keys(handWritten).sort();
+
 /** The snapshot a fixture brain answers `hello` with, or null for a message that isn't a snapshot. */
 export function toFixtureSnapshot(message: ServerMessage): FixtureSnapshot | null {
   switch (message.type) {

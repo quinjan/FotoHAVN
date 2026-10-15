@@ -392,6 +392,37 @@ public sealed class StartEventTests
         Assert.False(rig.WakeLock.IsHeld);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Step_5_a_store_that_cant_be_written_stops_the_start_before_the_list_is_read(bool throws)
+    {
+        var store = NewStore();
+        using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { Store = store });
+        var listsBefore = store.ListCalls;
+        store.FailProbe = !throws;
+        store.ThrowOnProbe = throws;
+
+        Assert.Equal(StartEventResult.Failed(StartFailureCode.StorageNotWritable), rig.Start());
+
+        Assert.Equal(1, store.ProbeCalls);
+        Assert.Equal(listsBefore, store.ListCalls);
+        Assert.Empty(((FakeCompositor)rig.Dependencies.Compositor).Requests);
+        AssertNothingHeld(rig, guestScreenWasOpened: false);
+    }
+
+    [Fact]
+    public async Task Step_5_probes_the_store_once_per_start_and_still_counts_the_completed_Guest_Cycles()
+    {
+        var store = NewStore();
+        using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { Store = store });
+
+        rig.StartAndExpectSuccess();
+
+        Assert.Equal(1, store.ProbeCalls);
+        Assert.NotNull(rig.LatestOperator().RunningEvent);
+    }
+
     // Step 8
 
     [Fact]
@@ -405,7 +436,7 @@ public sealed class StartEventTests
 
         rig.Advance(Brain.GuestScreenReadyTimeout + TimeSpan.FromSeconds(1));
 
-        Assert.Equal(StartEventResult.Failed(StartFailureCode.GuestDisplayMissing), await start);
+        Assert.Equal(StartEventResult.Failed(StartFailureCode.GuestScreenNotReady), await start);
         AssertNothingHeldAfterGuestScreen(rig);
     }
 
@@ -479,7 +510,7 @@ public sealed class StartEventTests
         var host = new ThrowingHost();
         using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { Host = host });
 
-        Assert.Equal(StartEventResult.Failed(StartFailureCode.GuestDisplayMissing), rig.Start());
+        Assert.Equal(StartEventResult.Failed(StartFailureCode.GuestScreenNotReady), rig.Start());
 
         Assert.Null(rig.Brain.ActiveEventId);
         Assert.False(rig.WakeLock.IsHeld);
@@ -496,7 +527,7 @@ public sealed class StartEventTests
         rig.Pump(() => host.Opened == 1);
         rig.Advance(Brain.GuestScreenReadyTimeout + TimeSpan.FromSeconds(1));
 
-        Assert.Equal(StartFailureCode.GuestDisplayMissing, (await start).Failure);
+        Assert.Equal(StartFailureCode.GuestScreenNotReady, (await start).Failure);
         Assert.Equal(1, host.Closed);
     }
 
@@ -516,15 +547,23 @@ public sealed class StartEventTests
     }
 
     [Fact]
-    public async Task StartEvent_whose_precondition_fails_is_accepted_and_leaves_nothing_held()
+    public async Task StartEvent_whose_precondition_fails_is_accepted_and_leaves_only_the_setup_preview_held()
     {
         using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { WithPin = false });
 
         var result = rig.OperatorCommand("StartEvent", $$"""{"eventId":"{{ActiveRig.EventId}}"}""");
-        rig.Pump(() => rig.Executor.PendingCount == 0 && rig.Brain.ActiveEventId is null && rig.Recorded.Calls.Count == 0, maxIterations: 20);
+        rig.Pump(() => rig.LatestOperator().Surface == OperatorSurface.EventSetup);
 
         Assert.Equal(CommandResultMessage.Accepted(result.Id), result);
-        AssertNothingHeld(rig, guestScreenWasOpened: false);
+        Assert.Equal(new EventSetupStartFailure(StartFailureCode.PinMissing, null), rig.LatestOperator().EventSetup!.StartFailure);
+        Assert.Null(rig.Brain.ActiveEventId);
+        Assert.False(rig.WakeLock.IsHeld);
+        Assert.False(rig.Diagnostics().GuestScreenOpen);
+        Assert.Empty(rig.Recorded.Calls);
+        Assert.Null(rig.LatestOperator().RunningEvent);
+        Assert.Equal(new StartView(false, false), rig.LatestGuest().Start);
+        // Event setup's own preview of the bound camera, for the Operator Screen: not the Event's.
+        Assert.Equal(PreviewTarget.Operator, rig.Diagnostics().Camera.PreviewTarget);
     }
 
     [Fact]

@@ -57,7 +57,7 @@ public sealed partial class Brain
             return NotAvailable(id);
         }
 
-        var today = DateOnly.FromDateTime(_dependencies.Clock.UtcNow.ToLocalTime().DateTime);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(_dependencies.Clock.UtcNow, _dependencies.LocalTimeZone).DateTime);
         OpenSetup(EventSetupDraft.CreateNew(_dependencies.Catalog, today));
         return CommandResultMessage.Accepted(id);
     }

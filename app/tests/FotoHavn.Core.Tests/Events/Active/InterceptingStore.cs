@@ -26,9 +26,28 @@ internal sealed class InterceptingStore(IEventStore inner) : IEventStore
     /// <summary>The PINs <see cref="VerifyPinAsync"/> was asked to check, in order.</summary>
     public List<string> VerifiedPins { get; } = [];
 
+    /// <summary>Makes <see cref="ProbeWritableAsync"/> fail (Start Event's storage write check).</summary>
+    public bool FailProbe { get; set; }
+
+    /// <summary>Makes <see cref="ProbeWritableAsync"/> throw instead of returning a faulted task.</summary>
+    public bool ThrowOnProbe { get; set; }
+
     public int ListCalls { get; private set; }
 
+    public int ProbeCalls { get; private set; }
+
     public string DataRoot => inner.DataRoot;
+
+    public Task ProbeWritableAsync(CancellationToken ct)
+    {
+        ProbeCalls++;
+        if (ThrowOnProbe)
+        {
+            throw new InvalidOperationException("The store threw.");
+        }
+
+        return FailProbe ? Task.FromException(new StorageException(StorageErrorKind.NotWritable, "Not writable.")) : inner.ProbeWritableAsync(ct);
+    }
 
     public Task DrainAsync(CancellationToken ct) => inner.DrainAsync(ct);
 

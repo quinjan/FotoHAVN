@@ -57,6 +57,8 @@ internal sealed class HookedStore(InMemoryEventStore inner) : IEventStore
 
     public Task<StorageOpenResult> OpenAsync(CancellationToken ct) => inner.OpenAsync(ct);
 
+    public Task ProbeWritableAsync(CancellationToken ct) => inner.ProbeWritableAsync(ct);
+
     public Task<IReadOnlyList<EventSummary>> ListEventsAsync(CancellationToken ct) => Run(nameof(ListEventsAsync), () => inner.ListEventsAsync(ct));
 
     public Task<EventRecord?> GetEventAsync(string eventId, CancellationToken ct) => Run(nameof(GetEventAsync), () => inner.GetEventAsync(eventId, ct));

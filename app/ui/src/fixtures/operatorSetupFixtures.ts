@@ -285,6 +285,9 @@ export function operatorSetupFixtures(): Record<string, OperatorWelcomeMessage> 
     "operator-setup-start-failure-pin": setupMessage(
       editingSetupView({ pin: { isSet: false, changing: false }, startFailure: { code: "pinMissing", cameraReason: null } }),
     ),
+    "operator-setup-start-failure-guest-screen": setupMessage(
+      editingSetupView({ startFailure: { code: "guestScreenNotReady", cameraReason: null } }),
+    ),
     "operator-setup-assistance": setupMessage(editingSetupView(runningEventDisabled), {
       runningEvent: runningEventPanel({ currentStep: "operatorAssistance", assistance: { reason: "camera" }, camera: { state: "notAvailable", reason: "stale" } }),
     }),
