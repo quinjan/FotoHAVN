@@ -508,7 +508,7 @@ public sealed class OperatorScaffoldTests
         var welcome = client.Single<GuestWelcomeMessage>();
 
         Assert.Equal(
-            new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null),
+            new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null),
             welcome.Presentation);
     }
 

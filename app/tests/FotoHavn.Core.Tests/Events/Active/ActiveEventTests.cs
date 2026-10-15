@@ -67,7 +67,7 @@ public sealed class ActiveEventTests
     {
         using var rig = await ActiveRig.CreateAsync();
 
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]
@@ -218,7 +218,7 @@ public sealed class ActiveEventTests
         var row = Assert.Single(presentation.EventList!.Events);
         Assert.False(row.Running);
         Assert.Equal(new EventRowActions(true, true, true, true, true), row.Actions);
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]

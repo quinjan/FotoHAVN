@@ -121,20 +121,26 @@ public sealed partial class Brain
     {
         if (_activeEvent is not { } active)
         {
-            return new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: false, GuestGalleryLinkVisible: false), null, GuestOverlays.None, null);
+            return new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: false, GuestGalleryLinkVisible: false), null, GuestOverlays.None, null, null, null, null, null, null, null);
         }
 
         var overlays = RenderGuestOverlays(active);
 
+        // A running Guest Cycle, or Operator Assistance, renders its own step (Brain.GuestCycle.cs); null means the guest is on Start or the guest gallery.
+        if (RenderGuestCycle(active, overlays) is { } cycle)
+        {
+            return cycle;
+        }
+
         // The guest gallery link waits for M9. Outside a Guest Cycle an ineligible camera or unwritable storage is Start unavailable, never Operator Assistance.
         if (_cameraState != CameraState.Ready)
         {
-            return new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, GuestGalleryLinkVisible: false), overlays, null);
+            return new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, GuestGalleryLinkVisible: false), overlays, null, null, null, null, null, null, null);
         }
 
         return !_storageResolved || _storageError is not null || active.StorageFailed
-            ? new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Storage, GuestGalleryLinkVisible: false), overlays, null)
-            : new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: true, GuestGalleryLinkVisible: false), null, overlays, null);
+            ? new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Storage, GuestGalleryLinkVisible: false), overlays, null, null, null, null, null, null, null)
+            : new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: true, GuestGalleryLinkVisible: false), null, overlays, null, null, null, null, null, null, null);
     }
 
     private GuestOverlays RenderGuestOverlays(ActiveEventState active)
@@ -154,7 +160,7 @@ public sealed partial class Brain
     }
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
-        ? new GuestPresentation(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView(reason))
+        ? new GuestPresentation(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView(reason), null, null, null, null, null, null)
         : RenderGuestShell();
 
     // End Event (plan section 8; contract section 10.8)

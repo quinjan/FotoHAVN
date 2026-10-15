@@ -143,7 +143,7 @@ public sealed class ExitHoldAndPinTests
         Assert.False(rig.Diagnostics().WakeLock.Held);
         Assert.Equal(OperatorSurface.EventList, rig.LatestOperator().Surface);
         Assert.Null(rig.LatestOperator().RunningEvent);
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]

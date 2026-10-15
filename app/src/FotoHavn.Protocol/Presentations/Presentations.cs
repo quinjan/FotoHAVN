@@ -132,12 +132,24 @@ public enum GuestSurface
 /// <param name="StartUnavailable">Set when <paramref name="Surface"/> is <see cref="GuestSurface.StartUnavailable"/>.</param>
 /// <param name="Overlays">Overlays on top of the surface; each is null when not shown.</param>
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Fatal"/>.</param>
+/// <param name="GuestCycle">The running Guest Cycle: set on every cycle step and on <see cref="GuestSurface.OperatorAssistance"/> during a cycle; null otherwise (protocol version 8).</param>
+/// <param name="Template">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Template"/>.</param>
+/// <param name="Photographs">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Photographs"/>.</param>
+/// <param name="Filters">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Filters"/>.</param>
+/// <param name="Keepsake">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Keepsake"/>.</param>
+/// <param name="OperatorAssistance">Set when <paramref name="Surface"/> is <see cref="GuestSurface.OperatorAssistance"/>.</param>
 public sealed record GuestPresentation(
     GuestSurface Surface,
     StartView? Start,
     StartUnavailableView? StartUnavailable,
     GuestOverlays Overlays,
-    FatalView? Fatal);
+    FatalView? Fatal,
+    GuestCycleView? GuestCycle,
+    TemplateView? Template,
+    PhotographsView? Photographs,
+    FiltersView? Filters,
+    KeepsakeView? Keepsake,
+    OperatorAssistanceView? OperatorAssistance);
 
 /// <summary>The Start view (plan section 7, Steps).</summary>
 /// <param name="StepInsideAvailable">Whether <c>STEP INSIDE →</c> works: the Camera is eligible and storage is writable. Always true on Start; Start unavailable is its own surface.</param>
@@ -193,10 +205,18 @@ public enum PinDialogError
 /// <param name="AttemptsRemaining">Wrong attempts left before a lockout; null while locked.</param>
 public sealed record PinDialogOverlay(PinDialogError? Error, int? LockedRemainingSeconds, int? AttemptsRemaining);
 
-/// <summary>The Phase Timer warning with <c>MORE TIME</c>. Placeholder until M8.</summary>
-public sealed record PhaseTimerWarningOverlay;
+/// <summary>
+/// The Phase Timer warning with <c>MORE TIME</c>: shown in the last 20 seconds of the Template, Photographs capture, Photographs review,
+/// Filters, and guest gallery phases, never on the Keepsake. The UI announces it once, politely, not every second.
+/// </summary>
+/// <param name="Phase">The phase running out.</param>
+/// <param name="RemainingSeconds">Whole seconds left; the brain pushes it every second while the warning shows.</param>
+public sealed record PhaseTimerWarningOverlay(PhaseTimer Phase, int RemainingSeconds);
 
-/// <summary>The Start over confirmation. Placeholder until M8.</summary>
+/// <summary>
+/// The Start over confirmation ("Start over? Your photographs stay with the Event, but no strip will be made." with <c>START OVER</c>
+/// and <c>KEEP GOING</c>). It carries nothing: its presence is the state.
+/// </summary>
 public sealed record StartOverConfirmationOverlay;
 
 /// <summary>A notice whose copy comes from the brain (it has domain meaning; plan section 9, Copy).</summary>

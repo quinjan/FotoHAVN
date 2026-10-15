@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 7
+      "const": 8
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -595,6 +595,49 @@
       "type": "object",
       "additionalProperties": false
     },
+    "CaptureSequenceView": {
+      "title": "CaptureSequenceView",
+      "type": "object",
+      "properties": {
+        "running": {
+          "type": "boolean"
+        },
+        "targetWindow": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "countdownRemaining": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "flashSequence": {
+          "type": "integer"
+        },
+        "capturedInSequence": {
+          "type": "integer"
+        },
+        "totalInSequence": {
+          "type": "integer"
+        },
+        "pausing": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "running",
+        "targetWindow",
+        "countdownRemaining",
+        "flashSequence",
+        "capturedInSequence",
+        "totalInSequence",
+        "pausing"
+      ],
+      "additionalProperties": false
+    },
     "ChangeEventFieldCommand": {
       "title": "ChangeEventFieldCommand",
       "type": "object",
@@ -923,6 +966,9 @@
           "$ref": "#/$defs/FinishStripCommand"
         },
         {
+          "$ref": "#/$defs/RetryCompositionCommand"
+        },
+        {
           "$ref": "#/$defs/MoreTimeCommand"
         },
         {
@@ -1138,6 +1184,9 @@
         "FinishStrip": {
           "$ref": "#/$defs/FinishStripPayload"
         },
+        "RetryComposition": {
+          "$ref": "#/$defs/RetryCompositionPayload"
+        },
         "MoreTime": {
           "$ref": "#/$defs/MoreTimePayload"
         },
@@ -1236,6 +1285,7 @@
         "DragPlace",
         "SelectLook",
         "FinishStrip",
+        "RetryComposition",
         "MoreTime",
         "StartOver",
         "ConfirmStartOver",
@@ -1829,6 +1879,16 @@
         },
         "clockScale": {
           "type": "number"
+        },
+        "guestCycle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestCycleDiagnostics"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1844,7 +1904,8 @@
         "openFolderRequests",
         "identifyOverlays",
         "wakeLock",
-        "clockScale"
+        "clockScale",
+        "guestCycle"
       ],
       "additionalProperties": false
     },
@@ -2621,6 +2682,45 @@
       ],
       "additionalProperties": false
     },
+    "FiltersView": {
+      "title": "FiltersView",
+      "type": "object",
+      "properties": {
+        "looks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LookOptionView"
+          }
+        },
+        "selectedLookId": {
+          "type": "string"
+        },
+        "stripPreviewKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "composing": {
+          "type": "boolean"
+        },
+        "compositionFailed": {
+          "type": "boolean"
+        },
+        "canFinish": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "looks",
+        "selectedLookId",
+        "stripPreviewKey",
+        "composing",
+        "compositionFailed",
+        "canFinish"
+      ],
+      "additionalProperties": false
+    },
     "FinishStripCommand": {
       "title": "FinishStripCommand",
       "type": "object",
@@ -2705,6 +2805,150 @@
       },
       "required": [
         "step"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCycleDiagnostics": {
+      "title": "GuestCycleDiagnostics",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "step": {
+          "$ref": "#/$defs/GuestCycleStepName"
+        },
+        "tab": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhotographsTabName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "windowsFilled": {
+          "type": "integer"
+        },
+        "windowCount": {
+          "type": "integer"
+        },
+        "sequenceRunning": {
+          "type": "boolean"
+        },
+        "countdownRemaining": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "timer": {
+          "$ref": "#/$defs/GuestCycleTimerDiagnostics"
+        }
+      },
+      "required": [
+        "id",
+        "step",
+        "tab",
+        "windowsFilled",
+        "windowCount",
+        "sequenceRunning",
+        "countdownRemaining",
+        "timer"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCycleStepEntry": {
+      "title": "GuestCycleStepEntry",
+      "type": "object",
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/GuestCycleStepName"
+        },
+        "state": {
+          "$ref": "#/$defs/GuestStepState"
+        },
+        "canGoBack": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "step",
+        "state",
+        "canGoBack"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCycleStepName": {
+      "title": "GuestCycleStepName",
+      "enum": [
+        "template",
+        "photographs",
+        "filters",
+        "keepsake"
+      ]
+    },
+    "GuestCycleTimerDiagnostics": {
+      "title": "GuestCycleTimerDiagnostics",
+      "type": "object",
+      "properties": {
+        "phase": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhaseTimer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "remainingMs": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "warning": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "phase",
+        "remainingMs",
+        "paused",
+        "warning"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCycleView": {
+      "title": "GuestCycleView",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "step": {
+          "$ref": "#/$defs/GuestCycleStepName"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuestCycleStepEntry"
+          }
+        },
+        "startOverAvailable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "step",
+        "steps",
+        "startOverAvailable"
       ],
       "additionalProperties": false
     },
@@ -2860,6 +3104,66 @@
               "type": "null"
             }
           ]
+        },
+        "guestCycle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestCycleView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "template": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemplateView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "photographs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhotographsView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "filters": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FiltersView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keepsake": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KeepsakeView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operatorAssistance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperatorAssistanceView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2867,7 +3171,13 @@
         "start",
         "startUnavailable",
         "overlays",
-        "fatal"
+        "fatal",
+        "guestCycle",
+        "template",
+        "photographs",
+        "filters",
+        "keepsake",
+        "operatorAssistance"
       ],
       "additionalProperties": false
     },
@@ -2902,6 +3212,15 @@
         "template",
         "photographs",
         "filters"
+      ]
+    },
+    "GuestStepState": {
+      "title": "GuestStepState",
+      "enum": [
+        "done",
+        "current",
+        "upcoming",
+        "skipped"
       ]
     },
     "GuestSurface": {
@@ -3177,6 +3496,31 @@
       "type": "object",
       "additionalProperties": false
     },
+    "KeepsakeView": {
+      "title": "KeepsakeView",
+      "type": "object",
+      "properties": {
+        "stripUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stripUrl",
+        "width",
+        "height",
+        "landscape"
+      ],
+      "additionalProperties": false
+    },
     "LeaveChoice": {
       "title": "LeaveChoice",
       "enum": [
@@ -3307,6 +3651,34 @@
       },
       "required": [
         "cursor"
+      ],
+      "additionalProperties": false
+    },
+    "LookOptionView": {
+      "title": "LookOptionView",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "thumbnailKey"
       ],
       "additionalProperties": false
     },
@@ -3681,6 +4053,23 @@
       "type": "object",
       "additionalProperties": false
     },
+    "OperatorAssistanceView": {
+      "title": "OperatorAssistanceView",
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/AssistanceReason"
+        },
+        "retrying": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "reason",
+        "retrying"
+      ],
+      "additionalProperties": false
+    },
     "OperatorNoticeCode": {
       "title": "OperatorNoticeCode",
       "enum": [
@@ -3942,6 +4331,191 @@
     "PhaseTimerWarningOverlay": {
       "title": "PhaseTimerWarningOverlay",
       "type": "object",
+      "properties": {
+        "phase": {
+          "$ref": "#/$defs/PhaseTimer"
+        },
+        "remainingSeconds": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "phase",
+        "remainingSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "PhotographSelectionMode": {
+      "title": "PhotographSelectionMode",
+      "enum": [
+        "none",
+        "selected",
+        "moving",
+        "retaking"
+      ]
+    },
+    "PhotographSelectionView": {
+      "title": "PhotographSelectionView",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "mode": {
+          "$ref": "#/$defs/PhotographSelectionMode"
+        }
+      },
+      "required": [
+        "index",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "PhotographsTabName": {
+      "title": "PhotographsTabName",
+      "enum": [
+        "camera",
+        "arrange"
+      ]
+    },
+    "PhotographsTemplateView": {
+      "title": "PhotographsTemplateView",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TemplateWindowView"
+          }
+        },
+        "blankPreviewKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "width",
+        "height",
+        "landscape",
+        "windows",
+        "blankPreviewKey"
+      ],
+      "additionalProperties": false
+    },
+    "PhotographsView": {
+      "title": "PhotographsView",
+      "type": "object",
+      "properties": {
+        "tab": {
+          "$ref": "#/$defs/PhotographsTabName"
+        },
+        "template": {
+          "$ref": "#/$defs/PhotographsTemplateView"
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PhotographsWindowView"
+          }
+        },
+        "retainedCount": {
+          "type": "integer"
+        },
+        "sequence": {
+          "$ref": "#/$defs/CaptureSequenceView"
+        },
+        "mirrored": {
+          "type": "boolean"
+        },
+        "cropAspect": {
+          "type": "number"
+        },
+        "selection": {
+          "$ref": "#/$defs/PhotographSelectionView"
+        },
+        "retakeCandidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RetakeCandidateView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "canTakePhotographs": {
+          "type": "boolean"
+        },
+        "canReview": {
+          "type": "boolean"
+        },
+        "canContinue": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tab",
+        "template",
+        "windows",
+        "retainedCount",
+        "sequence",
+        "mirrored",
+        "cropAspect",
+        "selection",
+        "retakeCandidate",
+        "revision",
+        "canTakePhotographs",
+        "canReview",
+        "canContinue"
+      ],
+      "additionalProperties": false
+    },
+    "PhotographsWindowView": {
+      "title": "PhotographsWindowView",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "captureId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imageUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "index",
+        "captureId",
+        "imageUrl"
+      ],
       "additionalProperties": false
     },
     "PinDialogError": {
@@ -4167,6 +4741,23 @@
         "pinLocked"
       ]
     },
+    "RetakeCandidateView": {
+      "title": "RetakeCandidateView",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "imageUrl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "imageUrl"
+      ],
+      "additionalProperties": false
+    },
     "RetryAssistanceCommand": {
       "title": "RetryAssistanceCommand",
       "type": "object",
@@ -4195,6 +4786,37 @@
     },
     "RetryAssistancePayload": {
       "title": "RetryAssistancePayload",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RetryCompositionCommand": {
+      "title": "RetryCompositionCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "RetryComposition"
+        },
+        "payload": {
+          "$ref": "#/$defs/RetryCompositionPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "RetryCompositionPayload": {
+      "title": "RetryCompositionPayload",
       "type": "object",
       "additionalProperties": false
     },
@@ -5464,6 +6086,102 @@
     "TakePhotographsPayload": {
       "title": "TakePhotographsPayload",
       "type": "object",
+      "additionalProperties": false
+    },
+    "TemplateOptionView": {
+      "title": "TemplateOptionView",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TemplateWindowView"
+          }
+        },
+        "blankPreviewKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "width",
+        "height",
+        "landscape",
+        "windows",
+        "blankPreviewKey"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateView": {
+      "title": "TemplateView",
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TemplateOptionView"
+          }
+        },
+        "selectedId": {
+          "type": "string"
+        },
+        "canContinue": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "templates",
+        "selectedId",
+        "canContinue"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateWindowView": {
+      "title": "TemplateWindowView",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
       "additionalProperties": false
     },
     "TestCamera": {

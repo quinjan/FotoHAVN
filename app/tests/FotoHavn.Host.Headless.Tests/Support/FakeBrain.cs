@@ -28,7 +28,7 @@ internal sealed class FakeBrain : IBrain
     public static GuestWelcomeMessage GuestWelcome { get; } = new(
         ProtocolVersion.Current,
         1,
-        new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null));
+        new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null));
 
     public IBrainConnection Connect(Role role, Action<string> send)
     {

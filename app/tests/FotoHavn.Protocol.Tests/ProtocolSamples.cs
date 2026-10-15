@@ -257,19 +257,25 @@ internal static class ProtocolSamples
         new CameraDiagnosticsView([new CameraOption("fake-camera", "Fake camera")], "fake-camera", CameraState.InUseByAnotherApp, CameraFailureKind.InUseByAnotherApp, null, false, null, null));
 
     public static GuestPresentation GuestStart { get; } =
-        new(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null);
+        new(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null);
 
     public static GuestPresentation GuestStartReady { get; } =
-        new(GuestSurface.Start, new StartView(true, true), null, new GuestOverlays(new ExitHoldOverlay(true), null, null, null, null), null);
+        new(GuestSurface.Start, new StartView(true, true), null, new GuestOverlays(new ExitHoldOverlay(true), null, null, null, null), null, null, null, null, null, null, null);
 
     public static GuestPresentation GuestStartUnavailable { get; } =
-        new(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, true), GuestOverlays.None, null);
+        new(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, true), GuestOverlays.None, null, null, null, null, null, null, null);
 
     public static GuestPresentation GuestPinDialogWrong { get; } = new(
         GuestSurface.Start,
         new StartView(true, false),
         null,
         new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, null, 3), null, null, null),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null);
 
     public static GuestPresentation GuestPinDialogLocked { get; } = new(
@@ -277,17 +283,160 @@ internal static class ProtocolSamples
         new StartView(true, false),
         null,
         new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, 27, null), null, null, null),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null);
 
     public static GuestPresentation GuestStartWithOverlays { get; } = new(
         GuestSurface.StartUnavailable,
         null,
         new StartUnavailableView(StartUnavailableReason.Storage, false),
-        new GuestOverlays(new ExitHoldOverlay(true), new PinDialogOverlay(null, null, 5), new PhaseTimerWarningOverlay(), new StartOverConfirmationOverlay(), new NoticeOverlay("One moment.")),
+        new GuestOverlays(new ExitHoldOverlay(true), new PinDialogOverlay(null, null, 5), new PhaseTimerWarningOverlay(PhaseTimer.Template, 14), new StartOverConfirmationOverlay(), new NoticeOverlay("One moment.")),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null);
 
     public static GuestPresentation GuestFatal { get; } =
-        new(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView("Something went wrong."));
+        new(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView("Something went wrong."), null, null, null, null, null, null);
+
+    private static GuestCycleView Cycle(GuestCycleStepName step, bool startOverAvailable = true) => new(
+        "cycle-1",
+        step,
+        [
+            new GuestCycleStepEntry(GuestCycleStepName.Template, step == GuestCycleStepName.Template ? GuestStepState.Current : GuestStepState.Done, step != GuestCycleStepName.Template && step != GuestCycleStepName.Keepsake),
+            new GuestCycleStepEntry(GuestCycleStepName.Photographs, step switch { GuestCycleStepName.Template => GuestStepState.Upcoming, GuestCycleStepName.Photographs => GuestStepState.Current, _ => GuestStepState.Done }, step is GuestCycleStepName.Filters),
+            new GuestCycleStepEntry(GuestCycleStepName.Filters, step switch { GuestCycleStepName.Filters => GuestStepState.Current, GuestCycleStepName.Keepsake => GuestStepState.Done, _ => GuestStepState.Upcoming }, false),
+            new GuestCycleStepEntry(GuestCycleStepName.Keepsake, step == GuestCycleStepName.Keepsake ? GuestStepState.Current : GuestStepState.Upcoming, false),
+        ],
+        startOverAvailable);
+
+    private static readonly TemplateWindowView[] StripWindows = [.. Enumerable.Range(0, 4).Select(index => new TemplateWindowView(0, index * 450, 600, 450))];
+
+    private static readonly TemplateOptionView[] TemplateOptions =
+    [
+        new("signature-strip", "Signature Strip", "Four edge-to-edge photographs with a signature across the middle.", 600, 1800, false, StripWindows, "signature-strip.blank"),
+        new("panorama-four", "Panorama Four", "Four portraits side by side, with a quiet corner signature.", 1800, 600, true, [.. Enumerable.Range(0, 4).Select(index => new TemplateWindowView(index * 450, 0, 450, 600))], null),
+    ];
+
+    /// <summary>The Template step.</summary>
+    public static GuestPresentation GuestTemplate { get; } = new(
+        GuestSurface.Template, null, null, GuestOverlays.None, null, Cycle(GuestCycleStepName.Template), new TemplateView(TemplateOptions, "signature-strip", true), null, null, null, null);
+
+    /// <summary>The Photographs step on the Camera tab, in the middle of a countdown, with the Phase Timer warning showing.</summary>
+    public static GuestPresentation GuestPhotographsCountdown { get; } = new(
+        GuestSurface.Photographs,
+        null,
+        null,
+        new GuestOverlays(null, null, new PhaseTimerWarningOverlay(PhaseTimer.PhotographsCapture, 18), null, null),
+        null,
+        Cycle(GuestCycleStepName.Photographs),
+        null,
+        new PhotographsView(
+            PhotographsTabName.Camera,
+            new PhotographsTemplateView("signature-strip", 600, 1800, false, StripWindows, "signature-strip.blank"),
+            [
+                new PhotographsWindowView(0, "capture-1", "https://media.fotohavn/events/event-1/guest-cycles/cycle-1/capture-1.jpg"),
+                new PhotographsWindowView(1, null, null),
+                new PhotographsWindowView(2, null, null),
+                new PhotographsWindowView(3, null, null),
+            ],
+            0,
+            new CaptureSequenceView(true, 1, 3, 1, 1, 3, false),
+            true,
+            600.0 / 450,
+            new PhotographSelectionView(null, PhotographSelectionMode.None),
+            null,
+            1,
+            false,
+            false,
+            false),
+        null,
+        null,
+        null);
+
+    /// <summary>The Photographs step on the Arrange tab with a Retake candidate waiting.</summary>
+    public static GuestPresentation GuestPhotographsRetake { get; } = new(
+        GuestSurface.Photographs,
+        null,
+        null,
+        GuestOverlays.None,
+        null,
+        Cycle(GuestCycleStepName.Photographs),
+        null,
+        new PhotographsView(
+            PhotographsTabName.Arrange,
+            new PhotographsTemplateView("panorama-four", 1800, 600, true, [.. Enumerable.Range(0, 4).Select(index => new TemplateWindowView(index * 450, 0, 450, 600))], null),
+            [.. Enumerable.Range(0, 4).Select(index => new PhotographsWindowView(index, $"capture-{index + 1}", $"https://media.fotohavn/events/event-1/guest-cycles/cycle-1/capture-{index + 1}.jpg"))],
+            1,
+            new CaptureSequenceView(false, null, null, 4, 0, 0, false),
+            false,
+            450.0 / 600,
+            new PhotographSelectionView(2, PhotographSelectionMode.Retaking),
+            new RetakeCandidateView(2, "https://media.fotohavn/events/event-1/guest-cycles/cycle-1/capture-5.jpg"),
+            6,
+            false,
+            true,
+            false),
+        null,
+        null,
+        null);
+
+    /// <summary>The Filters step after a composition failed.</summary>
+    public static GuestPresentation GuestFiltersFailed { get; } = new(
+        GuestSurface.Filters,
+        null,
+        null,
+        GuestOverlays.None,
+        null,
+        Cycle(GuestCycleStepName.Filters),
+        null,
+        null,
+        new FiltersView(
+            [new LookOptionView("naturale-v1", "Naturale", "Original colors. No filter.", "signature-strip.naturale-v1.thumb"), new LookOptionView("sepia-v1", "Sepia", "Soft brown tones with faded contrast.", null)],
+            "naturale-v1",
+            "signature-strip.naturale-v1.r1",
+            false,
+            true,
+            false),
+        null,
+        null);
+
+    /// <summary>The Keepsake step, with the Start over confirmation absent and no warning.</summary>
+    public static GuestPresentation GuestKeepsake { get; } = new(
+        GuestSurface.Keepsake,
+        null,
+        null,
+        GuestOverlays.None,
+        null,
+        Cycle(GuestCycleStepName.Keepsake, startOverAvailable: false),
+        null,
+        null,
+        null,
+        new KeepsakeView("https://media.fotohavn/events/event-1/guest-cycles/cycle-1/photo-strip.png?v=0a1b2c3d", 600, 1800, false),
+        null);
+
+    /// <summary>Operator Assistance during a cycle, with the Start over confirmation open.</summary>
+    public static GuestPresentation GuestOperatorAssistance { get; } = new(
+        GuestSurface.OperatorAssistance,
+        null,
+        null,
+        new GuestOverlays(null, null, null, new StartOverConfirmationOverlay(), null),
+        null,
+        Cycle(GuestCycleStepName.Photographs),
+        null,
+        null,
+        null,
+        null,
+        new OperatorAssistanceView(AssistanceReason.Camera, true));
+
     /// <summary>Every envelope, keyed by snapshot name.</summary>
     public static IReadOnlyList<(string Name, ProtocolMessage Message)> Messages { get; } =
     [
@@ -314,6 +463,12 @@ internal static class ProtocolSamples
         ("presentation-guest-start-unavailable", new GuestPresentationMessage(6, GuestStartUnavailable)),
         ("presentation-guest-pin-dialog-wrong", new GuestPresentationMessage(7, GuestPinDialogWrong)),
         ("presentation-guest-pin-dialog-locked", new GuestPresentationMessage(8, GuestPinDialogLocked)),
+        ("presentation-guest-template", new GuestPresentationMessage(9, GuestTemplate)),
+        ("presentation-guest-photographs-countdown", new GuestPresentationMessage(10, GuestPhotographsCountdown)),
+        ("presentation-guest-photographs-retake", new GuestPresentationMessage(11, GuestPhotographsRetake)),
+        ("presentation-guest-filters-failed", new GuestPresentationMessage(12, GuestFiltersFailed)),
+        ("presentation-guest-keepsake", new GuestPresentationMessage(13, GuestKeepsake)),
+        ("presentation-guest-operator-assistance", new GuestPresentationMessage(14, GuestOperatorAssistance)),
         ("command-result-accepted", CommandResultMessage.Accepted(Id)),
         ("command-result-rejected", CommandResultMessage.Rejected(Id, RejectReason.WrongRole)),
         ("protocol-mismatch", new ProtocolMismatchMessage(ProtocolVersion.Current, 0)),
@@ -355,7 +510,23 @@ internal static class ProtocolSamples
             [new OpenFolderRequest(@"C:\FOTOHAVN\Data\Events\6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b", new DateTimeOffset(2026, 10, 13, 9, 45, 0, TimeSpan.Zero))],
             [new IdentifyOverlayDiagnostics("virtual-operator", 1, false), new IdentifyOverlayDiagnostics("virtual-guest", 2, false)],
             new WakeLockDiagnostics(true),
-            10)),
+            10,
+            null)),
+        ("get-diagnostics-result-guest-cycle", new DiagnosticsResult(
+            ProtocolVersion.Current,
+            [Role.Operator, Role.Guest],
+            [new PresentationDiagnostics(Role.Operator, 5, "guestScreenActive"), new PresentationDiagnostics(Role.Guest, 12, "photographs")],
+            [],
+            [],
+            new DisplayDiagnostics(false, []),
+            true,
+            new StorageDiagnostics(StorageDiagnosticsState.Ready, null, 1, null),
+            new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 12, 30, 0, PreviewTarget.Guest),
+            [],
+            [],
+            new WakeLockDiagnostics(true),
+            10,
+            new GuestCycleDiagnostics("cycle-1", GuestCycleStepName.Photographs, PhotographsTabName.Camera, 1, 4, true, 3, new GuestCycleTimerDiagnostics(PhaseTimer.PhotographsCapture, 18_250, true, true)))),
         ("set-clock-scale-args", new SetClockScaleArgs(10)),
         ("camera-diagnostics-idle", new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None)),
         ("select-diagnostics-camera-args", new SelectDiagnosticsCameraArgs("fake-camera")),

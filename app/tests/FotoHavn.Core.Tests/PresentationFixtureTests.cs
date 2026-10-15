@@ -62,6 +62,7 @@ public sealed class PresentationFixtureTests
     private static readonly IReadOnlyDictionary<string, Func<Task<string>>> Fixtures = OwnFixtures
         .Concat(Events.Setup.SetupFixtures.All)
         .Concat(Events.Active.ActiveFixtures.All)
+        .Concat(GuestCycles.Orchestration.GuestCycleFixtures.All)
         .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
     public static TheoryData<string> Names => [.. Fixtures.Keys];
 

@@ -334,6 +334,32 @@ public sealed record IdentifyOverlayDiagnostics(string DisplayId, int Number, bo
 /// <summary>Whether the brain holds the wake lock (acquired while an Event runs).</summary>
 public sealed record WakeLockDiagnostics(bool Held);
 
+/// <summary>The Phase Timer as the brain sees it, for <c>test.getDiagnostics</c>.</summary>
+/// <param name="Phase">The phase being timed, or null when no timer is active.</param>
+/// <param name="RemainingMs">Milliseconds left, or null when no timer is active or the phase's timer is off.</param>
+/// <param name="Paused">Whether the timer is paused (a capture or Operator Assistance is running).</param>
+/// <param name="Warning">Whether the timer is in its warning window.</param>
+public sealed record GuestCycleTimerDiagnostics(PhaseTimer? Phase, long? RemainingMs, bool Paused, bool Warning);
+
+/// <summary>The running Guest Cycle as the brain sees it, for <c>test.getDiagnostics</c> (the end-to-end scenarios read it instead of scraping the UI).</summary>
+/// <param name="Id">The Guest Cycle's id.</param>
+/// <param name="Step">The step the guest is on (the step the cycle returns to during Operator Assistance).</param>
+/// <param name="Tab">The Photographs tab, or null on any other step.</param>
+/// <param name="WindowsFilled">Windows holding a Capture.</param>
+/// <param name="WindowCount">The selected Template's windows.</param>
+/// <param name="SequenceRunning">Whether a capture sequence or Retake is running.</param>
+/// <param name="CountdownRemaining">Whole seconds left in the countdown, or null between countdowns.</param>
+/// <param name="Timer">The Phase Timer.</param>
+public sealed record GuestCycleDiagnostics(
+    string Id,
+    GuestCycleStepName Step,
+    PhotographsTabName? Tab,
+    int WindowsFilled,
+    int WindowCount,
+    bool SequenceRunning,
+    int? CountdownRemaining,
+    GuestCycleTimerDiagnostics Timer);
+
 /// <summary>The result of <c>test.getDiagnostics</c>.</summary>
 /// <param name="ProtocolVersion">The brain's protocol version.</param>
 /// <param name="ConnectedRoles">Roles with at least one connection that completed the handshake, operator first.</param>
@@ -348,6 +374,7 @@ public sealed record WakeLockDiagnostics(bool Held);
 /// <param name="IdentifyOverlays">The displays of the last <c>IdentifyDisplays</c>, with whether they are showing now; empty before the first.</param>
 /// <param name="WakeLock">Whether the brain holds the wake lock.</param>
 /// <param name="ClockScale">The clock's speed factor (1 unless <c>test.setClockScale</c> changed it).</param>
+/// <param name="GuestCycle">The running Guest Cycle, or null when none runs (protocol version 8).</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -361,7 +388,8 @@ public sealed record DiagnosticsResult(
     IReadOnlyList<OpenFolderRequest> OpenFolderRequests,
     IReadOnlyList<IdentifyOverlayDiagnostics> IdentifyOverlays,
     WakeLockDiagnostics WakeLock,
-    double ClockScale)
+    double ClockScale,
+    GuestCycleDiagnostics? GuestCycle)
 {
     public const int MaxCommandResults = 20;
 

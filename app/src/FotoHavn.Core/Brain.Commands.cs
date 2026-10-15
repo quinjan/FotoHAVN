@@ -9,7 +9,9 @@ namespace FotoHavn.Core;
 //   Brain.ActiveEvent.cs   StartEvent, End Event, exit hold and PIN  (M6 wave B1b)
 //   Brain.Operator.cs      DismissNotice
 //   Brain.Storage.cs       RetryStorage
-// A command nothing implements yet (the galleries, the Guest Cycle) is rejected notAvailable. Handlers run on the executor,
+//   Brain.GuestCycle.cs    the Guest Cycle commands                  (M8 wave B1)
+//   Brain.Assistance.cs    RetryAssistance                           (M8 wave B1)
+// A command nothing implements yet (the galleries; the Guest Cycle until M8 wave B1) is rejected notAvailable. Handlers run on the executor,
 // answer at once, and never wait for I/O: they start it and post the outcome back (contract section 9, Threading).
 public sealed partial class Brain
 {
@@ -59,6 +61,32 @@ public sealed partial class Brain
         CompleteExitHoldPayload => CompleteExitHold(id),
         SubmitPinPayload pin => SubmitPin(id, pin),
         CancelExitPayload => CancelExit(id),
+
+        // The Guest Cycle (Brain.GuestCycle.cs) and Operator Assistance (Brain.Assistance.cs)
+        BeginGuestCyclePayload => BeginGuestCycle(id),
+        SelectTemplatePayload template => SelectTemplate(id, template),
+        GoToStepPayload step => GoToStep(id, step),
+        ShowCameraTabPayload => ShowCameraTab(id),
+        ShowArrangeTabPayload => ShowArrangeTab(id),
+        TakePhotographsPayload => TakePhotographs(id),
+        StopCapturePayload => StopCapture(id),
+        SelectPositionPayload position => SelectPosition(id, position),
+        BeginRetakePayload retake => BeginRetake(id, retake),
+        AcceptRetakePayload => AcceptRetake(id),
+        TryAgainPayload => TryAgain(id),
+        KeepOriginalPayload => KeepOriginal(id),
+        BeginMovePayload move => BeginMove(id, move),
+        MoveToPayload moveTo => MoveTo(id, moveTo),
+        CancelMovePayload => CancelMove(id),
+        DragPlacePayload drag => DragPlace(id, drag),
+        SelectLookPayload look => SelectLook(id, look),
+        FinishStripPayload => FinishStrip(id),
+        RetryCompositionPayload => RetryComposition(id),
+        MoreTimePayload => MoreTime(id),
+        StartOverPayload => StartOver(id),
+        ConfirmStartOverPayload => ConfirmStartOver(id),
+        KeepGoingPayload => KeepGoing(id),
+        RetryAssistancePayload => RetryAssistance(id),
 
         _ => NotAvailable(id),
     };

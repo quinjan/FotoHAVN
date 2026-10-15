@@ -69,7 +69,7 @@ public sealed class StartEventTests
         Assert.Null(panel.Assistance);
         var row = Assert.Single(rig.LatestOperator().EventList!.Events);
         Assert.True(row.Running);
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(true, false), null, GuestOverlays.None, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(true, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]

@@ -143,6 +143,10 @@ public sealed record BeginGuestCyclePayload : ICommandPayload;
 
 public sealed record SelectTemplatePayload(string TemplateId) : ICommandPayload;
 
+/// <summary>
+/// Goes to a Guest Cycle step: it is both <c>CONTINUE</c> (to the next step) and <c>BACK</c> (to an earlier one, from the step progress). The brain refuses
+/// Filters until the arrangement is complete, and the step the guest is already on. Keepsake has no command: the brain moves there itself after the Photo Strip is committed.
+/// </summary>
 public sealed record GoToStepPayload(GuestStep Step) : ICommandPayload;
 
 public sealed record ShowCameraTabPayload : ICommandPayload;
@@ -175,6 +179,9 @@ public sealed record DragPlacePayload(int SourceIndex, string CaptureId, long Re
 public sealed record SelectLookPayload(string LookId) : ICommandPayload;
 
 public sealed record FinishStripPayload : ICommandPayload;
+
+/// <summary><c>TRY AGAIN</c> after a composition failed on Filters: the brain composes again what failed (a Look's preview or the final Photo Strip). Nothing is lost.</summary>
+public sealed record RetryCompositionPayload : ICommandPayload;
 
 public sealed record MoreTimePayload : ICommandPayload;
 

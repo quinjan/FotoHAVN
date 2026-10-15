@@ -75,6 +75,12 @@ export const guestStart: GuestWelcomeMessage = {
     startUnavailable: null,
     overlays: { exitHold: null, pinDialog: null, phaseTimerWarning: null, startOverConfirmation: null, notice: null },
     fatal: null,
+    guestCycle: null,
+    template: null,
+    photographs: null,
+    filters: null,
+    keepsake: null,
+    operatorAssistance: null,
   },
 };
 

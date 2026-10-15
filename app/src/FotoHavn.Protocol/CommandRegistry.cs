@@ -99,6 +99,7 @@ public static class CommandRegistry
         Guest<DragPlacePayload>(),
         Guest<SelectLookPayload>(),
         Guest<FinishStripPayload>(),
+        Guest<RetryCompositionPayload>(),
         Guest<MoreTimePayload>(),
         Guest<StartOverPayload>(),
         Guest<ConfirmStartOverPayload>(),

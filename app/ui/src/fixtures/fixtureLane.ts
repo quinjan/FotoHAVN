@@ -1,6 +1,8 @@
 import { createFixtureTransport, type FixtureSnapshot } from "../brain/fixtureTransport.ts";
 import type { Transport } from "../brain/types.ts";
 import { PROTOCOL_VERSION, type ServerMessage } from "../protocol/generated.ts";
+import { guestCaptureFixtures } from "./guestCaptureFixtures.ts";
+import { guestFinishFixtures } from "./guestFinishFixtures.ts";
 import { guestShellFixtures, operatorEventListWithRows } from "./inlineFixtures.ts";
 import { operatorFixtures } from "./operatorFixtures.ts";
 import { fixturePreviewUrl } from "./previewImages.ts";
@@ -26,6 +28,8 @@ const generated: FixtureMessages = Object.fromEntries(
 const handWritten: FixtureMessages = {
   "operator-event-list": operatorEventListWithRows,
   ...guestShellFixtures,
+  ...guestCaptureFixtures,
+  ...guestFinishFixtures,
   ...operatorFixtures(),
 };
 

@@ -18,7 +18,7 @@ public sealed class CommandRegistryTests
     [
         "BeginGuestCycle", "SelectTemplate", "GoToStep", "ShowCameraTab", "ShowArrangeTab", "TakePhotographs", "StopCapture",
         "SelectPosition", "BeginRetake", "AcceptRetake", "TryAgain", "KeepOriginal", "BeginMove", "MoveTo", "CancelMove",
-        "DragPlace", "SelectLook", "FinishStrip", "MoreTime", "StartOver", "ConfirmStartOver", "KeepGoing",
+        "DragPlace", "SelectLook", "FinishStrip", "RetryComposition", "MoreTime", "StartOver", "ConfirmStartOver", "KeepGoing",
         "BeginExitHold", "CompleteExitHold", "SubmitPin", "CancelExit", "RetryAssistance", "OpenGuestGallery",
         "LoadMoreGuestStrips", "OpenGuestStrip", "CloseGuestStrip", "BackToStart",
     ];

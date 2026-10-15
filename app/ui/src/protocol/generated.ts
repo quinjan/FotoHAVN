@@ -71,6 +71,7 @@ export type Command =
   | DragPlaceCommand
   | SelectLookCommand
   | FinishStripCommand
+  | RetryCompositionCommand
   | MoreTimeCommand
   | StartOverCommand
   | ConfirmStartOverCommand
@@ -276,6 +277,26 @@ export type StartUnavailableReason = "camera" | "storage";
 export type PinDialogError = "wrongPin";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleStepName".
+ */
+export type GuestCycleStepName = "template" | "photographs" | "filters" | "keepsake";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestStepState".
+ */
+export type GuestStepState = "done" | "current" | "upcoming" | "skipped";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographsTabName".
+ */
+export type PhotographsTabName = "camera" | "arrange";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographSelectionMode".
+ */
+export type PhotographSelectionMode = "none" | "selected" | "moving" | "retaking";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "CommandStatus".
  */
 export type CommandStatus = "accepted" | "rejected";
@@ -351,7 +372,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 7;
+  protocolVersion: 8;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1288,6 +1309,21 @@ export interface FinishStripCommand {
 export interface FinishStripPayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RetryCompositionCommand".
+ */
+export interface RetryCompositionCommand {
+  type: "command";
+  id: string;
+  name: "RetryComposition";
+  payload: RetryCompositionPayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RetryCompositionPayload".
+ */
+export interface RetryCompositionPayload {}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "MoreTimeCommand".
  */
 export interface MoreTimeCommand {
@@ -1878,6 +1914,12 @@ export interface GuestPresentation {
   startUnavailable: StartUnavailableView | null;
   overlays: GuestOverlays;
   fatal: FatalView | null;
+  guestCycle: GuestCycleView | null;
+  template: TemplateView | null;
+  photographs: PhotographsView | null;
+  filters: FiltersView | null;
+  keepsake: KeepsakeView | null;
+  operatorAssistance: OperatorAssistanceView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1926,7 +1968,10 @@ export interface PinDialogOverlay {
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "PhaseTimerWarningOverlay".
  */
-export interface PhaseTimerWarningOverlay {}
+export interface PhaseTimerWarningOverlay {
+  phase: PhaseTimer;
+  remainingSeconds: number;
+}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "StartOverConfirmationOverlay".
@@ -1938,6 +1983,167 @@ export interface StartOverConfirmationOverlay {}
  */
 export interface NoticeOverlay {
   message: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleView".
+ */
+export interface GuestCycleView {
+  id: string;
+  step: GuestCycleStepName;
+  steps: GuestCycleStepEntry[];
+  startOverAvailable: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleStepEntry".
+ */
+export interface GuestCycleStepEntry {
+  step: GuestCycleStepName;
+  state: GuestStepState;
+  canGoBack: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "TemplateView".
+ */
+export interface TemplateView {
+  templates: TemplateOptionView[];
+  selectedId: string;
+  canContinue: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "TemplateOptionView".
+ */
+export interface TemplateOptionView {
+  id: string;
+  name: string;
+  description: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+  windows: TemplateWindowView[];
+  blankPreviewKey: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "TemplateWindowView".
+ */
+export interface TemplateWindowView {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographsView".
+ */
+export interface PhotographsView {
+  tab: PhotographsTabName;
+  template: PhotographsTemplateView;
+  windows: PhotographsWindowView[];
+  retainedCount: number;
+  sequence: CaptureSequenceView;
+  mirrored: boolean;
+  cropAspect: number;
+  selection: PhotographSelectionView;
+  retakeCandidate: RetakeCandidateView | null;
+  revision: number;
+  canTakePhotographs: boolean;
+  canReview: boolean;
+  canContinue: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographsTemplateView".
+ */
+export interface PhotographsTemplateView {
+  id: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+  windows: TemplateWindowView[];
+  blankPreviewKey: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographsWindowView".
+ */
+export interface PhotographsWindowView {
+  index: number;
+  captureId: string | null;
+  imageUrl: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CaptureSequenceView".
+ */
+export interface CaptureSequenceView {
+  running: boolean;
+  targetWindow: number | null;
+  countdownRemaining: number | null;
+  flashSequence: number;
+  capturedInSequence: number;
+  totalInSequence: number;
+  pausing: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "PhotographSelectionView".
+ */
+export interface PhotographSelectionView {
+  index: number | null;
+  mode: PhotographSelectionMode;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "RetakeCandidateView".
+ */
+export interface RetakeCandidateView {
+  index: number;
+  imageUrl: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "FiltersView".
+ */
+export interface FiltersView {
+  looks: LookOptionView[];
+  selectedLookId: string;
+  stripPreviewKey: string | null;
+  composing: boolean;
+  compositionFailed: boolean;
+  canFinish: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "LookOptionView".
+ */
+export interface LookOptionView {
+  id: string;
+  name: string;
+  description: string;
+  thumbnailKey: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "KeepsakeView".
+ */
+export interface KeepsakeView {
+  stripUrl: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "OperatorAssistanceView".
+ */
+export interface OperatorAssistanceView {
+  reason: AssistanceReason;
+  retrying: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2060,6 +2266,7 @@ export interface CommandPayloadMap {
   DragPlace: DragPlacePayload;
   SelectLook: SelectLookPayload;
   FinishStrip: FinishStripPayload;
+  RetryComposition: RetryCompositionPayload;
   MoreTime: MoreTimePayload;
   StartOver: StartOverPayload;
   ConfirmStartOver: ConfirmStartOverPayload;
@@ -2182,6 +2389,7 @@ export interface DiagnosticsResult {
   identifyOverlays: IdentifyOverlayDiagnostics[];
   wakeLock: WakeLockDiagnostics;
   clockScale: number;
+  guestCycle: GuestCycleDiagnostics | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2304,6 +2512,30 @@ export interface IdentifyOverlayDiagnostics {
  */
 export interface WakeLockDiagnostics {
   held: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleDiagnostics".
+ */
+export interface GuestCycleDiagnostics {
+  id: string;
+  step: GuestCycleStepName;
+  tab: PhotographsTabName | null;
+  windowsFilled: number;
+  windowCount: number;
+  sequenceRunning: boolean;
+  countdownRemaining: number | null;
+  timer: GuestCycleTimerDiagnostics;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleTimerDiagnostics".
+ */
+export interface GuestCycleTimerDiagnostics {
+  phase: PhaseTimer | null;
+  remainingMs: number | null;
+  paused: boolean;
+  warning: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2462,4 +2694,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 7;
+export const PROTOCOL_VERSION = 8;
