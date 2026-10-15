@@ -103,6 +103,7 @@ describe("EventList", () => {
       const runningRow = within(rowOf(new RegExp(`^${running[0]?.name ?? ""}$`)));
       expect(runningRow.getAllByRole("button").map((button) => button.textContent)).toEqual(["GALLERY", "OPEN FOLDER"]);
       expect(runningRow.getByText("RUNNING")).toBeVisible();
+      expect(runningRow.queryByText("End the running Event to start another.")).toBeNull();
 
       const other = rowOf(new RegExp(`^${running[1]?.name ?? ""}$`));
       expect(within(other).getAllByRole("button").map((button) => button.textContent)).toEqual(["START", "GALLERY", "EDIT", "OPEN FOLDER", "DELETE"]);

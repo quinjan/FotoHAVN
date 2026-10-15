@@ -501,3 +501,47 @@ export function reconcileScenario(dataDir: string): ReconcileScenario {
 export function seedReconcileScenario(dataDir: string): void {
   reconcileScenario(dataDir).plan.write();
 }
+
+/** The Events `seedOperatorEvents` writes, newest date first (the Event list's order). */
+export const operatorSeed = {
+  /** Two completed Guest Cycles: two Photo Strips and five kept photographs (one more was discarded). */
+  seaside: { id: seedId(0xe1, 1), name: "Seaside wedding", venue: "Pier Hall", guestCycles: 2, photoStrips: 2, photographs: 5 },
+  harbour: { id: seedId(0xe1, 2), name: "Harbour gala", venue: "Harbour Hall" },
+  studio: { id: seedId(0xe1, 3), name: "Studio open day" },
+} as const;
+
+/** Seeds three Events for the Event list scenarios (delete, open folder, visual record); pass it as `appOptions.seed`. */
+export function seedOperatorEvents(dataDir: string): void {
+  const plan = new DataFolderPlan(dataDir);
+  const seaside = plan.addEvent({
+    id: operatorSeed.seaside.id,
+    name: operatorSeed.seaside.name,
+    date: "2026-10-03",
+    venue: operatorSeed.seaside.venue,
+    createdAt: storageTimestamp(new Date(Date.UTC(2026, 8, 1))),
+  });
+  const first = plan.addCycle(seaside, seedId(0xe2, 1), "completed");
+  plan.addCapture(first, seedId(0xe3, 1), 1);
+  plan.addCapture(first, seedId(0xe3, 2), 2);
+  plan.addCapture(first, seedId(0xe3, 3), 3);
+  plan.addCapture(first, seedId(0xe3, 4), 4, { state: "discarded" });
+  plan.addPhotoStrip(first);
+  const second = plan.addCycle(seaside, seedId(0xe2, 2), "completed");
+  plan.addCapture(second, seedId(0xe3, 5), 1);
+  plan.addCapture(second, seedId(0xe3, 6), 2);
+  plan.addPhotoStrip(second);
+  plan.addEvent({
+    id: operatorSeed.harbour.id,
+    name: operatorSeed.harbour.name,
+    date: "2026-09-12",
+    venue: operatorSeed.harbour.venue,
+    createdAt: storageTimestamp(new Date(Date.UTC(2026, 7, 20))),
+  });
+  plan.addEvent({
+    id: operatorSeed.studio.id,
+    name: operatorSeed.studio.name,
+    date: "2026-08-22",
+    createdAt: storageTimestamp(new Date(Date.UTC(2026, 7, 1))),
+  });
+  plan.write();
+}

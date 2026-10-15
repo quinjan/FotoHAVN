@@ -180,6 +180,19 @@ export class HookClient {
     await this.call("test.clearCameraFault", null);
   }
 
+  async disconnectDisplay(displayId: string): Promise<void> {
+    await this.call("test.disconnectDisplay", { displayId });
+  }
+
+  async connectDisplay(displayId: string): Promise<void> {
+    await this.call("test.connectDisplay", { displayId });
+  }
+
+  /** Scales the brain's clock (the 30 s PIN lockout and the 10 s guest-ready wait shorten); `1` restores real time. */
+  async setClockScale(factor: number): Promise<void> {
+    await this.call("test.setClockScale", { factor });
+  }
+
   /**
    * Asks the app to shut down. The app may close the page before or while the reply arrives, so a lost connection
    * after sending counts as delivered; the caller checks the exit code.

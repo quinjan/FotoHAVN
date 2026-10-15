@@ -22,7 +22,7 @@ function RowActions({ row }: { readonly row: EventListRow }) {
   const reasonId = useId();
   const showStart = !row.running;
   const startDisabled = !row.actions.canStart;
-  const startReason = startDisabled && row.startDisabledReason === "eventRunning" ? eventRunningCopy : null;
+  const startReason = showStart && startDisabled && row.startDisabledReason === "eventRunning" ? eventRunningCopy : null;
   return (
     <div className={styles.actions}>
       <div className={styles.actionRow}>
