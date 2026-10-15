@@ -45,12 +45,9 @@ public sealed class StartHoldTests
         return start.Result;
     }
 
-    /// <summary>The start's answer reaches the brain from the thread pool: gives it real time to arrive, then runs it.</summary>
-    private static void Settle(ActiveRig rig)
-    {
-        Thread.Sleep(200);
-        rig.Run();
-    }
+    /// <summary>The start's answer reaches the brain from the thread pool: runs the brain until the held Event is released.</summary>
+    private static void AwaitStartEnded(ActiveRig rig) =>
+        rig.Pump(() => rig.Brain.HeldEventId is null);
 
     private static void AssertRejected(CommandResultMessage result) =>
         Assert.Equal((CommandStatus.Rejected, RejectReason.EventRunning), (result.Status, result.Reason));
@@ -194,7 +191,7 @@ public sealed class StartHoldTests
         OpenSetup(rig, ActiveRig.OtherEventId);
 
         rig.Advance(Brain.StartCameraTimeout + TimeSpan.FromSeconds(1));
-        Settle(rig);
+        AwaitStartEnded(rig);
 
         var open = rig.LatestOperator().EventSetup!;
         Assert.Equal(ActiveRig.OtherEventId, open.EventId);

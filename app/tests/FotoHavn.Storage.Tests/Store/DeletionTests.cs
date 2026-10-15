@@ -174,17 +174,22 @@ public sealed class DeletionTests
         var first = await CompletedCycleAsync(harness);
         var second = await CompletedCycleAsync(harness, first.Event);
         Task? queued = null;
+        using var drainStarted = new ManualResetEventSlim();
         harness.Crash.OnReached = step =>
         {
             if (step == CrashPoint.CycleRowsDeleted && queued is null)
             {
-                queued = Task.Run(() => harness.Store.MarkGuestCycleDeletingAsync(second.Cycle.Id, Ct), Ct);
-                Thread.Sleep(100);
+                // Hold the first job here until Drain is waiting on it, then queue the second Mark; the call registers on the
+                // store's lock before it returns, so it runs as soon as the first job's step ends.
+                Assert.True(drainStarted.Wait(TimeSpan.FromSeconds(30)), "Drain never started waiting.");
+                queued = harness.Store.MarkGuestCycleDeletingAsync(second.Cycle.Id, Ct);
             }
         };
 
         await harness.Store.MarkGuestCycleDeletingAsync(first.Cycle.Id, Ct);
-        await harness.Store.DrainAsync(Ct);
+        var drain = harness.Store.DrainAsync(Ct);
+        drainStarted.Set();
+        await drain;
         await queued!;
         await harness.Store.DrainAsync(Ct);
 
@@ -280,8 +285,9 @@ public sealed class DeletionTests
             if (step == CrashPoint.CycleMarkedDeleting)
             {
                 harness.Probe.Facts = harness.Probe.Facts with { CanWrite = false };
-                reopening = Task.Run(() => harness.Store.OpenAsync(Ct), Ct);
-                Thread.Sleep(300);
+                // OpenAsync registers on the store's lock before it returns its pending task, and the callback runs before the
+                // job is queued, so the reopen is ahead of the job in the lock's queue: the job always finds the store closed.
+                reopening = harness.Store.OpenAsync(Ct);
             }
         };
 
