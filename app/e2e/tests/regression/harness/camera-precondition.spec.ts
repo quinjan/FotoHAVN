@@ -10,6 +10,9 @@ import {
 import { chosenCameraEnvVar } from "../../../src/chosen-camera";
 import { outputEnvVar, paths } from "../../../src/paths";
 
+/** Where the child run's per-worker debugging port ranges start (the run's own start at 19300 and stay below 20000). */
+const childPortBase = 29300;
+
 interface ChildRun {
   status: number | null;
   output: string;
@@ -34,6 +37,9 @@ function runSmokeChild(outputDir: string, camera: string | undefined): ChildRun 
     env[cameraEnvVar] = camera;
   }
   env[outputEnvVar] = outputDir;
+  // Its own debugging port ranges: parallel apps of this run may be starting at the same moment, and two apps that
+  // probe the same port as free would answer each other's test.exit.
+  env.FOTOHAVN_E2E_PORT_BASE = String(childPortBase);
   env.FOTOHAVN_E2E_SKIP_BUILD = "1";
   env.FORCE_COLOR = "0";
 

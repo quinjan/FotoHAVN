@@ -5,7 +5,7 @@ import { ConfirmDialogScreen, EventListScreen, EventSetupScreen } from "../../..
 
 const reason = "End the running Event to start another.";
 
-test.describe("the running Event's lock", { tag: ["@m6"] }, () => {
+test.describe("the running Event's lock", { tag: ["@m6", "@camera"] }, () => {
   test("while Event A runs, its row offers only Gallery and Open folder, Start is disabled elsewhere, and A can't be edited, but Event B can be created, edited with the same camera, and deleted", async ({
     app,
     operatorPage,

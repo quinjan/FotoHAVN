@@ -4,7 +4,7 @@ import { EventListScreen, GuestStartScreen, PinDialogScreen } from "../../../src
 
 const pin = "4821";
 
-test.describe("leaving a running Event from the Guest Screen", { tag: ["@m6"] }, () => {
+test.describe("leaving a running Event from the Guest Screen", { tag: ["@m6", "@camera", "@cursor"] }, () => {
   test("holding the exit control for 3 seconds opens the PIN pad, and the right PIN ends the Event exactly as END EVENT does", async ({
     app,
     operatorPage,

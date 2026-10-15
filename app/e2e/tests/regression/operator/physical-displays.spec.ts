@@ -3,7 +3,7 @@ import { expect, test } from "../../../src/fixtures";
 import { createEvent, endEventFromOperator, guestPage } from "../../../src/operator";
 import { EventListScreen, GuestStartScreen } from "../../../src/screens/screens";
 
-test.describe("the operator flow on two real displays", { tag: ["@m6", "@physical-displays"] }, () => {
+test.describe("the operator flow on two real displays", { tag: ["@m6", "@physical-displays", "@camera", "@cursor"] }, () => {
   test("an Event created for the second real display starts there with Start, and ends with END EVENT", async ({
     app,
     operatorPage,

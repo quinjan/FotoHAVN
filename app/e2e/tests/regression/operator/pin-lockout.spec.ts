@@ -7,7 +7,7 @@ const pin = "4821";
 const wrongPin = "0000";
 const maxWrongAttempts = 5;
 
-test.describe("the PIN lockout", { tag: ["@m6"] }, () => {
+test.describe("the PIN lockout", { tag: ["@m6", "@camera"] }, () => {
   test("five wrong PINs lock the pad with a countdown; the lockout ends on the brain clock, and the right PIN then ends the Event", async ({
     app,
     operatorPage,

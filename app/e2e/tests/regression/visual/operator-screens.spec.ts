@@ -88,7 +88,7 @@ test.describe("operator screens in the real host: empty Event list and Event set
   });
 });
 
-test.describe("operator screens in the real host: Event list with Events and a running Event", { tag: ["@m6"] }, () => {
+test.describe("operator screens in the real host: Event list with Events and a running Event", { tag: ["@m6", "@camera"] }, () => {
   test.use({ appOptions: { seed: seedOperatorEvents } });
 
   test("the Event list with Events, and with the running-Event panel, fit the four resolutions", async ({ app, operatorPage, camera, hooks }, testInfo) => {

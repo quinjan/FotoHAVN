@@ -11,7 +11,7 @@ function binding(dataDir: string, id: string): { guest_display_id: string; guest
   return queryOne(path.join(dataDir, "fotohavn.db"), "SELECT guest_display_id, guest_display_name, camera_device_id FROM events WHERE id = ?", id);
 }
 
-test.describe("Start when the guest display is missing", { tag: ["@m6"] }, () => {
+test.describe("Start when the guest display is missing", { tag: ["@m6", "@camera"] }, () => {
   test("Start stays in setup with the reason and keeps the binding; once the display is back, Start succeeds", async ({
     app,
     operatorPage,

@@ -15,7 +15,7 @@ const pin = "739104";
 
 test(
   "an Event is created with every field, started with SAVE AND START on the second display, ended with END EVENT, and the store holds a PIN hash but no PIN",
-  { tag: ["@m6"] },
+  { tag: ["@m6", "@camera"] },
   async ({ app, operatorPage, camera, hooks, dataDir }) => {
     const screens = await useVirtualScreens(app, 2);
     const guestDisplay = screens.guest;

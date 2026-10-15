@@ -8,7 +8,7 @@ function binding(dataDir: string, id: string): { camera_device_id: string; camer
   return queryOne(path.join(dataDir, "fotohavn.db"), "SELECT camera_device_id, camera_name, guest_display_id FROM events WHERE id = ?", id);
 }
 
-test.describe("Start when the camera isn't eligible", { tag: ["@m6"] }, () => {
+test.describe("Start when the camera isn't eligible", { tag: ["@m6", "@camera"] }, () => {
   test("with an injected camera fault Start stays in setup with the reason and keeps the binding; with the fault cleared, Start succeeds", async ({
     app,
     operatorPage,

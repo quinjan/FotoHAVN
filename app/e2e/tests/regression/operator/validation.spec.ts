@@ -32,7 +32,7 @@ async function liftLimit(field: Locator): Promise<void> {
   });
 }
 
-test.describe("Event setup validation", { tag: ["@m6"] }, () => {
+test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
   test("each required field and range rule blocks SAVE with its message and moves focus to the first invalid field", async ({
     app,
     operatorPage,

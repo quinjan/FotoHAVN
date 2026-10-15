@@ -5,7 +5,7 @@ import { EventListScreen, GuestStartScreen, PinDialogScreen, SingleScreenOperato
 
 const pin = "4821";
 
-test.describe("a single screen", { tag: ["@m6"] }, () => {
+test.describe("a single screen", { tag: ["@m6", "@camera"] }, () => {
   test("with one display the Guest Screen covers the Operator Screen, which says so, offers no END EVENT, and returns only by the hold and PIN", async ({
     app,
     operatorPage,

@@ -8,7 +8,7 @@ function storedName(dataDir: string, id: string): string | undefined {
   return queryOne<{ name: string }>(path.join(dataDir, "fotohavn.db"), "SELECT name FROM events WHERE id = ?", id)?.name;
 }
 
-test.describe("editing an Event and leaving Event setup", { tag: ["@m6"] }, () => {
+test.describe("editing an Event and leaving Event setup", { tag: ["@m6", "@camera"] }, () => {
   test("KEEP EDITING stays with the change, DISCARD CHANGES returns with the old name, and SAVE returns with the new name", async ({
     app,
     operatorPage,

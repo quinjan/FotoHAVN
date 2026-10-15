@@ -349,7 +349,7 @@ let launchesInThisProcess = 0;
 /**
  * Picks the remote debugging port for the next launch. Each worker owns the range
  * `portBase + parallelIndex * 10 .. +9` and walks it round-robin (so a port just freed isn't reused at once), probing that
- * the port is free. A range port that is taken (a nested Playwright run uses the same indices) is skipped; when the whole range
+ * the port is free. A range port that is taken is skipped (a nested Playwright run sets its own FOTOHAVN_E2E_PORT_BASE, so the two never share a range); when the whole range
  * is taken, the OS hands out a free port.
  */
 async function allocateDebugPort(): Promise<number> {
