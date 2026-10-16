@@ -189,7 +189,8 @@ public partial class App : Application
         var environments = new WebViewEnvironmentProvider(
             paths.WebViewUserDataFolder,
             paths.WebView2RuntimeFolder,
-            WebViewSettings.AdditionalBrowserArguments(options));
+            WebViewSettings.AdditionalBrowserArguments(options),
+            _loggerFactory.CreateLogger("FotoHavn.Host.Windows.WebView"));
         var services = new BoothWindowServices(
             _brain,
             environments,

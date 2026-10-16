@@ -49,6 +49,8 @@ dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:Fo
 #    The compositor speed budget (spike S3), without coverage, which would slow it 3-4x: median per strip under 150 ms
 #    (FOTOHAVN_S3_BUDGET_MS overrides the budget; the default 150 ms is the booth budget)
 dotnet test --project tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj --filter-method "*Composing_a_strip_takes_under_150_ms_median*"
+#    The field-build script's Pester tests (argument and E2E guards, SHA-256, manifest, zip name, runtime placement; about 40 s, no network, Pester 3.4 or later)
+pwsh -NoProfile -Command '$run = Invoke-Pester ./scripts/publish-field-test.Tests.ps1 -PassThru; exit ($run.FailedCount -gt 0 ? 1 : 0)'
 # 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures,
 #    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET;
 #    the lane warms Chromium and the bundle once in tests/global-setup.ts, a fixture counts as ready when the gallery sets
@@ -72,6 +74,7 @@ npx playwright test --project=smoke
 ```
 
 - Delete `output/coverage` before each test run: the coverage files have GUID names and accumulate, so stale runs would be merged in.
+- For `e2e/` runs, set `FOTOHAVN_E2E_OUTPUT` to a short folder such as `C:\fh-e2e` when the checkout path is long (about 100 characters or more): nested WebView2 user-data folders otherwise pass Windows' 260-character limit. The `@m10` specs also write there (`portable launch/`, `soak-curve.txt`).
 - Write the threshold as `"minimumCoverageThresholds:lineCoverage=90"`, with no leading dash; ReportGenerator silently ignores the dashed form. The merged summary can hide a weak assembly, so the gate runs once per assembly. An assembly with no branches passes the branch threshold.
 - Read the coverage text summary and the Playwright HTML report and trace for any failure; results land in `output/`.
 - With no Available Camera, report "end-to-end not run: no camera". From M1 on, a milestone without a passing end-to-end run is incomplete.
