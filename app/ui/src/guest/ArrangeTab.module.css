@@ -1,0 +1,75 @@
+/*
+ * The Arrange tab: the strip on a Cream Paper mat on the left, the heading, what the selection allows, the retained
+ * count, and the one way on on the right. The mat takes whatever height the stage gives it; the print contains itself.
+ */
+.tab {
+  display: grid;
+  grid-template-columns: repeat(var(--app-grid-columns), minmax(0, 1fr));
+  align-items: stretch;
+  column-gap: var(--app-space-fluid-32);
+  block-size: 100%;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-16) var(--app-gutter) var(--app-space-fluid-32);
+  overflow: hidden;
+}
+
+.mat {
+  grid-column: span var(--app-split-print);
+  min-block-size: 0;
+  padding: var(--app-space-fluid-24);
+  border-radius: var(--radius-hairline);
+  background-color: var(--app-tone-surface);
+}
+
+.side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  grid-column: span var(--app-split-options);
+  justify-content: center;
+  gap: var(--app-space-fluid-24);
+  min-block-size: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-fluid-16);
+  min-block-size: 0;
+}
+
+.panel:empty {
+  display: none;
+}
+
+.status,
+.retained {
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-fluid-16) var(--app-space-fluid-24);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-fluid-16) var(--app-space-fluid-24);
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

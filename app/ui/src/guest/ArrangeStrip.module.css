@@ -1,0 +1,180 @@
+/*
+ * The strip on the Arrange tab: a print at the Template's native proportion that fits the box it is given, with the
+ * blank preview behind and each photograph cover-cropped into its window. The print is a size container, so a
+ * quarter-turned strip (Panorama Four) sizes its turned surface with cq units, as PrintObject does.
+ */
+.fit {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  container-type: size;
+}
+
+.print {
+  --print-border: var(--space-8);
+
+  position: relative;
+  box-sizing: content-box;
+  flex: none;
+  aspect-ratio: var(--print-ratio);
+  padding: var(--print-border);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-canvas);
+  box-shadow: var(--shadow-print-contact);
+  container-type: size;
+}
+
+.fit > .print {
+  inline-size: min(100cqw - 2 * var(--print-border), (100cqh - 2 * var(--print-border)) * var(--print-ratio));
+}
+
+.surface {
+  position: absolute;
+  inset: var(--print-border);
+}
+
+/* The quarter turn is layout, not motion: it applies under reduced motion too. */
+.print[data-rotated] .surface {
+  inset: auto;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 100cqh;
+  block-size: 100cqw;
+  translate: -50% -50%;
+  rotate: -90deg;
+}
+
+.blank {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.windows {
+  position: absolute;
+  inset: 0;
+}
+
+.cell {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.cell[data-empty] {
+  box-shadow: inset 0 0 0 var(--stroke-hairline) var(--app-tone-rule);
+}
+
+.button {
+  cursor: pointer;
+}
+
+.button[aria-disabled="true"] {
+  cursor: default;
+}
+
+.button[data-draggable] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.photo {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* The position number sits in a corner so a photograph can be named without its picture; it stays upright on a turned strip. */
+.badge {
+  position: absolute;
+  inset-block-start: var(--space-8);
+  inset-inline-start: var(--space-8);
+  display: grid;
+  place-items: center;
+  min-inline-size: 1.6em;
+  min-block-size: 1.6em;
+  border-radius: var(--radius-round);
+  background-color: var(--semantic-surface-canvas);
+  color: var(--semantic-text-primary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.print[data-rotated] .badge {
+  rotate: 90deg;
+}
+
+/* The state rings draw over the photograph: a double ring, Off-white inside and ink outside, so they read on any picture and never by color alone. */
+.cell[data-selected]::after,
+.cell[data-moving]::after,
+.cell[data-destination]::after,
+.cell[data-drag-over]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow:
+    inset 0 0 0 var(--space-4) var(--semantic-surface-canvas),
+    inset 0 0 0 calc(var(--space-4) * 2) var(--app-tone-ink);
+  pointer-events: none;
+}
+
+/* A Move waits for a destination: every other window shows a single thin ring. */
+.cell[data-destination]::after {
+  box-shadow:
+    inset 0 0 0 var(--space-4) var(--semantic-surface-canvas),
+    inset 0 0 0 calc(var(--space-4) * 1.5) var(--app-tone-ink);
+}
+
+.cell[data-moving] .photo,
+.cell[data-drag-source] .photo {
+  opacity: 0.55;
+}
+
+.hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .print {
+    outline: var(--stroke-hairline) solid CanvasText;
+  }
+
+  .cell[data-selected],
+  .cell[data-moving],
+  .cell[data-drag-over] {
+    outline: var(--space-4) solid Highlight;
+    outline-offset: calc(var(--space-4) * -1);
+  }
+
+  .cell[data-destination] {
+    outline: var(--stroke-hairline) dashed CanvasText;
+    outline-offset: calc(var(--space-4) * -1);
+  }
+
+  .cell::after {
+    box-shadow: none;
+  }
+}

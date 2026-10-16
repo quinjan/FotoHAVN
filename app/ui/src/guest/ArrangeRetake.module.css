@@ -1,0 +1,57 @@
+/* The original and the new photograph, side by side at the window's proportion, sized from the height that is left. */
+.retake {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-fluid-16);
+  min-block-size: 0;
+}
+
+.status {
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.compare {
+  --compare-height: clamp(120px, 24vh, 320px);
+
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--app-space-fluid-24);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+}
+
+.image {
+  display: block;
+  block-size: var(--compare-height);
+  aspect-ratio: var(--window-ratio);
+  border-radius: var(--radius-hairline);
+  object-fit: cover;
+}
+
+.figure[data-candidate] .image {
+  box-shadow:
+    0 0 0 var(--space-4) var(--semantic-surface-canvas),
+    0 0 0 calc(var(--space-4) * 2) var(--app-tone-ink);
+}
+
+.caption {
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-fluid-16) var(--app-space-fluid-24);
+}
