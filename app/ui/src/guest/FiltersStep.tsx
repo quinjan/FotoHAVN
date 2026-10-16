@@ -45,7 +45,13 @@ export function FiltersStep({ view }: { readonly cycle: GuestCycleView; readonly
   return (
     <div className={styles.step} data-selected-look={view.selectedLookId} data-composing={view.composing || undefined}>
       <div className={styles.mat} data-tone="paper">
-        <FiltersStripPreview src={url(view.stripPreviewKey)} composing={view.composing} />
+        <FiltersStripPreview
+          src={url(view.stripPreviewKey)}
+          composing={view.composing}
+          width={view.width}
+          height={view.height}
+          landscape={view.landscape}
+        />
       </div>
       <div className={styles.options}>
         <StatementHeading level={1} size="heading" {...filtersCopy} />

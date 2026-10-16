@@ -39,7 +39,7 @@ describe("CameraTab", () => {
   });
 
   it("shows the heading, the supporting line, the progress, and the shutter ready to take photographs", () => {
-    const { container } = renderPhotographs(photographsOf("guest-ui-camera-idle"), stubClient());
+    const { container } = renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stubClient());
 
     expect(screen.getByRole("heading", { level: 1, name: "Find your light." })).toBeVisible();
     expect(screen.getByText("Let this moment become a memory.")).toBeVisible();
@@ -51,10 +51,10 @@ describe("CameraTab", () => {
 
   it("starts the sequence from the shutter, and stops it from the same control while it runs", () => {
     const stub = stubClient();
-    const view = renderPhotographs(photographsOf("guest-ui-camera-idle"), stub);
+    const view = renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stub);
 
     fireEvent.click(screen.getByRole("button", { name: "Take photographs" }));
-    view.show(photographsOf("guest-ui-camera-countdown"));
+    view.show(photographsOf("guest-cycle-photographs-countdown"));
     fireEvent.click(screen.getByRole("button", { name: "Stop taking photographs" }));
 
     expect(stub.sent).toEqual([
@@ -88,7 +88,7 @@ describe("CameraTab", () => {
 
   it("draws the crop guide for the next window's ratio on the camera's own frame", () => {
     const { container } = renderPhotographs(
-      photographsOf("guest-ui-camera-idle", { cropAspect: 0.75 }),
+      photographsOf("guest-cycle-photographs-camera", { cropAspect: 0.75 }),
       stubClient({ frames: frames(1280, 720) }),
     );
 
@@ -105,7 +105,7 @@ describe("CameraTab", () => {
 
   it("draws the landscape window's guide as the full 4:3 crop", () => {
     const { container } = renderPhotographs(
-      photographsOf("guest-ui-camera-idle", { cropAspect: 600 / 450 }),
+      photographsOf("guest-cycle-photographs-camera", { cropAspect: 600 / 450 }),
       stubClient({ frames: frames(1280, 720) }),
     );
 
@@ -115,44 +115,44 @@ describe("CameraTab", () => {
   });
 
   it("mirrors the live picture only when the Event does", () => {
-    const view = renderPhotographs(photographsOf("guest-ui-camera-idle", { mirrored: true }), stubClient({ frames: frames(640, 480) }));
+    const view = renderPhotographs(photographsOf("guest-cycle-photographs-camera", { mirrored: true }), stubClient({ frames: frames(640, 480) }));
     expect(document.querySelector("canvas")).toHaveAttribute("data-mirrored", "true");
 
-    view.show(photographsOf("guest-ui-camera-idle", { mirrored: false }));
+    view.show(photographsOf("guest-cycle-photographs-camera", { mirrored: false }));
     expect(document.querySelector("canvas")).not.toHaveAttribute("data-mirrored");
   });
 
   it("waits quietly for the camera when no frames arrive", () => {
-    renderPhotographs(photographsOf("guest-ui-camera-idle"), stubClient());
+    renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stubClient());
 
     expect(screen.getByText("Getting the camera ready.")).toBeVisible();
     expect(document.querySelector("[data-fotohavn-crop-guide]")).toBeNull();
   });
 
   it("shows each countdown number the brain pushes and announces the countdown once, when it starts", () => {
-    const { container, show } = renderPhotographs(photographsOf("guest-ui-camera-countdown"), stubClient());
+    const { container, show } = renderPhotographs(photographsOf("guest-cycle-photographs-countdown"), stubClient());
     const announcements = () => live(container).filter((text) => text !== "");
 
-    expect(screen.getByText("3")).toBeVisible();
-    expect(announcements()).toContain("Next photograph in 3 seconds.");
+    expect(screen.getByText("4")).toBeVisible();
+    expect(announcements()).toContain("Next photograph in 4 seconds.");
 
-    for (const remaining of [2, 1]) {
-      show(photographsOf("guest-ui-camera-countdown", { sequence: { ...photographsOf("guest-ui-camera-countdown").sequence, countdownRemaining: remaining } }));
+    for (const remaining of [3, 2, 1]) {
+      show(photographsOf("guest-cycle-photographs-countdown", { sequence: { ...photographsOf("guest-cycle-photographs-countdown").sequence, countdownRemaining: remaining } }));
       expect(screen.getByText(String(remaining))).toBeVisible();
     }
-    expect(announcements().filter((text) => text.startsWith("Next photograph"))).toEqual(["Next photograph in 3 seconds."]);
+    expect(announcements().filter((text) => text.startsWith("Next photograph"))).toEqual(["Next photograph in 4 seconds."]);
 
-    show(photographsOf("guest-ui-camera-flash"));
+    show(photographsOf("guest-cycle-photographs-pausing"));
     expect(screen.queryByText("1")).toBeNull();
   });
 
   it("announces a photograph taken once, never on first render", () => {
-    const { container, show } = renderPhotographs(photographsOf("guest-ui-camera-countdown"), stubClient());
+    const { container, show } = renderPhotographs(photographsOf("guest-cycle-photographs-countdown"), stubClient());
     expect(live(container).join("")).not.toContain("Photograph 1 of 4 taken.");
 
-    show(photographsOf("guest-ui-camera-flash"));
+    show(photographsOf("guest-ui-camera-stopped"));
     expect(live(container)).toContain("Photograph 2 of 4 taken.");
-    show(photographsOf("guest-ui-camera-flash"));
+    show(photographsOf("guest-ui-camera-stopped"));
     expect(live(container).filter((text) => text === "Photograph 2 of 4 taken.")).toHaveLength(1);
   });
 
@@ -161,11 +161,11 @@ describe("CameraTab", () => {
 
     it("plays once for each increment of flashSequence, and not for the value it mounts with", () => {
       stubReducedMotion(false);
-      const sequence = photographsOf("guest-ui-camera-flash").sequence;
-      const { container, show } = renderPhotographs(photographsOf("guest-ui-camera-flash"), stubClient());
+      const sequence = photographsOf("guest-cycle-photographs-pausing").sequence;
+      const { container, show } = renderPhotographs(photographsOf("guest-cycle-photographs-pausing"), stubClient());
       expect(flash(container)).toHaveAttribute("data-state", "idle");
 
-      show(photographsOf("guest-ui-camera-flash", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 1 } }));
+      show(photographsOf("guest-cycle-photographs-pausing", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 1 } }));
       expect(flash(container)).toHaveAttribute("data-state", "flash");
       expect(flash(container)).toHaveAttribute("data-motion", "animated");
 
@@ -174,11 +174,11 @@ describe("CameraTab", () => {
       });
       expect(flash(container)).toHaveAttribute("data-state", "idle");
 
-      show(photographsOf("guest-ui-camera-flash", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 2 } }));
+      show(photographsOf("guest-cycle-photographs-pausing", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 2 } }));
       expect(flash(container)).toHaveAttribute("data-state", "flash");
 
       // A Capture that lands while a flash still shows does not start another: never more than three flashes a second.
-      show(photographsOf("guest-ui-camera-flash", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 3 } }));
+      show(photographsOf("guest-cycle-photographs-pausing", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 3 } }));
       act(() => {
         vi.advanceTimersByTime(flashWindowMs);
       });
@@ -187,10 +187,10 @@ describe("CameraTab", () => {
 
     it("is a static change under reduced motion", () => {
       stubReducedMotion(true);
-      const sequence = photographsOf("guest-ui-camera-flash").sequence;
-      const { container, show } = renderPhotographs(photographsOf("guest-ui-camera-flash"), stubClient());
+      const sequence = photographsOf("guest-cycle-photographs-pausing").sequence;
+      const { container, show } = renderPhotographs(photographsOf("guest-cycle-photographs-pausing"), stubClient());
 
-      show(photographsOf("guest-ui-camera-flash", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 1 } }));
+      show(photographsOf("guest-cycle-photographs-pausing", { sequence: { ...sequence, flashSequence: sequence.flashSequence + 1 } }));
 
       expect(flash(container)).toHaveAttribute("data-state", "flash");
       expect(flash(container)).toHaveAttribute("data-motion", "static");
@@ -213,7 +213,7 @@ describe("CameraTab", () => {
   });
 
   it("marks the pause between windows", () => {
-    const { container } = renderPhotographs(photographsOf("guest-ui-camera-flash"), stubClient());
+    const { container } = renderPhotographs(photographsOf("guest-cycle-photographs-pausing"), stubClient());
 
     expect(container.querySelector("[data-photographs-tab='camera']")).toHaveAttribute("data-sequence-pausing", "true");
   });

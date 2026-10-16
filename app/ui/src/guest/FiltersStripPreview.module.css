@@ -19,8 +19,9 @@
   opacity: 0.6;
 }
 
-.loader {
-  display: none;
+/* A picture still loading sits in the stack, unseen, until it can fade in over the one shown. */
+.preview .layer[data-waiting] {
+  opacity: 0;
 }
 
 @keyframes arrive {

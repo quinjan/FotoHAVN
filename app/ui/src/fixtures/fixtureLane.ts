@@ -4,6 +4,7 @@ import { PROTOCOL_VERSION, type ServerMessage } from "../protocol/generated.ts";
 import { guestCaptureFixtures } from "./guestCaptureFixtures.ts";
 import { guestFinishFixtures } from "./guestFinishFixtures.ts";
 import { guestShellFixtures, operatorEventListWithRows } from "./inlineFixtures.ts";
+import { withLaneMedia } from "./laneMedia.ts";
 import { operatorFixtures } from "./operatorFixtures.ts";
 import { fixturePreviewUrl } from "./previewImages.ts";
 
@@ -13,16 +14,19 @@ import { fixturePreviewUrl } from "./previewImages.ts";
  *
  * The fixtures are the brain-generated messages in `presentations/` (written by FotoHavn.Core tests, contract §14),
  * by file name. A `presentation` message is served as the `welcome` a page would get at that revision; the
- * `protocol-mismatch` message makes the stand-in brain answer every `hello` with it. The operator Event lists with rows
- * and the storage error for every kind are hand-written (`operatorFixtures.ts`), for states the brain tests don't write.
+ * `protocol-mismatch` message makes the stand-in brain answer every `hello` with it. The media URLs in a Guest presentation
+ * (Captures, the Photo Strip) become placeholder photographs (`laneMedia.ts`), since no host serves them here. The operator
+ * Event lists with rows and the storage error for every kind are hand-written (`operatorFixtures.ts`), for states the brain
+ * tests don't write.
  */
 
+// Every file in presentations/ is served by its name.
 export type FixtureMessages = Readonly<Record<string, ServerMessage>>;
 
 const generated: FixtureMessages = Object.fromEntries(
   Object.entries(
     import.meta.glob<ServerMessage>("./presentations/*.json", { eager: true, import: "default" }),
-  ).map(([file, message]) => [fileStem(file), message]),
+  ).map(([file, message]) => [fileStem(file), withLaneMedia(message)]),
 );
 
 const handWritten: FixtureMessages = {

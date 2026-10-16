@@ -285,7 +285,7 @@ for (const resolution of resolutions) {
 
       await expect(page.locator('[data-fotohavn-screen="protocolMismatch"]')).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: "A little mix-up." })).toBeVisible();
-      await expect(page.getByText("Booth version 7 · Screen version 6")).toBeVisible();
+      await expect(page.getByText("Booth version 8 · Screen version 7")).toBeVisible();
       await expectNoScrolling(page);
       await page.screenshot({ path: resolve(screenshotDir, `protocol-mismatch-${name}.png`) });
       await expectAccessible(page);

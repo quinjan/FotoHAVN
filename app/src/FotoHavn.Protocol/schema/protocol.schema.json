@@ -2695,6 +2695,15 @@
         "selectedLookId": {
           "type": "string"
         },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
         "stripPreviewKey": {
           "type": [
             "string",
@@ -2714,6 +2723,9 @@
       "required": [
         "looks",
         "selectedLookId",
+        "width",
+        "height",
+        "landscape",
         "stripPreviewKey",
         "composing",
         "compositionFailed",

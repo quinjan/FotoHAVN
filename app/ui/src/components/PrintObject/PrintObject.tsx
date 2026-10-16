@@ -14,8 +14,8 @@ export type PrintShadow = "contact" | "lifted";
 export type PrintFit = "contain" | "scale";
 
 export interface PrintObjectProps {
-  /** The image URL: a composed Photo Strip, or a thumbnail of one. */
-  readonly src: string;
+  /** The image URL: a composed Photo Strip, or a thumbnail of one. Null shows a blank print of the same shape, ready for the image. */
+  readonly src: string | null;
   /** The image's alternative text, e.g. "Photo Strip from this Event". */
   readonly alt: string;
   /** The image's native width in pixels; with `height`, it fixes the print's proportion. */
@@ -63,7 +63,11 @@ export function PrintObject({
       data-rotated={rotated || undefined}
       style={geometry}
     >
-      <img className={styles.image} src={src} alt={alt} width={width} height={height} draggable={false} />
+      {src === null ? (
+        <div className={styles.image} data-blank="true" aria-hidden="true" />
+      ) : (
+        <img className={styles.image} src={src} alt={alt} width={width} height={height} draggable={false} />
+      )}
     </div>
   );
   return fit === "scale" ? print : <div className={cx(styles.fit, className)}>{print}</div>;

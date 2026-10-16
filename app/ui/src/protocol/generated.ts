@@ -2112,6 +2112,9 @@ export interface RetakeCandidateView {
 export interface FiltersView {
   looks: LookOptionView[];
   selectedLookId: string;
+  width: number;
+  height: number;
+  landscape: boolean;
   stripPreviewKey: string | null;
   composing: boolean;
   compositionFailed: boolean;

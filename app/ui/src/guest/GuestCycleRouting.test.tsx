@@ -85,7 +85,7 @@ describe("Guest Cycle routing", () => {
       surface: "filters",
       start: null,
       guestCycle: cycle("filters"),
-      filters: { looks: [], selectedLookId: "naturale-v1", stripPreviewKey: null, composing: false, compositionFailed: false, canFinish: true },
+      filters: { looks: [], selectedLookId: "naturale-v1", width: 600, height: 1800, landscape: false, stripPreviewKey: null, composing: false, compositionFailed: false, canFinish: true },
     });
     expect(screen.getByRole("heading", { level: 1, name: "Find the feeling." })).toBeVisible();
     filters.unmount();

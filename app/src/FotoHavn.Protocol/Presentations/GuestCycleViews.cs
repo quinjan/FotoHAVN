@@ -173,6 +173,9 @@ public sealed record LookOptionView(string Id, string Name, string Description, 
 /// <summary>The Filters step.</summary>
 /// <param name="Looks">The Looks the Event offers, in the Event's order.</param>
 /// <param name="SelectedLookId">The selected Look.</param>
+/// <param name="Width">The selected Template's paper width in pixels, so the print's shape is reserved before its image loads.</param>
+/// <param name="Height">The selected Template's paper height in pixels.</param>
+/// <param name="Landscape">Whether the paper is wider than tall (the UI rotates the print a quarter turn).</param>
 /// <param name="StripPreviewKey">The preview key of the strip with the selected Look, or null until it is composed.</param>
 /// <param name="Composing">Whether the strip is being composed (a preview for a new Look, or the final Photo Strip).</param>
 /// <param name="CompositionFailed">Whether the last composition failed: the UI shows "Your strip couldn't be prepared. Try again." with <c>TRY AGAIN</c> (<c>RetryComposition</c>).</param>
@@ -180,6 +183,9 @@ public sealed record LookOptionView(string Id, string Name, string Description, 
 public sealed record FiltersView(
     IReadOnlyList<LookOptionView> Looks,
     string SelectedLookId,
+    int Width,
+    int Height,
+    bool Landscape,
     string? StripPreviewKey,
     bool Composing,
     bool CompositionFailed,

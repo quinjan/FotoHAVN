@@ -277,6 +277,7 @@ public sealed partial class Brain
     {
         var model = run.Model;
         var firstCaptureId = model.Windows[0]!;
+        var template = TemplateOf(model.TemplateId);
         return new FiltersView(
             [.. run.Active.Event.OfferedLookIds.Select(lookId =>
             {
@@ -284,6 +285,9 @@ public sealed partial class Brain
                 return new LookOptionView(look.Id, look.Name, look.Description, run.ThumbnailKeys.GetValueOrDefault((model.TemplateId, firstCaptureId, lookId)));
             })],
             model.LookId,
+            template.Width,
+            template.Height,
+            template.IsLandscape,
             run.StripPreviewKey,
             run.Composing,
             run.CompositionFailed,

@@ -13,9 +13,10 @@ import {
 } from "../protocol/generated.ts";
 
 /**
- * Hand-written Guest Screen fixtures for the Template and Photographs steps (M8 UI-1), so the UI can be built before the brain
- * produces the same states. Names start with `guest-ui-` and never repeat a brain-generated name (`guest-cycle-*`); wave C replaces
- * any that the brain's fixtures cover. Owner: M8 UI-1 only; `fixtureLane.ts` already merges this table.
+ * Hand-written Guest Screen fixtures for the Template and Photographs states the brain's fixtures (`guest-cycle-*`) don't write:
+ * other Templates, a camera that isn't ready, a stopped sequence, the Camera tab during a Retake, a partial or retained arrangement,
+ * and the Panorama Move and Retake. Names start with `guest-ui-` and never repeat a brain-generated name. The states the brain's
+ * fixtures do write (the default Camera, countdown, pause, Arrange, Move, Retake, one-Look Arrange) come from those files.
  */
 
 const noOverlays: GuestOverlays = {
@@ -93,11 +94,6 @@ function cycle(step: "template" | "photographs"): GuestCycleView {
     startOverAvailable: true,
   };
 }
-
-const filtersSkipped: GuestCycleView = {
-  ...cycle("photographs"),
-  steps: cycle("photographs").steps.map((entry) => (entry.step === "filters" ? { ...entry, state: "skipped" } : entry)),
-};
 
 function welcome(step: "template" | "photographs", fields: Partial<GuestWelcomeMessage["presentation"]>): GuestWelcomeMessage {
   return {
@@ -195,33 +191,12 @@ function arrange(template: TemplateOptionView, fields: Partial<PhotographsView> 
   });
 }
 
-function countdown(template: TemplateOptionView, filled: number, remaining: number | null, pausing: boolean): GuestWelcomeMessage {
-  return photographs(template, {
-    filled,
-    sequence: {
-      running: true,
-      targetWindow: filled,
-      countdownRemaining: remaining,
-      flashSequence: filled,
-      capturedInSequence: filled,
-      totalInSequence: template.windows.length,
-      pausing,
-    },
-    canTakePhotographs: false,
-    canReview: false,
-  });
-}
-
 export const guestCaptureFixtures: Readonly<Record<string, GuestWelcomeMessage>> = {
   "guest-ui-template-signature": templateStep("signature-strip"),
   "guest-ui-template-panorama": templateStep("panorama-four"),
   "guest-ui-template-gingham": templateStep("butter-gingham"),
-  "guest-ui-template-two": templateStep("signature-strip", [signatureStrip, panoramaFour]),
-  "guest-ui-camera-idle": photographs(signatureStrip, {}),
   "guest-ui-camera-panorama": photographs(panoramaFour, { mirrored: false }),
   "guest-ui-camera-waiting": photographs(signatureStrip, { canTakePhotographs: false }),
-  "guest-ui-camera-countdown": countdown(signatureStrip, 1, 3, false),
-  "guest-ui-camera-flash": countdown(signatureStrip, 2, null, true),
   "guest-ui-camera-stopped": photographs(signatureStrip, { filled: 2 }),
   "guest-ui-camera-retaking": photographs(signatureStrip, {
     filled: 4,
@@ -231,28 +206,22 @@ export const guestCaptureFixtures: Readonly<Record<string, GuestWelcomeMessage>>
     canTakePhotographs: false,
     canReview: false,
   }),
-  "guest-ui-arrange-signature": arrange(signatureStrip),
-  "guest-ui-arrange-panorama": arrange(panoramaFour, { mirrored: false }),
   "guest-ui-arrange-gingham": arrange(butterGingham),
   "guest-ui-arrange-polka": arrange(polkaKeepsake),
-  "guest-ui-arrange-finish": { ...arrange(signatureStrip), presentation: { ...arrange(signatureStrip).presentation, guestCycle: filtersSkipped } },
   "guest-ui-arrange-partial": arrange(signatureStrip, {
     windows: slots(signatureStrip, 3),
     canTakePhotographs: true,
     canContinue: false,
   }),
   "guest-ui-arrange-retained": arrange(butterGingham, { retainedCount: 1 }),
-  "guest-ui-arrange-selected": arrange(signatureStrip, { selection: { index: 1, mode: "selected" } }),
-  "guest-ui-arrange-selected-panorama": arrange(panoramaFour, { selection: { index: 2, mode: "selected" } }),
-  "guest-ui-arrange-moving": arrange(signatureStrip, { selection: { index: 1, mode: "moving" }, canContinue: false }),
   "guest-ui-arrange-moving-panorama": arrange(panoramaFour, { selection: { index: 1, mode: "moving" }, canContinue: false }),
-  "guest-ui-arrange-retake-candidate": arrange(signatureStrip, {
+  "guest-ui-arrange-retaking-retained": arrange(signatureStrip, {
     selection: { index: 2, mode: "retaking" },
     retakeCandidate: { index: 2, imageUrl: fixtureCapture(11, 960, 720).src },
     canContinue: false,
     retainedCount: 1,
   }),
-  "guest-ui-arrange-retake-candidate-panorama": arrange(panoramaFour, {
+  "guest-ui-arrange-retaking-panorama": arrange(panoramaFour, {
     selection: { index: 1, mode: "retaking" },
     retakeCandidate: { index: 1, imageUrl: fixtureCapture(12, 540, 720).src },
     canContinue: false,

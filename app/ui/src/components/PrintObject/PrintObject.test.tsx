@@ -48,6 +48,16 @@ describe("PrintObject", () => {
     expect(image).toHaveAttribute("height", "600");
   });
 
+  it("shows a blank print of the same shape while there is no image yet", () => {
+    const { container } = render(<PrintObject src={null} alt="Not shown" width={1800} height={600} rotated />);
+    expect(screen.queryByRole("img")).toBeNull();
+    const blank = container.querySelector("[data-blank]");
+    expect(blank).toHaveAttribute("aria-hidden", "true");
+    const paper = blank?.parentElement;
+    expect(paper).toHaveAttribute("data-rotated", "true");
+    expect(paper?.style.getPropertyValue("--print-ratio")).toBe(String(600 / 1800));
+  });
+
   it("sizes by native pixels at a common scale, with no wrapping box", () => {
     const { container } = render(
       <PrintObject src="panorama.png" alt="Panorama" width={1800} height={600} fit="scale" className="on-table" />,

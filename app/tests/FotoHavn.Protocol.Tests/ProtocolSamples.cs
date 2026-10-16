@@ -402,6 +402,9 @@ internal static class ProtocolSamples
         new FiltersView(
             [new LookOptionView("naturale-v1", "Naturale", "Original colors. No filter.", "signature-strip.naturale-v1.thumb"), new LookOptionView("sepia-v1", "Sepia", "Soft brown tones with faded contrast.", null)],
             "naturale-v1",
+            600,
+            1800,
+            false,
             "signature-strip.naturale-v1.r1",
             false,
             true,

@@ -41,6 +41,7 @@ public sealed class GuestCycleFilterTests
             Assert.True(Cached(rig, look.ThumbnailKey));
         });
         Assert.Equal("naturale-v1", filters.SelectedLookId);
+        Assert.Equal((600, 1800, false), (filters.Width, filters.Height, filters.Landscape));
         Assert.True(PreviewKey.IsValid(filters.StripPreviewKey));
         Assert.True(Cached(rig, filters.StripPreviewKey));
         Assert.False(filters.Composing);
@@ -251,6 +252,15 @@ public sealed class GuestCycleFilterTests
         Assert.All(rig.View.GuestCycle.Steps, step => Assert.False(step.CanGoBack));
         Assert.All(keys, key => Assert.False(Cached(rig, key)));
         Assert.Equal(PhaseTimer.Keepsake, rig.CycleDiagnostics().Timer.Phase);
+    }
+
+    [Fact]
+    public async Task A_landscape_Template_makes_a_landscape_Filters_print_at_its_native_size()
+    {
+        using var rig = await OnFiltersAsync(new GuestRigOptions { Tweak = record => record with { DefaultTemplateId = "panorama-four" } });
+
+        var filters = rig.Filters;
+        Assert.Equal((1800, 600, true), (filters.Width, filters.Height, filters.Landscape));
     }
 
     [Fact]

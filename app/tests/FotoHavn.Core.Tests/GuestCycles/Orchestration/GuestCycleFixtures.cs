@@ -17,6 +17,8 @@ internal static class GuestCycleFixtures
 {
     private static readonly TimeSpan Fine = TimeSpan.FromMilliseconds(100);
 
+    private static GuestRigOptions OneLook => new() { Tweak = record => record with { OfferedLookIds = ["naturale-v1"] } };
+
     private static GuestRigOptions Panorama => new() { Tweak = record => record with { DefaultTemplateId = "panorama-four" } };
 
     public static IReadOnlyDictionary<string, Func<Task<string>>> All { get; } =
@@ -71,6 +73,23 @@ internal static class GuestCycleFixtures
                 rig.Compositor.StripGate = new TaskCompletionSource();
                 rig.Guest("GoToStep", """{"step":"filters"}""");
             }),
+            ["guest-cycle-filters-landscape"] = () => GuestAsync(rig =>
+            {
+                rig.ToArrange();
+                rig.ToFilters();
+            }, Panorama),
+            ["guest-cycle-photographs-camera-one-template"] = () => GuestAsync(
+                rig => rig.Begin(),
+                new GuestRigOptions { Tweak = record => record with { OfferedTemplateIds = ["signature-strip"], DefaultTemplateId = "signature-strip" } }),
+            ["guest-cycle-photographs-arrange-one-look"] = () => GuestAsync(rig => rig.ToArrange(), OneLook),
+            ["guest-cycle-photographs-arrange-one-look-composing"] = () => GuestAsync(
+                rig =>
+                {
+                    rig.ToArrange();
+                    rig.Compositor.StripGate = new TaskCompletionSource();
+                    rig.Guest("GoToStep", """{"step":"filters"}""");
+                },
+                OneLook),
             ["guest-cycle-filters-composition-failed"] = () => GuestAsync(rig =>
             {
                 rig.Compositor.FailStrips = 1;

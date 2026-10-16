@@ -3,6 +3,7 @@ import { vi } from "vitest";
 import { BrainClientContext } from "../brain/BrainClientContext.ts";
 import type { BrainClient } from "../brain/types.ts";
 import type { FrameSource } from "../components/LivePreview/index.ts";
+import { fixtureSnapshots } from "../fixtures/fixtureLane.ts";
 import { guestCaptureFixtures } from "../fixtures/guestCaptureFixtures.ts";
 import type {
   CommandPayloadMap,
@@ -14,7 +15,7 @@ import type {
 import { PhotographsStep } from "./PhotographsStep.tsx";
 import { TemplateStep } from "./TemplateStep.tsx";
 
-/** What the Template and Photographs tests share: a stub brain client that records commands, and the hand-written fixtures' views. */
+/** What the Template and Photographs tests share: a stub brain client that records commands, and the fixtures' views. */
 
 export interface SentCommand {
   readonly name: keyof CommandPayloadMap;
@@ -44,10 +45,11 @@ export function stubClient(options: { readonly frames?: FrameSource; readonly pr
   return { client, sent };
 }
 
+/** A hand-written `guest-ui-*` fixture or a brain-generated `guest-cycle-*` one, by name. */
 function presentation(name: string): GuestPresentation {
-  const fixture = guestCaptureFixtures[name];
-  if (fixture === undefined) {
-    throw new Error(`No guest capture fixture ${name}`);
+  const fixture = guestCaptureFixtures[name] ?? fixtureSnapshots()[name];
+  if (fixture?.type !== "welcome" || fixture.role !== "guest") {
+    throw new Error(`No guest fixture ${name}`);
   }
   return fixture.presentation;
 }
@@ -83,7 +85,7 @@ export function names(sent: readonly SentCommand[]): string[] {
 export function renderPhotographs(
   view: PhotographsView,
   stub: StubClient,
-  cycle: GuestCycleView = cycleOf("guest-ui-camera-idle"),
+  cycle: GuestCycleView = cycleOf("guest-cycle-photographs-camera"),
 ): RenderResult & { readonly show: (next: PhotographsView) => void } {
   const ui = (next: PhotographsView) => (
     <BrainClientContext value={stub.client}>

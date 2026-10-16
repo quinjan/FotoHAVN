@@ -9,6 +9,7 @@ import { ArrangeRetake } from "./ArrangeRetake.tsx";
 import { ArrangeStrip } from "./ArrangeStrip.tsx";
 import styles from "./ArrangeTab.module.css";
 import { arrangeCopy } from "./captureCopy.ts";
+import { composingLine } from "./finishCopy.ts";
 import { usePhotographsCommands } from "./PhotographsCommands.ts";
 
 /**
@@ -16,7 +17,9 @@ import { usePhotographsCommands } from "./PhotographsCommands.ts";
  * photographs in its windows, and beside it what the selection allows. Tap a photograph to select it, then `RETAKE` or
  * `MOVE` (and tap or key to a destination); a drag does the same swap but is never required. A Retake's new
  * photograph waits beside the original until it is accepted, tried again, or the original is kept. The brain decides
- * every rule; the strip only asks.
+ * every rule; the strip only asks. When Filters is skipped, `FINISH MY STRIP →` composes the strip while the guest stays here:
+ * the brain then refuses every command (`canReview` false with no sequence and no candidate), so the strip goes quiet and a
+ * polite line says the strip is being prepared.
  */
 export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; readonly view: PhotographsView }) {
   const client = useBrainClient();
@@ -25,23 +28,26 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
   const selectedIndex = selection.index;
   const hasEmptyWindow = view.windows.some((window) => window.captureId === null);
   const idle = !sequence.running;
+  const preparing = idle && retakeCandidate === null && !view.canReview;
   const filtersSkipped = cycle.steps.some((entry) => entry.step === "filters" && entry.state === "skipped");
   const liveRef = useRef<HTMLSpanElement>(null);
-  const previous = useRef({ candidate: retakeCandidate !== null, revision: view.revision });
+  const previous = useRef({ candidate: retakeCandidate !== null, revision: view.revision, preparing });
 
   useEffect(() => {
     const before = previous.current;
-    previous.current = { candidate: retakeCandidate !== null, revision: view.revision };
+    previous.current = { candidate: retakeCandidate !== null, revision: view.revision, preparing };
     const live = liveRef.current;
     if (live === null) {
       return;
     }
-    if (retakeCandidate !== null && !before.candidate) {
+    if (preparing && !before.preparing) {
+      live.textContent = composingLine;
+    } else if (retakeCandidate !== null && !before.candidate) {
       live.textContent = arrangeCopy.announceCandidate;
     } else if (view.revision !== before.revision && selectedIndex !== null) {
       live.textContent = arrangeCopy.announceMoved(selectedIndex + 1);
     }
-  }, [retakeCandidate, view.revision, selectedIndex]);
+  }, [retakeCandidate, view.revision, selectedIndex, preparing]);
 
   return (
     <div
@@ -56,7 +62,7 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
           windows={view.windows}
           mode={selection.mode}
           selected={selectedIndex}
-          interactive={idle && retakeCandidate === null}
+          interactive={idle && retakeCandidate === null && !preparing}
           previewUrl={client.previewUrl}
           onSelect={commands.selectPosition}
           onMoveTo={commands.moveTo}
@@ -74,7 +80,9 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
           supporting={arrangeCopy.hint}
         />
         <div className={styles.panel}>
-          {retakeCandidate !== null ? (
+          {preparing ? (
+            <p className={styles.status}>{composingLine}</p>
+          ) : retakeCandidate !== null ? (
             <ArrangeRetake view={view} candidate={retakeCandidate} commands={commands} />
           ) : (
             <Selection view={view} commands={commands} />

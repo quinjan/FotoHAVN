@@ -28,6 +28,9 @@ function view(parts: Partial<FiltersView> = {}): FiltersView {
   return {
     looks,
     selectedLookId: "naturale-v1",
+    width: 600,
+    height: 1800,
+    landscape: false,
     stripPreviewKey: "signature-strip.naturale-v1.r1",
     composing: false,
     compositionFailed: false,
@@ -44,20 +47,14 @@ function ui(client: BrainClient, filters: FiltersView) {
   );
 }
 
-/** The browser reports an image's size when it loads; jsdom never loads one, so a test says when, and how big. */
-function loadPreview(width = 600, height = 1800): void {
-  const pending = [...document.querySelectorAll<HTMLImageElement>("img[alt='']")].filter(
-    (image) => image.closest("fieldset") === null && image.closest("[data-fit]") === null,
-  );
-  const target = pending.at(-1);
-  if (target === undefined) {
+/** A picture joins the stack unseen and the browser says when it has loaded; jsdom never loads one, so a test says when. */
+function loadPreview(): void {
+  const waiting = document.querySelector<HTMLImageElement>("[data-waiting] img");
+  if (waiting === null) {
     throw new Error("no preview is loading");
   }
-  Object.defineProperty(target, "naturalWidth", { value: width, configurable: true });
-  Object.defineProperty(target, "naturalHeight", { value: height, configurable: true });
-  fireEvent.load(target);
+  fireEvent.load(waiting);
 }
-
 /** jsdom has no AnimationEvent, so React listens for the prefixed name; a real browser sends `animationend`. */
 function endAnimation(element: Element): void {
   fireEvent(element, new Event("webkitAnimationEnd", { bubbles: true }));
@@ -128,41 +125,60 @@ describe("FiltersStep", () => {
     expect(sentCommands(client)).toEqual([]);
   });
 
-  it("shows the strip preview from its key once the picture has loaded, as a print at the picture's own proportion", () => {
-    render(ui(stubClient(), view()));
+  it("reserves the print's shape from the view at once, then fades the picture in over it once it has loaded", () => {
+    const { container } = render(ui(stubClient(), view()));
     expect(screen.queryByRole("img", { name: "Preview of your Photo Strip" })).toBeNull();
-    loadPreview(600, 1800);
+    const blank = container.querySelector<HTMLElement>("[data-blank]");
+    const paper = blank?.parentElement;
+    expect(paper?.style.getPropertyValue("--print-ratio")).toBe(String(600 / 1800));
+    expect(paper).not.toHaveAttribute("data-rotated");
+
+    loadPreview();
     expect(strip()).toHaveAttribute("src", "https://preview.fotohavn/signature-strip.naturale-v1.r1.png");
     expect(strip()).toHaveAttribute("width", "600");
     expect(strip()).toHaveAttribute("height", "1800");
     expect(strip().closest("[data-rotated]")).toBeNull();
+    const entering = container.querySelector<HTMLElement>("[data-entering]");
+    expect(entering).not.toBeNull();
+    expect(container.querySelector("[data-blank]")).not.toBeNull();
+    if (entering !== null) {
+      endAnimation(entering);
+    }
+    expect(container.querySelector("[data-blank]")).toBeNull();
   });
 
-  it("turns a landscape picture a quarter turn, as Panorama Four is everywhere on the Guest Screen", () => {
-    render(ui(stubClient(), view({ stripPreviewKey: "panorama-four.naturale-v1.r1" })));
-    loadPreview(1800, 600);
+  it("turns a landscape print a quarter turn from the first frame, as Panorama Four is everywhere on the Guest Screen", () => {
+    const { container } = render(ui(stubClient(), view({ width: 1800, height: 600, landscape: true, stripPreviewKey: "panorama-four.naturale-v1.r1" })));
+    const blank = container.querySelector<HTMLElement>("[data-blank]");
+    expect(blank?.parentElement).toHaveAttribute("data-rotated", "true");
+    expect(blank?.parentElement?.style.getPropertyValue("--print-ratio")).toBe(String(600 / 1800));
+    loadPreview();
     expect(strip().closest("[data-rotated]")).not.toBeNull();
+    expect(strip()).toHaveAttribute("width", "1800");
   });
 
-  it("falls back to the Signature Strip's proportion when the picture reports no size", () => {
-    render(ui(stubClient(), view()));
-    loadPreview(0, 0);
-    expect(strip()).toHaveAttribute("width", "600");
-    expect(strip()).toHaveAttribute("height", "1800");
-  });
-
-  it("shows no strip, and no error, where the transport has no host to serve previews", () => {
+  it("shows the blank print, and no error, where the transport has no host to serve previews", () => {
     const client: BrainClient = { ...stubClient(), previewUrl: undefined };
     const { container } = render(ui(client, view()));
     expect(container.querySelectorAll("img")).toHaveLength(0);
+    expect(container.querySelector("[data-blank]")).not.toBeNull();
     expect(screen.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  it("waits quietly before the first composition: no strip, a polite line, FINISH unavailable", () => {
-    render(ui(stubClient(), view({ stripPreviewKey: null, composing: true, canFinish: false })));
+  it("waits quietly before the first composition: a blank print, a polite line, FINISH unavailable", () => {
+    const { container } = render(ui(stubClient(), view({ stripPreviewKey: null, composing: true, canFinish: false })));
     expect(screen.getByRole("status")).toHaveTextContent("Preparing your strip.");
     expect(screen.queryByRole("img", { name: "Preview of your Photo Strip" })).toBeNull();
+    expect(container.querySelector("[data-blank]")).not.toBeNull();
     expect(screen.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("shows the picture when the first composition arrives after the screen did", () => {
+    const client = stubClient();
+    const { rerender } = render(ui(client, view({ stripPreviewKey: null, composing: true, canFinish: false })));
+    rerender(ui(client, view()));
+    loadPreview();
+    expect(strip()).toHaveAttribute("src", "https://preview.fotohavn/signature-strip.naturale-v1.r1.png");
   });
 
   it("keeps the strip on screen while composing, and announces the line through a live region that was already there", () => {
@@ -202,6 +218,7 @@ describe("FiltersStep", () => {
     const client = stubClient();
     const { rerender, container } = render(ui(client, view()));
     loadPreview();
+    endAnimation(container.querySelectorAll("[data-entering]")[0] ?? container);
     expect(container.querySelectorAll("[data-entering]")).toHaveLength(0);
 
     rerender(ui(client, view({ selectedLookId: "sepia-v1", stripPreviewKey: "signature-strip.sepia-v1.r2" })));
@@ -222,6 +239,23 @@ describe("FiltersStep", () => {
     endAnimation(entering);
     expect(container.querySelector("[data-entering]")).toBeNull();
     expect(strip()).toHaveAttribute("src", "https://preview.fotohavn/signature-strip.sepia-v1.r2.png");
+  });
+
+  it("drops a picture that is still loading when a newer one is chosen, and goes back to the one on screen without loading it again", () => {
+    const client = stubClient();
+    const { rerender, container } = render(ui(client, view()));
+    loadPreview();
+    endAnimation(container.querySelector("[data-entering]") ?? container);
+
+    rerender(ui(client, view({ stripPreviewKey: "signature-strip.sepia-v1.r2" })));
+    rerender(ui(client, view({ stripPreviewKey: "signature-strip.classic-v1.r3" })));
+    const waiting = container.querySelectorAll("[data-waiting] img");
+    expect(waiting).toHaveLength(1);
+    expect(waiting[0]).toHaveAttribute("src", "https://preview.fotohavn/signature-strip.classic-v1.r3.png");
+
+    rerender(ui(client, view()));
+    expect(container.querySelectorAll("[data-waiting]")).toHaveLength(0);
+    expect(strip()).toHaveAttribute("src", "https://preview.fotohavn/signature-strip.naturale-v1.r1.png");
   });
 
   it("replaces the picture at once under reduced motion", () => {

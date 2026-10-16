@@ -8,20 +8,17 @@ import {
   type GuestWelcomeMessage,
   type KeepsakeView,
   type LookOptionView,
-  type OperatorWelcomeMessage,
   type PhaseTimerWarningOverlay,
 } from "../protocol/generated.ts";
 import { fixtureStrip } from "../components/shared/fixturePhotographs.ts";
 import { guestStart } from "./inlineFixtures.ts";
-import { eventRows } from "./operatorFixtures.ts";
-import { operatorWelcome, runningEventPanel } from "./operatorSetupFixtures.ts";
 
 /**
- * Hand-written fixtures for the Filters, Keepsake, and Operator Assistance views, the cycle chrome, and its overlays (M8 UI-2),
- * so the UI can be built before the brain produces the same states, typed against the generated protocol. Names start with
- * `guest-ui-` (or `operator-ui-` for the operator's panel) and never repeat a brain-generated name (`guest-cycle-*`,
- * `guest-assistance-*`, `operator-running-assistance*`); wave C replaces any that the brain's fixtures cover. Owner: M8 UI-2
- * only; `fixtureLane.ts` already merges this table.
+ * Hand-written fixtures for the Filters, Keepsake, and Operator Assistance states the brain's fixtures (`guest-cycle-*`,
+ * `guest-assistance-*`, `operator-running-assistance-*`) don't write: the longest single-column list and the two-column ones, a
+ * Look change that keeps the strip on screen, a failure with a previous strip, a Look list without thumbnails, a skipped Template
+ * or Filters step, the last second of the Phase Timer warning, and Operator Assistance while it retries. Names start with
+ * `guest-ui-` and never repeat a brain-generated name.
  */
 
 const noOverlays: GuestOverlays = guestStart.presentation.overlays;
@@ -41,8 +38,6 @@ const filtersCycle = cycle("filters", [step("template", "done", true), step("pho
 
 /** A one-Template Event: Template is skipped, so there is nothing before Photographs to go back to. */
 const skippedTemplateCycle = cycle("filters", [step("template", "skipped"), step("photographs", "done", true), step("filters", "current"), step("keepsake", "upcoming")]);
-
-const keepsakeCycle = cycle("keepsake", [step("template", "done"), step("photographs", "done"), step("filters", "done"), step("keepsake", "current")]);
 
 /** A one-Look Event reaching Keepsake: Filters was skipped. */
 const skippedFiltersKeepsakeCycle = cycle("keepsake", [step("template", "done"), step("photographs", "done"), step("filters", "skipped"), step("keepsake", "current")]);
@@ -69,6 +64,9 @@ function filters(parts: Partial<FiltersView> = {}): FiltersView {
   return {
     looks: threeLooks,
     selectedLookId: "naturale-v1",
+    width: 600,
+    height: 1800,
+    landscape: false,
     stripPreviewKey: "signature-strip.naturale-v1.r1",
     composing: false,
     compositionFailed: false,
@@ -96,65 +94,34 @@ function filtersWelcome(view: FiltersView, parts: { readonly cycle?: GuestCycleV
   });
 }
 
-function keepsakeWelcome(view: KeepsakeView, cycleView: GuestCycleView = keepsakeCycle): GuestWelcomeMessage {
+function keepsakeWelcome(view: KeepsakeView, cycleView: GuestCycleView): GuestWelcomeMessage {
   return welcome({ surface: "keepsake", guestCycle: cycleView, keepsake: view });
 }
 
-function assistanceWelcome(reason: "camera" | "storage" | "guestDisplay", retrying: boolean, withCycle: boolean): GuestWelcomeMessage {
+function assistanceWelcome(reason: "camera" | "storage" | "guestDisplay", retrying: boolean): GuestWelcomeMessage {
   return welcome({
     surface: "operatorAssistance",
-    guestCycle: withCycle ? filtersCycle : null,
+    guestCycle: filtersCycle,
     operatorAssistance: { reason, retrying },
   });
 }
 
 const portraitStrip = fixtureStrip("signature-strip", 4);
-const panoramaStrip = fixtureStrip("panorama-four", 8);
 
 const warning = (parts: Partial<PhaseTimerWarningOverlay> = {}): PhaseTimerWarningOverlay => ({ phase: "filters", remainingSeconds: 18, ...parts });
 
-function assistanceList(reason: "camera" | "storage"): OperatorWelcomeMessage {
-  const events = eventRows(3);
-  return operatorWelcome("eventList", {
-    eventList: { events, newEventAvailable: true },
-    runningEvent: runningEventPanel({
-      eventId: events[0]?.id ?? "event-3",
-      name: events[0]?.name ?? "Event",
-      currentStep: "operatorAssistance",
-      assistance: { reason },
-      camera: reason === "camera" ? { state: "notAvailable", reason: "failed" } : { state: "ready", reason: null },
-    }),
-  });
-}
-
-export const guestFinishFixtures: Readonly<Record<string, GuestWelcomeMessage | OperatorWelcomeMessage>> = {
-  "guest-ui-filters": filtersWelcome(filters()),
-  "guest-ui-filters-selected": filtersWelcome(filters({ selectedLookId: "sepia-v1", stripPreviewKey: "signature-strip.sepia-v1.r2" })),
+export const guestFinishFixtures: Readonly<Record<string, GuestWelcomeMessage>> = {
+  "guest-ui-filters-four-looks": filtersWelcome(filters({ looks: pick(["naturale-v1", "monochrome-v1", "sepia-v1", "classic-v1"]) })),
   "guest-ui-filters-composing": filtersWelcome(filters({ selectedLookId: "sepia-v1", composing: true, canFinish: false })),
-  "guest-ui-filters-first-composing": filtersWelcome(filters({ stripPreviewKey: null, composing: true, canFinish: false })),
   "guest-ui-filters-composition-failed": filtersWelcome(filters({ selectedLookId: "sepia-v1", compositionFailed: true, canFinish: false })),
-  "guest-ui-filters-two-looks": filtersWelcome(filters({ looks: pick(["naturale-v1", "sepia-v1"]) })),
   "guest-ui-filters-many-looks": filtersWelcome(filters({ looks: looks.slice() })),
   "guest-ui-filters-five-looks": filtersWelcome(filters({ looks: pick(["monochrome-v1", "naturale-v1", "soft-color-v1", "sepia-v1", "classic-v1"]) })),
-  "guest-ui-filters-panorama": filtersWelcome(
-    filters({ looks: pick(["naturale-v1", "sepia-v1", "classic-v1"], "panorama-four"), stripPreviewKey: "panorama-four.naturale-v1.r3" }),
-  ),
   "guest-ui-filters-no-thumbnails": filtersWelcome(filters({ looks: threeLooks.map((look) => ({ ...look, thumbnailKey: null })) })),
   "guest-ui-filters-skipped-template": filtersWelcome(filters(), { cycle: skippedTemplateCycle }),
-  "guest-ui-filters-start-over": filtersWelcome(filters(), { overlays: { startOverConfirmation: {} } }),
-  "guest-ui-filters-timer-warning": filtersWelcome(filters(), { overlays: { phaseTimerWarning: warning() } }),
   "guest-ui-filters-timer-warning-last-second": filtersWelcome(filters(), { overlays: { phaseTimerWarning: warning({ remainingSeconds: 1 }) } }),
-  "guest-ui-keepsake": keepsakeWelcome({ stripUrl: portraitStrip.src, width: portraitStrip.width, height: portraitStrip.height, landscape: false }),
-  "guest-ui-keepsake-panorama": keepsakeWelcome({ stripUrl: panoramaStrip.src, width: panoramaStrip.width, height: panoramaStrip.height, landscape: true }),
   "guest-ui-keepsake-skipped-filters": keepsakeWelcome(
     { stripUrl: portraitStrip.src, width: portraitStrip.width, height: portraitStrip.height, landscape: false },
     skippedFiltersKeepsakeCycle,
   ),
-  "guest-ui-assistance-camera": assistanceWelcome("camera", false, true),
-  "guest-ui-assistance-storage": assistanceWelcome("storage", false, true),
-  "guest-ui-assistance-display": assistanceWelcome("guestDisplay", false, true),
-  "guest-ui-assistance-retrying": assistanceWelcome("camera", true, true),
-  "guest-ui-assistance-no-cycle": assistanceWelcome("guestDisplay", false, false),
-  "operator-ui-list-assistance-camera": assistanceList("camera"),
-  "operator-ui-list-assistance-storage": assistanceList("storage"),
+  "guest-ui-assistance-retrying": assistanceWelcome("camera", true),
 };

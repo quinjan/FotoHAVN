@@ -3,8 +3,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { resolutionName, resolutions, screenshotDir } from "./resolutions.ts";
 
-// The Template and Photographs steps (M8 UI-1) through the fixture lane (`?fixture=guest-ui-*`, hand-written in
-// src/fixtures/guestCaptureFixtures.ts): every Template, Camera, and Arrange state at the four Guest Screen resolutions.
+// The Template and Photographs steps (M8 UI-1) through the fixture lane (`?fixture=<name>`): the brain-generated
+// `guest-cycle-*` files, and the hand-written `guest-ui-*` ones (src/fixtures/guestCaptureFixtures.ts) for the states the
+// brain's files don't write. Every Template, Camera, and Arrange state is checked at the four Guest Screen resolutions.
 // Each must fit without scrolling, keep every control at its role's minimum target, show at most one primary action, and
 // pass axe. The lane's stand-in brain answers every command `rejected notAvailable`, so these are rendering checks; the
 // commands are unit-tested.
@@ -70,8 +71,25 @@ async function expectInsideViewport(page: Page, selector: string): Promise<void>
   }
 }
 
+/** Every step renders inside the real cycle chrome: its band, then a stage that holds the step, all within the screen. */
+async function expectStepFitsStage(page: Page): Promise<void> {
+  const viewport = page.viewportSize();
+  const chrome = await page.locator("[data-fotohavn-cycle-step]").evaluate((element) => {
+    const band = element.querySelector("header")?.getBoundingClientRect();
+    const stage = element.lastElementChild?.getBoundingClientRect();
+    const step = element.lastElementChild?.firstElementChild?.getBoundingClientRect();
+    return { bandBottom: band?.bottom ?? -1, stageTop: stage?.top ?? -1, stageBottom: stage?.bottom ?? -1, stepTop: step?.top ?? -1, stepBottom: step?.bottom ?? -1 };
+  });
+  expect(chrome.bandBottom).toBeGreaterThan(0);
+  expect(chrome.stageTop).toBeGreaterThanOrEqual(chrome.bandBottom - 0.5);
+  expect(chrome.stepTop).toBeGreaterThanOrEqual(chrome.stageTop - 0.5);
+  expect(chrome.stepBottom).toBeLessThanOrEqual(chrome.stageBottom + 0.5);
+  expect(chrome.stageBottom).toBeLessThanOrEqual((viewport?.height ?? 0) + 0.5);
+}
+
 async function finish(page: Page, fixture: string, suffix: string): Promise<void> {
   await expectNoScrolling(page);
+  await expectStepFitsStage(page);
   await expectTargets(page);
   expect(await page.locator('main [data-fotohavn-action="primary"]').count()).toBeLessThanOrEqual(1);
   await page.screenshot({ path: resolve(screenshotDir, `${fixture}-${suffix}.png`) });
@@ -80,36 +98,38 @@ async function finish(page: Page, fixture: string, suffix: string): Promise<void
 }
 
 const templateFixtures = [
+  ["guest-cycle-template", "Signature Strip"],
   ["guest-ui-template-signature", "Signature Strip"],
   ["guest-ui-template-panorama", "Panorama Four"],
   ["guest-ui-template-gingham", "Butter Gingham"],
-  ["guest-ui-template-two", "Signature Strip"],
 ] as const;
 
 const cameraFixtures = [
-  "guest-ui-camera-idle",
+  "guest-cycle-photographs-camera",
+  "guest-cycle-photographs-camera-one-template",
+  "guest-cycle-photographs-countdown",
+  "guest-cycle-photographs-pausing",
   "guest-ui-camera-panorama",
   "guest-ui-camera-waiting",
-  "guest-ui-camera-countdown",
-  "guest-ui-camera-flash",
   "guest-ui-camera-stopped",
   "guest-ui-camera-retaking",
 ] as const;
 
 const arrangeFixtures = [
-  "guest-ui-arrange-signature",
-  "guest-ui-arrange-panorama",
+  "guest-cycle-photographs-arrange",
+  "guest-cycle-photographs-arrange-landscape",
+  "guest-cycle-photographs-arrange-selected",
+  "guest-cycle-photographs-arrange-moving",
+  "guest-cycle-photographs-arrange-one-look",
+  "guest-cycle-photographs-arrange-one-look-composing",
+  "guest-cycle-photographs-retaking",
   "guest-ui-arrange-gingham",
   "guest-ui-arrange-polka",
-  "guest-ui-arrange-finish",
   "guest-ui-arrange-partial",
   "guest-ui-arrange-retained",
-  "guest-ui-arrange-selected",
-  "guest-ui-arrange-selected-panorama",
-  "guest-ui-arrange-moving",
   "guest-ui-arrange-moving-panorama",
-  "guest-ui-arrange-retake-candidate",
-  "guest-ui-arrange-retake-candidate-panorama",
+  "guest-ui-arrange-retaking-retained",
+  "guest-ui-arrange-retaking-panorama",
 ] as const;
 
 for (const resolution of resolutions) {
@@ -160,36 +180,42 @@ for (const resolution of resolutions) {
         await finish(page, fixture, name);
       });
     }
+    test("steps the brain marks skipped are left out of the progress and the rest renumbered", async ({ page }) => {
+      await open(page, "guest-cycle-photographs-camera-one-template");
+      await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Photographs", "02 Filters", "03 Keepsake"]);
+      await open(page, "guest-cycle-photographs-arrange-one-look");
+      await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Template, completed", "02 Photographs", "03 Keepsake"]);
+      await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
+      await expect(page.getByRole("button", { name: "CONTINUE TO FILTERS" })).toHaveCount(0);
+    });
+
+    test("a Retake candidate waits in Arrange beside the original, as the brain sends it", async ({ page }) => {
+      await open(page, "guest-cycle-photographs-retaking");
+      await expect(page.locator("[data-photographs-tab='arrange']")).toBeVisible();
+      await expect(page.getByText("Keep the new photograph for position 3, or try again.")).toBeVisible();
+      await expect(page.getByRole("button", { name: "ACCEPT" })).toBeVisible();
+      await expect(page.getByText("Original", { exact: true })).toBeVisible();
+      await expect(page.getByText("New", { exact: true })).toBeVisible();
+    });
+
+    test("while the strip is prepared with Filters skipped, Arrange goes quiet", async ({ page }) => {
+      await open(page, "guest-cycle-photographs-arrange-one-look-composing");
+      await expect(page.getByText("Preparing your strip.")).toBeVisible();
+      await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "true");
+      await expect(page.getByRole("button", { name: "RETAKE" })).toHaveCount(0);
+    });
   });
 }
-
-test.describe("guest photographs beneath the guest top band", () => {
-  // The cycle chrome (M8 UI-2) reserves `--app-region-top` above the step; each step must still fit the stage that is left.
-  const band =
-    "[data-fotohavn-cycle-step]{display:grid;grid-template-rows:var(--app-region-top) minmax(0,1fr);block-size:100%}[data-fotohavn-cycle-step]>*{grid-row:2}";
-
-  for (const resolution of resolutions) {
-    const name = resolutionName(resolution);
-    test.describe(name, () => {
-      test.use({ viewport: resolution });
-
-      for (const fixture of [...templateFixtures.map(([id]) => id), ...cameraFixtures, ...arrangeFixtures]) {
-        test(`${fixture} fits the stage`, async ({ page }) => {
-          await open(page, fixture);
-          await page.addStyleTag({ content: band });
-          await expectNoScrolling(page);
-          await expectTargets(page);
-          await page.screenshot({ path: resolve(screenshotDir, `${fixture}-band-${name}.png`) });
-        });
-      }
-    });
-  }
-});
 
 test.describe("guest photographs, reduced motion and forced colors", () => {
   test.use({ viewport: resolutions[0] });
 
-  for (const fixture of ["guest-ui-camera-countdown", "guest-ui-camera-flash", "guest-ui-arrange-moving", "guest-ui-arrange-retake-candidate"]) {
+  for (const fixture of [
+    "guest-cycle-photographs-countdown",
+    "guest-cycle-photographs-pausing",
+    "guest-cycle-photographs-arrange-moving",
+    "guest-cycle-photographs-retaking",
+  ]) {
     test(`${fixture} with reduced motion`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await open(page, fixture);

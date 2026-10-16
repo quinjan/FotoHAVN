@@ -4,7 +4,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { resolutionName, resolutions, screenshotDir } from "./resolutions.ts";
 
 // The M8 UI-2 views through the fixture lane (`?fixture=<name>`): Filters, Keepsake, Operator Assistance, the cycle chrome,
-// and its overlays (hand-written in src/fixtures/guestFinishFixtures.ts, so they stand beside the brain's own). At the four
+// and its overlays. The brain-generated `guest-cycle-*` and `guest-assistance-*` files are the real shapes; the hand-written
+// `guest-ui-*` ones (src/fixtures/guestFinishFixtures.ts) cover the states the brain's files don't write. At the four
 // Guest Screen resolutions each must fit without scrolling or overlap, keep every control at the 64 target, show at most one
 // primary action, and pass axe. The lane's stand-in brain answers every command `rejected notAvailable`.
 
@@ -92,28 +93,27 @@ interface View {
 }
 
 const filtersViews: readonly View[] = [
-  { fixture: "guest-ui-filters", surface: "filters", heading: "Find the feeling.", texts: ["Choose a filter for your photographs.", "Naturale", "Sepia", "Classic"] },
-  { fixture: "guest-ui-filters-selected", surface: "filters", heading: "Find the feeling.", texts: ["Sepia"] },
+  { fixture: "guest-cycle-filters", surface: "filters", heading: "Find the feeling.", texts: ["Choose a filter for your photographs.", "Naturale", "Monochrome"] },
+  { fixture: "guest-cycle-filters-composing", surface: "filters", heading: "Find the feeling.", texts: ["Preparing your strip."] },
+  { fixture: "guest-cycle-filters-composition-failed", surface: "filters", heading: "Find the feeling.", texts: ["Your strip couldn't be prepared. Try again."] },
+  { fixture: "guest-cycle-filters-landscape", surface: "filters", heading: "Find the feeling." },
+  { fixture: "guest-cycle-timer-warning", surface: "template", heading: "Make a little Moment", texts: ["SECONDS LEFT", "MORE TIME"] },
+  { fixture: "guest-cycle-start-over", surface: "photographs", heading: "Arrange your moment.", texts: ["Start over?", "Your photographs stay with the Event, but no strip will be made."] },
+  { fixture: "guest-ui-filters-four-looks", surface: "filters", heading: "Find the feeling.", texts: ["Naturale", "Monochrome", "Sepia", "Classic"] },
   { fixture: "guest-ui-filters-composing", surface: "filters", heading: "Find the feeling.", texts: ["Preparing your strip."] },
-  { fixture: "guest-ui-filters-first-composing", surface: "filters", heading: "Find the feeling.", texts: ["Preparing your strip."] },
   { fixture: "guest-ui-filters-composition-failed", surface: "filters", heading: "Find the feeling.", texts: ["Your strip couldn't be prepared. Try again."] },
-  { fixture: "guest-ui-filters-two-looks", surface: "filters", heading: "Find the feeling." },
   { fixture: "guest-ui-filters-five-looks", surface: "filters", heading: "Find the feeling." },
   { fixture: "guest-ui-filters-many-looks", surface: "filters", heading: "Find the feeling.", texts: ["Soft Monochrome", "Warm Monochrome"] },
-  { fixture: "guest-ui-filters-panorama", surface: "filters", heading: "Find the feeling." },
   { fixture: "guest-ui-filters-no-thumbnails", surface: "filters", heading: "Find the feeling." },
   { fixture: "guest-ui-filters-skipped-template", surface: "filters", heading: "Find the feeling." },
-  { fixture: "guest-ui-filters-start-over", surface: "filters", heading: "Find the feeling.", texts: ["Start over?", "Your photographs stay with the Event, but no strip will be made."] },
-  { fixture: "guest-ui-filters-timer-warning", surface: "filters", heading: "Find the feeling.", texts: ["SECONDS LEFT", "MORE TIME"] },
   { fixture: "guest-ui-filters-timer-warning-last-second", surface: "filters", heading: "Find the feeling.", texts: ["SECOND LEFT"] },
-  { fixture: "guest-ui-keepsake", surface: "keepsake", heading: "A little moment. Yours.", texts: ["Keep the moment close."] },
-  { fixture: "guest-ui-keepsake-panorama", surface: "keepsake", heading: "A little moment. Yours." },
+  { fixture: "guest-cycle-keepsake", surface: "keepsake", heading: "A little moment. Yours.", texts: ["Keep the moment close."] },
+  { fixture: "guest-cycle-keepsake-landscape", surface: "keepsake", heading: "A little moment. Yours." },
   { fixture: "guest-ui-keepsake-skipped-filters", surface: "keepsake", heading: "A little moment. Yours." },
-  { fixture: "guest-ui-assistance-camera", surface: "operatorAssistance", heading: "A little interruption.", texts: ["Please ask the FOTOHAVN team for help.", "RETRY"] },
-  { fixture: "guest-ui-assistance-storage", surface: "operatorAssistance", heading: "A little interruption." },
-  { fixture: "guest-ui-assistance-display", surface: "operatorAssistance", heading: "A little interruption." },
+  { fixture: "guest-assistance-camera", surface: "operatorAssistance", heading: "A little interruption.", texts: ["Please ask the FOTOHAVN team for help.", "RETRY"] },
+  { fixture: "guest-assistance-storage", surface: "operatorAssistance", heading: "A little interruption." },
+  { fixture: "guest-assistance-display", surface: "operatorAssistance", heading: "A little interruption." },
   { fixture: "guest-ui-assistance-retrying", surface: "operatorAssistance", heading: "A little interruption.", texts: ["Trying again…"] },
-  { fixture: "guest-ui-assistance-no-cycle", surface: "operatorAssistance", heading: "A little interruption." },
 ];
 
 for (const resolution of resolutions) {
@@ -141,12 +141,33 @@ for (const resolution of resolutions) {
     }
 
     test("Filters: FINISH MY STRIP is the one primary action, and the chrome's actions are not", async ({ page }) => {
-      await open(page, "guest-ui-filters");
+      await open(page, "guest-cycle-filters");
       await expect(page.locator('main [data-fotohavn-action="primary"]')).toHaveCount(1);
       await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
       await expect(page.getByRole("radiogroup").or(page.getByRole("group", { name: "Filters" }))).toBeVisible();
       await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Template, completed", "02 Photographs, completed", "03 Filters", "04 Keepsake"]);
       await expect(page.getByRole("button", { name: "START OVER" })).toBeVisible();
+    });
+
+    test("Filters: a first composition that failed holds the print's shape, blank, and offers TRY AGAIN", async ({ page }) => {
+      await open(page, "guest-cycle-filters-composition-failed");
+      await expect(page.getByText("Your strip couldn't be prepared. Try again.")).toBeVisible();
+      await expect(page.getByRole("img", { name: "Preview of your Photo Strip" })).toHaveCount(0);
+      const print = await page.locator("[data-blank]").boundingBox();
+      expect(print).not.toBeNull();
+      // The Template's size comes with the view, so the print stands at its Signature Strip proportion before any picture.
+      expect((print?.height ?? 0) / (print?.width ?? 1)).toBeCloseTo(3, 0);
+      await expect(page.getByRole("button", { name: "TRY AGAIN" })).toBeVisible();
+      await expect(page.locator('main [data-fotohavn-action="primary"]')).toHaveCount(1);
+    });
+
+    test("Filters: a landscape Template reserves a turned print at once", async ({ page }) => {
+      await open(page, "guest-cycle-filters-landscape");
+      const preview = page.getByRole("img", { name: "Preview of your Photo Strip" });
+      await expect(preview).toBeVisible();
+      await expect(page.locator("[data-rotated]")).toHaveCount(1);
+      const box = await page.locator("[data-rotated]").boundingBox();
+      expect((box?.height ?? 0) / (box?.width ?? 1)).toBeGreaterThan(2);
     });
 
     test("Filters: composition failure keeps the previous strip and offers TRY AGAIN as the primary action", async ({ page }) => {
@@ -164,7 +185,7 @@ for (const resolution of resolutions) {
     });
 
     test("Keepsake: no warning and no START OVER, and the strip is lifted", async ({ page }) => {
-      await open(page, "guest-ui-keepsake");
+      await open(page, "guest-cycle-keepsake");
       await expect(page.getByRole("button", { name: "START OVER" })).toHaveCount(0);
       await expect(page.getByRole("button", { name: "MORE TIME" })).toHaveCount(0);
       await expect(page.getByRole("button")).toHaveCount(1);
@@ -174,7 +195,7 @@ for (const resolution of resolutions) {
     });
 
     test("Start over confirmation: the content behind is inert and focus starts on KEEP GOING", async ({ page }) => {
-      await open(page, "guest-ui-filters-start-over");
+      await open(page, "guest-cycle-start-over");
       const dialog = page.getByRole("alertdialog", { name: "Start over?" });
       await expect(dialog).toBeVisible();
       await expect(dialog.getByRole("button", { name: "START OVER" })).toBeVisible();
@@ -188,11 +209,10 @@ for (const resolution of resolutions) {
       expect(target?.height).toBeGreaterThanOrEqual(64);
     });
 
-    test("Timer warning: announced once, MORE TIME is reachable, and nothing behind is blocked", async ({ page }) => {
-      await open(page, "guest-ui-filters-timer-warning");
-      const warning = page.locator('[data-phase="filters"]');
+    async function expectWarningInBand(page: Page, phase: string, message: string): Promise<void> {
+      const warning = page.locator(`[data-phase="${phase}"]`);
       await expect(warning).toBeVisible();
-      await expect(warning.getByRole("status")).toHaveText("18 seconds left. Choose MORE TIME to stay a little longer.");
+      await expect(warning.getByRole("status")).toHaveText(message);
       const more = await warning.getByRole("button", { name: "MORE TIME" }).boundingBox();
       expect(more?.height).toBeGreaterThanOrEqual(64);
       const box = await warning.boundingBox();
@@ -204,11 +224,21 @@ for (const resolution of resolutions) {
       expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(startOver?.x ?? 0);
       expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(await page.evaluate(() => document.querySelector("header")?.getBoundingClientRect().height ?? 0));
       expect(box?.y).toBeGreaterThanOrEqual(0);
-      await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
+    }
+
+    test("Timer warning: announced once, MORE TIME is reachable, and nothing behind is blocked", async ({ page }) => {
+      await open(page, "guest-cycle-timer-warning");
+      await expectWarningInBand(page, "template", "15 seconds left. Choose MORE TIME to stay a little longer.");
+      await expect(page.getByRole("button", { name: "CONTINUE TO PHOTOGRAPHS" })).toHaveAttribute("aria-disabled", "false");
     });
 
+    test("Timer warning on Filters: the last second still fits the band beside the longer step progress", async ({ page }) => {
+      await open(page, "guest-ui-filters-timer-warning-last-second");
+      await expectWarningInBand(page, "filters", "1 second left. Choose MORE TIME to stay a little longer.");
+      await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
+    });
     test("Operator Assistance: one dark band with RETRY inverted, and the exit hold above it on the canvas", async ({ page }) => {
-      await open(page, "guest-ui-assistance-camera");
+      await open(page, "guest-assistance-camera");
       const band = page.locator('[data-tone="dark"]');
       await expect(band).toHaveCount(1);
       const retry = page.getByRole("button", { name: "RETRY" });
@@ -234,7 +264,7 @@ for (const resolution of resolutions) {
 test.describe("guest finish views in reduced motion and forced colors", () => {
   test.use({ viewport: resolutions[0] });
 
-  for (const fixture of ["guest-ui-keepsake", "guest-ui-filters", "guest-ui-filters-timer-warning", "guest-ui-assistance-camera"]) {
+  for (const fixture of ["guest-cycle-keepsake", "guest-cycle-filters", "guest-cycle-timer-warning", "guest-assistance-camera"]) {
     test(`${fixture} with reduced motion shows everything at once, with no movement left`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(`/index.html?fixture=${fixture}`);
@@ -263,7 +293,7 @@ test.describe("guest finish views in reduced motion and forced colors", () => {
   }
 
   test("Keepsake develops in over the reveal duration, once", async ({ page }) => {
-    await page.goto("/index.html?fixture=guest-ui-keepsake");
+    await page.goto("/index.html?fixture=guest-cycle-keepsake");
     await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "guest");
     const durations = await page.evaluate(() =>
       document
@@ -282,8 +312,8 @@ test.describe("operator panel in Operator Assistance", () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   for (const [fixture, reason] of [
-    ["operator-ui-list-assistance-camera", "The camera needs attention."],
-    ["operator-ui-list-assistance-storage", "The Data folder needs attention."],
+    ["operator-running-assistance-camera", "The camera needs attention."],
+    ["operator-running-assistance-storage", "The Data folder needs attention."],
   ] as const) {
     test(fixture, async ({ page }) => {
       await open(page, fixture, "operator");
