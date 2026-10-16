@@ -1922,11 +1922,11 @@ Verification record (M9):
 ### M10: hardening and field build (M)
 
 Tasks:
-- [ ] Single instance (named mutex); wake lock during the Active Event only; closing the app from Windows ends the Active Event cleanly.
-- [ ] Input guards in field builds: the Guest window blocks Alt+F4 and window shortcuts while an Active Event runs, while allowing the system escape (Ctrl+Alt+Del). Closing the Operator window during an Active Event asks "End the running Event and close FOTOHAVN?" first.
-- [ ] Logging with Event and Guest Cycle IDs; no personal metadata or images in logs.
-- [ ] `scripts/publish-field-test.ps1`: UI build, self-contained `dotnet publish`, `wwwroot` copy, a pinned Fixed Version WebView2 runtime verified by SHA-256, and a versioned zip.
-- [ ] The portable-launch and soak scenarios in the end-to-end project.
+- [x] Single instance (named mutex); wake lock during the Active Event only; closing the app from Windows ends the Active Event cleanly.
+- [x] Input guards in field builds: the Guest window blocks Alt+F4 and window shortcuts while an Active Event runs, while allowing the system escape (Ctrl+Alt+Del). Closing the Operator window during an Active Event asks "End the running Event and close FOTOHAVN?" first.
+- [x] Logging with Event and Guest Cycle IDs; no personal metadata or images in logs.
+- [x] `scripts/publish-field-test.ps1`: UI build, self-contained `dotnet publish`, `wwwroot` copy, a pinned Fixed Version WebView2 runtime verified by SHA-256, and a versioned zip.
+- [x] The portable-launch and soak scenarios in the end-to-end project.
 - [ ] Spike S2 (Windows touch keyboard) and the hardware checklist on the booth laptop, including the S1-booth re-measure of the raw preview path (ADR 0004; the JPEG fallback is built only if it fails the floor).
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
@@ -1946,6 +1946,63 @@ Verification. The implementing agent writes and runs these through the [verifica
   - A 4-hour Active Event with power settings and sleep checked.
   - The booth's real two-display setup: Guest Screen on the guest monitor with touch mapped, Operator Screen on the laptop, different scaling on each, and the guest monitor unplugged and replugged during an Event.
   - Recovery from a lost PIN by closing the app.
+
+Verification record (M10):
+- **Date and commits:** 2026-10-16/17.
+  - Contracts (protocol v10, `SingleInstancePolicy`, `CloseRequestRules`, `LogRedaction`, `WakeLockRules`, ports, scaffolding): `78b01941`.
+  - Parallel merges (Windows runtime hardening; field build): `e4c21cbc`, `87cc8013`.
+  - Integration, `@m10` end-to-end, field-build seam, hardware checklist and docs: `6ea7e836`.
+  - Review fixes: `013991ad`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45 (Evergreen) and the pinned Fixed Version 155.0.4283.60 in the field build, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
+- **Results:** from an independent clean clone at `6ea7e836`; the review fixes were re-verified on the full .NET suite, the Pester tests, the field build, and the changed `@m10` specs at `013991ad`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` with coverage | 3840 tests: 3835 passed, 5 skipped (2 file symlinks, 2 opt-in Windows Camera app tests, 1 field-build-only host test) |
+  | 2 | Second run of the changed projects | Core 2196, Host.Windows 350 + 1 skipped, Host.Headless 185; Host.Windows in the E2E build 5 runs of 344 + 7 skipped, no failure |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 2177 passed |
+  | 2 | Spike S3 speed step | Medians 32.0–42.7 ms (budget 150 ms) |
+  | 2 | Pester (`publish-field-test.Tests.ps1`) | 35 passed (45 after the review fixes) |
+  | 3 | UI `test:coverage` | 1466 passed |
+  | 3 | UI `test:fixtures` | 1022 passed |
+  | 5 | `--project=regression` | 92 passed, 2 skipped (both physical-display scenarios, "not run: one display"), 1 failed (`large-event` warm page 7 at 319 ms under parallel load; passed alone at 110 ms; fixed by the `@timing` serial class), in 50 m 44 s |
+  | 5 | Smoke | 9 passed in 2 m 43 s |
+  | 5 | Visual comparison | 888 comparisons, maximum 0.517%, mean 0.016% |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | After the review fixes (`013991ad`) | Core 2203 (one known load-sensitive gallery test failed once in the parallel run and passed alone), Host.Windows 354 + 1 skipped; `single-instance` 1, `shortcuts`, `wake-lock` and `portable-launch` 5, `large-event` 1 (warm pages ≤ 135 ms) |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.4% | 93.4% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 99.7% | 95.5% |
+
+  UI: 99.45% lines and 97.82% branches.
+- **Field build (spike S4):** the pinned WebView2 Fixed Version 155.0.4283.60 x64 (cab 310,497,658 bytes, expanded 705 MB, SHA-256 in `app/scripts/webview2-fixed-version.json`; details and the update procedure in ADR 0003). The zip is 406 MB (950 MB unpacked) and publishes in about 40 s from the runtime cache. Unzipped into a path with spaces, `--smoke` exits 0 in about 3 s with `Data\` beside the exe and the log naming the Fixed Version runtime; a second launch on the same Data folder exits 3 in about 155 ms.
+- **`@m10` end-to-end:**
+  - `smoke/single-instance` (`@cursor`): the second launch exits 3 and the minimized Operator window is restored to the foreground.
+  - `regression/hardening/portable-launch` (`@build`): publish, unzip, `--smoke` exit 0, Data beside the exe, second launch exit 3.
+  - `regression/hardening/shortcuts` (`@camera @cursor`): a real Alt+F4 closes the Guest window with no Event (control), changes nothing during an Active Event; closing the Operator window asks first, `KEEP RUNNING` keeps running, `END EVENT AND CLOSE` ends the cycle as `operator_exit` and exits 0; with no Event the Operator window closes normally.
+  - `regression/hardening/wake-lock` (`@camera`): held with its reason only while an Event is active; released after `END EVENT` and after the guest PIN exit.
+  - `regression/hardening/soak` (`@camera`): 300 Guest Cycles in 22.8 min at a 20× clock (Q41), 1200 kept Captures and 300 Photo Strips with every hash matching. Growth after the cycle-25 baseline: host working set +12.2 MiB (bound 100), process tree +60.1 MiB (bound 300), host handles +2 (bound 150), tree handles 0 (bound 200), database 8.6 KiB per cycle (bound 32).
+- **GitHub CI:** not run (manual-only since M9); the clean-clone verification and the code review are the gate.
+- **Review fixes:**
+  - **(Medium)** Closing the app during a Capture commit could shut the store before the cycle's `operator_exit` end was written. Shutdown now waits, with a bound, for the brain's pending store and compositor work, and `OnExit` drains again before disposing the brain and store.
+  - **(Medium)** The publish script never cleaned its output folder, so a build run in place could ship `Data/`, logs and guest photographs. The folder is now recreated before publishing (dangerous paths refused), and the zip step refuses user data.
+  - **(Low–medium)** The runtime cab was verified about a minute before it was expanded, from a user-writable path. It is now copied to a private staging folder, re-hashed, and expanded only from there.
+  - **(Low)** `single-instance` could leak the second process on a timeout. It now kills it by PID.
+  - **(Low)** A `closeApp` confirmation outlived a failed Start, leaving a dead confirm. A failed Start now clears it, and confirming with no Event simply closes.
+  - **(Low, gate)** Specs with wall-clock budgets (`large-event`, `ui-crash-recovery`, `identify-displays`) now carry `@timing` and run in the serial pool.
+- **Decisions:** Q34 (input guards), Q35 (wake lock), Q36 (single instance and exit codes), Q37 (closing the app), Q38 (the pinned runtime version), Q39 (log redaction), Q40 (field zip name and location), and Q41 (end-to-end clock limits with the real camera) are recorded in section 18. Protocol v10. Spike S4 is done; S2 stays pending.
+- **Not done on this machine (task 6 stays open, for the owner on the booth laptop):** spike S2 (Windows touch keyboard), the hardware checklist in `local-development-guide.md`, the S1-booth raw preview re-measure (the JPEG fallback is built only if it fails), the S3 booth re-measure, and the full `regression` suite with the booth laptop's own camera.
+- **Not proven:**
+  - A real Windows logoff or shutdown with an Event running, `powercfg /requests`, sleep over a 4-hour Event, and Win-key, Win+L and Ctrl+Alt+Del behaviour (Win+L and Ctrl+Alt+Del can't be blocked by design).
+  - Real photographs: every frame was the camera's "camera off" placeholder.
+  - Two real displays and display scaling other than this machine's.
 
 ## 17. Risks and spikes
 
