@@ -691,7 +691,9 @@ public sealed partial class Brain
 
     private RunningEventStep PanelStep(ActiveEventState active) => _assistance is not null
         ? RunningEventStep.OperatorAssistance
-        : _cycle is { Ended: false } run && ReferenceEquals(run.Active, active) ? GuestCyclePlan.ToRunning(run.Model.Step) : active.Step;
+        : _cycle is { Ended: false } run && ReferenceEquals(run.Active, active)
+            ? GuestCyclePlan.ToRunning(run.Model.Step)
+            : ActiveGuestGallery is not null ? RunningEventStep.GuestGallery : active.Step;
 
     private RunningEventAssistance? PanelAssistance(ActiveEventState active) =>
         _assistance is { } assistance ? new RunningEventAssistance(assistance.Reason) : active.Assistance;

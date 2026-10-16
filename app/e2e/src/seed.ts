@@ -502,6 +502,82 @@ export function seedReconcileScenario(dataDir: string): void {
   reconcileScenario(dataDir).plan.write();
 }
 
+/** The Event `seedLargeGalleryEvent` writes. */
+export const largeGallerySeed = {
+  id: seedId(0xe4, 1),
+  name: "Harbour Hall open house",
+  venue: "Harbour Hall",
+} as const;
+
+export interface LargeGallerySeedOptions {
+  /** How many Guest Cycles to write, all ended; 300 by default. Three in four complete, so 300 gives 225 Photo Strips. */
+  cycles?: number;
+}
+
+/** What `seedLargeGalleryEvent` wrote, for a test to assert against without reading the folder back. */
+export interface LargeGallerySeed {
+  eventId: string;
+  eventName: string;
+  cycles: number;
+  /** The completed Guest Cycles, each with a Photo Strip. */
+  completed: number;
+  photoStrips: number;
+  captures: number;
+  /** Every Guest Cycle id, oldest first (the gallery lists them newest first). */
+  cycleIds: string[];
+  /** The completed Guest Cycles' ids, oldest first (the guest gallery lists them newest first). */
+  completedCycleIds: string[];
+}
+
+const largeGalleryEndings = ["started_over", "operator_exit", "app_closed", "unrecoverable"] as const;
+
+/**
+ * Seeds one Event with `cycles` ended Guest Cycles (300 by default) before the app starts, so the Event Gallery has eight pages to
+ * scroll: three in four completed (four kept Captures and a Photo Strip), the rest started over, ended by the operator, closed with
+ * the app, or unrecoverable (three kept Captures and no strip). The images are the tiny valid JPEG and PNG the other seeds use, which keeps
+ * every thumbnail fast to make; the Storage tests time real-size strips. Deterministic ids, so a test can name any cycle.
+ */
+export function seedLargeGalleryEvent(dataDir: string, options: LargeGallerySeedOptions = {}): LargeGallerySeed {
+  const cycles = options.cycles ?? 300;
+  const plan = new DataFolderPlan(dataDir);
+  const event = plan.addEvent({
+    id: largeGallerySeed.id,
+    name: largeGallerySeed.name,
+    date: "2026-10-24",
+    venue: largeGallerySeed.venue,
+    createdAt: storageTimestamp(new Date(Date.UTC(2026, 9, 1))),
+  });
+  const cycleIds: string[] = [];
+  const completedCycleIds: string[] = [];
+  let captures = 0;
+  for (let index = 0; index < cycles; index += 1) {
+    const completed = index % 4 !== 3;
+    const ending = completed ? "completed" : (largeGalleryEndings[Math.floor(index / 4) % largeGalleryEndings.length] ?? "started_over");
+    const cycle = plan.addCycle(event, seedId(0xe6, index + 1), ending);
+    cycleIds.push(cycle.id);
+    const kept = completed ? 4 : 3;
+    for (let sequence = 1; sequence <= kept; sequence += 1) {
+      captures += 1;
+      plan.addCapture(cycle, seedId(0xe5, captures), sequence);
+    }
+    if (completed) {
+      plan.addPhotoStrip(cycle);
+      completedCycleIds.push(cycle.id);
+    }
+  }
+  plan.write();
+  return {
+    eventId: event.id,
+    eventName: event.name,
+    cycles,
+    completed: completedCycleIds.length,
+    photoStrips: completedCycleIds.length,
+    captures,
+    cycleIds,
+    completedCycleIds,
+  };
+}
+
 /** The Events `seedOperatorEvents` writes, newest date first (the Event list's order). */
 export const operatorSeed = {
   /** Two completed Guest Cycles: two Photo Strips and five kept photographs (one more was discarded). */

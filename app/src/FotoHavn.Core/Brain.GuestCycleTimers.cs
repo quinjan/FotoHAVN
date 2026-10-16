@@ -114,7 +114,7 @@ public sealed partial class Brain
         var now = _dependencies.Clock.UtcNow;
         if (ActionableRun is not { } run || !run.Timer.IsRunning || !run.Timer.IsWarning(now))
         {
-            return NotAvailable(id);
+            return MoreTimeInGallery(id);
         }
 
         run.Timer = run.Timer.Restart(now);

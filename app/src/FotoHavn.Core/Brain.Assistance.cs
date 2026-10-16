@@ -33,6 +33,7 @@ public sealed partial class Brain
         }
 
         _assistance = new AssistanceState(reason);
+        DropGuestGallery();
         BrainLog.AssistanceEntered(_logger, reason);
         if (CurrentRun is { } run)
         {
