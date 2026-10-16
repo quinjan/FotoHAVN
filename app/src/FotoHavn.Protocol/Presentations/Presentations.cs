@@ -41,6 +41,8 @@ public enum OperatorSurface
 /// <param name="Fatal">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.Fatal"/>.</param>
 /// <param name="StorageError">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.StorageError"/>.</param>
 /// <param name="CameraDiagnostics">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.CameraDiagnostics"/>.</param>
+/// <param name="EventGallery">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.EventGallery"/> (protocol version 9).</param>
+/// <param name="GuestCycleDetail">Set when <paramref name="Surface"/> is <see cref="OperatorSurface.GuestCycleDetail"/> (protocol version 9).</param>
 public sealed record OperatorPresentation(
     OperatorSurface Surface,
     EventListView? EventList,
@@ -49,7 +51,9 @@ public sealed record OperatorPresentation(
     OperatorOverlays Overlays,
     FatalView? Fatal,
     StorageErrorView? StorageError,
-    CameraDiagnosticsView? CameraDiagnostics);
+    CameraDiagnosticsView? CameraDiagnostics,
+    EventGalleryView? EventGallery,
+    GuestCycleDetailView? GuestCycleDetail);
 
 /// <summary>
 /// The camera diagnostics screen (plan section 14, E2E-only until M6). Frame age and frame rate are not here: they change
@@ -138,6 +142,8 @@ public enum GuestSurface
 /// <param name="Filters">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Filters"/>.</param>
 /// <param name="Keepsake">Set when <paramref name="Surface"/> is <see cref="GuestSurface.Keepsake"/>.</param>
 /// <param name="OperatorAssistance">Set when <paramref name="Surface"/> is <see cref="GuestSurface.OperatorAssistance"/>.</param>
+/// <param name="GuestGallery">Set when <paramref name="Surface"/> is <see cref="GuestSurface.GuestGallery"/> (protocol version 9).</param>
+/// <param name="GuestStripDetail">Set when <paramref name="Surface"/> is <see cref="GuestSurface.GuestStripDetail"/> (protocol version 9).</param>
 public sealed record GuestPresentation(
     GuestSurface Surface,
     StartView? Start,
@@ -149,7 +155,9 @@ public sealed record GuestPresentation(
     PhotographsView? Photographs,
     FiltersView? Filters,
     KeepsakeView? Keepsake,
-    OperatorAssistanceView? OperatorAssistance);
+    OperatorAssistanceView? OperatorAssistance,
+    GuestGalleryView? GuestGallery,
+    GuestStripDetailView? GuestStripDetail);
 
 /// <summary>The Start view (plan section 7, Steps).</summary>
 /// <param name="StepInsideAvailable">Whether <c>STEP INSIDE →</c> works: the Camera is eligible and storage is writable. Always true on Start; Start unavailable is its own surface.</param>

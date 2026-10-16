@@ -37,6 +37,8 @@ export function operatorWelcome(surface: OperatorPresentation["surface"], parts:
       fatal: null,
       storageError: null,
       cameraDiagnostics: null,
+      eventGallery: null,
+      guestCycleDetail: null,
       ...parts,
     },
   };
@@ -271,7 +273,7 @@ export function operatorSetupFixtures(): Record<string, OperatorWelcomeMessage> 
       }),
     ),
     "operator-setup-leave-confirmation": setupMessage(editingSetupView({ dirty: true }), {
-      overlays: overlays({ confirmation: { kind: "leaveSetup", eventName: "Harbour gala", counts: null } }),
+      overlays: overlays({ confirmation: { kind: "leaveSetup", eventName: "Harbour gala", counts: null, guestCycle: null } }),
     }),
     "operator-setup-start-failure-display": setupMessage(
       editingSetupView({ startFailure: { code: "guestDisplayMissing", cameraReason: null } }),

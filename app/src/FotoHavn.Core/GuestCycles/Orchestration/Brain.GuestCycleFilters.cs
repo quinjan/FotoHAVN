@@ -256,6 +256,7 @@ public sealed partial class Brain
         run.Active.CompletedGuestCycles++;
         ReleaseFilterWork(run);
         StartSummaryRefresh();
+        OnGuestCycleEnded(run.Id, GuestCycleEndReason.Completed);
         BrainLog.GuestCycleCompleted(_logger, run.Id);
         AfterChange(run);
     }

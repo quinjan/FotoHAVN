@@ -7,6 +7,8 @@ import screen from "../screens/Screen.module.css";
 import { CameraDiagnosticsSurface } from "./CameraDiagnosticsSurface.tsx";
 import { noticeCopy, singleScreenCopy } from "./copy.ts";
 import { EventList } from "./EventList.tsx";
+import { EventGallerySurface } from "./gallery/EventGallerySurface.tsx";
+import { GuestCycleDetailSurface } from "./gallery/GuestCycleDetailSurface.tsx";
 import styles from "./Operator.module.css";
 import { LocalNotice, OperatorNoticeProvider, useSendCommand } from "./OperatorCommands.tsx";
 import { OperatorDialogs } from "./OperatorDialogs.tsx";
@@ -65,6 +67,18 @@ function OperatorSurface({ presentation }: { readonly presentation: OperatorPres
       );
     case "guestScreenActive":
       return <GuestScreenActive />;
+    case "eventGallery":
+      return presentation.eventGallery === null ? (
+        <OperatorPending />
+      ) : (
+        <EventGallerySurface view={presentation.eventGallery} running={presentation.runningEvent} />
+      );
+    case "guestCycleDetail":
+      return presentation.guestCycleDetail === null ? (
+        <OperatorPending />
+      ) : (
+        <GuestCycleDetailSurface view={presentation.guestCycleDetail} running={presentation.runningEvent} />
+      );
     case "fatal":
       return <OperatorFatal reason={presentation.fatal?.reason ?? null} />;
     case "storageError":

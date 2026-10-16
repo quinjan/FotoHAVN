@@ -152,7 +152,7 @@ public sealed class StorageTests
         harness.Run();
 
         var welcome = client.Messages.OfType<OperatorWelcomeMessage>().Single();
-        Assert.Equal(new OperatorPresentation(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null), welcome.Presentation);
+        Assert.Equal(new OperatorPresentation(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null, null, null), welcome.Presentation);
         Assert.Contains(CommandResultMessage.Rejected(id, RejectReason.NotAvailable), client.Messages);
         Assert.Equal(1, store.OpenCalls);
     }

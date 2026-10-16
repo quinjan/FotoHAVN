@@ -118,7 +118,7 @@ public sealed partial class Brain
         if (completed.IsCompletedSuccessfully)
         {
             _deleteEventId = summary.Id;
-            SetConfirmation(new ConfirmationOverlay(ConfirmationKind.DeleteEvent, summary.Name, completed.Result));
+            SetConfirmation(new ConfirmationOverlay(ConfirmationKind.DeleteEvent, summary.Name, completed.Result, null));
         }
         else
         {

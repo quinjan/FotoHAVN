@@ -10,6 +10,8 @@ import { ExitHold } from "./ExitHold.tsx";
 import { FiltersStep } from "./FiltersStep.tsx";
 import { guestCommandNotice } from "./guestCopy.ts";
 import { GuestCycleChrome } from "./GuestCycleChrome.tsx";
+import { GuestGalleryView } from "./GuestGalleryView.tsx";
+import { GuestStripDetailView } from "./GuestStripDetailView.tsx";
 import { KeepsakeStep } from "./KeepsakeStep.tsx";
 import { OperatorAssistanceView } from "./OperatorAssistanceView.tsx";
 import { PhotographsStep } from "./PhotographsStep.tsx";
@@ -82,6 +84,18 @@ function GuestSurface({ presentation, actions }: { readonly presentation: GuestP
         <GuestPending />
       ) : (
         <OperatorAssistanceView cycle={presentation.guestCycle} view={presentation.operatorAssistance} />
+      );
+    case "guestGallery":
+      return presentation.guestGallery === null ? (
+        <GuestPending />
+      ) : (
+        <GuestGalleryView view={presentation.guestGallery} overlays={presentation.overlays} />
+      );
+    case "guestStripDetail":
+      return presentation.guestStripDetail === null ? (
+        <GuestPending />
+      ) : (
+        <GuestStripDetailView view={presentation.guestStripDetail} overlays={presentation.overlays} />
       );
     case "fatal":
       return <GuestFatal />;

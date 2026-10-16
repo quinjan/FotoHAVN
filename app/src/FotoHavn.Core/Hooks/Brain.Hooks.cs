@@ -138,7 +138,8 @@ public sealed partial class Brain
         _identifyOverlays,
         new WakeLockDiagnostics(_dependencies.WakeLock.IsHeld),
         ClockScaleNow,
-        GuestCycleDiagnosticsNow());
+        GuestCycleDiagnosticsNow(),
+        GalleryDiagnosticsNow());
 
     private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
     {

@@ -360,6 +360,25 @@ public sealed record GuestCycleDiagnostics(
     int? CountdownRemaining,
     GuestCycleTimerDiagnostics Timer);
 
+/// <summary>The operator's Event Gallery as the brain sees it, for <c>test.getDiagnostics</c> (protocol version 9).</summary>
+/// <param name="EventId">The Event whose gallery is open.</param>
+/// <param name="ItemCount">The Guest Cycles loaded so far.</param>
+/// <param name="NextCursor">The cursor for the next page, or null when every page is loaded.</param>
+/// <param name="DetailId">The Guest Cycle whose detail is open, or null.</param>
+public sealed record OperatorGalleryDiagnostics(string EventId, int ItemCount, string? NextCursor, string? DetailId);
+
+/// <summary>The guest gallery as the brain sees it, for <c>test.getDiagnostics</c> (protocol version 9).</summary>
+/// <param name="StripCount">The Photo Strips loaded so far.</param>
+/// <param name="NextCursor">The cursor for the next page, or null when every page is loaded.</param>
+/// <param name="DetailId">The Guest Cycle whose strip detail is open, or null.</param>
+/// <param name="Timer">The guest gallery's Phase Timer.</param>
+public sealed record GuestGalleryDiagnostics(int StripCount, string? NextCursor, string? DetailId, GuestCycleTimerDiagnostics Timer);
+
+/// <summary>The galleries as the brain sees them (protocol version 9): each side is null while that gallery isn't open.</summary>
+/// <param name="Operator">The operator's Event Gallery, or null.</param>
+/// <param name="Guest">The guest gallery, or null.</param>
+public sealed record GalleryDiagnostics(OperatorGalleryDiagnostics? Operator, GuestGalleryDiagnostics? Guest);
+
 /// <summary>The result of <c>test.getDiagnostics</c>.</summary>
 /// <param name="ProtocolVersion">The brain's protocol version.</param>
 /// <param name="ConnectedRoles">Roles with at least one connection that completed the handshake, operator first.</param>
@@ -375,6 +394,7 @@ public sealed record GuestCycleDiagnostics(
 /// <param name="WakeLock">Whether the brain holds the wake lock.</param>
 /// <param name="ClockScale">The clock's speed factor (1 unless <c>test.setClockScale</c> changed it).</param>
 /// <param name="GuestCycle">The running Guest Cycle, or null when none runs (protocol version 8).</param>
+/// <param name="Gallery">The open galleries, or null when neither is open (protocol version 9).</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -389,7 +409,8 @@ public sealed record DiagnosticsResult(
     IReadOnlyList<IdentifyOverlayDiagnostics> IdentifyOverlays,
     WakeLockDiagnostics WakeLock,
     double ClockScale,
-    GuestCycleDiagnostics? GuestCycle)
+    GuestCycleDiagnostics? GuestCycle,
+    GalleryDiagnostics? Gallery)
 {
     public const int MaxCommandResults = 20;
 

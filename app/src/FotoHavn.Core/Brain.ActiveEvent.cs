@@ -124,7 +124,7 @@ public sealed partial class Brain
     {
         if (_activeEvent is not { } active)
         {
-            return new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: false, GuestGalleryLinkVisible: false), null, GuestOverlays.None, null, null, null, null, null, null, null);
+            return new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: false, GuestGalleryLinkVisible: false), null, GuestOverlays.None, null, null, null, null, null, null, null, null, null);
         }
 
         var overlays = RenderGuestOverlays(active);
@@ -135,15 +135,21 @@ public sealed partial class Brain
             return cycle;
         }
 
-        // The guest gallery link waits for M9. Outside a Guest Cycle an ineligible camera or unwritable storage is Start unavailable, never Operator Assistance.
+        // The guest gallery and its strip detail (Brain.GuestGallery.cs); null means Start. Outside a Guest Cycle an ineligible camera or unwritable storage is Start unavailable, never Operator Assistance.
+        if (RenderGuestGallery(active, overlays) is { } gallery)
+        {
+            return gallery;
+        }
+
+        var galleryLink = GuestGalleryLinkVisible(active);
         if (_cameraState != CameraState.Ready)
         {
-            return new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, GuestGalleryLinkVisible: false), overlays, null, null, null, null, null, null, null);
+            return new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, galleryLink), overlays, null, null, null, null, null, null, null, null, null);
         }
 
         return !_storageResolved || _storageError is not null || active.StorageFailed
-            ? new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Storage, GuestGalleryLinkVisible: false), overlays, null, null, null, null, null, null, null)
-            : new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: true, GuestGalleryLinkVisible: false), null, overlays, null, null, null, null, null, null, null);
+            ? new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Storage, galleryLink), overlays, null, null, null, null, null, null, null, null, null)
+            : new GuestPresentation(GuestSurface.Start, new StartView(StepInsideAvailable: true, galleryLink), null, overlays, null, null, null, null, null, null, null, null, null);
     }
 
     private GuestOverlays RenderGuestOverlays(ActiveEventState active)
@@ -163,7 +169,7 @@ public sealed partial class Brain
     }
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason
-        ? new GuestPresentation(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView(reason), null, null, null, null, null, null)
+        ? new GuestPresentation(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView(reason), null, null, null, null, null, null, null, null)
         : RenderGuestShell();
 
     // End Event (plan section 8; contract section 10.8)
@@ -275,7 +281,7 @@ public sealed partial class Brain
             return NotAvailable(id);
         }
 
-        SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null));
+        SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null, null));
         return CommandResultMessage.Accepted(id);
     }
 

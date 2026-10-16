@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 8
+      "const": 9
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -1681,7 +1681,8 @@
       "enum": [
         "deleteEvent",
         "endEvent",
-        "leaveSetup"
+        "leaveSetup",
+        "deleteGuestCycle"
       ]
     },
     "ConfirmationOverlay": {
@@ -1706,12 +1707,23 @@
               "type": "null"
             }
           ]
+        },
+        "guestCycle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeleteGuestCycleConfirmation"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "kind",
         "eventName",
-        "counts"
+        "counts",
+        "guestCycle"
       ],
       "additionalProperties": false
     },
@@ -1806,6 +1818,28 @@
       ],
       "additionalProperties": false
     },
+    "DeleteGuestCycleConfirmation": {
+      "title": "DeleteGuestCycleConfirmation",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fileCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "guestCycleId",
+        "startedAt",
+        "fileCount"
+      ],
+      "additionalProperties": false
+    },
     "DeleteGuestCyclePayload": {
       "title": "DeleteGuestCyclePayload",
       "type": "object",
@@ -1889,6 +1923,16 @@
               "type": "null"
             }
           ]
+        },
+        "gallery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GalleryDiagnostics"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1905,7 +1949,8 @@
         "identifyOverlays",
         "wakeLock",
         "clockScale",
-        "guestCycle"
+        "guestCycle",
+        "gallery"
       ],
       "additionalProperties": false
     },
@@ -2142,6 +2187,53 @@
         "customer",
         "notes"
       ]
+    },
+    "EventGalleryView": {
+      "title": "EventGalleryView",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        },
+        "eventName": {
+          "type": "string"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GalleryItemView"
+          }
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "loadingMore": {
+          "type": "boolean"
+        },
+        "loadFailed": {
+          "type": "boolean"
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "eventId",
+        "eventName",
+        "running",
+        "items",
+        "nextCursor",
+        "loadingMore",
+        "loadFailed",
+        "empty"
+      ],
+      "additionalProperties": false
     },
     "EventListRow": {
       "title": "EventListRow",
@@ -2781,6 +2873,197 @@
         "seq"
       ]
     },
+    "GalleryCaptureImageView": {
+      "title": "GalleryCaptureImageView",
+      "type": "object",
+      "properties": {
+        "imageUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "imageUrl",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "GalleryCaptureThumbnailView": {
+      "title": "GalleryCaptureThumbnailView",
+      "type": "object",
+      "properties": {
+        "thumbnailUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "thumbnailUrl",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "GalleryDiagnostics": {
+      "title": "GalleryDiagnostics",
+      "type": "object",
+      "properties": {
+        "operator": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperatorGalleryDiagnostics"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "guest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestGalleryDiagnostics"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operator",
+        "guest"
+      ],
+      "additionalProperties": false
+    },
+    "GalleryItemView": {
+      "title": "GalleryItemView",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outcome": {
+          "$ref": "#/$defs/GalleryOutcome"
+        },
+        "templateName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lookName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "strip": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GalleryStripThumbnailView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "captures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GalleryCaptureThumbnailView"
+          }
+        },
+        "unavailable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "guestCycleId",
+        "startedAt",
+        "outcome",
+        "templateName",
+        "lookName",
+        "strip",
+        "captures",
+        "unavailable"
+      ],
+      "additionalProperties": false
+    },
+    "GalleryOutcome": {
+      "title": "GalleryOutcome",
+      "enum": [
+        "completed",
+        "startedOver",
+        "endedByOperator",
+        "appClosed",
+        "unrecoverable"
+      ]
+    },
+    "GalleryStripImageView": {
+      "title": "GalleryStripImageView",
+      "type": "object",
+      "properties": {
+        "imageUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "imageUrl",
+        "width",
+        "height",
+        "landscape"
+      ],
+      "additionalProperties": false
+    },
+    "GalleryStripThumbnailView": {
+      "title": "GalleryStripThumbnailView",
+      "type": "object",
+      "properties": {
+        "thumbnailUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "thumbnailUrl",
+        "width",
+        "height",
+        "landscape"
+      ],
+      "additionalProperties": false
+    },
     "GoToStepCommand": {
       "title": "GoToStepCommand",
       "type": "object",
@@ -2817,6 +3100,105 @@
       },
       "required": [
         "step"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCaptureImageView": {
+      "title": "GuestCaptureImageView",
+      "type": "object",
+      "properties": {
+        "imageUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "imageUrl",
+        "width",
+        "height",
+        "alt"
+      ],
+      "additionalProperties": false
+    },
+    "GuestCycleDetailView": {
+      "title": "GuestCycleDetailView",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        },
+        "eventName": {
+          "type": "string"
+        },
+        "guestCycleId": {
+          "type": "string"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outcome": {
+          "$ref": "#/$defs/GalleryOutcome"
+        },
+        "templateName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lookName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "strip": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GalleryStripImageView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "captures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GalleryCaptureImageView"
+          }
+        },
+        "unavailable": {
+          "type": "boolean"
+        },
+        "canOpenFolder": {
+          "type": "boolean"
+        },
+        "canDelete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "eventId",
+        "eventName",
+        "guestCycleId",
+        "startedAt",
+        "outcome",
+        "templateName",
+        "lookName",
+        "strip",
+        "captures",
+        "unavailable",
+        "canOpenFolder",
+        "canDelete"
       ],
       "additionalProperties": false
     },
@@ -3013,6 +3395,64 @@
         "missing"
       ]
     },
+    "GuestGalleryDiagnostics": {
+      "title": "GuestGalleryDiagnostics",
+      "type": "object",
+      "properties": {
+        "stripCount": {
+          "type": "integer"
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "detailId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timer": {
+          "$ref": "#/$defs/GuestCycleTimerDiagnostics"
+        }
+      },
+      "required": [
+        "stripCount",
+        "nextCursor",
+        "detailId",
+        "timer"
+      ],
+      "additionalProperties": false
+    },
+    "GuestGalleryView": {
+      "title": "GuestGalleryView",
+      "type": "object",
+      "properties": {
+        "strips": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuestStripView"
+          }
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "loadingMore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "strips",
+        "nextCursor",
+        "loadingMore"
+      ],
+      "additionalProperties": false
+    },
     "GuestOverlays": {
       "title": "GuestOverlays",
       "type": "object",
@@ -3176,6 +3616,26 @@
               "type": "null"
             }
           ]
+        },
+        "guestGallery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestGalleryView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "guestStripDetail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestStripDetailView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -3189,7 +3649,9 @@
         "photographs",
         "filters",
         "keepsake",
-        "operatorAssistance"
+        "operatorAssistance",
+        "guestGallery",
+        "guestStripDetail"
       ],
       "additionalProperties": false
     },
@@ -3234,6 +3696,88 @@
         "upcoming",
         "skipped"
       ]
+    },
+    "GuestStripDetailView": {
+      "title": "GuestStripDetailView",
+      "type": "object",
+      "properties": {
+        "strip": {
+          "$ref": "#/$defs/GuestStripImageView"
+        },
+        "captures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuestCaptureImageView"
+          }
+        }
+      },
+      "required": [
+        "strip",
+        "captures"
+      ],
+      "additionalProperties": false
+    },
+    "GuestStripImageView": {
+      "title": "GuestStripImageView",
+      "type": "object",
+      "properties": {
+        "imageUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "imageUrl",
+        "width",
+        "height",
+        "landscape",
+        "alt"
+      ],
+      "additionalProperties": false
+    },
+    "GuestStripView": {
+      "title": "GuestStripView",
+      "type": "object",
+      "properties": {
+        "guestCycleId": {
+          "type": "string"
+        },
+        "thumbnailUrl": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "landscape": {
+          "type": "boolean"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "guestCycleId",
+        "thumbnailUrl",
+        "width",
+        "height",
+        "landscape",
+        "alt"
+      ],
+      "additionalProperties": false
     },
     "GuestSurface": {
       "title": "GuestSurface",
@@ -4082,12 +4626,45 @@
       ],
       "additionalProperties": false
     },
+    "OperatorGalleryDiagnostics": {
+      "title": "OperatorGalleryDiagnostics",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string"
+        },
+        "itemCount": {
+          "type": "integer"
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "detailId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "eventId",
+        "itemCount",
+        "nextCursor",
+        "detailId"
+      ],
+      "additionalProperties": false
+    },
     "OperatorNoticeCode": {
       "title": "OperatorNoticeCode",
       "enum": [
         "saveFailed",
         "deleteFailed",
-        "eventNotFound"
+        "eventNotFound",
+        "guestCycleDeleteFailed",
+        "guestCycleNotFound"
       ]
     },
     "OperatorNoticeOverlay": {
@@ -4214,6 +4791,26 @@
               "type": "null"
             }
           ]
+        },
+        "eventGallery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EventGalleryView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "guestCycleDetail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuestCycleDetailView"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -4224,7 +4821,9 @@
         "overlays",
         "fatal",
         "storageError",
-        "cameraDiagnostics"
+        "cameraDiagnostics",
+        "eventGallery",
+        "guestCycleDetail"
       ],
       "additionalProperties": false
     },

@@ -230,12 +230,13 @@ export type AssistanceReason = "camera" | "storage" | "guestDisplay";
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ConfirmationKind".
  */
-export type ConfirmationKind = "deleteEvent" | "endEvent" | "leaveSetup";
+export type ConfirmationKind = "deleteEvent" | "endEvent" | "leaveSetup" | "deleteGuestCycle";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "OperatorNoticeCode".
  */
-export type OperatorNoticeCode = "saveFailed" | "deleteFailed" | "eventNotFound";
+export type OperatorNoticeCode =
+  "saveFailed" | "deleteFailed" | "eventNotFound" | "guestCycleDeleteFailed" | "guestCycleNotFound";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "StorageErrorReason".
@@ -250,6 +251,11 @@ export type StorageErrorReason =
   | "integrityFailed"
   | "corrupt"
   | "unknown";
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryOutcome".
+ */
+export type GalleryOutcome = "completed" | "startedOver" | "endedByOperator" | "appClosed" | "unrecoverable";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "GuestSurface".
@@ -372,7 +378,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 8;
+  protocolVersion: 9;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1565,6 +1571,8 @@ export interface OperatorPresentation {
   fatal: FatalView | null;
   storageError: StorageErrorView | null;
   cameraDiagnostics: CameraDiagnosticsView | null;
+  eventGallery: EventGalleryView | null;
+  guestCycleDetail: GuestCycleDetailView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1800,6 +1808,7 @@ export interface ConfirmationOverlay {
   kind: ConfirmationKind;
   eventName: string | null;
   counts: ConfirmationCounts | null;
+  guestCycle: DeleteGuestCycleConfirmation | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1809,6 +1818,15 @@ export interface ConfirmationCounts {
   guestCycles: number;
   photoStrips: number;
   captures: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "DeleteGuestCycleConfirmation".
+ */
+export interface DeleteGuestCycleConfirmation {
+  guestCycleId: string;
+  startedAt: string;
+  fileCount: number;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -1895,6 +1913,90 @@ export interface CompositionView {
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "EventGalleryView".
+ */
+export interface EventGalleryView {
+  eventId: string;
+  eventName: string;
+  running: boolean;
+  items: GalleryItemView[];
+  nextCursor: string | null;
+  loadingMore: boolean;
+  loadFailed: boolean;
+  empty: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryItemView".
+ */
+export interface GalleryItemView {
+  guestCycleId: string;
+  startedAt: string;
+  outcome: GalleryOutcome;
+  templateName: string | null;
+  lookName: string | null;
+  strip: GalleryStripThumbnailView | null;
+  captures: GalleryCaptureThumbnailView[];
+  unavailable: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryStripThumbnailView".
+ */
+export interface GalleryStripThumbnailView {
+  thumbnailUrl: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryCaptureThumbnailView".
+ */
+export interface GalleryCaptureThumbnailView {
+  thumbnailUrl: string;
+  width: number;
+  height: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCycleDetailView".
+ */
+export interface GuestCycleDetailView {
+  eventId: string;
+  eventName: string;
+  guestCycleId: string;
+  startedAt: string;
+  outcome: GalleryOutcome;
+  templateName: string | null;
+  lookName: string | null;
+  strip: GalleryStripImageView | null;
+  captures: GalleryCaptureImageView[];
+  unavailable: boolean;
+  canOpenFolder: boolean;
+  canDelete: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryStripImageView".
+ */
+export interface GalleryStripImageView {
+  imageUrl: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryCaptureImageView".
+ */
+export interface GalleryCaptureImageView {
+  imageUrl: string;
+  width: number;
+  height: number;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "GuestWelcomeMessage".
  */
 export interface GuestWelcomeMessage {
@@ -1920,6 +2022,8 @@ export interface GuestPresentation {
   filters: FiltersView | null;
   keepsake: KeepsakeView | null;
   operatorAssistance: OperatorAssistanceView | null;
+  guestGallery: GuestGalleryView | null;
+  guestStripDetail: GuestStripDetailView | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2147,6 +2251,56 @@ export interface KeepsakeView {
 export interface OperatorAssistanceView {
   reason: AssistanceReason;
   retrying: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestGalleryView".
+ */
+export interface GuestGalleryView {
+  strips: GuestStripView[];
+  nextCursor: string | null;
+  loadingMore: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestStripView".
+ */
+export interface GuestStripView {
+  guestCycleId: string;
+  thumbnailUrl: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+  alt: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestStripDetailView".
+ */
+export interface GuestStripDetailView {
+  strip: GuestStripImageView;
+  captures: GuestCaptureImageView[];
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestStripImageView".
+ */
+export interface GuestStripImageView {
+  imageUrl: string;
+  width: number;
+  height: number;
+  landscape: boolean;
+  alt: string;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestCaptureImageView".
+ */
+export interface GuestCaptureImageView {
+  imageUrl: string;
+  width: number;
+  height: number;
+  alt: string;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2393,6 +2547,7 @@ export interface DiagnosticsResult {
   wakeLock: WakeLockDiagnostics;
   clockScale: number;
   guestCycle: GuestCycleDiagnostics | null;
+  gallery: GalleryDiagnostics | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2539,6 +2694,34 @@ export interface GuestCycleTimerDiagnostics {
   remainingMs: number | null;
   paused: boolean;
   warning: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GalleryDiagnostics".
+ */
+export interface GalleryDiagnostics {
+  operator: OperatorGalleryDiagnostics | null;
+  guest: GuestGalleryDiagnostics | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "OperatorGalleryDiagnostics".
+ */
+export interface OperatorGalleryDiagnostics {
+  eventId: string;
+  itemCount: number;
+  nextCursor: string | null;
+  detailId: string | null;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "GuestGalleryDiagnostics".
+ */
+export interface GuestGalleryDiagnostics {
+  stripCount: number;
+  nextCursor: string | null;
+  detailId: string | null;
+  timer: GuestCycleTimerDiagnostics;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2697,4 +2880,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 8;
+export const PROTOCOL_VERSION = 9;

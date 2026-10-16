@@ -3,9 +3,11 @@ import type { Transport } from "../brain/types.ts";
 import { PROTOCOL_VERSION, type ServerMessage } from "../protocol/generated.ts";
 import { guestCaptureFixtures } from "./guestCaptureFixtures.ts";
 import { guestFinishFixtures } from "./guestFinishFixtures.ts";
+import { guestGalleryFixtures } from "./guestGalleryFixtures.ts";
 import { guestShellFixtures, operatorEventListWithRows } from "./inlineFixtures.ts";
 import { withLaneMedia } from "./laneMedia.ts";
 import { operatorFixtures } from "./operatorFixtures.ts";
+import { operatorGalleryFixtures } from "./operatorGalleryFixtures.ts";
 import { fixturePreviewUrl } from "./previewImages.ts";
 
 /**
@@ -34,6 +36,8 @@ const handWritten: FixtureMessages = {
   ...guestShellFixtures,
   ...guestCaptureFixtures,
   ...guestFinishFixtures,
+  ...guestGalleryFixtures,
+  ...operatorGalleryFixtures,
   ...operatorFixtures(),
 };
 

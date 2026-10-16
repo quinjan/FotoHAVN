@@ -35,35 +35,41 @@ public sealed partial class Brain
     {
         if (_fatalReason is { } reason)
         {
-            return new OperatorPresentation(OperatorSurface.Fatal, null, null, null, OperatorOverlays.None, new FatalView(reason), null, null);
+            return new OperatorPresentation(OperatorSurface.Fatal, null, null, null, OperatorOverlays.None, new FatalView(reason), null, null, null, null);
         }
 
         if (RenderCameraDiagnostics() is { } diagnostics)
         {
-            return new OperatorPresentation(OperatorSurface.CameraDiagnostics, null, null, null, OperatorOverlays.None, null, null, diagnostics);
+            return new OperatorPresentation(OperatorSurface.CameraDiagnostics, null, null, null, OperatorOverlays.None, null, null, diagnostics, null, null);
         }
 
         if (!_storageResolved)
         {
-            return new OperatorPresentation(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null);
+            return new OperatorPresentation(OperatorSurface.Starting, null, null, null, OperatorOverlays.None, null, null, null, null, null);
         }
 
         if (_storageError is { } storageError)
         {
             return new OperatorPresentation(
-                OperatorSurface.StorageError, null, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot), null);
+                OperatorSurface.StorageError, null, null, null, OperatorOverlays.None, null, new StorageErrorView(storageError, _dependencies.Store.DataRoot), null, null, null);
         }
 
         var panel = RenderRunningEventPanel();
         var overlays = RenderOperatorOverlays();
         if (_activeEvent is { SingleScreen: true })
         {
-            return new OperatorPresentation(OperatorSurface.GuestScreenActive, null, null, panel, overlays, null, null, null);
+            return new OperatorPresentation(OperatorSurface.GuestScreenActive, null, null, panel, overlays, null, null, null, null, null);
+        }
+
+        // The Event Gallery and the Guest Cycle detail (Brain.Gallery.cs); null means the operator isn't in a gallery.
+        if (RenderEventGallery(panel, overlays) is { } gallery)
+        {
+            return gallery;
         }
 
         return _operatorSurface == OperatorSurface.EventSetup && RenderEventSetup() is { } setup
-            ? new OperatorPresentation(OperatorSurface.EventSetup, null, setup, panel, overlays, null, null, null)
-            : new OperatorPresentation(OperatorSurface.EventList, RenderEventList(), null, panel, overlays, null, null, null);
+            ? new OperatorPresentation(OperatorSurface.EventSetup, null, setup, panel, overlays, null, null, null, null, null)
+            : new OperatorPresentation(OperatorSurface.EventList, RenderEventList(), null, panel, overlays, null, null, null, null, null);
     }
 
     private OperatorOverlays RenderOperatorOverlays() => new(

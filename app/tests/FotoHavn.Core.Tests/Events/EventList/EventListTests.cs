@@ -168,7 +168,7 @@ public sealed class EventListTests
         rig.Rejects(RejectReason.NotAvailable, "ConfirmDeleteEvent");
         rig.Rejects(RejectReason.NotAvailable, "CancelDeleteEvent");
 
-        rig.OnBrain(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null)));
+        rig.OnBrain(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null, null)));
         rig.Rejects(RejectReason.NotAvailable, "ConfirmDeleteEvent");
         rig.Rejects(RejectReason.NotAvailable, "CancelDeleteEvent");
     }

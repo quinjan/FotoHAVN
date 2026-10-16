@@ -67,7 +67,7 @@ public sealed class ActiveEventTests
     {
         using var rig = await ActiveRig.CreateAsync();
 
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]
@@ -182,7 +182,7 @@ public sealed class ActiveEventTests
 
         var end = rig.OperatorCommand("EndEvent");
         Assert.Equal(CommandResultMessage.Accepted(end.Id), end);
-        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null), rig.LatestOperator().Overlays.Confirmation);
+        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null, null), rig.LatestOperator().Overlays.Confirmation);
         Assert.Equal(ActiveRig.EventId, rig.Brain.ActiveEventId);
 
         var keep = rig.OperatorCommand("KeepRunning");
@@ -218,7 +218,7 @@ public sealed class ActiveEventTests
         var row = Assert.Single(presentation.EventList!.Events);
         Assert.False(row.Running);
         Assert.Equal(new EventRowActions(true, true, true, true, true), row.Actions);
-        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null), rig.LatestGuest());
+        Assert.Equal(new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null, null, null), rig.LatestGuest());
     }
 
     [Fact]
@@ -293,7 +293,7 @@ public sealed class ActiveEventTests
         rig.StartAndExpectSuccess();
         rig.OperatorCommand("EndEvent");
 
-        rig.Executor.Post(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Harbour gala", null)));
+        rig.Executor.Post(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Harbour gala", null, null)));
         rig.Run();
 
         Assert.Equal(RejectReason.NotAvailable, rig.OperatorCommand("ConfirmEndEvent").Reason);
@@ -306,7 +306,7 @@ public sealed class ActiveEventTests
     {
         using var rig = await ActiveRig.CreateAsync();
         rig.StartAndExpectSuccess();
-        rig.Executor.Post(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Harbour gala", null)));
+        rig.Executor.Post(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Harbour gala", null, null)));
         rig.Run();
 
         rig.OpenAndCompleteExitWithPin();

@@ -546,7 +546,7 @@ public sealed class EventSetupCommandTests
 
         rig.Accepts("LeaveEventSetup");
 
-        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Quay party", null), rig.Latest.Overlays.Confirmation);
+        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, "Quay party", null, null), rig.Latest.Overlays.Confirmation);
         Assert.Equal(OperatorSurface.EventSetup, rig.Latest.Surface);
 
         rig.Accepts("ConfirmLeave", """{"choice":"keepEditing"}""");
@@ -565,7 +565,7 @@ public sealed class EventSetupCommandTests
 
         rig.Accepts("LeaveEventSetup");
 
-        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, null, null), rig.Latest.Overlays.Confirmation);
+        Assert.Equal(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, null, null, null), rig.Latest.Overlays.Confirmation);
     }
 
     [Fact]
@@ -625,7 +625,7 @@ public sealed class EventSetupCommandTests
         rig.OpenNew();
         rig.Field("name", "x");
         rig.Accepts("LeaveEventSetup");
-        rig.OnBrain(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null)));
+        rig.OnBrain(() => rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null, null)));
 
         rig.Rejects(RejectReason.NotAvailable, "ConfirmLeave", """{"choice":"discardChanges"}""");
     }

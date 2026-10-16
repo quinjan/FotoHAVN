@@ -227,14 +227,14 @@ public sealed class OperatorScaffoldTests
     {
         using var harness = new BrainHarness();
         var client = harness.Handshake(Role.Operator);
-        var delete = new ConfirmationOverlay(ConfirmationKind.DeleteEvent, "Harbour gala", new ConfirmationCounts(3, 2, 9));
+        var delete = new ConfirmationOverlay(ConfirmationKind.DeleteEvent, "Harbour gala", new ConfirmationCounts(3, 2, 9), null);
 
         harness.Executor.Post(() => harness.Brain.SetConfirmation(delete));
         harness.Brain.ShowOperatorSurface(OperatorSurface.EventList);
         harness.Run();
         Assert.Equal(delete, Latest(client).Overlays.Confirmation);
 
-        var end = new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null);
+        var end = new ConfirmationOverlay(ConfirmationKind.EndEvent, null, null, null);
         harness.Executor.Post(() => harness.Brain.SetConfirmation(end));
         harness.Brain.ShowOperatorSurface(OperatorSurface.EventList);
         harness.Run();
@@ -508,7 +508,7 @@ public sealed class OperatorScaffoldTests
         var welcome = client.Single<GuestWelcomeMessage>();
 
         Assert.Equal(
-            new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null),
+            new GuestPresentation(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null, null, null),
             welcome.Presentation);
     }
 

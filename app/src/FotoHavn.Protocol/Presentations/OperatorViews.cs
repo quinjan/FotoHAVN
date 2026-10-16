@@ -22,7 +22,7 @@ public sealed record EventListView(IReadOnlyList<EventListRow> Events, bool NewE
 /// <param name="CanEdit">Edit; false for the running Event.</param>
 /// <param name="CanDelete">Delete; false for the running Event.</param>
 /// <param name="CanOpenFolder">Open folder; true on every row.</param>
-/// <param name="CanOpenGallery">Gallery; true on every row (the gallery itself arrives in M9: until then <c>OpenGallery</c> answers <c>rejected notAvailable</c>).</param>
+/// <param name="CanOpenGallery">Gallery; true on every row (<c>OpenGallery</c> answers <c>rejected notAvailable</c> only while the Event setup draft is open or storage is down).</param>
 public sealed record EventRowActions(bool CanStart, bool CanEdit, bool CanDelete, bool CanOpenFolder, bool CanOpenGallery);
 
 /// <summary>One Event list row (plan section 8, Event list).</summary>
@@ -376,6 +376,9 @@ public enum ConfirmationKind
 
     /// <summary>Leaving Event setup with changes: <c>ConfirmLeave(save | discardChanges | keepEditing)</c>.</summary>
     LeaveSetup,
+
+    /// <summary>"Delete this Guest Cycle?" naming its time and counting its files (protocol version 9): <c>ConfirmDeleteGuestCycle</c> or <c>CancelDeleteGuestCycle</c>.</summary>
+    DeleteGuestCycle,
 }
 
 /// <summary>What a delete removes, for the confirmation.</summary>
@@ -388,7 +391,8 @@ public sealed record ConfirmationCounts(int GuestCycles, int PhotoStrips, int Ca
 /// <param name="Kind">Which dialog.</param>
 /// <param name="EventName">The Event the dialog is about, or null for none.</param>
 /// <param name="Counts">What deleting removes; set only for <see cref="ConfirmationKind.DeleteEvent"/>.</param>
-public sealed record ConfirmationOverlay(ConfirmationKind Kind, string? EventName, ConfirmationCounts? Counts);
+/// <param name="GuestCycle">The Guest Cycle a delete is for; set only for <see cref="ConfirmationKind.DeleteGuestCycle"/> (protocol version 9).</param>
+public sealed record ConfirmationOverlay(ConfirmationKind Kind, string? EventName, ConfirmationCounts? Counts, DeleteGuestCycleConfirmation? GuestCycle);
 
 /// <summary>A display <c>IDENTIFY DISPLAYS</c> numbers.</summary>
 /// <param name="Id">The display's stable identity.</param>
@@ -413,6 +417,12 @@ public enum OperatorNoticeCode
 
     /// <summary>The Event no longer exists (for example it was deleted while it was open).</summary>
     EventNotFound,
+
+    /// <summary>The Guest Cycle couldn't be deleted (storage failed); it is back in the gallery (protocol version 9).</summary>
+    GuestCycleDeleteFailed,
+
+    /// <summary>The Guest Cycle no longer exists (for example it was deleted already) (protocol version 9).</summary>
+    GuestCycleNotFound,
 }
 
 /// <summary>A notice on the Operator Screen.</summary>

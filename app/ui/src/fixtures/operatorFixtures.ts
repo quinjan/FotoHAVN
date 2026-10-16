@@ -63,6 +63,8 @@ export function operatorStorageError(kind: StorageErrorReason, dataPath: string)
       fatal: null,
       storageError: { kind, dataPath },
       cameraDiagnostics: null,
+      eventGallery: null,
+      guestCycleDetail: null,
     },
   };
 }
@@ -103,6 +105,8 @@ export function operatorCameraDiagnostics(view: CameraDiagnosticsView): Operator
       fatal: null,
       storageError: null,
       cameraDiagnostics: view,
+      eventGallery: null,
+      guestCycleDetail: null,
     },
   };
 }
@@ -145,9 +149,9 @@ function operatorListFixtures(): Record<string, OperatorWelcomeMessage> {
     }),
     "operator-list-confirm-delete": operatorWelcome("eventList", {
       eventList: { events: idle, newEventAvailable: true },
-      overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: idle[1]?.name ?? "", counts: { guestCycles: 12, photoStrips: 11, captures: 41 } } }),
+      overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: idle[1]?.name ?? "", counts: { guestCycles: 12, photoStrips: 11, captures: 41 }, guestCycle: null } }),
     }),
-    "operator-list-confirm-end": runningList({}, { overlays: overlays({ confirmation: { kind: "endEvent", eventName: null, counts: null } }) }),
+    "operator-list-confirm-end": runningList({}, { overlays: overlays({ confirmation: { kind: "endEvent", eventName: null, counts: null, guestCycle: null } }) }),
     "operator-list-notice": operatorWelcome("eventList", {
       eventList: { events: idle, newEventAvailable: true },
       overlays: overlays({ notice: "deleteFailed" }),

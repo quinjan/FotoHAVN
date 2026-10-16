@@ -11,7 +11,9 @@ namespace FotoHavn.Core;
 //   Brain.Storage.cs       RetryStorage
 //   Brain.GuestCycle.cs    the Guest Cycle commands                  (M8 wave B1)
 //   Brain.Assistance.cs    RetryAssistance                           (M8 wave B1)
-// A command nothing implements yet (the galleries; the Guest Cycle until M8 wave B1) is rejected notAvailable. Handlers run on the executor,
+//   Brain.Gallery.cs       the operator's Event Gallery commands     (M9 wave B1)
+//   Brain.GuestGallery.cs  the guest gallery commands                (M9 wave B1)
+// A command nothing implements yet is rejected notAvailable. Handlers run on the executor,
 // answer at once, and never wait for I/O: they start it and post the outcome back (contract section 9, Threading).
 public sealed partial class Brain
 {
@@ -87,6 +89,24 @@ public sealed partial class Brain
         ConfirmStartOverPayload => ConfirmStartOver(id),
         KeepGoingPayload => KeepGoing(id),
         RetryAssistancePayload => RetryAssistance(id),
+
+        // The operator's Event Gallery (Brain.Gallery.cs)
+        OpenGalleryPayload gallery => OpenGallery(id, gallery),
+        LoadMoreGuestCyclesPayload more => LoadMoreGuestCycles(id, more),
+        OpenGuestCyclePayload open => OpenGuestCycle(id, open),
+        CloseGuestCyclePayload => CloseGuestCycle(id),
+        OpenGuestCycleFolderPayload folder => OpenGuestCycleFolder(id, folder),
+        DeleteGuestCyclePayload delete => DeleteGuestCycle(id, delete),
+        ConfirmDeleteGuestCyclePayload => ConfirmDeleteGuestCycle(id),
+        CancelDeleteGuestCyclePayload => CancelDeleteGuestCycle(id),
+        CloseGalleryPayload => CloseGallery(id),
+
+        // The guest gallery (Brain.GuestGallery.cs)
+        OpenGuestGalleryPayload => OpenGuestGallery(id),
+        LoadMoreGuestStripsPayload more => LoadMoreGuestStrips(id, more),
+        OpenGuestStripPayload strip => OpenGuestStrip(id, strip),
+        CloseGuestStripPayload => CloseGuestStrip(id),
+        BackToStartPayload => BackToStart(id),
 
         _ => NotAvailable(id),
     };

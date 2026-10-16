@@ -118,7 +118,7 @@ describe("OperatorRoot", () => {
     it("says an Event that was never used has nothing in it, and falls back to a plain name if the brain sent none", () => {
       renderRoot({
         ...fixture("operator-list-confirm-delete"),
-        overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: null, counts: { guestCycles: 0, photoStrips: 0, captures: 0 } } }),
+        overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: null, counts: { guestCycles: 0, photoStrips: 0, captures: 0 }, guestCycle: null } }),
       });
       expect(screen.getByRole("alertdialog")).toHaveAccessibleDescription("“this Event” will be removed. It has no photographs yet. This can't be undone.");
     });
@@ -169,7 +169,7 @@ describe("OperatorRoot", () => {
       const { update } = renderRoot(running);
       const endEvent = screen.getByRole("button", { name: "END EVENT" });
       endEvent.focus();
-      update({ ...running, overlays: overlays({ confirmation: { kind: "endEvent", eventName: null, counts: null } }) });
+      update({ ...running, overlays: overlays({ confirmation: { kind: "endEvent", eventName: null, counts: null, guestCycle: null } }) });
       expect(screen.getByRole("button", { name: "KEEP RUNNING" })).toHaveFocus();
       update(running);
       expect(screen.getByRole("button", { name: "END EVENT" })).toHaveFocus();

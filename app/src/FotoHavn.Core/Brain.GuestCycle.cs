@@ -420,7 +420,14 @@ public sealed partial class Brain
             await _dependencies.Store.EndGuestCycleAsync(run.Id, reason, CancellationToken.None).ConfigureAwait(false);
             return true;
         });
-        OffVoid(() => write, completed => LogEndFailure(completed, "end the Guest Cycle"));
+        OffVoid(() => write, completed =>
+        {
+            LogEndFailure(completed, "end the Guest Cycle");
+            if (completed.IsCompletedSuccessfully)
+            {
+                OnGuestCycleEnded(run.Id, reason);
+            }
+        });
     }
 
     /// <summary>Ends a cycle the brain never held (the Event ended while the store created it).</summary>
@@ -538,7 +545,9 @@ public sealed partial class Brain
                 null,
                 null,
                 null,
-                new OperatorAssistanceView(assistance.Reason, assistance.Retrying));
+                new OperatorAssistanceView(assistance.Reason, assistance.Retrying),
+                null,
+                null);
         }
 
         if (run is null)
@@ -550,10 +559,10 @@ public sealed partial class Brain
         var cycle = CycleView(run);
         return run.Model.Step switch
         {
-            GuestCycleStep.Template => new GuestPresentation(GuestSurface.Template, null, null, shown, null, cycle, RenderTemplate(run), null, null, null, null),
-            GuestCycleStep.Photographs => new GuestPresentation(GuestSurface.Photographs, null, null, shown, null, cycle, null, RenderPhotographs(run), null, null, null),
-            GuestCycleStep.Filters => new GuestPresentation(GuestSurface.Filters, null, null, shown, null, cycle, null, null, RenderFilters(run), null, null),
-            _ => new GuestPresentation(GuestSurface.Keepsake, null, null, shown, null, cycle, null, null, null, run.Keepsake, null),
+            GuestCycleStep.Template => new GuestPresentation(GuestSurface.Template, null, null, shown, null, cycle, RenderTemplate(run), null, null, null, null, null, null),
+            GuestCycleStep.Photographs => new GuestPresentation(GuestSurface.Photographs, null, null, shown, null, cycle, null, RenderPhotographs(run), null, null, null, null, null),
+            GuestCycleStep.Filters => new GuestPresentation(GuestSurface.Filters, null, null, shown, null, cycle, null, null, RenderFilters(run), null, null, null, null),
+            _ => new GuestPresentation(GuestSurface.Keepsake, null, null, shown, null, cycle, null, null, null, run.Keepsake, null, null, null),
         };
     }
 

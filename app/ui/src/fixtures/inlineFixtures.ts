@@ -27,6 +27,8 @@ export const operatorEventListEmpty: OperatorWelcomeMessage = {
     fatal: null,
     storageError: null,
     cameraDiagnostics: null,
+    eventGallery: null,
+    guestCycleDetail: null,
   },
 };
 
@@ -81,6 +83,8 @@ export const guestStart: GuestWelcomeMessage = {
     filters: null,
     keepsake: null,
     operatorAssistance: null,
+    guestGallery: null,
+    guestStripDetail: null,
   },
 };
 

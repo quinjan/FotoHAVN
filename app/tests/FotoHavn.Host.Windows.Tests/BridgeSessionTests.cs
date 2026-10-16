@@ -35,10 +35,10 @@ public sealed class BridgeSessionTests : IDisposable
         const string ack = """{"type":"frameAck","seq":42}""";
 
         session.Receive(AppSource, ack);
-        session.Receive(AppSource, """{"type":"hello","protocolVersion":8}""");
+        session.Receive(AppSource, """{"type":"hello","protocolVersion":9}""");
 
         Assert.Equal([ack], acks);
-        Assert.Equal(["""{"type":"hello","protocolVersion":8}"""], _brain.Connections[0].Received);
+        Assert.Equal(["""{"type":"hello","protocolVersion":9}"""], _brain.Connections[0].Received);
     }
 
     [Fact]

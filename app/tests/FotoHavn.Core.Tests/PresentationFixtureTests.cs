@@ -63,6 +63,7 @@ public sealed class PresentationFixtureTests
         .Concat(Events.Setup.SetupFixtures.All)
         .Concat(Events.Active.ActiveFixtures.All)
         .Concat(GuestCycles.Orchestration.GuestCycleFixtures.All)
+        .Concat(Gallery.GalleryFixtures.All)
         .ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
     public static TheoryData<string> Names => [.. Fixtures.Keys];
 

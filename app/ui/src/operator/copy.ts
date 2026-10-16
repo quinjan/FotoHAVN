@@ -9,6 +9,8 @@ export const noticeCopy: Readonly<Record<OperatorNoticeCode, string>> = {
   saveFailed: "The Event couldn't be saved. Check the Data folder, then try again.",
   deleteFailed: "The Event couldn't be deleted. Try again in a moment.",
   eventNotFound: "That Event isn't there any more.",
+  guestCycleDeleteFailed: "The Guest Cycle couldn't be deleted. Try again in a moment.",
+  guestCycleNotFound: "That Guest Cycle isn't there any more.",
 };
 
 export const eventRunningCopy = "End the running Event to start another.";

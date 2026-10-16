@@ -113,6 +113,8 @@ function welcome(step: "template" | "photographs", fields: Partial<GuestWelcomeM
       filters: null,
       keepsake: null,
       operatorAssistance: null,
+      guestGallery: null,
+      guestStripDetail: null,
       ...fields,
     },
   };

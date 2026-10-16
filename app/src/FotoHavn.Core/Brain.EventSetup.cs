@@ -660,7 +660,7 @@ public sealed partial class Brain
 
         if (draft.IsDirty)
         {
-            SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, EventSetupLimits.NormalizeOptional(draft.Name), null));
+            SetConfirmation(new ConfirmationOverlay(ConfirmationKind.LeaveSetup, EventSetupLimits.NormalizeOptional(draft.Name), null, null));
         }
         else
         {
