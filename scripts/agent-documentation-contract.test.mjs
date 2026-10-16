@@ -290,6 +290,8 @@ test("desktop workflow executes inside the app module", () => {
   assert.equal(existsSync(path.join(repoRoot, workflowPath)), true, `${workflowPath} must exist`);
   const workflow = read(workflowPath);
   assert.match(workflow, /working-directory: app/);
-  assert.match(workflow, /^\s*-\s*["']?app\/\*\*["']?\s*$/m);
+  // Manual only: local verification gates replace hosted runs on every push and pull request.
+  assert.match(workflow, /^\s*workflow_dispatch:/m);
+  assert.doesNotMatch(workflow, /^\s*(push|pull_request):/m);
   assert.match(workflow, /\.\/scripts\/verify-agent-docs\.ps1/);
 });
