@@ -71,6 +71,8 @@ public sealed class GuestCycleInvariantTests
             if (outcome.Applied && action is CaptureCommittedAction committed)
             {
                 known.Add(committed.Capture.Id);
+                // The generator re-commits a discarded id; the model keeps no record of discards, so the id is kept again, not discarded.
+                discarded.Remove(committed.Capture.Id);
             }
 
             foreach (var id in outcome.DiscardedCaptureIds)

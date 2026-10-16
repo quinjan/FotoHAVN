@@ -247,6 +247,21 @@ public sealed class GuestCycleRuleTests
     }
 
     [Fact]
+    public void A_discarded_Capture_id_committed_again_is_a_new_kept_Capture_because_the_model_keeps_no_record_of_discards()
+    {
+        var retaken = GuestCycleKit.Loaded("A", "B", "C").Do(new BeginRetakeAction(2, 1)).Do(new CaptureCommittedAction(2, 1, GuestCycleKit.Capture("E", 5)));
+        var accepted = retaken.Try(new AcceptRetakeAction());
+        Assert.Equal(["B"], accepted.DiscardedCaptureIds);
+        Assert.DoesNotContain("B", accepted.Model.KeptCaptures.Keys);
+
+        var again = accepted.Model.Try(new BeginSequenceAction(3)).Model.Try(new CaptureCommittedAction(3, 3, GuestCycleKit.Capture("B", 6)));
+
+        Assert.True(again.Applied);
+        Assert.Equal("B", again.Model.Windows[3]);
+        Assert.Contains("B", again.Model.KeptCaptures.Keys);
+    }
+
+    [Fact]
     public void Accepting_without_a_candidate_or_a_Retake_is_ignored()
     {
         AssertIgnored(Retaking(), new AcceptRetakeAction());
