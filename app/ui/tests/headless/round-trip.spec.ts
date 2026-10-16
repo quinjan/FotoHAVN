@@ -1,8 +1,5 @@
-import { randomBytes } from "node:crypto";
-import { mkdirSync, rmSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { test as base, expect, type Browser, type Page } from "@playwright/test";
-import { e2eUiFolder, headlessOutputDir, startHeadlessHost, type HeadlessHost } from "./headlessHost.ts";
+import type { Page } from "@playwright/test";
+import { expect, expectHandshake, openRolePage, test } from "./hostFixture.ts";
 
 // Integration lane (plan §14, M2): the real headless host (real brain, WebSocket bridge) with one operator and one
 // guest page in Chromium, each using the UI's own WebSocket BrainClient. The host serves the E2E UI (dist-e2e/, built
@@ -16,67 +13,7 @@ interface E2EWindow {
   };
 }
 
-interface ReceivedMessage {
-  readonly type: string;
-  readonly role?: string;
-  readonly revision?: number;
-}
-
-interface RolePage {
-  readonly page: Page;
-  /** Every brain message this page received over its WebSocket, oldest first. */
-  readonly received: ReceivedMessage[];
-}
-
-const test = base.extend<object, { host: HeadlessHost }>({
-  host: [
-    // eslint-disable-next-line no-empty-pattern -- Playwright fixtures must destructure their first argument.
-    async ({}, use) => {
-      const dataFolder = resolve(headlessOutputDir, `${String(Date.now())}-${randomBytes(3).toString("hex")}`, "Data");
-      mkdirSync(dataFolder, { recursive: true });
-      const host = await startHeadlessHost({ uiFolder: e2eUiFolder, dataFolder });
-      try {
-        await use(host);
-      } finally {
-        await host.stop();
-        // The host's file handles (the database, the logs) and a virus scanner can hold the folder for a moment after
-        // the process is gone, and Windows answers EPERM or EBUSY; retry, and never fail the run over a git-ignored
-        // scratch folder that the next run's own folder doesn't share.
-        try {
-          rmSync(dirname(dataFolder), { recursive: true, force: true, maxRetries: 20, retryDelay: 250 });
-        } catch (error) {
-          console.warn(`Could not remove ${dirname(dataFolder)}: ${String(error)}`);
-        }
-      }
-    },
-    { scope: "worker", timeout: 90_000 },
-  ],
-});
-
 test.describe.configure({ mode: "serial" });
-
-async function openRolePage(browser: Browser, url: string): Promise<RolePage> {
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  const received: ReceivedMessage[] = [];
-  page.on("websocket", (socket) => {
-    socket.on("framereceived", ({ payload }) => {
-      if (typeof payload === "string") {
-        received.push(JSON.parse(payload) as ReceivedMessage);
-      }
-    });
-  });
-  await page.goto(url);
-  return { page, received };
-}
-
-async function expectHandshake(page: Page, role: "operator" | "guest"): Promise<void> {
-  const root = page.locator("html");
-  await expect(root).toHaveAttribute("data-fotohavn-status", "connected");
-  await expect(root).toHaveAttribute("data-fotohavn-role", role);
-  // The Operator Screen shows Starting (revision 1) until the Event store opens, then the Event list (revision 2).
-  await expect(root).toHaveAttribute("data-fotohavn-revision", role === "operator" ? "2" : "1");
-}
 
 function sendCommand(page: Page, name: string): Promise<unknown> {
   return page.evaluate((command) => (window as unknown as E2EWindow).fotohavnE2E.sendCommand(command, {}), name);
