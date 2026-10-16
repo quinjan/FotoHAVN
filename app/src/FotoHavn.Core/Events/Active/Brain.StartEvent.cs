@@ -73,7 +73,7 @@ public sealed partial class Brain
 
         if ((_cameraState is CameraState.NotAvailable or CameraState.InUseByAnotherApp) && active.Event.CameraDeviceId is { } deviceId)
         {
-            OpenCameraFor(deviceId, PreviewTarget.Guest);
+            OpenCameraFor(deviceId, DesiredPreviewTarget());
             PublishChanges();
         }
 

@@ -35,7 +35,7 @@ internal sealed class DiagnosticsCaptureWriter(string dataFolder, TimeProvider t
         return Task.Run(() => Save(frame, mirrored));
     }
 
-    private static byte[] Encode(CapturedFrame frame)
+    internal static byte[] Encode(CapturedFrame frame)
     {
         var rowBytes = frame.Stride;
         var pixels = frame.Bgra;
@@ -61,7 +61,7 @@ internal sealed class DiagnosticsCaptureWriter(string dataFolder, TimeProvider t
         return data.ToArray();
     }
 
-    private static void Validate(CapturedFrame frame)
+    internal static void Validate(CapturedFrame frame)
     {
         var rowBytes = (long)frame.Width * BytesPerPixel;
         if (frame.Width <= 0

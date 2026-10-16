@@ -21,6 +21,22 @@ public sealed class PreviewCacheTests
     }
 
     [Fact]
+    public void Contains_says_whether_an_entry_exists_without_counting_as_a_use()
+    {
+        var cache = new PreviewCache(maxEntries: 2);
+        cache.Put("a", Bytes(1));
+        cache.Put("b", Bytes(1));
+
+        Assert.True(cache.Contains("a"));
+        Assert.False(cache.Contains("missing"));
+        cache.Put("c", Bytes(1));
+
+        Assert.False(cache.Contains("a"));
+        Assert.True(cache.Contains("b"));
+        Assert.Throws<ArgumentNullException>(() => cache.Contains(null!));
+    }
+
+    [Fact]
     public void The_defaults_are_sixty_four_entries_and_128_MiB()
     {
         Assert.Equal(64, PreviewCache.DefaultMaxEntries);

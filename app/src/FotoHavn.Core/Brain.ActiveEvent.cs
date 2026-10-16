@@ -37,6 +37,9 @@ public sealed partial class Brain
             BrainLog.GuestDisplayLost(_logger, display.Id);
             _dependencies.Host.CloseGuestScreen();
             _guestScreenDisplay = null;
+
+            // M8: the bound display going away is Operator Assistance at any time the Event runs (a start still waiting for the Guest Screen fails on its own).
+            EnterAssistance(AssistanceReason.GuestDisplay);
         }
     }
 
@@ -106,10 +109,10 @@ public sealed partial class Brain
             active.Event.Name,
             new RunningEventDisplay(active.GuestDisplay.Name, connected ? RunningDisplayState.Connected : RunningDisplayState.Disconnected),
             new RunningEventCamera(_cameraState, _cameraReason),
-            active.Step,
+            PanelStep(active),
             active.CompletedGuestCycles,
             active.StartedAt,
-            active.Assistance,
+            PanelAssistance(active),
             active.SingleScreen);
     }
 
@@ -166,7 +169,7 @@ public sealed partial class Brain
     // End Event (plan section 8; contract section 10.8)
 
     /// <summary>
-    /// Ends the running Event: ends any unfinished Guest Cycle (M8; none exist yet), closes the Guest Screen, releases the camera and
+    /// Ends the running Event: ends any unfinished Guest Cycle (<c>operator_exit</c>; a completed one stays completed) and Operator Assistance, closes the Guest Screen, releases the camera and
     /// the wake lock, and clears the Event, its overlays, the exit-hold state, and the lockout. Called on the executor; the caller
     /// publishes. The operator's surface is left as it is: it shows the Event list again because the Event is gone.
     /// </summary>
@@ -179,6 +182,7 @@ public sealed partial class Brain
 
         // Ending while the start still waits for the Guest Screen's handshake: the start is over (no failure to report); the releases below are its rollback.
         _start?.Cancel();
+        EndGuestCycleForEvent();
         active.StopTimers();
         _dependencies.Host.CloseGuestScreen();
         _guestScreenDisplay = null;

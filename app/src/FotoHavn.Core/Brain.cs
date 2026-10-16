@@ -44,6 +44,9 @@ public sealed record BrainDependencies(
     /// <summary>The preview channel's frame counters, for diagnostics only. Null reads as no preview channel.</summary>
     public IPreviewStats? PreviewStats { get; init; }
 
+    /// <summary>Encodes a Capture's frame as its JPEG (M8). The hosts supply it; null makes every Capture fail to save, which is Operator Assistance.</summary>
+    public GuestCycles.Orchestration.ICaptureEncoder? CaptureEncoder { get; init; }
+
 #if E2E_HOOKS
     /// <summary>The host side of the test hooks. Null makes every host hook fail with <c>notSupported</c>.</summary>
     public E2E.IHostTestHooks? HostTestHooks { get; init; }

@@ -105,6 +105,7 @@ public partial class App : Application
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
             PreviewStats = frames,
+            CaptureEncoder = new Diagnostics.HostCaptureEncoder(),
 #if E2E_HOOKS
             CameraFaults = cameraFaults,
             HostTestHooks = new E2E.WindowsHostTestHooks(

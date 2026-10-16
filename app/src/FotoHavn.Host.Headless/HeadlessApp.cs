@@ -165,6 +165,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         {
             Logger = brainLogger,
             PreviewStats = previews,
+            CaptureEncoder = new Diagnostics.HostCaptureEncoder(),
 #if E2E_HOOKS
             CameraFaults = cameraFaults,
             HostTestHooks = new E2E.HeadlessTestHooks(sessions, app.Lifetime, settings.DataFolder),

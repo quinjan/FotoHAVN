@@ -27,8 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- One diagnostics Capture writer for both hosts (the headless project owns it; see its remarks). -->
+    <!-- One diagnostics Capture writer and one Guest Cycle Capture encoder for both hosts (the headless project owns them; see their remarks). -->
     <Compile Include="..\FotoHavn.Host.Headless\Diagnostics\DiagnosticsCaptureWriter.cs" Link="Diagnostics\DiagnosticsCaptureWriter.cs" />
+    <Compile Include="..\FotoHavn.Host.Headless\Diagnostics\HostCaptureEncoder.cs" Link="Diagnostics\HostCaptureEncoder.cs" />
   </ItemGroup>
 
   <ItemGroup>
