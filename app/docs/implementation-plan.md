@@ -846,8 +846,8 @@ flowchart TB
 
 | Layer | Runs where | How it gates |
 | --- | --- | --- |
-| Unit + coverage | Any machine, GitHub CI | `dotnet test` and `npm run test:coverage` fail on any failure; the coverage check fails below threshold |
-| Integration | Any machine, GitHub CI (camera tests only where a camera exists) | Part of the same `dotnet test` run, plus `npm run test:fixtures` |
+| Unit + coverage | Any machine; GitHub CI on demand | `dotnet test` and `npm run test:coverage` fail on any failure; the coverage check fails below threshold |
+| Integration | Any machine; GitHub CI on demand (camera tests only where a camera exists) | Part of the same `dotnet test` run, plus `npm run test:fixtures` |
 | End-to-end | A local Windows machine or the booth laptop with at least one camera; never GitHub's hosted runners, which have no camera | `npx playwright test` in `app/e2e/`, with results recorded in the milestone's verification record |
 | Manual hardware | Booth laptop | Checklist in the milestone, with results recorded |
 
@@ -949,7 +949,7 @@ app/e2e/
 
 ### CI
 
-- Add `.github/workflows/desktop.yml`: Windows runner, triggered by changes under `app/**` and by the workflow file.
+- Add `.github/workflows/desktop.yml`: Windows runner. Since M9 it runs only when started by hand (`workflow_dispatch`), never on push or pull request, to keep GitHub Actions minutes down. The gate for each milestone is the local verification procedure on a clean clone plus the code review; hosted runs are optional.
 - It sets up .NET from `global.json` and Node 24.19.0, then runs steps 1–4 of the [verification procedure](#verification-procedure-for-the-implementing-agent) as separate workflow steps, plus `scripts/verify-agent-docs.ps1`. It uploads `app/output/` on failure.
 - Delete the three `ui-verification-batch-*.yml` workflows with the old app.
 
@@ -1838,10 +1838,10 @@ Verification record (M8):
 ### M9: Event Gallery, operator and guest views (M)
 
 Tasks:
-- [ ] Brain: Event Gallery state for both views (paging, detail, operator delete with confirmation), the guest view's reduced view models, the Start screen link rule, the `guest_gallery` phase timer, and live updates of the running Event's gallery on both screens.
-- [ ] Event store: thumbnail generation and cache, Guest Cycle deletion with background file removal, and reconciler cases.
-- [ ] UI: operator Event Gallery, Guest Cycle detail, and delete confirmation; guest gallery and guest strip detail with `BACK TO START`; the Start screen link; the Event setup guest gallery control with its permission note.
-- [ ] Fixtures for empty, partial, and large galleries (300+ Guest Cycles), cycles without a Photo Strip, and the guest view with 1, 4, and 40+ strips.
+- [x] Brain: Event Gallery state for both views (paging, detail, operator delete with confirmation), the guest view's reduced view models, the Start screen link rule, the `guest_gallery` phase timer, and live updates of the running Event's gallery on both screens.
+- [x] Event store: thumbnail generation and cache, Guest Cycle deletion with background file removal, and reconciler cases.
+- [x] UI: operator Event Gallery, Guest Cycle detail, and delete confirmation; guest gallery and guest strip detail with `BACK TO START`; the Start screen link; the Event setup guest gallery control with its permission note.
+- [x] Fixtures for empty, partial, and large galleries (300+ Guest Cycles), cycles without a Photo Strip, and the guest view with 1, 4, and 40+ strips.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
@@ -1862,6 +1862,61 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/gallery/live-while-running`: while an Event runs, the operator opens its gallery from the running-Event panel. A cycle completed on the Guest Screen appears without reloading, and deleting it removes it from a guest gallery open on the Guest Screen at the same moment.
   - `regression/gallery/large-event`: on a seeded 300-cycle Data folder, pages load in under 300 ms each, and scrolling by touch reaches the end.
 - **Manual:** browse the guest gallery by touch on the booth screen; confirm the permission note in Event setup reads clearly.
+
+Verification record (M9):
+- **Date and commits:** 2026-10-16.
+  - Contracts (protocol v9, `GalleryRules`, `GalleryUrls`, `GalleryPage`, scaffolding): `4632a628`.
+  - Parallel merges (brain and storage; operator and guest UI): `2821634b`, `f0f66856`.
+  - Integration, `@m9` end-to-end, Q28–Q33, DESIGN.md copy, and the load-proof brain test rigs: `baa1ff37`, `a398dda0`.
+  - GitHub Actions made manual-only: `8141789d`, `a873105d`.
+  - Review fixes: `90ce6df6`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
+- **Results:** from an independent clean clone at `a398dda0`; the review fixes were re-verified on the full .NET suite, the changed UI areas, and the `@m9` specs at `90ce6df6`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` with coverage | 3592 tests: 3587 passed, 5 skipped (2 file symlinks, 2 opt-in Windows Camera app tests, 1 E2E-only host test) |
+  | 2 | Second run of the changed projects | Core 2046, Storage 459 + 2 skipped, Host.Headless 185, Host.Windows 255 + 1 skipped |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 2027 passed |
+  | 2 | Spike S3 speed step | Medians 34.2–45.3 ms, worst p95 80.0 ms (budget 150 ms) |
+  | 3 | UI `test:coverage` | 1465 passed (a second run hit the known `lint-rules` load timeout once; it passed alone) |
+  | 3 | UI `test:fixtures` | 1018 passed |
+  | 5 | `--project=regression` | 87 passed, 2 skipped (both physical-display scenarios, "not run: one display"), in 29 m 09 s |
+  | 5 | Smoke | 8 passed in 2 m 36 s |
+  | 5 | Visual comparison | The four WebView2 resolutions passed (11.7 min) |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | After the review fixes (`90ce6df6`) | .NET 3590 passed and 5 skipped; Core 2030 in the E2E build; `@m9` regression 6 and smoke 1; `guest-timer` 5 of 5 repeats |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.8% | 93.9% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 99.7% | 95.5% |
+
+  UI: 99.45% lines and 97.82% branches.
+- **`@m9` end-to-end:** all 7 scenarios carry `@m9`; every one that starts an Event carries `@camera`, and `large-event` (seeded Data folder, operator only) runs in the parallel pool. A second run of the `@m9` specs passed with no flaky tests.
+- **Large Event (300 seeded Guest Cycles, 8 pages of 40):** a hook-latency baseline (median of 5 round trips, about 10 ms) is subtracted. Warm pages, as in a running Event where each strip's thumbnail is made when it commits, took 26–224 ms against the 300 ms budget. The first open of an old Event makes thumbnails on the way and took 333–1341 ms per page; the operator list fills in item by item while that happens (Q33). Touch scrolling reached the end in 9–11 swipes.
+- **GitHub CI:** not run. From M9 the `Desktop app` workflow runs only on demand (user decision to save Actions minutes); the clean-clone verification and the code review are the gate.
+- **Review fixes:**
+  - **(Medium)** The Start link showed on Start unavailable for a storage failure, where the gallery always refused to open. The link now shows only where the gallery can open (camera-unavailable Start still offers it).
+  - **(Medium)** `STEP INSIDE` from a stale Start screen started a Guest Cycle under an open guest gallery, leaving the gallery and its timer alive for the next guest. `BeginGuestCycle` is now refused while the guest gallery is open.
+  - **(Medium)** The `guest-timer` spec had about 2 real seconds to check the warning at clock scale 10. It now slows the clock to real time for the warning checks.
+  - **(Low)** Hard 300 ms wall-clock asserts in a Storage test and the `large-event` spec could fail on a loaded machine. The Storage test now bounds a warm page at 2 s and reports the time; the end-to-end spec keeps the 300 ms criterion with the hook latency subtracted.
+- **Found in integration:** six Core failures from the wave-B coverage run were never identified. They reproduced only under heavy load: the brain test rigs treated 3 ms of quiet as settled. The rigs now wait on the expected state and count queued thread-pool work, and the full Core suite passed under 32 CPU-spinning processes. Two stale end-to-end specs (protocol versions 9/8, and the gallery no longer answering "That isn't ready yet.") were updated.
+- **Decisions:** Q28 (the guest gallery's first page waits for its thumbnails), Q29 (deleting the last completed strip returns a browsing guest to Start), Q30 (a guest on the Keepsake of a deleted cycle returns to Start), Q31 (a not-running Event's gallery opens while another runs), Q32 (unfinished cycles aren't listed), and Q33 (gallery details from waves B and C) are recorded in section 18. Protocol v9.
+- **Manual (pending, to be run by the owner):**
+  - Browse the guest gallery by touch on the booth screen.
+  - Confirm the permission note in Event setup reads clearly.
+  - Look at a gallery of real photographs (needs the camera shutter open).
+- **Not proven:**
+  - Real photographs in either gallery view.
+  - Real finger input: CDP touch stands in for it.
+  - Cold thumbnails for real-size strips end to end: the e2e seed uses tiny images, and the Storage tests time real-size ones (about 1 s per page of 40 when cold).
+  - Two real displays.
 
 ### M10: hardening and field build (M)
 
