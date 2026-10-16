@@ -298,3 +298,20 @@ internal sealed class RecordingCameraAdapter(FakeCameraAdapter inner) : ICameraA
         public ValueTask DisposeAsync() => inner.DisposeAsync();
     }
 }
+/// <summary>A camera adapter that passes to the fake until told to hang: then opening a camera never answers (a device that never opens).</summary>
+internal sealed class HangableCameraAdapter(FakeCameraAdapter inner) : ICameraAdapter
+{
+    public event EventHandler? CamerasChanged
+    {
+        add => inner.CamerasChanged += value;
+        remove => inner.CamerasChanged -= value;
+    }
+
+    /// <summary>While set, <see cref="OpenAsync"/> never completes.</summary>
+    public bool HangOpen { get; set; }
+
+    public Task<IReadOnlyList<AvailableCamera>> ListAsync(CancellationToken cancellationToken) => inner.ListAsync(cancellationToken);
+
+    public Task<ICameraSession> OpenAsync(string deviceId, CancellationToken cancellationToken) =>
+        HangOpen ? new TaskCompletionSource<ICameraSession>().Task : inner.OpenAsync(deviceId, cancellationToken);
+}

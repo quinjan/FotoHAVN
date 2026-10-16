@@ -48,11 +48,13 @@ public sealed partial class Brain
                 continue;
             }
 
-            Off(() => compositor.ComposeLookThumbnailAsync(photo, aspectRatio, lookId, LookThumbnailWidth, CancellationToken.None), composed => CompleteThumbnail(run, cacheKey, composed));
+            // The key's revision is taken now, in request order, so the same cycle always gets the same keys however the compositions finish.
+            var revision = ++_previewRevision;
+            Off(() => compositor.ComposeLookThumbnailAsync(photo, aspectRatio, lookId, LookThumbnailWidth, CancellationToken.None), composed => CompleteThumbnail(run, cacheKey, revision, composed));
         }
     }
 
-    private void CompleteThumbnail(GuestCycleRun run, (string TemplateId, string CaptureId, string LookId) cacheKey, Task<CompositionResult> composed)
+    private void CompleteThumbnail(GuestCycleRun run, (string TemplateId, string CaptureId, string LookId) cacheKey, long revision, Task<CompositionResult> composed)
     {
         run.ThumbnailsInFlight.Remove(cacheKey);
         if (run.Ended)
@@ -67,7 +69,7 @@ public sealed partial class Brain
             return;
         }
 
-        var key = PreviewKey.For(cacheKey.TemplateId, cacheKey.LookId, ++_previewRevision);
+        var key = PreviewKey.For(cacheKey.TemplateId, cacheKey.LookId, revision);
         if (TryCache(key, composed.Result.Png))
         {
             run.ThumbnailKeys[cacheKey] = key;
@@ -92,17 +94,18 @@ public sealed partial class Brain
         run.Composing = true;
         var composition = CompositionOf(run);
         var compositor = _dependencies.Compositor;
-        Off(() => compositor.ComposeAsync(composition, CancellationToken.None), composed => CompleteStripPreview(run, request, cacheKey, composed));
+        var revision = ++_previewRevision;
+        Off(() => compositor.ComposeAsync(composition, CancellationToken.None), composed => CompleteStripPreview(run, request, cacheKey, revision, composed));
     }
 
-    private void CompleteStripPreview(GuestCycleRun run, int request, (string TemplateId, string LookId, long Revision) cacheKey, Task<CompositionResult> composed)
+    private void CompleteStripPreview(GuestCycleRun run, int request, (string TemplateId, string LookId, long Revision) cacheKey, long revision, Task<CompositionResult> composed)
     {
         if (run.Ended || request != run.CompositionRequest)
         {
             return;
         }
 
-        var key = PreviewKey.For(cacheKey.TemplateId, cacheKey.LookId, ++_previewRevision);
+        var key = PreviewKey.For(cacheKey.TemplateId, cacheKey.LookId, revision);
         if (!composed.IsCompletedSuccessfully || !TryCache(key, composed.Result.Png))
         {
             FailComposition(run, CompositionStage.Preview, FailureOf(composed));

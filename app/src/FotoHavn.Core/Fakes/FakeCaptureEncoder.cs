@@ -38,12 +38,15 @@ public sealed class FakeCaptureEncoder : ICaptureEncoder
 
         var span = frame.Bgra.Span;
         var first = span.Length >= 4 ? span[..4].ToArray() : span.ToArray();
+        int count;
         lock (_gate)
         {
             _frames.Add(new EncodedFrame(frame.Width, frame.Height, first));
+            count = _frames.Count;
         }
 
-        return [0xFF, 0xD8, (byte)(frame.Width >> 8), (byte)frame.Width, (byte)(frame.Height >> 8), (byte)frame.Height, .. first, 0xFF, 0xD9];
+        // The running count makes every JPEG different, as real ones are, so each Capture has its own hash.
+        return [0xFF, 0xD8, (byte)(frame.Width >> 8), (byte)frame.Width, (byte)(frame.Height >> 8), (byte)frame.Height, .. first, (byte)(count >> 8), (byte)count, 0xFF, 0xD9];
     }
 
     /// <summary>A frame the encoder was given.</summary>
