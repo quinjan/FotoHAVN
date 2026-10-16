@@ -5,8 +5,8 @@ using FotoHavn.Protocol.Presentations;
 namespace FotoHavn.Core.Tests.Gallery;
 
 /// <summary>
-/// The gallery commands' wiring (M9 wave A): which role may send which command, and, until wave B1 builds them, that every command is answered
-/// <c>rejected notAvailable</c> and changes no presentation. B1 replaces the second part with the real behavior's tests.
+/// The gallery commands' wiring: which role may send which command, and what the idle presentations carry before any gallery is open. The commands'
+/// behavior is in <see cref="OperatorGalleryTests"/> and <see cref="GuestGalleryTests"/>.
 /// </summary>
 public sealed class GalleryScaffoldTests
 {
@@ -75,34 +75,6 @@ public sealed class GalleryScaffoldTests
         var operatorClient = harness.Handshake(Role.Operator);
 
         Assert.Equal(RejectReason.WrongRole, Result(harness, operatorClient, name, payload).Reason);
-    }
-
-    [Theory]
-    [MemberData(nameof(OperatorData))]
-    public void Until_B1_builds_them_the_operator_gallery_commands_are_not_available(string name, string payload)
-    {
-        using var harness = new BrainHarness();
-        var client = harness.Handshake(Role.Operator);
-
-        var result = Result(harness, client, name, payload);
-
-        Assert.Equal(CommandStatus.Rejected, result.Status);
-        Assert.Equal(RejectReason.NotAvailable, result.Reason);
-        Assert.Empty(client.Messages.OfType<OperatorPresentationMessage>());
-    }
-
-    [Theory]
-    [MemberData(nameof(GuestData))]
-    public void Until_B1_builds_them_the_guest_gallery_commands_are_not_available(string name, string payload)
-    {
-        using var harness = new BrainHarness();
-        var client = harness.Handshake(Role.Guest);
-
-        var result = Result(harness, client, name, payload);
-
-        Assert.Equal(CommandStatus.Rejected, result.Status);
-        Assert.Equal(RejectReason.NotAvailable, result.Reason);
-        Assert.Empty(client.Messages.OfType<GuestPresentationMessage>());
     }
 
     [Fact]

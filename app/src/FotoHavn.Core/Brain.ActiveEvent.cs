@@ -189,6 +189,7 @@ public sealed partial class Brain
         // Ending while the start still waits for the Guest Screen's handshake: the start is over (no failure to report); the releases below are its rollback.
         _start?.Cancel();
         EndGuestCycleForEvent();
+        DropGuestGallery();
         active.StopTimers();
         _dependencies.Host.CloseGuestScreen();
         _guestScreenDisplay = null;
