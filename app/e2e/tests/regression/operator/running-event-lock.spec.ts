@@ -1,4 +1,5 @@
 import { expect, test } from "../../../src/fixtures";
+import { OperatorGalleryScreen } from "../../../src/gallery";
 import { sendCommand } from "../../../src/hooks";
 import { createEvent, endEventFromOperator, openNewEventAndFill, useVirtualScreens } from "../../../src/operator";
 import { ConfirmDialogScreen, EventListScreen, EventSetupScreen } from "../../../src/screens/screens";
@@ -16,6 +17,7 @@ test.describe("the running Event's lock", { tag: ["@m6", "@camera"] }, () => {
     const list = new EventListScreen(operatorPage);
     const setup = new EventSetupScreen(operatorPage);
     const dialog = new ConfirmDialogScreen(operatorPage);
+    const gallery = new OperatorGalleryScreen(operatorPage);
     const nameA = "Event A";
     const nameB = "Event B";
 
@@ -61,9 +63,22 @@ test.describe("the running Event's lock", { tag: ["@m6", "@camera"] }, () => {
       expect((await app.hooks.getDiagnostics()).guestScreenOpen).toBe(startedBefore);
     });
 
-    await test.step("GALLERY on the running row is answered as not ready yet (M9)", async () => {
+    await test.step("GALLERY opens the running Event's gallery, live and empty, and BACK TO EVENTS returns", async () => {
       await list.rowAction(nameA, "GALLERY").click();
-      await expect(list.notice.filter({ hasText: "That isn't ready yet." }).first()).toBeVisible();
+      await expect(gallery.main).toBeVisible();
+      await expect(gallery.main.getByText("RUNNING", { exact: true })).toBeVisible();
+      await expect(gallery.empty).toBeVisible();
+      await gallery.backToEvents.click();
+      await expect(list.main).toBeVisible();
+    });
+
+    await test.step("GALLERY on Event B, which doesn't run, opens its gallery too, not live", async () => {
+      await list.rowAction(nameB, "GALLERY").click();
+      await expect(gallery.main).toBeVisible();
+      await expect(gallery.main.getByText("RUNNING", { exact: true })).toHaveCount(0);
+      await expect(gallery.empty).toBeVisible();
+      await gallery.backToEvents.click();
+      await expect(list.main).toBeVisible();
     });
 
     await test.step("Event B can be edited while A runs, keeping the same camera", async () => {
