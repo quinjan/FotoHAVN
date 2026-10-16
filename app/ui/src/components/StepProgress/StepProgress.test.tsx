@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StepProgress, guestSteps } from "./StepProgress.tsx";
 
@@ -78,6 +78,17 @@ describe("StepProgress", () => {
     render(<StepProgress current="filters" onSelectStep={vi.fn()} skipped={["template"]} />);
     expect(screen.getAllByRole("button").map((button) => button.textContent)).toEqual(["02 Photographs, completed"]);
     expect(items()[0]?.firstElementChild).toHaveAttribute("data-state", "completed");
+  });
+
+  it("leaves out the steps it isn't given and renumbers the rest from 01", () => {
+    render(<StepProgress current="photographs" steps={["photographs", "keepsake"]} />);
+    expect(items().map((item) => item.textContent)).toEqual(["01 Photographs", "02 Keepsake"]);
+    expect(items()[0]?.firstElementChild).toHaveAttribute("aria-current", "step");
+
+    cleanup();
+    render(<StepProgress current="keepsake" steps={["template", "photographs", "keepsake"]} onSelectStep={vi.fn()} />);
+    expect(items().map((item) => item.textContent)).toEqual(["01 Template, completed", "02 Photographs, completed", "03 Keepsake"]);
+    expect(screen.getAllByRole("button")).toHaveLength(2);
   });
 
   it("takes an accessible name and a layout class", () => {

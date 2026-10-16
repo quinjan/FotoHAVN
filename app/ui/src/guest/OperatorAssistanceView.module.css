@@ -1,0 +1,23 @@
+/* The one dark band: it crosses the whole width, centered on the Off-white canvas. */
+.view {
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+}
+
+.band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-stack-gap);
+  padding: var(--app-space-fluid-64) var(--app-gutter);
+  background-color: var(--app-tone-surface);
+  color: var(--app-tone-ink);
+  text-align: center;
+}
+
+/* The line is always laid out, so "Trying again…" appears without moving the action. */
+.status {
+  min-block-size: calc(var(--app-text-body) * 1.5);
+  justify-content: center;
+}

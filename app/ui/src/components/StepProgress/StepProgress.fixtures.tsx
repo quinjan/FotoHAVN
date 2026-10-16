@@ -32,6 +32,13 @@ export const fixtures: readonly ComponentFixture[] = [
     render: () => <StepProgress current="filters" onSelectStep={noop} skipped={["template"]} />,
   },
   {
+    id: "step-progress-omitted-steps",
+    title: "Step progress, on Photographs, Template and Filters skipped and left out, renumbered",
+    surface: "light",
+    role: "guest",
+    render: () => <StepProgress current="photographs" steps={["photographs", "keepsake"]} />,
+  },
+  {
     id: "step-progress-keepsake",
     title: "Step progress, on Keepsake, no going back",
     surface: "light",

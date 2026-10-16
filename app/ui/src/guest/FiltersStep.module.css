@@ -1,0 +1,71 @@
+/* The 5 / 7 split of the 12-column grid: the print on its mat, then the heading, the Looks, and the action (DESIGN.md, Layout regions). */
+.step {
+  display: grid;
+  grid-template-columns: repeat(var(--app-grid-columns), minmax(0, 1fr));
+  align-items: stretch;
+  column-gap: var(--app-space-fluid-32);
+  padding: 0 var(--app-gutter) var(--app-space-fluid-24);
+  overflow: hidden;
+}
+
+.mat {
+  grid-column: span var(--app-split-print);
+  display: grid;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-24);
+  border-radius: var(--radius-panel);
+  background-color: var(--app-tone-surface);
+}
+
+.options {
+  grid-column: span var(--app-split-options);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--app-stack-gap);
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* The Look titles step down to the body-large role so seven Looks fit beside the heading at 1280 × 720. */
+.looks {
+  --app-text-subheading: var(--app-text-body-lg);
+}
+
+/* A big list takes two columns that fill downward, so the up and down arrows follow what the guest sees. */
+.looks[data-dense] ul {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(var(--look-rows), auto);
+}
+
+.looks img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.quiet {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The status line and the one action share a row of the action's height, so no state changes the step's size. */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-stack-gap);
+  min-block-size: var(--app-target);
+}
+
+.status {
+  flex: 1;
+  min-inline-size: 0;
+}

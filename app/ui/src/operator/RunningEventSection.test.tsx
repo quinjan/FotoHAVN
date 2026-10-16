@@ -93,6 +93,18 @@ describe("RunningEventSection", () => {
     expect(screen.getByRole("button", { name: "RETRY" })).toHaveAttribute("data-fotohavn-action", "primary");
   });
 
+  it.each([
+    ["camera", "The camera needs attention."],
+    ["storage", "The Data folder needs attention."],
+    ["guestDisplay", "The guest display isn't connected."],
+  ] as const)("says the %s reason in words, never by color alone, while the step reads Operator Assistance", (reason, words) => {
+    renderOperator(<RunningEventSection panel={runningEventPanel({ assistance: { reason }, currentStep: "operatorAssistance" })} />);
+    expect(document.querySelector("[data-status-tone='alert']")).toHaveTextContent(words);
+    expect(screen.getByRole("group")).toHaveAttribute("data-assistance", "true");
+    expect(facts()["CURRENT STEP"]).toBe("Operator Assistance");
+    expect(document.querySelectorAll('[data-fotohavn-action="primary"]')).toHaveLength(1);
+  });
+
   it("sends OpenGallery with the Event's id, RetryAssistance, and EndEvent", async () => {
     const client = stubClient();
     renderOperator(<RunningEventSection panel={runningEventPanel({ eventId: "event-9", assistance: { reason: "camera" } })} />, client);
