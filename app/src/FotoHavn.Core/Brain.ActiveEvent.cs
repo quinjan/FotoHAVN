@@ -169,7 +169,7 @@ public sealed partial class Brain
     // End Event (plan section 8; contract section 10.8)
 
     /// <summary>
-    /// Ends the running Event: ends any unfinished Guest Cycle (M8; none exist yet), closes the Guest Screen, releases the camera and
+    /// Ends the running Event: ends any unfinished Guest Cycle (<c>operator_exit</c>; a completed one stays completed) and Operator Assistance, closes the Guest Screen, releases the camera and
     /// the wake lock, and clears the Event, its overlays, the exit-hold state, and the lockout. Called on the executor; the caller
     /// publishes. The operator's surface is left as it is: it shows the Event list again because the Event is gone.
     /// </summary>
