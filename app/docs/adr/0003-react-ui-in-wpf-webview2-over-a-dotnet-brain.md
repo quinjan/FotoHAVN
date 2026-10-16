@@ -67,3 +67,42 @@ Replaces: the deleted WinUI 3 desktop app (`FotoHavn.App` and `FotoHavn.Core`) a
 - A protocol change requires regenerating the TypeScript types in the same change.
 - The field build must carry and verify the Fixed Version WebView2 runtime.
 - All of `app/` except `app/docs/research/` and the implementation plan is deleted and recreated in M1.
+
+## Spike S4 result: the pinned Fixed Version WebView2 runtime
+
+Closed in M10. The field build carries the runtime and never depends on what Windows has installed.
+
+| | |
+| --- | --- |
+| Pinned version | `155.0.4283.60`, x64 |
+| Why not 155.0.4283.45 | The development machine's Evergreen runtime is 155.0.4283.45, but Microsoft's download page lists no Fixed Version cab for it (it lists 155.0.4283.60, 154.0.4258.62, 153.0.4234.48, 152.0.4191.62, and 151.0.4129.107). The nearest is 155.0.4283.60, the same 155.0.4283 build line, and the newest stable. |
+| URL | `https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/ad24dc89-9edc-4b7b-b15a-0d63f8f6ea1d/Microsoft.WebView2.FixedVersionRuntime.155.0.4283.60.x64.cab` |
+| SHA-256 (cab) | `5c5b38df347b2d05b51ef01640ed5ba48511499e4310e71e679e620aaff2ad40` |
+| Cab size | 310,497,658 bytes (296.1 MiB). The file carries a valid Microsoft Corporation Authenticode signature. |
+| Expanded size | 705,188,190 bytes (672.5 MiB) in 256 files; `expand.exe -F:*` takes about 3 s. |
+| Layout in the field build | `runtime/webview2/` beside `FOTOHAVN.exe`, holding `msedgewebview2.exe` (file version 155.0.4283.60). `HostPaths` already looks there. |
+| Published build | 950 MB unpacked; the zip `FOTOHAVN-field-<version>-<shortSha>.zip` is 406 MB (the app is self-contained, so .NET and WPF account for the rest). |
+| Publish time | About 79 s on the first run (`npm ci`, UI build, publish, expand, zip) and about 37 s with the download from Microsoft on later runs. |
+
+The pin lives in one place, `app/scripts/webview2-fixed-version.json` (version, architecture, URL, SHA-256, `sizeBytes`, `expandedSizeBytes`, `expandedFileCount`, `runtimeFolderName`). `app/scripts/publish-field-test.ps1`:
+
+1. refuses a manifest with a missing or empty field, an architecture other than x64, a URL or folder name that does not match the version, or a plain-http URL;
+2. takes the cab from `-WebView2Cab`, then from the cache (`%LOCALAPPDATA%\FOTOHAVN\webview2-cache`, outside the repository), then downloads it from the manifest URL;
+3. checks the size and the SHA-256 against the manifest before anything is built or expanded. A mismatch fails the build, deletes a bad download instead of caching it, and re-downloads a bad cached file once;
+4. expands to `runtime/webview2` and checks `msedgewebview2.exe`, the file count, and the expanded size against the manifest, removing the runtime folder on any failure;
+5. has no switch to skip the runtime: a field build always carries it. Development and E2E builds run without the folder and use the Evergreen runtime.
+
+The host creates the shared environment with `browserExecutableFolder` set to `runtime/webview2` when that folder holds `msedgewebview2.exe` (or `--webview2-runtime` names one), and logs the kind, version, and folder (`WebViewEnvironmentProvider`). A configured folder without the executable fails with a message that names the folder.
+
+**Update procedure.**
+
+1. Find the new Fixed Version x64 cab on <https://developer.microsoft.com/microsoft-edge/webview2/> (Fixed Version section) and note its exact URL.
+2. Download it, check that it carries a valid Microsoft Authenticode signature, and compute `Get-FileHash -Algorithm SHA256`.
+3. Expand it once (`expand.exe -F:* <cab> <folder>`) to count the files and the bytes.
+4. Edit `webview2-fixed-version.json`: `version`, `url`, `sha256`, `sizeBytes`, `expandedSizeBytes`, `expandedFileCount`, and `runtimeFolderName` (`Microsoft.WebView2.FixedVersionRuntime.<version>.x64`). The script refuses a half-edited bump.
+5. Run `pwsh scripts/publish-field-test.ps1` and the Pester tests (`Invoke-Pester scripts/publish-field-test.Tests.ps1`).
+6. Smoke the zip: unzip it to a path with spaces and run `FOTOHAVN.exe --smoke`, then retest the touch keyboard (S2) and the preview path (S1, S3) on the booth laptop, because the browser engine changed.
+7. Record the new version, size, and hash in this section and in the plan's S4 row.
+
+The runtime is updated only this way, on purpose: a field booth must not change its browser between two Events. Security fixes arrive as a new pin and a new field build.
+
