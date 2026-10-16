@@ -1,16 +1,9 @@
 name: Desktop app
 
+# Manual only: the local verification gate (app/AGENTS.md) is the gate. Run this from the Actions tab when a hosted
+# Windows check is wanted; it never runs on push or pull request, to keep Actions minutes down.
 on:
-  push:
-    paths:
-      - "app/**"
-      - "brand/tokens/**"
-      - ".github/workflows/desktop.yml"
-  pull_request:
-    paths:
-      - "app/**"
-      - "brand/tokens/**"
-      - ".github/workflows/desktop.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
