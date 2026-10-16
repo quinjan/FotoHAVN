@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commandNotice, formatDeletionCounts, formatEventDate, formatGuestCycles, formatLastUsed, formatTimeSinceStart, hookNotice } from "./format.ts";
+import { commandNotice, formatDeletionCounts, formatEventDate, formatGuestCycles, formatGuestCycleTime, formatLastUsed, formatTimeSinceStart, hookNotice } from "./format.ts";
 
 describe("operator formatting", () => {
   it("formats an Event date as a calendar day, whatever the time zone", () => {
@@ -76,6 +76,24 @@ describe("operator formatting", () => {
 
     it("has nothing to list for an Event that was never used", () => {
       expect(formatDeletionCounts({ guestCycles: 0, photoStrips: 0, captures: 0 })).toBeNull();
+    });
+  });
+
+  describe("formatGuestCycleTime", () => {
+    const local = (hours: number, minutes: number, day = 13) => new Date(2026, 9, day, hours, minutes).toISOString();
+
+    it("reads in the operator's local time with the date, on a 12-hour clock", () => {
+      expect(formatGuestCycleTime(local(20, 42))).toBe("13 Oct, 8:42 PM");
+      expect(formatGuestCycleTime(local(9, 5, 3))).toBe("3 Oct, 9:05 AM");
+    });
+
+    it("reads midnight and noon as 12", () => {
+      expect(formatGuestCycleTime(local(0, 7))).toBe("13 Oct, 12:07 AM");
+      expect(formatGuestCycleTime(local(12, 0))).toBe("13 Oct, 12:00 PM");
+    });
+
+    it("passes an unreadable time through", () => {
+      expect(formatGuestCycleTime("later")).toBe("later");
     });
   });
 });

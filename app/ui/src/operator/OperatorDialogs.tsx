@@ -4,7 +4,8 @@ import { Dialog } from "../components/Dialog/index.ts";
 import { PrimaryAction } from "../components/PrimaryAction/index.ts";
 import { SecondaryAction } from "../components/SecondaryAction/index.ts";
 import type { ConfirmationOverlay, LeaveChoice } from "../protocol/generated.ts";
-import { deleteDialog, deleteDialogBody, endEventDialog, leaveDialog } from "./copy.ts";
+import { deleteDialog, deleteDialogBody, deleteGuestCycleBody, deleteGuestCycleDialog, endEventDialog, leaveDialog } from "./copy.ts";
+import { formatGuestCycleTime } from "./format.ts";
 import { useSendCommand } from "./OperatorCommands.tsx";
 
 function LeaveSetupDialog() {
@@ -54,7 +55,8 @@ function LeaveSetupDialog() {
 
 /**
  * The confirmation the brain has open, if any: delete an Event (its name and what goes with it), end the running Event
- * (the plan's sentence), or leave Event setup with changes. Each opens with focus on the choice that loses nothing, and
+ * (the plan's sentence), delete a Guest Cycle (its time and how many files go), or leave Event setup with changes. Each
+ * opens with focus on the choice that loses nothing, and
  * the brain closes it: the dialog goes away when the presentation no longer carries it.
  */
 export function OperatorDialogs({ confirmation }: { readonly confirmation: ConfirmationOverlay | null }) {
@@ -95,5 +97,25 @@ export function OperatorDialogs({ confirmation }: { readonly confirmation: Confi
       );
     case "leaveSetup":
       return <LeaveSetupDialog />;
+    case "deleteGuestCycle": {
+      const { guestCycle } = confirmation;
+      return (
+        <ConfirmDialog
+          title={deleteGuestCycleDialog.title}
+          body={deleteGuestCycleBody(
+            guestCycle === null ? null : formatGuestCycleTime(guestCycle.startedAt),
+            guestCycle === null ? null : guestCycle.fileCount,
+          )}
+          confirmLabel={deleteGuestCycleDialog.confirmLabel}
+          cancelLabel={deleteGuestCycleDialog.cancelLabel}
+          onConfirm={() => {
+            void send("ConfirmDeleteGuestCycle", {}, { key: "confirm-delete-guest-cycle" });
+          }}
+          onCancel={() => {
+            void send("CancelDeleteGuestCycle", {}, { key: "cancel-delete-guest-cycle" });
+          }}
+        />
+      );
+    }
   }
 }

@@ -223,7 +223,7 @@ describe("GuestCycleList, guest", () => {
     expect(observers).toHaveLength(1);
     const observer = observers[0];
     expect(observer?.options?.root).toBe(row);
-    expect(observer?.observed[0]).toBe(row?.lastElementChild);
+    expect(observer?.observed[0]).toBe(row?.querySelector("[aria-hidden='true']"));
 
     act(() => {
       observer?.callback([{ isIntersecting: false } as IntersectionObserverEntry], {} as IntersectionObserver);

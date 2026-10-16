@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
-import { outcomeLabels, type GalleryImage, type GuestStrip, type OperatorGuestCycle } from "../GuestCycleList/index.ts";
+import type { CSSProperties, ReactNode, Ref } from "react";
+import { outcomeLabels, unavailableCopy, type GalleryImage, type OperatorGuestCycle } from "../GuestCycleList/index.ts";
 import { PrintObject } from "../PrintObject/index.ts";
 import { cx } from "../shared/cx.ts";
 import { TextLink } from "../TextLink/index.ts";
@@ -14,17 +14,25 @@ export interface OperatorGuestCycleDetailProps {
   readonly onDelete: () => void;
   /** `CLOSE`, back to the list, when the screen shows the detail over it. */
   readonly onClose?: () => void;
+  /** `OPEN FOLDER` is unavailable (the brain's `canOpenFolder`). Default true. */
+  readonly canOpenFolder?: boolean;
+  /** `DELETE` is unavailable while the brain counts the files for its confirmation (`canDelete`). Default true. */
+  readonly canDelete?: boolean;
   readonly className?: string;
 }
 
 export interface GuestGuestCycleDetailProps {
   readonly mode: "guest";
   /** The completed Photo Strip: an image only. */
-  readonly strip: GuestStrip;
+  readonly strip: GalleryImage;
   /** Its arranged Captures, in arrangement order; discarded Captures never reach the guest view. */
   readonly captures: readonly GalleryImage[];
   /** `CLOSE`, back to the guest gallery's row. */
   readonly onClose: () => void;
+  /** `BACK TO START ←`, beside `CLOSE`, when the view offers it. */
+  readonly onBack?: () => void;
+  /** Receives the `CLOSE` button, so the view can put focus there when the detail opens. */
+  readonly closeRef?: Ref<HTMLButtonElement>;
   readonly className?: string;
 }
 
@@ -93,26 +101,36 @@ function Pair({
   );
 }
 
-function OperatorDetail({ cycle, onOpenFolder, onDelete, onClose, className }: OperatorGuestCycleDetailProps) {
+function OperatorDetail({ cycle, onOpenFolder, onDelete, onClose, canOpenFolder = true, canDelete = true, className }: OperatorGuestCycleDetailProps) {
+  const unavailable = cycle.unavailable === true;
   const facts: readonly (readonly [string, string])[] = [
     ["Time", cycle.time],
     ["Outcome", outcomeLabels[cycle.outcome]],
-    ["Template", cycle.templateName],
+    ...(cycle.templateName === undefined ? [] : [["Template", cycle.templateName] as const]),
     ...(cycle.lookName === undefined ? [] : [["Look", cycle.lookName] as const]),
-    ["Captures", String(cycle.captures.length)],
+    ...(unavailable ? [] : [["Captures", String(cycle.captures.length)] as const]),
   ];
   const { strip } = cycle;
   return (
     <section className={cx(styles.operator, className)} aria-label={`Guest Cycle, ${cycle.time}`}>
-      <Pair stripRatio={strip === null ? 1 / 3 : strip.width / strip.height} captures={cycle.captures} empty="No Captures">
+      <Pair
+        stripRatio={strip === null ? 1 / 3 : strip.width / strip.height}
+        captures={cycle.captures}
+        {...(unavailable ? {} : { empty: "No Captures" })}
+      >
         {strip === null ? (
-          <p className={styles.missing} data-tone="paper">
-            No Photo Strip
-          </p>
+          unavailable ? (
+            <div className={styles.missing} data-tone="paper" aria-hidden="true" />
+          ) : (
+            <p className={styles.missing} data-tone="paper">
+              No Photo Strip
+            </p>
+          )
         ) : (
           <PrintObject {...strip} />
         )}
       </Pair>
+      {unavailable && <p className={styles.unavailableNote}>{unavailableCopy}</p>}
       <dl className={styles.facts}>
         {facts.map(([term, value]) => (
           <div key={term} className={styles.fact}>
@@ -122,15 +140,19 @@ function OperatorDetail({ cycle, onOpenFolder, onDelete, onClose, className }: O
         ))}
       </dl>
       <div className={styles.actions}>
-        <TextLink onClick={onOpenFolder}>OPEN FOLDER</TextLink>
-        <TextLink onClick={onDelete}>DELETE</TextLink>
+        <TextLink disabled={!canOpenFolder} onClick={onOpenFolder}>
+          OPEN FOLDER
+        </TextLink>
+        <TextLink disabled={!canDelete} onClick={onDelete}>
+          DELETE
+        </TextLink>
         {onClose !== undefined && <TextLink onClick={onClose}>CLOSE</TextLink>}
       </div>
     </section>
   );
 }
 
-function GuestDetail({ strip, captures, onClose, className }: GuestGuestCycleDetailProps) {
+function GuestDetail({ strip, captures, onClose, onBack, closeRef, className }: GuestGuestCycleDetailProps) {
   // Landscape strips (Panorama Four) turn a quarter counterclockwise, as every guest preview shows them.
   const rotated = strip.width > strip.height;
   return (
@@ -138,7 +160,16 @@ function GuestDetail({ strip, captures, onClose, className }: GuestGuestCycleDet
       <Pair stripRatio={rotated ? strip.height / strip.width : strip.width / strip.height} captures={captures}>
         <PrintObject src={strip.src} alt={strip.alt} width={strip.width} height={strip.height} rotated={rotated} shadow="lifted" />
       </Pair>
-      <TextLink onClick={onClose}>CLOSE</TextLink>
+      <div className={styles.guestActions}>
+        <TextLink ref={closeRef} onClick={onClose}>
+          CLOSE
+        </TextLink>
+        {onBack !== undefined && (
+          <TextLink arrow="left" onClick={onBack}>
+            BACK TO START
+          </TextLink>
+        )}
+      </div>
     </section>
   );
 }

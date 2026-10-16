@@ -61,6 +61,17 @@ const cycles: readonly OperatorGuestCycle[] = [
   },
 ];
 
+const gone: OperatorGuestCycle = {
+  id: "gone",
+  time: "9:14 PM",
+  outcome: "app-closed",
+  templateName: "Signature Strip",
+  lookName: "Sepia",
+  strip: null,
+  captures: [],
+  unavailable: true,
+};
+
 const endings: readonly OperatorGuestCycle[] = [
   { id: "e1", time: "10:02 PM", outcome: "ended-by-operator", templateName: "Signature Strip", strip: null, captures: captures(3, 1) },
   { id: "e2", time: "9:58 PM", outcome: "unrecoverable", templateName: "Butter Gingham", lookName: "Classic", strip: null, captures: captures(1, 5) },
@@ -140,6 +151,19 @@ export const fixtures: readonly ComponentFixture[] = [
     render: () => <GuestCycleList {...operator} cycles={[]} hasMore={false} />,
   },
   {
+    id: "guest-cycle-list-operator-unavailable",
+    title: "Guest Cycle list, operator, a Guest Cycle whose files are gone",
+    surface: "light",
+    role: "operator",
+    render: () => (
+      <GuestCycleList
+        {...operator}
+        cycles={[gone, ...cycles.slice(1, 3)]}
+        hasMore={false}
+      />
+    ),
+  },
+  {
     id: "guest-cycle-list-guest",
     title: "Guest gallery, a row of Photo Strips that scrolls by touch",
     surface: "light",
@@ -154,6 +178,14 @@ export const fixtures: readonly ComponentFixture[] = [
     role: "guest",
     layout: "fill",
     render: () => <GuestCycleList {...guest} strips={strips.slice(0, 2)} />,
+  },
+  {
+    id: "guest-cycle-list-guest-loading",
+    title: "Guest gallery, loading the first page",
+    surface: "light",
+    role: "guest",
+    layout: "fill",
+    render: () => <GuestCycleList {...guest} strips={[]} loading />,
   },
   {
     id: "guest-cycle-list-guest-focus",

@@ -111,6 +111,28 @@ export const fixtures: readonly ComponentFixture[] = [
     render: () => <GuestCycleDetail mode="guest" strip={strip("panorama-four", 2)} captures={captures(4, 2)} onClose={noop} />,
   },
   {
+    id: "guest-cycle-detail-operator-unavailable",
+    title: "Guest Cycle detail, operator, files gone: an empty mat, the reason once, no Captures fact",
+    surface: "light",
+    role: "operator",
+    render: () => <GuestCycleDetail {...operator} cycle={{ ...appClosed, lookName: "Sepia", unavailable: true }} />,
+  },
+  {
+    id: "guest-cycle-detail-operator-delete-unavailable",
+    title: "Guest Cycle detail, operator, DELETE and OPEN FOLDER unavailable while the brain prepares",
+    surface: "light",
+    role: "operator",
+    render: () => <GuestCycleDetail {...operator} cycle={completed} canDelete={false} canOpenFolder={false} />,
+  },
+  {
+    id: "guest-cycle-detail-guest-back",
+    title: "Guest strip detail, CLOSE beside BACK TO START",
+    surface: "light",
+    role: "guest",
+    layout: "fill",
+    render: () => <GuestCycleDetail mode="guest" strip={strip("signature-strip", 0)} captures={captures(4, 0)} onClose={noop} onBack={noop} />,
+  },
+  {
     id: "guest-cycle-detail-guest-three",
     title: "Guest strip detail, three Captures (Butter Gingham), keyboard focus on CLOSE",
     surface: "light",

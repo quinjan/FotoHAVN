@@ -1,0 +1,16 @@
+/* The frame fills the Guest Screen; the warning floats at the end of the footer line, over the gallery's own padding. */
+.frame {
+  position: relative;
+  block-size: 100%;
+  min-block-size: 0;
+
+  /* Warm Ivory runs on under the frame, over the strip the notices row keeps, which would otherwise show the Off-white canvas. */
+  box-shadow: 0 var(--space-48) 0 0 var(--semantic-surface-editorial);
+}
+
+.warning {
+  position: absolute;
+  inset-block-end: var(--app-space-fluid-32);
+  inset-inline-end: var(--app-gutter);
+  z-index: var(--app-z-timer-warning);
+}
