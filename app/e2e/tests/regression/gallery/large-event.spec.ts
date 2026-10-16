@@ -91,7 +91,7 @@ function describe(timings: readonly PageTiming[]): string {
 
 test(
   "on a seeded 300-cycle Data folder, pages load in under 300 ms each, and scrolling by touch reaches the end",
-  { tag: ["@m9"] },
+  { tag: ["@m9", "@timing"] },
   async ({ operatorPage, hooks }) => {
     test.setTimeout(300_000);
     const list = new EventListScreen(operatorPage);

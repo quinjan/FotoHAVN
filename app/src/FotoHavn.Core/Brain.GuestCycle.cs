@@ -64,7 +64,10 @@ public sealed partial class Brain
                 {
                     complete(completed);
                     PublishChanges();
-                    Interlocked.Decrement(ref _offExecutorWork);
+                    if (Interlocked.Decrement(ref _offExecutorWork) == 0)
+                    {
+                        ReleaseStoreSettleWaiters();
+                    }
                 });
             },
             CancellationToken.None,

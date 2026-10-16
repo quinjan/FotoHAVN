@@ -6,6 +6,7 @@ using FotoHavn.Core.Tests.Events.Active;
 using FotoHavn.Core.Tests.GuestCycles.Orchestration;
 using FotoHavn.Protocol;
 using FotoHavn.Protocol.Presentations;
+using Microsoft.Extensions.Logging;
 
 namespace FotoHavn.Core.Tests.Hardening;
 
@@ -25,9 +26,11 @@ public sealed class CloseFlowTests
     private static async Task<CloseRequestOutcome> CloseAsync(ActiveRig rig, CloseSource source)
     {
         var request = rig.Brain.RequestClose(source);
-        rig.Run();
+        rig.Pump(() => request.IsCompleted);
         return await request;
     }
+
+    private static void WaitForShutdown(ActiveRig rig, RecordingLifetime lifetime) => rig.Pump(() => lifetime.ShutdownRequests > 0);
 
     [Fact]
     public async Task The_Operator_window_closing_with_no_Event_closes_the_app()
@@ -146,7 +149,141 @@ public sealed class CloseFlowTests
 
         using var idle = await ActiveRig.CreateAsync();
         idle.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.CloseApp, null, null, null));
-        Assert.Equal(RejectReason.NotAvailable, idle.OperatorCommand("ConfirmCloseApp").Reason);
+        Assert.Equal(RejectReason.NotAvailable, idle.OperatorCommand("ConfirmEndEvent").Reason);
+    }
+
+    [Fact]
+    public async Task Confirming_the_close_with_no_Event_held_closes_the_app_once()
+    {
+        var lifetime = new RecordingLifetime();
+        using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { AppLifetime = lifetime });
+        rig.Brain.SetConfirmation(new ConfirmationOverlay(ConfirmationKind.CloseApp, null, null, null));
+
+        var answer = rig.OperatorCommand("ConfirmCloseApp");
+        WaitForShutdown(rig, lifetime);
+        rig.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.Equal(CommandStatus.Accepted, answer.Status);
+        Assert.Equal(1, lifetime.ShutdownRequests);
+        Assert.Null(rig.LatestOperator().Overlays.Confirmation);
+    }
+
+    [Fact]
+    public async Task A_close_confirmation_does_not_survive_a_start_that_fails_after_the_Event_was_held()
+    {
+        var wakeLock = new FakeWakeLock();
+        var lifetime = new RecordingLifetime();
+        using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { WakeLock = wakeLock, AppLifetime = lifetime, GuestConnected = false });
+        var start = rig.BeginStart();
+        rig.Pump(() => rig.Recorded.OpenedGuestScreens.Count == 1);
+        Assert.Equal(CloseRequestOutcome.AskToEndEvent, await CloseAsync(rig, CloseSource.OperatorWindow));
+        Assert.Equal(ConfirmationKind.CloseApp, rig.LatestOperator().Overlays.Confirmation?.Kind);
+
+        rig.Advance(Brain.GuestScreenReadyTimeout + TimeSpan.FromSeconds(1));
+
+        Assert.Equal(StartFailureCode.GuestScreenNotReady, (await start).Failure);
+        Assert.False(wakeLock.IsHeld);
+        Assert.Null(rig.LatestOperator().Overlays.Confirmation);
+        Assert.Equal(RejectReason.NotAvailable, rig.OperatorCommand("ConfirmCloseApp").Reason);
+        Assert.Equal(0, lifetime.ShutdownRequests);
+    }
+
+    [Fact]
+    public async Task Confirming_the_close_waits_for_the_store_to_end_the_Guest_Cycle_before_shutting_down()
+    {
+        var lifetime = new RecordingLifetime();
+        using var rig = await GuestCycleRig.CreateAsync(new GuestRigOptions { AppLifetime = lifetime });
+        rig.Begin();
+        rig.ToPhotographs();
+        rig.TakeAll();
+        rig.Store.EndGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        var request = rig.Brain.RequestClose(CloseSource.OperatorWindow);
+        Assert.True(rig.SettleUntil(() => request.IsCompleted, TimeSpan.FromSeconds(5)));
+
+        rig.Operator("ConfirmCloseApp").ShouldBeAccepted();
+        Assert.True(rig.SettleUntil(() => rig.Store.Ended.Count == 1, TimeSpan.FromSeconds(5)));
+        Thread.Sleep(100);
+        rig.Settle();
+
+        Assert.Equal(0, lifetime.ShutdownRequests);
+        rig.Store.EndGate.SetResult();
+        Assert.True(rig.SettleUntil(() => lifetime.ShutdownRequests == 1, TimeSpan.FromSeconds(10)));
+
+        var detail = await rig.OnlyCycleAsync();
+        Assert.Equal(GuestCycleEndReason.OperatorExit, detail.Cycle.EndReason);
+        Assert.Equal(1, lifetime.ShutdownRequests);
+    }
+
+    [Fact]
+    public async Task Windows_ending_the_session_completes_only_after_the_store_ended_the_Guest_Cycle()
+    {
+        var lifetime = new RecordingLifetime();
+        using var rig = await GuestCycleRig.CreateAsync(new GuestRigOptions { AppLifetime = lifetime });
+        rig.Begin();
+        rig.ToPhotographs();
+        rig.TakeAll();
+        rig.Store.EndGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var request = rig.Brain.RequestClose(CloseSource.SessionEnd);
+        Assert.True(rig.SettleUntil(() => rig.Store.Ended.Count == 1, TimeSpan.FromSeconds(5)));
+        Thread.Sleep(100);
+        rig.Settle();
+
+        Assert.False(request.IsCompleted);
+        Assert.Equal(0, lifetime.ShutdownRequests);
+        rig.Store.EndGate.SetResult();
+        Assert.True(rig.SettleUntil(() => request.IsCompleted, TimeSpan.FromSeconds(10)));
+
+        Assert.Equal(CloseRequestOutcome.EndEventAndClose, await request);
+        Assert.Equal(1, lifetime.ShutdownRequests);
+        Assert.Equal(GuestCycleEndReason.OperatorExit, (await rig.OnlyCycleAsync()).Cycle.EndReason);
+    }
+
+    [Fact]
+    public async Task A_store_write_that_never_finishes_does_not_hold_the_shutdown_beyond_the_bound()
+    {
+        var lifetime = new RecordingLifetime();
+        using var rig = await GuestCycleRig.CreateAsync(new GuestRigOptions { AppLifetime = lifetime });
+        rig.Begin();
+        rig.ToPhotographs();
+        rig.TakeAll();
+        rig.Store.EndGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        rig.Operator("EndEvent").ShouldBeAccepted();
+        rig.Operator("ConfirmEndEvent").ShouldBeAccepted();
+        Assert.True(rig.SettleUntil(() => rig.Store.Ended.Count == 1, TimeSpan.FromSeconds(5)));
+
+        var settled = rig.Brain.WhenStoreWritesSettledAsync(TimeSpan.FromMilliseconds(50));
+        Assert.True(rig.SettleUntil(() => settled.IsCompleted, TimeSpan.FromSeconds(10)));
+
+        Assert.True(settled.IsCompletedSuccessfully);
+        Assert.Contains(rig.Active.Logger.Entries, entry => entry.Level == LogLevel.Warning && entry.Message.StartsWith("Closing without waiting further", StringComparison.Ordinal));
+        Assert.True(rig.Brain.OffExecutorWork > 0);
+        rig.Store.EndGate.SetResult();
+        Assert.True(rig.SettleUntil(() => rig.Brain.OffExecutorWork == 0, TimeSpan.FromSeconds(10)));
+    }
+
+    [Fact]
+    public async Task Waiting_for_store_writes_completes_at_once_when_none_are_pending_or_the_brain_is_disposed()
+    {
+        var rig = await ActiveRig.CreateAsync();
+
+        var idle = rig.Brain.WhenStoreWritesSettledAsync(TimeSpan.FromSeconds(10));
+        rig.Run();
+        await idle.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        Assert.True(idle.IsCompletedSuccessfully);
+
+        rig.Dispose();
+        Assert.True(rig.Brain.WhenStoreWritesSettledAsync(TimeSpan.FromSeconds(10)).IsCompletedSuccessfully);
+    }
+
+    [Fact]
+    public async Task Waiting_for_store_writes_refuses_a_bound_that_is_not_positive()
+    {
+        using var rig = await ActiveRig.CreateAsync();
+
+        var thrown = Record.Exception((Action)(() => _ = rig.Brain.WhenStoreWritesSettledAsync(TimeSpan.Zero)));
+
+        Assert.IsType<ArgumentOutOfRangeException>(thrown);
     }
 
     [Fact]
@@ -251,7 +388,7 @@ public sealed class CloseFlowTests
         rig.TakeAll();
 
         var request = rig.Brain.RequestClose(CloseSource.SessionEnd);
-        rig.Settle();
+        Assert.True(rig.SettleUntil(() => request.IsCompleted, TimeSpan.FromSeconds(10)));
 
         Assert.Equal(CloseRequestOutcome.EndEventAndClose, await request);
         var ended = Assert.Single(rig.Store.Ended);

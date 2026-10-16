@@ -237,6 +237,13 @@ public partial class App : Application
         _windows?.CloseGuest();
         _inputGuard?.Dispose();
         _smoke?.Dispose();
+
+        // Safety net for every exit path (the close flows already waited): the store must see the Event's last writes before it is disposed.
+        if (_brain is { } brain && !ExitDrain.Wait(() => brain.WhenStoreWritesSettledAsync(Brain.ShutdownStoreDrainBound), Brain.ShutdownStoreDrainBound) && _logger is not null)
+        {
+            HostLog.StoreWritesDrainTimedOut(_logger);
+        }
+
         _brain?.Dispose();
         _wakeLock?.Release();
         _cameraAdapter?.Dispose();

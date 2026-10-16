@@ -3,7 +3,7 @@ import { expect, test } from "../../../src/fixtures";
 import { useVirtualScreens } from "../../../src/operator";
 import { EventListScreen, EventSetupScreen } from "../../../src/screens/screens";
 
-test.describe("identifying displays", { tag: ["@m6"] }, () => {
+test.describe("identifying displays", { tag: ["@m6", "@timing"] }, () => {
   test("IDENTIFY DISPLAYS shows one numbered overlay per display, matching the picker's numbers, for about 3 seconds", async ({
     app,
     operatorPage,

@@ -131,4 +131,7 @@ internal static partial class HostLog
 
     [LoggerMessage(EventId = 42, EventName = "guestCloseRefused", Level = LogLevel.Debug, Message = "Refused to close the Guest window while an Event runs")]
     public static partial void GuestCloseRefused(ILogger logger);
+
+    [LoggerMessage(EventId = 43, EventName = "storeWritesDrainTimedOut", Level = LogLevel.Warning, Message = "The brain's store writes were still pending at exit; the next start's reconciler completes any open Guest Cycle")]
+    public static partial void StoreWritesDrainTimedOut(ILogger logger);
 }

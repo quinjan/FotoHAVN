@@ -49,7 +49,7 @@ dotnet test --project tests/FotoHavn.Core.Tests/FotoHavn.Core.Tests.csproj -p:Fo
 #    The compositor speed budget (spike S3), without coverage, which would slow it 3-4x: median per strip under 150 ms
 #    (FOTOHAVN_S3_BUDGET_MS overrides the budget; the default 150 ms is the booth budget)
 dotnet test --project tests/FotoHavn.Catalog.Tests/FotoHavn.Catalog.Tests.csproj --filter-method "*Composing_a_strip_takes_under_150_ms_median*"
-#    The field-build script's Pester tests (argument and E2E guards, SHA-256, manifest, zip name, runtime placement; about 40 s, no network, Pester 3.4 or later)
+#    The field-build script's Pester tests (argument and E2E guards, SHA-256, manifest, zip name, runtime placement, publish-folder cleaning, staged cab; about 65 s, no network, Pester 3.4 or later)
 pwsh -NoProfile -Command '$run = Invoke-Pester ./scripts/publish-field-test.Tests.ps1 -PassThru; exit ($run.FailedCount -gt 0 ? 1 : 0)'
 # 3. UI (in ui/; test:coverage fails below 80%; run `npx playwright install chromium` once before test:fixtures,
 #    which also runs the headless integration lane with `dotnet run --no-build`, so step 1 must have built .NET;
@@ -64,7 +64,7 @@ $env:FOTOHAVN_E2E_CAMERA = "<camera name or device id>"   # optional; defaults t
 npx playwright test --project=regression --grep "@m<N>"
 npx playwright test --project=smoke
 #    Each project runs a parallel pool (FOTOHAVN_E2E_WORKERS workers, default 4) and a serial exclusive pool of the specs tagged
-#    @camera, @cursor, or @build; a spec that opens the camera, moves the cursor, or runs dotnet build/publish must carry that tag
+#    @camera, @cursor, @build, or @timing; a spec that opens the camera, moves the cursor, runs dotnet build/publish, or asserts a wall-clock budget must carry that tag
 #    (docs/local-development-guide.md, "Parallel runs and resource classes")
 #    The E2E build on its own (in ui/: npm run build:e2e, which writes ui/dist-e2e; then from app/):
 #    dotnet build src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj -c Debug -p:FotoHavnE2E=true -o output/e2e-build

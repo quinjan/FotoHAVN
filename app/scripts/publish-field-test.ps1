@@ -13,21 +13,28 @@
          runtimeFolderName). A missing or malformed field fails.
       2. Obtain the pinned runtime .cab: -WebView2Cab, else the cache folder, else a download from the manifest URL.
          Its SHA-256 and size must match the manifest before anything is expanded; a mismatch fails, and a downloaded
-         file that does not match is deleted, never cached.
+         file that does not match is deleted, never cached. The verified cab is then copied to a private staging
+         folder and hashed again there; only the staged copy is ever expanded (it is deleted when the script ends).
       3. Build the field UI (`npm ci` when ui/node_modules is missing, then `npm run build`) and refuse an E2E UI build.
-      4. `dotnet publish` (self-contained, win-x64, no E2E hooks) and check the output: no FOTOHAVN or FotoHavn.*
+      4. Clear the publish folder (the whole folder, so no Data/, logs, or other leftovers can reach the zip), then
+         `dotnet publish` (self-contained, win-x64, no E2E hooks) and check the output: no FOTOHAVN or FotoHavn.*
          assembly may carry the FotoHavnE2E assembly metadata or a type in an .E2E namespace, and wwwroot/ may not hold
          the E2E UI marker (e2e-build.txt).
-      5. Expand the runtime (`expand.exe`) to runtime/webview2 beside FOTOHAVN.exe (where HostPaths looks for it) and
-         check msedgewebview2.exe, the expanded size, and the file count against the manifest.
+      5. Expand the runtime (`expand.exe`) from the staged, re-verified copy of the cab to runtime/webview2 beside
+         FOTOHAVN.exe (where HostPaths looks for it) and check msedgewebview2.exe, the expanded size, and the file count
+         against the manifest.
       6. Write build-info.json and the zip FOTOHAVN-field-<version>-<shortSha>[-dirty].zip, which holds one top-level
-         FOTOHAVN folder. The version is "version" in ui/package.json (the one product version in the repository), or
+         FOTOHAVN folder. The zip step refuses a folder that holds Data/, logs/, webview2-user-data/, a *.db file, or
+         e2e-build.txt. The version is "version" in ui/package.json (the one product version in the repository), or
          -AppVersion.
 
     A field build always carries the runtime: there is no switch to skip it. Paths resolve relative to app/.
 
 .PARAMETER Output
-    The publish folder (default output/field/FOTOHAVN). Only runtime/webview2 inside it is cleaned before a build.
+    The publish folder (default output/field/FOTOHAVN). The script deletes and recreates it before publishing, so
+    never point it at a folder that holds anything you want to keep: a drive root, the user profile, the repository,
+    app/ or a folder above them is refused, and a folder outside app/output/ must be empty or hold a previous field
+    build (FOTOHAVN.exe or build-info.json).
 
 .PARAMETER ZipDirectory
     Where the zip goes (default output/field).
@@ -239,6 +246,52 @@ function Get-VerifiedRuntimeCab([object] $Manifest, [string] $LocalCab, [string]
     $cached
 }
 
+# The cab was verified at the start, but it sits in a writable folder and is expanded much later. A private copy is
+# hashed again where it is, and that copy is the only thing ever expanded.
+function Copy-CabToStaging([string] $Cab, [object] $Manifest, [string] $StagingDirectory) {
+    New-Item -ItemType Directory -Force -Path $StagingDirectory | Out-Null
+    $staged = Join-Path $StagingDirectory (Split-Path -Leaf $Cab)
+    Copy-Item -LiteralPath $Cab -Destination $staged -Force
+    $problem = Get-CabProblem $staged $Manifest
+    if ($problem) {
+        Remove-Item -LiteralPath $StagingDirectory -Recurse -Force -ErrorAction SilentlyContinue
+        Fail "The staged copy of the WebView2 runtime $problem The cab changed after it was verified. Refusing to expand an unverified WebView2 runtime."
+    }
+    $staged
+}
+
+# Refuses to clear a folder that is not a publish folder: a root, the user profile, the repository, app/, a folder above
+# any of them, or (outside app/output/) a folder that holds something other than an earlier field build.
+function Assert-SafePublishFolder([string] $Folder, [string] $AppRoot) {
+    $normalize = { param([string] $path) [System.IO.Path]::GetFullPath($path).TrimEnd('\', '/') }
+    $full = & $normalize $Folder
+    $isRoot = [System.IO.Path]::GetPathRoot($full).TrimEnd('\', '/') -ieq $full
+    $protected = @(
+        (& $normalize $AppRoot),
+        (& $normalize (Join-Path $AppRoot '..')),
+        (& $normalize $PSScriptRoot),
+        (& $normalize ([Environment]::GetFolderPath('UserProfile')))
+    )
+    $isProtected = $false
+    foreach ($path in $protected) {
+        if ($path -ieq $full -or $path.StartsWith("$full\", [System.StringComparison]::OrdinalIgnoreCase)) {
+            $isProtected = $true
+        }
+    }
+    if ($isRoot -or $isProtected) {
+        Fail "Refusing to clear the publish folder ${Folder}: it is a drive root, the user profile, the repository, app/, or a folder above them. Pass a folder that holds only the field build."
+    }
+
+    $outputRoot = & $normalize (Join-Path $AppRoot 'output')
+    $underOutput = $full.StartsWith("$outputRoot\", [System.StringComparison]::OrdinalIgnoreCase)
+    if (-not $underOutput -and (Test-Path -LiteralPath $full)) {
+        $isEarlierBuild = (Test-Path -LiteralPath (Join-Path $full 'FOTOHAVN.exe') -PathType Leaf) -or (Test-Path -LiteralPath (Join-Path $full 'build-info.json') -PathType Leaf)
+        if (-not $isEarlierBuild -and @(Get-ChildItem -LiteralPath $full -Force).Count -gt 0) {
+            Fail "Refusing to clear the publish folder ${Folder}: it is not empty and does not hold an earlier field build (FOTOHAVN.exe or build-info.json). Pass an empty or new folder."
+        }
+    }
+}
+
 # Expands the verified cab to <Output>/runtime/webview2 and checks it against the manifest. A failure removes the
 # runtime folder, so a half-expanded runtime never ends up in a zip.
 function Install-Runtime([object] $Manifest, [string] $Cab, [string] $Output) {
@@ -249,6 +302,7 @@ function Install-Runtime([object] $Manifest, [string] $Cab, [string] $Output) {
     }
     New-Item -ItemType Directory -Force -Path $runtimeParent | Out-Null
     try {
+        Write-Host "Expanding the staged WebView2 runtime from $Cab"
         & expand.exe '-F:*' $Cab $runtimeParent | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Fail "expand.exe failed with exit code $LASTEXITCODE for $Cab."
@@ -313,7 +367,26 @@ function Get-ZipName([string] $Version, [string] $AppRoot) {
     "$name.zip"
 }
 
+# Defence in depth behind the cleaned publish folder: a field zip never carries what a running booth writes (the Data
+# folder, logs, the WebView2 profile, any database) or an E2E marker.
+function Assert-NoUserData([string] $Directory) {
+    $found = [System.Collections.Generic.List[string]]::new()
+    foreach ($name in 'Data', 'logs', 'webview2-user-data') {
+        $path = Join-Path $Directory $name
+        if (Test-Path -LiteralPath $path) {
+            $found.Add($path)
+        }
+    }
+    foreach ($item in Get-ChildItem -LiteralPath $Directory -Recurse -File -Force | Where-Object { $_.Extension -ieq '.db' -or $_.Name -ieq $e2eUiMarker }) {
+        $found.Add($item.FullName)
+    }
+    if ($found.Count -gt 0) {
+        Fail "Refusing to zip ${Directory}: it holds user data or test files that must never ship:`n$($found -join "`n")"
+    }
+}
+
 function New-FieldZip([string] $SourceDirectory, [string] $ZipDirectory, [string] $ZipName) {
+    Assert-NoUserData $SourceDirectory
     New-Item -ItemType Directory -Force -Path $ZipDirectory | Out-Null
     $zipPath = Join-Path (Resolve-Path -LiteralPath $ZipDirectory).Path $ZipName
     $partial = "$zipPath.partial"
@@ -330,6 +403,11 @@ function New-FieldZip([string] $SourceDirectory, [string] $ZipDirectory, [string
         Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
     }
     $zipPath
+}
+
+# Dot-sourced (the Pester tests load the functions this way): define them and stop.
+if ($MyInvocation.InvocationName -eq '.') {
+    return
 }
 
 $e2eRequested = $FotoHavnE2E.IsPresent -or
@@ -353,81 +431,99 @@ if (-not $CacheDirectory) {
     $CacheDirectory = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'FOTOHAVN/webview2-cache'
 }
 $ProgressPreference = 'SilentlyContinue'
+$Output = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Output)
+
+# The publish folder is deleted below, so it is checked before anything else happens.
+Assert-SafePublishFolder -Folder $Output -AppRoot $appRoot
 
 # The pinned runtime comes first: it is the cheapest thing to get wrong, and a bad hash must stop the build before
 # anything is published.
 $manifest = Read-RuntimeManifest $ManifestPath
 $cab = Get-VerifiedRuntimeCab -Manifest $manifest -LocalCab $WebView2Cab -CacheDirectory $CacheDirectory
 Write-Host "WebView2 Fixed Version $($manifest.version) ($($manifest.architecture)): $cab (SHA-256 verified)."
-
 $productVersion = Get-ProductVersion -Override $AppVersion -PackageJson (Join-Path $appRoot 'ui/package.json')
 $zipName = Get-ZipName -Version $productVersion -AppRoot $appRoot
 
-# The field UI: always rebuilt, so wwwroot/ never ships a stale or E2E bundle.
-$uiDir = Join-Path $appRoot 'ui'
-Push-Location $uiDir
+$stagingDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "fotohavn-staging-$([guid]::NewGuid().ToString('N'))"
+$stagedCab = $null
 try {
-    if (-not (Test-Path (Join-Path $uiDir 'node_modules'))) {
-        & npm ci
+    $stagedCab = Copy-CabToStaging -Cab $cab -Manifest $manifest -StagingDirectory $stagingDirectory
+    # The field UI: always rebuilt, so wwwroot/ never ships a stale or E2E bundle.
+    $uiDir = Join-Path $appRoot 'ui'
+    Push-Location $uiDir
+    try {
+        if (-not (Test-Path (Join-Path $uiDir 'node_modules'))) {
+            & npm ci
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+        & npm run build
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
-    & npm run build
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    finally {
+        Pop-Location
+    }
+    if (Test-Path (Join-Path $uiDir "dist/$e2eUiMarker")) {
+        Stop-WithGuard "$guardText ui/dist holds an E2E UI build ($e2eUiMarker)."
+    }
+
+    # A clean folder, so nothing an earlier run, or a run of the booth in this folder, left behind (Data/, logs/, the
+    # WebView2 profile) can reach the zip.
+    if (Test-Path -LiteralPath $Output) {
+        Remove-Item -LiteralPath $Output -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $Output | Out-Null
+
+    $project = Join-Path $appRoot 'src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj'
+    $msbuildProperties = @($Property | ForEach-Object { "-p:$_" })
+    & dotnet publish $project -c $Configuration -r win-x64 --self-contained true -p:FotoHavnE2E=false -o $Output @msbuildProperties
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+
+    # Check what was actually published, whatever the build properties said.
+    $problems = [System.Collections.Generic.List[string]]::new()
+    $assemblies = Get-ChildItem -Path $Output -Filter *.dll -File -Recurse |
+        Where-Object { $_.BaseName -ceq 'FOTOHAVN' -or $_.BaseName.StartsWith('FotoHavn.', [System.StringComparison]::Ordinal) }
+    if (-not ($assemblies | Where-Object { $_.Name -ceq 'FOTOHAVN.dll' })) {
+        $problems.Add("FOTOHAVN.dll is missing from $Output, so the hook check proves nothing.")
+    }
+    foreach ($assembly in $assemblies) {
+        foreach ($evidence in Get-E2EHookEvidence $assembly.FullName) {
+            $problems.Add("$($assembly.FullName) $evidence.")
+        }
+    }
+    foreach ($marker in Get-ChildItem -Path $Output -Filter $e2eUiMarker -File -Recurse) {
+        $problems.Add("$($marker.FullName) marks an E2E UI build.")
+    }
+    if ($problems.Count -gt 0) {
+        Stop-WithGuard "$guardText The publish output in $Output is not a field build:`n$($problems -join "`n")"
+    }
+
+    Write-Host "Field-test build published to $Output (no E2E hooks, field UI)."
+
+    $runtimeFolder = Install-Runtime -Manifest $manifest -Cab $stagedCab -Output $Output
+    $sizeBytes = (Get-ChildItem -Path $Output -Recurse -File | Measure-Object -Property Length -Sum).Sum
+
+    $buildInfo = [ordered]@{
+        product = 'FOTOHAVN'
+        version = $productVersion
+        commit = Get-ShortSha $appRoot
+        webView2 = [ordered]@{
+            version = $manifest.version
+            architecture = $manifest.architecture
+            sha256 = $manifest.sha256
+            folder = $runtimeRelativeFolder
+        }
+    }
+    $buildInfo | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $Output 'build-info.json') -Encoding utf8
+
+    $zipPath = New-FieldZip -SourceDirectory $Output -ZipDirectory $ZipDirectory -ZipName $zipName
+    $zipSize = (Get-Item -LiteralPath $zipPath).Length
+    Write-Host ("Runtime: {0}" -f $runtimeFolder)
+    Write-Host ("Unpacked size: {0:N1} MB" -f ($sizeBytes / 1MB))
+    Write-Host ("Field-test zip: {0} ({1:N1} MB)" -f $zipPath, ($zipSize / 1MB))
+    exit 0
 }
 finally {
-    Pop-Location
+    Remove-Item -LiteralPath $stagingDirectory -Recurse -Force -ErrorAction SilentlyContinue
 }
-if (Test-Path (Join-Path $uiDir "dist/$e2eUiMarker")) {
-    Stop-WithGuard "$guardText ui/dist holds an E2E UI build ($e2eUiMarker)."
-}
-
-$project = Join-Path $appRoot 'src/FotoHavn.Host.Windows/FotoHavn.Host.Windows.csproj'
-$msbuildProperties = @($Property | ForEach-Object { "-p:$_" })
-& dotnet publish $project -c $Configuration -r win-x64 --self-contained true -p:FotoHavnE2E=false -o $Output @msbuildProperties
-if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
-}
-
-# Check what was actually published, whatever the build properties said.
-$problems = [System.Collections.Generic.List[string]]::new()
-$assemblies = Get-ChildItem -Path $Output -Filter *.dll -File -Recurse |
-    Where-Object { $_.BaseName -ceq 'FOTOHAVN' -or $_.BaseName.StartsWith('FotoHavn.', [System.StringComparison]::Ordinal) }
-if (-not ($assemblies | Where-Object { $_.Name -ceq 'FOTOHAVN.dll' })) {
-    $problems.Add("FOTOHAVN.dll is missing from $Output, so the hook check proves nothing.")
-}
-foreach ($assembly in $assemblies) {
-    foreach ($evidence in Get-E2EHookEvidence $assembly.FullName) {
-        $problems.Add("$($assembly.FullName) $evidence.")
-    }
-}
-foreach ($marker in Get-ChildItem -Path $Output -Filter $e2eUiMarker -File -Recurse) {
-    $problems.Add("$($marker.FullName) marks an E2E UI build.")
-}
-if ($problems.Count -gt 0) {
-    Stop-WithGuard "$guardText The publish output in $Output is not a field build:`n$($problems -join "`n")"
-}
-
-Write-Host "Field-test build published to $Output (no E2E hooks, field UI)."
-
-$runtimeFolder = Install-Runtime -Manifest $manifest -Cab $cab -Output $Output
-$sizeBytes = (Get-ChildItem -Path $Output -Recurse -File | Measure-Object -Property Length -Sum).Sum
-
-$buildInfo = [ordered]@{
-    product = 'FOTOHAVN'
-    version = $productVersion
-    commit = Get-ShortSha $appRoot
-    webView2 = [ordered]@{
-        version = $manifest.version
-        architecture = $manifest.architecture
-        sha256 = $manifest.sha256
-        folder = $runtimeRelativeFolder
-    }
-}
-$buildInfo | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $Output 'build-info.json') -Encoding utf8
-
-$zipPath = New-FieldZip -SourceDirectory $Output -ZipDirectory $ZipDirectory -ZipName $zipName
-$zipSize = (Get-Item -LiteralPath $zipPath).Length
-Write-Host ("Runtime: {0}" -f $runtimeFolder)
-Write-Host ("Unpacked size: {0:N1} MB" -f ($sizeBytes / 1MB))
-Write-Host ("Field-test zip: {0} ({1:N1} MB)" -f $zipPath, ($zipSize / 1MB))
-exit 0

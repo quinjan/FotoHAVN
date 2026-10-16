@@ -5,9 +5,11 @@ import { paths } from "./paths";
 /**
  * Tags for a test that needs a resource only one test may use at a time:
  * `@camera` opens the real camera, `@cursor` moves or depends on the OS cursor or the real screens,
- * `@build` runs `dotnet build`/`dotnet publish` or a nested Playwright run. Every other test is parallel-safe.
+ * `@build` runs `dotnet build`/`dotnet publish` or a nested Playwright run, and
+ * `@timing` asserts a wall-clock budget, which other workers' load on the machine would distort.
+ * Every other test is parallel-safe.
  */
-export const exclusiveTags = ["@camera", "@cursor", "@build"] as const;
+export const exclusiveTags = ["@camera", "@cursor", "@build", "@timing"] as const;
 
 /** The pattern the config uses to split the exclusive pool from the parallel pool. */
 export const exclusivePattern = new RegExp(exclusiveTags.join("|"));

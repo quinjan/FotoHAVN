@@ -42,6 +42,9 @@ internal sealed class CycleStore(IEventStore inner) : IEventStore
     /// <summary>While set, <see cref="CommitPhotoStripAsync"/> completes only when the gate does.</summary>
     public TaskCompletionSource? StripGate { get; set; }
 
+    /// <summary>While set, <see cref="EndGuestCycleAsync"/> completes only when the gate does.</summary>
+    public TaskCompletionSource? EndGate { get; set; }
+
     public List<(string CycleId, GuestCycleEndReason Reason)> Ended { get; } = [];
 
     public int InFlight => Volatile.Read(ref _inFlight);
@@ -112,7 +115,16 @@ internal sealed class CycleStore(IEventStore inner) : IEventStore
             Ended.Add((guestCycleId, reason));
         }
 
-        return FailEnd ? Task.FromException(new StorageException(StorageErrorKind.Locked, "Locked.")) : inner.EndGuestCycleAsync(guestCycleId, reason, ct);
+        if (FailEnd)
+        {
+            return Task.FromException(new StorageException(StorageErrorKind.Locked, "Locked."));
+        }
+
+        return EndGate is { } gate ? After(gate, async () =>
+        {
+            await inner.EndGuestCycleAsync(guestCycleId, reason, ct).ConfigureAwait(false);
+            return true;
+        }) : inner.EndGuestCycleAsync(guestCycleId, reason, ct);
     }
 
     public Task<CaptureRecord> CommitCaptureAsync(CaptureCommit commit, CancellationToken ct) => Track(() =>

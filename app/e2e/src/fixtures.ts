@@ -25,7 +25,7 @@ function sameOptions(a: AppOptions, b: AppOptions): boolean {
  * and it is shut down when the next file starts, when a test fails, or when the worker ends.
  * A test whose launch options differ from the running app's (another `test.describe` with its own `appOptions`)
  * gets a fresh app, so each launch sees its own seed and arguments.
- * An exclusive test (`@camera`, `@cursor`, `@build`) keeps the worker's exclusive lock for as long as its app runs,
+ * An exclusive test (`@camera`, `@cursor`, `@build`, `@timing`) keeps the worker's exclusive lock for as long as its app runs,
  * because the camera stays open until the app closes.
  */
 class AppManager {
@@ -90,7 +90,7 @@ interface TestFixtures {
   hooks: HookClient;
   /** The run's Data folder, passed as `--data`. */
   dataDir: string;
-  /** Automatic: a test tagged `@camera`, `@cursor`, or `@build` waits here for the exclusive lock and holds it. */
+  /** Automatic: a test tagged `@camera`, `@cursor`, `@build`, or `@timing` waits here for the exclusive lock and holds it. */
   exclusiveResource: void;
 }
 

@@ -22,12 +22,12 @@ const parallelWorkers = readParallelWorkers();
 
 /**
  * One user-facing project (`smoke`, `regression`) is two Playwright projects: a parallel pool of every test that needs no
- * exclusive resource, and a serial pool of the tests tagged `@camera`, `@cursor`, or `@build` (see src/exclusive.ts).
+ * exclusive resource, and a serial pool of the tests tagged `@camera`, `@cursor`, `@build`, or `@timing` (see src/exclusive.ts).
  *
  * Both pools carry the same name apart from letter case: Playwright matches `--project` case-insensitively, so
  * `--project=regression` selects both pools, and `--grep` still filters both, exactly as with the one project this
  * replaces. (Playwright's `dependencies` and `teardown` would skip the CLI `--grep` for the second pool.) The upper-case
- * name is the exclusive pool. Use `--grep-invert "@camera|@cursor|@build"` to run only the parallel pool.
+ * name is the exclusive pool. Use `--grep-invert "@camera|@cursor|@build|@timing"` to run only the parallel pool.
  *
  * The exclusive pool has one worker, and a lock (src/exclusive.ts) also keeps the exclusive tests of the smoke and
  * regression pools from running together when one command selects both.

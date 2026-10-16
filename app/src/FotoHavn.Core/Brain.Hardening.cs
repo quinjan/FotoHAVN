@@ -19,6 +19,12 @@ public sealed partial class Brain
     // the executor and by Dispose; read by any thread through IsEventActive.
     private int _eventHeld;
 
+    /// <summary>How long closing the app waits for the store writes the Event's end queued before it tells the host to close (and the host waits again before it disposes the store).</summary>
+    public static readonly TimeSpan ShutdownStoreDrainBound = TimeSpan.FromSeconds(10);
+
+    /// <summary>The same wait when Windows is ending the session: the host gives the brain 5 s in all, and the wait must end inside it.</summary>
+    public static readonly TimeSpan SessionEndStoreDrainBound = TimeSpan.FromSeconds(3);
+
     /// <summary>
     /// Whether an Event is held (starting from step 7 on, or running). Safe to read from any thread: the Windows host reads it in the
     /// Guest window's closing handler, which has to answer at once, to apply <see cref="CloseRequestRules.Decide"/> to a close attempt.
@@ -81,19 +87,22 @@ public sealed partial class Brain
         {
             try
             {
-                completion.SetResult(CloseOnExecutor(source));
+                CloseOnExecutor(source, completion);
             }
             catch (Exception exception)
             {
-                completion.SetException(exception);
+                completion.TrySetException(exception);
                 throw;
             }
         });
         return completion.Task;
     }
 
-    /// <summary>Acts on a close request on the executor, deciding from the state it finds there (an Event may have ended since the request was made).</summary>
-    private CloseRequestOutcome CloseOnExecutor(CloseSource source)
+    /// <summary>
+    /// Acts on a close request on the executor, deciding from the state it finds there (an Event may have ended since the request was made).
+    /// Closing waits for the store writes the Event's end queued (<see cref="ShutdownAfterStoreWrites"/>), so the request completes after the app was told to close.
+    /// </summary>
+    private void CloseOnExecutor(CloseSource source, TaskCompletionSource<CloseRequestOutcome> completion)
     {
         var outcome = CloseRequestRules.Decide(IsEventActive, source);
         BrainLog.CloseRequested(_logger, source, outcome);
@@ -101,7 +110,8 @@ public sealed partial class Brain
         {
             SetConfirmation(new ConfirmationOverlay(ConfirmationKind.CloseApp, null, null, null));
             PublishChanges();
-            return outcome;
+            completion.SetResult(outcome);
+            return;
         }
 
         if (outcome == CloseRequestOutcome.EndEventAndClose)
@@ -110,21 +120,113 @@ public sealed partial class Brain
             PublishChanges();
         }
 
-        _dependencies.AppLifetime.Shutdown();
-        return outcome;
+        ShutdownAfterStoreWrites(source == CloseSource.SessionEnd ? SessionEndStoreDrainBound : ShutdownStoreDrainBound, completion, outcome);
     }
 
-    /// <summary><c>ConfirmCloseApp</c>: end the running Event cleanly (the End Event sequence), then close the app once this command has been answered.</summary>
+    /// <summary><c>ConfirmCloseApp</c>: end the Event if one is held (the End Event sequence), then close the app once this command has been answered and the store has the Event's end.</summary>
     private CommandResultMessage ConfirmCloseApp(string id)
     {
-        if (_confirmation?.Kind != ConfirmationKind.CloseApp || !IsEventActive)
+        if (_confirmation?.Kind != ConfirmationKind.CloseApp)
         {
             return NotAvailable(id);
         }
 
         EndActiveEvent();
-        Post(_dependencies.AppLifetime.Shutdown);
+        _confirmation = null;
+        Post(() => ShutdownAfterStoreWrites(ShutdownStoreDrainBound, null, CloseRequestOutcome.CloseNow));
         return CommandResultMessage.Accepted(id);
+    }
+
+    /// <summary>
+    /// A completed Capture commit, Guest Cycle end, or Photo Strip commit is durable before the process goes: the store is disposed right after the app
+    /// shuts down, and a write that arrives later fails against a closed connection (an <c>operator_exit</c> cycle would stay open until the next start).
+    /// Waits for every write the brain started off the executor (bounded), then tells the host to close. Called on the executor; it never blocks it.
+    /// </summary>
+    private void ShutdownAfterStoreWrites(TimeSpan bound, TaskCompletionSource<CloseRequestOutcome>? completion, CloseRequestOutcome outcome)
+    {
+        if (_offExecutorWork == 0)
+        {
+            CloseApp(completion, outcome);
+            return;
+        }
+
+        var settled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        RegisterStoreSettleWaiter(settled);
+        _ = SettledWithinAsync(settled.Task, bound).ContinueWith(
+            _ => Post(() => CloseApp(completion, outcome)),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+    }
+
+    private void CloseApp(TaskCompletionSource<CloseRequestOutcome>? completion, CloseRequestOutcome outcome)
+    {
+        try
+        {
+            _dependencies.AppLifetime.Shutdown();
+        }
+        catch (Exception exception)
+        {
+            completion?.TrySetException(exception);
+            throw;
+        }
+
+        completion?.TrySetResult(outcome);
+    }
+
+    /// <summary>
+    /// Completes when every store and compositor call the brain started off the executor has finished and been handled (the Event's end, its Guest Cycle's end,
+    /// and the writes queued before it), or after <paramref name="bound"/> of real time, which is logged. Callable from any thread; the wait never blocks the
+    /// executor. The host calls it before it disposes the brain and the store, so no write meets a closed store.
+    /// </summary>
+    public Task WhenStoreWritesSettledAsync(TimeSpan bound)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(bound, TimeSpan.Zero);
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        var settled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Post(() => RegisterStoreSettleWaiter(settled));
+        return SettledWithinAsync(settled.Task, bound);
+    }
+
+    // Executor only: the waiters are released when the off-executor work count reaches zero.
+    private readonly List<TaskCompletionSource> _storeSettleWaiters = [];
+
+    private void RegisterStoreSettleWaiter(TaskCompletionSource settled)
+    {
+        if (_offExecutorWork == 0)
+        {
+            settled.TrySetResult();
+        }
+        else
+        {
+            _storeSettleWaiters.Add(settled);
+        }
+    }
+
+    private void ReleaseStoreSettleWaiters()
+    {
+        foreach (var waiter in _storeSettleWaiters)
+        {
+            waiter.TrySetResult();
+        }
+
+        _storeSettleWaiters.Clear();
+    }
+
+    private async Task SettledWithinAsync(Task settled, TimeSpan bound)
+    {
+        try
+        {
+            await settled.WaitAsync(bound, TimeProvider.System).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            BrainLog.StoreWritesNotSettled(_dependencies.Logger, (long)bound.TotalMilliseconds, OffExecutorWork);
+        }
     }
 
     /// <summary><c>CancelCloseApp</c>: close the dialog; the Event keeps running.</summary>
@@ -151,4 +253,7 @@ internal static partial class BrainLog
 {
     [LoggerMessage(Level = LogLevel.Information, Message = "A close request ({Reason}) was decided: {Outcome}.")]
     public static partial void CloseRequested(ILogger logger, CloseSource reason, CloseRequestOutcome outcome);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Closing without waiting further: {Pending} store or compositor calls were still pending after {BoundMs} ms.")]
+    public static partial void StoreWritesNotSettled(ILogger logger, long boundMs, int pending);
 }

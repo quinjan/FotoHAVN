@@ -41,7 +41,7 @@ async function crash(page: Page, role: Role): Promise<number> {
   return Date.now();
 }
 
-test.describe("UI crash recovery", { tag: ["@m2"] }, () => {
+test.describe("UI crash recovery", { tag: ["@m2", "@timing"] }, () => {
   test("each window's UI returns within 5 s at the same revision after test.crashUi, and the other window is unaffected", async ({
     app,
     operatorPage,

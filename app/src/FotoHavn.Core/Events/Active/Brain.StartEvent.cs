@@ -436,6 +436,12 @@ public sealed partial class Brain
                 brain._activeEvent = null;
             }
 
+            if (brain._confirmation?.Kind == ConfirmationKind.CloseApp)
+            {
+                // The Event this dialog was about is gone.
+                brain._confirmation = null;
+            }
+
             brain._start = null;
             BrainLog.StartFailed(brain._logger, code);
             brain.PublishChanges();

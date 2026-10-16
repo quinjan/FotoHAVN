@@ -68,7 +68,7 @@ Describe 'publish-field-test.ps1' {
         New-Item -ItemType Directory -Force -Path $bin | Out-Null
         $script:Bin = $bin
         Set-Content -Path (Join-Path $bin 'dotnet.cmd') -Value "@echo off`r`n`"$($script:Pwsh)`" -NoProfile -File `"%~dp0fake-dotnet.ps1`" %*`r`nexit /b %ERRORLEVEL%"
-        Set-Content -Path (Join-Path $bin 'npm.cmd') -Value "@echo off`r`necho npm %* >> `"%FAKE_LOG%`"`r`nexit /b 0"
+        Set-Content -Path (Join-Path $bin 'npm.cmd') -Value "@echo off`r`necho npm %* >> `"%FAKE_LOG%`"`r`nif defined FAKE_NPM_SWAP echo swapped> `"%FAKE_NPM_SWAP%`"`r`nexit /b 0"
         $managedDll = Join-Path ([System.Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) 'System.Collections.dll'
         Set-Content -Path (Join-Path $bin 'fake-dotnet.ps1') -Value @"
 `$arguments = @(`$args)
@@ -80,6 +80,11 @@ Set-Content -Path (Join-Path `$out 'FOTOHAVN.exe') -Value 'fake exe'
 Set-Content -Path (Join-Path `$out 'wwwroot\index.html') -Value 'fake ui'
 if (`$env:FAKE_DOTNET_MODE -ne 'no-dll') { Copy-Item -LiteralPath '$managedDll' -Destination (Join-Path `$out 'FOTOHAVN.dll') }
 if (`$env:FAKE_DOTNET_MODE -eq 'e2e-marker') { Set-Content -Path (Join-Path `$out 'wwwroot\e2e-build.txt') -Value 'e2e' }
+if (`$env:FAKE_DOTNET_EXTRA) {
+    `$extra = Join-Path `$out `$env:FAKE_DOTNET_EXTRA
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent `$extra) | Out-Null
+    Set-Content -Path `$extra -Value 'leftover'
+}
 exit 0
 "@
 
@@ -114,7 +119,9 @@ exit 0
             $log = Join-Path $sandbox 'fake.log'
             Set-Content -Path $log -Value ''
             $saved = @{}
-            $variables = @{ FAKE_LOG = $log; PATH = "$($script:Bin);$env:PATH"; FotoHavnE2E = $null }
+            $sandboxTemp = Join-Path $sandbox 'tmp'
+            New-Item -ItemType Directory -Force -Path $sandboxTemp | Out-Null
+            $variables = @{ FAKE_LOG = $log; PATH = "$($script:Bin);$env:PATH"; FotoHavnE2E = $null; TMP = $sandboxTemp; TEMP = $sandboxTemp }
             foreach ($name in $Environment.Keys) { $variables[$name] = $Environment[$name] }
             foreach ($name in $variables.Keys) {
                 $saved[$name] = [Environment]::GetEnvironmentVariable($name)
@@ -127,6 +134,10 @@ exit 0
             }
             finally {
                 foreach ($name in $saved.Keys) { [Environment]::SetEnvironmentVariable($name, $saved[$name]) }
+            }
+            $leftover = @(Get-ChildItem $variables['TMP'] -Filter 'fotohavn-staging-*' -ErrorAction SilentlyContinue)
+            if ($leftover.Count -gt 0) {
+                throw "The script left a staged cab folder behind (exit code $exit): $($leftover[0].FullName)"
             }
             [pscustomobject]@{
                 Sha = (& git -C $sandbox rev-parse --short=8 HEAD 2>$null)
@@ -278,6 +289,165 @@ exit 0
             $result = Invoke-Publish $sandbox (Get-Local $sandbox)
             $result.ExitCode | Should Be 0
             ($result.Calls -contains 'npm ci') | Should Be $false
+        }
+    }
+
+    Context 'the publish folder' {
+        It 'deletes what an earlier run or a run in place left in it' {
+            $sandbox = New-Sandbox
+            $output = Join-Path $sandbox 'app\output\field\FOTOHAVN'
+            New-Item -ItemType Directory -Force -Path (Join-Path $output 'Data'), (Join-Path $output 'logs'), (Join-Path $output 'webview2-user-data\Default') | Out-Null
+            Set-Content -Path (Join-Path $output 'Data\x.db') -Value 'a guest database'
+            Set-Content -Path (Join-Path $output 'logs\a.log') -Value 'a log'
+            Set-Content -Path (Join-Path $output 'webview2-user-data\Default\Cookies') -Value 'cookies'
+            Set-Content -Path (Join-Path $output 'stale.txt') -Value 'stale'
+
+            $result = Invoke-Publish $sandbox (Get-Local $sandbox)
+
+            $result.ExitCode | Should Be 0
+            Join-Path $output 'Data' | Should Not Exist
+            Join-Path $output 'logs' | Should Not Exist
+            Join-Path $output 'webview2-user-data' | Should Not Exist
+            Join-Path $output 'stale.txt' | Should Not Exist
+            Join-Path $output 'FOTOHAVN.exe' | Should Exist
+            $entries = Get-ZipEntries $result.Zips[0].FullName
+            @($entries | Where-Object { $_ -match '/(Data|logs|webview2-user-data)/' -or $_ -match 'x\.db$|stale\.txt$' }).Count | Should Be 0
+        }
+
+        It 'refuses to zip a folder that holds user data or a database' {
+            foreach ($extra in 'Data\x.db', 'logs\a.log', 'webview2-user-data\Default\Cookies', 'notes.db') {
+                $sandbox = New-Sandbox
+                $result = Invoke-Publish $sandbox (Get-Local $sandbox) @{ FAKE_DOTNET_EXTRA = $extra }
+                $result.ExitCode | Should Be 1
+                ($result.Text -match 'Refusing to zip') | Should Be $true
+                $result.Zips.Count | Should Be 0
+            }
+        }
+
+        It 'refuses a publish folder that is a root, the profile, the repository, app, or a folder above them' {
+            $sandbox = New-Sandbox
+            foreach ($dangerous in 'C:\', $env:USERPROFILE, $sandbox, (Join-Path $sandbox 'app'), (Split-Path -Parent $sandbox)) {
+                $marker = Join-Path $sandbox 'app\ui\package.json'
+                $result = Invoke-Publish $sandbox (@('-Output', $dangerous) + (Get-Local $sandbox))
+                $result.ExitCode | Should Be 1
+                ($result.Text -match 'Refusing to clear the publish folder') | Should Be $true
+                Assert-NothingBuilt $result
+                $marker | Should Exist
+            }
+        }
+
+        It 'refuses a folder that holds something other than an earlier field build' {
+            $sandbox = New-Sandbox
+            $mine = Join-Path $sandbox 'my documents'
+            New-Item -ItemType Directory -Force -Path $mine | Out-Null
+            Set-Content -Path (Join-Path $mine 'thesis.docx') -Value 'precious'
+
+            $result = Invoke-Publish $sandbox (@('-Output', $mine) + (Get-Local $sandbox))
+
+            $result.ExitCode | Should Be 1
+            ($result.Text -match 'Refusing to clear the publish folder') | Should Be $true
+            Join-Path $mine 'thesis.docx' | Should Exist
+            Assert-NothingBuilt $result
+        }
+
+        It 'accepts an empty folder or an earlier field build outside app/output' {
+            $sandbox = New-Sandbox
+            $empty = Join-Path $sandbox 'elsewhere\empty'
+            $previous = Join-Path $sandbox 'elsewhere\previous'
+            New-Item -ItemType Directory -Force -Path $empty, (Join-Path $previous 'Data') | Out-Null
+            Set-Content -Path (Join-Path $previous 'FOTOHAVN.exe') -Value 'old exe'
+            Set-Content -Path (Join-Path $previous 'Data\x.db') -Value 'a guest database'
+
+            (Invoke-Publish $sandbox (@('-Output', $empty) + (Get-Local $sandbox))).ExitCode | Should Be 0
+            (Invoke-Publish $sandbox (@('-Output', $previous) + (Get-Local $sandbox))).ExitCode | Should Be 0
+            Join-Path $previous 'Data' | Should Not Exist
+        }
+    }
+
+    Context 'the staged runtime cab' {
+        It 'expands only a staged, re-verified copy, even when the cab changes after verification' {
+            $sandbox = New-Sandbox
+            $mine = Join-Path $sandbox 'mine'
+            $temp = Join-Path $sandbox 'tmp'
+            New-Item -ItemType Directory -Force -Path $mine, $temp | Out-Null
+            $copy = Join-Path $mine "$($script:RuntimeName).cab"
+            Copy-Item $script:Cab $copy
+
+            $result = Invoke-Publish $sandbox @('-WebView2Cab', $copy, '-CacheDirectory', (Join-Path $sandbox 'cache')) @{ FAKE_NPM_SWAP = $copy; TMP = $temp; TEMP = $temp }
+
+            $result.ExitCode | Should Be 0
+            ((Get-Item $copy).Length -ne $script:CabSize) | Should Be $true
+            ($result.Text -match 'Expanding the staged WebView2 runtime from .*fotohavn-staging-') | Should Be $true
+            ($result.Text.Contains("from $copy") -or $result.Text.Contains("from $($script:Cab)")) | Should Be $false
+            Join-Path $result.Output 'runtime\webview2\msedgewebview2.exe' | Should Exist
+            @(Get-ChildItem $temp -Filter 'fotohavn-staging-*' -ErrorAction SilentlyContinue).Count | Should Be 0
+        }
+
+        It 'removes the staged copy when the build fails' {
+            foreach ($mode in 'fail', 'e2e-marker', 'no-dll') {
+                $sandbox = New-Sandbox
+                $temp = Join-Path $sandbox 'tmp'
+                New-Item -ItemType Directory -Force -Path $temp | Out-Null
+
+                $result = Invoke-Publish $sandbox (Get-Local $sandbox) @{ FAKE_DOTNET_MODE = $mode; TMP = $temp; TEMP = $temp }
+
+                ($result.ExitCode -ne 0) | Should Be $true
+                @(Get-ChildItem $temp -Filter 'fotohavn-staging-*' -ErrorAction SilentlyContinue).Count | Should Be 0
+            }
+        }
+
+        It 'removes the staged copy when the UI holds an E2E build or the expanded runtime is wrong' {
+            $sandbox = New-Sandbox
+            $temp = Join-Path $sandbox 'tmp'
+            New-Item -ItemType Directory -Force -Path $temp, (Join-Path $sandbox 'app\ui\dist') | Out-Null
+            Set-Content -Path (Join-Path $sandbox 'app\ui\dist\e2e-build.txt') -Value 'e2e'
+            $uiResult = Invoke-Publish $sandbox (Get-Local $sandbox) @{ TMP = $temp; TEMP = $temp }
+            $uiResult.ExitCode | Should Be 1
+            @(Get-ChildItem $temp -Filter 'fotohavn-staging-*' -ErrorAction SilentlyContinue).Count | Should Be 0
+
+            $manifest = [ordered]@{} + $script:Manifest
+            $manifest.expandedSizeBytes = $script:ExpandedSize + 1
+            $wrong = New-Sandbox $manifest
+            $wrongTemp = Join-Path $wrong 'tmp'
+            New-Item -ItemType Directory -Force -Path $wrongTemp | Out-Null
+            $runtimeResult = Invoke-Publish $wrong (Get-Local $wrong) @{ TMP = $wrongTemp; TEMP = $wrongTemp }
+            $runtimeResult.ExitCode | Should Be 1
+            @(Get-ChildItem $wrongTemp -Filter 'fotohavn-staging-*' -ErrorAction SilentlyContinue).Count | Should Be 0
+        }
+
+        It 'refuses a cab that changed between verification and staging' {
+            $sandbox = New-Sandbox
+            $mine = Join-Path $sandbox 'mine'
+            $staging = Join-Path $sandbox 'staging'
+            New-Item -ItemType Directory -Force -Path $mine | Out-Null
+            $copy = Join-Path $mine "$($script:RuntimeName).cab"
+            Copy-Item $script:Cab $copy
+            $script = Join-Path $sandbox 'app\scripts\publish-field-test.ps1'
+            $manifest = Join-Path $sandbox 'app\scripts\webview2-fixed-version.json'
+            $command = ". '$script'; `$m = Read-RuntimeManifest '$manifest'; " +
+                "`$v = Get-VerifiedRuntimeCab -Manifest `$m -LocalCab '$copy' -CacheDirectory '$sandbox\cache'; " +
+                "Set-Content -Path '$copy' -Value 'swapped after verification'; " +
+                "try { Copy-CabToStaging `$v `$m '$staging'; 'staged' } catch { `$_.Exception.Message }"
+
+            $text = (& $script:Pwsh -NoProfile -Command $command 2>&1 | Out-String)
+
+            ($text -match 'staged copy') | Should Be $true
+            ($text -match 'unverified') | Should Be $true
+            $text.Trim().EndsWith('staged') | Should Be $false
+            Join-Path $staging "$($script:RuntimeName).cab" | Should Not Exist
+        }
+
+        It 'stages a verified cab byte for byte' {
+            $sandbox = New-Sandbox
+            $staging = Join-Path $sandbox 'staging'
+            $script = Join-Path $sandbox 'app\scripts\publish-field-test.ps1'
+            $manifest = Join-Path $sandbox 'app\scripts\webview2-fixed-version.json'
+            $command = ". '$script'; `$m = Read-RuntimeManifest '$manifest'; (Copy-CabToStaging '$($script:Cab)' `$m '$staging')"
+
+            $text = (& $script:Pwsh -NoProfile -Command $command 2>&1 | Out-String).Trim()
+
+            $text | Should Be (Join-Path $staging "$($script:RuntimeName).cab")
+            (Get-FileHash $text -Algorithm SHA256).Hash.ToLowerInvariant() | Should Be $script:CabHash
         }
     }
 

@@ -31,6 +31,9 @@ internal sealed class GuestRigOptions
 
     public Func<FakeCameraAdapter, ICameraAdapter>? CameraDecorator { get; init; }
 
+    /// <summary>How the brain closes the app (a no-op by default).</summary>
+    public IAppLifetime? AppLifetime { get; init; }
+
     /// <summary>Whether the Event is started (the default); false leaves a saved Event for a test to start itself.</summary>
     public bool Start { get; init; } = true;
 }
@@ -82,6 +85,7 @@ internal sealed class GuestCycleRig : IDisposable
             BrainClock = options.BrainClock,
             CameraFramesPerSecond = options.FramesPerSecond,
             CameraDecorator = options.CameraDecorator,
+            AppLifetime = options.AppLifetime,
         });
         var rig = new GuestCycleRig(active, store, memory, compositor);
         if (options.Start)
@@ -107,7 +111,7 @@ internal sealed class GuestCycleRig : IDisposable
         ],
     };
 
-    private bool Gated => Store.StartGate is not null || Store.CommitGate is not null || Store.StripGate is not null || Store.SetStateGate is not null || Store.ProbeGate is not null || Compositor.ThumbnailGate is not null || Compositor.StripGate is not null;
+    private bool Gated => Store.StartGate is not null || Store.EndGate is not null || Store.CommitGate is not null || Store.StripGate is not null || Store.SetStateGate is not null || Store.ProbeGate is not null || Compositor.ThumbnailGate is not null || Compositor.StripGate is not null;
 
     /// <summary>
     /// Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds. Work still queued on the thread pool counts as
