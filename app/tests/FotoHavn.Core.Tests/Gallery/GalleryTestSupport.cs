@@ -426,6 +426,7 @@ internal sealed class GalleryRig : IDisposable
     /// <summary>
     /// Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds. Gated calls aren't waited for, so while
     /// one waits the rest of the I/O (the other thumbnails of a page, say) is judged by the store's own count of calls in flight and a longer quiet.
+    /// Work still queued on the thread pool counts as busy, so a loaded machine that is slow to start it doesn't look quiet.
     /// </summary>
     public void Settle()
     {
@@ -436,13 +437,38 @@ internal sealed class GalleryRig : IDisposable
             var gated = Store.Waiting > 0;
             var ran = Active.Executor.RunPending();
             var working = gated ? Store.InFlight > Store.Waiting : Brain.OffExecutorWork > 0 || Store.InFlight > 0;
-            if (ran > 0 || Active.Executor.PendingCount > 0 || working)
+            if (ran > 0 || Active.Executor.PendingCount > 0 || working || ThreadPool.PendingWorkItemCount > 0)
             {
                 lastBusy = clock.Elapsed;
             }
             else if (clock.Elapsed - lastBusy >= TimeSpan.FromMilliseconds(gated ? 40 : 3))
             {
                 return;
+            }
+
+            Thread.Yield();
+        }
+    }
+
+    /// <summary>
+    /// Settles until <paramref name="done"/> holds or <paramref name="budget"/> of real time is spent, without moving the clock. A settle ends on a few
+    /// milliseconds of quiet, which a loaded machine can show while a released gate's work is still queued on the thread pool; a test that releases a gate
+    /// waits on what it expects instead. True when it held.
+    /// </summary>
+    public bool SettleUntil(Func<bool> done, TimeSpan budget)
+    {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (true)
+        {
+            Settle();
+            if (done())
+            {
+                return true;
+            }
+
+            if (clock.Elapsed >= budget)
+            {
+                return false;
             }
 
             Thread.Yield();

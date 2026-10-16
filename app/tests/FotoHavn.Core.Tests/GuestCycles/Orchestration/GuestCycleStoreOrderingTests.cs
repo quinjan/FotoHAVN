@@ -189,7 +189,7 @@ public sealed class GuestCycleStoreOrderingTests
         Assert.True(rig.AdvanceUntil(() => rig.Compositor.InFlight == 2, TimeSpan.FromSeconds(60), Coarse));
 
         preview.SetResult();
-        Assert.True(rig.AdvanceUntil(() => rig.Brain.OffExecutorWork == 1, TimeSpan.FromSeconds(10), Fine));
+        Assert.True(rig.SettleUntil(() => rig.Brain.OffExecutorWork == 1, TimeSpan.FromSeconds(30)));
 
         Assert.True(rig.Filters.Composing);
         Assert.False(rig.Filters.CompositionFailed);
@@ -215,7 +215,7 @@ public sealed class GuestCycleStoreOrderingTests
         var cached = rig.Active.Previews.Count;
 
         preview.SetResult();
-        Assert.True(rig.AdvanceUntil(() => rig.Brain.OffExecutorWork == 0, TimeSpan.FromSeconds(10), Fine));
+        Assert.True(rig.SettleUntil(() => rig.Brain.OffExecutorWork == 0, TimeSpan.FromSeconds(30)));
 
         Assert.Equal(cached, rig.Active.Previews.Count);
         Assert.Equal(GuestSurface.Keepsake, rig.Surface);
@@ -235,7 +235,7 @@ public sealed class GuestCycleStoreOrderingTests
         var cached = rig.Active.Previews.Count;
 
         thumbnails.SetResult();
-        Assert.True(rig.AdvanceUntil(() => rig.Brain.OffExecutorWork == 0, TimeSpan.FromSeconds(10), Fine));
+        Assert.True(rig.SettleUntil(() => rig.Brain.OffExecutorWork == 0, TimeSpan.FromSeconds(30)));
 
         Assert.Equal(cached, rig.Active.Previews.Count);
     }

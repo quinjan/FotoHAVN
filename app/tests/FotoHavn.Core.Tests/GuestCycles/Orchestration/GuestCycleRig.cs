@@ -109,7 +109,10 @@ internal sealed class GuestCycleRig : IDisposable
 
     private bool Gated => Store.StartGate is not null || Store.CommitGate is not null || Store.StripGate is not null || Store.SetStateGate is not null || Store.ProbeGate is not null || Compositor.ThumbnailGate is not null || Compositor.StripGate is not null;
 
-    /// <summary>Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds.</summary>
+    /// <summary>
+    /// Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds. Work still queued on the thread pool counts as
+    /// busy, so a loaded machine that is slow to start it doesn't look quiet.
+    /// </summary>
     public void Settle()
     {
         var clock = System.Diagnostics.Stopwatch.StartNew();
@@ -117,13 +120,38 @@ internal sealed class GuestCycleRig : IDisposable
         while (clock.Elapsed < TimeSpan.FromSeconds(30))
         {
             var ran = Active.Executor.RunPending();
-            if (ran > 0 || Active.Executor.PendingCount > 0 || (!Gated && (Brain.OffExecutorWork > 0 || Store.InFlight > 0 || Compositor.InFlight > 0)))
+            if (ran > 0 || Active.Executor.PendingCount > 0 || ThreadPool.PendingWorkItemCount > 0 || (!Gated && (Brain.OffExecutorWork > 0 || Store.InFlight > 0 || Compositor.InFlight > 0)))
             {
                 lastBusy = clock.Elapsed;
             }
             else if (clock.Elapsed - lastBusy >= TimeSpan.FromMilliseconds(3))
             {
                 return;
+            }
+
+            Thread.Yield();
+        }
+    }
+
+    /// <summary>
+    /// Settles until <paramref name="done"/> holds or <paramref name="budget"/> of real time is spent, without moving the clock. A settle ends on a few
+    /// milliseconds of quiet, which a loaded machine can show while work is still queued on the thread pool and a gate holds the brain's own count up;
+    /// a test that releases a gate, or reads a presentation beside one, waits on what it expects instead. True when it held.
+    /// </summary>
+    public bool SettleUntil(Func<bool> done, TimeSpan budget)
+    {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (true)
+        {
+            Settle();
+            if (done())
+            {
+                return true;
+            }
+
+            if (clock.Elapsed >= budget)
+            {
+                return false;
             }
 
             Thread.Yield();

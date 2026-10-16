@@ -230,9 +230,8 @@ public sealed class GuestGalleryTimerTests
 
         rig.Advance(TimeSpan.FromSeconds(30), Second);
         gate.SetResult();
-        rig.Settle();
 
+        Assert.True(rig.SettleUntil(() => !rig.Strips.LoadingMore, TimeSpan.FromSeconds(30)));
         Assert.Equal(30_000, Timer(rig).RemainingMs);
-        Assert.False(rig.Strips.LoadingMore);
     }
 }

@@ -72,6 +72,8 @@ internal static class GuestCycleFixtures
                 rig.ToArrange();
                 rig.Compositor.StripGate = new TaskCompletionSource();
                 rig.Guest("GoToStep", """{"step":"filters"}""");
+                // The waiting gate keeps the brain's own count up, so a settle can end before the Look thumbnails exist on a loaded machine: wait for them.
+                Assert.True(rig.SettleUntil(() => rig.Filters.Looks.All(look => look.ThumbnailKey is not null), TimeSpan.FromSeconds(30)));
             }),
             ["guest-cycle-filters-landscape"] = () => GuestAsync(rig =>
             {

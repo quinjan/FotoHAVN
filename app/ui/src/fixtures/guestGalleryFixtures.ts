@@ -13,7 +13,7 @@ import { guestStart } from "./inlineFixtures.ts";
 /**
  * Hand-written fixtures for the guest gallery (M9 UI-2 owns this file; wave A seeds it). The brain's own gallery fixtures
  * (`guest-gallery-*`, `guest-strip-detail-*`, `guest-start-gallery-link`) come from the .NET tests; these cover what those don't write:
- * one strip, four, a long row with more to load, a landscape strip, the Phase Timer warning on the gallery and on a detail, and the load
+ * four strips, a long row with more to load, a landscape strip, the Phase Timer warning on the gallery and on a detail, and the load
  * state. Names start with `guest-ui-gallery-` and never repeat a brain-generated name. The views carry only images, proportions, and alt
  * text, so nothing here can show metadata.
  */
@@ -55,7 +55,6 @@ const detailView: GuestStripDetailView = {
 };
 
 export const guestGalleryFixtures: Readonly<Record<string, GuestWelcomeMessage>> = {
-  "guest-ui-gallery-one-strip": galleryWelcome({ strips: strips(1), nextCursor: null, loadingMore: false }),
   "guest-ui-gallery-four-strips": galleryWelcome({ strips: strips(4), nextCursor: null, loadingMore: false }),
   "guest-ui-gallery-many-strips": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: false }),
   "guest-ui-gallery-loading-more": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: true }),

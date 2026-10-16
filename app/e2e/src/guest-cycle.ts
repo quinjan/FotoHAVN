@@ -45,6 +45,8 @@ export interface GuestEventOptions {
   readonly timers?: Partial<Record<TimerLabel, number>>;
   /** The Operator PIN (default `739104`). */
   readonly pin?: string;
+  /** Turns the guest gallery on for the Event (default off, as Event setup has it). */
+  readonly guestGallery?: boolean;
 }
 
 export const defaultPin = "739104";
@@ -530,6 +532,10 @@ export async function startGuestEvent(context: OperatorContext, options: GuestEv
         await expect(setup.look(name)).not.toBeChecked();
       }
     }
+  }
+  if (options.guestGallery === true) {
+    await setup.guestGallery.click();
+    await expect(setup.guestGallery).toBeChecked();
   }
   for (const [label, seconds] of Object.entries(options.timers ?? {})) {
     await setup.timer(label).fill(String(seconds));

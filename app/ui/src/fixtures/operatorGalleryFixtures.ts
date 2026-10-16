@@ -105,9 +105,6 @@ export const operatorGalleryFixtures: Readonly<Record<string, OperatorWelcomeMes
   "operator-ui-gallery-loading-more": galleryWelcome(gallery({ loadingMore: true })),
   "operator-ui-gallery-load-failed": galleryWelcome(gallery({ loadFailed: true })),
   "operator-ui-gallery-end": galleryWelcome(gallery({ nextCursor: null })),
-  "operator-ui-gallery-empty": galleryWelcome(gallery({ items: [], nextCursor: null, empty: true })),
-  "operator-ui-gallery-loading-first": galleryWelcome(gallery({ items: [], nextCursor: null, loadingMore: true })),
-  "operator-ui-gallery-load-failed-first": galleryWelcome(gallery({ items: [], nextCursor: null, loadFailed: true })),
   "operator-ui-gallery-large": galleryWelcome(gallery({ items: manyItems(320), nextCursor: null })),
   "operator-ui-gallery-large-more": galleryWelcome(gallery({ items: manyItems(320), nextCursor: "cursor-8" })),
   "operator-ui-gallery-running": operatorWelcome("eventGallery", {

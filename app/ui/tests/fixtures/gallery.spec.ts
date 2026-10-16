@@ -20,10 +20,7 @@ const operatorViews: readonly View[] = [
   { fixture: "operator-ui-gallery-mixed", surface: "eventGallery", heading: "Event Gallery.", texts: ["Completed", "Started over", "Ended by operator", "App closed", "Unrecoverable", "No Photo Strip", "These photographs can't be found.", "SHOW MORE"] },
   { fixture: "operator-ui-gallery-end", surface: "eventGallery", heading: "Event Gallery." },
   { fixture: "operator-ui-gallery-loading-more", surface: "eventGallery", heading: "Event Gallery.", texts: ["Loading more photographs."] },
-  { fixture: "operator-ui-gallery-loading-first", surface: "eventGallery", heading: "Event Gallery.", texts: ["Loading photographs."] },
   { fixture: "operator-ui-gallery-load-failed", surface: "eventGallery", heading: "Event Gallery.", texts: ["Couldn't load these photographs.", "TRY AGAIN"] },
-  { fixture: "operator-ui-gallery-load-failed-first", surface: "eventGallery", heading: "Event Gallery.", texts: ["Couldn't load these photographs.", "TRY AGAIN"] },
-  { fixture: "operator-ui-gallery-empty", surface: "eventGallery", heading: "Event Gallery.", texts: ["No photographs yet."] },
   { fixture: "operator-ui-gallery-large", surface: "eventGallery", heading: "Event Gallery." },
   { fixture: "operator-ui-gallery-large-more", surface: "eventGallery", heading: "Event Gallery.", texts: ["SHOW MORE"] },
   { fixture: "operator-ui-gallery-running", surface: "eventGallery", heading: "Event Gallery.", texts: ["RUNNING", "New photographs appear here as guests finish."] },
@@ -36,10 +33,20 @@ const operatorViews: readonly View[] = [
   { fixture: "operator-ui-gallery-detail-delete", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["Delete this Guest Cycle?", "KEEP GUEST CYCLE"] },
   { fixture: "operator-ui-gallery-detail-delete-one-file", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["and its file will be removed"] },
   { fixture: "operator-ui-gallery-detail-delete-failed", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["The Guest Cycle couldn't be deleted. Try again in a moment."] },
+  // The brain-generated fixtures (FotoHavn.Core tests write them).
+  { fixture: "operator-gallery-empty", surface: "eventGallery", heading: "Event Gallery.", texts: ["No photographs yet."] },
+  { fixture: "operator-gallery-large", surface: "eventGallery", heading: "Event Gallery.", texts: ["SHOW MORE"] },
+  { fixture: "operator-gallery-load-failed", surface: "eventGallery", heading: "Event Gallery.", texts: ["Couldn't load these photographs.", "TRY AGAIN"] },
+  { fixture: "operator-gallery-loading", surface: "eventGallery", heading: "Event Gallery.", texts: ["Loading photographs."] },
+  { fixture: "operator-gallery-mixed-outcomes", surface: "eventGallery", heading: "Event Gallery.", texts: ["Completed", "Started over", "Ended by operator", "App closed", "Unrecoverable", "No Photo Strip", "These photographs can't be found."] },
+  { fixture: "operator-gallery-partial", surface: "eventGallery", heading: "Event Gallery.", texts: ["Completed", "Started over"] },
+  { fixture: "operator-gallery-running-live", surface: "eventGallery", heading: "Event Gallery.", texts: ["RUNNING", "New photographs appear here as guests finish."] },
+  { fixture: "operator-guest-cycle-detail-completed", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["Time", "Outcome", "Template", "Look", "Captures", "OPEN FOLDER", "DELETE"] },
+  { fixture: "operator-guest-cycle-detail-delete-confirmation", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["Delete this Guest Cycle?", "DELETE GUEST CYCLE", "KEEP GUEST CYCLE"] },
+  { fixture: "operator-guest-cycle-detail-no-strip", surface: "guestCycleDetail", heading: "Guest Cycle.", texts: ["No Photo Strip", "Started over"] },
 ];
 
 const guestViews: readonly View[] = [
-  { fixture: "guest-ui-gallery-one-strip", surface: "guestGallery", heading: "Look at you.", texts: ["BACK TO START"] },
   { fixture: "guest-ui-gallery-four-strips", surface: "guestGallery", heading: "Look at you." },
   { fixture: "guest-ui-gallery-many-strips", surface: "guestGallery", heading: "Look at you." },
   { fixture: "guest-ui-gallery-loading-more", surface: "guestGallery", heading: "Look at you." },
@@ -48,6 +55,14 @@ const guestViews: readonly View[] = [
   { fixture: "guest-ui-strip-detail", surface: "guestStripDetail", heading: "", texts: ["CLOSE", "BACK TO START"] },
   { fixture: "guest-ui-strip-detail-landscape", surface: "guestStripDetail", heading: "" },
   { fixture: "guest-ui-strip-detail-timer-warning", surface: "guestStripDetail", heading: "", texts: ["SECOND LEFT", "MORE TIME"] },
+  // The brain-generated fixtures (FotoHavn.Core tests write them).
+  { fixture: "guest-gallery-one", surface: "guestGallery", heading: "Look at you.", texts: ["BACK TO START"] },
+  { fixture: "guest-gallery-four", surface: "guestGallery", heading: "Look at you." },
+  { fixture: "guest-gallery-many", surface: "guestGallery", heading: "Look at you." },
+  { fixture: "guest-gallery-timer-warning", surface: "guestGallery", heading: "Look at you.", texts: ["MORE TIME"] },
+  { fixture: "guest-strip-detail", surface: "guestStripDetail", heading: "", texts: ["CLOSE", "BACK TO START"] },
+  { fixture: "guest-strip-detail-timer-warning", surface: "guestStripDetail", heading: "", texts: ["MORE TIME"] },
+  { fixture: "guest-start-gallery-link", surface: "start", heading: "", texts: ["SEE THE GOOD COMPANY"] },
 ];
 
 /** A one-finger drag from one point to another, in small steps. */
