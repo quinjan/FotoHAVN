@@ -25,6 +25,13 @@ public sealed class GuestGalleryTests
 
     private static string[] CompletedNewestFirst(IEnumerable<SeededCycle> seeded) => GalleryAssert.NewestFirst(seeded.Where(cycle => cycle.Strip is not null));
 
+    private static void FailStorage(GalleryRig rig)
+    {
+        rig.Active.Executor.Post(() => rig.Brain.SetActiveStorageFailed(true));
+        rig.Brain.ShowOperatorSurface(OperatorSurface.EventList);
+        rig.Settle();
+    }
+
     [Fact]
     public async Task The_Start_link_shows_when_the_Event_enables_the_gallery_and_a_completed_Photo_Strip_exists()
     {
@@ -71,7 +78,7 @@ public sealed class GuestGalleryTests
     }
 
     [Fact]
-    public async Task The_gallery_needs_neither_the_camera_nor_working_storage_on_the_link_but_storage_must_be_readable()
+    public async Task The_gallery_does_not_need_the_camera_so_the_link_stays_on_Start_unavailable_for_the_camera()
     {
         var (rig, _) = await StartedAsync();
         using var _ = rig;
@@ -79,16 +86,57 @@ public sealed class GuestGalleryTests
         rig.Settle();
 
         Assert.Equal(GuestSurface.StartUnavailable, rig.GuestView.Surface);
-        Assert.True(rig.GuestView.StartUnavailable!.GuestGalleryLinkVisible);
+        Assert.Equal(StartUnavailableReason.Camera, rig.GuestView.StartUnavailable!.Reason);
+        Assert.True(rig.GuestView.StartUnavailable.GuestGalleryLinkVisible);
         rig.OpenGuestGallery().ShouldBeAccepted();
         Assert.Equal(GuestSurface.GuestGallery, rig.GuestView.Surface);
-        rig.Guest("BackToStart");
+    }
 
-        rig.Active.Executor.Post(() => rig.Brain.SetActiveStorageFailed(true));
-        rig.Settle();
+    [Fact]
+    public async Task The_link_is_hidden_on_Start_unavailable_for_storage_because_the_gallery_could_not_open()
+    {
+        var (rig, _) = await StartedAsync();
+        using var _ = rig;
 
-        Assert.True(rig.GuestView.StartUnavailable!.GuestGalleryLinkVisible);
+        FailStorage(rig);
+
+        Assert.Equal(GuestSurface.StartUnavailable, rig.GuestView.Surface);
+        Assert.Equal(StartUnavailableReason.Storage, rig.GuestView.StartUnavailable!.Reason);
+        Assert.False(rig.GuestView.StartUnavailable.GuestGalleryLinkVisible);
         rig.OpenGuestGallery().ShouldBeRejected();
+        Assert.Equal(GuestSurface.StartUnavailable, rig.GuestView.Surface);
+    }
+
+    [Fact]
+    public async Task The_link_is_hidden_when_the_camera_and_storage_are_both_unavailable()
+    {
+        var (rig, _) = await StartedAsync();
+        using var _ = rig;
+        rig.Active.Camera.Fail(CameraFailureKind.Failed);
+        FailStorage(rig);
+
+        Assert.Equal(GuestSurface.StartUnavailable, rig.GuestView.Surface);
+        Assert.False(rig.GuestView.StartUnavailable!.GuestGalleryLinkVisible);
+        rig.OpenGuestGallery().ShouldBeRejected();
+    }
+
+    [Fact]
+    public async Task A_stale_STEP_INSIDE_while_the_gallery_is_open_is_not_available_and_leaves_the_gallery_alone()
+    {
+        var (rig, _) = await StartedAsync(2);
+        using var _ = rig;
+        rig.OpenGuestGallery().ShouldBeAccepted();
+        var before = rig.Diagnostics().Gallery;
+
+        rig.Guest("BeginGuestCycle").ShouldBeRejected();
+
+        Assert.Equal(GuestSurface.GuestGallery, rig.GuestView.Surface);
+        Assert.Equal(RunningEventStep.GuestGallery, rig.OperatorView.RunningEvent!.CurrentStep);
+        Assert.Equal(before, rig.Diagnostics().Gallery);
+        Assert.Null(rig.Diagnostics().GuestCycle);
+
+        rig.Guest("BackToStart").ShouldBeAccepted();
+        rig.Guest("BeginGuestCycle").ShouldBeAccepted();
     }
 
     [Fact]

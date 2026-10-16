@@ -20,12 +20,26 @@ test.use({ appOptions: { seed } });
 interface PageTiming {
   readonly page: number;
   readonly items: number;
+  /** Raw milliseconds from the command send to the first diagnostics read showing the full page. */
   readonly ms: number;
+  /** `ms` minus the hook-latency baseline: what the brain took, not the test hook's own round trip. */
+  readonly adjustedMs: number;
 }
 
-/** Sends `command`, then polls the brain's diagnostics (no pause beyond one round trip) until `ready` holds; returns the milliseconds that took. */
+/** The median of five plain `test.getDiagnostics` round trips: the hook's own latency, which every measured page includes at least once. */
+async function hookLatencyMs(hooks: HookClient): Promise<number> {
+  const samples: number[] = [];
+  for (let sample = 0; sample < 5; sample += 1) {
+    const start = performance.now();
+    await hooks.getDiagnostics();
+    samples.push(performance.now() - start);
+  }
+  samples.sort((left, right) => left - right);
+  return samples[2] ?? 0;
+}
+
+/** Sends `command`, then reads the brain's diagnostics back to back (no pause beyond one round trip) until `ready` holds; returns the milliseconds that took. */
 async function timed(
-  page: Page,
   hooks: HookClient,
   send: () => Promise<unknown>,
   ready: (gallery: NonNullable<Awaited<ReturnType<typeof operatorGallery>>>) => boolean,
@@ -40,20 +54,18 @@ async function timed(
     if (performance.now() - start > 60_000) {
       throw new Error(`The gallery was not ready after 60 s: ${JSON.stringify(gallery)}`);
     }
-    await page.waitForTimeout(2);
   }
 }
 
 /** Opens the seeded Event's gallery and pages to its end through the brain's commands, timing every page. */
-async function pageThrough(page: Page, hooks: HookClient): Promise<PageTiming[]> {
+async function pageThrough(page: Page, hooks: HookClient, baselineMs: number): Promise<PageTiming[]> {
   const timings: PageTiming[] = [];
   const first = await timed(
-    page,
     hooks,
     () => sendCommand(page, "OpenGallery", { eventId: largeGallerySeed.id }),
     (gallery) => gallery.eventId === largeGallerySeed.id && gallery.itemCount === pageSize && gallery.nextCursor !== null,
   );
-  timings.push({ page: 1, items: pageSize, ms: first });
+  timings.push({ page: 1, items: pageSize, ms: first, adjustedMs: first - baselineMs });
   for (let next = 2; next <= Math.ceil(cycles / pageSize); next += 1) {
     const before = await operatorGallery(hooks);
     const cursor = before?.nextCursor ?? null;
@@ -62,18 +74,19 @@ async function pageThrough(page: Page, hooks: HookClient): Promise<PageTiming[]>
     }
     const target = Math.min(next * pageSize, cycles);
     const ms = await timed(
-      page,
       hooks,
       () => sendCommand(page, "LoadMoreGuestCycles", { cursor }),
       (gallery) => gallery.itemCount === target && gallery.nextCursor !== cursor,
     );
-    timings.push({ page: next, items: target, ms });
+    timings.push({ page: next, items: target, ms, adjustedMs: ms - baselineMs });
   }
   return timings;
 }
 
 function describe(timings: readonly PageTiming[]): string {
-  return timings.map((timing) => `page ${String(timing.page)} (${String(timing.items)} items): ${timing.ms.toFixed(0)} ms`).join("; ");
+  return timings
+    .map((timing) => `page ${String(timing.page)} (${String(timing.items)} items): ${timing.ms.toFixed(0)} ms raw, ${timing.adjustedMs.toFixed(0)} ms adjusted`)
+    .join("; ");
 }
 
 test(
@@ -87,9 +100,12 @@ test(
     await expect.poll(async () => (await hooks.getDiagnostics()).storage.state, { timeout: 30_000 }).toBe("ready");
     await expect(list.row(largeGallerySeed.name)).toBeVisible();
 
+    const baselineMs = await hookLatencyMs(hooks);
+    console.log(`Hook latency baseline (median of 5 test.getDiagnostics round trips): ${baselineMs.toFixed(1)} ms`);
+
     let cold: PageTiming[] = [];
     await test.step("cold: the first pass makes the thumbnails (a strip warms its own when it commits during a real Event)", async () => {
-      cold = await pageThrough(operatorPage, hooks);
+      cold = await pageThrough(operatorPage, hooks, baselineMs);
       expect(await operatorGallery(hooks)).toMatchObject({ eventId: largeGallerySeed.id, itemCount: cycles, nextCursor: null });
       expect(cold.map((timing) => timing.items)).toEqual([40, 80, 120, 160, 200, 240, 280, 300]);
       console.log(`Cold pages of the seeded Event (thumbnails made on the way): ${describe(cold)}`);
@@ -99,10 +115,13 @@ test(
     await test.step("warm: after the gallery closes and opens again, every page loads in under 300 ms", async () => {
       expect(await sendCommand(operatorPage, "CloseGallery", {})).toEqual({ status: "accepted" });
       await expect.poll(() => operatorGallery(hooks)).toBeNull();
-      warm = await pageThrough(operatorPage, hooks);
+      warm = await pageThrough(operatorPage, hooks, baselineMs);
       console.log(`Warm pages of the seeded Event: ${describe(warm)}`);
       for (const timing of warm) {
-        expect(timing.ms, `page ${String(timing.page)} took ${timing.ms.toFixed(0)} ms`).toBeLessThan(pageBudgetMs);
+        expect(
+          timing.adjustedMs,
+          `page ${String(timing.page)} took ${timing.ms.toFixed(0)} ms raw, ${timing.adjustedMs.toFixed(0)} ms after the ${baselineMs.toFixed(0)} ms hook baseline`,
+        ).toBeLessThan(pageBudgetMs);
       }
       expect(await operatorGallery(hooks)).toMatchObject({ itemCount: cycles, nextCursor: null });
     });

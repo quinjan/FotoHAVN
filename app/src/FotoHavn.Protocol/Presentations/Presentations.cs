@@ -176,7 +176,7 @@ public enum StartUnavailableReason
 
 /// <summary>The Start unavailable view: Start with <c>STEP INSIDE</c> disabled. The guest sees the same neutral copy for both reasons; the reason is for the UI's data attributes and tests.</summary>
 /// <param name="Reason">Why.</param>
-/// <param name="GuestGalleryLinkVisible">Whether <c>SEE THE GOOD COMPANY →</c> still shows (the guest gallery needs no camera).</param>
+/// <param name="GuestGalleryLinkVisible">Whether <c>SEE THE GOOD COMPANY →</c> still shows: only for the camera reason (the guest gallery needs no camera), and only while storage is readable; never for the storage reason.</param>
 public sealed record StartUnavailableView(StartUnavailableReason Reason, bool GuestGalleryLinkVisible);
 
 /// <summary>Overlays on the Guest Screen; each is null when not shown.</summary>

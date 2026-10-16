@@ -29,27 +29,36 @@ test(
         await expect(guest.warning).toHaveCount(0);
       });
 
-      await test.step("opening and closing a strip keeps the same timer running down", async () => {
+      await test.step("opening and closing a strip keeps the same timer running down, never restarting it", async () => {
+        const samples = [opened];
         await tap(guest.strips.first());
         await expect(guest.detail).toBeVisible();
-        const inDetail = (await guestGallery(hooks))?.timer.remainingMs ?? 0;
-        expect(inDetail).toBeGreaterThan(0);
-        expect(inDetail).toBeLessThan(opened);
+        samples.push((await guestGallery(hooks))?.timer.remainingMs ?? Number.NaN);
         await tap(guest.close);
         await expect(guest.list).toBeVisible();
-        const back = (await guestGallery(hooks))?.timer.remainingMs ?? 0;
-        expect(back).toBeGreaterThan(0);
-        expect(back).toBeLessThan(inDetail);
+        samples.push((await guestGallery(hooks))?.timer.remainingMs ?? Number.NaN);
+        expect(samples.every((remaining) => remaining > 0 && remaining <= opened), `the timer never restarts: ${samples.join(", ")}`).toBe(true);
+        for (let index = 1; index < samples.length; index += 1) {
+          expect(samples[index], `remainingMs after step ${String(index)}: ${samples.join(", ")}`).toBeLessThan(samples[index - 1] ?? 0);
+        }
       });
 
       await test.step("in its last 20 s the gallery warns, with the countdown and MORE TIME", async () => {
+        // Scale 10 until the warning is 15 s (real) away, then real time, so the 20 s warning lasts 20 real seconds for the checks below.
+        await expect
+          .poll(async () => (await guestGallery(hooks))?.timer.remainingMs ?? Infinity, { timeout: 30_000, intervals: [50] })
+          .toBeLessThanOrEqual(35_000);
+        await hooks.setClockScale(1);
+        expect((await guestGallery(hooks))?.timer.warning, "the warning has not begun yet").toBe(false);
         await expect.poll(async () => (await guestGallery(hooks))?.timer.warning, { timeout: 30_000 }).toBe(true);
         await expect(guest.warning).toBeVisible();
         await expect(guest.warning).toContainText(/\d+ SECONDS? LEFT/);
         await expect(guest.warning.getByRole("button", { name: "MORE TIME", exact: true })).toBeVisible();
-        expect((await guestGallery(hooks))?.timer.remainingMs ?? Infinity).toBeLessThanOrEqual(20_000);
+        const timer = (await guestGallery(hooks))?.timer;
+        expect(timer?.warning).toBe(true);
+        expect(timer?.remainingMs ?? Infinity).toBeLessThanOrEqual(20_000);
+        await hooks.setClockScale(10);
       });
-
       await test.step("when the time runs out the Guest Screen returns to Start and the gallery is closed", async () => {
         await expect((await run.controls()).surface("start")).toBeVisible({ timeout: 30_000 });
         expect(await guestGallery(hooks)).toBeNull();

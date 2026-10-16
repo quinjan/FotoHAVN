@@ -141,7 +141,7 @@ public sealed partial class Brain
             return gallery;
         }
 
-        var galleryLink = GuestGalleryLinkVisible(active);
+        var galleryLink = GuestGalleryLinkShown(active);
         if (_cameraState != CameraState.Ready)
         {
             return new GuestPresentation(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, galleryLink), overlays, null, null, null, null, null, null, null, null, null);

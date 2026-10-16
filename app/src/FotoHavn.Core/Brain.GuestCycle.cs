@@ -92,6 +92,7 @@ public sealed partial class Brain
             || _start is not null
             || _cycle is not null
             || _cycleStarting
+            || ActiveGuestGallery is not null
             || _assistance is not null
             || active.PinDialogOpen
             || _cameraState != CameraState.Ready

@@ -27,21 +27,23 @@ public sealed partial class Brain
     private static bool GuestGalleryLinkVisible(ActiveEventState active) =>
         GalleryRules.GuestLinkVisible(active.Event.GuestGalleryEnabled, active.CompletedGuestCycles);
 
+    /// <summary>Whether the link is shown on the Guest Screen and the gallery can open: <see cref="GuestGalleryLinkVisible"/> and readable storage (a link that <c>OpenGuestGallery</c> would refuse is never shown). The camera isn't needed.</summary>
+    private bool GuestGalleryLinkShown(ActiveEventState active) =>
+        GuestGalleryLinkVisible(active) && StorageReady && !active.StorageFailed;
+
     /// <summary>
     /// <c>OpenGuestGallery</c> (<c>SEE THE GOOD COMPANY →</c>): shows the gallery with its first page loading and starts its timer. Only from Start
-    /// (no cycle, no Operator Assistance, no PIN dialog) while the link shows and storage can be read; the camera isn't needed.
+    /// (no cycle, no Operator Assistance, no PIN dialog) while the link shows; the camera isn't needed.
     /// </summary>
     private CommandResultMessage OpenGuestGallery(string id)
     {
         if (_activeEvent is not { } active
-            || !GuestGalleryLinkVisible(active)
+            || !GuestGalleryLinkShown(active)
             || ActiveGuestGallery is not null
             || _cycle is not null
             || _cycleStarting
             || _assistance is not null
-            || active.PinDialogOpen
-            || !StorageReady
-            || active.StorageFailed)
+            || active.PinDialogOpen)
         {
             return NotAvailable(id);
         }
