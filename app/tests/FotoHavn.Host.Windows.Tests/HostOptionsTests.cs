@@ -26,6 +26,15 @@ public sealed class HostOptionsTests
         Assert.Equal(new HostOptions("D", 1, "cam=1", "R"), options);
     }
 
+    [Fact]
+    public void Smoke_is_a_flag_without_a_value()
+    {
+        Assert.True(HostOptions.Parse(["--smoke"]).Smoke);
+        Assert.True(HostOptions.Parse(["--data", "D", "--smoke"]).Smoke);
+        Assert.False(HostOptions.Default.Smoke);
+        Assert.Throws<HostOptionsException>(() => HostOptions.Parse(["--smoke=1"]));
+    }
+
     [Theory]
     [InlineData("diskFull", StorageFaultKind.DiskFull)]
     [InlineData("accessDenied", StorageFaultKind.AccessDenied)]

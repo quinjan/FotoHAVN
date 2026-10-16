@@ -1,5 +1,4 @@
 #if E2E_HOOKS
-using System.Windows;
 using System.Windows.Threading;
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.Displays;
@@ -17,13 +16,15 @@ namespace FotoHavn.Host.Windows.E2E;
 /// <summary>
 /// The host side of the test hooks (compiled only with <c>E2E_HOOKS</c>; a field build never contains this type, which
 /// the publish guard and the reflection test in FotoHavn.Host.Windows.Tests enforce). The brain calls these on its
-/// executor; each returns at once and does the work on the UI thread.
+/// executor; each returns at once and does the work on the UI thread. <c>test.exit</c> ends the app through the host's exit path, which lets the
+/// windows close without a confirmation even while an Event runs.
 /// </summary>
 internal sealed class WindowsHostTestHooks(
     Dispatcher dispatcher,
     ScreenWindows windows,
     string dataFolder,
-    ILogger logger) : IHostTestHooks
+    ILogger logger,
+    Action<int> exit) : IHostTestHooks
 {
     /// <summary>Hooks that end something wait this long, so the brain's reply reaches the page first.</summary>
     private static readonly TimeSpan ReplyDeliveryDelay = TimeSpan.FromMilliseconds(250);
@@ -70,7 +71,7 @@ internal sealed class WindowsHostTestHooks(
         dispatcher.InvokeAsync(async () =>
         {
             await Task.Delay(ReplyDeliveryDelay);
-            Application.Current.Shutdown(0);
+            exit(0);
         });
     }
 

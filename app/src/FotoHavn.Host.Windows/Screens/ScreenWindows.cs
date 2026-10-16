@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using FotoHavn.Core;
 using FotoHavn.Core.Displays;
 using FotoHavn.Host.Windows.Displays;
+using FotoHavn.Host.Windows.Hardening;
 using FotoHavn.Host.Windows.Interop;
 using FotoHavn.Host.Windows.Logging;
 using FotoHavn.Protocol;
@@ -95,6 +96,9 @@ internal sealed class ScreenWindows : IHostServices
         UpdateOperatorDisplayId();
         return window.LoadWebViewAsync();
     }
+
+    /// <summary>Brings the Operator window forward: restored if minimized, then the foreground window if Windows allows (UI thread). Returns whether it took the foreground.</summary>
+    public bool ActivateOperator() => _operator is { } window && ForegroundActivator.Bring(new BoothWindowForeground(window));
 
     public bool HasWindow(Role role) => role == Role.Operator ? _operatorOpen : _guestOpen;
 
@@ -221,6 +225,7 @@ internal sealed class ScreenWindows : IHostServices
 
         _guest = null;
         _guestOpen = false;
+        _services?.Guard.Detach();
         guest.CloseByHost();
         HostLog.GuestScreenClosed(_logger);
     }
@@ -228,13 +233,13 @@ internal sealed class ScreenWindows : IHostServices
     private void OpenGuest(DisplayInfo display)
     {
         CloseGuest();
-        if (_services is null)
+        if (_services is not { } services)
         {
             return;
         }
 
         // The display is used as given (it may be virtual): no lookup in the adapter.
-        var window = new BoothWindow(Role.Guest, _services)
+        var window = new BoothWindow(Role.Guest, services)
         {
             WindowStyle = WindowStyle.None,
             ResizeMode = ResizeMode.NoResize,
@@ -244,8 +249,22 @@ internal sealed class ScreenWindows : IHostServices
         window.PinBounds(display.Bounds);
         _guest = window;
         _guestOpen = true;
+        window.Closed += (_, _) =>
+        {
+            // Closed by something other than CloseGuest (no Event runs, so the closing handler let it go): forget it.
+            if (ReferenceEquals(_guest, window))
+            {
+                _guest = null;
+                _guestOpen = false;
+                services.Guard.Detach();
+            }
+        };
         window.Show();
         window.PinBounds(display.Bounds);
+        if (!services.Guard.Attach(window.EnsureHandle()))
+        {
+            HostLog.InputGuardUnavailable(_logger, services.Guard.LastError);
+        }
 
         var windowBounds = window.GetPhysicalBounds();
         HostLog.GuestScreenOpened(_logger, display.Name, display.Id, display.Bounds, display.Scale, windowBounds);

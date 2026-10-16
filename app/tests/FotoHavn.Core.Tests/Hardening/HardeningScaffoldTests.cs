@@ -5,11 +5,11 @@ using FotoHavn.Protocol.Presentations;
 
 namespace FotoHavn.Core.Tests.Hardening;
 
-/// <summary>The wave A seams of runtime hardening: the close request, the close confirmation commands, and the diagnostics (M10 wave B1 fills the bodies).</summary>
+/// <summary>The seams of runtime hardening that do not depend on a running Event: the close request, the close confirmation commands, and the diagnostics.</summary>
 public sealed class HardeningScaffoldTests
 {
     [Fact]
-    public async Task The_scaffold_close_request_shuts_the_app_down_at_once()
+    public async Task A_close_request_with_no_Event_shuts_the_app_down_at_once()
     {
         var lifetime = new NoOpAppLifetime();
         using var rig = await ActiveRig.CreateAsync(new ActiveRigOptions { AppLifetime = lifetime });
@@ -44,7 +44,7 @@ public sealed class HardeningScaffoldTests
     }
 
     [Fact]
-    public async Task The_close_confirmation_commands_are_not_available_until_wave_B1_fills_them()
+    public async Task The_close_confirmation_commands_are_not_available_without_the_dialog()
     {
         using var rig = await ActiveRig.CreateAsync();
 
