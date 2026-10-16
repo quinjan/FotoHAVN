@@ -1738,12 +1738,12 @@ Verification record (M7):
 ### M8: Guest Cycle (L)
 
 Tasks:
-- [ ] Brain: Guest Cycle state machine (section 7), including the ported arrangement and retake rules, skipped steps, back navigation, capture sequence, Phase Timers with automatic progress, warning, and `MORE TIME`, Start Over, Keepsake, failures, and Operator Assistance with Retry.
-- [ ] FsCheck model with the invariants in Q23 (section 18).
-- [ ] UI screens: Start, Start unavailable, Template, Photographs (Camera and Arrange, drag and Move), Filters, Keepsake, Operator Assistance, phase timer warning, Start Over confirmation, and exit hold on every guest screen.
-- [ ] Motion: countdown, one flash, step crossfades at 240 ms, paper reveal for the Keepsake, and the reduced-motion equivalents.
-- [ ] Live regions: capture progress, countdown (announced once at start), notices, and phase timer warnings.
-- [ ] Presentation fixtures for every guest state.
+- [x] Brain: Guest Cycle state machine (section 7), including the ported arrangement and retake rules, skipped steps, back navigation, capture sequence, Phase Timers with automatic progress, warning, and `MORE TIME`, Start Over, Keepsake, failures, and Operator Assistance with Retry.
+- [x] FsCheck model with the invariants in Q23 (section 18).
+- [x] UI screens: Start, Start unavailable, Template, Photographs (Camera and Arrange, drag and Move), Filters, Keepsake, Operator Assistance, phase timer warning, Start Over confirmation, and exit hold on every guest screen.
+- [x] Motion: countdown, one flash, step crossfades at 240 ms, paper reveal for the Keepsake, and the reduced-motion equivalents.
+- [x] Live regions: capture progress, countdown (announced once at start), notices, and phase timer warnings.
+- [x] Presentation fixtures for every guest state.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
@@ -1772,6 +1772,67 @@ Verification. The implementing agent writes and runs these through the [verifica
   - `regression/guest/reduced-motion`: with reduced-motion emulation, there are no transforms and the flash is a static change.
   - `regression/visual/guest-screens`: real-host screenshots of every step at four resolutions, with no scrollbars.
 - **Manual:** a full cycle on the booth touch screen at standing distance while the operator uses the Operator Screen; flash comfort; countdown legibility from 1.5 m; a guest cycle with two people in frame to check the crop guides; unplug the guest monitor mid-cycle and recover with `RETRY`.
+
+Verification record (M8):
+- **Date and commits:** 2026-10-15/16.
+  - Contracts (protocol v8, pure Guest Cycle model, `PhaseTimerEngine`, scaffolding): `91af0d34`.
+  - Parallel merges (brain orchestration, Template and Photographs, Filters/Keepsake/Assistance/chrome): `628a174e`, `dfe3f5f0`, `cda223f5`.
+  - Integration (FsCheck bookkeeping fix, fixture consolidation, skipped-Filters compose state, `FiltersView` geometry, Q24–Q27, DESIGN.md copy): `40ed21e4`, `17dc233b`.
+  - `@m8` end-to-end and headless Guest Cycle scenarios: `319e7e1e`.
+  - Review fixes: `073186b5`.
+- **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
+- **Results:** from an independent clean clone at `319e7e1e`; the review fixes were re-verified on the changed projects and the `@m8` specs at `073186b5`.
+
+  | Step | Command | Result |
+  | --- | --- | --- |
+  | 1 | Locked restore and build | 0 warnings |
+  | 2 | `dotnet test` with coverage | 3316 tests: 3311 passed, 5 skipped (2 file symlinks, 2 opt-in Windows Camera app tests, 1 E2E-only host test) |
+  | 2 | Second run of the changed projects | Core 1782, Host.Headless 185, Host.Windows 255 + 1 skipped |
+  | 2 | Per-assembly 90% gate | All four pass |
+  | 2 | Core tests in an E2E build | 1763 passed |
+  | 2 | Spike S3 speed step | Medians 37.7–78.5 ms, worst p95 100.4 ms (budget 150 ms) |
+  | 3 | UI `test:coverage` | 1339 passed |
+  | 3 | UI `test:fixtures` | 832 passed (fixture lane and headless lane, including 5 headless Guest Cycle scenarios) |
+  | 5 | `--project=regression` | 81 passed, 2 skipped (both physical-display scenarios, "not run: one display"), in 23 m 09 s |
+  | 5 | Smoke | 7 passed in 1 m 24 s |
+  | 5 | Visual comparison (wave C run) | 868 comparisons, maximum 0.52%, mean 0.016% |
+  | 8 | `verify-agent-docs.ps1` | 21 passed |
+  | — | After the review fixes (`073186b5`) | Core 1793 with coverage and 1774 in the E2E build; UI 1341 unit and 348 guest fixture tests; `@m8` regression 14 and smoke 1 |
+- **Coverage:**
+
+  | Assembly | Line | Branch |
+  | --- | --- | --- |
+  | `FotoHavn.Core` | 97.6% | 93.5% |
+  | `FotoHavn.Protocol` | 100% | 100% |
+  | `FotoHavn.Storage` | 99.3% | 97.8% |
+  | `FotoHavn.Catalog` | 99.7% | 95.5% |
+
+  UI: 99.44% lines and 97.85% branches.
+- **`@m8` end-to-end:** all 14 scenarios carry `@m8` and `@camera`; `keyboard-only` and `guest-screens` also carry `@cursor`. Touch uses CDP touch events, and the drag swap is a real pointer drag on the Guest Screen. A second run of the 15 `@m8` specs passed 15 of 15 with no flaky tests. `guest-screens` saved 52 screenshots (13 states × 4 resolutions) with no scroll or overflow.
+- **CI counterparts (no hooks on CI):** the headless lane runs the pointer cycle, keyboard-only with Move, Start Over from all three steps, template change, and skipped steps on the real brain with the fake camera. The hook-dependent scenarios are covered by brain tests in `GuestCycles/Orchestration`: the progress property (default and random Event settings), timer warning and `MORE TIME`, camera and storage faults with `RETRY`, display loss and reopening, `END EVENT` and the guest PIN exit, and the operator panel step.
+- **Path length:** in a 127-character worktree path, the nested `@build` runs in `camera-precondition` fail because the child's WebView2 user-data folder exceeds 260 characters. They pass from the clean clone's shorter path. Keep checkouts short or set `FOTOHAVN_E2E_OUTPUT`.
+- **GitHub CI:**
+  - `Desktop app` run 38860614081 (`319e7e1e`) succeeded.
+  - Run 38865756182 (`073186b5`) succeeded.
+- **Review fixes:**
+  - **(Medium)** The Retake-candidate announcement never fired in the real flow, because the Arrange tab mounted with the candidate already present. `PhotographsStep` now announces once per candidate.
+  - **(Low)** `DragPlace` sent the revision at release, not at the start of the gesture. It now sends the gesture's revision, so the model's stale-gesture guard works.
+  - **(Low)** Capture discards, commits, the Photo Strip commit and the cycle end ran in independent tasks, so a discard could land after the cycle ended (file kept, Assistance on Keepsake). Store writes for a cycle now run through one ordered queue.
+  - **(Low)** Start Over, `END EVENT` and the guest PIN exit left a pending Retake candidate kept. It is now discarded before the cycle ends, and a late Retake commit is discarded too.
+  - **(Low)** A Look preview still in flight when the final strip began could clear `composing` and re-add cache keys. The final compose now supersedes it.
+  - **(Low)** The brain test rig could settle before an off-executor encode posted back. The encode now counts as off-executor work.
+- **Bug found in integration:** the wave A FsCheck "no kept Capture lost" check failed once. The rules were right; the test kept a re-committed id in its discarded set. While composing with Filters skipped, Arrange offered `RETAKE` and `MOVE`; it now shows "Preparing your strip.".
+- **Decisions:** Q24 (retained pool as a count line), Q25 (failed composition keeps the previous preview), Q26 (skipped steps omitted from progress), and Q27 (Retry, Keepsake, storage and warning behaviours) are recorded in section 18. `FiltersView` gained `width`, `height` and `landscape` within protocol v8 (unreleased, so no bump). Captures are JPEG-encoded through the new `ICaptureEncoder` port (quality 92, shared with diagnostics).
+- **Manual (pending, to be run by the owner):**
+  - A full cycle on the booth touch screen at standing distance while the operator uses the Operator Screen.
+  - Flash comfort and countdown legibility from 1.5 m.
+  - A Guest Cycle with two people in frame to check the crop guides (needs the camera shutter open).
+  - Unplug the guest monitor mid-cycle and recover with `RETRY`.
+- **Not proven:**
+  - A real scene: every frame was the camera's "camera off" placeholder.
+  - Real finger input: CDP touch stands in for it.
+  - Physical display loss: simulated with `test.disconnectDisplay`.
+  - Note: at 2560×1440 the Arrange strip takes only the left ~40% of the stage. It fits the layout but may merit a design review.
 
 ### M9: Event Gallery, operator and guest views (M)
 
