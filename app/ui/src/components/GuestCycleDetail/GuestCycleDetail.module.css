@@ -97,6 +97,14 @@
   block-size: var(--detail-stage);
 }
 
+.unavailableNote {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
 .facts {
   display: flex;
   flex-wrap: wrap;
@@ -161,4 +169,11 @@
   --capture-share: 0.76; /* The lifted strip stays the subject; its Captures sit a little smaller beside it. */
 
   justify-content: center;
+}
+
+.guestActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 var(--app-space-fluid-48);
 }

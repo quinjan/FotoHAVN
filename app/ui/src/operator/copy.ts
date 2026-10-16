@@ -72,3 +72,16 @@ export const deleteDialog = {
   confirmLabel: "DELETE EVENT",
   cancelLabel: "KEEP EVENT",
 } as const;
+
+export const deleteGuestCycleDialog = {
+  title: "Delete this Guest Cycle?",
+  confirmLabel: "DELETE GUEST CYCLE",
+  cancelLabel: "KEEP GUEST CYCLE",
+} as const;
+
+/** The Guest Cycle's delete sentence: when it began and how many files go with it (its Captures and its Photo Strip). */
+export function deleteGuestCycleBody(time: string | null, fileCount: number | null): string {
+  const subject = time === null ? "This Guest Cycle" : `The Guest Cycle from ${time}`;
+  const files = fileCount === null ? " and its files" : fileCount === 0 ? "" : fileCount === 1 ? " and its file" : ` and its ${String(fileCount)} files`;
+  return `${subject}${files} will be removed from this computer. This can't be undone.`;
+}

@@ -45,6 +45,22 @@
   block-size: calc(var(--print-scale) * 1.8);
 }
 
+/* A Guest Cycle whose files are gone: an empty Cream Paper mat where the print would stand, the caption says why. */
+.unavailable {
+  display: block;
+  inline-size: calc(var(--print-scale) * 0.6);
+  block-size: calc(var(--print-scale) * 1.8);
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-paper);
+}
+
+/* The sentinel for near-the-end loading: it takes no space, and cancels the list's gap above it. */
+.operatorEnd {
+  block-size: var(--stroke-hairline);
+  inline-size: var(--stroke-hairline);
+  margin-block-start: calc(var(--space-32) * -1);
+}
+
 .capture {
   inline-size: 100%;
   block-size: auto;
@@ -146,6 +162,25 @@
 .end {
   flex: none;
   inline-size: var(--stroke-hairline);
+}
+
+.loading {
+  flex: none;
+  align-self: center;
+  padding-inline: var(--app-gutter);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.loading:empty {
+  display: none;
+}
+
+.loading[data-alone] {
+  margin-inline: auto;
 }
 
 @media (prefers-reduced-motion: no-preference) {

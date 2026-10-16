@@ -38,14 +38,14 @@ describe("the guest gallery surfaces", () => {
     renderRoot(fixture("guest-ui-gallery-four-strips"));
     expect(document.querySelector("main")).toHaveAttribute("data-fotohavn-surface", "guestGallery");
     expect(screen.getByRole("heading", { level: 1, name: "Look at you." })).toBeVisible();
-    expect(document.querySelector("[data-guest-strip-count]")).toHaveAttribute("data-guest-strip-count", "4");
+    expect(screen.getAllByRole("img", { name: "Photo Strip from this Event" })).toHaveLength(4);
   });
 
   it("routes guestStripDetail to the strip detail with its arranged Captures", () => {
     renderRoot(fixture("guest-ui-strip-detail"));
     expect(document.querySelector("main")).toHaveAttribute("data-fotohavn-surface", "guestStripDetail");
-    expect(screen.getByRole("heading", { level: 1, name: "Look at you." })).toBeVisible();
-    expect(document.querySelector("[data-guest-capture-count]")).toHaveAttribute("data-guest-capture-count", "4");
+    expect(screen.getByRole("button", { name: "CLOSE" })).toBeVisible();
+    expect(screen.getAllByRole("img", { name: "Photograph from this Event" })).toHaveLength(4);
   });
 
   it("keeps the exit hold on both surfaces", () => {

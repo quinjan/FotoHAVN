@@ -1,18 +1,47 @@
-import { StatementHeading } from "../components/StatementHeading/index.ts";
+import { useEffect, useState } from "react";
+import { useBrainClient } from "../brain/BrainClientContext.ts";
+import { GuestCycleList } from "../components/GuestCycleList/index.ts";
 import type { GuestGalleryView as GuestGalleryData, GuestOverlays } from "../protocol/generated.ts";
-import screen from "../screens/Screen.module.css";
+import { forgetOpenedStrip, rememberedStrip, rememberOpenedStrip } from "./galleryFocus.ts";
+import { GuestGalleryChrome } from "./GuestGalleryChrome.tsx";
+import { guestStrip } from "./guestGalleryMapping.ts";
 
 /**
- * The guest gallery (M9 UI-2; plan section 8, Event Gallery, Guest view). Wave A routes `surface: guestGallery` here and ships a placeholder;
- * UI-2 builds it from `view` alone with `GuestCycleList` in guest mode: "Look at *you.*", the horizontally scrolling row of Photo Strips
- * (`OpenGuestStrip` with a strip's `guestCycleId`, `LoadMoreGuestStrips` with `view.nextCursor`), and `BACK TO START ←` (`BackToStart`). The
- * `guest_gallery` Phase Timer's warning is `overlays.phaseTimerWarning` (phase `guestGallery`) with `MORE TIME` (`MoreTime`); the exit hold and
- * the PIN dialog are the shell's. `GuestRoot` is frozen: it passes exactly these props.
+ * The guest gallery (plan section 8, Guest view), drawn from the brain's view alone: "Look at *you.*", the row of completed
+ * Photo Strips that scrolls sideways by touch (`OpenGuestStrip` with a strip's id), the next page as the row nears its end
+ * (`LoadMoreGuestStrips` with the view's cursor, once for each cursor), and `BACK TO START ←` (`BackToStart`). The
+ * `guest_gallery` Phase Timer's warning, with `MORE TIME`, is the shell's overlay drawn by `GuestGalleryChrome`; the exit hold
+ * and the PIN dialog are `GuestRoot`'s. The view carries images and alternative text only, so nothing else can be shown.
  */
-export function GuestGalleryView({ view }: { readonly view: GuestGalleryData; readonly overlays: GuestOverlays }) {
+export function GuestGalleryView({ view, overlays }: { readonly view: GuestGalleryData; readonly overlays: GuestOverlays }) {
+  const client = useBrainClient();
+  const [restoreFocus] = useState(rememberedStrip);
+  useEffect(() => {
+    forgetOpenedStrip();
+  }, []);
+
   return (
-    <div className={screen.screen} data-guest-strip-count={view.strips.length}>
-      <StatementHeading level={1} size="heading-lg" align="center" lead="Look at" turn="you." />
-    </div>
+    <GuestGalleryChrome overlays={overlays}>
+      <GuestCycleList
+        mode="guest"
+        strips={view.strips.map(guestStrip)}
+        hasMore={view.nextCursor !== null}
+        pageKey={view.nextCursor}
+        loading={view.loadingMore}
+        restoreFocus={restoreFocus}
+        onOpen={(guestCycleId) => {
+          rememberOpenedStrip(guestCycleId);
+          void client.sendCommand("OpenGuestStrip", { guestCycleId });
+        }}
+        onBack={() => {
+          void client.sendCommand("BackToStart", {});
+        }}
+        onLoadMore={() => {
+          if (view.nextCursor !== null) {
+            void client.sendCommand("LoadMoreGuestStrips", { cursor: view.nextCursor });
+          }
+        }}
+      />
+    </GuestGalleryChrome>
   );
 }

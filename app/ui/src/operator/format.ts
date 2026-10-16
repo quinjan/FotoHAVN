@@ -28,6 +28,17 @@ export function formatLastUsed(lastUsed: string | null): string {
     : `Last used ${formatDay(parsed.getDay(), parsed.getDate(), parsed.getMonth(), parsed.getFullYear())}`;
 }
 
+/** A Guest Cycle's start as the operator reads it: local time with the date, e.g. "13 Oct, 8:42 PM". */
+export function formatGuestCycleTime(startedAt: string): string {
+  const parsed = new Date(startedAt);
+  if (Number.isNaN(parsed.getTime())) {
+    return startedAt;
+  }
+  const hours = parsed.getHours();
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+  return `${String(parsed.getDate())} ${months[parsed.getMonth()] ?? ""}, ${String(hours % 12 === 0 ? 12 : hours % 12)}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
+}
+
 export function formatGuestCycles(count: number): string {
   return count === 1 ? "1 Guest Cycle" : `${String(count)} Guest Cycles`;
 }

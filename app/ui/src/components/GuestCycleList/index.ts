@@ -5,7 +5,11 @@ export {
   type OperatorGuestCycleListProps,
 } from "./GuestCycleList.tsx";
 export {
+  loadingFirstCopy,
+  loadingMoreCopy,
   outcomeLabels,
+  templateAndLook,
+  unavailableCopy,
   type GalleryImage,
   type GuestCycleOutcome,
   type GuestStrip,

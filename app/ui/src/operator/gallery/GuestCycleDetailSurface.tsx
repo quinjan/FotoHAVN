@@ -1,18 +1,58 @@
+import { useEffect, useRef } from "react";
+import { GuestCycleDetail } from "../../components/GuestCycleDetail/index.ts";
 import { StatementHeading } from "../../components/StatementHeading/index.ts";
+import { TextLink } from "../../components/TextLink/index.ts";
 import type { GuestCycleDetailView, RunningEventPanel } from "../../protocol/generated.ts";
-import screen from "../../screens/Screen.module.css";
+import { OperatorAssistanceAlert } from "../OperatorAssistanceAlert.tsx";
+import { useSendCommand } from "../OperatorCommands.tsx";
+import { backToGalleryLabel, detailHeading } from "./galleryCopy.ts";
+import { operatorDetail } from "./galleryMapping.ts";
+import styles from "./Gallery.module.css";
 
 /**
- * The operator's Guest Cycle detail (M9 UI-1; plan section 8, Event Gallery, Operator view). Wave A routes `surface: guestCycleDetail` here
- * and ships a placeholder; UI-1 builds it from `view` alone with `GuestCycleDetail` in operator mode: the full Photo Strip, the Captures in
- * arrangement order, the facts, `OPEN FOLDER` (`OpenGuestCycleFolder`), `DELETE` (`DeleteGuestCycle`), and the way back (`CloseGuestCycle`). The
- * delete confirmation is the shell's `confirmation` overlay (kind `deleteGuestCycle`), not part of this surface. `OperatorRoot` is frozen: it
- * passes exactly these props.
+ * The operator's Guest Cycle detail (plan section 8, Operator view), drawn from the brain's view alone: the full Photo Strip,
+ * the kept Captures in arrangement order, the facts, `OPEN FOLDER` (`OpenGuestCycleFolder`), `DELETE` (`DeleteGuestCycle`; the
+ * confirmation is the shell's overlay, not this surface's), and `BACK TO GALLERY` (`CloseGuestCycle`), where focus starts so
+ * the way back is one key away. A Guest Cycle whose files are gone says so.
  */
-export function GuestCycleDetailSurface({ view }: { readonly view: GuestCycleDetailView; readonly running: RunningEventPanel | null }) {
+export function GuestCycleDetailSurface({ view, running }: { readonly view: GuestCycleDetailView; readonly running: RunningEventPanel | null }) {
+  const send = useSendCommand();
+  const backRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    backRef.current?.focus();
+  }, []);
+
+  const close = () => {
+    void send("CloseGuestCycle", {}, { key: "close-guest-cycle" });
+  };
   return (
-    <div className={screen.screen} data-gallery-guest-cycle={view.guestCycleId}>
-      <StatementHeading level={1} size="heading-lg" align="center" lead="Guest" turn="Cycle." />
+    <div className={styles.view} data-gallery-guest-cycle={view.guestCycleId}>
+      <header className={styles.header}>
+        <TextLink ref={backRef} arrow="left" onClick={close}>
+          {backToGalleryLabel}
+        </TextLink>
+        <StatementHeading level={1} eyebrow={view.eventName} lead={detailHeading.lead} turn={detailHeading.turn} />
+      </header>
+      <div className={styles.statuses}>
+        <OperatorAssistanceAlert
+          reason={running?.assistance?.reason ?? null}
+          onReturn={() => {
+            void send("CloseGallery", {}, { key: "close-gallery" });
+          }}
+        />
+      </div>
+      <GuestCycleDetail
+        mode="operator"
+        cycle={operatorDetail(view)}
+        canOpenFolder={view.canOpenFolder}
+        canDelete={view.canDelete}
+        onOpenFolder={() => {
+          void send("OpenGuestCycleFolder", { guestCycleId: view.guestCycleId }, { key: "open-guest-cycle-folder" });
+        }}
+        onDelete={() => {
+          void send("DeleteGuestCycle", { guestCycleId: view.guestCycleId }, { key: "delete-guest-cycle" });
+        }}
+      />
     </div>
   );
 }

@@ -59,6 +59,7 @@ export const guestGalleryFixtures: Readonly<Record<string, GuestWelcomeMessage>>
   "guest-ui-gallery-four-strips": galleryWelcome({ strips: strips(4), nextCursor: null, loadingMore: false }),
   "guest-ui-gallery-many-strips": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: false }),
   "guest-ui-gallery-loading-more": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: true }),
+  "guest-ui-gallery-loading-first": galleryWelcome({ strips: [], nextCursor: null, loadingMore: true }),
   "guest-ui-gallery-timer-warning": galleryWelcome(
     { strips: strips(4), nextCursor: null, loadingMore: false },
     { phaseTimerWarning: { phase: "guestGallery", remainingSeconds: 18 } },

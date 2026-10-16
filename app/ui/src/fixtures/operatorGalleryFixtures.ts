@@ -1,6 +1,6 @@
 import { fixtureCapture, fixtureStrip } from "../components/shared/fixturePhotographs.ts";
 import type { EventGalleryView, GalleryItemView, GuestCycleDetailView, OperatorWelcomeMessage } from "../protocol/generated.ts";
-import { operatorWelcome, overlays } from "./operatorSetupFixtures.ts";
+import { operatorWelcome, overlays, runningEventPanel } from "./operatorSetupFixtures.ts";
 
 /**
  * Hand-written fixtures for the operator's Event Gallery (M9 UI-1 owns this file; wave A seeds it). The brain's own gallery fixtures
@@ -83,11 +83,50 @@ function detail(parts: Partial<GuestCycleDetailView> = {}): GuestCycleDetailView
   };
 }
 
+/** Three hundred and twenty Guest Cycles (eight pages of 40), newest first, in the mix of endings an Event has. */
+function manyItems(count: number): GalleryItemView[] {
+  return Array.from({ length: count }, (_, index) => {
+    const id = `cycle-${String(count - index)}`;
+    const minutes = 3 + index * 2;
+    if (index % 9 === 4) {
+      return withoutStrip(id, minutes, index % 2 === 0 ? "startedOver" : "endedByOperator", 1 + (index % 3));
+    }
+    return completed(id, minutes, index % 7 === 3);
+  });
+}
+
+const confirmation = (fileCount: number) =>
+  overlays({
+    confirmation: { kind: "deleteGuestCycle", eventName: null, counts: null, guestCycle: { guestCycleId: "cycle-9", startedAt: at(2), fileCount } },
+  });
+
 export const operatorGalleryFixtures: Readonly<Record<string, OperatorWelcomeMessage>> = {
   "operator-ui-gallery-mixed": galleryWelcome(gallery()),
   "operator-ui-gallery-loading-more": galleryWelcome(gallery({ loadingMore: true })),
   "operator-ui-gallery-load-failed": galleryWelcome(gallery({ loadFailed: true })),
   "operator-ui-gallery-end": galleryWelcome(gallery({ nextCursor: null })),
+  "operator-ui-gallery-empty": galleryWelcome(gallery({ items: [], nextCursor: null, empty: true })),
+  "operator-ui-gallery-loading-first": galleryWelcome(gallery({ items: [], nextCursor: null, loadingMore: true })),
+  "operator-ui-gallery-load-failed-first": galleryWelcome(gallery({ items: [], nextCursor: null, loadFailed: true })),
+  "operator-ui-gallery-large": galleryWelcome(gallery({ items: manyItems(320), nextCursor: null })),
+  "operator-ui-gallery-large-more": galleryWelcome(gallery({ items: manyItems(320), nextCursor: "cursor-8" })),
+  "operator-ui-gallery-running": operatorWelcome("eventGallery", {
+    eventGallery: gallery({ running: true, items: items.slice(0, 3), nextCursor: null }),
+    runningEvent: runningEventPanel({ currentStep: "photographs" }),
+  }),
+  "operator-ui-gallery-running-assistance": operatorWelcome("eventGallery", {
+    eventGallery: gallery({ running: true, items: items.slice(0, 3), nextCursor: null }),
+    runningEvent: runningEventPanel({ assistance: { reason: "camera" } }),
+  }),
+  "operator-ui-gallery-delete-list": operatorWelcome("eventGallery", { eventGallery: gallery(), overlays: confirmation(5) }),
+  "operator-ui-gallery-detail": operatorWelcome("guestCycleDetail", { guestCycleDetail: detail() }),
+  "operator-ui-gallery-detail-landscape": operatorWelcome("guestCycleDetail", {
+    guestCycleDetail: detail({
+      guestCycleId: "cycle-7",
+      templateName: "Panorama Four",
+      strip: { imageUrl: panorama.src, width: 1800, height: 600, landscape: true },
+    }),
+  }),
   "operator-ui-gallery-detail-no-strip": operatorWelcome("guestCycleDetail", {
     guestCycleDetail: detail({
       guestCycleId: "cycle-8",
@@ -98,10 +137,16 @@ export const operatorGalleryFixtures: Readonly<Record<string, OperatorWelcomeMes
       captures: detail().captures.slice(0, 2),
     }),
   }),
-  "operator-ui-gallery-detail-delete": operatorWelcome("guestCycleDetail", {
+  "operator-ui-gallery-detail-unavailable": operatorWelcome("guestCycleDetail", {
+    guestCycleDetail: detail({ guestCycleId: "cycle-5", outcome: "appClosed", lookName: "Sepia", strip: null, captures: [], unavailable: true }),
+  }),
+  "operator-ui-gallery-detail-delete": operatorWelcome("guestCycleDetail", { guestCycleDetail: detail(), overlays: confirmation(5) }),
+  "operator-ui-gallery-detail-delete-one-file": operatorWelcome("guestCycleDetail", {
+    guestCycleDetail: detail({ guestCycleId: "cycle-9", outcome: "startedOver", templateName: null, lookName: null, strip: null, captures: detail().captures.slice(0, 1) }),
+    overlays: confirmation(1),
+  }),
+  "operator-ui-gallery-detail-delete-failed": operatorWelcome("guestCycleDetail", {
     guestCycleDetail: detail(),
-    overlays: overlays({
-      confirmation: { kind: "deleteGuestCycle", eventName: null, counts: null, guestCycle: { guestCycleId: "cycle-9", startedAt: at(2), fileCount: 5 } },
-    }),
+    overlays: overlays({ notice: "guestCycleDeleteFailed" }),
   }),
 };
