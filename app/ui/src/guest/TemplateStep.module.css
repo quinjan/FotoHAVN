@@ -1,0 +1,46 @@
+/*
+ * The Template step's 5 / 7 split (app/DESIGN.md, Layout regions): the heading and the blank preview's mat on the
+ * left, the option list and the one primary action on the right. Nothing scrolls: the mat takes whatever height the
+ * heading leaves, and the print inside it contains itself in that box.
+ */
+.step {
+  display: grid;
+  grid-template-columns: repeat(var(--app-grid-columns), minmax(0, 1fr));
+  align-items: stretch;
+  column-gap: var(--app-space-fluid-32);
+  block-size: 100%;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-16) var(--app-gutter) var(--app-space-fluid-32);
+  overflow: hidden;
+}
+
+.print {
+  display: flex;
+  flex-direction: column;
+  grid-column: span var(--app-split-print);
+  gap: var(--app-space-fluid-16);
+  min-block-size: 0;
+}
+
+.mat {
+  display: grid;
+  flex: 1;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-24);
+  border-radius: var(--radius-hairline);
+  background-color: var(--app-tone-surface);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  grid-column: span var(--app-split-options);
+  justify-content: center;
+  gap: var(--app-space-fluid-24);
+  min-block-size: 0;
+}
+
+.action {
+  display: flex;
+  justify-content: flex-end;
+}

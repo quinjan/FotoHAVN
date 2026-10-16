@@ -1,0 +1,58 @@
+/*
+ * The Camera tab (app/DESIGN.md, Photographs: Camera): a Dark Walnut stage that holds the controls on the left and the
+ * live preview, dominant, on the right. Nothing scrolls: the preview takes whatever the controls leave and contains its
+ * frame in that box.
+ */
+.tab {
+  block-size: 100%;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-16) var(--app-gutter) var(--app-space-fluid-24);
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: repeat(var(--app-grid-columns), minmax(0, 1fr));
+  align-items: stretch;
+  column-gap: var(--app-space-fluid-32);
+  block-size: 100%;
+  min-block-size: 0;
+  padding: var(--app-space-fluid-32);
+  overflow: hidden;
+  border-radius: var(--radius-hairline);
+  background-color: var(--semantic-surface-dark);
+  color: var(--app-tone-ink);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 4;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--app-space-fluid-24);
+  min-block-size: 0;
+}
+
+.shutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-fluid-16);
+  padding-inline: var(--space-8);
+}
+
+.waiting {
+  max-inline-size: var(--app-measure-supporting);
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
+  text-align: center;
+}
+
+.stage {
+  position: relative;
+  grid-column: span 8;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
