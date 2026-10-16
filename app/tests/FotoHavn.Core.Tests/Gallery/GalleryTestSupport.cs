@@ -423,19 +423,24 @@ internal sealed class GalleryRig : IDisposable
 
     public Task<List<SeededCycle>> SeedManyAsync(int count, CycleSpec? spec = null) => GallerySeed.AddAsync(Memory, StoreClock, EventId, GallerySeed.Many(count, spec));
 
-    /// <summary>Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds (gated calls aren't waited for).</summary>
+    /// <summary>
+    /// Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds. Gated calls aren't waited for, so while
+    /// one waits the rest of the I/O (the other thumbnails of a page, say) is judged by the store's own count of calls in flight and a longer quiet.
+    /// </summary>
     public void Settle()
     {
         var clock = System.Diagnostics.Stopwatch.StartNew();
         var lastBusy = TimeSpan.Zero;
         while (clock.Elapsed < TimeSpan.FromSeconds(30))
         {
+            var gated = Store.Waiting > 0;
             var ran = Active.Executor.RunPending();
-            if (ran > 0 || Active.Executor.PendingCount > 0 || (Store.Waiting == 0 && (Brain.OffExecutorWork > 0 || Store.InFlight > 0)))
+            var working = gated ? Store.InFlight > Store.Waiting : Brain.OffExecutorWork > 0 || Store.InFlight > 0;
+            if (ran > 0 || Active.Executor.PendingCount > 0 || working)
             {
                 lastBusy = clock.Elapsed;
             }
-            else if (clock.Elapsed - lastBusy >= TimeSpan.FromMilliseconds(3))
+            else if (clock.Elapsed - lastBusy >= TimeSpan.FromMilliseconds(gated ? 40 : 3))
             {
                 return;
             }
