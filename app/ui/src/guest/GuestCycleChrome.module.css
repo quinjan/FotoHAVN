@@ -1,0 +1,53 @@
+/* The chrome: the guest top band over the step's stage. The stage takes everything the band leaves, and no region scrolls. */
+.chrome {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+/* The top band holds a 64 target with 16 to 32 above and below (DESIGN.md, Layout regions); the exit hold sits over its right end.
+   It is not a stacking context, so the Start Over dialog inside it stacks above the warning at the root. */
+.band {
+  --chrome-hold-reserve: calc(var(--app-target) + var(--space-16) * 2);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-stack-gap);
+  block-size: var(--app-region-top);
+  padding-inline: var(--app-gutter) max(var(--app-gutter), var(--chrome-hold-reserve));
+}
+
+.progress {
+  flex: none;
+}
+
+.stage {
+  display: grid;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.stage > * {
+  min-block-size: 0;
+}
+
+/* The warning sits in the band between the step progress and START OVER, so it covers nothing and nothing moves when it
+   arrives. It stays within the band's height at every scale; at 1280 the free width is just over its own. */
+.warning {
+  flex: none;
+}
+
+/* A step arrives with a soft fade; under reduced motion it simply appears. */
+@keyframes step-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage[data-fade="in"] {
+    animation: step-in var(--motion-duration-standard) var(--motion-easing-editorial) both;
+  }
+}

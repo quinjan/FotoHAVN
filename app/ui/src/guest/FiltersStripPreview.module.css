@@ -1,0 +1,40 @@
+/* The strip preview: stacked layers of one print size, so a new picture crossfades in place and nothing moves. */
+.preview {
+  display: grid;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.layer {
+  display: grid;
+  grid-area: 1 / 1;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* Composing: the strip shown stays, a little quieter. It is a state, not a movement, so reduced motion keeps it. */
+.preview[data-composing] .layer {
+  opacity: 0.6;
+}
+
+.loader {
+  display: none;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .layer {
+    transition: opacity var(--motion-duration-standard) var(--motion-easing-editorial);
+  }
+
+  .layer[data-entering] {
+    animation: arrive var(--motion-duration-standard) var(--motion-easing-editorial) both;
+  }
+}

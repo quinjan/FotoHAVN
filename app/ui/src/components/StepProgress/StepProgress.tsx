@@ -20,8 +20,13 @@ export interface StepProgressProps {
    * where going back isn't possible (Keepsake, where the Guest Cycle is already completed).
    */
   readonly onSelectStep?: (step: GuestStepId) => void;
-  /** Completed steps the Event skipped (one Template or one Look); they show as completed but aren't offered. */
+  /** Completed steps the guest may not return to; they show as completed but aren't offered. */
   readonly skipped?: readonly GuestStepId[];
+  /**
+   * The steps the Event shows, in order, renumbered consecutively from `01`: a one-Template Event leaves Template out and a
+   * one-Look Event leaves Filters out (M8, Q26). Default: all four.
+   */
+  readonly steps?: readonly GuestStepId[];
   /** The list's accessible name. */
   readonly label?: string;
   readonly className?: string;
@@ -33,14 +38,15 @@ export interface StepProgressProps {
  * the others take the secondary ink. Completed steps the guest may return to are buttons with a Hairline underline,
  * so going back never depends on color; every completed step also says "completed" to assistive technology.
  */
-export function StepProgress({ current, onSelectStep, skipped = [], label = "Steps", className }: StepProgressProps) {
-  const currentIndex = guestSteps.findIndex((step) => step.id === current);
+export function StepProgress({ current, onSelectStep, skipped = [], steps, label = "Steps", className }: StepProgressProps) {
+  const shown = steps === undefined ? guestSteps : guestSteps.filter((step) => steps.includes(step.id));
+  const currentIndex = shown.findIndex((step) => step.id === current);
   return (
     <ol className={cx(styles.progress, className)} aria-label={label}>
-      {guestSteps.map((step, index) => {
+      {shown.map((step, index) => {
         const content = (
           <>
-            <span className={styles.number}>{step.number}</span>{" "}
+            <span className={styles.number}>{String(index + 1).padStart(2, "0")}</span>{" "}
             <span className={styles.label}>{step.label}</span>
           </>
         );
