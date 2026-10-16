@@ -379,6 +379,12 @@ public enum ConfirmationKind
 
     /// <summary>"Delete this Guest Cycle?" naming its time and counting its files (protocol version 9): <c>ConfirmDeleteGuestCycle</c> or <c>CancelDeleteGuestCycle</c>.</summary>
     DeleteGuestCycle,
+
+    /// <summary>
+    /// "End the running Event and close FOTOHAVN?" (protocol version 10), asked when the operator closes the Operator window
+    /// while an Event runs: <c>ConfirmCloseApp</c> or <c>CancelCloseApp</c>. It carries no Event name, counts, or Guest Cycle.
+    /// </summary>
+    CloseApp,
 }
 
 /// <summary>What a delete removes, for the confirmation.</summary>

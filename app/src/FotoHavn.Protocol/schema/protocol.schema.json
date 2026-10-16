@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 9
+      "const": 10
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -471,6 +471,37 @@
         "inUseByAnotherApp"
       ]
     },
+    "CancelCloseAppCommand": {
+      "title": "CancelCloseAppCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "CancelCloseApp"
+        },
+        "payload": {
+          "$ref": "#/$defs/CancelCloseAppPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "CancelCloseAppPayload": {
+      "title": "CancelCloseAppPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
     "CancelDeleteEventCommand": {
       "title": "CancelDeleteEventCommand",
       "type": "object",
@@ -909,6 +940,12 @@
           "$ref": "#/$defs/RetryAssistanceCommand"
         },
         {
+          "$ref": "#/$defs/ConfirmCloseAppCommand"
+        },
+        {
+          "$ref": "#/$defs/CancelCloseAppCommand"
+        },
+        {
           "$ref": "#/$defs/RetryStorageCommand"
         },
         {
@@ -1127,6 +1164,12 @@
         "RetryAssistance": {
           "$ref": "#/$defs/RetryAssistancePayload"
         },
+        "ConfirmCloseApp": {
+          "$ref": "#/$defs/ConfirmCloseAppPayload"
+        },
+        "CancelCloseApp": {
+          "$ref": "#/$defs/CancelCloseAppPayload"
+        },
         "RetryStorage": {
           "$ref": "#/$defs/RetryStoragePayload"
         },
@@ -1266,6 +1309,8 @@
         "ConfirmEndEvent",
         "KeepRunning",
         "RetryAssistance",
+        "ConfirmCloseApp",
+        "CancelCloseApp",
         "RetryStorage",
         "BeginGuestCycle",
         "SelectTemplate",
@@ -1492,6 +1537,37 @@
       ],
       "additionalProperties": false
     },
+    "ConfirmCloseAppCommand": {
+      "title": "ConfirmCloseAppCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "ConfirmCloseApp"
+        },
+        "payload": {
+          "$ref": "#/$defs/ConfirmCloseAppPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "ConfirmCloseAppPayload": {
+      "title": "ConfirmCloseAppPayload",
+      "type": "object",
+      "additionalProperties": false
+    },
     "ConfirmDeleteEventCommand": {
       "title": "ConfirmDeleteEventCommand",
       "type": "object",
@@ -1682,7 +1758,8 @@
         "deleteEvent",
         "endEvent",
         "leaveSetup",
-        "deleteGuestCycle"
+        "deleteGuestCycle",
+        "closeApp"
       ]
     },
     "ConfirmationOverlay": {
@@ -1933,6 +2010,9 @@
               "type": "null"
             }
           ]
+        },
+        "instance": {
+          "$ref": "#/$defs/InstanceDiagnostics"
         }
       },
       "required": [
@@ -1950,7 +2030,8 @@
         "wakeLock",
         "clockScale",
         "guestCycle",
-        "gallery"
+        "gallery",
+        "instance"
       ],
       "additionalProperties": false
     },
@@ -3956,6 +4037,22 @@
       "required": [
         "kind",
         "scope"
+      ],
+      "additionalProperties": false
+    },
+    "InstanceDiagnostics": {
+      "title": "InstanceDiagnostics",
+      "type": "object",
+      "properties": {
+        "mutexName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mutexName"
       ],
       "additionalProperties": false
     },
@@ -7405,10 +7502,17 @@
       "properties": {
         "held": {
           "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
-        "held"
+        "held",
+        "reason"
       ],
       "additionalProperties": false
     }

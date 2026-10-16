@@ -52,6 +52,8 @@ export type Command =
   | ConfirmEndEventCommand
   | KeepRunningCommand
   | RetryAssistanceCommand
+  | ConfirmCloseAppCommand
+  | CancelCloseAppCommand
   | RetryStorageCommand
   | BeginGuestCycleCommand
   | SelectTemplateCommand
@@ -230,7 +232,7 @@ export type AssistanceReason = "camera" | "storage" | "guestDisplay";
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "ConfirmationKind".
  */
-export type ConfirmationKind = "deleteEvent" | "endEvent" | "leaveSetup" | "deleteGuestCycle";
+export type ConfirmationKind = "deleteEvent" | "endEvent" | "leaveSetup" | "deleteGuestCycle" | "closeApp";
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "OperatorNoticeCode".
@@ -378,7 +380,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 9;
+  protocolVersion: 10;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -1009,6 +1011,36 @@ export interface RetryAssistanceCommand {
  * via the `definition` "RetryAssistancePayload".
  */
 export interface RetryAssistancePayload {}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ConfirmCloseAppCommand".
+ */
+export interface ConfirmCloseAppCommand {
+  type: "command";
+  id: string;
+  name: "ConfirmCloseApp";
+  payload: ConfirmCloseAppPayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "ConfirmCloseAppPayload".
+ */
+export interface ConfirmCloseAppPayload {}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CancelCloseAppCommand".
+ */
+export interface CancelCloseAppCommand {
+  type: "command";
+  id: string;
+  name: "CancelCloseApp";
+  payload: CancelCloseAppPayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "CancelCloseAppPayload".
+ */
+export interface CancelCloseAppPayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "RetryStorageCommand".
@@ -2404,6 +2436,8 @@ export interface CommandPayloadMap {
   ConfirmEndEvent: ConfirmEndEventPayload;
   KeepRunning: KeepRunningPayload;
   RetryAssistance: RetryAssistancePayload;
+  ConfirmCloseApp: ConfirmCloseAppPayload;
+  CancelCloseApp: CancelCloseAppPayload;
   RetryStorage: RetryStoragePayload;
   BeginGuestCycle: BeginGuestCyclePayload;
   SelectTemplate: SelectTemplatePayload;
@@ -2548,6 +2582,7 @@ export interface DiagnosticsResult {
   clockScale: number;
   guestCycle: GuestCycleDiagnostics | null;
   gallery: GalleryDiagnostics | null;
+  instance: InstanceDiagnostics;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2670,6 +2705,7 @@ export interface IdentifyOverlayDiagnostics {
  */
 export interface WakeLockDiagnostics {
   held: boolean;
+  reason: string | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2722,6 +2758,13 @@ export interface GuestGalleryDiagnostics {
   nextCursor: string | null;
   detailId: string | null;
   timer: GuestCycleTimerDiagnostics;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "InstanceDiagnostics".
+ */
+export interface InstanceDiagnostics {
+  mutexName: string | null;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2880,4 +2923,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 9;
+export const PROTOCOL_VERSION = 10;

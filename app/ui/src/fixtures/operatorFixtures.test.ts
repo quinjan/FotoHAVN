@@ -90,6 +90,7 @@ describe("operator fixtures", () => {
         "operator-list-running-camera-checking",
         "operator-list-running-assistance",
         "operator-list-confirm-end",
+        "operator-list-confirm-close",
       ]) {
         const { eventList, runningEvent } = presentation(name);
         expect(eventList?.events[0]?.running, name).toBe(true);
@@ -110,6 +111,7 @@ describe("operator fixtures", () => {
       expect(presentation("operator-list-confirm-delete").overlays.confirmation).toMatchObject({ kind: "deleteEvent", counts: { guestCycles: 12, photoStrips: 11, captures: 41 } });
       expect(presentation("operator-list-confirm-delete").runningEvent).toBeNull();
       expect(presentation("operator-list-confirm-end").overlays.confirmation).toMatchObject({ kind: "endEvent", eventName: null, counts: null });
+      expect(presentation("operator-list-confirm-close").overlays.confirmation).toMatchObject({ kind: "closeApp", eventName: null, counts: null, guestCycle: null });
       expect(presentation("operator-list-notice").overlays.notice).toEqual({ code: "deleteFailed" });
       expect(presentation("operator-single-screen")).toMatchObject({ surface: "guestScreenActive", eventList: null, runningEvent: { singleScreen: true } });
     });

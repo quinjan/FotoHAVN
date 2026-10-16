@@ -30,6 +30,12 @@ internal sealed class ActiveRigOptions
 
     public IWakeLock? WakeLock { get; init; }
 
+    /// <summary>How the brain closes the app (a no-op by default).</summary>
+    public IAppLifetime? AppLifetime { get; init; }
+
+    /// <summary>The single-instance names the diagnostics report (none by default, as in the headless host).</summary>
+    public Core.Hardening.SingleInstanceNames? SingleInstance { get; init; }
+
     public ICompositor? Compositor { get; init; }
 
     /// <summary>Replaces the brain's Capture encoder (the fake by default).</summary>
@@ -91,6 +97,8 @@ internal sealed class ActiveRig : IDisposable
         Dependencies = dependencies with
         {
             WakeLock = WakeLock,
+            AppLifetime = options.AppLifetime ?? new NoOpAppLifetime(),
+            SingleInstance = options.SingleInstance,
             Compositor = options.Compositor ?? dependencies.Compositor,
             Logger = Logger,
             CaptureEncoder = options.NoCaptureEncoder ? null : options.CaptureEncoder ?? dependencies.CaptureEncoder,

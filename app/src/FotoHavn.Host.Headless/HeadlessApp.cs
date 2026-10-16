@@ -164,6 +164,7 @@ internal sealed partial class HeadlessApp : IAsyncDisposable
         var dependencies = new BrainDependencies(executor, ClockComposition.ForBuild(SystemClock.Instance), displays, camera, hostServices, store, new CatalogData(), new SkiaCompositor(), previewCache, new NoOpWakeLock())
         {
             Logger = brainLogger,
+            AppLifetime = NoOpAppLifetime.Instance,
             PreviewStats = previews,
             CaptureEncoder = new Diagnostics.HostCaptureEncoder(),
 #if E2E_HOOKS

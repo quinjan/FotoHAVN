@@ -107,6 +107,18 @@ internal static class ProtocolSamples
         null,
         null);
 
+    public static OperatorPresentation EventListCloseApp { get; } = new(
+        OperatorSurface.EventList,
+        new EventListView([new EventListRow("event-1", "Studio open day", new DateOnly(2026, 10, 13), null, 37, null, true, new EventRowActions(false, false, false, true, true), StartDisabledReason.EventRunning)], NewEventAvailable: true),
+        null,
+        RunningPanel,
+        new OperatorOverlays(new ConfirmationOverlay(ConfirmationKind.CloseApp, null, null, null), null, null),
+        null,
+        null,
+        null,
+        null,
+        null);
+
     private static readonly IReadOnlyList<EventSetupTemplateOption> SampleTemplates =
     [
         new("signature-strip", "Signature Strip", "Four photographs on a tall strip.", 600, 1800, false, true, true, "signature-strip.naturale-v1.r1"),
@@ -634,6 +646,7 @@ internal static class ProtocolSamples
         ("presentation-operator-camera-diagnostics", new OperatorPresentationMessage(7, OperatorCameraDiagnostics)),
         ("presentation-operator-camera-diagnostics-in-use", new OperatorPresentationMessage(8, OperatorCameraDiagnosticsInUse)),
         ("presentation-operator-event-list-idle", new OperatorPresentationMessage(9, EventListIdle)),
+        ("presentation-operator-close-app", new OperatorPresentationMessage(10, EventListCloseApp)),
         ("presentation-operator-event-setup-new-with-errors", new OperatorPresentationMessage(10, EventSetupNewWithErrors)),
         ("presentation-operator-event-setup-editing-while-running", new OperatorPresentationMessage(11, EventSetupEditingWhileRunning)),
         ("presentation-operator-guest-screen-active", new OperatorPresentationMessage(12, OperatorGuestScreenActive)),
@@ -696,10 +709,11 @@ internal static class ProtocolSamples
             new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 41, 29.5, 3, PreviewTarget.Operator),
             [new OpenFolderRequest(@"C:\FOTOHAVN\Data\Events\6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b", new DateTimeOffset(2026, 10, 13, 9, 45, 0, TimeSpan.Zero))],
             [new IdentifyOverlayDiagnostics("virtual-operator", 1, false), new IdentifyOverlayDiagnostics("virtual-guest", 2, false)],
-            new WakeLockDiagnostics(true),
+            new WakeLockDiagnostics(true, "FOTOHAVN Event event-1 is running"),
             10,
             null,
-            null)),
+            null,
+            new InstanceDiagnostics(@"Local\FOTOHAVN-0123456789abcdef"))),
         ("get-diagnostics-result-guest-cycle", new DiagnosticsResult(
             ProtocolVersion.Current,
             [Role.Operator, Role.Guest],
@@ -712,10 +726,11 @@ internal static class ProtocolSamples
             new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 12, 30, 0, PreviewTarget.Guest),
             [],
             [],
-            new WakeLockDiagnostics(true),
+            new WakeLockDiagnostics(true, "FOTOHAVN Event event-1 is running"),
             10,
             new GuestCycleDiagnostics("cycle-1", GuestCycleStepName.Photographs, PhotographsTabName.Camera, 1, 4, true, 3, new GuestCycleTimerDiagnostics(PhaseTimer.PhotographsCapture, 18_250, true, true)),
-            null)),
+            null,
+            new InstanceDiagnostics(null))),
         ("get-diagnostics-result-galleries", new DiagnosticsResult(
             ProtocolVersion.Current,
             [Role.Operator, Role.Guest],
@@ -728,12 +743,13 @@ internal static class ProtocolSamples
             new CameraDiagnostics(CameraState.Ready, "fake-camera", new CameraFormatView(1280, 720, 30), 12, 30, 0, PreviewTarget.Guest),
             [],
             [],
-            new WakeLockDiagnostics(true),
+            new WakeLockDiagnostics(true, "FOTOHAVN Event event-1 is running"),
             10,
             null,
             new GalleryDiagnostics(
                 new OperatorGalleryDiagnostics("event-1", 40, "MjAyNi0xMC0xM1QwOTozMDowMC4wMDAwMDAwWnw2ZjFjMmE4ZS0zYjRkLTRlNWYtOWEwYi0xYzJkM2U0ZjVhNmI", "6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b"),
-                new GuestGalleryDiagnostics(12, null, null, new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 41_000, false, false))))),
+                new GuestGalleryDiagnostics(12, null, null, new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 41_000, false, false))),
+            new InstanceDiagnostics(null))),
         ("set-clock-scale-args", new SetClockScaleArgs(10)),
         ("camera-diagnostics-idle", new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None)),
         ("select-diagnostics-camera-args", new SelectDiagnosticsCameraArgs("fake-camera")),

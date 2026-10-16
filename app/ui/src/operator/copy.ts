@@ -48,6 +48,14 @@ export const endEventDialog = {
   cancelLabel: "KEEP RUNNING",
 } as const;
 
+/** Closing FOTOHAVN with an Event running: shown when the operator closes the Operator window. */
+export const closeAppDialog = {
+  title: "End the running Event and close FOTOHAVN?",
+  body: "Anyone using the booth will be stopped. Their photographs are kept.",
+  confirmLabel: "END EVENT AND CLOSE",
+  cancelLabel: "KEEP RUNNING",
+} as const;
+
 export const leaveDialog = {
   title: "Save your changes?",
   body: "If you leave now, what you changed is lost unless you save it.",

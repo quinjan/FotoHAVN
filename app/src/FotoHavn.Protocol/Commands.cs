@@ -130,6 +130,14 @@ public sealed record ConfirmEndEventPayload : ICommandPayload;
 
 public sealed record KeepRunningPayload : ICommandPayload;
 
+// Closing FOTOHAVN (operator, protocol version 10)
+
+/// <summary>"End the running Event and close FOTOHAVN?" was answered yes: the brain ends the Event cleanly, then closes the app.</summary>
+public sealed record ConfirmCloseAppPayload : ICommandPayload;
+
+/// <summary>"End the running Event and close FOTOHAVN?" was answered <c>KEEP RUNNING</c>: the dialog closes and the Event keeps running.</summary>
+public sealed record CancelCloseAppPayload : ICommandPayload;
+
 /// <summary>Allowed from both roles: the running-Event panel and the Guest Screen's Operator Assistance.</summary>
 public sealed record RetryAssistancePayload : ICommandPayload;
 

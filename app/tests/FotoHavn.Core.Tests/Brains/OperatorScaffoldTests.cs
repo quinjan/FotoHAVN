@@ -399,8 +399,11 @@ public sealed class OperatorScaffoldTests
         Assert.Empty(idle.OpenFolderRequests);
         Assert.Empty(idle.IdentifyOverlays);
 
-        wakeLock.Acquire();
-        Assert.True(Diagnostics(harness, client).WakeLock.Held);
+        wakeLock.Acquire("because");
+        var held = Diagnostics(harness, client).WakeLock;
+        Assert.True(held.Held);
+        Assert.Equal("because", held.Reason);
+        Assert.Null(idle.WakeLock.Reason);
     }
 
     [Fact]

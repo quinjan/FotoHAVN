@@ -136,10 +136,11 @@ public sealed partial class Brain
         CameraDiagnosticsNow(),
         [.. _openFolderRequests],
         _identifyOverlays,
-        new WakeLockDiagnostics(_dependencies.WakeLock.IsHeld),
+        WakeLockDiagnosticsNow(),
         ClockScaleNow,
         GuestCycleDiagnosticsNow(),
-        GalleryDiagnosticsNow());
+        GalleryDiagnosticsNow(),
+        InstanceDiagnosticsNow());
 
     private HookOutcome RunStorageHook(Action<IStorageHookPort> run)
     {

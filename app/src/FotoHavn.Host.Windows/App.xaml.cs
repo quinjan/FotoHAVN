@@ -104,6 +104,7 @@ public partial class App : Application
         var dependencies = new BrainDependencies(_executor, ClockComposition.ForBuild(SystemClock.Instance), _displays, camera, _windows, _store, new CatalogData(), new SkiaCompositor(), previewCache, new NoOpWakeLock())
         {
             Logger = _loggerFactory.CreateLogger("FotoHavn.Core.Brain"),
+            AppLifetime = NoOpAppLifetime.Instance,
             PreviewStats = frames,
             CaptureEncoder = new Diagnostics.HostCaptureEncoder(),
 #if E2E_HOOKS

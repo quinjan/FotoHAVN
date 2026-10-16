@@ -23,7 +23,7 @@ namespace FotoHavn.Core;
 /// <param name="Catalog">The Templates and Looks.</param>
 /// <param name="Compositor">Composes Photo Strips and Look thumbnails. The brain calls it off the executor and posts the result back.</param>
 /// <param name="Previews">Where the brain puts composed previews; the host serves the same cache at <c>preview.fotohavn</c>.</param>
-/// <param name="WakeLock">Keeps Windows awake while an Event runs (acquired at Start Event step 7, released when the Event ends). <see cref="NoOpWakeLock"/> until M10.</param>
+/// <param name="WakeLock">Keeps Windows awake while an Event runs (acquired at Start Event step 7, released when the Event ends or its start rolls back). <see cref="NoOpWakeLock"/> in hosts that keep nothing awake.</param>
 public sealed record BrainDependencies(
     IBrainExecutor Executor,
     IClock Clock,
@@ -37,6 +37,12 @@ public sealed record BrainDependencies(
     IWakeLock WakeLock)
 {
     public ILogger Logger { get; init; } = NullLogger.Instance;
+
+    /// <summary>How the brain closes the application after a close request (M10). A no-op until the host supplies one.</summary>
+    public IAppLifetime AppLifetime { get; init; } = NoOpAppLifetime.Instance;
+
+    /// <summary>The single-instance names the host holds (M10), for <c>test.getDiagnostics</c> only. Null when the host has no single-instance guard (the headless host).</summary>
+    public Hardening.SingleInstanceNames? SingleInstance { get; init; }
 
     /// <summary>The time zone that decides "today" for a new Event's default date. The machine's local zone in the app; tests and fixtures fix it so dates never depend on the machine.</summary>
     public TimeZoneInfo LocalTimeZone { get; init; } = TimeZoneInfo.Local;
@@ -106,6 +112,7 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies.Compositor);
         ArgumentNullException.ThrowIfNull(dependencies.Previews);
         ArgumentNullException.ThrowIfNull(dependencies.WakeLock);
+        ArgumentNullException.ThrowIfNull(dependencies.AppLifetime);
         _dependencies = dependencies;
         _logger = dependencies.Logger;
         _hooksEnabled = hooksEnabled;
@@ -158,6 +165,7 @@ public sealed partial class Brain : IBrain
 
         _dependencies.Displays.DisplaysChanged -= OnDisplaysChanged;
         _storageCancellation.Cancel();
+        ReleaseHoldsOnDispose();
         ShutdownCamera();
     }
 

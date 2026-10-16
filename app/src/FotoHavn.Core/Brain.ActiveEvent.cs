@@ -194,10 +194,10 @@ public sealed partial class Brain
         _dependencies.Host.CloseGuestScreen();
         _guestScreenDisplay = null;
         ReleaseCamera();
-        _dependencies.WakeLock.Release();
+        EventReleased();
         _activeEvent = null;
         RefreshSetupCamera();
-        if (_confirmation?.Kind == ConfirmationKind.EndEvent)
+        if (_confirmation?.Kind is ConfirmationKind.EndEvent or ConfirmationKind.CloseApp)
         {
             _confirmation = null;
         }

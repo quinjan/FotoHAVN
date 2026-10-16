@@ -13,6 +13,7 @@ namespace FotoHavn.Core;
 //   Brain.Assistance.cs    RetryAssistance                           (M8 wave B1)
 //   Brain.Gallery.cs       the operator's Event Gallery commands     (M9 wave B1)
 //   Brain.GuestGallery.cs  the guest gallery commands                (M9 wave B1)
+//   Brain.Hardening.cs     ConfirmCloseApp and CancelCloseApp        (M10 wave B1)
 // A command nothing implements yet is rejected notAvailable. Handlers run on the executor,
 // answer at once, and never wait for I/O: they start it and post the outcome back (contract section 9, Threading).
 public sealed partial class Brain
@@ -59,6 +60,8 @@ public sealed partial class Brain
         EndEventPayload => EndEvent(id),
         ConfirmEndEventPayload => ConfirmEndEvent(id),
         KeepRunningPayload => KeepRunning(id),
+        ConfirmCloseAppPayload => ConfirmCloseApp(id),
+        CancelCloseAppPayload => CancelCloseApp(id),
         BeginExitHoldPayload => BeginExitHold(id),
         CompleteExitHoldPayload => CompleteExitHold(id),
         SubmitPinPayload pin => SubmitPin(id, pin),

@@ -23,6 +23,7 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-list-running-assistance", surface: "eventList", text: ["The guest display isn't connected.", "RETRY", "NEW EVENT"] },
   { fixture: "operator-list-confirm-delete", surface: "eventList", text: ["Delete this Event?", "12 Guest Cycles, 11 Photo Strips, and 41 photographs", "KEEP EVENT"] },
   { fixture: "operator-list-confirm-end", surface: "eventList", text: ["End this Event?", "Their photographs are kept.", "KEEP RUNNING"] },
+  { fixture: "operator-list-confirm-close", surface: "eventList", text: ["End the running Event and close FOTOHAVN?", "Their photographs are kept.", "END EVENT AND CLOSE", "KEEP RUNNING"] },
   { fixture: "operator-list-notice", surface: "eventList", text: ["The Event couldn't be deleted."] },
   { fixture: "operator-single-screen", surface: "guestScreenActive", text: ["The booth is running on this screen."] },
   { fixture: "operator-setup-new", surface: "eventSetup", text: ["Name", "Camera", "OPERATOR PIN", "SAVE AND START"] },

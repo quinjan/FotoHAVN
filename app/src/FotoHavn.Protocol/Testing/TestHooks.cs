@@ -331,8 +331,14 @@ public sealed record OpenFolderRequest(string Path, DateTimeOffset At);
 /// <param name="Visible">True from the request until the brain's 3-second timer asks the host to hide the overlays.</param>
 public sealed record IdentifyOverlayDiagnostics(string DisplayId, int Number, bool Visible);
 
-/// <summary>Whether the brain holds the wake lock (acquired while an Event runs).</summary>
-public sealed record WakeLockDiagnostics(bool Held);
+/// <summary>Whether the brain holds the wake lock (held while an Event runs), and why (protocol version 10).</summary>
+/// <param name="Held">Whether the lock is held.</param>
+/// <param name="Reason">Why it is held (names the Event by its ID), or null while it is not held.</param>
+public sealed record WakeLockDiagnostics(bool Held, string? Reason);
+
+/// <summary>The single-instance guard of the host the brain runs in, for <c>test.getDiagnostics</c> (protocol version 10).</summary>
+/// <param name="MutexName">The name of the mutex derived from the Data folder (<c>Local\FOTOHAVN-&lt;16 hex&gt;</c>), or null in a host with no single-instance guard (headless).</param>
+public sealed record InstanceDiagnostics(string? MutexName);
 
 /// <summary>The Phase Timer as the brain sees it, for <c>test.getDiagnostics</c>.</summary>
 /// <param name="Phase">The phase being timed, or null when no timer is active.</param>
@@ -391,10 +397,11 @@ public sealed record GalleryDiagnostics(OperatorGalleryDiagnostics? Operator, Gu
 /// <param name="Camera">The camera's state and frame statistics.</param>
 /// <param name="OpenFolderRequests">The last <see cref="MaxOpenFolderRequests"/> folders the brain asked the host to open, oldest first.</param>
 /// <param name="IdentifyOverlays">The displays of the last <c>IdentifyDisplays</c>, with whether they are showing now; empty before the first.</param>
-/// <param name="WakeLock">Whether the brain holds the wake lock.</param>
+/// <param name="WakeLock">Whether the brain holds the wake lock, and why (the reason arrived in protocol version 10).</param>
 /// <param name="ClockScale">The clock's speed factor (1 unless <c>test.setClockScale</c> changed it).</param>
 /// <param name="GuestCycle">The running Guest Cycle, or null when none runs (protocol version 8).</param>
 /// <param name="Gallery">The open galleries, or null when neither is open (protocol version 9).</param>
+/// <param name="Instance">The host's single-instance guard (protocol version 10).</param>
 public sealed record DiagnosticsResult(
     int ProtocolVersion,
     IReadOnlyList<Role> ConnectedRoles,
@@ -410,7 +417,8 @@ public sealed record DiagnosticsResult(
     WakeLockDiagnostics WakeLock,
     double ClockScale,
     GuestCycleDiagnostics? GuestCycle,
-    GalleryDiagnostics? Gallery)
+    GalleryDiagnostics? Gallery,
+    InstanceDiagnostics Instance)
 {
     public const int MaxCommandResults = 20;
 

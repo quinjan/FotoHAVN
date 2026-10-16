@@ -334,7 +334,7 @@ public sealed partial class Brain
         // Step 7.
         private void AcquireWakeLock()
         {
-            brain._dependencies.WakeLock.Acquire();
+            brain.EventHeld(eventId);
             _wakeLockTaken = true;
             OpenGuestScreen();
         }
@@ -423,7 +423,7 @@ public sealed partial class Brain
 
             if (_wakeLockTaken)
             {
-                brain._dependencies.WakeLock.Release();
+                brain.EventReleased();
             }
 
             if (_cameraTaken)

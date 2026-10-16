@@ -4,7 +4,7 @@ import { Dialog } from "../components/Dialog/index.ts";
 import { PrimaryAction } from "../components/PrimaryAction/index.ts";
 import { SecondaryAction } from "../components/SecondaryAction/index.ts";
 import type { ConfirmationOverlay, LeaveChoice } from "../protocol/generated.ts";
-import { deleteDialog, deleteDialogBody, deleteGuestCycleBody, deleteGuestCycleDialog, endEventDialog, leaveDialog } from "./copy.ts";
+import { closeAppDialog, deleteDialog, deleteDialogBody, deleteGuestCycleBody, deleteGuestCycleDialog, endEventDialog, leaveDialog } from "./copy.ts";
 import { formatGuestCycleTime } from "./format.ts";
 import { useSendCommand } from "./OperatorCommands.tsx";
 
@@ -55,7 +55,7 @@ function LeaveSetupDialog() {
 
 /**
  * The confirmation the brain has open, if any: delete an Event (its name and what goes with it), end the running Event
- * (the plan's sentence), delete a Guest Cycle (its time and how many files go), or leave Event setup with changes. Each
+ * (the plan's sentence), close FOTOHAVN with the Event running (ends it first), delete a Guest Cycle (its time and how many files go), or leave Event setup with changes. Each
  * opens with focus on the choice that loses nothing, and
  * the brain closes it: the dialog goes away when the presentation no longer carries it.
  */
@@ -92,6 +92,21 @@ export function OperatorDialogs({ confirmation }: { readonly confirmation: Confi
           }}
           onCancel={() => {
             void send("KeepRunning", {}, { key: "keep-running" });
+          }}
+        />
+      );
+    case "closeApp":
+      return (
+        <ConfirmDialog
+          title={closeAppDialog.title}
+          body={closeAppDialog.body}
+          confirmLabel={closeAppDialog.confirmLabel}
+          cancelLabel={closeAppDialog.cancelLabel}
+          onConfirm={() => {
+            void send("ConfirmCloseApp", {}, { key: "confirm-close-app" });
+          }}
+          onCancel={() => {
+            void send("CancelCloseApp", {}, { key: "cancel-close-app" });
           }}
         />
       );

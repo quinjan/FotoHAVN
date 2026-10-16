@@ -134,6 +134,18 @@ describe("OperatorRoot", () => {
       expect(sentCommands(client)).toEqual([["ConfirmEndEvent", {}], ["KeepRunning", {}], ["KeepRunning", {}]]);
     });
 
+    it("asks to end the running Event before closing FOTOHAVN, and confirms or keeps it running", async () => {
+      const { client } = renderRoot(fixture("operator-list-confirm-close"));
+      const dialog = screen.getByRole("alertdialog", { name: "End the running Event and close FOTOHAVN?" });
+      expect(dialog).toHaveAccessibleDescription("Anyone using the booth will be stopped. Their photographs are kept.");
+      expect(within(dialog).getAllByRole("button").map((button) => button.textContent)).toEqual(["END EVENT AND CLOSE", "KEEP RUNNING"]);
+      expect(screen.getByRole("button", { name: "KEEP RUNNING" })).toHaveFocus();
+      await click(within(dialog).getByRole("button", { name: "END EVENT AND CLOSE" }));
+      await click(within(dialog).getByRole("button", { name: "KEEP RUNNING" }));
+      fireEvent.keyDown(dialog, { key: "Escape" });
+      expect(sentCommands(client)).toEqual([["ConfirmCloseApp", {}], ["CancelCloseApp", {}], ["CancelCloseApp", {}]]);
+    });
+
     it("opens the leave confirmation with SAVE, DISCARD CHANGES, and KEEP EDITING, focused on the one that loses nothing", async () => {
       const { client } = renderRoot(fixture("operator-setup-leave-confirmation"));
       const dialog = screen.getByRole("alertdialog", { name: "Save your changes?" });

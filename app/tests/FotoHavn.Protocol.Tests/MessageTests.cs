@@ -10,9 +10,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_is_nine()
+    public void Protocol_version_is_ten()
     {
-        Assert.Equal(9, ProtocolVersion.Current);
+        Assert.Equal(10, ProtocolVersion.Current);
     }
 
     [Fact]

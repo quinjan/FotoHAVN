@@ -455,7 +455,7 @@ public sealed class SharedBufferPreviewChannelTests
     }
 
     [Theory]
-    [InlineData("""{"type":"hello","protocolVersion":9}""")]
+    [InlineData("""{"type":"hello","protocolVersion":10}""")]
     [InlineData("""{"type":"frameAck","seq":-1}""")]
     [InlineData("""{"type":"frameAck","seq":1,"role":"guest"}""")]
     [InlineData("""{"type":"frameAck"}""")]

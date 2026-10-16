@@ -77,6 +77,10 @@ public static class CommandRegistry
         Operator<KeepRunningPayload>(),
         Descriptor<RetryAssistancePayload>(CommandAudience.Both),
 
+        // Closing FOTOHAVN (operator, protocol version 10)
+        Operator<ConfirmCloseAppPayload>(),
+        Operator<CancelCloseAppPayload>(),
+
         // Storage (operator)
         Operator<RetryStoragePayload>(),
 

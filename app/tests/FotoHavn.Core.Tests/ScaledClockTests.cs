@@ -204,8 +204,8 @@ public sealed class ScaledClockTests
         wakeLock.Release();
         Assert.False(wakeLock.IsHeld);
 
-        wakeLock.Acquire();
-        wakeLock.Acquire();
+        wakeLock.Acquire("first");
+        wakeLock.Acquire("second");
         Assert.True(wakeLock.IsHeld);
 
         wakeLock.Release();
