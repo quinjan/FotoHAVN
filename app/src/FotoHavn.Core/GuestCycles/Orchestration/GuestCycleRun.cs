@@ -1,4 +1,5 @@
 using FotoHavn.Core.Events.Active;
+using FotoHavn.Core.Storage;
 using FotoHavn.Protocol.Presentations;
 
 namespace FotoHavn.Core.GuestCycles.Orchestration;
@@ -118,6 +119,12 @@ internal sealed class GuestCycleRun(ActiveEventState active, string id, GuestCyc
 
     /// <summary>The Photo Strip's commit is in flight: ending the cycle leaves its completion to the store.</summary>
     public bool CommitInFlight { get; set; }
+
+    /// <summary>The last store write queued for this cycle: each later write waits for it, so the store sees them in the order the brain decided them.</summary>
+    public Task StoreWrites { get; set; } = Task.CompletedTask;
+
+    /// <summary>The commit of a Retake's Capture while it is in the store's queue and its result is not yet handled; the store may still keep it if the cycle ends first.</summary>
+    public Task<CaptureRecord>? RetakeCommit { get; set; }
 
     public PhaseTimerEngine Timer { get; set; } = PhaseTimerEngine.Stopped;
 

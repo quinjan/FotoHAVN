@@ -31,23 +31,21 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
   const preparing = idle && retakeCandidate === null && !view.canReview;
   const filtersSkipped = cycle.steps.some((entry) => entry.step === "filters" && entry.state === "skipped");
   const liveRef = useRef<HTMLSpanElement>(null);
-  const previous = useRef({ candidate: retakeCandidate !== null, revision: view.revision, preparing });
+  const previous = useRef({ revision: view.revision, preparing });
 
   useEffect(() => {
     const before = previous.current;
-    previous.current = { candidate: retakeCandidate !== null, revision: view.revision, preparing };
+    previous.current = { revision: view.revision, preparing };
     const live = liveRef.current;
     if (live === null) {
       return;
     }
     if (preparing && !before.preparing) {
       live.textContent = composingLine;
-    } else if (retakeCandidate !== null && !before.candidate) {
-      live.textContent = arrangeCopy.announceCandidate;
     } else if (view.revision !== before.revision && selectedIndex !== null) {
       live.textContent = arrangeCopy.announceMoved(selectedIndex + 1);
     }
-  }, [retakeCandidate, view.revision, selectedIndex, preparing]);
+  }, [view.revision, selectedIndex, preparing]);
 
   return (
     <div
@@ -59,6 +57,7 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
       <div className={styles.mat} data-tone="paper">
         <ArrangeStrip
           template={view.template}
+          revision={view.revision}
           windows={view.windows}
           mode={selection.mode}
           selected={selectedIndex}
@@ -66,9 +65,7 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
           previewUrl={client.previewUrl}
           onSelect={commands.selectPosition}
           onMoveTo={commands.moveTo}
-          onDragPlace={(source, captureId, target) => {
-            commands.dragPlace(source, captureId, view.revision, target);
-          }}
+          onDragPlace={commands.dragPlace}
         />
       </div>
       <div className={styles.side}>

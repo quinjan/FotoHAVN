@@ -9,6 +9,8 @@ import { templateImageSource } from "./TemplateArt.ts";
 
 export interface ArrangeStripProps {
   readonly template: PhotographsTemplateView;
+  /** The arrangement revision shown now; a drag sends the one it began at. */
+  readonly revision: number;
   readonly windows: readonly PhotographsWindowView[];
   /** The brain's selection: a Move turns every window into a destination. */
   readonly mode: PhotographSelectionMode;
@@ -18,12 +20,13 @@ export interface ArrangeStripProps {
   readonly previewUrl: ((key: string) => string) | undefined;
   readonly onSelect: (index: number) => void;
   readonly onMoveTo: (index: number) => void;
-  readonly onDragPlace: (sourceIndex: number, captureId: string, targetIndex: number) => void;
+  readonly onDragPlace: (sourceIndex: number, captureId: string, revision: number, targetIndex: number) => void;
 }
 
 interface Press {
   readonly index: number;
   readonly captureId: string;
+  readonly revision: number;
   readonly pointerId: number;
   readonly x: number;
   readonly y: number;
@@ -37,7 +40,7 @@ interface Press {
  * Move waits), arrow keys step between windows, and a press that travels far enough drags the photograph onto another
  * window. Nothing here needs a drag: Move and its destination choice do the same job with taps or keys.
  */
-export function ArrangeStrip({ template, windows, mode, selected, interactive, previewUrl, onSelect, onMoveTo, onDragPlace }: ArrangeStripProps) {
+export function ArrangeStrip({ template, revision, windows, mode, selected, interactive, previewUrl, onSelect, onMoveTo, onDragPlace }: ArrangeStripProps) {
   const cells = useRef<(HTMLElement | null)[]>([]);
   const press = useRef<Press | null>(null);
   const suppressClick = useRef(false);
@@ -58,7 +61,7 @@ export function ArrangeStrip({ template, windows, mode, selected, interactive, p
     if (!canDrag || (event.pointerType === "mouse" && event.button !== 0)) {
       return;
     }
-    press.current = { index, captureId, pointerId: event.pointerId, x: event.clientX, y: event.clientY, dragging: false };
+    press.current = { index, captureId, revision, pointerId: event.pointerId, x: event.clientX, y: event.clientY, dragging: false };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
@@ -93,7 +96,7 @@ export function ArrangeStrip({ template, windows, mode, selected, interactive, p
     }, 0);
     const target = overIndex(event.clientX, event.clientY);
     if (target !== null && target !== current.index) {
-      onDragPlace(current.index, current.captureId, target);
+      onDragPlace(current.index, current.captureId, current.revision, target);
     }
   }
 

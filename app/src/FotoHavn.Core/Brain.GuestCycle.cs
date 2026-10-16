@@ -352,9 +352,27 @@ public sealed partial class Brain
         return outcome;
     }
 
-    private void DiscardInStore(GuestCycleRun run, string captureId) =>
+    /// <summary>
+    /// Queues a store write behind every earlier one of the cycle and returns its outcome. The store deletes a discarded Capture's file only when the cycle
+    /// ends or the Photo Strip commits, and refuses a write after either, so the writes must reach it in the order the brain decided them. Called on the
+    /// executor; the write itself runs off it.
+    /// </summary>
+    private static Task<T> InOrder<T>(GuestCycleRun run, Func<Task<T>> write)
+    {
+        var queued = run.StoreWrites.ContinueWith(_ => write(), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+        run.StoreWrites = queued;
+        return queued;
+    }
+
+    private void DiscardInStore(GuestCycleRun run, string captureId)
+    {
+        var write = InOrder(run, async () =>
+        {
+            await _dependencies.Store.SetCaptureStateAsync(captureId, CaptureState.Discarded, CancellationToken.None).ConfigureAwait(false);
+            return true;
+        });
         OffVoid(
-            () => _dependencies.Store.SetCaptureStateAsync(captureId, CaptureState.Discarded, CancellationToken.None),
+            () => write,
             completed =>
             {
                 if (!completed.IsCompletedSuccessfully)
@@ -366,17 +384,56 @@ public sealed partial class Brain
                     }
                 }
             });
+    }
 
-    private void EndInStore(string cycleId, GuestCycleEndReason reason) =>
-        OffVoid(
-            () => _dependencies.Store.EndGuestCycleAsync(cycleId, reason, CancellationToken.None),
-            completed =>
+    /// <summary>Discards a Retake's Capture whose commit is still in the store's queue when the cycle ends: the discard is queued right behind that commit, so it lands before the end.</summary>
+    private void DiscardCommitted(GuestCycleRun run, Task<CaptureRecord> commit)
+    {
+        var write = InOrder(run, async () =>
+        {
+            if (commit.IsCompletedSuccessfully)
             {
-                if (!completed.IsCompletedSuccessfully)
-                {
-                    BrainLog.GuestCycleStoreFailed(_logger, FailureOf(completed), "end the Guest Cycle");
-                }
-            });
+                await _dependencies.Store.SetCaptureStateAsync(commit.Result.Id, CaptureState.Discarded, CancellationToken.None).ConfigureAwait(false);
+            }
+
+            return true;
+        });
+        OffVoid(() => write, completed => LogEndFailure(completed, "discard a Capture"));
+    }
+
+    /// <summary>Ends the cycle in the store. Whatever the cycle still holds as a Retake candidate is discarded first, so no candidate stays kept.</summary>
+    private void EndInStore(GuestCycleRun run, GuestCycleEndReason reason)
+    {
+        if (run.Model.Operation?.Candidate is { } candidate)
+        {
+            DiscardInStore(run, candidate);
+        }
+
+        if (run.RetakeCommit is { } late)
+        {
+            run.RetakeCommit = null;
+            DiscardCommitted(run, late);
+        }
+
+        var write = InOrder(run, async () =>
+        {
+            await _dependencies.Store.EndGuestCycleAsync(run.Id, reason, CancellationToken.None).ConfigureAwait(false);
+            return true;
+        });
+        OffVoid(() => write, completed => LogEndFailure(completed, "end the Guest Cycle"));
+    }
+
+    /// <summary>Ends a cycle the brain never held (the Event ended while the store created it).</summary>
+    private void EndInStore(string cycleId, GuestCycleEndReason reason) =>
+        OffVoid(() => _dependencies.Store.EndGuestCycleAsync(cycleId, reason, CancellationToken.None), completed => LogEndFailure(completed, "end the Guest Cycle"));
+
+    private void LogEndFailure(Task completed, string what)
+    {
+        if (!completed.IsCompletedSuccessfully)
+        {
+            BrainLog.GuestCycleStoreFailed(_logger, FailureOf(completed), what);
+        }
+    }
 
     // Start over (plan section 7, D21)
 
@@ -418,7 +475,7 @@ public sealed partial class Brain
     {
         if (endReason is { } reason)
         {
-            EndInStore(run.Id, reason);
+            EndInStore(run, reason);
         }
 
         TearDownCycle(run);

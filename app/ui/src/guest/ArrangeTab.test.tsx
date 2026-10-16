@@ -289,6 +289,23 @@ describe("ArrangeTab", () => {
       expect(windowButton(1)).not.toHaveAttribute("data-drag-source");
     });
 
+    it("sends the revision the gesture began at, so a mid-drag change is the brain's stale-gesture guard to catch", () => {
+      const stub = stubClient();
+      const arranged = photographsOf("guest-cycle-photographs-arrange", { revision: 5 });
+      const view = renderPhotographs(arranged, stub);
+      layOut();
+
+      press(windowButton(1), 50, 45);
+      view.show({ ...arranged, revision: 6 });
+      layOut();
+      move(windowButton(1), 50, 245);
+      release(windowButton(1), 50, 245);
+
+      expect(dragged(stub.sent)).toEqual([
+        { name: "DragPlace", payload: { sourceIndex: 0, captureId: arranged.windows[0]?.captureId, revision: 5, targetIndex: 2 } },
+      ]);
+    });
+
     it("moves a photograph into an empty window the same way", () => {
       const stub = stubClient();
       renderPhotographs(photographsOf("guest-ui-arrange-partial"), stub);
@@ -487,17 +504,33 @@ describe("ArrangeTab", () => {
       expect(announcements(container)).toEqual(["Preparing your strip."]);
     });
 
-    it("announces a new photograph once, when the candidate arrives", () => {
-      const { container, show } = renderPhotographs(
-        photographsOf("guest-cycle-photographs-arrange", { selection: { index: 2, mode: "retaking" } }),
-        stubClient(),
-      );
-      expect(announcements(container)).toEqual([]);
+    describe("a Retake's new photograph, across the Camera to Arrange swap", () => {
+      const ready = "Your new photograph is ready. Accept it, try again, or keep the original.";
+      const candidate = photographsOf("guest-cycle-photographs-retaking");
+      /** What the brain shows while the Retake waits for its photograph: the Camera tab, retaking, no candidate yet. */
+      const camera = { ...candidate, tab: "camera" as const, retakeCandidate: null };
+      const another = { ...candidate, retakeCandidate: { index: 2, imageUrl: "data:image/svg+xml,another-candidate" } };
 
-      show(photographsOf("guest-cycle-photographs-retaking"));
-      expect(announcements(container)).toEqual(["Your new photograph is ready. Accept it, try again, or keep the original."]);
-      show(photographsOf("guest-cycle-photographs-retaking", { retainedCount: 2 }));
-      expect(announcements(container)).toHaveLength(1);
+      it("announces once when the candidate arrives under a fresh Arrange tab, and not again for the same candidate", () => {
+        const { container, show } = renderPhotographs(camera, stubClient());
+        expect(announcements(container)).toEqual([]);
+
+        show(candidate);
+        expect(announcements(container)).toEqual([ready]);
+        show({ ...candidate, retainedCount: 2 });
+        expect(announcements(container)).toEqual([ready]);
+      });
+
+      it("announces again for the candidate a TRY AGAIN brings", () => {
+        const { container, show } = renderPhotographs(camera, stubClient());
+        show(candidate);
+        expect(announcements(container)).toEqual([ready]);
+
+        show(camera);
+        expect(announcements(container)).toEqual([]);
+        show(another);
+        expect(announcements(container)).toEqual([ready]);
+      });
     });
 
     it("announces where a photograph was placed, when the arrangement changes under a selection", () => {

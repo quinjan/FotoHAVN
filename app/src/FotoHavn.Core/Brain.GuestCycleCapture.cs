@@ -153,10 +153,26 @@ public sealed partial class Brain
         }
 
         var mirrored = run.Active.Event.Mirror;
+
+        // The mirror, the JPEG, and the post back run on the pool; they count as off-executor work from the moment the camera answers, so a test settles on them.
         capture.ContinueWith(
-            completed => ProcessFrame(run, sequence, completed, mirrored),
+            completed =>
+            {
+                Interlocked.Increment(ref _offExecutorWork);
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        ProcessFrame(run, sequence, completed, mirrored);
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref _offExecutorWork);
+                    }
+                });
+            },
             CancellationToken.None,
-            TaskContinuationOptions.None,
+            TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
     }
 
@@ -235,14 +251,25 @@ public sealed partial class Brain
         }
 
         var commit = new CaptureCommit(run.Id, run.NextCaptureNumber++, jpeg, width, height, mirrored, sequence.TakenAt);
-        Off(() => _dependencies.Store.CommitCaptureAsync(commit, CancellationToken.None), committed => CaptureCommitted(run, sequence, committed, jpeg, width, height));
+        var write = InOrder(run, () => _dependencies.Store.CommitCaptureAsync(commit, CancellationToken.None));
+        if (sequence.Mode == OperationMode.Retake)
+        {
+            run.RetakeCommit = write;
+        }
+
+        Off(() => write, committed => CaptureCommitted(run, sequence, committed, jpeg, width, height));
     }
 
     private void CaptureCommitted(GuestCycleRun run, CaptureSequence sequence, Task<CaptureRecord> committed, byte[] jpeg, int width, int height)
     {
+        if (sequence.Mode == OperationMode.Retake)
+        {
+            run.RetakeCommit = null;
+        }
+
         if (run.Ended)
         {
-            // The cycle ended meanwhile: the Capture, if it was saved, stays with the Event.
+            // The cycle ended meanwhile: a Sequence's Capture, if it was saved, stays with the Event; a Retake's was discarded when the cycle ended.
             return;
         }
 

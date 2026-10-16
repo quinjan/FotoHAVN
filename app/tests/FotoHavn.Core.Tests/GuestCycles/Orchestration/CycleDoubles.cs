@@ -123,11 +123,39 @@ internal sealed class CycleStore(IEventStore inner) : IEventStore
             return Task.FromException<CaptureRecord>(new StorageException(StorageErrorKind.DiskFull, "Disk full."));
         }
 
-        return CommitGate is { } gate ? After(gate, () => inner.CommitCaptureAsync(commit, ct)) : inner.CommitCaptureAsync(commit, ct);
+        return Recorded(CommitGate is { } gate ? After(gate, () => inner.CommitCaptureAsync(commit, ct)) : inner.CommitCaptureAsync(commit, ct));
     });
 
-    public Task SetCaptureStateAsync(string captureId, CaptureState state, CancellationToken ct) =>
-        FailSetState ? Task.FromException(new StorageException(StorageErrorKind.Locked, "Locked.")) : inner.SetCaptureStateAsync(captureId, state, ct);
+    /// <summary>Every Capture the store committed, oldest first.</summary>
+    public List<CaptureRecord> Committed { get; } = [];
+
+    private async Task<CaptureRecord> Recorded(Task<CaptureRecord> commit)
+    {
+        var record = await commit.ConfigureAwait(false);
+        lock (Committed)
+        {
+            Committed.Add(record);
+        }
+
+        return record;
+    }
+
+    /// <summary>While set, <see cref="SetCaptureStateAsync"/> completes only when the gate does.</summary>
+    public TaskCompletionSource? SetStateGate { get; set; }
+
+    public Task SetCaptureStateAsync(string captureId, CaptureState state, CancellationToken ct)
+    {
+        if (FailSetState)
+        {
+            return Task.FromException(new StorageException(StorageErrorKind.Locked, "Locked."));
+        }
+
+        return SetStateGate is { } gate ? After(gate, async () =>
+        {
+            await inner.SetCaptureStateAsync(captureId, state, ct).ConfigureAwait(false);
+            return true;
+        }) : inner.SetCaptureStateAsync(captureId, state, ct);
+    }
 
     public Task<PhotoStripRecord> CommitPhotoStripAsync(PhotoStripCommit commit, CancellationToken ct) => Track(() =>
     {
@@ -163,6 +191,9 @@ internal sealed class ScriptedCompositor(ICatalog catalog) : ICompositor
 
     /// <summary>While set, a strip with photographs completes only when the gate does.</summary>
     public TaskCompletionSource? StripGate { get; set; }
+
+    /// <summary>While set, a Look thumbnail completes only when the gate does.</summary>
+    public TaskCompletionSource? ThumbnailGate { get; set; }
 
     public int InFlight => Volatile.Read(ref _inFlight);
 
@@ -208,9 +239,15 @@ internal sealed class ScriptedCompositor(ICatalog catalog) : ICompositor
         Interlocked.Increment(ref _inFlight);
         var task = FailThumbnails
             ? Task.FromException<CompositionResult>(new CompositionException(CompositionErrorKind.UndecodablePhoto, "The scripted compositor failed."))
-            : _inner.ComposeLookThumbnailAsync(photo, aspectRatio, lookId, width, ct);
+            : ThumbnailGate is { } gate ? GatedThumbnail(gate, photo, aspectRatio, lookId, width, ct) : _inner.ComposeLookThumbnailAsync(photo, aspectRatio, lookId, width, ct);
         task.ContinueWith(_ => Interlocked.Decrement(ref _inFlight), CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         return task;
+    }
+
+    private async Task<CompositionResult> GatedThumbnail(TaskCompletionSource gate, CompositionPhoto photo, double aspectRatio, string lookId, int width, CancellationToken ct)
+    {
+        await gate.Task.ConfigureAwait(false);
+        return await _inner.ComposeLookThumbnailAsync(photo, aspectRatio, lookId, width, ct).ConfigureAwait(false);
     }
 }
 

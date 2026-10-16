@@ -107,7 +107,7 @@ internal sealed class GuestCycleRig : IDisposable
         ],
     };
 
-    private bool Gated => Store.StartGate is not null || Store.CommitGate is not null || Store.StripGate is not null || Store.ProbeGate is not null || Compositor.StripGate is not null;
+    private bool Gated => Store.StartGate is not null || Store.CommitGate is not null || Store.StripGate is not null || Store.SetStateGate is not null || Store.ProbeGate is not null || Compositor.ThumbnailGate is not null || Compositor.StripGate is not null;
 
     /// <summary>Runs the executor until the brain and the I/O it started have been quiet for a couple of milliseconds.</summary>
     public void Settle()

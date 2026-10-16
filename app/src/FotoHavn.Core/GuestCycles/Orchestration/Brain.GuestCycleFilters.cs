@@ -57,7 +57,7 @@ public sealed partial class Brain
     private void CompleteThumbnail(GuestCycleRun run, (string TemplateId, string CaptureId, string LookId) cacheKey, long revision, Task<CompositionResult> composed)
     {
         run.ThumbnailsInFlight.Remove(cacheKey);
-        if (run.Ended)
+        if (run.Ended || run.Completed)
         {
             return;
         }
@@ -192,6 +192,7 @@ public sealed partial class Brain
     private void BeginFinalCompose(GuestCycleRun run)
     {
         run.Finishing = true;
+        run.CompositionRequest++;
         run.Composing = true;
         run.CompositionFailed = false;
         var composition = CompositionOf(run);
@@ -219,7 +220,8 @@ public sealed partial class Brain
         run.CommitInFlight = true;
         var strip = composed.Result;
         var commit = new PhotoStripCommit(run.Id, composition.TemplateId, composition.LookId, [.. run.Model.ArrangedCaptureIds], strip.Png, strip.Width, strip.Height);
-        Off(() => _dependencies.Store.CommitPhotoStripAsync(commit, CancellationToken.None), committed => CompleteFinalCommit(run, committed));
+        var write = InOrder(run, () => _dependencies.Store.CommitPhotoStripAsync(commit, CancellationToken.None));
+        Off(() => write, committed => CompleteFinalCommit(run, committed));
     }
 
     private void CompleteFinalCommit(GuestCycleRun run, Task<PhotoStripRecord> committed)
