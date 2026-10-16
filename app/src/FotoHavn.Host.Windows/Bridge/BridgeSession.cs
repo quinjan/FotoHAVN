@@ -26,6 +26,7 @@ internal sealed class BridgeSession : IDisposable
     private readonly ILogger _logger;
     private readonly IBrainConnection _connection;
     private readonly Func<string, bool>? _tryHandleFrameAck;
+    private readonly Action<Role>? _uiReady;
     private volatile bool _closed;
 
     /// <param name="brain">The brain to connect to.</param>
@@ -37,7 +38,8 @@ internal sealed class BridgeSession : IDisposable
     /// Takes a page message that is a <c>frameAck</c> (returns true) before the brain sees it: the frame channel's ack.
     /// Null passes every message on.
     /// </param>
-    public BridgeSession(IBrain brain, Role role, Action<Action> postToUi, Action<string> postWebMessage, ILogger logger, Func<string, bool>? tryHandleFrameAck = null)
+    /// <param name="uiReady">Called on the UI thread when the page's <c>welcome</c> is delivered (the page finished its handshake).</param>
+    public BridgeSession(IBrain brain, Role role, Action<Action> postToUi, Action<string> postWebMessage, ILogger logger, Func<string, bool>? tryHandleFrameAck = null, Action<Role>? uiReady = null)
     {
         ArgumentNullException.ThrowIfNull(brain);
         ArgumentNullException.ThrowIfNull(postToUi);
@@ -48,6 +50,7 @@ internal sealed class BridgeSession : IDisposable
         _postWebMessage = postWebMessage;
         _logger = logger;
         _tryHandleFrameAck = tryHandleFrameAck;
+        _uiReady = uiReady;
         _connection = brain.Connect(role, Send);
     }
 
@@ -110,6 +113,7 @@ internal sealed class BridgeSession : IDisposable
         if (json.StartsWith(WelcomePrefix, StringComparison.Ordinal))
         {
             HostLog.UiReady(_logger, Role);
+            _uiReady?.Invoke(Role);
         }
 
         try

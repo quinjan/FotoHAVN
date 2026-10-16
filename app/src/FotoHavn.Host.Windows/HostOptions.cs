@@ -9,8 +9,10 @@ namespace FotoHavn.Host.Windows;
 /// command line stays the same, but only E2E builds act on them. <c>--webview2-runtime</c> names a Fixed Version
 /// WebView2 runtime folder; without it the host uses <c>runtime/webview2</c> beside the executable when present, and
 /// the Evergreen runtime otherwise.
+/// <c>--smoke</c> (no value, read in every build) starts the app as usual and exits <c>HostExitCodes.Success</c> once the Operator UI has
+/// finished its handshake, or <c>HostExitCodes.SmokeTimeout</c> if that takes too long: the field build's own check.
 /// </summary>
-internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera, string? WebView2RuntimeFolder = null, StorageFaultKind? E2EStorageFault = null)
+internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort, string? E2ECamera, string? WebView2RuntimeFolder = null, StorageFaultKind? E2EStorageFault = null, bool Smoke = false)
 {
     public static HostOptions Default { get; } = new(null, null, null);
 
@@ -35,6 +37,11 @@ internal sealed record HostOptions(string? DataFolder, int? RemoteDebuggingPort,
                     break;
                 case "--webview2-runtime":
                     options = options with { WebView2RuntimeFolder = ReadValue(args, ref index, name, inlineValue) };
+                    break;
+                case "--smoke":
+                    options = inlineValue is null
+                        ? options with { Smoke = true }
+                        : throw new HostOptionsException("Option '--smoke' takes no value.");
                     break;
                 case "--e2e-storage-fault":
                     options = options with { E2EStorageFault = ParseFault(ReadValue(args, ref index, name, inlineValue)) };

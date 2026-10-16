@@ -110,4 +110,25 @@ internal static partial class HostLog
 
     [LoggerMessage(EventId = 30, EventName = "previewSurfaceRecovered", Level = LogLevel.Information, Message = "The {Role} preview frame surface works again")]
     public static partial void PreviewSurfaceRecovered(ILogger logger, Role role);
+
+    [LoggerMessage(EventId = 36, EventName = "wakeLockFailed", Level = LogLevel.Warning, Message = "The wake lock failed to {Operation} (Windows error {Code}); the display may sleep during the Event")]
+    public static partial void WakeLockFailed(ILogger logger, string operation, int code);
+
+    [LoggerMessage(EventId = 37, EventName = "inputGuardUnavailable", Level = LogLevel.Warning, Message = "The Guest window's keyboard guard could not be installed (Windows error {Code}); closing and window commands are still refused")]
+    public static partial void InputGuardUnavailable(ILogger logger, int code);
+
+    [LoggerMessage(EventId = 38, EventName = "instanceActivated", Level = LogLevel.Information, Message = "A second launch asked for this window: the Operator window came forward ({Outcome})")]
+    public static partial void InstanceActivated(ILogger logger, string outcome);
+
+    [LoggerMessage(EventId = 39, EventName = "sessionEnding", Level = LogLevel.Information, Message = "Windows is ending the session ({Reason}); the brain {Outcome} in time")]
+    public static partial void SessionEnding(ILogger logger, System.Windows.ReasonSessionEnding reason, string outcome);
+
+    [LoggerMessage(EventId = 40, EventName = "smokeReady", Level = LogLevel.Information, Message = "Smoke run: the Operator UI is ready")]
+    public static partial void SmokeReady(ILogger logger);
+
+    [LoggerMessage(EventId = 41, EventName = "smokeTimedOut", Level = LogLevel.Error, Message = "Smoke run: the Operator UI was not ready within {ElapsedMs} ms")]
+    public static partial void SmokeTimedOut(ILogger logger, long elapsedMs);
+
+    [LoggerMessage(EventId = 42, EventName = "guestCloseRefused", Level = LogLevel.Debug, Message = "Refused to close the Guest window while an Event runs")]
+    public static partial void GuestCloseRefused(ILogger logger);
 }

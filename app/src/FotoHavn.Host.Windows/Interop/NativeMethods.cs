@@ -88,6 +88,102 @@ internal static partial class NativeMethods
         public int Y;
     }
 
+    // Power requests (the wake lock). REASON_CONTEXT's union is padded to its largest member, so Windows reads a whole structure.
+    public const uint PowerRequestContextVersion = 0;
+    public const uint PowerRequestContextSimpleString = 0x00000001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ReasonContext
+    {
+        public uint Version;
+        public uint Flags;
+        public IntPtr SimpleReasonString;
+        public IntPtr Reserved1;
+        public IntPtr Reserved2;
+    }
+
+    [DllImport("kernel32.dll", EntryPoint = "PowerCreateRequest", SetLastError = true)]
+    public static extern IntPtr PowerCreateRequest(ref ReasonContext context);
+
+    [DllImport("kernel32.dll", EntryPoint = "PowerSetRequest", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PowerSetRequest(IntPtr request, int requestType);
+
+    [DllImport("kernel32.dll", EntryPoint = "PowerClearRequest", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PowerClearRequest(IntPtr request, int requestType);
+
+    [DllImport("kernel32.dll", EntryPoint = "CloseHandle", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseHandle(IntPtr handle);
+
+    // The Guest window's input guard: a low-level keyboard hook and the foreground-window calls.
+    public const int WhKeyboardLl = 13;
+    public const int WmKeyDown = 0x0100;
+    public const int WmKeyUp = 0x0101;
+    public const int WmSysKeyDown = 0x0104;
+    public const int WmSysKeyUp = 0x0105;
+    public const int WmSysCommand = 0x0112;
+    public const uint LlkhfAltDown = 0x00000020;
+    public const int VkTab = 0x09;
+    public const int VkReturn = 0x0D;
+    public const int VkControl = 0x11;
+    public const int VkShift = 0x10;
+    public const int VkEscape = 0x1B;
+    public const int VkSpace = 0x20;
+    public const int VkF4 = 0x73;
+    public const int VkLWin = 0x5B;
+    public const int VkRWin = 0x5C;
+    public const uint AsfwAny = 0xFFFFFFFF;
+    public const int SwRestore = 9;
+
+    public delegate IntPtr LowLevelKeyboardProcedure(int code, IntPtr wParam, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KeyboardHookData
+    {
+        public uint VirtualKey;
+        public uint ScanCode;
+        public uint Flags;
+        public uint Time;
+        public UIntPtr ExtraInfo;
+    }
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
+    public static extern IntPtr SetWindowsHookEx(int hookId, LowLevelKeyboardProcedure procedure, IntPtr module, uint threadId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool UnhookWindowsHookEx(IntPtr hook);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern IntPtr GetModuleHandle(string? moduleName);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    public static extern short GetAsyncKeyState(int virtualKey);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetForegroundWindow(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool AllowSetForegroundWindow(uint processId);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool IsIconic(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool ShowWindow(IntPtr hwnd, int command);
+
     public const int WmGetMinMaxInfo = 0x0024;
     public const int WmNcDestroy = 0x0082;
     public const int GwlpWndProc = -4;

@@ -6,6 +6,7 @@ using FotoHavn.Core;
 using FotoHavn.Core.Displays;
 using FotoHavn.Core.Media;
 using FotoHavn.Host.Windows.Bridge;
+using FotoHavn.Host.Windows.Hardening;
 using FotoHavn.Host.Windows.Interop;
 using FotoHavn.Host.Windows.Logging;
 using FotoHavn.Host.Windows.Preview;
@@ -25,7 +26,10 @@ internal sealed record BoothWindowServices(
     IPreviewSource Previews,
     SharedBufferPreviewChannel Frames,
     TimeProvider Time,
-    ILogger Logger);
+    ILogger Logger,
+    WindowCloseController Close,
+    GuestInputGuard Guard,
+    Action<Role>? UiReady = null);
 
 /// <summary>
 /// One screen's window: the Operator window or the Guest window. It hosts one WebView2 at a time with the guardrails,
@@ -59,6 +63,11 @@ internal sealed class BoothWindow : Window
         Closing += OnClosing;
         Closed += OnClosed;
         DpiChanged += OnDpiChanged;
+        if (role == Role.Guest)
+        {
+            SourceInitialized += (_, _) => HwndSource.FromHwnd(Handle)?.AddHook(GuestWindowHook);
+            PreviewKeyDown += OnGuestPreviewKeyDown;
+        }
     }
 
     public Role Role { get; }
@@ -211,7 +220,8 @@ internal sealed class BoothWindow : Window
             work => Dispatcher.InvokeAsync(work),
             core.PostWebMessageAsJson,
             _services.Logger,
-            text => _services.Frames.TryHandleAck(Role, text));
+            text => _services.Frames.TryHandleAck(Role, text),
+            _services.UiReady);
         _session = session;
         core.WebMessageReceived += (_, e) => session.Receive(e.Source, e.WebMessageAsJson);
 
@@ -449,11 +459,51 @@ internal sealed class BoothWindow : Window
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Guests can't close the Guest Screen (Alt+F4); only the host closes it, when the brain asks.
-        if (Role == Role.Guest && !_hostClose)
+        // The host closes the Guest window itself when the brain asks; a close by a guest (Alt+F4, the system menu) is refused while an Event runs.
+        if (_hostClose)
         {
-            e.Cancel = true;
+            return;
         }
+
+        if (Role == Role.Guest)
+        {
+            e.Cancel = _services.Close.ShouldCancelGuestClose();
+            if (e.Cancel)
+            {
+                HostLog.GuestCloseRefused(_services.Logger);
+            }
+
+            return;
+        }
+
+        // The Operator window never closes by itself: the brain answers (end the Event first, or shut the app down) and the host closes for real.
+        e.Cancel = _services.Close.ShouldCancelOperatorClose();
+    }
+
+    /// <summary>
+    /// Refuses the system commands that move, size, switch, or open the system menu of the Guest window while an Event runs. Closing is
+    /// refused by <see cref="OnClosing"/>; the keys are also swallowed by the keyboard hook when the window is in the foreground.
+    /// </summary>
+    private IntPtr GuestWindowHook(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message == NativeMethods.WmSysCommand && _services.Guard.BlocksSystemCommand(wParam))
+        {
+            handled = true;
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private void OnGuestPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.System)
+        {
+            return;
+        }
+
+        var modifiers = System.Windows.Input.Keyboard.Modifiers;
+        var key = new KeyboardEvent(System.Windows.Input.KeyInterop.VirtualKeyFromKey(e.SystemKey), AltDown: true, IsKeyDown: true);
+        e.Handled = _services.Guard.BlocksKey(key, modifiers.HasFlag(System.Windows.Input.ModifierKeys.Control), modifiers.HasFlag(System.Windows.Input.ModifierKeys.Shift));
     }
 
     private void OnClosed(object? sender, EventArgs e)

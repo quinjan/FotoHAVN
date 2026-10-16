@@ -1,6 +1,7 @@
 using FotoHavn.Core.Camera;
 using FotoHavn.Core.Catalog;
 using FotoHavn.Core.Displays;
+using FotoHavn.Core.Hardening;
 using FotoHavn.Core.Hooks;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Storage;
@@ -114,7 +115,7 @@ public sealed partial class Brain : IBrain
         ArgumentNullException.ThrowIfNull(dependencies.WakeLock);
         ArgumentNullException.ThrowIfNull(dependencies.AppLifetime);
         _dependencies = dependencies;
-        _logger = dependencies.Logger;
+        _logger = new EventScopedLogger(dependencies.Logger, LogScopeIds);
         _hooksEnabled = hooksEnabled;
         _hostHooks = hostHooks;
         _storageHooks = storageHooks;
