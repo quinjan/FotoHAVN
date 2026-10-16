@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
 
 namespace FotoHavn.Host.Windows.WebView;
@@ -7,7 +8,17 @@ namespace FotoHavn.Host.Windows.WebView;
 /// <c>Data/</c>). Used on the UI thread only. When the browser process exits, the failed environment is invalidated
 /// and the next window to recover creates a new one, which the other window then shares.
 /// </summary>
-internal sealed class WebViewEnvironmentProvider(string userDataFolder, string? runtimeFolder, string? additionalBrowserArguments)
+/// <remarks>
+/// <paramref name="runtimeFolder"/> is the Fixed Version runtime folder (<c>runtime/webview2</c> beside the exe, or
+/// <c>--webview2-runtime</c>, resolved by <see cref="HostPaths"/>); null means the Evergreen runtime installed on the
+/// machine (development and E2E builds). The field build's zip always carries the folder.
+/// </remarks>
+internal sealed class WebViewEnvironmentProvider(
+    string userDataFolder,
+    string? runtimeFolder,
+    string? additionalBrowserArguments,
+    ILogger? logger = null,
+    Func<string, bool>? fileExists = null)
 {
     private Task<CoreWebView2Environment>? _current;
 
@@ -30,9 +41,16 @@ internal sealed class WebViewEnvironmentProvider(string userDataFolder, string? 
         }
     }
 
-    private Task<CoreWebView2Environment> CreateAsync()
+    private async Task<CoreWebView2Environment> CreateAsync()
     {
-        return CoreWebView2Environment.CreateAsync(runtimeFolder, userDataFolder, BuildOptions(additionalBrowserArguments));
+        var selection = WebViewRuntimeSelection.Select(runtimeFolder, fileExists ?? File.Exists);
+        var environment = await CoreWebView2Environment.CreateAsync(selection.Folder, userDataFolder, BuildOptions(additionalBrowserArguments));
+        if (logger is not null)
+        {
+            WebViewEnvironmentLog.RuntimeSelected(logger, selection, environment.BrowserVersionString);
+        }
+
+        return environment;
     }
 
     /// <summary>
@@ -44,6 +62,56 @@ internal sealed class WebViewEnvironmentProvider(string userDataFolder, string? 
         AdditionalBrowserArguments = additionalBrowserArguments,
         ScrollBarStyle = CoreWebView2ScrollbarStyle.FluentOverlay,
     };
+}
+
+/// <summary>Which WebView2 runtime a host runs on.</summary>
+internal enum WebViewRuntimeKind
+{
+    /// <summary>The runtime installed on the machine, updated by Windows (development and E2E builds).</summary>
+    Evergreen,
+
+    /// <summary>The pinned Fixed Version runtime that the field build carries beside the executable.</summary>
+    FixedVersion,
+}
+
+/// <summary>The runtime choice: a Fixed Version folder when one is configured, Evergreen otherwise.</summary>
+internal sealed record WebViewRuntimeSelection(WebViewRuntimeKind Kind, string? Folder)
+{
+    /// <summary>
+    /// A configured folder is the Fixed Version runtime and must hold <see cref="HostPaths.WebView2RuntimeExecutable"/>;
+    /// WebView2 would otherwise fail with a bare HRESULT, so the failure names the folder instead. Nothing configured
+    /// means Evergreen.
+    /// </summary>
+    public static WebViewRuntimeSelection Select(string? runtimeFolder, Func<string, bool> fileExists)
+    {
+        if (string.IsNullOrWhiteSpace(runtimeFolder))
+        {
+            return new WebViewRuntimeSelection(WebViewRuntimeKind.Evergreen, null);
+        }
+
+        if (!fileExists(Path.Combine(runtimeFolder, HostPaths.WebView2RuntimeExecutable)))
+        {
+            throw new InvalidOperationException(
+                $"The WebView2 runtime folder '{runtimeFolder}' does not hold {HostPaths.WebView2RuntimeExecutable}. " +
+                "Unpack the field build's zip as a whole, or point --webview2-runtime at a Fixed Version runtime folder.");
+        }
+
+        return new WebViewRuntimeSelection(WebViewRuntimeKind.FixedVersion, runtimeFolder);
+    }
+}
+
+/// <summary>Which runtime and version the host runs on. Every property is on the log allow-list (Kind, Version, Runtime).</summary>
+internal static partial class WebViewEnvironmentLog
+{
+    public static void RuntimeSelected(ILogger logger, WebViewRuntimeSelection selection, string version)
+    {
+        var kind = selection.Kind.ToString();
+        var runtime = selection.Folder ?? "system";
+        RuntimeSelected(logger, kind, version, runtime);
+    }
+
+    [LoggerMessage(EventId = 900, EventName = "webViewRuntime", Level = LogLevel.Information, Message = "WebView2 runtime {Kind} version {Version} at {Runtime}")]
+    private static partial void RuntimeSelected(ILogger logger, string kind, string version, string runtime);
 }
 
 /// <summary>
