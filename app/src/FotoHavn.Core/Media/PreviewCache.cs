@@ -13,6 +13,9 @@ public interface IPreviewStore
     /// </returns>
     bool Put(string key, ReadOnlyMemory<byte> png);
 
+    /// <summary>Whether an entry for <paramref name="key"/> exists, without counting as a use.</summary>
+    bool Contains(string key);
+
     /// <summary>Removes the entry for <paramref name="key"/>. Returns whether there was one.</summary>
     bool Remove(string key);
 
@@ -85,6 +88,15 @@ public sealed class PreviewCache : IPreviewSource, IPreviewStore
 
         png = ReadOnlyMemory<byte>.Empty;
         return false;
+    }
+
+    public bool Contains(string key)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        lock (_gate)
+        {
+            return _entries.ContainsKey(key);
+        }
     }
 
     public bool Put(string key, ReadOnlyMemory<byte> png)

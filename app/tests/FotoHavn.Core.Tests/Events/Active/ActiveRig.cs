@@ -4,6 +4,7 @@ using FotoHavn.Core.Displays;
 using FotoHavn.Core.Events;
 using FotoHavn.Core.Events.Active;
 using FotoHavn.Core.Fakes;
+using FotoHavn.Core.GuestCycles.Orchestration;
 using FotoHavn.Core.Media;
 using FotoHavn.Core.Storage;
 using FotoHavn.Core.Tests.Support;
@@ -22,12 +23,23 @@ internal sealed class ActiveRigOptions
 
     public ICameraAdapter? CameraPort { get; init; }
 
+    /// <summary>Wraps the rig's own fake camera adapter with a double the brain is given instead.</summary>
+    public Func<FakeCameraAdapter, ICameraAdapter>? CameraDecorator { get; init; }
+
     public IHostServices? Host { get; init; }
 
     public IWakeLock? WakeLock { get; init; }
 
     public ICompositor? Compositor { get; init; }
 
+    /// <summary>Replaces the brain's Capture encoder (the fake by default).</summary>
+    public ICaptureEncoder? CaptureEncoder { get; init; }
+
+    /// <summary>Gives the brain no Capture encoder at all, as a host that forgot one would.</summary>
+    public bool NoCaptureEncoder { get; init; }
+
+    /// <summary>The fake camera's frame rate; each frame rendered for a preview target costs real time, so long scenarios use fewer.</summary>
+    public double CameraFramesPerSecond { get; init; } = 8;
     /// <summary>Wraps the fake clock the brain runs on (a <see cref="ScaledClock"/> in the E2E hosts).</summary>
     public Func<FakeClock, IClock>? BrainClock { get; init; }
 
@@ -70,13 +82,19 @@ internal sealed class ActiveRig : IDisposable
     {
         Clock = new FakeClock();
         Displays = options.Displays ?? FakeDisplayAdapter.CreateDefault();
-        Camera = new FakeCameraAdapter(Clock, framesPerSecond: 8);
+        Camera = new FakeCameraAdapter(Clock, framesPerSecond: options.CameraFramesPerSecond);
         Store = options.Store ?? new InMemoryEventStore(Clock);
         Host = options.Host ?? new RecordingHostServices(Displays.PrimaryDisplayId);
         WakeLock = options.WakeLock ?? new NoOpWakeLock();
         BrainClock = options.BrainClock?.Invoke(Clock) ?? Clock;
-        var dependencies = TestDependencies.Create(Executor, BrainClock, Displays, options.CameraPort ?? Camera, Host, Store);
-        Dependencies = dependencies with { WakeLock = WakeLock, Compositor = options.Compositor ?? dependencies.Compositor, Logger = Logger };
+        var dependencies = TestDependencies.Create(Executor, BrainClock, Displays, options.CameraPort ?? options.CameraDecorator?.Invoke(Camera) ?? Camera, Host, Store);
+        Dependencies = dependencies with
+        {
+            WakeLock = WakeLock,
+            Compositor = options.Compositor ?? dependencies.Compositor,
+            Logger = Logger,
+            CaptureEncoder = options.NoCaptureEncoder ? null : options.CaptureEncoder ?? dependencies.CaptureEncoder,
+        };
         Brain = new Brain(Dependencies, options.Hooks, null);
     }
 
