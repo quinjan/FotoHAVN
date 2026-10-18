@@ -418,19 +418,19 @@ The form is one screen, with grouped sections in this order. It saves as a draft
 | Section | Field | Rules |
 | --- | --- | --- |
 | Event | Name | Required, 1–80 characters, trimmed |
-| | Date | Required, local date; defaults to today |
-| | Venue | Optional, up to 120 characters |
-| | Customer or host | Optional, up to 120 characters |
-| | Notes | Optional, up to 1,000 characters |
+|  | Date | Required, local date; defaults to today |
+|  | Venue | Optional, up to 120 characters |
+|  | Customer or host | Optional, up to 120 characters |
+|  | Notes | Optional, up to 1,000 characters |
 | Camera | Camera | Required. Lists Available Cameras by name; the Camera Binding stores the device ID. Shows a live preview and the eligibility state: Checking, Ready, Not available, In use by another app, or In use by the running Event. In the last case, the binding can be saved but the preview and eligibility check wait until that Event ends. When the Windows camera privacy setting blocks access, the state is Not available with "Camera access is off in Windows privacy settings." |
 | Guest display | Guest display | Required. Lists Available Displays by name, resolution, and position, marking the one showing the Operator Screen. The Guest Display Binding stores the display's stable identity. `IDENTIFY DISPLAYS` shows a large number on every display for 3 s to match the list to the hardware. Choosing the Operator Screen's display shows the note "The Guest Screen will cover this screen. Use the hold and PIN to return." (D38). If the bound display isn't connected, the field says so and keeps the binding until the operator chooses another. |
-| | Mirror | On or off. Default on. Applies to the preview and saved Captures. |
-| | Countdown | 3, 5, or 10 seconds. Default 5. |
+|  | Mirror | On or off. Default on. Applies to the preview and saved Captures. |
+|  | Countdown | 3, 5, or 10 seconds. Default 5. |
 | Printer | Printer | Fixed read-only value "No printer". Stored as `none`. |
 | Templates | Offered Templates | At least one of the four built-in Templates, shown with blank previews |
-| | Default Template | One of the offered Templates |
+|  | Default Template | One of the offered Templates |
 | Filters | Offered Looks | At least one of the seven Looks, in [`brand/photography.md`](../../brand/photography.md) order |
-| | Default Look | One of the offered Looks; Naturale by default |
+|  | Default Look | One of the offered Looks; Naturale by default |
 | Timing | Phase Timers | Per the [phase timer table](#phase-timers-d18); each has a note on what happens when it runs out or is off |
 | Guests | Guest gallery | Off by default. When on, guests can browse the Event's completed Photo Strips from the Start screen. The control says "Turn this on only with the Customer's permission." |
 | Operator PIN | PIN | Required before the Event can start. 4–6 digits, entered twice, never shown again. Changing it means entering a new one twice. |
@@ -892,11 +892,11 @@ app/e2e/
 ```
 
 - **Launch.** Each test file gets a fresh app process with:
-  - its own temporary Data folder (`--data`)
-  - its own WebView2 user-data folder
-  - a free debugging port (`--remote-debugging-port`)
-  - optionally `--e2e-camera "<name or device id>"`
-  - optionally `--e2e-storage-fault <diskFull|accessDenied|locked>` (E2E builds only; a field build ignores it): injects `allWrites` before the brain constructs the store, so `OpenAsync` fails at its first write and the operator sees the storage error screen. `test.clearStorageFault` plus `RetryStorage` recovers
+    - its own temporary Data folder (`--data`)
+    - its own WebView2 user-data folder
+    - a free debugging port (`--remote-debugging-port`)
+    - optionally `--e2e-camera "<name or device id>"`
+    - optionally `--e2e-storage-fault <diskFull|accessDenied|locked>` (E2E builds only; a field build ignores it): injects `allWrites` before the brain constructs the store, so `OpenAsync` fails at its first write and the operator sees the storage error screen. `test.clearStorageFault` plus `RetryStorage` recovers
 
   The fixture waits for the `hello` handshake before the test starts. On teardown, it collects the app log, the Data folder snapshot, and screenshots.
 - **Two screens in every test.** Both WebView2 controls share one browser process, so one CDP connection exposes both pages. The fixture provides `operatorPage` and, once an Event starts, `guestPage`, identified by the role the host assigns.
@@ -906,13 +906,13 @@ app/e2e/
 - **Assertions on real camera frames.** Real frames vary, so tests assert properties, not pixels: frames are fresh (age under 500 ms), the measured frame rate meets the floor set by spike S1, a Capture is a decodable JPEG of at least 1280×720, and its pixel variance shows it isn't blank. Pixel-exact checks stay in the catalog's golden-image unit tests.
 - **Locators.** Role, label, and visible-text locators first, which also checks accessible naming. `data-testid` only where there's no accessible handle, such as photograph windows on a canvas.
 - **Suites.**
-  - `smoke` covers the critical path of every built milestone in under 5 minutes, and runs before every merge that touches `app/`.
-  - `regression` covers every scenario and runs at each milestone's end and before a field build.
-  - `--grep @m6` runs one milestone's scenarios.
+    - `smoke` covers the critical path of every built milestone in under 5 minutes, and runs before every merge that touches `app/`.
+    - `regression` covers every scenario and runs at each milestone's end and before a field build.
+    - `--grep @m6` runs one milestone's scenarios.
 - **Running it.** From `app/e2e/`: `npx playwright test --project=smoke`, or `npx playwright test --project=regression --grep "@m6"`. Set `FOTOHAVN_E2E_CAMERA` to choose a camera.
-  - Playwright's global setup builds the E2E configuration of the app with `dotnet build -p:FotoHavnE2E=true` and checks for a camera.
-  - Results go to `app/output/e2e/`: the HTML report, JUnit XML, traces, screenshots, and app logs.
-  - The global setup prints the chosen camera, so the agent can copy it into the verification record.
+    - Playwright's global setup builds the E2E configuration of the app with `dotnet build -p:FotoHavnE2E=true` and checks for a camera.
+    - Results go to `app/output/e2e/`: the HTML report, JUnit XML, traces, screenshots, and app logs.
+    - The global setup prints the chosen camera, so the agent can copy it into the verification record.
 - **CI.** GitHub CI doesn't run end-to-end tests. A self-hosted runner on the booth laptop, labelled `camera`, may later run `smoke` nightly and `regression` before field builds.
 
 ### E2E build and test hooks
@@ -921,18 +921,18 @@ app/e2e/
 - **Publish guard.** `publish-field-test.ps1` and MSBuild targets refuse to publish a field build with `FotoHavnE2E=true` or `E2E_HOOKS`, and refuse any publish (including `--no-build`) whose FotoHavn assemblies carry the marker or an `.E2E` namespace, or whose UI carries the E2E marker. The script checks its publish output again. Unit tests check by reflection that a field build's assemblies contain no hook types or marker.
 - **Channel.** Hooks travel as `test.*` messages over the same bridge. The brain rejects them unless compiled with `E2E_HOOKS`.
 
-| Hook | Purpose |
-| --- | --- |
-| `test.listCameras` | Camera precondition and selection: the cameras the adapter lists now, `{ id, name }` each |
-| `test.setClockScale(factor)` | M6 (protocol 6). Speeds up brain timers (countdown, phase timers, Keepsake, PIN lockout, the Identify displays timer) for long scenarios; camera frames stay real-time. `factor` is 1 (real time) to 100, otherwise `invalidArgs`; a host whose brain clock isn't a `ScaledClock` answers `notSupported`. The E2E hosts wrap their real clock in a `ScaledClock` |
-| `test.openCameraDiagnostics` / `test.selectDiagnosticsCamera(deviceId)` / `test.setDiagnosticsMirror(mirrored)` / `test.captureDiagnostics` | Drive the E2E-only camera diagnostics screen (M5; M6 adds Event setup). `openCameraDiagnostics` shows the surface and selects nothing; `selectDiagnosticsCamera` re-lists, opens the camera, and answers `unknownCamera` for an id that isn't listed; `captureDiagnostics` takes a Capture of a `ready` camera, mirrored when asked, and the host saves it as `<data>/diagnostics/capture-yyyyMMdd-HHmmss-fff.jpg` (JPEG at the `JpegEncodingSpec` quality, no metadata) and returns `{ fileName, width, height, byteLength, mirrored }` |
-| `test.injectCameraFault(kind)` / `test.clearCameraFault` | Simulates `stale`, `failed`, `removed`, or `exclusiveLost` on top of the real camera, at the session level (the `FaultInjectingCameraAdapter` decorator the E2E hosts wrap around the adapter); clearing re-opens the selected camera when the fault left it Not available |
-| `test.composeDiagnostics(templateId, lookId)` / `test.composeBlankPreview(templateId)` | M7 (protocol 5). Compose into the preview cache and return `{ previewKey, width, height, byteLength }`; the PNG is served at `https://preview.fotohavn/<previewKey>.png`. `composeDiagnostics` uses the newest N diagnostics Captures, oldest of them first (N is the Template's window count; the brain keeps the last 4; fewer Captures leave the rest of the windows empty); `composeBlankPreview` leaves every window empty with Naturale. `cameraDiagnostics.lastComposition` mirrors the last result. Answer `compositionFailed` when the compositor fails |
-| `test.injectStorageFault(kind, scope)` / `test.clearStorageFault` | Fails the Event store's file writes: `kind` is `diskFull`, `accessDenied`, or `locked`, and `scope` is `nextWrite` (the next write only, then the fault clears) or `allWrites` (every write until `test.clearStorageFault`). Database-level faults aren't injected. The host maps both onto the store's fault-injecting file system |
+| Hook | Purpose |  |  |
+| --- | --- | --- | --- |
+| `test.listCameras` | Camera precondition and selection: the cameras the adapter lists now, `{ id, name }` each |  |  |
+| `test.setClockScale(factor)` | M6 (protocol 6). Speeds up brain timers (countdown, phase timers, Keepsake, PIN lockout, the Identify displays timer) for long scenarios; camera frames stay real-time. `factor` is 1 (real time) to 100, otherwise `invalidArgs`; a host whose brain clock isn't a `ScaledClock` answers `notSupported`. The E2E hosts wrap their real clock in a `ScaledClock` |  |  |
+| `test.openCameraDiagnostics` / `test.selectDiagnosticsCamera(deviceId)` / `test.setDiagnosticsMirror(mirrored)` / `test.captureDiagnostics` | Drive the E2E-only camera diagnostics screen (M5; M6 adds Event setup). `openCameraDiagnostics` shows the surface and selects nothing; `selectDiagnosticsCamera` re-lists, opens the camera, and answers `unknownCamera` for an id that isn't listed; `captureDiagnostics` takes a Capture of a `ready` camera, mirrored when asked, and the host saves it as `<data>/diagnostics/capture-yyyyMMdd-HHmmss-fff.jpg` (JPEG at the `JpegEncodingSpec` quality, no metadata) and returns `{ fileName, width, height, byteLength, mirrored }` |  |  |
+| `test.injectCameraFault(kind)` / `test.clearCameraFault` | Simulates `stale`, `failed`, `removed`, or `exclusiveLost` on top of the real camera, at the session level (the `FaultInjectingCameraAdapter` decorator the E2E hosts wrap around the adapter); clearing re-opens the selected camera when the fault left it Not available |  |  |
+| `test.composeDiagnostics(templateId, lookId)` / `test.composeBlankPreview(templateId)` | M7 (protocol 5). Compose into the preview cache and return `{ previewKey, width, height, byteLength }`; the PNG is served at `https://preview.fotohavn/<previewKey>.png`. `composeDiagnostics` uses the newest N diagnostics Captures, oldest of them first (N is the Template's window count; the brain keeps the last 4; fewer Captures leave the rest of the windows empty); `composeBlankPreview` leaves every window empty with Naturale. `cameraDiagnostics.lastComposition` mirrors the last result. Answer `compositionFailed` when the compositor fails |  |  |
+| `test.injectStorageFault(kind, scope)` / `test.clearStorageFault` | Fails the Event store's file writes: `kind` is `diskFull`, `accessDenied`, or `locked`, and `scope` is `nextWrite` (the next write only, then the fault clears) or `allWrites` (every write until `test.clearStorageFault`). Database-level faults aren't injected. The host maps both onto the store's fault-injecting file system |  |  |
 | `test.getDiagnostics` | Presentation revision, `camera` (`state`, `deviceId`, `format`, `frameAgeMs`, `deliveredFps`, `droppedFrames`, `previewTarget`), last command results; M6 (protocol 6) adds `openFolderRequests` (the last 10 `{ path, at }` the brain asked the host to open), `identifyOverlays` (`{ displayId, number, visible }` of the last Identify displays), `wakeLock` (`{ held }`), and `clockScale`; M8 (protocol 8) adds `guestCycle` (`{ id, step, tab, windowsFilled, windowCount, sequenceRunning, countdownRemaining, timer: { phase, remainingMs, paused, warning } }`, null while no cycle runs); M9 (protocol 9) adds `gallery` (`{ operator: { eventId, itemCount, nextCursor, detailId } | null, guest: { stripCount, nextCursor, detailId, timer } | null }`, null while neither gallery is open); M10 (protocol 10) adds the wake lock's `reason` (`wakeLock: { held, reason }`, the reason naming the Event by its ID, null while not held) and `instance` (`{ mutexName }`, the `Local\FOTOHAVN-<16 hex>` name derived from the Data folder, null in the headless host) |
-| `test.setWindowBounds(role, width, height)` | Places the Operator or Guest window at 1280×720, 1366×768, 1920×1080, or 2560×1440 for layout checks without changing the monitor |
-| `test.useVirtualDisplays(displays)` / `test.disconnectDisplay(id)` / `test.connectDisplay(id)` | Replaces real display enumeration with virtual displays mapped onto the real monitor, and simulates connects and disconnects |
-| `test.crashUi(role)` | Ends one window's WebView2 process to test recovery |
+| `test.setWindowBounds(role, width, height)` | Places the Operator or Guest window at 1280×720, 1366×768, 1920×1080, or 2560×1440 for layout checks without changing the monitor |  |  |
+| `test.useVirtualDisplays(displays)` / `test.disconnectDisplay(id)` / `test.connectDisplay(id)` | Replaces real display enumeration with virtual displays mapped onto the real monitor, and simulates connects and disconnects |  |  |
+| `test.crashUi(role)` | Ends one window's WebView2 process to test recovery |  |  |
 
 ### Integration tests
 
@@ -1137,13 +1137,13 @@ Verification record (M1):
 - **Coverage (collected and reported only in M1):** `FotoHavn.Core`, `FotoHavn.Protocol`, `FotoHavn.Storage`, and `FotoHavn.Catalog` are each 100% line coverage of placeholder code with no branches. UI: 100% statements, branches, functions, and lines.
 - **GitHub CI:** `Desktop app` runs 38402543467 (`7e940a3`) and 38405750103 (`eb0d2ba`) both succeeded.
 - **Review:**
-  - The code review found three issues: a publish-guard bypass through the shared `obj/` folder, the E2E UI bundle being able to ship in field builds, and the camera-precondition test never running global setup.
-  - All three are fixed. E2E builds now use `obj/e2e` and `bin/e2e`, and E2E assemblies carry a `FotoHavnE2E` marker. Publishing fails with guards FOTOHAVN0001–0003. The E2E UI builds to `ui/dist-e2e` with a marker file. A child-process test now runs global setup itself.
-  - The original bypass now publishes a field build with no E2E types.
+    - The code review found three issues: a publish-guard bypass through the shared `obj/` folder, the E2E UI bundle being able to ship in field builds, and the camera-precondition test never running global setup.
+    - All three are fixed. E2E builds now use `obj/e2e` and `bin/e2e`, and E2E assemblies carry a `FotoHavnE2E` marker. Publishing fails with guards FOTOHAVN0001–0003. The E2E UI builds to `ui/dist-e2e` with a marker file. A child-process test now runs global setup itself.
+    - The original bypass now publishes a field build with no E2E types.
 - **Manual:** none for M1.
 - **Not proven:**
-  - The "not run: no camera" path of `FotoHavn.Camera.Windows.Tests`, because a camera was connected. It is covered only by an in-process test.
-  - `website/docs/research/photohavn-branding-website-benchmark.md` still links to the deleted `app/docs/design-system/`. It is website research, so it's allowed, but the link is broken.
+    - The "not run: no camera" path of `FotoHavn.Camera.Windows.Tests`, because a camera was connected. It is covered only by an in-process test.
+    - `website/docs/research/photohavn-branding-website-benchmark.md` still links to the deleted `app/docs/design-system/`. It is website research, so it's allowed, but the link is broken.
 
 ### M2: host, two screens, bridge, and protocol (M)
 
@@ -1168,33 +1168,33 @@ Tasks:
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
-  - Envelope parsing and validation (unknown types, missing IDs, oversized payloads).
-  - Serialization snapshots for every command and presentation record.
-  - Protocol version mismatch.
-  - Dispatcher ordering and single-threaded execution.
-  - Correlation of command results; presentation revisions only increase, per role.
-  - Role checks: every guest-only and operator-only command is rejected from the other role; a page can't change its role.
-  - Display identity matching (same device path matches; same position with another device path doesn't) and single-screen detection.
-  - Schema and TypeScript drift.
-  - Hook rejection when built without `E2E_HOOKS`.
+    - Envelope parsing and validation (unknown types, missing IDs, oversized payloads).
+    - Serialization snapshots for every command and presentation record.
+    - Protocol version mismatch.
+    - Dispatcher ordering and single-threaded execution.
+    - Correlation of command results; presentation revisions only increase, per role.
+    - Role checks: every guest-only and operator-only command is rejected from the other role; a page can't change its role.
+    - Display identity matching (same device path matches; same position with another device path doesn't) and single-screen detection.
+    - Schema and TypeScript drift.
+    - Hook rejection when built without `E2E_HOOKS`.
 - **Unit (UI):**
-  - Each `BrainClient` with a mocked transport: handshake, stale-revision drop, reconnect, and command result correlation.
-  - Role-based root routing.
-  - Rendering the Event list fixture.
+    - Each `BrainClient` with a mocked transport: handshake, stale-revision drop, reconnect, and command result correlation.
+    - Role-based root routing.
+    - Rendering the Event list fixture.
 - **Integration:** headless host round trip over WebSocket with one operator and one guest client in Chromium.
 - **End-to-end `@m2`:**
-  - `smoke/handshake`: the app launches, the operator handshake completes, and the empty Event list renders with "No Events yet."
-  - `regression/host/two-screens`: with two virtual displays, the development command opens the Guest window on the second display's bounds; Playwright sees both pages with roles `operator` and `guest`; each receives only its own presentation.
-  - `regression/host/role-isolation`: a guest page sending an operator command (for example `OpenNewEvent`) gets `rejected`.
-  - `regression/host/navigation-guard`: script navigation to an external URL and `window.open` are blocked in both windows.
-  - `regression/host/ui-crash-recovery`: `test.crashUi('guest')` and then `test.crashUi('operator')`; each UI returns within 5 s at the same revision, and the other window is unaffected.
-  - `regression/host/protocol-mismatch`: a UI started with a wrong protocol version shows the fixed error screen.
-  - `regression/host/media-hosts`: `media.fotohavn` serves files only inside `Data/Events` and `Data/Cache/thumbnails`, and refuses path traversal.
-  - `regression/host/physical-displays` (`@physical-displays`): with two real displays, the Guest window covers the second display's full bounds.
+    - `smoke/handshake`: the app launches, the operator handshake completes, and the empty Event list renders with "No Events yet."
+    - `regression/host/two-screens`: with two virtual displays, the development command opens the Guest window on the second display's bounds; Playwright sees both pages with roles `operator` and `guest`; each receives only its own presentation.
+    - `regression/host/role-isolation`: a guest page sending an operator command (for example `OpenNewEvent`) gets `rejected`.
+    - `regression/host/navigation-guard`: script navigation to an external URL and `window.open` are blocked in both windows.
+    - `regression/host/ui-crash-recovery`: `test.crashUi('guest')` and then `test.crashUi('operator')`; each UI returns within 5 s at the same revision, and the other window is unaffected.
+    - `regression/host/protocol-mismatch`: a UI started with a wrong protocol version shows the fixed error screen.
+    - `regression/host/media-hosts`: `media.fotohavn` serves files only inside `Data/Events` and `Data/Cache/thumbnails`, and refuses path traversal.
+    - `regression/host/physical-displays` (`@physical-displays`): with two real displays, the Guest window covers the second display's full bounds.
 - **Manual:**
-  - The Operator window maximizes on the primary display.
-  - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
-  - Alt+Tab behavior is noted for M10.
+    - The Operator window maximizes on the primary display.
+    - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
+    - Alt+Tab behavior is noted for M10.
 
 Verification record (M2):
 - **Date and commits:** 2026-10-13. Protocol `20560da`, contract addendum `470e2b6`, parallel merges `b39caae`, integration `6285baf`, `ff9debf`, and `48d3760`.
@@ -1229,22 +1229,22 @@ Verification record (M2):
 - **GitHub CI:** `Desktop app` run 38421045609 (`48d3760`) succeeded.
 - **Review:** a code review of security (role isolation, hooks in field builds, headless loopback and tokens, media path scope, navigation guard), concurrency, and protocol correctness found no significant issues.
 - **Integration fixes:**
-  - `test.setWindowBounds` now sizes the page viewport instead of the outer window, and windows can exceed the screen size for 2560×1440 checks.
-  - Field UI builds contain no fixture code.
-  - Hosts ignore `CloseGuestScreen` when no Guest Screen is open.
-  - A headless options test no longer depends on a built `ui/dist`.
+    - `test.setWindowBounds` now sizes the page viewport instead of the outer window, and windows can exceed the screen size for 2560×1440 checks.
+    - Field UI builds contain no fixture code.
+    - Hosts ignore `CloseGuestScreen` when no Guest Screen is open.
+    - A headless options test no longer depends on a built `ui/dist`.
 - **Decision:** the Guest zoom uses the monitor's actual scale, as Q14 intends.
 - **Manual (pending, to be run by the owner):**
-  - The Operator window maximizes on the primary display. It did on the one-display laptop; this check is still needed on the booth.
-  - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
-  - Note Alt+Tab behavior for M10.
+    - The Operator window maximizes on the primary display. It did on the one-display laptop; this check is still needed on the booth.
+    - With a second monitor, the Guest window covers it fully, including the taskbar area, at different scaling on each display.
+    - Note Alt+Tab behavior for M10.
 - **Not proven:**
-  - `regression/host/physical-displays` (`@physical-displays`) is not run: one display.
-  - Scaling other than 100%. At other scaling, the Operator page's CSS viewport is the requested size divided by the scale.
-  - Display hot-plug, touch, Alt+F4 on the Guest window, and a fixed-version WebView2 runtime.
-  - A raw `..` path from a page: Chromium normalizes it before the request leaves the page, so only encoded forms reach the host. Host unit tests cover raw paths.
-  - The `npm run dev` plus headless host loop wasn't exercised by hand.
-  - Guest pages currently allow text selection; M3's global styles disable it.
+    - `regression/host/physical-displays` (`@physical-displays`) is not run: one display.
+    - Scaling other than 100%. At other scaling, the Operator page's CSS viewport is the requested size divided by the scale.
+    - Display hot-plug, touch, Alt+F4 on the Guest window, and a fixed-version WebView2 runtime.
+    - A raw `..` path from a page: Chromium normalizes it before the request leaves the page, so only encoded forms reach the host. Host unit tests cover raw paths.
+    - The `npm run dev` plus headless host loop wasn't exercised by hand.
+    - Guest pages currently allow text selection; M3's global styles disable it.
 
 ### M3: brand foundation in the UI (M)
 
@@ -1267,13 +1267,13 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M3):
 - **Date and commits:** 2026-10-14.
-  - Foundation: `f6b99b9`.
-  - Component merges: `783f672`.
-  - UI fixes and design doc: `e8ff733`.
-  - `@m3` end-to-end: `5f7bed2`.
-  - Fluent overlay scrollbars: `9f0fffd`.
-  - Review fixes: `e0d4978`.
-  - Headless close-handshake fix: `8fe2232`.
+    - Foundation: `f6b99b9`.
+    - Component merges: `783f672`.
+    - UI fixes and design doc: `e8ff733`.
+    - `@m3` end-to-end: `5f7bed2`.
+    - Fluent overlay scrollbars: `9f0fffd`.
+    - Review fixes: `e0d4978`.
+    - Headless close-handshake fix: `8fe2232`.
 - **Machine and camera:** developer laptop with Windows 11, an Intel Arc 140T, .NET SDK 10.0.401, Node 24.20.0, and one display at 100% scaling. Camera: `Integrated Webcam (\\?\USB#VID_0BDA&PID_5596&MI_00#6&339f1394&0&0000#{e5323777-f976-4f5b-9b55-b94699c46e44}\GLOBAL)`.
 - **Results:** from a clean clone at `9f0fffd`, plus reruns after the fixes.
 
@@ -1294,7 +1294,7 @@ Verification record (M3):
   | 6 | Screenshots | PinPad, guest gallery, TextField error, running-Event panel, and countdown: on-brand, nothing clipped or overflowing |
   | 8 | `verify-agent-docs.ps1` | 21 passed |
 - **Coverage:**
-  - .NET:
+    - .NET:
 
     | Assembly | Line | Branch |
     | --- | --- | --- |
@@ -1303,29 +1303,29 @@ Verification record (M3):
     | `FotoHavn.Storage` | 100% | No branches |
     | `FotoHavn.Catalog` | 100% | No branches |
 
-  - UI: 99.62% statements, 99.03% branches, 99.39% functions, and 99.71% lines.
+    - UI: 99.62% statements, 99.03% branches, 99.39% functions, and 99.71% lines.
 - **Visual parity (WebView2 against Chromium):**
-  - 740 comparisons, measured over each fixture's content area with a 1% limit and nothing allowed outside that area.
-  - Maximum 0.517% (`countdown-numeral-10` at 2560×1440), mean 0.0187%.
-  - Both windows use Fluent overlay scrollbars, and the comparison hides scrollbar chrome. Headless Chromium hides scrollbars, so this keeps the two engines comparable.
-  - Later refinement (see [local development guide](local-development-guide.md)): the comparison stays strict, with no displacement tolerance. The pointer is parked before each screenshot: the real OS cursor can rest on a control, and WebView2 keeps its `:hover` state even after the page's own pointer is moved away (the text area's border, the guest-cycle image's hover scale), which made the 1920×1080 comparison fail from run to run. The test moves the real cursor to the window's top-left corner once per resolution, parks the page's pointer there, verifies nothing else is hovered, and waits out the un-hover transitions.
+    - 740 comparisons, measured over each fixture's content area with a 1% limit and nothing allowed outside that area.
+    - Maximum 0.517% (`countdown-numeral-10` at 2560×1440), mean 0.0187%.
+    - Both windows use Fluent overlay scrollbars, and the comparison hides scrollbar chrome. Headless Chromium hides scrollbars, so this keeps the two engines comparable.
+    - Later refinement (see [local development guide](local-development-guide.md)): the comparison stays strict, with no displacement tolerance. The pointer is parked before each screenshot: the real OS cursor can rest on a control, and WebView2 keeps its `:hover` state even after the page's own pointer is moved away (the text area's border, the guest-cycle image's hover scale), which made the 1920×1080 comparison fail from run to run. The test moves the real cursor to the window's top-left corner once per resolution, parks the page's pointer there, verifies nothing else is hovered, and waits out the un-hover transitions.
 - **Touch:** touch from the end-to-end tests (CDP `Input.dispatchTouchEvent`) reaches the page in WebView2 with `pointerType: "touch"`. PinPad keys measure 64×64, the shutter 112×112, and guest OptionList rows at least 64 px tall.
 - **GitHub CI:** `Desktop app` runs 38442817628 (`9f0fffd`) and 38454098728 (`8fe2232`) both succeeded.
 - **Review:** the code review found four issues, all fixed:
-  - The visual-diff ratio was measured over the whole viewport, so small components could change completely and pass. It is now measured over the content area, with helper tests.
-  - The lint didn't catch modern color functions or inline `zIndex` and color values.
-  - The Dialog focus trap counted controls Tab never reaches, so focus could leave the dialog.
-  - `DESIGN.md` had a duplicated bullet.
+    - The visual-diff ratio was measured over the whole viewport, so small components could change completely and pass. It is now measured over the content area, with helper tests.
+    - The lint didn't catch modern color functions or inline `zIndex` and color values.
+    - The Dialog focus trap counted controls Tab never reaches, so focus could leave the dialog.
+    - `DESIGN.md` had a duplicated bullet.
 - **Accepted risk:**
-  - `npm audit` in `app/ui` reports one high-severity advisory (GHSA-vfj7-8cjw-p6xm, `braces` 3.0.3) through stylelint. Development tools only: `npm audit --omit=dev` reports 0, and nothing from it ships in `dist`.
-  - There is no patched version yet; re-check when stylelint or `braces` releases one.
+    - `npm audit` in `app/ui` reports one high-severity advisory (GHSA-vfj7-8cjw-p6xm, `braces` 3.0.3) through stylelint. Development tools only: `npm audit --omit=dev` reports 0, and nothing from it ships in `dist`.
+    - There is no patched version yet; re-check when stylelint or `braces` releases one.
 - **Manual (pending, to be run by the owner):**
-  - The components at 125% and 150% Windows display scaling on the developer monitor.
-  - One review of brand fidelity against `brand/` and `website/` references.
+    - The components at 125% and 150% Windows display scaling on the developer monitor.
+    - One review of brand fidelity against `brand/` and `website/` references.
 - **Not proven:**
-  - Touch on a physical touch screen.
-  - Display scaling other than 100%.
-  - The fixture gallery in the Guest window: the comparisons used the Operator window, which renders the same bundle.
+    - Touch on a physical touch screen.
+    - Display scaling other than 100%.
+    - The fixture gallery in the Guest window: the comparisons used the Operator window, which renders the same bundle.
 
 ### M4: storage (M)
 
@@ -1355,11 +1355,11 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M4):
 - **Date and commits:** 2026-10-14.
-  - Contracts: `3167caf`.
-  - Parallel merges: `6d4fe12`.
-  - Hosts, `starting` surface (protocol v3), and crash harness: `0ddee6a`.
-  - Starting screen and `@m4` end-to-end: `36c1559`.
-  - Review fixes: `ec21a3c`.
+    - Contracts: `3167caf`.
+    - Parallel merges: `6d4fe12`.
+    - Hosts, `starting` surface (protocol v3), and crash harness: `0ddee6a`.
+    - Starting screen and `@m4` end-to-end: `36c1559`.
+    - Review fixes: `ec21a3c`.
 - **Machine and camera:** developer laptop with Windows 11, .NET SDK 10.0.401, Node 24.20.0, one display, and Integrated Webcam.
 - **Results:** from an independent clean clone at `36c1559`, plus a full rerun after the review fixes at `ec21a3c`.
 
@@ -1390,27 +1390,27 @@ Verification record (M4):
 
   UI: 99.64% statements, 98.85% branches, 99.42% functions, and 99.72% lines.
 - **Integration evidence:**
-  - Kill-at-every-step crash tests: a child process is killed at each of 14 steps (Capture and Photo Strip staged, flushed, renamed, inserted; Event and Guest Cycle marked deleting, folder deleted, rows deleted). After a restart, every invariant holds. `staged` comes before the flush.
-  - Real faults: a read-only file gives access denied and a `FileShare.None` handle gives locked. The decorator covers disk full. Each recovers once the fault is cleared.
-  - Paging over 300 cycles.
-  - Opening a 300-cycle, 534 MiB Data folder, hashing every file: 0.77 s with a warm disk cache.
+    - Kill-at-every-step crash tests: a child process is killed at each of 14 steps (Capture and Photo Strip staged, flushed, renamed, inserted; Event and Guest Cycle marked deleting, folder deleted, rows deleted). After a restart, every invariant holds. `staged` comes before the flush.
+    - Real faults: a read-only file gives access denied and a `FileShare.None` handle gives locked. The decorator covers disk full. Each recovers once the fault is cleared.
+    - Paging over 300 cycles.
+    - Opening a 300-cycle, 534 MiB Data folder, hashing every file: 0.77 s with a warm disk cache.
 - **Reconciled seeded data (end-to-end):** staging 1, orphans 2, `app_closed` 1, cycles deleted 2, Events deleted 1, discarded files 1, orphan thumbnails 4, problems 0. The same counts as the .NET `SeededDataFolder` scenario.
 - **GitHub CI:** `Desktop app` runs 38471777165 (`36c1559`) and 38476385042 (`ec21a3c`) both succeeded.
 - **Review:** three medium-severity issues, all fixed:
-  - The reconciler followed junctions and could delete files outside the Data folder. Now enumeration skips reparse points and deletes refuse them, proven with real junctions.
-  - Startup repair changed committed rows beyond the plan. It now logs and keeps.
-  - `staged` and `flushed` were the same crash state. A write callback now separates them.
+    - The reconciler followed junctions and could delete files outside the Data folder. Now enumeration skips reparse points and deletes refuse them, proven with real junctions.
+    - Startup repair changed committed rows beyond the plan. It now logs and keeps.
+    - `staged` and `flushed` were the same crash state. A write callback now separates them.
 - **Decisions:**
-  - Protocol v3 adds the operator `starting` surface, so "No Events yet." never flashes before storage opens.
-  - A Data folder on a removable USB drive is allowed.
-  - The UI's storage-error lines are what the operator sees. Classifier reasons are for logs.
-  - Q18 (window numbers): `captures.sequence >= 1`, and the store validates the arrangement.
+    - Protocol v3 adds the operator `starting` surface, so "No Events yet." never flashes before storage opens.
+    - A Data folder on a removable USB drive is allowed.
+    - The UI's storage-error lines are what the operator sees. Classifier reasons are for logs.
+    - Q18 (window numbers): `captures.sequence >= 1`, and the store validates the arrangement.
 - **Manual (pending, to be run by the owner):** run the app from a USB drive (expected to work) and from a OneDrive-synced folder (expected: the storage error screen with the cloud-synced line).
 - **Not proven:**
-  - Opening on a cold disk cache.
-  - File symlinks; junctions are covered.
-  - SQLite-level `SQLITE_FULL` and `SQLITE_BUSY` from the real engine; they're covered through the error mapper and the file seam.
-  - `npm audit`: the same development-only `braces` advisory as M3.
+    - Opening on a cold disk cache.
+    - File symlinks; junctions are covered.
+    - SQLite-level `SQLITE_FULL` and `SQLITE_BUSY` from the real engine; they're covered through the error mapper and the file seam.
+    - `npm audit`: the same development-only `braces` advisory as M3.
 
 ### M5: webcam adapter (M)
 
@@ -1425,41 +1425,41 @@ Tasks:
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit:**
-  - Format selection against recorded format lists from several webcams.
-  - Freshness and staleness thresholds with a fake clock.
-  - Capture-frame selection (never a frame from before the countdown ended).
-  - Mirror transform and JPEG encoding on synthetic frames.
-  - The one-in-flight back-pressure policy.
-  - Failure classification and Retry decisions.
-  - Fake camera behavior.
+    - Format selection against recorded format lists from several webcams.
+    - Freshness and staleness thresholds with a fake clock.
+    - Capture-frame selection (never a frame from before the countdown ended).
+    - Mirror transform and JPEG encoding on synthetic frames.
+    - The one-in-flight back-pressure policy.
+    - Failure classification and Retry decisions.
+    - Fake camera behavior.
 - **Integration:** `FotoHavn.Camera.Windows.Tests` with a real webcam (open exclusively, receive fresh frames, capture a JPEG, release, reopen), reported "not run" without a camera.
 - **End-to-end `@m5`:**
-  - `smoke/camera-live`: on the diagnostics screen, the selected camera shows a live preview; frame age stays under 500 ms; the frame rate meets the S1 floor for 10 s.
-  - `regression/camera/capture`: a capture produces a decodable JPEG of at least 1280×720 that isn't blank, mirrored when requested (compared with an unmirrored capture taken right after).
-  - `regression/camera/faults`: each injected fault (`stale`, `failed`, `removed`, `exclusiveLost`) moves the state to Not available; clearing it and retrying brings back fresh frames. Budgets from the injection: `failed`, `removed`, and `exclusiveLost` within 500 ms (they act at once); `stale` within 2 s of the last frame plus one check interval (2.4 s with the hook round trip), because staleness is defined as 2 s without frames ([ADR 0004](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md)).
-  - `regression/camera/watcher`: the camera list from `test.listCameras` matches the diagnostics screen.
+    - `smoke/camera-live`: on the diagnostics screen, the selected camera shows a live preview; frame age stays under 500 ms; the frame rate meets the S1 floor for 10 s.
+    - `regression/camera/capture`: a capture produces a decodable JPEG of at least 1280×720 that isn't blank, mirrored when requested (compared with an unmirrored capture taken right after).
+    - `regression/camera/faults`: each injected fault (`stale`, `failed`, `removed`, `exclusiveLost`) moves the state to Not available; clearing it and retrying brings back fresh frames. Budgets from the injection: `failed`, `removed`, and `exclusiveLost` within 500 ms (they act at once); `stale` within 2 s of the last frame plus one check interval (2.4 s with the hook round trip), because staleness is defined as 2 s without frames ([ADR 0004](adr/0004-brain-owned-webcam-through-one-exclusive-mediacapture-stream.md)).
+    - `regression/camera/watcher`: the camera list from `test.listCameras` matches the diagnostics screen.
 - **Manual:**
-  - Unplug and replug a USB webcam.
-  - Open the Windows Camera app first to confirm the "In use by another app" state.
-  - Turn off camera access in Windows privacy settings to confirm Not available with "Camera access is off in Windows privacy settings."
-  - Compare the preview frame rate on the booth laptop with the developer machine.
+    - Unplug and replug a USB webcam.
+    - Open the Windows Camera app first to confirm the "In use by another app" state.
+    - Turn off camera access in Windows privacy settings to confirm Not available with "Camera access is off in Windows privacy settings."
+    - Compare the preview frame rate on the booth laptop with the developer machine.
 
 Verification record (M5):
 - **Date and commits:** 2026-10-14.
-  - Spike S1: `dd72942`.
-  - Contracts (protocol v4): `f8d4eab`.
-  - Parallel merges: `8c41322`.
-  - Integration and `@m5` end-to-end: `68501d0`.
-  - Review fixes: `0f2c661`.
-  - Flaky-test fix: `40cad11`.
+    - Spike S1: `dd72942`.
+    - Contracts (protocol v4): `f8d4eab`.
+    - Parallel merges: `8c41322`.
+    - Integration and `@m5` end-to-end: `68501d0`.
+    - Review fixes: `0f2c661`.
+    - Flaky-test fix: `40cad11`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, one display, and WebView2 runtime 155.0.4283.45. The `Integrated Webcam` offers NV12 at 1920×1080, 1280×960, 1280×720, 640×480, and 640×360, all at 30 fps.
 - **Camera frames:** the privacy shutter was closed for the whole milestone. The camera delivered its "camera off" placeholder (a black frame with a crossed-out camera icon) at about 20 fps. Every automated check ran on those frames.
 - **Spike S1 (ADR 0004):**
-  - Decision: raw RGBA at 1280 px in a reused WebView2 shared buffer, with one frame in flight.
-  - Measured: 29.7 fps delivered, p95 latency under 10 ms, and about 3% of machine CPU, from a synthetic 30 fps source.
-  - Two views at once: both held 29.7 fps.
-  - End-to-end floor: 15 fps.
-  - The JPEG and 960 px fallbacks are deferred until the booth re-measure (M10).
+    - Decision: raw RGBA at 1280 px in a reused WebView2 shared buffer, with one frame in flight.
+    - Measured: 29.7 fps delivered, p95 latency under 10 ms, and about 3% of machine CPU, from a synthetic 30 fps source.
+    - Two views at once: both held 29.7 fps.
+    - End-to-end floor: 15 fps.
+    - The JPEG and 960 px fallbacks are deferred until the booth re-measure (M10).
 - **Results:** from an independent clean clone at `68501d0`, plus reruns after the fixes at `40cad11`.
 
   | Step | Command | Result |
@@ -1493,30 +1493,30 @@ Verification record (M5):
 
   UI: 99.71% statements, 99.02% branches, 99.52% functions, and 99.77% lines.
 - **Measured camera values (end-to-end, placeholder frames):**
-  - Live preview: maximum frame age 83 ms; 19.5–20 fps delivered, which is the camera's full rate and above the 15 fps floor; 0% dropped; the canvas is 1280×720.
-  - Captures: 1920×1080 JPEGs about 15 KB, luminance standard deviation 8.55.
-  - Mirror check: D_direct 0.378 against D_flip 0.0001–0.0056, which is conclusive. A deterministic .NET test also proves the mirror on an asymmetric pattern, and it fails when mirroring is skipped or applied twice.
-  - Faults: `failed`, `removed`, and `exclusiveLost` reach Not available in 17–25 ms (budget 500 ms). `stale` takes 2007–2085 ms (budget 2400 ms: 2 s without frames plus one check). After each is cleared, the first fresh frame is 38–72 ms old.
+    - Live preview: maximum frame age 83 ms; 19.5–20 fps delivered, which is the camera's full rate and above the 15 fps floor; 0% dropped; the canvas is 1280×720.
+    - Captures: 1920×1080 JPEGs about 15 KB, luminance standard deviation 8.55.
+    - Mirror check: D_direct 0.378 against D_flip 0.0001–0.0056, which is conclusive. A deterministic .NET test also proves the mirror on an asymmetric pattern, and it fails when mirroring is skipped or applied twice.
+    - Faults: `failed`, `removed`, and `exclusiveLost` reach Not available in 17–25 ms (budget 500 ms). `stale` takes 2007–2085 ms (budget 2400 ms: 2 s without frames plus one check). After each is cleared, the first fresh frame is 38–72 ms old.
 - **Adapter findings:**
-  - When another app such as the Windows Camera app holds the camera, `MediaFrameReader.StartAsync` returns `ExclusiveControlNotAvailable` and no error code is thrown. The adapter maps that status to "In use by another app".
-  - An unknown device ID gives `0x80070490`, which maps to Not found.
-  - The camera's frame timestamps share a clock with `Stopwatch`.
+    - When another app such as the Windows Camera app holds the camera, `MediaFrameReader.StartAsync` returns `ExclusiveControlNotAvailable` and no error code is thrown. The adapter maps that status to "In use by another app".
+    - An unknown device ID gives `0x80070490`, which maps to Not found.
+    - The camera's frame timestamps share a clock with `Stopwatch`.
 - **GitHub CI:** `Desktop app` runs 38494948639 (`68501d0`) and 38498706687 (`40cad11`) both succeeded.
 - **Review:** three medium-severity issues, all fixed:
-  - The mirror check could pass on a symmetric scene. It now skips with a reason when the scene can't decide, and a deterministic test proves the mirror.
-  - The fault timing budgets were too loose. The immediate faults are now held to 500 ms.
-  - The preview had no recovery when the shared buffer failed. Buffer creation now retries at most once per second; the JPEG fallback is deferred to M10 and documented in ADR 0004 and the plan.
+    - The mirror check could pass on a symmetric scene. It now skips with a reason when the scene can't decide, and a deterministic test proves the mirror.
+    - The fault timing budgets were too loose. The immediate faults are now held to 500 ms.
+    - The preview had no recovery when the shared buffer failed. Buffer creation now retries at most once per second; the JPEG fallback is deferred to M10 and documented in ADR 0004 and the plan.
 - **Manual (pending, to be run by the owner):**
-  - Open the camera's privacy shutter, then rerun `npx playwright test --project=smoke --grep "@m5"` and `--project=regression --grep "@m5"` on a real scene.
-  - Unplug and replug a USB webcam.
-  - Open the Windows Camera app first to confirm "In use by another app" (or run `FOTOHAVN_CAMERA_APP_TEST=1` with the adapter tests).
-  - Compare the preview frame rate on the booth laptop with the developer machine, including the two-view S5 case, and repeat spike S1 there.
-  - Confirm the "Camera access is off in Windows privacy settings" state by turning off camera access in Windows Settings.
+    - Open the camera's privacy shutter, then rerun `npx playwright test --project=smoke --grep "@m5"` and `--project=regression --grep "@m5"` on a real scene.
+    - Unplug and replug a USB webcam.
+    - Open the Windows Camera app first to confirm "In use by another app" (or run `FOTOHAVN_CAMERA_APP_TEST=1` with the adapter tests).
+    - Compare the preview frame rate on the booth laptop with the developer machine, including the two-view S5 case, and repeat spike S1 there.
+    - Confirm the "Camera access is off in Windows privacy settings" state by turning off camera access in Windows Settings.
 - **Not proven:**
-  - Any behavior on a real scene.
-  - Booth-laptop performance.
-  - The headless WebSocket frame path with a real camera; unit and integration tests cover it with the fake camera.
-  - Device hot-plug on the real adapter.
+    - Any behavior on a real scene.
+    - Booth-laptop performance.
+    - The headless WebSocket frame path with a real camera; unit and integration tests cover it with the fake camera.
+    - Device hot-plug on the real adapter.
 
 ### M6: operator screens, Event setup, and running an Event (L)
 
@@ -1533,53 +1533,53 @@ Tasks:
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
 - **Unit (.NET):**
-  - Every field rule in [Event setup](#event-setup).
-  - Offered and default Template and Look consistency.
-  - Phase Timer ranges, including never-off timers.
-  - The draft, save, and leave confirmation transitions.
-  - Delete confirmation.
-  - The Start Event sequence with each failing precondition (another Event running, guest display missing, camera not eligible, storage not writable, missing PIN).
-  - PIN set, confirm, and mismatch; five-wrong-attempt lockout and its 30 s release on the fake clock.
-  - The bound camera and bound display are never substituted.
-  - While an Event runs: every command that would change it is rejected; other Events stay editable; Start is rejected for all; the shared-camera preview state.
-  - `END EVENT` confirmation and its effects; single-screen detection.
+    - Every field rule in [Event setup](#event-setup).
+    - Offered and default Template and Look consistency.
+    - Phase Timer ranges, including never-off timers.
+    - The draft, save, and leave confirmation transitions.
+    - Delete confirmation.
+    - The Start Event sequence with each failing precondition (another Event running, guest display missing, camera not eligible, storage not writable, missing PIN).
+    - PIN set, confirm, and mismatch; five-wrong-attempt lockout and its 30 s release on the fake clock.
+    - The bound camera and bound display are never substituted.
+    - While an Event runs: every command that would change it is rejected; other Events stay editable; Start is rejected for all; the shared-camera preview state.
+    - `END EVENT` confirmation and its effects; single-screen detection.
 - **Unit (UI):** form controls mapped to commands, field error display and announcement, the camera field states, the display picker and identify overlay, the running-Event panel states, and the PIN pad lockout presentation.
 - **Integration:** fixture screenshots and axe for every operator state at four resolutions; headless flow with the fake camera and fake displays.
 - **End-to-end `@m6`** (two virtual displays unless noted):
-  - `smoke/operator-create-and-start`:
-    - Create an Event with every metadata field, the real camera (wait for Ready), and the second display, then set a PIN and `SAVE AND START`.
-    - The Guest Screen opens on the second display's bounds with Start; the Operator Screen shows the running-Event panel.
-    - `END EVENT` and confirm. The Guest Screen closes and the camera is released.
-    - The database has the Event with its offered Templates, Looks, timers, display binding, and a PIN hash, but no PIN.
-  - `regression/operator/validation`: each required field and range rule blocks saving with its message.
-  - `regression/operator/edit-and-leave`: edit an Event, try to leave, and check `KEEP EDITING`, `DISCARD CHANGES`, and `SAVE`.
-  - `regression/operator/running-event-lock`: while an Event runs, its row offers only Gallery and Open folder; Start is disabled everywhere; a direct `EditEvent` for it is `rejected` with `eventRunning`; another Event can be created, edited (its preview says "In use by the running Event" when sharing the camera), and deleted.
-  - `regression/operator/guest-exit-with-pin`: from the Guest Screen, hold 3 s, enter the PIN, and the Event ends exactly as with `END EVENT`.
-  - `regression/operator/pin-lockout`: five wrong PINs lock the dialog; with `test.setClockScale`, the lockout ends and the right PIN works.
-  - `regression/operator/single-screen`: with one virtual display, the Guest Screen covers the Operator Screen, and only the hold and PIN return to the Event list.
-  - `regression/operator/display-missing-at-start`: with the bound display disconnected (`test.disconnectDisplay`), Start stays in setup with the reason; the binding isn't replaced.
-  - `regression/operator/camera-not-eligible`: with `test.injectCameraFault('removed')`, Start Event stays in setup with the reason, and the binding isn't replaced.
-  - `regression/operator/delete`: delete with confirmation; the row disappears at once, and the folder is gone after cleanup.
-  - `regression/operator/open-folder`: the command reaches the host (checked through the diagnostics record, not by driving File Explorer).
-  - `regression/operator/identify-displays`: an overlay appears on each virtual display with the right number and closes after 3 s.
-  - `regression/visual/operator-screens`: real-host screenshots at four resolutions, including the running-Event panel.
-  - `regression/operator/physical-displays` (`@physical-displays`): the full smoke flow on two real displays.
-  - `regression/catalog/blank-previews` (`@m7`, written with M6 because it needs Event setup): every offered Template's blank preview loads in Event setup at the right native size, and Panorama Four appears rotated in the UI. It is part of M6's exit gate (see M7).
+    - `smoke/operator-create-and-start`:
+        - Create an Event with every metadata field, the real camera (wait for Ready), and the second display, then set a PIN and `SAVE AND START`.
+        - The Guest Screen opens on the second display's bounds with Start; the Operator Screen shows the running-Event panel.
+        - `END EVENT` and confirm. The Guest Screen closes and the camera is released.
+        - The database has the Event with its offered Templates, Looks, timers, display binding, and a PIN hash, but no PIN.
+    - `regression/operator/validation`: each required field and range rule blocks saving with its message.
+    - `regression/operator/edit-and-leave`: edit an Event, try to leave, and check `KEEP EDITING`, `DISCARD CHANGES`, and `SAVE`.
+    - `regression/operator/running-event-lock`: while an Event runs, its row offers only Gallery and Open folder; Start is disabled everywhere; a direct `EditEvent` for it is `rejected` with `eventRunning`; another Event can be created, edited (its preview says "In use by the running Event" when sharing the camera), and deleted.
+    - `regression/operator/guest-exit-with-pin`: from the Guest Screen, hold 3 s, enter the PIN, and the Event ends exactly as with `END EVENT`.
+    - `regression/operator/pin-lockout`: five wrong PINs lock the dialog; with `test.setClockScale`, the lockout ends and the right PIN works.
+    - `regression/operator/single-screen`: with one virtual display, the Guest Screen covers the Operator Screen, and only the hold and PIN return to the Event list.
+    - `regression/operator/display-missing-at-start`: with the bound display disconnected (`test.disconnectDisplay`), Start stays in setup with the reason; the binding isn't replaced.
+    - `regression/operator/camera-not-eligible`: with `test.injectCameraFault('removed')`, Start Event stays in setup with the reason, and the binding isn't replaced.
+    - `regression/operator/delete`: delete with confirmation; the row disappears at once, and the folder is gone after cleanup.
+    - `regression/operator/open-folder`: the command reaches the host (checked through the diagnostics record, not by driving File Explorer).
+    - `regression/operator/identify-displays`: an overlay appears on each virtual display with the right number and closes after 3 s.
+    - `regression/visual/operator-screens`: real-host screenshots at four resolutions, including the running-Event panel.
+    - `regression/operator/physical-displays` (`@physical-displays`): the full smoke flow on two real displays.
+    - `regression/catalog/blank-previews` (`@m7`, written with M6 because it needs Event setup): every offered Template's blank preview loads in Event setup at the right native size, and Panorama Four appears rotated in the UI. It is part of M6's exit gate (see M7).
 - **Manual:**
-  - On two real monitors, choose each display with `IDENTIFY DISPLAYS` and confirm the Guest Screen lands on the right one.
-  - Map the guest touch screen in Windows and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
-  - Type Event metadata with the Windows touch keyboard (spike S2 starts here).
-  - Check readability of the Event list at arm's length.
+    - On two real monitors, choose each display with `IDENTIFY DISPLAYS` and confirm the Guest Screen lands on the right one.
+    - Map the guest touch screen in Windows and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
+    - Type Event metadata with the Windows touch keyboard (spike S2 starts here).
+    - Check readability of the Event list at arm's length.
 
 Verification record (M6):
 - **Date and commits:** 2026-10-15.
-  - Contracts (protocol v6): `41752cc`.
-  - Parallel merges: `c72499b`.
-  - Integration (protocol v7, `ProbeWritableAsync`, time-zone-independent fixtures): `3700a43`.
-  - `@m6` end-to-end: `cc866ed9`.
-  - Parallel end-to-end pools: `4e7f3126` and `3d1d2a8c`.
-  - Review fixes: `c9252737`.
-  - Storage timing-test fix: `74969ab`.
+    - Contracts (protocol v6): `41752cc`.
+    - Parallel merges: `c72499b`.
+    - Integration (protocol v7, `ProbeWritableAsync`, time-zone-independent fixtures): `3700a43`.
+    - `@m6` end-to-end: `cc866ed9`.
+    - Parallel end-to-end pools: `4e7f3126` and `3d1d2a8c`.
+    - Review fixes: `c9252737`.
+    - Storage timing-test fix: `74969ab`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (two virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
 - **Results:** from an independent clean clone at `c9252737`.
 
@@ -1608,37 +1608,37 @@ Verification record (M6):
 
   UI: 99.77% lines and 98.21% branches.
 - **Load sensitivity:** the gate's first pass ran while an unrelated CPU stress loop held the machine at about 85% CPU. Five tests with tight time budgets failed:
-  - UI `lint-rules` (60 s timeout);
-  - the guest-shell hold fixture;
-  - `ui-crash-recovery` (5185 ms against a 5 s budget);
-  - `identify-displays` (2 s wait);
-  - `camera/faults` (544 ms against 500 ms).
+    - UI `lint-rules` (60 s timeout);
+    - the guest-shell hold fixture;
+    - `ui-crash-recovery` (5185 ms against a 5 s budget);
+    - `identify-displays` (2 s wait);
+    - `camera/faults` (544 ms against 500 ms).
 
   All passed in isolation and on the quiet rerun. Gate runs must not overlap other heavy work.
 - **End-to-end parallelism:** specs are tagged `@camera`, `@cursor`, or `@build` and run in a serial pool. Everything else runs on 4 workers. The parallel pool alone takes 29 s instead of 60 s. A full regression run takes about the same time either way (895 s on 4 workers, 863 s on 1), because the serial pool (about 13 minutes, mostly the `@m3` visual run) dominates. A cross-pool lock means the camera is never opened twice. A debugging-port clash in the nested camera-precondition run was found and fixed.
 - **GitHub CI:**
-  - `Desktop app` run 38672412693 (`cc866ed9`) succeeded.
-  - Run 38678662316 (`c9252737`) failed: a Storage test waited a fixed 300 ms for the store to close and lost the race on the hosted runner.
-  - Run 38684947760 (`74969ab`) succeeded on two attempts after that test was made deterministic.
+    - `Desktop app` run 38672412693 (`cc866ed9`) succeeded.
+    - Run 38678662316 (`c9252737`) failed: a Storage test waited a fixed 300 ms for the store to close and lost the race on the hosted runner.
+    - Run 38684947760 (`74969ab`) succeeded on two attempts after that test was made deterministic.
 - **Review fixes:**
-  - **(High)** An Event that was still starting wasn't locked. During Start steps 2–7, the Event could be edited, deleted, or saved, and its camera replaced or released. Starting now holds the Event and the camera.
-  - **(High)** `END EVENT` during Start step 8 left the start sequence running. That caused double releases and a false "guest display didn't respond". Ending now cancels the start, and the rollback runs exactly once.
-  - **(Medium)** The exit hold was accepted at 2.5 s. It now takes at least 2.85 s on the brain clock: 3 s minus a 150 ms allowance for message delay.
-  - **(Medium)** Typed PIN digits stayed in the setup form after a save. They're now cleared.
-  - **(Medium)** Focus wasn't returned to the exit control after the PIN dialog closed. It now is.
+    - **(High)** An Event that was still starting wasn't locked. During Start steps 2–7, the Event could be edited, deleted, or saved, and its camera replaced or released. Starting now holds the Event and the camera.
+    - **(High)** `END EVENT` during Start step 8 left the start sequence running. That caused double releases and a false "guest display didn't respond". Ending now cancels the start, and the rollback runs exactly once.
+    - **(Medium)** The exit hold was accepted at 2.5 s. It now takes at least 2.85 s on the brain clock: 3 s minus a 150 ms allowance for message delay.
+    - **(Medium)** Typed PIN digits stayed in the setup form after a save. They're now cleared.
+    - **(Medium)** Focus wasn't returned to the exit control after the PIN dialog closed. It now is.
 - **Product bug found by end-to-end:** the running Event's row showed "End the running Event to start another." although it offers no START.
 - **Decisions:** Q19 (camera sharing during an Active Event), Q20 (a PIN is required only to start), Q21 (a PIN-store failure counts as a wrong attempt), and Q22 (`guestScreenNotReady`) are recorded in section 18. Protocol v7.
 - **Manual (pending, to be run by the owner):**
-  - On two real monitors, choose each display with `IDENTIFY DISPLAYS` and confirm the Guest Screen lands on the right one. This also covers the skipped `physical-displays` scenarios.
-  - Map the guest touch screen and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
-  - Type Event metadata with the Windows touch keyboard (spike S2).
-  - Check readability of the Event list at arm's length.
+    - On two real monitors, choose each display with `IDENTIFY DISPLAYS` and confirm the Guest Screen lands on the right one. This also covers the skipped `physical-displays` scenarios.
+    - Map the guest touch screen and confirm touches reach the Guest Screen while the mouse works on the Operator Screen.
+    - Type Event metadata with the Windows touch keyboard (spike S2).
+    - Check readability of the Event list at arm's length.
 - **Not proven:**
-  - Two real displays.
-  - A real mouse press-and-hold on the Guest Screen: the end-to-end tests use touch and the keyboard.
-  - Identify overlays on real hardware: they're checked through diagnostics and a manual screenshot on virtual displays.
-  - Behavior with a real scene.
-  - Note: at 1920 px and wider, the setup form uses only the left column, about 775–860 px. That fits the layout but may merit a design review.
+    - Two real displays.
+    - A real mouse press-and-hold on the Guest Screen: the end-to-end tests use touch and the keyboard.
+    - Identify overlays on real hardware: they're checked through diagnostics and a manual screenshot on virtual displays.
+    - Behavior with a real scene.
+    - Note: at 1920 px and wider, the setup form uses only the left column, about 775–860 px. That fits the layout but may merit a design review.
 
 ### M7: catalog and compositor (M)
 
@@ -1668,12 +1668,12 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M7):
 - **Date and commits:** 2026-10-14/15.
-  - Contracts (protocol v5): `3b1e0ae`.
-  - Parallel merges: `b701700`.
-  - Integration and `@m7` end-to-end: `20643a5`.
-  - Hover root cause in the WebView2 visual spec: `a00406f`.
-  - Review fixes: `8a8dc18`.
-  - Fixture-lane reliability: `82b0a7e`.
+    - Contracts (protocol v5): `3b1e0ae`.
+    - Parallel merges: `b701700`.
+    - Integration and `@m7` end-to-end: `20643a5`.
+    - Hover root cause in the WebView2 visual spec: `a00406f`.
+    - Review fixes: `8a8dc18`.
+    - Fixture-lane reliability: `82b0a7e`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 runtime 155.0.4283.45, one display, and Integrated Webcam. The camera's privacy shutter was closed, so the end-to-end captures are the camera's "camera off" placeholder frames.
 - **Results:** from an independent clean clone at `a00406f`, plus a full rerun on `82b0a7e` after the review and reliability fixes.
 
@@ -1706,36 +1706,36 @@ Verification record (M7):
 
   UI: about 99.5% statements.
 - **Golden images:** 32 decoded-pixel hashes, covering 28 Template × Look strips and 4 blank previews. Five were reviewed by eye:
-  - blank Signature Strip with hairlines and a centered signature;
-  - Butter Gingham Sepia with the Look confined to the windows;
-  - Panorama Four Monochrome, 1800×600, with a corner signature;
-  - Polka Keepsake Classic;
-  - the kerned signature after the fix.
+    - blank Signature Strip with hairlines and a centered signature;
+    - Butter Gingham Sepia with the Look confined to the windows;
+    - Panorama Four Monochrome, 1800×600, with a corner signature;
+    - Polka Keepsake Classic;
+    - the kerned signature after the fix.
 
   Rewriting the baselines (`FOTOHAVN_UPDATE_GOLDEN=1`) now fails the run on purpose, and is refused when `CI` is set.
 - **`@m7` end-to-end:** 4 real captures, then 28 compositions fetched from `preview.fotohavn`. Each is 200, `image/png`, `no-store`, at the Template's native size, decodable, and fully opaque. Each Template's Naturale strip has a capture in its first window. The UI `COMPOSE` action shows Panorama Four rotated. 28 compositions took 2.7 s (median round trip 46 ms).
 - **GitHub CI:**
-  - `Desktop app` run 38609358498 (`a00406f`) failed on cold-start timeouts in the fixture lane.
-  - Run 38641927888 (`82b0a7e`) succeeded on both attempts.
+    - `Desktop app` run 38609358498 (`a00406f`) failed on cold-start timeouts in the fixture lane.
+    - Run 38641927888 (`82b0a7e`) succeeded on both attempts.
 - **Review findings, all fixed:**
-  - **Signature kerning (medium):** the signature wasn't kerned like the website's canvas. It is now shaped with HarfBuzz; only the signature pixels changed.
-  - **Visual tolerance (medium):** the 1-pixel tolerance also excused 1→2 px border changes. It was removed. The real cause of the `@m3` failure was the OS pointer's hover state: the spec now parks the system cursor and waits for transitions to finish, and comparison is strict pixelmatch again.
-  - **S3 budget (medium):** the budget was never asserted in a gate run. It now has its own non-coverage step: 150 ms locally, 500 ms on hosted CI.
-  - **Preview retention (low–medium):** composed previews of released diagnostics captures stayed in the preview cache. They're now removed, and stale results are never cached.
-  - **`@m7` assertion (low):** `@m7` didn't prove a capture reached a window. It now checks the first window isn't blank.
+    - **Signature kerning (medium):** the signature wasn't kerned like the website's canvas. It is now shaped with HarfBuzz; only the signature pixels changed.
+    - **Visual tolerance (medium):** the 1-pixel tolerance also excused 1→2 px border changes. It was removed. The real cause of the `@m3` failure was the OS pointer's hover state: the spec now parks the system cursor and waits for transitions to finish, and comparison is strict pixelmatch again.
+    - **S3 budget (medium):** the budget was never asserted in a gate run. It now has its own non-coverage step: 150 ms locally, 500 ms on hosted CI.
+    - **Preview retention (low–medium):** composed previews of released diagnostics captures stayed in the preview cache. They're now removed, and stale results are never cached.
+    - **`@m7` assertion (low):** `@m7` didn't prove a capture reached a window. It now checks the first window isn't blank.
 - **Decisions:**
-  - Diagnostics composition uses the newest N captures.
-  - The preview key format lives in Core.
-  - PNG encoding uses the Sub filter at zlib level 1: lossless, about 30% larger, and about 5× faster.
-  - The fixture lane runs on 2 workers with `retries: 1` on CI only, as a visible safety net.
+    - Diagnostics composition uses the newest N captures.
+    - The preview key format lives in Core.
+    - PNG encoding uses the Sub filter at zlib level 1: lossless, about 30% larger, and about 5× faster.
+    - The fixture lane runs on 2 workers with `retries: 1` on CI only, as a visible safety net.
 - **Moved to M6's gate:** `regression/catalog/blank-previews` needs Event setup.
 - **Manual (pending, to be run by the owner):**
-  - Review all 28 Template × Look strips composed from real Captures against the website's online booth. This needs the camera shutter open.
-  - Re-measure spike S3 on the booth laptop.
+    - Review all 28 Template × Look strips composed from real Captures against the website's online booth. This needs the camera shutter open.
+    - Re-measure spike S3 on the booth laptop.
 - **Not proven:**
-  - Composition of a real scene.
-  - Booth-laptop speed.
-  - `npm audit` still shows the development-only `braces` advisory.
+    - Composition of a real scene.
+    - Booth-laptop speed.
+    - `npm audit` still shows the development-only `braces` advisory.
 
 ### M8: Guest Cycle (L)
 
@@ -1777,11 +1777,11 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M8):
 - **Date and commits:** 2026-10-15/16.
-  - Contracts (protocol v8, pure Guest Cycle model, `PhaseTimerEngine`, scaffolding): `91af0d34`.
-  - Parallel merges (brain orchestration, Template and Photographs, Filters/Keepsake/Assistance/chrome): `628a174e`, `dfe3f5f0`, `cda223f5`.
-  - Integration (FsCheck bookkeeping fix, fixture consolidation, skipped-Filters compose state, `FiltersView` geometry, Q24–Q27, DESIGN.md copy): `40ed21e4`, `17dc233b`.
-  - `@m8` end-to-end and headless Guest Cycle scenarios: `319e7e1e`.
-  - Review fixes: `073186b5`.
+    - Contracts (protocol v8, pure Guest Cycle model, `PhaseTimerEngine`, scaffolding): `91af0d34`.
+    - Parallel merges (brain orchestration, Template and Photographs, Filters/Keepsake/Assistance/chrome): `628a174e`, `dfe3f5f0`, `cda223f5`.
+    - Integration (FsCheck bookkeeping fix, fixture consolidation, skipped-Filters compose state, `FiltersView` geometry, Q24–Q27, DESIGN.md copy): `40ed21e4`, `17dc233b`.
+    - `@m8` end-to-end and headless Guest Cycle scenarios: `319e7e1e`.
+    - Review fixes: `073186b5`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
 - **Results:** from an independent clean clone at `319e7e1e`; the review fixes were re-verified on the changed projects and the `@m8` specs at `073186b5`.
 
@@ -1814,27 +1814,27 @@ Verification record (M8):
 - **CI counterparts (no hooks on CI):** the headless lane runs the pointer cycle, keyboard-only with Move, Start Over from all three steps, template change, and skipped steps on the real brain with the fake camera. The hook-dependent scenarios are covered by brain tests in `GuestCycles/Orchestration`: the progress property (default and random Event settings), timer warning and `MORE TIME`, camera and storage faults with `RETRY`, display loss and reopening, `END EVENT` and the guest PIN exit, and the operator panel step.
 - **Path length:** in a 127-character worktree path, the nested `@build` runs in `camera-precondition` fail because the child's WebView2 user-data folder exceeds 260 characters. They pass from the clean clone's shorter path. Keep checkouts short or set `FOTOHAVN_E2E_OUTPUT`.
 - **GitHub CI:**
-  - `Desktop app` run 38860614081 (`319e7e1e`) succeeded.
-  - Run 38865756182 (`073186b5`) succeeded.
+    - `Desktop app` run 38860614081 (`319e7e1e`) succeeded.
+    - Run 38865756182 (`073186b5`) succeeded.
 - **Review fixes:**
-  - **(Medium)** The Retake-candidate announcement never fired in the real flow, because the Arrange tab mounted with the candidate already present. `PhotographsStep` now announces once per candidate.
-  - **(Low)** `DragPlace` sent the revision at release, not at the start of the gesture. It now sends the gesture's revision, so the model's stale-gesture guard works.
-  - **(Low)** Capture discards, commits, the Photo Strip commit and the cycle end ran in independent tasks, so a discard could land after the cycle ended (file kept, Assistance on Keepsake). Store writes for a cycle now run through one ordered queue.
-  - **(Low)** Start Over, `END EVENT` and the guest PIN exit left a pending Retake candidate kept. It is now discarded before the cycle ends, and a late Retake commit is discarded too.
-  - **(Low)** A Look preview still in flight when the final strip began could clear `composing` and re-add cache keys. The final compose now supersedes it.
-  - **(Low)** The brain test rig could settle before an off-executor encode posted back. The encode now counts as off-executor work.
+    - **(Medium)** The Retake-candidate announcement never fired in the real flow, because the Arrange tab mounted with the candidate already present. `PhotographsStep` now announces once per candidate.
+    - **(Low)** `DragPlace` sent the revision at release, not at the start of the gesture. It now sends the gesture's revision, so the model's stale-gesture guard works.
+    - **(Low)** Capture discards, commits, the Photo Strip commit and the cycle end ran in independent tasks, so a discard could land after the cycle ended (file kept, Assistance on Keepsake). Store writes for a cycle now run through one ordered queue.
+    - **(Low)** Start Over, `END EVENT` and the guest PIN exit left a pending Retake candidate kept. It is now discarded before the cycle ends, and a late Retake commit is discarded too.
+    - **(Low)** A Look preview still in flight when the final strip began could clear `composing` and re-add cache keys. The final compose now supersedes it.
+    - **(Low)** The brain test rig could settle before an off-executor encode posted back. The encode now counts as off-executor work.
 - **Bug found in integration:** the wave A FsCheck "no kept Capture lost" check failed once. The rules were right; the test kept a re-committed id in its discarded set. While composing with Filters skipped, Arrange offered `RETAKE` and `MOVE`; it now shows "Preparing your strip.".
 - **Decisions:** Q24 (retained pool as a count line), Q25 (failed composition keeps the previous preview), Q26 (skipped steps omitted from progress), and Q27 (Retry, Keepsake, storage and warning behaviours) are recorded in section 18. `FiltersView` gained `width`, `height` and `landscape` within protocol v8 (unreleased, so no bump). Captures are JPEG-encoded through the new `ICaptureEncoder` port (quality 92, shared with diagnostics).
 - **Manual (pending, to be run by the owner):**
-  - A full cycle on the booth touch screen at standing distance while the operator uses the Operator Screen.
-  - Flash comfort and countdown legibility from 1.5 m.
-  - A Guest Cycle with two people in frame to check the crop guides (needs the camera shutter open).
-  - Unplug the guest monitor mid-cycle and recover with `RETRY`.
+    - A full cycle on the booth touch screen at standing distance while the operator uses the Operator Screen.
+    - Flash comfort and countdown legibility from 1.5 m.
+    - A Guest Cycle with two people in frame to check the crop guides (needs the camera shutter open).
+    - Unplug the guest monitor mid-cycle and recover with `RETRY`.
 - **Not proven:**
-  - A real scene: every frame was the camera's "camera off" placeholder.
-  - Real finger input: CDP touch stands in for it.
-  - Physical display loss: simulated with `test.disconnectDisplay`.
-  - Note: at 2560×1440 the Arrange strip takes only the left ~40% of the stage. It fits the layout but may merit a design review.
+    - A real scene: every frame was the camera's "camera off" placeholder.
+    - Real finger input: CDP touch stands in for it.
+    - Physical display loss: simulated with `test.disconnectDisplay`.
+    - Note: at 2560×1440 the Arrange strip takes only the left ~40% of the stage. It fits the layout but may merit a design review.
 
 ### M9: Event Gallery, operator and guest views (M)
 
@@ -1866,11 +1866,11 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M9):
 - **Date and commits:** 2026-10-16.
-  - Contracts (protocol v9, `GalleryRules`, `GalleryUrls`, `GalleryPage`, scaffolding): `4632a628`.
-  - Parallel merges (brain and storage; operator and guest UI): `2821634b`, `f0f66856`.
-  - Integration, `@m9` end-to-end, Q28–Q33, DESIGN.md copy, and the load-proof brain test rigs: `baa1ff37`, `a398dda0`.
-  - GitHub Actions made manual-only: `8141789d`, `a873105d`.
-  - Review fixes: `90ce6df6`.
+    - Contracts (protocol v9, `GalleryRules`, `GalleryUrls`, `GalleryPage`, scaffolding): `4632a628`.
+    - Parallel merges (brain and storage; operator and guest UI): `2821634b`, `f0f66856`.
+    - Integration, `@m9` end-to-end, Q28–Q33, DESIGN.md copy, and the load-proof brain test rigs: `baa1ff37`, `a398dda0`.
+    - GitHub Actions made manual-only: `8141789d`, `a873105d`.
+    - Review fixes: `90ce6df6`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
 - **Results:** from an independent clean clone at `a398dda0`; the review fixes were re-verified on the full .NET suite, the changed UI areas, and the `@m9` specs at `90ce6df6`.
 
@@ -1903,21 +1903,21 @@ Verification record (M9):
 - **Large Event (300 seeded Guest Cycles, 8 pages of 40):** a hook-latency baseline (median of 5 round trips, about 10 ms) is subtracted. Warm pages, as in a running Event where each strip's thumbnail is made when it commits, took 26–224 ms against the 300 ms budget. The first open of an old Event makes thumbnails on the way and took 333–1341 ms per page; the operator list fills in item by item while that happens (Q33). Touch scrolling reached the end in 9–11 swipes.
 - **GitHub CI:** not run. From M9 the `Desktop app` workflow runs only on demand (user decision to save Actions minutes); the clean-clone verification and the code review are the gate.
 - **Review fixes:**
-  - **(Medium)** The Start link showed on Start unavailable for a storage failure, where the gallery always refused to open. The link now shows only where the gallery can open (camera-unavailable Start still offers it).
-  - **(Medium)** `STEP INSIDE` from a stale Start screen started a Guest Cycle under an open guest gallery, leaving the gallery and its timer alive for the next guest. `BeginGuestCycle` is now refused while the guest gallery is open.
-  - **(Medium)** The `guest-timer` spec had about 2 real seconds to check the warning at clock scale 10. It now slows the clock to real time for the warning checks.
-  - **(Low)** Hard 300 ms wall-clock asserts in a Storage test and the `large-event` spec could fail on a loaded machine. The Storage test now bounds a warm page at 2 s and reports the time; the end-to-end spec keeps the 300 ms criterion with the hook latency subtracted.
+    - **(Medium)** The Start link showed on Start unavailable for a storage failure, where the gallery always refused to open. The link now shows only where the gallery can open (camera-unavailable Start still offers it).
+    - **(Medium)** `STEP INSIDE` from a stale Start screen started a Guest Cycle under an open guest gallery, leaving the gallery and its timer alive for the next guest. `BeginGuestCycle` is now refused while the guest gallery is open.
+    - **(Medium)** The `guest-timer` spec had about 2 real seconds to check the warning at clock scale 10. It now slows the clock to real time for the warning checks.
+    - **(Low)** Hard 300 ms wall-clock asserts in a Storage test and the `large-event` spec could fail on a loaded machine. The Storage test now bounds a warm page at 2 s and reports the time; the end-to-end spec keeps the 300 ms criterion with the hook latency subtracted.
 - **Found in integration:** six Core failures from the wave-B coverage run were never identified. They reproduced only under heavy load: the brain test rigs treated 3 ms of quiet as settled. The rigs now wait on the expected state and count queued thread-pool work, and the full Core suite passed under 32 CPU-spinning processes. Two stale end-to-end specs (protocol versions 9/8, and the gallery no longer answering "That isn't ready yet.") were updated.
 - **Decisions:** Q28 (the guest gallery's first page waits for its thumbnails), Q29 (deleting the last completed strip returns a browsing guest to Start), Q30 (a guest on the Keepsake of a deleted cycle returns to Start), Q31 (a not-running Event's gallery opens while another runs), Q32 (unfinished cycles aren't listed), and Q33 (gallery details from waves B and C) are recorded in section 18. Protocol v9.
 - **Manual (pending, to be run by the owner):**
-  - Browse the guest gallery by touch on the booth screen.
-  - Confirm the permission note in Event setup reads clearly.
-  - Look at a gallery of real photographs (needs the camera shutter open).
+    - Browse the guest gallery by touch on the booth screen.
+    - Confirm the permission note in Event setup reads clearly.
+    - Look at a gallery of real photographs (needs the camera shutter open).
 - **Not proven:**
-  - Real photographs in either gallery view.
-  - Real finger input: CDP touch stands in for it.
-  - Cold thumbnails for real-size strips end to end: the e2e seed uses tiny images, and the Storage tests time real-size ones (about 1 s per page of 40 when cold).
-  - Two real displays.
+    - Real photographs in either gallery view.
+    - Real finger input: CDP touch stands in for it.
+    - Cold thumbnails for real-size strips end to end: the e2e seed uses tiny images, and the Storage tests time real-size ones (about 1 s per page of 40 when cold).
+    - Two real displays.
 
 ### M10: hardening and field build (M)
 
@@ -1949,10 +1949,10 @@ Verification. The implementing agent writes and runs these through the [verifica
 
 Verification record (M10):
 - **Date and commits:** 2026-10-16/17.
-  - Contracts (protocol v10, `SingleInstancePolicy`, `CloseRequestRules`, `LogRedaction`, `WakeLockRules`, ports, scaffolding): `78b01941`.
-  - Parallel merges (Windows runtime hardening; field build): `e4c21cbc`, `87cc8013`.
-  - Integration, `@m10` end-to-end, field-build seam, hardware checklist and docs: `6ea7e836`.
-  - Review fixes: `013991ad`.
+    - Contracts (protocol v10, `SingleInstancePolicy`, `CloseRequestRules`, `LogRedaction`, `WakeLockRules`, ports, scaffolding): `78b01941`.
+    - Parallel merges (Windows runtime hardening; field build): `e4c21cbc`, `87cc8013`.
+    - Integration, `@m10` end-to-end, field-build seam, hardware checklist and docs: `6ea7e836`.
+    - Review fixes: `013991ad`.
 - **Machine and camera:** Dell Pro Max 16 (Core Ultra 7 265H, Arc 140T), Windows 11, .NET SDK 10.0.401, Node 24.20.0, WebView2 155.0.4283.45 (Evergreen) and the pinned Fixed Version 155.0.4283.60 in the field build, one display (virtual displays mapped onto it), and Integrated Webcam with its privacy shutter closed (placeholder frames).
 - **Results:** from an independent clean clone at `6ea7e836`; the review fixes were re-verified on the full .NET suite, the Pester tests, the field build, and the changed `@m10` specs at `013991ad`.
 
@@ -1984,25 +1984,25 @@ Verification record (M10):
   UI: 99.45% lines and 97.82% branches.
 - **Field build (spike S4):** the pinned WebView2 Fixed Version 155.0.4283.60 x64 (cab 310,497,658 bytes, expanded 705 MB, SHA-256 in `app/scripts/webview2-fixed-version.json`; details and the update procedure in ADR 0003). The zip is 406 MB (950 MB unpacked) and publishes in about 40 s from the runtime cache. Unzipped into a path with spaces, `--smoke` exits 0 in about 3 s with `Data\` beside the exe and the log naming the Fixed Version runtime; a second launch on the same Data folder exits 3 in about 155 ms.
 - **`@m10` end-to-end:**
-  - `smoke/single-instance` (`@cursor`): the second launch exits 3 and the minimized Operator window is restored to the foreground.
-  - `regression/hardening/portable-launch` (`@build`): publish, unzip, `--smoke` exit 0, Data beside the exe, second launch exit 3.
-  - `regression/hardening/shortcuts` (`@camera @cursor`): a real Alt+F4 closes the Guest window with no Event (control), changes nothing during an Active Event; closing the Operator window asks first, `KEEP RUNNING` keeps running, `END EVENT AND CLOSE` ends the cycle as `operator_exit` and exits 0; with no Event the Operator window closes normally.
-  - `regression/hardening/wake-lock` (`@camera`): held with its reason only while an Event is active; released after `END EVENT` and after the guest PIN exit.
-  - `regression/hardening/soak` (`@camera`): 300 Guest Cycles in 22.8 min at a 20× clock (Q41), 1200 kept Captures and 300 Photo Strips with every hash matching. Growth after the cycle-25 baseline: host working set +12.2 MiB (bound 100), process tree +60.1 MiB (bound 300), host handles +2 (bound 150), tree handles 0 (bound 200), database 8.6 KiB per cycle (bound 32).
+    - `smoke/single-instance` (`@cursor`): the second launch exits 3 and the minimized Operator window is restored to the foreground.
+    - `regression/hardening/portable-launch` (`@build`): publish, unzip, `--smoke` exit 0, Data beside the exe, second launch exit 3.
+    - `regression/hardening/shortcuts` (`@camera @cursor`): a real Alt+F4 closes the Guest window with no Event (control), changes nothing during an Active Event; closing the Operator window asks first, `KEEP RUNNING` keeps running, `END EVENT AND CLOSE` ends the cycle as `operator_exit` and exits 0; with no Event the Operator window closes normally.
+    - `regression/hardening/wake-lock` (`@camera`): held with its reason only while an Event is active; released after `END EVENT` and after the guest PIN exit.
+    - `regression/hardening/soak` (`@camera`): 300 Guest Cycles in 22.8 min at a 20× clock (Q41), 1200 kept Captures and 300 Photo Strips with every hash matching. Growth after the cycle-25 baseline: host working set +12.2 MiB (bound 100), process tree +60.1 MiB (bound 300), host handles +2 (bound 150), tree handles 0 (bound 200), database 8.6 KiB per cycle (bound 32).
 - **GitHub CI:** not run (manual-only since M9); the clean-clone verification and the code review are the gate.
 - **Review fixes:**
-  - **(Medium)** Closing the app during a Capture commit could shut the store before the cycle's `operator_exit` end was written. Shutdown now waits, with a bound, for the brain's pending store and compositor work, and `OnExit` drains again before disposing the brain and store.
-  - **(Medium)** The publish script never cleaned its output folder, so a build run in place could ship `Data/`, logs and guest photographs. The folder is now recreated before publishing (dangerous paths refused), and the zip step refuses user data.
-  - **(Low–medium)** The runtime cab was verified about a minute before it was expanded, from a user-writable path. It is now copied to a private staging folder, re-hashed, and expanded only from there.
-  - **(Low)** `single-instance` could leak the second process on a timeout. It now kills it by PID.
-  - **(Low)** A `closeApp` confirmation outlived a failed Start, leaving a dead confirm. A failed Start now clears it, and confirming with no Event simply closes.
-  - **(Low, gate)** Specs with wall-clock budgets (`large-event`, `ui-crash-recovery`, `identify-displays`) now carry `@timing` and run in the serial pool.
+    - **(Medium)** Closing the app during a Capture commit could shut the store before the cycle's `operator_exit` end was written. Shutdown now waits, with a bound, for the brain's pending store and compositor work, and `OnExit` drains again before disposing the brain and store.
+    - **(Medium)** The publish script never cleaned its output folder, so a build run in place could ship `Data/`, logs and guest photographs. The folder is now recreated before publishing (dangerous paths refused), and the zip step refuses user data.
+    - **(Low–medium)** The runtime cab was verified about a minute before it was expanded, from a user-writable path. It is now copied to a private staging folder, re-hashed, and expanded only from there.
+    - **(Low)** `single-instance` could leak the second process on a timeout. It now kills it by PID.
+    - **(Low)** A `closeApp` confirmation outlived a failed Start, leaving a dead confirm. A failed Start now clears it, and confirming with no Event simply closes.
+    - **(Low, gate)** Specs with wall-clock budgets (`large-event`, `ui-crash-recovery`, `identify-displays`) now carry `@timing` and run in the serial pool.
 - **Decisions:** Q34 (input guards), Q35 (wake lock), Q36 (single instance and exit codes), Q37 (closing the app), Q38 (the pinned runtime version), Q39 (log redaction), Q40 (field zip name and location), and Q41 (end-to-end clock limits with the real camera) are recorded in section 18. Protocol v10. Spike S4 is done; S2 stays pending.
 - **Not done on this machine (task 6 stays open, for the owner on the booth laptop):** spike S2 (Windows touch keyboard), the hardware checklist in `local-development-guide.md`, the S1-booth raw preview re-measure (the JPEG fallback is built only if it fails), the S3 booth re-measure, and the full `regression` suite with the booth laptop's own camera.
 - **Not proven:**
-  - A real Windows logoff or shutdown with an Event running, `powercfg /requests`, sleep over a 4-hour Event, and Win-key, Win+L and Ctrl+Alt+Del behaviour (Win+L and Ctrl+Alt+Del can't be blocked by design).
-  - Real photographs: every frame was the camera's "camera off" placeholder.
-  - Two real displays and display scaling other than this machine's.
+    - A real Windows logoff or shutdown with an Event running, `powercfg /requests`, sleep over a 4-hour Event, and Win-key, Win+L and Ctrl+Alt+Del behaviour (Win+L and Ctrl+Alt+Del can't be blocked by design).
+    - Real photographs: every frame was the camera's "camera off" placeholder.
+    - Two real displays and display scaling other than this machine's.
 
 ## 17. Risks and spikes
 
