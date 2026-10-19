@@ -131,7 +131,7 @@ _Avoid_: Album, history, photo board
 | Phase | Starts when | Default | Range | When it runs out |
 | --- | --- | ---: | --- | --- |
 | Template | The Template step appears | 30 s | 0 (off) or 20–300 s | Continue with the selected Template |
-| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Start the capture sequence for every empty window |
+| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
 | Photographs: review | All windows are filled | 45 s | 0 or 20–300 s | Discard any pending Retake candidate, cancel a pending move, and continue to Filters with the current Arrangement |
 | Filters | The Filters step appears | 30 s | 0 or 20–300 s | Finish with the selected Look |
 | Keepsake | The Photo Strip is saved and shown | 12 s | 5–60 s, never off | Return to Start |

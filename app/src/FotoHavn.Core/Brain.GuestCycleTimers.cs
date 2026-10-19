@@ -83,6 +83,13 @@ public sealed partial class Brain
                 ApplyModel(run, new GoToStepAction(GuestCycleStep.Photographs));
                 break;
             case PhaseTimerPhase.PhotographsCapture:
+                // A Retake left waiting (its candidate, or after TRY AGAIN) blocks the sequence: it ends as KEEP ORIGINAL, as on the
+                // review timer, so the empty windows still fill and an untouched cycle reaches its Photo Strip.
+                if (run.Model.Operation is { Mode: OperationMode.Retake } && run.Sequence is null)
+                {
+                    ApplyModel(run, new CancelAction());
+                }
+
                 TryBeginSequence(run);
                 break;
             case PhaseTimerPhase.PhotographsReview:

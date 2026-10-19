@@ -363,7 +363,7 @@ A phase timer starts when its phase begins and runs regardless of touches or key
 | --- | --- | ---: | --- | --- |
 | Start | — | — | — | No timer |
 | Template | The Template step appears | 30 s | 0 (off) or 20–300 s | Continue with the selected Template (the default unless changed) |
-| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Start the capture sequence for every empty window |
+| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
 | Photographs: review | All windows are filled | 45 s | 0 or 20–300 s | Discard any pending Retake candidate (keep the original), cancel a pending Move, and continue to Filters with the current arrangement |
 | Filters | The Filters step appears | 30 s | 0 or 20–300 s | Finish with the selected Look (the default unless changed) |
 | Keepsake | The Photo Strip is saved and shown | 12 s | 5–60 s, never off | Return to Start |

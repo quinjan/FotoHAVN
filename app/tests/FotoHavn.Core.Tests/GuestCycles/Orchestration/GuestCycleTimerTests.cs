@@ -171,6 +171,31 @@ public sealed class GuestCycleTimerTests
     }
 
     [Fact]
+    public async Task The_capture_timer_keeps_the_original_of_a_Retake_left_waiting_and_takes_the_empty_windows()
+    {
+        using var rig = await GuestCycleRig.CreateAsync(With(capture: 20));
+        rig.Begin();
+        rig.ToPhotographs();
+        rig.Guest("TakePhotographs").ShouldBeAccepted();
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Windows[0].CaptureId is not null && rig.Photographs.Sequence.CountdownRemaining == 4, TimeSpan.FromSeconds(30), Fine));
+        rig.Guest("StopCapture").ShouldBeAccepted();
+        var original = rig.Photographs.Windows[0].CaptureId;
+        rig.Guest("BeginRetake", """{"index":0}""").ShouldBeAccepted();
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.RetakeCandidate is not null, TimeSpan.FromSeconds(30), Fine));
+
+        // Nobody answers the Retake: the capture timer ends it as KEEP ORIGINAL, then fills the empty windows, rather than restarting forever.
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.Running, TimeSpan.FromSeconds(25), Fine));
+
+        Assert.Null(rig.Photographs.RetakeCandidate);
+        Assert.Equal(original, rig.Photographs.Windows[0].CaptureId);
+        Assert.Equal(1, rig.Photographs.Sequence.TargetWindow);
+        Assert.True(rig.AdvanceUntil(() => !rig.Photographs.Sequence.Running, TimeSpan.FromMinutes(1), Fine));
+        Assert.All(rig.Photographs.Windows, window => Assert.NotNull(window.CaptureId));
+        var detail = await rig.OnlyCycleAsync();
+        Assert.Equal(4, detail.Captures.Count);
+    }
+
+    [Fact]
     public async Task The_timer_pauses_while_a_Retake_counts_down_and_resumes_at_the_candidate()
     {
         using var rig = await GuestCycleRig.CreateAsync();
