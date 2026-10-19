@@ -11,7 +11,7 @@ test(
     const guest = await run.controls();
     const { page } = guest;
 
-    await test.step("Start, Template, and the shutter by Tab and Enter", async () => {
+    await test.step("Start, Template, and the live preview (the one start control) by Tab and Enter", async () => {
       await expect(guest.stepInside).not.toHaveAttribute("aria-disabled", "true");
       await keyboardActivate(page, guest.stepInside);
       await expect(guest.surface("template")).toBeVisible();
@@ -28,7 +28,7 @@ test(
       await expect(page.getByText("Photograph 1 is selected.")).toBeVisible();
       await keyboardActivate(page, guest.move);
       await expect(page.getByText("Choose where photograph 1 goes.")).toBeVisible();
-      await keyboardActivate(page, page.getByRole("button", { name: "Swap with position 3", exact: true }));
+      await keyboardActivate(page, page.getByRole("button", { name: "Move here: swap with position 3", exact: true }));
       await expect.poll(() => guest.arrangement()).toEqual([3, 2, 1, 4]);
     });
 
@@ -36,7 +36,7 @@ test(
       await keyboardActivate(page, guest.windowButton(2));
       await expect(page.getByText("Photograph 2 is selected.")).toBeVisible();
       await keyboardActivate(page, guest.retake);
-      await expect(guest.accept).toBeVisible({ timeout: 30_000 });
+      await run.retakeCapture(guest, (control) => keyboardActivate(page, control));
       await keyboardActivate(page, guest.accept);
       await expect.poll(() => guest.arrangement()).toEqual([3, 5, 1, 4]);
     });

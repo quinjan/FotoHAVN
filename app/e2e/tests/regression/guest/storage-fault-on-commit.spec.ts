@@ -34,17 +34,16 @@ test(
       expect(staging, "staging files of the Event").toEqual([]);
     });
 
-    await test.step("clearing the fault and pressing RETRY returns to the Camera tab, and the next Capture is saved", async () => {
+    await test.step("clearing the fault and pressing RETRY returns to the Camera tab, and the next Captures are saved", async () => {
       await hooks.clearStorageFault();
       await tap(guest.retry);
       await expect(guest.surface("photographs")).toBeVisible({ timeout: 20_000 });
       await run.waitForStep("photographs", "camera");
       expect(await run.cycle()).toMatchObject({ windowsFilled: 0, sequenceRunning: false });
-      await tap(guest.takePhotographs);
-      await run.waitForFilled(1, 30_000);
-      await run.stopCapture(guest);
+      await run.takePhotographsUntil(guest, 4);
+      await run.waitForStep("photographs", "arrange");
       const kept = run.captures(cycleId).filter((capture) => capture.state === "kept");
-      expect(kept).toHaveLength(1);
+      expect(kept).toHaveLength(4);
       run.expectCaptureFiles(cycleId);
       run.expectNoStrayFiles(cycleId);
     });

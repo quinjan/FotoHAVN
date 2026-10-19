@@ -2,14 +2,13 @@ using FotoHavn.Core.Events;
 using FotoHavn.Core.GuestCycles;
 using FotoHavn.Core.GuestCycles.Orchestration;
 using FotoHavn.Core.Storage;
-using FotoHavn.Protocol;
 
 namespace FotoHavn.Core;
 
 // The Phase Timer (plan section 7, Phase timers, D18). One PhaseTimerEngine times the phase the guest is in; the brain feeds it the clock
-// and keeps exactly one wake-up scheduled, at the engine's next deadline or, while the warning shows, at the next whole second. The
-// timer is paused during a capture sequence and Operator Assistance, and restarted only by MORE TIME, going back or entering a phase,
-// showing the Camera tab, and stopping a sequence. It never deletes a kept Capture.
+// and keeps exactly one wake-up scheduled, at the next whole second the always-visible timer shows, the last being the expiry. The timer is
+// paused during a capture sequence and Operator Assistance, and restarted only by entering a phase and by the Camera tab appearing. Guests
+// can't add time (protocol version 12). It never deletes a kept Capture.
 public sealed partial class Brain
 {
     private static int SecondsFor(GuestCycleRun run, PhaseTimerPhase phase) =>
@@ -40,17 +39,15 @@ public sealed partial class Brain
         run.TimerWake?.Dispose();
         run.TimerWake = null;
         var generation = ++run.TimerGeneration;
-        var now = _dependencies.Clock.UtcNow;
-        if (run.Timer.NextDeadline(now) is not { } deadline)
+        if (!run.Timer.IsRunning || run.Timer.Remaining(_dependencies.Clock.UtcNow) is not { } left)
         {
             return;
         }
 
-        var delay = GuestCyclePlan.WakeDelay(deadline - now, run.Timer.Remaining(now)!.Value, run.Timer.IsWarning(now));
-        run.TimerWake = _dependencies.Clock.Schedule(delay, () => Post(() => OnTimerWake(run, generation)));
+        run.TimerWake = _dependencies.Clock.Schedule(GuestCyclePlan.WakeDelay(left), () => Post(() => OnTimerWake(run, generation)));
     }
 
-    /// <summary>The timer's wake-up: the warning began, a second of it passed, or the time ran out.</summary>
+    /// <summary>The timer's wake-up: a second passed, or the time ran out.</summary>
     private void OnTimerWake(GuestCycleRun run, int generation)
     {
         if (run.Ended || generation != run.TimerGeneration)
@@ -72,11 +69,10 @@ public sealed partial class Brain
 
     /// <summary>
     /// The phase ran out (plan section 7, Phase timers): the cycle carries on with what the guest chose, the way it would have if they had
-    /// pressed the action themselves. An open Start over confirmation closes as KEEP GOING first.
+    /// pressed the action themselves.
     /// </summary>
     private void HandleExpiry(GuestCycleRun run)
     {
-        run.StartOverOpen = false;
         switch (run.Timer.Phase)
         {
             case PhaseTimerPhase.Template:
@@ -113,19 +109,5 @@ public sealed partial class Brain
         }
 
         AfterChange(run);
-    }
-
-    /// <summary><c>MoreTime</c>: restarts the phase's full time while its warning shows.</summary>
-    private CommandResultMessage MoreTime(string id)
-    {
-        var now = _dependencies.Clock.UtcNow;
-        if (ActionableRun is not { } run || !run.Timer.IsRunning || !run.Timer.IsWarning(now))
-        {
-            return MoreTimeInGallery(id);
-        }
-
-        run.Timer = run.Timer.Restart(now);
-        AfterChange(run);
-        return Accepted(id);
     }
 }

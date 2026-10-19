@@ -39,4 +39,17 @@ describe("DateField", () => {
     expect(input).toHaveAccessibleDescription("Why");
     expect(input.closest(".extra")).not.toBeNull();
   });
+
+  it("writes the date in words beside the input and describes the input with it", () => {
+    const { rerender } = render(<DateField label="Date" value="2026-10-13" formatValue={() => "Tue 13 Oct 2026"} onChange={vi.fn()} help="The day the booth runs." />);
+    const input = screen.getByLabelText("Date");
+    expect(screen.getByText("Tue 13 Oct 2026")).toBeVisible();
+    expect(input).toHaveValue("2026-10-13");
+    expect(input).toHaveAccessibleDescription("The day the booth runs. Tue 13 Oct 2026");
+    rerender(<DateField label="Date" value="" formatValue={() => "Tue 13 Oct 2026"} onChange={vi.fn()} />);
+    expect(screen.queryByText("Tue 13 Oct 2026")).toBeNull();
+    expect(screen.getByLabelText("Date")).not.toHaveAttribute("aria-describedby");
+    rerender(<DateField label="Date" value="not a date" formatValue={(value) => value} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Date")).not.toHaveAttribute("aria-describedby");
+  });
 });

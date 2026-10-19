@@ -36,7 +36,7 @@ describe("EventList", () => {
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
-  it("renders each Event row in the brain's order with its name, date, venue, and counts", () => {
+  it("renders each Event row in the brain's order with its name, date, venue, and counts; the running row keeps only its date and venue", () => {
     renderList();
     const items = within(screen.getByRole("list", { name: "Events" })).getAllByRole("listitem");
     expect(items).toHaveLength(2);
@@ -46,8 +46,9 @@ describe("EventList", () => {
     expect(wedding).toHaveTextContent("RUNNING");
     expect(wedding).toHaveTextContent("Sat 21 Nov 2026");
     expect(wedding).toHaveTextContent("The Glasshouse, Tagaytay");
-    expect(wedding).toHaveTextContent("1 Guest Cycle");
-    expect(wedding).toHaveTextContent("Not used yet");
+    expect(wedding).not.toHaveTextContent("Guest Cycle");
+    expect(wedding).not.toHaveTextContent("Not used yet");
+    expect(wedding).not.toHaveTextContent("Last used");
     expect(wedding).toHaveAttribute("data-event-id", "event-2");
 
     expect(within(birthday).getByRole("heading", { level: 2 })).toHaveTextContent("Mara's 30th");

@@ -17,7 +17,7 @@ namespace FotoHavn.Core;
 // (GuestCycles/GuestCycleRules.cs) and the timer engine (GuestCycles/PhaseTimerEngine.cs); this partial and its siblings only orchestrate them:
 //   Brain.GuestCycle.cs                                    commands, lifecycle, presentation, diagnostics   (this file)
 //   Brain.GuestCycleCapture.cs                             countdown, flash, capture, commit, sequence, Retake
-//   Brain.GuestCycleTimers.cs                              the Phase Timer's scheduling, pause and resume, warning, and expiry outcomes
+//   Brain.GuestCycleTimers.cs                              the Phase Timer's scheduling, pause and resume, and expiry outcomes
 //   GuestCycles/Orchestration/Brain.GuestCycleFilters.cs   Look thumbnails, strip previews, the final Photo Strip, the Keepsake
 //   Brain.Assistance.cs                                    Operator Assistance: entry, RetryAssistance, recovery
 // Every handler runs on the executor, answers at once, and starts store, camera, and compositor work off it; the outcome is posted back
@@ -37,8 +37,8 @@ public sealed partial class Brain
     /// <summary>The running Guest Cycle of the running Event, or null (none, ended, or left over from another Event).</summary>
     private GuestCycleRun? CurrentRun => _cycle is { Ended: false } run && ReferenceEquals(run.Active, _activeEvent) ? run : null;
 
-    /// <summary>The cycle when the guest can act on it now: no Operator Assistance, no Start over confirmation, and no Photo Strip being made.</summary>
-    private GuestCycleRun? ActionableRun => CurrentRun is { StartOverOpen: false, Finishing: false } run && _assistance is null ? run : null;
+    /// <summary>The cycle when the guest can act on it now: no Operator Assistance and no Photo Strip being made.</summary>
+    private GuestCycleRun? ActionableRun => CurrentRun is { Finishing: false } run && _assistance is null ? run : null;
 
     private static CommandResultMessage Accepted(string id) => CommandResultMessage.Accepted(id);
 
@@ -175,48 +175,34 @@ public sealed partial class Brain
 
     // Steps
 
+    /// <summary>
+    /// <c>GoToStep</c> (<c>CONTINUE</c>). Guests only go on: the step they are on and any earlier one are refused, and so is Filters until every
+    /// window is filled with nothing running and no Move (a running capture sequence is an operation, so it always refuses).
+    /// </summary>
     private CommandResultMessage GoToStep(string id, GoToStepPayload payload)
     {
-        if (ActionableRun is not { } run)
-        {
-            return NotAvailable(id);
-        }
-
         var target = payload.Step switch
         {
             GuestStep.Template => GuestCycleStep.Template,
             GuestStep.Photographs => GuestCycleStep.Photographs,
             _ => GuestCycleStep.Filters,
         };
-        var model = run.Model;
-        if (target == model.Step || model.Step == GuestCycleStep.Keepsake || (target == GuestCycleStep.Template && run.TemplateSkipped))
+        if (ActionableRun is not { } run || target <= run.Model.Step)
         {
             return NotAvailable(id);
         }
 
-        // Going on or back during a countdown cancels it; once a frame is taken the Capture finishes first, so the guest tries again.
-        if (run.Sequence is { } sequence && !StopIfIdle(run, sequence))
+        if (target == GuestCycleStep.Photographs)
         {
-            return NotAvailable(id);
+            ApplyModel(run, new GoToStepAction(GuestCycleStep.Photographs));
         }
-
-        if (target == GuestCycleStep.Filters)
+        else if (run.Model.CanContinue)
         {
-            if (!run.Model.CanContinue)
-            {
-                return NotAvailable(id);
-            }
-
             ContinueToFilters(run);
         }
         else
         {
-            if (!ApplyModel(run, new GoToStepAction(target)).Applied)
-            {
-                return NotAvailable(id);
-            }
-
-            LeaveFilters(run);
+            return NotAvailable(id);
         }
 
         AfterChange(run);
@@ -234,14 +220,6 @@ public sealed partial class Brain
         {
             EnterFilters(run);
         }
-    }
-
-    /// <summary>Whatever Filters was composing no longer matters once the guest leaves it.</summary>
-    private static void LeaveFilters(GuestCycleRun run)
-    {
-        run.CompositionRequest++;
-        run.Composing = false;
-        run.CompositionFailed = false;
     }
 
     private CommandResultMessage ShowCameraTab(string id)
@@ -446,40 +424,7 @@ public sealed partial class Brain
         }
     }
 
-    // Start over (plan section 7, D21)
-
-    private CommandResultMessage StartOver(string id)
-    {
-        if (CurrentRun is not { StartOverOpen: false, Finishing: false } run || _assistance is not null || run.Model.Step == GuestCycleStep.Keepsake)
-        {
-            return NotAvailable(id);
-        }
-
-        run.StartOverOpen = true;
-        return Accepted(id);
-    }
-
-    private CommandResultMessage KeepGoing(string id)
-    {
-        if (CurrentRun is not { StartOverOpen: true } run)
-        {
-            return NotAvailable(id);
-        }
-
-        run.StartOverOpen = false;
-        return Accepted(id);
-    }
-
-    private CommandResultMessage ConfirmStartOver(string id)
-    {
-        if (CurrentRun is not { StartOverOpen: true } run)
-        {
-            return NotAvailable(id);
-        }
-
-        ReturnToStart(run, GuestCycleEndReason.StartedOver);
-        return Accepted(id);
-    }
+    // Ending a cycle. Guests can't end one themselves (protocol version 12 has no Start over): it completes, or the Event ends.
 
     /// <summary>Ends the cycle in the brain (and in the store with <paramref name="endReason"/>, unless it is already completed) and shows Start.</summary>
     private void ReturnToStart(GuestCycleRun run, GuestCycleEndReason? endReason)
@@ -530,8 +475,8 @@ public sealed partial class Brain
     /// <summary>
     /// The Guest Screen's presentation while a Guest Cycle runs, or while Operator Assistance shows with or without one; null when the guest
     /// is on Start, Start unavailable, or the guest gallery, so <see cref="RenderGuestShell"/> renders those. <paramref name="overlays"/> holds
-    /// the exit hold and PIN dialog M6 owns; the cycle adds <c>phaseTimerWarning</c> and <c>startOverConfirmation</c> with
-    /// <c>overlays with { ... }</c>. Called on the executor.
+    /// the exit hold and PIN dialog M6 owns; the cycle adds the always-visible <c>phaseTimer</c> with <c>overlays with { ... }</c>, also on
+    /// Operator Assistance during a cycle, where it shows paused. Called on the executor.
     /// </summary>
     private GuestPresentation? RenderGuestCycle(ActiveEventState active, GuestOverlays overlays)
     {
@@ -542,7 +487,7 @@ public sealed partial class Brain
                 GuestSurface.OperatorAssistance,
                 null,
                 null,
-                overlays,
+                run is null ? overlays : overlays with { PhaseTimer = TimerOverlay(run) },
                 null,
                 run is null ? null : CycleView(run),
                 null,
@@ -559,7 +504,7 @@ public sealed partial class Brain
             return null;
         }
 
-        var shown = overlays with { PhaseTimerWarning = WarningOverlay(run), StartOverConfirmation = run.StartOverOpen ? new StartOverConfirmationOverlay() : null };
+        var shown = overlays with { PhaseTimer = TimerOverlay(run) };
         var cycle = CycleView(run);
         return run.Model.Step switch
         {
@@ -573,16 +518,15 @@ public sealed partial class Brain
     private static GuestCycleView CycleView(GuestCycleRun run) => new(
         run.Id,
         GuestCyclePlan.ToName(run.Model.Step),
-        GuestCyclePlan.Steps(run.Model.Step, run.TemplateSkipped, run.FiltersSkipped),
-        run.Model.Step != GuestCycleStep.Keepsake);
+        GuestCyclePlan.Steps(run.Model.Step, run.TemplateSkipped, run.FiltersSkipped));
 
-    private PhaseTimerWarningOverlay? WarningOverlay(GuestCycleRun run)
-    {
-        var now = _dependencies.Clock.UtcNow;
-        return run.Timer.IsRunning && run.Timer.IsWarning(now)
-            ? new PhaseTimerWarningOverlay(PhaseTimerRules.ToProtocol(run.Timer.Phase!.Value), GuestCyclePlan.WholeSecondsLeft(run.Timer.Remaining(now)!.Value))
+    private PhaseTimerOverlay? TimerOverlay(GuestCycleRun run) => PhaseTimerOverlayOf(run.Timer);
+
+    /// <summary>The always-visible Phase Timer for <paramref name="timer"/>: null while no phase is timed or the phase's timer is off.</summary>
+    private PhaseTimerOverlay? PhaseTimerOverlayOf(PhaseTimerEngine timer) =>
+        timer.Remaining(_dependencies.Clock.UtcNow) is { } left
+            ? new PhaseTimerOverlay(PhaseTimerRules.ToProtocol(timer.Phase!.Value), GuestCyclePlan.WholeSecondsLeft(left), timer.IsPaused)
             : null;
-    }
 
     private TemplateView RenderTemplate(GuestCycleRun run) => new(
         [.. run.Active.Event.OfferedTemplateIds.Select(templateId =>
@@ -617,7 +561,6 @@ public sealed partial class Brain
             tab == PhotographsTab.Camera ? PhotographsTabName.Camera : PhotographsTabName.Arrange,
             new PhotographsTemplateView(template.Id, template.Width, template.Height, template.IsLandscape, WindowViews(template), BlankKey(template.Id)),
             windows,
-            model.RetainedPool.Count,
             new CaptureSequenceView(
                 sequence is not null,
                 sequence?.TargetWindow,
@@ -625,7 +568,8 @@ public sealed partial class Brain
                 run.FlashSequence,
                 sequence?.Captured ?? 0,
                 sequence?.Total ?? 0,
-                sequence?.Step == SequenceStep.Pausing),
+                sequence?.Step == SequenceStep.Pausing,
+                run.Active.Event.GuestSoundsEnabled),
             run.Active.Event.Mirror,
             (double)cropWindow.Width / cropWindow.Height,
             SelectionView(model, sequence),
@@ -653,7 +597,7 @@ public sealed partial class Brain
 
         if (model.Move is { } move)
         {
-            return new PhotographSelectionView(move.SourceIndex ?? model.Selected, PhotographSelectionMode.Moving);
+            return new PhotographSelectionView(move.SourceIndex, PhotographSelectionMode.Moving);
         }
 
         return sequence is null && model.Selected is { } selected
@@ -687,8 +631,7 @@ public sealed partial class Brain
             new GuestCycleTimerDiagnostics(
                 remaining is not null ? PhaseTimerRules.ToProtocol(timer.Phase!.Value) : null,
                 remaining is { } left ? (long)left.TotalMilliseconds : null,
-                timer.IsPaused,
-                timer.IsWarning(now)));
+                timer.IsPaused));
     }
 
     // The panel on the Operator Screen: which step the guest is on, or the assistance alert.

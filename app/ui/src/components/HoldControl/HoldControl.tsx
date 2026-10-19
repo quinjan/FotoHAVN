@@ -1,4 +1,4 @@
-import { LockSimpleIcon } from "@phosphor-icons/react";
+import { DotsThreeIcon } from "@phosphor-icons/react";
 import {
   useEffect,
   useId,
@@ -41,7 +41,9 @@ export interface HoldControlViewProps {
 
 /**
  * How the exit hold looks in each phase. HoldControl drives it; fixtures render it directly to show a hold in
- * progress. Under reduced motion the ring isn't drawn, and the text carries the progress alone.
+ * progress. Its glyph is three plain dots in the secondary ink (Soft Brown, 5.33:1 on Off-white), quiet beside a
+ * lock or a bag; the ring's track is decoration. Under reduced motion the ring isn't drawn, and the text carries the
+ * progress alone.
  */
 export function HoldControlView({
   phase,
@@ -74,7 +76,7 @@ export function HoldControlView({
           </g>
         </svg>
         <span className={styles.icon} aria-hidden="true">
-          <LockSimpleIcon weight="light" size="1em" />
+          <DotsThreeIcon weight="light" size="1em" />
         </span>
       </button>
       <span id={progressId} className={styles.progress}>

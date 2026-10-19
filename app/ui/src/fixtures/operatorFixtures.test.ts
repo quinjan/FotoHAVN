@@ -89,6 +89,7 @@ describe("operator fixtures", () => {
         "operator-list-running-camera-not-available",
         "operator-list-running-camera-checking",
         "operator-list-running-assistance",
+        "operator-list-running-assistance-camera-removed",
         "operator-list-confirm-end",
         "operator-list-confirm-close",
       ]) {
@@ -105,6 +106,11 @@ describe("operator fixtures", () => {
       expect(presentation("operator-list-running-camera-not-available").runningEvent?.camera.state).toBe("notAvailable");
       expect(presentation("operator-list-running-camera-checking").runningEvent?.camera.state).toBe("checking");
       expect(presentation("operator-list-running-assistance").runningEvent).toMatchObject({ currentStep: "operatorAssistance", assistance: { reason: "guestDisplay" } });
+      expect(presentation("operator-list-running-assistance-camera-removed").runningEvent).toMatchObject({
+        currentStep: "operatorAssistance",
+        assistance: { reason: "camera" },
+        camera: { state: "notAvailable", reason: "removed" },
+      });
     });
 
     it("writes the delete and end confirmations, and a notice, over an Event list", () => {
@@ -138,6 +144,7 @@ describe("operator fixtures", () => {
         "operator-setup-new",
         "operator-setup-new-errors",
         "operator-setup-errors-offered",
+        "operator-setup-errors-start-only",
         "operator-setup-editing",
         "operator-setup-camera-checking",
         "operator-setup-camera-not-available",

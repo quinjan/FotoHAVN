@@ -11,7 +11,7 @@ public abstract record GuestCycleAction
     }
 }
 
-/// <summary>Chooses a Template (website <c>template</c>/<c>layout</c>). Every kept Capture stays: windows fill in order, extras go to the retained pool.</summary>
+/// <summary>Chooses a Template (website <c>template</c>/<c>layout</c>) on the Template step, before any Capture: the windows are the new Template's, all empty.</summary>
 public sealed record SelectTemplateAction(string TemplateId, int WindowCount) : GuestCycleAction;
 
 /// <summary>Starts a capture sequence for the empty windows (website <c>begin</c> with mode sequence).</summary>
@@ -44,9 +44,6 @@ public sealed record SelectWindowAction(int Index) : GuestCycleAction;
 /// <summary>Begins a Move from an occupied window (website <c>move-start</c> from a slot).</summary>
 public sealed record MoveStartAction(int Index) : GuestCycleAction;
 
-/// <summary>Begins a Move from the retained pool (website <c>move-start</c> from the tray).</summary>
-public sealed record MoveStartFromPoolAction(string CaptureId) : GuestCycleAction;
-
 /// <summary>Places the Move at a window (website <c>move-to</c>); an occupied window swaps.</summary>
 public sealed record MoveToAction(int Index) : GuestCycleAction;
 
@@ -59,7 +56,7 @@ public sealed record MoveCancelAction : GuestCycleAction;
 /// <summary>Chooses a Look (website <c>look</c>).</summary>
 public sealed record SelectLookAction(string LookId) : GuestCycleAction;
 
-/// <summary>Goes to a step (website <c>stage</c>). Filters and Keepsake need <see cref="GuestCycleModel.CanContinue"/>.</summary>
+/// <summary>Goes on to a later step (website <c>stage</c>, forward only: guests never go back). Filters and Keepsake need <see cref="GuestCycleModel.CanContinue"/>.</summary>
 public sealed record GoToStepAction(GuestCycleStep Step) : GuestCycleAction;
 
 /// <summary>Shows a Photographs tab.</summary>

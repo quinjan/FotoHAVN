@@ -10,9 +10,9 @@ public sealed class MessageTests
     private const string Id = ProtocolSamples.Id;
 
     [Fact]
-    public void Protocol_version_is_ten()
+    public void Protocol_version_is_twelve()
     {
-        Assert.Equal(10, ProtocolVersion.Current);
+        Assert.Equal(12, ProtocolVersion.Current);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class MessageTests
     public void Presentation_overlays_default_to_none()
     {
         Assert.Equal(new OperatorOverlays(null, null, null), OperatorOverlays.None);
-        Assert.Equal(new GuestOverlays(null, null, null, null, null), GuestOverlays.None);
+        Assert.Equal(new GuestOverlays(null, null, null, null), GuestOverlays.None);
     }
 
     [Fact]

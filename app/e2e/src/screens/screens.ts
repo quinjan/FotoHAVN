@@ -239,9 +239,19 @@ export class EventSetupScreen {
     return this.templates.locator("li").filter({ has: this.page.getByRole("checkbox", { name, exact: true }) }).locator("img");
   }
 
-  /** A Phase Timer's input by its label (Template, Photographs: capture, …, Keepsake, Guest gallery view). */
+  /** A Phase Timer's seconds input by its name (Template, Photographs: capture, …, Keepsake, Guest gallery view). */
   timer(label: string): Locator {
-    return this.main.getByLabel(label, { exact: true });
+    return this.main.getByLabel(`${label} seconds`, { exact: true });
+  }
+
+  /** The On/Off switch of a Phase Timer that can be off (every timer but Keepsake and Guest gallery view). */
+  timerSwitch(label: string): Locator {
+    return this.main.getByRole("switch", { name: `${label} timer`, exact: true });
+  }
+
+  /** The error summary above the step after a refused SAVE or SAVE AND START; it takes focus and links to each problem's field. */
+  get errorSummary(): Locator {
+    return this.main.getByRole("group", { name: /attention before this Event can be saved|needs an Operator PIN to start/ });
   }
 
   countdown(seconds: 3 | 5 | 10): Locator {

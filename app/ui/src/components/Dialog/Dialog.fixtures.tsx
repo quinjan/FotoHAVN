@@ -39,13 +39,13 @@ export const fixtures: readonly ComponentFixture[] = [
     render: () => (
       <OverlayFrame stage>
         <Dialog
-          title="Start over?"
-          description="Your photographs stay with the Event, but no strip will be made."
+          title="Operator PIN"
+          description="Enter the Event's Operator PIN to end the Event."
           onCancel={noop}
           actions={
             <>
-              <PrimaryAction onClick={noop}>START OVER</PrimaryAction>
-              <SecondaryAction onClick={noop}>KEEP GOING</SecondaryAction>
+              <PrimaryAction onClick={noop}>END EVENT</PrimaryAction>
+              <SecondaryAction onClick={noop}>KEEP RUNNING</SecondaryAction>
             </>
           }
         />

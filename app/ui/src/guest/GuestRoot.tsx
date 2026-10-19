@@ -18,6 +18,7 @@ import { PhotographsStep } from "./PhotographsStep.tsx";
 import { PinDialog } from "./PinDialog.tsx";
 import { StartSurface, StartUnavailableSurface, type GuestActions } from "./StartSurface.tsx";
 import { TemplateStep } from "./TemplateStep.tsx";
+import { useCaptureSounds } from "./useCaptureSounds.ts";
 import styles from "./Guest.module.css";
 
 function GuestFatal() {
@@ -120,7 +121,7 @@ export function GuestRoot({
   const dialogWasOpen = useRef(false);
   const brainNotice = presentation.overlays.notice?.message ?? "";
   const notice = brainNotice === "" ? localNotice : brainNotice;
-
+  useCaptureSounds(presentation);
   // The exit hold is unmounted while the PIN dialog is open, so the dialog has no opener to return to: focus goes back to the hold when it closes.
   useEffect(() => {
     if (dialogWasOpen.current && !dialogOpen) {

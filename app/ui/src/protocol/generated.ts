@@ -34,6 +34,7 @@ export type Command =
   | SetDefaultLookCommand
   | SetPhaseTimerCommand
   | SetGuestGalleryCommand
+  | SetGuestSoundsCommand
   | SetPinCommand
   | SaveEventCommand
   | SaveAndStartEventCommand
@@ -61,7 +62,6 @@ export type Command =
   | ShowCameraTabCommand
   | ShowArrangeTabCommand
   | TakePhotographsCommand
-  | StopCaptureCommand
   | SelectPositionCommand
   | BeginRetakeCommand
   | AcceptRetakeCommand
@@ -74,10 +74,6 @@ export type Command =
   | SelectLookCommand
   | FinishStripCommand
   | RetryCompositionCommand
-  | MoreTimeCommand
-  | StartOverCommand
-  | ConfirmStartOverCommand
-  | KeepGoingCommand
   | BeginExitHoldCommand
   | CompleteExitHoldCommand
   | SubmitPinCommand
@@ -380,7 +376,7 @@ export type PreviewPixelFormat = "rgba";
  * The FOTOHAVN UI and brain protocol. Generated from FotoHavn.Protocol by scripts/generate-protocol.ps1; do not edit.
  */
 export interface FotoHavnProtocol {
-  protocolVersion: 10;
+  protocolVersion: 12;
   clientMessage: ClientMessage;
   serverMessage: ServerMessage;
   commandPayloads: CommandPayloadMap;
@@ -724,6 +720,23 @@ export interface SetGuestGalleryCommand {
  * via the `definition` "SetGuestGalleryPayload".
  */
 export interface SetGuestGalleryPayload {
+  enabled: boolean;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "SetGuestSoundsCommand".
+ */
+export interface SetGuestSoundsCommand {
+  type: "command";
+  id: string;
+  name: "SetGuestSounds";
+  payload: SetGuestSoundsPayload;
+}
+/**
+ * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
+ * via the `definition` "SetGuestSoundsPayload".
+ */
+export interface SetGuestSoundsPayload {
   enabled: boolean;
 }
 /**
@@ -1152,21 +1165,6 @@ export interface TakePhotographsCommand {
 export interface TakePhotographsPayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StopCaptureCommand".
- */
-export interface StopCaptureCommand {
-  type: "command";
-  id: string;
-  name: "StopCapture";
-  payload: StopCapturePayload;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StopCapturePayload".
- */
-export interface StopCapturePayload {}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "SelectPositionCommand".
  */
 export interface SelectPositionCommand {
@@ -1360,66 +1358,6 @@ export interface RetryCompositionCommand {
  * via the `definition` "RetryCompositionPayload".
  */
 export interface RetryCompositionPayload {}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "MoreTimeCommand".
- */
-export interface MoreTimeCommand {
-  type: "command";
-  id: string;
-  name: "MoreTime";
-  payload: MoreTimePayload;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "MoreTimePayload".
- */
-export interface MoreTimePayload {}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StartOverCommand".
- */
-export interface StartOverCommand {
-  type: "command";
-  id: string;
-  name: "StartOver";
-  payload: StartOverPayload;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StartOverPayload".
- */
-export interface StartOverPayload {}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "ConfirmStartOverCommand".
- */
-export interface ConfirmStartOverCommand {
-  type: "command";
-  id: string;
-  name: "ConfirmStartOver";
-  payload: ConfirmStartOverPayload;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "ConfirmStartOverPayload".
- */
-export interface ConfirmStartOverPayload {}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "KeepGoingCommand".
- */
-export interface KeepGoingCommand {
-  type: "command";
-  id: string;
-  name: "KeepGoing";
-  payload: KeepGoingPayload;
-}
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "KeepGoingPayload".
- */
-export interface KeepGoingPayload {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "BeginExitHoldCommand".
@@ -1660,6 +1598,7 @@ export interface EventSetupView {
   looks: EventSetupLookOption[];
   phaseTimers: PhaseTimerOption[];
   guestGalleryEnabled: boolean;
+  guestSoundsEnabled: boolean;
   pin: EventSetupPinView;
   saveAndStartAvailable: boolean;
   saveAndStartDisabledReason: StartDisabledReason | null;
@@ -2080,8 +2019,7 @@ export interface StartUnavailableView {
 export interface GuestOverlays {
   exitHold: ExitHoldOverlay | null;
   pinDialog: PinDialogOverlay | null;
-  phaseTimerWarning: PhaseTimerWarningOverlay | null;
-  startOverConfirmation: StartOverConfirmationOverlay | null;
+  phaseTimer: PhaseTimerOverlay | null;
   notice: NoticeOverlay | null;
 }
 /**
@@ -2102,17 +2040,13 @@ export interface PinDialogOverlay {
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "PhaseTimerWarningOverlay".
+ * via the `definition` "PhaseTimerOverlay".
  */
-export interface PhaseTimerWarningOverlay {
+export interface PhaseTimerOverlay {
   phase: PhaseTimer;
   remainingSeconds: number;
+  paused: boolean;
 }
-/**
- * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
- * via the `definition` "StartOverConfirmationOverlay".
- */
-export interface StartOverConfirmationOverlay {}
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
  * via the `definition` "NoticeOverlay".
@@ -2128,7 +2062,6 @@ export interface GuestCycleView {
   id: string;
   step: GuestCycleStepName;
   steps: GuestCycleStepEntry[];
-  startOverAvailable: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2137,7 +2070,6 @@ export interface GuestCycleView {
 export interface GuestCycleStepEntry {
   step: GuestCycleStepName;
   state: GuestStepState;
-  canGoBack: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2180,7 +2112,6 @@ export interface PhotographsView {
   tab: PhotographsTabName;
   template: PhotographsTemplateView;
   windows: PhotographsWindowView[];
-  retainedCount: number;
   sequence: CaptureSequenceView;
   mirrored: boolean;
   cropAspect: number;
@@ -2224,6 +2155,7 @@ export interface CaptureSequenceView {
   capturedInSequence: number;
   totalInSequence: number;
   pausing: boolean;
+  soundsOn: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2418,6 +2350,7 @@ export interface CommandPayloadMap {
   SetDefaultLook: SetDefaultLookPayload;
   SetPhaseTimer: SetPhaseTimerPayload;
   SetGuestGallery: SetGuestGalleryPayload;
+  SetGuestSounds: SetGuestSoundsPayload;
   SetPin: SetPinPayload;
   SaveEvent: SaveEventPayload;
   SaveAndStartEvent: SaveAndStartEventPayload;
@@ -2445,7 +2378,6 @@ export interface CommandPayloadMap {
   ShowCameraTab: ShowCameraTabPayload;
   ShowArrangeTab: ShowArrangeTabPayload;
   TakePhotographs: TakePhotographsPayload;
-  StopCapture: StopCapturePayload;
   SelectPosition: SelectPositionPayload;
   BeginRetake: BeginRetakePayload;
   AcceptRetake: AcceptRetakePayload;
@@ -2458,10 +2390,6 @@ export interface CommandPayloadMap {
   SelectLook: SelectLookPayload;
   FinishStrip: FinishStripPayload;
   RetryComposition: RetryCompositionPayload;
-  MoreTime: MoreTimePayload;
-  StartOver: StartOverPayload;
-  ConfirmStartOver: ConfirmStartOverPayload;
-  KeepGoing: KeepGoingPayload;
   BeginExitHold: BeginExitHoldPayload;
   CompleteExitHold: CompleteExitHoldPayload;
   SubmitPin: SubmitPinPayload;
@@ -2729,7 +2657,6 @@ export interface GuestCycleTimerDiagnostics {
   phase: PhaseTimer | null;
   remainingMs: number | null;
   paused: boolean;
-  warning: boolean;
 }
 /**
  * This interface was referenced by `FotoHavnProtocol`'s JSON-Schema
@@ -2923,4 +2850,4 @@ export interface PreviewFrameMetadata {
 }
 
 /** The protocol version this UI build speaks; it sends it in `hello`. */
-export const PROTOCOL_VERSION = 10;
+export const PROTOCOL_VERSION = 12;

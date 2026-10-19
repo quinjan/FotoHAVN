@@ -21,12 +21,11 @@ function cycle(step: GuestCycleView["step"]): GuestCycleView {
     id: "cycle-1",
     step,
     steps: [
-      { step: "template", state: "done", canGoBack: true },
-      { step: "photographs", state: "current", canGoBack: false },
-      { step: "filters", state: "upcoming", canGoBack: false },
-      { step: "keepsake", state: "upcoming", canGoBack: false },
+      { step: "template", state: "done" },
+      { step: "photographs", state: "current" },
+      { step: "filters", state: "upcoming" },
+      { step: "keepsake", state: "upcoming" },
     ],
-    startOverAvailable: step !== "keepsake",
   };
 }
 
@@ -35,8 +34,7 @@ function photographs(tab: PhotographsView["tab"]): PhotographsView {
     tab,
     template: { id: "signature-strip", width: 600, height: 1800, landscape: false, windows: [{ x: 0, y: 0, width: 600, height: 450 }], blankPreviewKey: null },
     windows: [{ index: 0, captureId: null, imageUrl: null }],
-    retainedCount: 0,
-    sequence: { running: false, targetWindow: null, countdownRemaining: null, flashSequence: 0, capturedInSequence: 0, totalInSequence: 0, pausing: false },
+    sequence: { running: false, targetWindow: null, countdownRemaining: null, flashSequence: 0, capturedInSequence: 0, totalInSequence: 0, pausing: false, soundsOn: true },
     mirrored: true,
     cropAspect: 600 / 450,
     selection: { index: null, mode: "none" },
@@ -72,7 +70,7 @@ describe("Guest Cycle routing", () => {
 
   it("routes the Photographs step to the tab the brain names", () => {
     const view = renderGuest({ surface: "photographs", start: null, guestCycle: cycle("photographs"), photographs: photographs("camera") });
-    expect(screen.getByRole("heading", { level: 1, name: "Find your light." })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Find your light." })).toBeInTheDocument();
     expect(document.querySelector("[data-photographs-tab='camera']")).not.toBeNull();
     view.unmount();
 

@@ -10,12 +10,11 @@ const cycle: GuestCycleView = {
   id: "cycle-1",
   step: "photographs",
   steps: [
-    { step: "template", state: "done", canGoBack: true },
-    { step: "photographs", state: "current", canGoBack: false },
-    { step: "filters", state: "upcoming", canGoBack: false },
-    { step: "keepsake", state: "upcoming", canGoBack: false },
+    { step: "template", state: "done" },
+    { step: "photographs", state: "current" },
+    { step: "filters", state: "upcoming" },
+    { step: "keepsake", state: "upcoming" },
   ],
-  startOverAvailable: true,
 };
 
 function ui(client: BrainClient, view: Assistance, withCycle: GuestCycleView | null = cycle) {

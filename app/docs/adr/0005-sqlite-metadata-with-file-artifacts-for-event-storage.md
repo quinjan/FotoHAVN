@@ -44,7 +44,7 @@ It must be on a local disk. Startup refuses network and cloud-synced paths it ca
 
 - `events.printer` is always `none` in v1 (D6).
 - `countdown_seconds` is 3, 5, or 10.
-- `guest_cycles.end_reason` is `completed`, `started_over`, `operator_exit`, `app_closed`, or `unrecoverable`. A Guest Cycle is recorded as `completed` when its Photo Strip is committed; the Keepsake step only displays it, so ending the Event, closing the app, or a timer during Keepsake leaves it `completed`. A cycle finished by Phase Timers is recorded as `completed`, the same as one a guest finished (D28).
+- `guest_cycles.end_reason` is `completed`, `started_over`, `operator_exit`, `app_closed`, or `unrecoverable`. A Guest Cycle is recorded as `completed` when its Photo Strip is committed; the Keepsake step only displays it, so ending the Event, closing the app, or a timer during Keepsake leaves it `completed`. A cycle finished by Phase Timers is recorded as `completed`, the same as one a guest finished (D28). Since guests lost `START OVER` (D39, protocol version 12), nothing records `started_over`; the value stays valid for Guest Cycles recorded before, so the schema and its CHECK constraint are unchanged.
 - `captures.state` is `kept` or `discarded`. `photo_strips.arrangement` records the Capture IDs, one per photograph window.
 - Each artifact row records its byte length and SHA-256.
 

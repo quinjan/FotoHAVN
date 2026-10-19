@@ -4,6 +4,7 @@ import { InlineStatus } from "../../components/InlineStatus/index.ts";
 import { PrimaryAction } from "../../components/PrimaryAction/index.ts";
 import { SecondaryAction } from "../../components/SecondaryAction/index.ts";
 import { SegmentedChoice } from "../../components/SegmentedChoice/index.ts";
+import { fieldStyles } from "../../components/shared/field.tsx";
 import { StatementHeading } from "../../components/StatementHeading/index.ts";
 import { Switch } from "../../components/Switch/index.ts";
 import { TextField } from "../../components/TextField/index.ts";
@@ -15,17 +16,18 @@ import { useSendCommand } from "../OperatorCommands.tsx";
 import { CameraField } from "./CameraField.tsx";
 import { DisplayField } from "./DisplayField.tsx";
 import { DraftDateField, DraftTextArea, DraftTextField, TimerField } from "./DraftFields.tsx";
+import { ErrorSummary } from "./ErrorSummary.tsx";
 import { PinSection } from "./PinSection.tsx";
 import { LookPicker, TemplatePicker } from "./Pickers.tsx";
 import {
   copy,
-  errorSummary,
   fieldErrorText,
   fieldIds,
   fieldOrder,
   focusTargetId,
   limits,
   startFailureText,
+  timingIntro,
 } from "./setupCopy.ts";
 import { SetupStepNav } from "./SetupStepNav.tsx";
 import { setupSteps, stepForField, stepForStartFailure, type SetupStepId } from "./setupSteps.ts";
@@ -64,10 +66,15 @@ function focusField(root: HTMLElement, id: string): void {
   target.focus();
 }
 
+/** The marked fields in the order the steps show them. */
+function sortErrors(errors: readonly EventSetupFieldError[], view: EventSetupView): readonly EventSetupFieldError[] {
+  const order = fieldOrder(view.phaseTimers);
+  return [...errors].sort((a, b) => order.indexOf(a.field) - order.indexOf(b.field));
+}
+
 /** The first field the brain marked, in the order the steps show them. */
 function firstError(errors: readonly EventSetupFieldError[], view: EventSetupView): EventSetupFieldError | undefined {
-  const order = fieldOrder(view.phaseTimers);
-  return [...errors].sort((a, b) => order.indexOf(a.field) - order.indexOf(b.field))[0];
+  return sortErrors(errors, view)[0];
 }
 
 /**
@@ -96,12 +103,16 @@ export interface EventSetupProps {
  * `05 Guests`, with a summary of the whole draft beside the step. Which step shows is the page's own view state; every
  * control sends its command and shows only what the brain's draft says, and the brain validates only at save, so any
  * step can be opened at any time. Every step stays mounted while hidden, so what is being typed survives a step change.
- * A refused save opens the step of the first invalid field and moves focus to it.
+ * A refused save opens the step of the first invalid field and moves focus to the error summary, whose links open a
+ * problem's step and focus its field.
  */
 export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   const send = useSendCommand();
   const rootRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
+  /** The problem the operator chose in the error summary, until its step shows and its field takes focus. */
+  const pendingFocus = useRef<EventSetupFieldError | null>(null);
   const [step, setStep] = useState<SetupStepId>(() => openingStep(view));
   /** How many times the operator has changed step; each change moves focus to the new step's content. */
   const [moves, setMoves] = useState(0);
@@ -110,11 +121,11 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   const [jumpedFor, setJumpedFor] = useState(0);
   const focusedFor = useRef(0);
 
-  const errors = view.showErrors ? view.fieldErrors : [];
+  const errors = view.showErrors ? sortErrors(view.fieldErrors, view) : [];
   const stepIndex = setupSteps.findIndex((candidate) => candidate.id === step);
   const nextStep = setupSteps[stepIndex + 1];
   const attention = new Set(errors.map((error) => stepForField(error.field)));
-  const first = firstError(errors, view);
+  const first = errors[0];
 
   // A refused save opens the step of the first invalid field, once the brain's errors are here (they can arrive after
   // the refusal). Adjusted while rendering, like useDraftText, so the step shows in the same commit.
@@ -134,14 +145,24 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   }
 
   useEffect(() => {
-    if (refusals === focusedFor.current || refusals !== jumpedFor || first === undefined || rootRef.current === null) {
+    if (refusals === focusedFor.current || refusals !== jumpedFor || first === undefined) {
       return;
     }
     if (stepForField(first.field) !== step) {
       return;
     }
     focusedFor.current = refusals;
-    focusField(rootRef.current, focusTargetId(first.field, first.code));
+    summaryRef.current?.focus();
+  });
+
+  // A problem chosen in the summary opens its step (when it isn't showing) and focuses its field once that step is shown.
+  useEffect(() => {
+    const target = pendingFocus.current;
+    if (target === null || rootRef.current === null || stepForField(target.field) !== step) {
+      return;
+    }
+    pendingFocus.current = null;
+    focusField(rootRef.current, focusTargetId(target.field, target.code));
   });
 
   // A step change moves focus to the top of the view (the heading), which also scrolls it back into view below the bar,
@@ -158,6 +179,20 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
     }
     setStep(target);
     setMoves((count) => count + 1);
+  }
+
+  /** A problem in the error summary: open its step and focus the field, which isn't focusable until its step shows. */
+  function showProblem(problem: EventSetupFieldError): void {
+    const target = stepForField(problem.field);
+    pendingFocus.current = problem;
+    if (target === step) {
+      if (rootRef.current !== null) {
+        pendingFocus.current = null;
+        focusField(rootRef.current, focusTargetId(problem.field, problem.code));
+      }
+      return;
+    }
+    setStep(target);
   }
 
   const errorText = (field: string): string | undefined => {
@@ -270,10 +305,12 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
     ),
     timing: (
       <Section id="setup-section-timing" title={copy.sections.timing}>
+        <p className={fieldStyles.help}>{timingIntro(view.phaseTimers)}</p>
         {view.phaseTimers.map((timer) => (
           <TimerField
             key={timer.phase}
             timer={timer}
+            timers={view.phaseTimers}
             error={errorText(`timers.${timer.phase}`)}
             onCommit={(phase, seconds) => {
               command("SetPhaseTimer", { phase, seconds });
@@ -285,6 +322,14 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
     guests: (
       <>
         <Section id="setup-section-guests" title={copy.sections.guests}>
+          <Switch
+            label={copy.fields.guestSounds}
+            help={copy.fields.guestSoundsHelp}
+            checked={view.guestSoundsEnabled}
+            onCheckedChange={(enabled) => {
+              command("SetGuestSounds", { enabled });
+            }}
+          />
           <Switch
             label={copy.fields.guestGallery}
             help={copy.fields.guestGalleryHelp}
@@ -372,7 +417,7 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
               }}
             />
             <InlineStatus tone="alert">{view.startFailure === null ? "" : startFailureText(view.startFailure)}</InlineStatus>
-            <InlineStatus tone="alert">{errors.length === 0 ? "" : errorSummary(errors.length)}</InlineStatus>
+            <ErrorSummary errors={errors} timers={view.phaseTimers} summaryRef={summaryRef} onSelect={showProblem} />
             <InlineStatus>{view.saving ? copy.saving : ""}</InlineStatus>
           </div>
 

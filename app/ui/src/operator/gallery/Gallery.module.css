@@ -14,6 +14,14 @@
   gap: var(--space-16);
 }
 
+/* The count line: what the list below holds, so the outcomes can be scanned against it. */
+.count {
+  color: var(--app-tone-ink);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
 /* The running Event's gallery is live: a brass-ruled label, as on the Event list's running row, and what it means. */
 .live {
   display: flex;

@@ -68,29 +68,6 @@ public sealed partial class Brain
         return Accepted(id);
     }
 
-    /// <summary><c>StopCapture</c>: the remaining countdown is cancelled, the Captures saved stay, and the capture timer starts afresh.</summary>
-    private CommandResultMessage StopCapture(string id)
-    {
-        if (ActionableRun is not { Sequence: { } sequence } run)
-        {
-            return NotAvailable(id);
-        }
-
-        sequence.RestartsTimer = true;
-        if (sequence.Step is SequenceStep.Capturing or SequenceStep.Saving)
-        {
-            // The frame is already taken: that Capture is saved first, then the sequence ends.
-            sequence.StopRequested = true;
-        }
-        else
-        {
-            EndSequence(run, sequence);
-        }
-
-        AfterChange(run);
-        return Accepted(id);
-    }
-
     private void LaunchSequence(GuestCycleRun run, CaptureSequence sequence)
     {
         run.Sequence = sequence;
@@ -383,11 +360,6 @@ public sealed partial class Brain
         else if (run.Model.Operation is { Candidate: null })
         {
             ApplyModel(run, new CancelAction());
-        }
-
-        if (sequence.RestartsTimer)
-        {
-            run.Timer = run.Timer.Restart(_dependencies.Clock.UtcNow);
         }
     }
 

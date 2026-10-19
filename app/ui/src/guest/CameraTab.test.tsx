@@ -29,6 +29,10 @@ function live(container: HTMLElement): readonly string[] {
   return [...container.querySelectorAll("[aria-live='polite']")].map((region) => region.textContent);
 }
 
+function start(): HTMLElement {
+  return screen.getByRole("button", { name: "Tap to start taking photographs" });
+}
+
 describe("CameraTab", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -38,80 +42,97 @@ describe("CameraTab", () => {
     vi.useRealTimers();
   });
 
-  it("shows the heading, the supporting line, the progress, and the shutter ready to take photographs", () => {
+  it("is all live preview: a hidden heading, the count, and the whole preview one button ready to take photographs", () => {
     const { container } = renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stubClient());
 
-    expect(screen.getByRole("heading", { level: 1, name: "Find your light." })).toBeVisible();
-    expect(screen.getByText("Let this moment become a memory.")).toBeVisible();
+    const heading = screen.getByRole("heading", { level: 1, name: "Find your light." });
+    expect(heading.className).toContain("visuallyHidden");
+    expect(screen.queryByText("Let this moment become a memory.")).toBeNull();
     expect(screen.getByRole("progressbar", { name: "Photographs" })).toHaveAttribute("aria-valuetext", "0 of 4");
-    expect(screen.getByRole("button", { name: "Take photographs" })).toHaveAttribute("aria-disabled", "false");
+    expect(start()).toHaveAttribute("aria-disabled", "false");
+    expect(start()).toHaveAttribute("data-state", "ready");
+    expect(start()).toHaveTextContent("TAP TO START");
+    // Label in name (WCAG 2.5.3): the accessible name begins with the words on screen.
+    expect(start().getAttribute("aria-label")?.toUpperCase().startsWith("TAP TO START")).toBe(true);
     expect(container.querySelector("[data-photographs-tab='camera']")).toHaveAttribute("data-sequence-running", "false");
-    expect(screen.queryByRole("button", { name: /Review/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: "SEE MY PHOTOGRAPHS" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /stop/i })).toBeNull();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
-  it("starts the sequence from the shutter, and stops it from the same control while it runs", () => {
+  it("starts the sequence with a tap anywhere on the preview, and then ignores taps: there is no stop", () => {
     const stub = stubClient();
     const view = renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stub);
 
-    fireEvent.click(screen.getByRole("button", { name: "Take photographs" }));
+    fireEvent.click(start());
     view.show(photographsOf("guest-cycle-photographs-countdown"));
-    fireEvent.click(screen.getByRole("button", { name: "Stop taking photographs" }));
+    expect(start()).toHaveAttribute("aria-disabled", "true");
+    expect(start()).toHaveAttribute("data-state", "running");
+    expect(start()).not.toHaveTextContent("TAP TO START");
+    fireEvent.click(start());
 
-    expect(stub.sent).toEqual([
-      { name: "TakePhotographs", payload: {} },
-      { name: "StopCapture", payload: {} },
-    ]);
+    expect(stub.sent).toEqual([{ name: "TakePhotographs", payload: {} }]);
   });
 
-  it("keeps the shutter focusable but silent, with a reason beside it, until the brain says photographs can be taken", () => {
+  it("is a real button, so the keyboard reaches it and Enter or Space press it", () => {
+    renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stubClient());
+    expect(start().tagName).toBe("BUTTON");
+    expect(start()).toHaveAttribute("type", "button");
+    start().focus();
+    expect(start()).toHaveFocus();
+  });
+
+  it("reads as unavailable, with the reason as its description, until the brain says photographs can be taken", () => {
     const stub = stubClient();
     renderPhotographs(photographsOf("guest-ui-camera-waiting"), stub);
 
-    const shutter = screen.getByRole("button", { name: "Take photographs" });
-    expect(shutter).toHaveAttribute("aria-disabled", "true");
-    fireEvent.click(shutter);
+    expect(start()).toHaveAttribute("aria-disabled", "true");
+    expect(start()).toHaveAttribute("data-state", "waiting");
+    expect(start()).toHaveAccessibleDescription("One moment. The camera is getting ready.");
+    expect(start()).not.toHaveTextContent("TAP TO START");
+    fireEvent.click(start());
 
     expect(stub.sent).toEqual([]);
     expect(screen.getByText("One moment. The camera is getting ready.")).toBeVisible();
   });
 
-  it("offers a way to the Arrange tab only once the brain allows a review", () => {
+  it("offers a way to the Arrange tab only once the brain allows a review, without starting the sequence", () => {
     const stub = stubClient();
-    const view = renderPhotographs(photographsOf("guest-ui-camera-stopped"), stub);
+    const view = renderPhotographs(photographsOf("guest-ui-camera-partial"), stub);
 
     fireEvent.click(screen.getByRole("button", { name: "SEE MY PHOTOGRAPHS" }));
     expect(names(stub.sent)).toEqual(["ShowArrangeTab"]);
 
-    view.show(photographsOf("guest-ui-camera-stopped", { canReview: false }));
+    view.show(photographsOf("guest-ui-camera-partial", { canReview: false }));
     expect(screen.queryByRole("button", { name: "SEE MY PHOTOGRAPHS" })).toBeNull();
   });
 
-  it("draws the crop guide for the next window's ratio on the camera's own frame", () => {
+  it("lays the capture area over the camera's frame so the window's guide lands exactly on it", () => {
     const { container } = renderPhotographs(
       photographsOf("guest-cycle-photographs-camera", { cropAspect: 0.75 }),
       stubClient({ frames: frames(1280, 720) }),
     );
 
-    const guide = container.querySelector<HTMLElement>("[data-fotohavn-crop-guide]");
-    const expected = cameraGuideFraction(1280, 720, 0.75);
-    expect(guide).not.toBeNull();
-    expect(expected).not.toBeNull();
+    const preview = container.querySelector<HTMLElement>("[data-framing='capture']");
+    const area = container.querySelector<HTMLElement>("[data-fotohavn-crop-guide]");
+    const frame = area?.previousElementSibling as HTMLElement | null | undefined;
+    expect(preview?.style.getPropertyValue("--capture-ratio")).toBe("0.75");
+    expect(area).not.toBeNull();
     // The 1280 × 720 frame is first cropped to its centered 4:3 (960 × 720); the 3:4 window is 540 of those 960 pixels wide.
-    expect(guide?.style.width).toBe("42.1875%");
-    expect(guide?.style.left).toBe("28.90625%");
-    expect(guide?.style.top).toBe("0%");
-    expect(guide?.style.height).toBe("100%");
+    expect(cameraGuideFraction(1280, 720, 0.75)?.width).toBe(0.421875);
+    expect(frame?.style.getPropertyValue("--guide-fraction")).toBe("0.421875");
+    expect(frame?.style.getPropertyValue("--frame-ratio")).toBe(String(1280 / 720));
   });
 
-  it("draws the landscape window's guide as the full 4:3 crop", () => {
+  it("scales the frame for a 4:3 window by the full 4:3 crop", () => {
     const { container } = renderPhotographs(
       photographsOf("guest-cycle-photographs-camera", { cropAspect: 600 / 450 }),
       stubClient({ frames: frames(1280, 720) }),
     );
 
-    const guide = container.querySelector<HTMLElement>("[data-fotohavn-crop-guide]");
-    expect(guide?.style.width).toBe("75%");
-    expect(guide?.style.left).toBe("12.5%");
+    const area = container.querySelector<HTMLElement>("[data-fotohavn-crop-guide]");
+    const frame = area?.previousElementSibling as HTMLElement | null | undefined;
+    expect(frame?.style.getPropertyValue("--guide-fraction")).toBe("0.75");
   });
 
   it("mirrors the live picture only when the Event does", () => {
@@ -122,11 +143,12 @@ describe("CameraTab", () => {
     expect(document.querySelector("canvas")).not.toHaveAttribute("data-mirrored");
   });
 
-  it("waits quietly for the camera when no frames arrive", () => {
+  it("waits quietly for the camera when no frames arrive, with the capture area already drawn", () => {
     renderPhotographs(photographsOf("guest-cycle-photographs-camera"), stubClient());
 
     expect(screen.getByText("Getting the camera ready.")).toBeVisible();
-    expect(document.querySelector("[data-fotohavn-crop-guide]")).toBeNull();
+    expect(document.querySelector("[data-fotohavn-crop-guide]")).not.toBeNull();
+    expect(document.querySelector("[data-framing='capture']")).toHaveAttribute("data-state", "waiting");
   });
 
   it("shows each countdown number the brain pushes and announces the countdown once, when it starts", () => {
@@ -150,9 +172,9 @@ describe("CameraTab", () => {
     const { container, show } = renderPhotographs(photographsOf("guest-cycle-photographs-countdown"), stubClient());
     expect(live(container).join("")).not.toContain("Photograph 1 of 4 taken.");
 
-    show(photographsOf("guest-ui-camera-stopped"));
+    show(photographsOf("guest-ui-camera-partial"));
     expect(live(container)).toContain("Photograph 2 of 4 taken.");
-    show(photographsOf("guest-ui-camera-stopped"));
+    show(photographsOf("guest-ui-camera-partial"));
     expect(live(container).filter((text) => text === "Photograph 2 of 4 taken.")).toHaveLength(1);
   });
 
@@ -197,19 +219,27 @@ describe("CameraTab", () => {
     });
   });
 
-  it("lets the guest keep the original while a Retake counts down, with STOP still on the shutter", () => {
+  it("lets the guest keep the original while a Retake counts down, and taps on the preview do nothing then", () => {
     const stub = stubClient();
     renderPhotographs(photographsOf("guest-ui-camera-retaking"), stub);
 
     expect(screen.getByText("4")).toBeVisible();
     expect(screen.queryByRole("button", { name: "SEE MY PHOTOGRAPHS" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "KEEP ORIGINAL" }));
-    fireEvent.click(screen.getByRole("button", { name: "Stop taking photographs" }));
+    fireEvent.click(start());
 
-    expect(stub.sent).toEqual([
-      { name: "KeepOriginal", payload: {} },
-      { name: "StopCapture", payload: {} },
-    ]);
+    expect(stub.sent).toEqual([{ name: "KeepOriginal", payload: {} }]);
+  });
+
+  it("starts a Retake with the same tap, KEEP ORIGINAL beside it", () => {
+    const stub = stubClient();
+    renderPhotographs(photographsOf("guest-ui-camera-retaking-ready"), stub);
+
+    expect(screen.getByRole("button", { name: "KEEP ORIGINAL" })).toBeVisible();
+    expect(start()).toHaveTextContent("TAP TO START");
+    fireEvent.click(start());
+
+    expect(stub.sent).toEqual([{ name: "TakePhotographs", payload: {} }]);
   });
 
   it("marks the pause between windows", () => {

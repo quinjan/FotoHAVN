@@ -1,6 +1,7 @@
 import type {
   EventSetupCameraView,
   EventSetupErrorCode,
+  EventSetupFieldError,
   EventSetupStartFailure,
   PhaseTimer,
   PhaseTimerOption,
@@ -94,9 +95,7 @@ export function fieldErrorText(field: string, code: EventSetupErrorCode, timers:
       if (timer === undefined) {
         return "Enter a number of seconds in range.";
       }
-      return timer.canBeOff
-        ? `Enter 0 to turn it off, or ${String(timer.min)} to ${String(timer.max)} seconds.`
-        : `Enter ${String(timer.min)} to ${String(timer.max)} seconds.`;
+      return `Enter ${String(timer.min)} to ${String(timer.max)} seconds.`;
     }
     case "pinFormat":
       return "Use 4 to 6 digits, 0 to 9 only.";
@@ -111,11 +110,69 @@ export function fieldErrorText(field: string, code: EventSetupErrorCode, timers:
   }
 }
 
-/** The announcement after a failed save: how many things need attention. */
+/** Whether an error blocks only `SAVE AND START`: a draft without an Operator PIN still saves. */
+export function blocksOnlyStart(error: EventSetupFieldError): boolean {
+  return error.field === "pin" && error.code === "pinRequired";
+}
+
+/** The heading's count of what blocks saving. */
 export function errorSummary(count: number): string {
   return count === 1
     ? "One thing needs attention before this Event can be saved."
     : `${String(count)} things need attention before this Event can be saved.`;
+}
+
+/**
+ * The error summary's heading, which is also the polite announcement after a failed save: what blocks saving, or, when
+ * only the missing Operator PIN is left, that the Event can be saved but not started.
+ */
+export function errorSummaryHeading(errors: readonly EventSetupFieldError[]): string {
+  const blockers = errors.filter((error) => !blocksOnlyStart(error)).length;
+  if (blockers > 0) {
+    return errorSummary(blockers);
+  }
+  return errors.length === 0 ? "" : "This Event can be saved, but it needs an Operator PIN to start.";
+}
+
+const fieldNames: Readonly<Record<string, string>> = {
+  name: "Name",
+  date: "Date",
+  venue: "Venue",
+  customer: "Customer or host",
+  notes: "Notes",
+};
+
+/**
+ * One line of the error summary. The summary reads away from its fields, so each line names the field it is about;
+ * a message that already does (Offer at least one Template.) is the field's own.
+ */
+export function errorSummaryItem(
+  field: string,
+  code: EventSetupErrorCode,
+  timers: readonly PhaseTimerOption[],
+  otherBlockers: boolean,
+): string {
+  const name = fieldNames[field];
+  switch (code) {
+    case "required":
+      return field === "name" ? "Name the Event." : `${name ?? "This"} is needed.`;
+    case "tooLong":
+      return name === undefined ? "That's too long." : `${name} is too long.`;
+    case "invalidDate":
+      return "The date isn't valid. Choose another.";
+    case "timerOutOfRange": {
+      const timer = timers.find((candidate) => `timers.${candidate.phase}` === field);
+      return timer === undefined
+        ? "A timer needs a number of seconds in range."
+        : `${timerNames[timer.phase]} needs ${String(timer.min)} to ${String(timer.max)} seconds.`;
+    }
+    case "pinFormat":
+      return "The Operator PIN needs 4 to 6 digits, 0 to 9 only.";
+    case "pinRequired":
+      return otherBlockers ? "Set an Operator PIN to start this Event. Saving doesn't need one." : "Set an Operator PIN to start this Event.";
+    default:
+      return fieldErrorText(field, code, timers);
+  }
 }
 
 export const timerNames: Readonly<Record<PhaseTimer, string>> = {
@@ -137,17 +194,36 @@ export const timerRunsOut: Readonly<Record<PhaseTimer, string>> = {
   guestGallery: "When time runs out, the booth returns to Start.",
 };
 
-/** What it means to turn a timer off, shown beside the fields that can be off. */
-export const timerOffCopy = "If it is off, a guest stays on this step until someone continues or uses START OVER.";
+/** The names a timer's controls carry for assistive technology, and the unit written after its seconds. */
+export const timerControlCopy = {
+  unit: "s",
+  switchName: (timer: string) => `${timer} timer`,
+  secondsName: (timer: string) => `${timer} seconds`,
+} as const;
 
-/** The timer's state in words when it is off; a timer that is on says nothing here. */
-export const timerIsOff = "Off now.";
+/**
+ * The Timing step's one shared line: the range the timers that can be off run in, and what off means. It is built from
+ * the brain's own limits, and a timer whose range differs (Keepsake) says its own.
+ */
+export function timingIntro(timers: readonly PhaseTimerOption[]): string {
+  const range = groupRange(timers);
+  const lead = range === null ? "" : `Most timers run ${String(range.min)} to ${String(range.max)} seconds. `;
+  return `${lead}Turn a timer off and that step waits for the guest to continue. If they walk away, only ending the Event clears it.`;
+}
 
-/** The range line under a timer: its limits, and whether 0 turns it off. */
-export function timerRange(timer: PhaseTimerOption): string {
-  return timer.canBeOff
-    ? `${String(timer.min)} to ${String(timer.max)} seconds. Enter 0 for Off.`
-    : `${String(timer.min)} to ${String(timer.max)} seconds. This timer is always on.`;
+/** The limits shared by the timers that can be off; null when there are none. */
+export function groupRange(timers: readonly PhaseTimerOption[]): { readonly min: number; readonly max: number } | null {
+  const first = timers.find((timer) => timer.canBeOff);
+  return first === undefined ? null : { min: first.min, max: first.max };
+}
+
+/** What differs for one timer: the outcome, and its limits when they aren't the group's or when it can't be off. */
+export function timerHelp(timer: PhaseTimerOption, timers: readonly PhaseTimerOption[]): string {
+  const range = groupRange(timers);
+  const shared = timer.canBeOff && range !== null && timer.min === range.min && timer.max === range.max;
+  return [shared ? null : `${String(timer.min)} to ${String(timer.max)} seconds.`, timer.canBeOff ? null : "Always on.", timerRunsOut[timer.phase]]
+    .filter((line) => line !== null)
+    .join(" ");
 }
 
 export interface CameraLine {
@@ -245,6 +321,7 @@ export const copy = {
       guestDisplay: "Guest display",
       printer: "Printer",
       guestGallery: "Guest gallery",
+      guestSounds: "Guest sounds",
       pin: "Operator PIN",
     },
   },
@@ -278,6 +355,8 @@ export const copy = {
     looksHelp: "Choose the Looks guests can pick from, and mark one as the default.",
     guestGallery: "Guest gallery",
     guestGalleryHelp: "Turn this on only with the Customer's permission.",
+    guestSounds: "Guest sounds",
+    guestSoundsHelp: "Plays a tick during the countdown and a shutter sound for each photograph.",
   },
   pin: {
     set: "PIN set",

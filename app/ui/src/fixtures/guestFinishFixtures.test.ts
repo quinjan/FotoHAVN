@@ -40,17 +40,17 @@ describe("the hand-written Filters, Keepsake, and Assistance fixtures", () => {
     }
   });
 
-  it("show Keepsake with no warning and no START OVER, and Filters on its way with both available", () => {
+  it("carry each step's own Phase Timer, Keepsake's included, and never a Start Over or a way back", () => {
     for (const name of names) {
       const presentation = guest(name);
-      if (presentation.surface === "keepsake") {
-        expect(presentation.guestCycle?.startOverAvailable, name).toBe(false);
-        expect(presentation.overlays.phaseTimerWarning, name).toBeNull();
-        expect(presentation.overlays.startOverConfirmation, name).toBeNull();
-        expect(presentation.guestCycle?.steps.every((entry) => !entry.canGoBack), name).toBe(true);
+      const overlays: Record<string, unknown> = { ...presentation.overlays };
+      expect(Object.keys(overlays).sort(), name).toEqual(["exitHold", "notice", "phaseTimer", "pinDialog"]);
+      expect(Object.keys(presentation.guestCycle ?? { id: "", step: "", steps: [] }).sort(), name).toEqual(["id", "step", "steps"]);
+      for (const entry of presentation.guestCycle?.steps ?? []) {
+        expect(Object.keys(entry).sort(), name).toEqual(["state", "step"]);
       }
-      if (presentation.surface === "filters") {
-        expect(presentation.guestCycle?.startOverAvailable, name).toBe(true);
+      if (presentation.surface === "keepsake") {
+        expect(presentation.overlays.phaseTimer?.phase, name).toBe("keepsake");
       }
     }
   });
@@ -75,10 +75,12 @@ describe("the hand-written Filters, Keepsake, and Assistance fixtures", () => {
     }
   });
 
-  it("write the chrome's states: a skipped step and the last second of the warning", () => {
-    expect(guest("guest-ui-filters-skipped-template").guestCycle?.steps[0]).toEqual({ step: "template", state: "skipped", canGoBack: false });
-    expect(guest("guest-ui-keepsake-skipped-filters").guestCycle?.steps[2]).toEqual({ step: "filters", state: "skipped", canGoBack: false });
-    expect(guest("guest-ui-filters-timer-warning-last-second").overlays.phaseTimerWarning).toEqual({ phase: "filters", remainingSeconds: 1 });
+  it("write the chrome's states: a skipped step, and the Phase Timer at its last second, paused, and off", () => {
+    expect(guest("guest-ui-filters-skipped-template").guestCycle?.steps[0]).toEqual({ step: "template", state: "skipped" });
+    expect(guest("guest-ui-keepsake-skipped-filters").guestCycle?.steps[2]).toEqual({ step: "filters", state: "skipped" });
+    expect(guest("guest-ui-filters-timer-last-second").overlays.phaseTimer).toEqual({ phase: "filters", remainingSeconds: 1, paused: false });
+    expect(guest("guest-ui-filters-timer-paused").overlays.phaseTimer).toMatchObject({ phase: "filters", paused: true });
+    expect(guest("guest-ui-filters-no-timer").overlays.phaseTimer).toBeNull();
   });
 
   it("write Keepsake for a one-Look Event, at the Template's native size", () => {

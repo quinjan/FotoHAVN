@@ -1,0 +1,36 @@
+/* Beneath the statement, in the Start grid's last row: the wait hint and, when the brain shows it, the gallery link. */
+.tail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: start;
+}
+
+/*
+ * The wait hint is in the page from the start but stays hidden for the first 25 seconds, then appears with no movement,
+ * so it works under reduced motion too (global.css exempts [data-delayed-reveal] from the instant-animation reset).
+ * `visibility: hidden` keeps its space, so the screen doesn't shift when it appears, and keeps it out of the
+ * accessibility tree until it shows; it is neither a live region nor an announcement. The brain still owns every
+ * timer: this clock changes no state and sends no command.
+ */
+.waitHint {
+  max-inline-size: var(--app-measure-supporting);
+  padding-block-start: var(--app-stack-gap);
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-supporting-line-height);
+  visibility: hidden;
+  animation: reveal var(--app-duration-instant) linear var(--app-wait-hint-delay) forwards;
+}
+
+@keyframes reveal {
+  from {
+    visibility: hidden;
+  }
+
+  to {
+    visibility: visible;
+  }
+}

@@ -3,8 +3,9 @@ import { StatementHeading } from "../components/StatementHeading/index.ts";
 import { TextLink } from "../components/TextLink/index.ts";
 import type { StartUnavailableView, StartView } from "../protocol/generated.ts";
 import screen from "../screens/Screen.module.css";
-import { galleryLinkLabel, startUnavailableCopy, stepInsideLabel } from "./guestCopy.ts";
+import { galleryLinkLabel, startUnavailableCopy, startUnavailableWaitHint, stepInsideLabel } from "./guestCopy.ts";
 import styles from "./Guest.module.css";
+import unavailableStyles from "./StartUnavailable.module.css";
 
 export interface GuestActions {
   /** `BeginGuestCycle`. */
@@ -67,7 +68,12 @@ export function StartUnavailableSurface({
     <div className={screen.start} data-unavailable-reason={unavailable.reason}>
       <p className={screen.wordmark}>FOTOHAVN</p>
       <StatementHeading level={1} size="display" align="center" lead={lead} turn={turn} supporting={supporting} />
-      {unavailable.guestGalleryLinkVisible && <GalleryLink onOpen={actions.onOpenGallery} />}
+      <div className={unavailableStyles.tail}>
+        <p className={unavailableStyles.waitHint} data-delayed-reveal="">
+          {startUnavailableWaitHint}
+        </p>
+        {unavailable.guestGalleryLinkVisible && <GalleryLink onOpen={actions.onOpenGallery} />}
+      </div>
     </div>
   );
 }

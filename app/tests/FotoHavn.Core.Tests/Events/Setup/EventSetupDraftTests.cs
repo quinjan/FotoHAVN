@@ -28,6 +28,7 @@ public sealed class EventSetupDraftTests
         Assert.Equal(Catalog.Looks.Select(look => look.Id), draft.OfferedLookIds);
         Assert.Equal("naturale-v1", draft.DefaultLookId);
         Assert.False(draft.GuestGalleryEnabled);
+        Assert.True(draft.GuestSoundsEnabled);
         Assert.Null(draft.CameraDeviceId);
         Assert.Null(draft.GuestDisplayId);
         Assert.False(draft.HasPin);
@@ -64,6 +65,7 @@ public sealed class EventSetupDraftTests
             draft => draft.SetOfferedLooks(["naturale-v1"]),
             draft => draft.SetDefaultLook("sepia-v1"),
             draft => draft.SetGuestGallery(true),
+            draft => draft.SetGuestSounds(false),
             draft => draft.SetTimer(PhaseTimerPhase.Filters, 0),
             draft => draft.SetPin("1234", "1234"),
             draft => draft.SetPin("1234", string.Empty),
@@ -110,6 +112,7 @@ public sealed class EventSetupDraftTests
             Mirror = false,
             CountdownSeconds = 10,
             GuestGalleryEnabled = true,
+            GuestSoundsEnabled = false,
             HasPin = true,
             OfferedTemplateIds = ["panorama-four", "signature-strip"],
             DefaultTemplateId = "panorama-four",
@@ -125,6 +128,7 @@ public sealed class EventSetupDraftTests
         Assert.False(draft.Mirror);
         Assert.Equal(10, draft.CountdownSeconds);
         Assert.True(draft.GuestGalleryEnabled);
+        Assert.False(draft.GuestSoundsEnabled);
         Assert.True(draft.HasSavedPin);
         Assert.Equal(["signature-strip", "panorama-four"], draft.OfferedTemplateIds);
         Assert.Equal("panorama-four", draft.DefaultTemplateId);
@@ -156,11 +160,13 @@ public sealed class EventSetupDraftTests
         draft.BindCamera("camera-1", "Camera");
         draft.BindGuestDisplay("display-1", "Display");
         draft.SetOfferedTemplates(["polka-keepsake", "signature-strip"]);
+        draft.SetGuestSounds(false);
         draft.SetTimer(PhaseTimerPhase.Filters, 0);
 
         var record = draft.ToRecord(SetupSamples.HarbourId);
 
         Assert.Equal(SetupSamples.HarbourId, record.Id);
+        Assert.False(record.GuestSoundsEnabled);
         Assert.Equal("Harbour gala", record.Name);
         Assert.Equal(Today, record.EventDate);
         Assert.Null(record.Venue);

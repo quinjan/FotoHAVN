@@ -54,6 +54,7 @@ public static class CommandRegistry
         Operator<SetDefaultLookPayload>(),
         Operator<SetPhaseTimerPayload>(),
         Operator<SetGuestGalleryPayload>(),
+        Operator<SetGuestSoundsPayload>(),
         Operator<SetPinPayload>(),
         Operator<SaveEventPayload>(),
         Operator<SaveAndStartEventPayload>(),
@@ -91,7 +92,6 @@ public static class CommandRegistry
         Guest<ShowCameraTabPayload>(),
         Guest<ShowArrangeTabPayload>(),
         Guest<TakePhotographsPayload>(),
-        Guest<StopCapturePayload>(),
         Guest<SelectPositionPayload>(),
         Guest<BeginRetakePayload>(),
         Guest<AcceptRetakePayload>(),
@@ -104,10 +104,6 @@ public static class CommandRegistry
         Guest<SelectLookPayload>(),
         Guest<FinishStripPayload>(),
         Guest<RetryCompositionPayload>(),
-        Guest<MoreTimePayload>(),
-        Guest<StartOverPayload>(),
-        Guest<ConfirmStartOverPayload>(),
-        Guest<KeepGoingPayload>(),
 
         // Guest Screen (guest)
         Guest<BeginExitHoldPayload>(),

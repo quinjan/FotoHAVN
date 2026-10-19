@@ -105,8 +105,9 @@ function OperatorItem({
   };
   const names = templateAndLook(cycle);
   const unavailable = cycle.unavailable === true;
+  const wide = cycle.strip !== null && cycle.strip.width > cycle.strip.height;
   return (
-    <li className={styles.item} data-unavailable={unavailable || undefined}>
+    <li className={styles.item} data-unavailable={unavailable || undefined} data-wide={wide || undefined}>
       {/* The print opens the Guest Cycle for pointer and touch; keyboard and screen readers use `OPEN` below. */}
       <button type="button" className={styles.open} tabIndex={-1} aria-hidden="true" onClick={open}>
         {unavailable ? (

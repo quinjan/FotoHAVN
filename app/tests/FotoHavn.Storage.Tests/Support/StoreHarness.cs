@@ -172,6 +172,7 @@ public static class Sample
         "signature-strip",
         "naturale-v1",
         true,
+        true,
         ["signature-strip", "panorama-four"],
         ["naturale-v1", "sepia-v1", "classic-v1"],
         [new PhaseTimerSetting(PhaseTimerPhase.Template, 30), new PhaseTimerSetting(PhaseTimerPhase.Filters, 20)]);

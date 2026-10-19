@@ -22,16 +22,22 @@ export function templatePreviewAlt(name: string): string {
 }
 
 export const cameraCopy = {
+  /** The view's heading, for assistive technology only: S1 shows no heading over the live preview. */
   lead: "Find your",
   turn: "light.",
-  supporting: "Let this moment become a memory.",
-  /** The shutter is the one control; this line says why it can't be pressed yet. */
+  /** The accessible name of the whole live preview, the one control that starts the sequence; it begins with the visible prompt (WCAG 2.5.3). */
+  start: "Tap to start taking photographs",
+  /** The prompt over the preview's centre while the sequence can start. */
+  tapToStart: "TAP TO START",
+  /** Said in the prompt's place while the sequence can't start yet; tapping does nothing. */
   waiting: "One moment. The camera is getting ready.",
   /** Camera tab to Arrange tab, once a photograph exists. */
   review: "SEE MY PHOTOGRAPHS",
   /** While a Retake runs, the way back to the photograph that is already there. */
   keepOriginal: "KEEP ORIGINAL",
   previewLabel: "Live camera preview",
+  /** Shown on the countdown's last second, so the group looks at the lens and not at the screen. Visual only. */
+  lookAtCamera: "Look at the camera.",
 } as const;
 
 export const arrangeCopy = {
@@ -56,14 +62,14 @@ export const arrangeCopy = {
   selected: (position: number) => `Photograph ${String(position)} is selected.`,
   moving: (position: number) => `Choose where photograph ${String(position)} goes.`,
   comparing: (position: number) => `Keep the new photograph for position ${String(position)}, or try again.`,
-  /** The retained pool, as a quiet count (Q24): the Captures a smaller Template left unused stay with the Event. */
-  retained: (count: number) =>
-    count === 1 ? "1 more photograph is kept for this Event." : `${String(count)} more photographs are kept for this Event.`,
   /** The window buttons' names; the position is the strip's, counted from 1. */
   windowName: (position: number, total: number) => `Photograph ${String(position)} of ${String(total)}`,
   emptyWindowName: (position: number) => `Position ${String(position)} is empty.`,
+  /** The visible label on every destination window while a Move waits (the Meta role sets it in capitals). */
+  moveHere: "Move here",
+  /** A destination begins with its visible label, so the accessible name contains the words on screen. */
   moveTarget: (position: number, occupied: boolean) =>
-    occupied ? `Swap with position ${String(position)}` : `Move to position ${String(position)}`,
+    occupied ? `Move here: swap with position ${String(position)}` : `Move here: position ${String(position)}`,
   moveSource: (position: number) => `Photograph ${String(position)}, moving`,
   /** Said once, politely, when a Retake's new photograph arrives or a photograph is placed. */
   announceCandidate: "Your new photograph is ready. Accept it, try again, or keep the original.",

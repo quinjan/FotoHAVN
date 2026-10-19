@@ -39,41 +39,40 @@ public sealed class GuestCyclePlanTests
     }
 
     [Fact]
-    public void The_step_progress_lists_all_four_steps_and_lets_the_guest_go_back_to_done_steps()
+    public void The_step_progress_lists_all_four_steps_with_where_the_guest_is()
     {
         var onPhotographs = GuestCyclePlan.Steps(GuestCycleStep.Photographs, templateSkipped: false, filtersSkipped: false);
 
         Assert.Equal(
             [
-                new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Done, true),
-                new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Current, false),
-                new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Upcoming, false),
-                new GuestCycleStepEntry(GuestCycleStepName.Keepsake, GuestStepState.Upcoming, false),
+                new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Done),
+                new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Current),
+                new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Upcoming),
+                new GuestCycleStepEntry(GuestCycleStepName.Keepsake, GuestStepState.Upcoming),
             ],
             onPhotographs);
     }
 
     [Fact]
-    public void A_skipped_step_is_never_one_to_go_back_to()
+    public void A_skipped_step_stays_skipped()
     {
         var steps = GuestCyclePlan.Steps(GuestCycleStep.Filters, templateSkipped: true, filtersSkipped: false);
 
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Skipped, false), steps[0]);
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Done, true), steps[1]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Skipped), steps[0]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Done), steps[1]);
 
         var filtersSkipped = GuestCyclePlan.Steps(GuestCycleStep.Photographs, templateSkipped: false, filtersSkipped: true);
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Skipped, false), filtersSkipped[2]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Skipped), filtersSkipped[2]);
     }
 
     [Fact]
-    public void Nothing_can_be_gone_back_to_from_the_Keepsake()
+    public void On_the_Keepsake_every_earlier_step_is_done()
     {
         var steps = GuestCyclePlan.Steps(GuestCycleStep.Keepsake, templateSkipped: false, filtersSkipped: false);
 
         Assert.Equal(
             [GuestStepState.Done, GuestStepState.Done, GuestStepState.Done, GuestStepState.Current],
             steps.Select(entry => entry.State));
-        Assert.All(steps, entry => Assert.False(entry.CanGoBack));
     }
 
     [Theory]
@@ -88,27 +87,30 @@ public sealed class GuestCyclePlanTests
     }
 
     [Theory]
+    [InlineData(300.0, 300)]
     [InlineData(20.0, 20)]
     [InlineData(19.001, 20)]
     [InlineData(18.5, 19)]
     [InlineData(0.2, 1)]
-    public void The_warning_shows_the_time_left_rounded_up(double seconds, int expected) =>
+    [InlineData(0.0, 0)]
+    public void The_timer_shows_the_time_left_rounded_up(double seconds, int expected) =>
         Assert.Equal(expected, GuestCyclePlan.WholeSecondsLeft(TimeSpan.FromSeconds(seconds)));
 
     [Fact]
-    public void Outside_the_warning_the_timer_next_matters_at_its_deadline()
+    public void A_running_timer_wakes_as_the_displayed_second_changes_the_last_wake_being_the_expiry()
     {
-        Assert.Equal(TimeSpan.FromSeconds(10), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30), warning: false));
-        Assert.Equal(TimeSpan.Zero, GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(-3), TimeSpan.Zero, warning: false));
+        Assert.Equal(TimeSpan.FromSeconds(0.25), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(7.25)));
+        Assert.Equal(TimeSpan.FromSeconds(1), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(7)));
+        Assert.Equal(TimeSpan.FromSeconds(1), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(60)));
+        Assert.Equal(TimeSpan.FromSeconds(0.5), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(0.5)));
+        Assert.Equal(TimeSpan.FromTicks(1), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(3) + TimeSpan.FromTicks(1)));
     }
 
     [Fact]
-    public void During_the_warning_the_timer_wakes_as_the_displayed_second_changes_or_at_expiry()
+    public void A_timer_whose_time_is_up_acts_now()
     {
-        Assert.Equal(TimeSpan.FromSeconds(0.25), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(7.25), TimeSpan.FromSeconds(7.25), warning: true));
-        Assert.Equal(TimeSpan.FromSeconds(1), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(7), warning: true));
-        Assert.Equal(TimeSpan.FromSeconds(0.5), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(0.5), TimeSpan.FromSeconds(0.5), warning: true));
-        Assert.Equal(TimeSpan.FromSeconds(0.3), GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(0.3), TimeSpan.FromSeconds(1.0), warning: true));
+        Assert.Equal(TimeSpan.Zero, GuestCyclePlan.WakeDelay(TimeSpan.Zero));
+        Assert.Equal(TimeSpan.Zero, GuestCyclePlan.WakeDelay(TimeSpan.FromSeconds(-3)));
     }
 
     [Fact]

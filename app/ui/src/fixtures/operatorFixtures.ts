@@ -147,6 +147,11 @@ function operatorListFixtures(): Record<string, OperatorWelcomeMessage> {
       assistance: { reason: "guestDisplay" },
       guestDisplay: { name: "DELL P2419H", state: "disconnected" },
     }),
+    "operator-list-running-assistance-camera-removed": runningList({
+      currentStep: "operatorAssistance",
+      assistance: { reason: "camera" },
+      camera: { state: "notAvailable", reason: "removed" },
+    }),
     "operator-list-confirm-delete": operatorWelcome("eventList", {
       eventList: { events: idle, newEventAvailable: true },
       overlays: overlays({ confirmation: { kind: "deleteEvent", eventName: idle[1]?.name ?? "", counts: { guestCycles: 12, photoStrips: 11, captures: 41 }, guestCycle: null } }),

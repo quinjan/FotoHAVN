@@ -98,6 +98,18 @@ export async function tap(locator: Locator): Promise<void> {
   await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
 }
 
+/**
+ * One finger taps the centre of the control whatever its state, for proving that a tap on an unavailable control (the Camera
+ * tab's live preview while a sequence runs) does nothing.
+ */
+export async function tapEvenIfUnavailable(locator: Locator): Promise<void> {
+  await expect(locator).toBeVisible();
+  const { x, y } = await centreOf(locator);
+  const session = await touchSession(locator.page());
+  await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y, id: 0 }] });
+  await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+}
+
 /** One finger presses on `from`, travels to `to` in steps, and lifts there. */
 export async function touchDrag(from: Locator, to: Locator, steps = 12): Promise<void> {
   const start = await centreOf(from);
@@ -170,8 +182,10 @@ function exact(name: string): RegExp {
 export class GuestControls {
   readonly stepInside: Locator;
   readonly templateContinue: Locator;
+  /** The Camera tab's live preview: the one control that starts the sequence (S1, tap to start). */
   readonly takePhotographs: Locator;
-  readonly stopCapture: Locator;
+  /** The preview's prompt while the sequence can start. */
+  readonly tapToStart: Locator;
   readonly seePhotographs: Locator;
   readonly takeMore: Locator;
   readonly continueToFilters: Locator;
@@ -182,19 +196,17 @@ export class GuestControls {
   readonly accept: Locator;
   readonly tryAgain: Locator;
   readonly keepOriginal: Locator;
-  readonly moreTime: Locator;
-  readonly startOver: Locator;
   readonly retry: Locator;
-  readonly confirmDialog: Locator;
-  readonly warning: Locator;
+  /** The Phase Timer pill: always visible while a timed phase runs, with no way to extend it. */
+  readonly phaseTimer: Locator;
   readonly stepList: Locator;
   readonly exitHold: Locator;
 
   constructor(readonly page: Page) {
     this.stepInside = page.getByRole("button", { name: "STEP INSIDE" });
     this.templateContinue = page.getByRole("button", { name: "CONTINUE TO PHOTOGRAPHS" });
-    this.takePhotographs = page.getByRole("button", { name: "Take photographs", exact: true });
-    this.stopCapture = page.getByRole("button", { name: "Stop taking photographs", exact: true });
+    this.takePhotographs = page.getByRole("button", { name: "Tap to start taking photographs", exact: true });
+    this.tapToStart = page.getByText("TAP TO START", { exact: true });
     this.seePhotographs = page.getByRole("button", { name: "SEE MY PHOTOGRAPHS" });
     this.takeMore = page.getByRole("button", { name: "TAKE MORE PHOTOGRAPHS" });
     this.continueToFilters = page.getByRole("button", { name: /^(CONTINUE TO FILTERS|FINISH MY STRIP)/ });
@@ -205,11 +217,8 @@ export class GuestControls {
     this.accept = page.getByRole("button", { name: "ACCEPT", exact: true });
     this.tryAgain = page.getByRole("button", { name: "TRY AGAIN", exact: true });
     this.keepOriginal = page.getByRole("button", { name: "KEEP ORIGINAL", exact: true });
-    this.moreTime = page.getByRole("button", { name: "MORE TIME", exact: true });
-    this.startOver = page.getByRole("button", { name: "START OVER", exact: true });
     this.retry = page.getByRole("button", { name: "RETRY", exact: true });
-    this.confirmDialog = page.getByRole("alertdialog");
-    this.warning = page.locator("[data-phase][data-tone='light']").filter({ has: page.getByRole("button", { name: "MORE TIME" }) });
+    this.phaseTimer = page.getByRole("timer");
     this.stepList = page.getByRole("list", { name: "Steps" });
     this.exitHold = page.getByRole("button", { name: "Operator exit", exact: true });
   }
@@ -227,9 +236,9 @@ export class GuestControls {
     return this.page.locator("fieldset").filter({ has: this.page.getByRole("radio") });
   }
 
-  /** A step of the step progress, a button once it is completed. */
-  completedStep(label: "Template" | "Photographs" | "Filters"): Locator {
-    return this.stepList.getByRole("button", { name: new RegExp(label) });
+  /** A step of the step progress. It only shows where the guest is: no step is a control. */
+  step(label: "Template" | "Photographs" | "Filters" | "Keepsake"): Locator {
+    return this.stepList.getByRole("listitem").filter({ hasText: label }).locator("[data-state]");
   }
 
   /** The strip's photograph window for a 1-based position, while no Move waits. */
@@ -237,12 +246,11 @@ export class GuestControls {
     return this.page.getByRole("button", { name: new RegExp(`^Photograph ${String(position)} of \\d+$`) });
   }
 
-  confirmStartOver(): Locator {
-    return this.confirmDialog.getByRole("button", { name: "START OVER", exact: true });
-  }
-
-  keepGoing(): Locator {
-    return this.confirmDialog.getByRole("button", { name: "KEEP GOING", exact: true });
+  /** Any control the rule change removed (no START OVER, no MORE TIME, no stop, no going back by the step progress). */
+  get removedControls(): Locator {
+    return this.page
+      .getByRole("button", { name: /^(START OVER|MORE TIME|KEEP GOING|STOP)$|^Stop taking photographs$/ })
+      .or(this.stepList.getByRole("button"));
   }
 
   /** The capture numbers (`capture-N.jpg`) in the strip's windows, in order; null for an empty one. */
@@ -378,17 +386,23 @@ export class GuestRun {
     return controls;
   }
 
-  /** Taps `TAKE PHOTOGRAPHS` and waits until `windows` windows are filled in all. */
+  /** Taps the live preview to start and waits until `windows` windows are filled in all. A sequence can't be stopped. */
   async takePhotographsUntil(controls: GuestControls, windows: number): Promise<void> {
     const before = (await this.cycle())?.windowsFilled ?? 0;
     await tap(controls.takePhotographs);
     await this.waitForFilled(windows, captureBudgetMs(this.countdownSeconds, Math.max(1, windows - before)));
   }
 
-  /** Taps `STOP` and waits for the sequence to end. */
-  async stopCapture(controls: GuestControls): Promise<void> {
-    await tap(controls.stopCapture);
-    await this.waitForSequenceIdle();
+  /**
+   * After `RETAKE`: the Camera tab's capture for the retaken window. Starts it with a tap on the preview when the brain waits
+   * for one (`activate` overrides the tap, for the keyboard), then waits for the candidate's `ACCEPT`.
+   */
+  async retakeCapture(controls: GuestControls, activate: (control: Locator) => Promise<void> = tap): Promise<void> {
+    await expect(controls.accept.or(controls.tapToStart)).toBeVisible({ timeout: 30_000 });
+    if (await controls.tapToStart.isVisible()) {
+      await activate(controls.takePhotographs);
+    }
+    await expect(controls.accept).toBeVisible({ timeout: captureBudgetMs(this.countdownSeconds, 1) });
   }
 
   async cycles(): Promise<StoredCycle[]> {

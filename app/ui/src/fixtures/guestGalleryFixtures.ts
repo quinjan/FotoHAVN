@@ -13,12 +13,13 @@ import { guestStart } from "./inlineFixtures.ts";
 /**
  * Hand-written fixtures for the guest gallery (M9 UI-2 owns this file; wave A seeds it). The brain's own gallery fixtures
  * (`guest-gallery-*`, `guest-strip-detail-*`, `guest-start-gallery-link`) come from the .NET tests; these cover what those don't write:
- * four strips, a long row with more to load, a landscape strip, the Phase Timer warning on the gallery and on a detail, and the load
+ * four strips, a long row with more to load, a landscape strip, the Phase Timer in its last seconds on the gallery and on a detail, and the load
  * state. Names start with `guest-ui-gallery-` and never repeat a brain-generated name. The views carry only images, proportions, and alt
  * text, so nothing here can show metadata.
  */
 
-const noOverlays: GuestOverlays = guestStart.presentation.overlays;
+/** The guest gallery's Phase Timer is always on, so every gallery view carries it. */
+const noOverlays: GuestOverlays = { ...guestStart.presentation.overlays, phaseTimer: { phase: "guestGallery", remainingSeconds: 52, paused: false } };
 
 const alt = "Photo Strip from this Event";
 const captureAlt = "Photograph from this Event";
@@ -59,14 +60,14 @@ export const guestGalleryFixtures: Readonly<Record<string, GuestWelcomeMessage>>
   "guest-ui-gallery-many-strips": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: false }),
   "guest-ui-gallery-loading-more": galleryWelcome({ strips: strips(40, 5), nextCursor: "cursor-1", loadingMore: true }),
   "guest-ui-gallery-loading-first": galleryWelcome({ strips: [], nextCursor: null, loadingMore: true }),
-  "guest-ui-gallery-timer-warning": galleryWelcome(
+  "guest-ui-gallery-timer-low": galleryWelcome(
     { strips: strips(4), nextCursor: null, loadingMore: false },
-    { phaseTimerWarning: { phase: "guestGallery", remainingSeconds: 18 } },
+    { phaseTimer: { phase: "guestGallery", remainingSeconds: 8, paused: false } },
   ),
   "guest-ui-strip-detail": detailWelcome(detailView),
   "guest-ui-strip-detail-landscape": detailWelcome({
     strip: { imageUrl: fixtureStrip("panorama-four", 2).src, width: 1800, height: 600, landscape: true, alt },
     captures: detailView.captures,
   }),
-  "guest-ui-strip-detail-timer-warning": detailWelcome(detailView, { phaseTimerWarning: { phase: "guestGallery", remainingSeconds: 1 } }),
+  "guest-ui-strip-detail-timer-low": detailWelcome(detailView, { phaseTimer: { phase: "guestGallery", remainingSeconds: 1, paused: false } }),
 };

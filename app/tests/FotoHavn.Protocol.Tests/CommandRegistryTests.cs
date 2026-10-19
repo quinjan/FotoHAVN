@@ -7,7 +7,7 @@ public sealed class CommandRegistryTests
     [
         "OpenNewEvent", "EditEvent", "StartEvent", "DeleteEvent", "ConfirmDeleteEvent", "CancelDeleteEvent", "OpenEventFolder", "DismissNotice",
         "ChangeEventField", "SelectCamera", "SelectGuestDisplay", "IdentifyDisplays", "SetMirror", "SetCountdown",
-        "SetOfferedTemplates", "SetDefaultTemplate", "SetOfferedLooks", "SetDefaultLook", "SetPhaseTimer", "SetGuestGallery",
+        "SetOfferedTemplates", "SetDefaultTemplate", "SetOfferedLooks", "SetDefaultLook", "SetPhaseTimer", "SetGuestGallery", "SetGuestSounds",
         "SetPin", "SaveEvent", "SaveAndStartEvent", "LeaveEventSetup", "ConfirmLeave",
         "OpenGallery", "LoadMoreGuestCycles", "OpenGuestCycle", "CloseGuestCycle", "OpenGuestCycleFolder", "DeleteGuestCycle",
         "ConfirmDeleteGuestCycle", "CancelDeleteGuestCycle", "CloseGallery",
@@ -16,9 +16,9 @@ public sealed class CommandRegistryTests
 
     private static readonly string[] GuestRows =
     [
-        "BeginGuestCycle", "SelectTemplate", "GoToStep", "ShowCameraTab", "ShowArrangeTab", "TakePhotographs", "StopCapture",
+        "BeginGuestCycle", "SelectTemplate", "GoToStep", "ShowCameraTab", "ShowArrangeTab", "TakePhotographs",
         "SelectPosition", "BeginRetake", "AcceptRetake", "TryAgain", "KeepOriginal", "BeginMove", "MoveTo", "CancelMove",
-        "DragPlace", "SelectLook", "FinishStrip", "RetryComposition", "MoreTime", "StartOver", "ConfirmStartOver", "KeepGoing",
+        "DragPlace", "SelectLook", "FinishStrip", "RetryComposition",
         "BeginExitHold", "CompleteExitHold", "SubmitPin", "CancelExit", "RetryAssistance", "OpenGuestGallery",
         "LoadMoreGuestStrips", "OpenGuestStrip", "CloseGuestStrip", "BackToStart",
     ];
@@ -81,6 +81,18 @@ public sealed class CommandRegistryTests
         Assert.Equal(typeof(OpenNewEventPayload), command.PayloadType);
         Assert.False(CommandRegistry.TryGet("openNewEvent", out _));
         Assert.False(CommandRegistry.TryGet("Unknown", out _));
+    }
+
+    [Theory]
+    [InlineData("StartOver")]
+    [InlineData("ConfirmStartOver")]
+    [InlineData("KeepGoing")]
+    [InlineData("MoreTime")]
+    [InlineData("StopCapture")]
+    public void Commands_removed_in_protocol_version_12_are_unknown(string name)
+    {
+        // Guests can't start over, add time, or stop a capture sequence (a business decision), so these names are unknown commands.
+        Assert.False(CommandRegistry.TryGet(name, out _));
     }
 
     [Fact]

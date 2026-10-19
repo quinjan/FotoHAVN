@@ -264,6 +264,7 @@ public sealed record EventSetupStartFailure(StartFailureCode Code, CameraFailure
 /// <param name="Looks">Every Look, in the brand's order.</param>
 /// <param name="PhaseTimers">The six Phase Timers, in the plan's order.</param>
 /// <param name="GuestGalleryEnabled">Whether guests can open the guest gallery (default off).</param>
+/// <param name="GuestSoundsEnabled">Whether the Guest Screen plays the countdown tick and the shutter sound (default on).</param>
 /// <param name="Pin">The Operator PIN section.</param>
 /// <param name="SaveAndStartAvailable">Whether <c>SAVE AND START</c> works.</param>
 /// <param name="SaveAndStartDisabledReason">Why it doesn't (<c>eventRunning</c>: "End the running Event to start another."); null when it works.</param>
@@ -285,6 +286,7 @@ public sealed record EventSetupView(
     IReadOnlyList<EventSetupLookOption> Looks,
     IReadOnlyList<PhaseTimerOption> PhaseTimers,
     bool GuestGalleryEnabled,
+    bool GuestSoundsEnabled,
     EventSetupPinView Pin,
     bool SaveAndStartAvailable,
     StartDisabledReason? SaveAndStartDisabledReason,

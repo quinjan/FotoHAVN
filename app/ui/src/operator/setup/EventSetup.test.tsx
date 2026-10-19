@@ -126,8 +126,10 @@ describe("EventSetup", () => {
       expect(screen.getByLabelText("Printer")).toHaveValue("No printer");
       expect(screen.getByLabelText("Printer")).toHaveAttribute("readonly");
       expect(screen.getByRole("switch", { name: "Guest gallery", hidden: true })).toBeChecked();
+      expect(screen.getByRole("switch", { name: "Guest sounds", hidden: true })).toBeChecked();
       goTo("Guests");
       expect(screen.getByText("Turn this on only with the Customer's permission.")).toBeVisible();
+      expect(screen.getByRole("switch", { name: "Guest sounds" })).toHaveAccessibleDescription("Plays a tick during the countdown and a shutter sound for each photograph.");
     });
 
     it("shows a new Event's defaults: Naturale and the first Template as defaults, nothing chosen for the camera or display", () => {
@@ -136,6 +138,7 @@ describe("EventSetup", () => {
       expect(screen.getByLabelText(/^Camera/)).toHaveValue("");
       expect(screen.getAllByRole("radio", { checked: true, hidden: true }).map((radio) => radio.closest("li")?.querySelector("[id$='-title']")?.textContent ?? radio.getAttribute("aria-label"))).toContain("Signature Strip");
       expect(screen.getByRole("switch", { name: "Guest gallery", hidden: true })).not.toBeChecked();
+      expect(screen.getByRole("switch", { name: "Guest sounds", hidden: true })).toBeChecked();
       expect(screen.getByRole("radio", { name: "5 seconds", hidden: true })).toBeChecked();
     });
 
@@ -175,6 +178,16 @@ describe("EventSetup", () => {
       const { client } = setup(setupView());
       change(/^Date/, "2026-12-01");
       expect(sent(client)).toEqual([["ChangeEventField", { field: "date", value: "2026-12-01" }]]);
+    });
+
+    it("writes the date in words beside the field, in the format every other date uses", () => {
+      setup(editingSetupView());
+      expect(screen.getByText("Fri 12 Jun 2026")).toBeVisible();
+      expect(screen.getByLabelText(/^Date/)).toHaveAccessibleDescription("Fri 12 Jun 2026");
+      change(/^Date/, "2026-10-13");
+      expect(screen.getByText("Tue 13 Oct 2026")).toBeVisible();
+      change(/^Date/, "");
+      expect(screen.queryByText("Tue 13 Oct 2026")).toBeNull();
     });
 
     it("keeps what is typed while the brain's earlier echoes arrive, and shows a new draft's value after", () => {
@@ -226,8 +239,9 @@ describe("EventSetup", () => {
       expect(screen.getByLabelText(/^Venue/)).toHaveAccessibleDescription(expect.stringContaining("Keep the venue to 120 characters or fewer."));
       expect(screen.getByLabelText(/^Customer or host/)).toHaveAccessibleDescription(expect.stringContaining("Keep this to 120 characters or fewer."));
       expect(screen.getByLabelText(/^Notes/)).toHaveAccessibleDescription(expect.stringContaining("Keep the notes to 1,000 characters or fewer."));
-      expect(screen.getByLabelText("Keepsake")).toHaveAccessibleDescription(expect.stringContaining("Enter 5 to 60 seconds."));
-      expect(screen.getByLabelText("Template")).toHaveAccessibleDescription(expect.stringContaining("Enter 0 to turn it off, or 20 to 300 seconds."));
+      expect(screen.getByLabelText("Keepsake seconds")).toHaveAccessibleDescription(expect.stringContaining("Enter 5 to 60 seconds."));
+      expect(screen.getByLabelText("Template seconds")).toHaveAccessibleDescription(expect.stringContaining("Enter 20 to 300 seconds."));
+      expect(screen.getByLabelText("Template seconds")).toHaveAttribute("aria-invalid", "true");
     });
 
     it("shows the camera, display, Template, Look, and PIN errors under their fields", () => {
@@ -246,10 +260,10 @@ describe("EventSetup", () => {
         }),
       );
       expect(screen.getByLabelText(/^Camera/)).toHaveAccessibleDescription(expect.stringContaining("Choose a camera."));
-      expect(screen.getByText("Choose the guest display.")).toBeVisible();
+      expect(screen.getAllByText("Choose the guest display.")).toHaveLength(2);
       goTo("Templates");
-      expect(screen.getByText("Offer at least one Template.")).toBeVisible();
-      expect(screen.getByText("Choose the default from the Looks you offer.")).toBeVisible();
+      expect(screen.getAllByText("Offer at least one Template.")).toHaveLength(2);
+      expect(screen.getAllByText("Choose the default from the Looks you offer.")).toHaveLength(2);
       expect(screen.getByLabelText("PIN")).toHaveAccessibleDescription(expect.stringContaining("Use 4 to 6 digits, 0 to 9 only."));
       expect(screen.getByLabelText("Confirm PIN")).not.toHaveAttribute("aria-invalid");
     });
@@ -284,10 +298,10 @@ describe("EventSetup", () => {
       );
       expect(screen.getByLabelText("Confirm PIN")).toHaveAccessibleDescription(expect.stringContaining("The two PINs don't match."));
       expect(screen.getByLabelText("PIN")).not.toHaveAttribute("aria-invalid");
-      expect(screen.getByText("Choose the default from the Templates you offer.")).toBeVisible();
+      expect(screen.getAllByText("Choose the default from the Templates you offer.")).toHaveLength(2);
     });
 
-    it("announces how many things need attention, in a live region that stays mounted", () => {
+    it("announces what blocks saving, in a live region that stays mounted", () => {
       const { update } = setup(editingSetupView());
       const live = screen.getAllByRole("status").find((status) => status.parentElement?.getAttribute("data-status-tone") === "alert" && status.closest("[data-empty]") !== null);
       expect(live).toBeDefined();
@@ -304,6 +318,69 @@ describe("EventSetup", () => {
       expect(screen.getByText("2 things need attention before this Event can be saved.")).toBeVisible();
       update(errors({ fieldErrors: [] }));
       expect(screen.queryByText(/need attention before this Event can be saved/)).toBeNull();
+    });
+
+    it("lists every problem as a button in the form's order, named for its field", () => {
+      setup(
+        errors({
+          phaseTimers: phaseTimers({ keepsake: 2 }),
+          fieldErrors: [
+            { field: "timers.keepsake", code: "timerOutOfRange" },
+            { field: "camera", code: "cameraRequired" },
+            { field: "name", code: "required" },
+          ],
+        }),
+      );
+      const summary = screen.getByRole("group", { name: "3 things need attention before this Event can be saved." });
+      expect(within(summary).getAllByRole("button").map((button) => button.textContent)).toEqual([
+        "Name the Event.",
+        "Choose a camera.",
+        "Keepsake needs 5 to 60 seconds.",
+      ]);
+    });
+
+    it("words a missing Operator PIN by what it blocks: only starting", () => {
+      const { update } = setup(errors({ pin: { isSet: false, changing: false }, fieldErrors: [{ field: "pin", code: "pinRequired" }] }));
+      expect(screen.getByRole("group", { name: "This Event can be saved, but it needs an Operator PIN to start." })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Set an Operator PIN to start this Event." })).toBeVisible();
+      update(
+        errors({
+          pin: { isSet: false, changing: false },
+          fieldErrors: [
+            { field: "pin", code: "pinRequired" },
+            { field: "name", code: "required" },
+          ],
+        }),
+      );
+      expect(screen.getByRole("group", { name: "One thing needs attention before this Event can be saved." })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Set an Operator PIN to start this Event. Saving doesn't need one." })).toBeVisible();
+    });
+
+    it("opens a problem's step and focuses its field when its button is chosen", () => {
+      setup(
+        errors({
+          phaseTimers: phaseTimers({ keepsake: 2 }),
+          fieldErrors: [
+            { field: "name", code: "required" },
+            { field: "timers.keepsake", code: "timerOutOfRange" },
+            { field: "camera", code: "cameraRequired" },
+            { field: "pin", code: "pinMismatch" },
+          ],
+          pin: { isSet: false, changing: true },
+        }),
+      );
+      expect(stepButton("Event")).toHaveAttribute("aria-current", "step");
+      fireEvent.click(screen.getByRole("button", { name: "Name the Event." }));
+      expect(screen.getByLabelText(/^Name/)).toHaveFocus();
+      fireEvent.click(screen.getByRole("button", { name: "Keepsake needs 5 to 60 seconds." }));
+      expect(stepButton("Timing")).toHaveAttribute("aria-current", "step");
+      expect(screen.getByLabelText("Keepsake seconds")).toHaveFocus();
+      fireEvent.click(screen.getByRole("button", { name: "Choose a camera." }));
+      expect(stepButton("Hardware")).toHaveAttribute("aria-current", "step");
+      expect(screen.getByLabelText(/^Camera/)).toHaveFocus();
+      fireEvent.click(screen.getByRole("button", { name: "The two PINs don't match." }));
+      expect(stepButton("Guests")).toHaveAttribute("aria-current", "step");
+      expect(screen.getByLabelText("Confirm PIN")).toHaveFocus();
     });
   });
 
@@ -375,7 +452,7 @@ describe("EventSetup", () => {
     });
   });
 
-  describe("focus to the first invalid field", () => {
+  describe("focus after a refused save", () => {
     beforeEach(() => {
       openStep = "Guests";
     });
@@ -389,8 +466,9 @@ describe("EventSetup", () => {
         fieldErrors,
         ...overrides,
       });
+    const summary = () => screen.getByRole("group", { name: /needs? attention before this Event can be saved|needs an Operator PIN to start/ });
 
-    it("moves focus to the first invalid control in the form's order when a save is refused", async () => {
+    it("opens the step of the first invalid field in the form's order and moves focus to the error summary when a save is refused", async () => {
       const view = failing([
         { field: "camera", code: "cameraRequired" },
         { field: "name", code: "required" },
@@ -399,47 +477,61 @@ describe("EventSetup", () => {
       setup(view, { client: stubClient({ result: refused }) });
       fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
       await flush();
-      expect(screen.getByLabelText(/^Name/)).toHaveFocus();
+      expect(stepButton("Event")).toHaveAttribute("aria-current", "step");
+      expect(summary()).toHaveFocus();
+      expect(screen.getByLabelText(/^Name/)).not.toHaveFocus();
     });
 
     it("works the same for SAVE AND START", async () => {
       setup(failing([{ field: "camera", code: "cameraRequired" }]), { client: stubClient({ result: refused }) });
       fireEvent.click(screen.getByRole("button", { name: "SAVE AND START" }));
       await flush();
-      expect(screen.getByLabelText(/^Camera/)).toHaveFocus();
+      expect(stepButton("Hardware")).toHaveAttribute("aria-current", "step");
+      expect(summary()).toHaveFocus();
     });
 
-    it("focuses a control of a group of options: the display, Templates, and Looks", async () => {
-      for (const [field, code, group] of [
-        ["guestDisplay", "displayRequired", "Guest display"],
-        ["templates", "atLeastOneTemplate", "Offered Templates"],
-        ["defaultLook", "defaultLookNotOffered", "Offered Looks"],
+    it("takes focus for a missing PIN alone, which blocks only SAVE AND START", async () => {
+      setup(failing([{ field: "pin", code: "pinRequired" }], { pin: { isSet: false, changing: false } }), { client: stubClient({ result: refused }) });
+      fireEvent.click(screen.getByRole("button", { name: "SAVE AND START" }));
+      await flush();
+      expect(screen.getByRole("group", { name: "This Event can be saved, but it needs an Operator PIN to start." })).toHaveFocus();
+    });
+
+    it("lets each problem's button focus a control of a group of options: the display, Templates, and Looks", async () => {
+      for (const [field, code, text, group] of [
+        ["guestDisplay", "displayRequired", "Choose the guest display.", "Guest display"],
+        ["templates", "atLeastOneTemplate", "Offer at least one Template.", "Offered Templates"],
+        ["defaultLook", "defaultLookNotOffered", "Choose the default from the Looks you offer.", "Offered Looks"],
       ] as const) {
         const { unmount } = setup(failing([{ field, code }]), { client: stubClient({ result: refused }) });
         fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
         await flush();
+        fireEvent.click(within(summary()).getByRole("button", { name: text }));
         const inside = within(screen.getByRole("group", { name: group })).getAllByRole(field === "guestDisplay" ? "radio" : "checkbox");
         expect(inside).toContain(document.activeElement);
         unmount();
       }
     });
 
-    it("focuses a timer, and the PIN inputs by what is wrong", async () => {
+    it("lets each problem's button focus a timer, and the PIN inputs by what is wrong", async () => {
       const timer = setup(failing([{ field: "timers.keepsake", code: "timerOutOfRange" }]), { client: stubClient({ result: refused }) });
       fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
       await flush();
-      expect(screen.getByLabelText("Keepsake")).toHaveFocus();
+      fireEvent.click(within(summary()).getByRole("button", { name: "Keepsake needs 5 to 60 seconds." }));
+      expect(screen.getByLabelText("Keepsake seconds")).toHaveFocus();
       timer.unmount();
 
       const pin = setup(failing([{ field: "pin", code: "pinMismatch" }], { pin: { isSet: false, changing: true } }), { client: stubClient({ result: refused }) });
       fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
       await flush();
+      fireEvent.click(within(summary()).getByRole("button", { name: "The two PINs don't match." }));
       expect(screen.getByLabelText("Confirm PIN")).toHaveFocus();
       pin.unmount();
 
       setup(failing([{ field: "pin", code: "pinRequired" }], { pin: { isSet: false, changing: false } }), { client: stubClient({ result: refused }) });
-      fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
+      fireEvent.click(screen.getByRole("button", { name: "SAVE AND START" }));
       await flush();
+      fireEvent.click(within(summary()).getByRole("button", { name: "Set an Operator PIN to start this Event." }));
       expect(screen.getByLabelText("PIN")).toHaveFocus();
     });
 
@@ -447,9 +539,9 @@ describe("EventSetup", () => {
       const { update } = setup(editingSetupView({ dirty: true }), { client: stubClient({ result: refused }) });
       fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
       await flush();
-      expect(screen.getByLabelText(/^Name/)).not.toHaveFocus();
+      expect(screen.queryByRole("group", { name: /attention|Operator PIN to start/ })).toBeNull();
       update(failing([{ field: "name", code: "required" }]));
-      expect(screen.getByLabelText(/^Name/)).toHaveFocus();
+      expect(summary()).toHaveFocus();
     });
 
     it("leaves focus alone when the save is accepted, and doesn't steal it again when errors change later", async () => {
@@ -457,6 +549,7 @@ describe("EventSetup", () => {
       fireEvent.click(screen.getByRole("button", { name: "SAVE" }));
       await flush();
       update(failing([{ field: "name", code: "required" }]));
+      expect(summary()).not.toHaveFocus();
       expect(screen.getByLabelText(/^Name/)).not.toHaveFocus();
     });
   });
@@ -572,15 +665,16 @@ describe("EventSetup", () => {
     });
   });
 
-  describe("Mirror, Countdown, and Guest gallery", () => {
-    it("send SetMirror, SetCountdown, and SetGuestGallery with the new value", async () => {
+  describe("Mirror, Countdown, Guest gallery, and Guest sounds", () => {
+    it("send SetMirror, SetCountdown, SetGuestGallery, and SetGuestSounds with the new value", async () => {
       const { client } = setup(editingSetupView(), { step: "Hardware" });
       fireEvent.click(screen.getByRole("switch", { name: "Mirror" }));
       fireEvent.click(screen.getByRole("radio", { name: "3 seconds" }));
       goTo("Guests");
       fireEvent.click(screen.getByRole("switch", { name: "Guest gallery" }));
+      fireEvent.click(screen.getByRole("switch", { name: "Guest sounds" }));
       await flush();
-      expect(sent(client)).toEqual([["SetMirror", { enabled: false }], ["SetCountdown", { seconds: 3 }], ["SetGuestGallery", { enabled: false }]]);
+      expect(sent(client)).toEqual([["SetMirror", { enabled: false }], ["SetCountdown", { seconds: 3 }], ["SetGuestGallery", { enabled: false }], ["SetGuestSounds", { enabled: false }]]);
     });
 
     it("offers 3, 5, and 10 seconds", () => {
@@ -664,53 +758,85 @@ describe("EventSetup", () => {
       openStep = "Timing";
     });
 
-    it("shows one numeric control per phase, with its range, what happens at the end, and Off where allowed", () => {
+    it("shows a seconds field with an s unit per phase, an On/Off switch where the timer can be off, and only what differs as help", () => {
       setup(editingSetupView());
-      for (const [name, value] of [["Template", "45"], ["Photographs: capture", "30"], ["Photographs: review", "0"], ["Filters", "30"], ["Keepsake", "15"], ["Guest gallery view", "60"]] as const) {
-        const field = screen.getByLabelText(name);
+      for (const [name, value] of [["Template", "45"], ["Photographs: capture", "30"], ["Photographs: review", "45"], ["Filters", "30"], ["Keepsake", "15"], ["Guest gallery view", "60"]] as const) {
+        const field = screen.getByLabelText(`${name} seconds`);
         expect(field).toHaveValue(value);
         expect(field).toHaveAttribute("inputmode", "numeric");
+        expect(within(screen.getByRole("group", { name })).getByText("s")).toBeInTheDocument();
       }
-      expect(screen.getByLabelText("Template")).toHaveAccessibleDescription(
-        "20 to 300 seconds. Enter 0 for Off. When time runs out, the booth continues with the selected Template. If it is off, a guest stays on this step until someone continues or uses START OVER.",
-      );
-      expect(screen.getByLabelText("Photographs: review")).toHaveAccessibleDescription(expect.stringMatching(/^Off now\. 20 to 300 seconds\./));
-      expect(screen.getByLabelText("Keepsake")).toHaveAccessibleDescription("5 to 60 seconds. This timer is always on. When time runs out, the booth returns to Start.");
-      expect(screen.getByLabelText("Guest gallery view")).toHaveAccessibleDescription("20 to 300 seconds. This timer is always on. When time runs out, the booth returns to Start.");
+      expect(screen.getAllByRole("switch", { name: /timer$/ }).map((control) => control.getAttribute("aria-checked"))).toEqual(["true", "true", "false", "true"]);
+      expect(screen.queryByRole("switch", { name: "Keepsake timer" })).toBeNull();
+      expect(screen.queryByRole("switch", { name: "Guest gallery view timer" })).toBeNull();
+      expect(screen.getByLabelText("Photographs: review seconds")).toBeDisabled();
+      expect(screen.getByLabelText("Template seconds")).toHaveAccessibleDescription("When time runs out, the booth continues with the selected Template.");
+      expect(screen.getByRole("switch", { name: "Template timer" })).toHaveAccessibleDescription("When time runs out, the booth continues with the selected Template.");
+      expect(screen.getByLabelText("Keepsake seconds")).toHaveAccessibleDescription("5 to 60 seconds. Always on. When time runs out, the booth returns to Start.");
+      expect(screen.getByLabelText("Guest gallery view seconds")).toHaveAccessibleDescription("20 to 300 seconds. Always on. When time runs out, the booth returns to Start.");
+      expect(screen.getByText("Most timers run 20 to 300 seconds. Turn a timer off and that step waits for the guest to continue. If they walk away, only ending the Event clears it.")).toBeVisible();
+      expect(screen.queryByText(/Enter 0 for Off/)).toBeNull();
     });
 
     it("sends SetPhaseTimer with the whole number typed", () => {
       const { client } = setup(editingSetupView());
-      change("Filters", "45");
-      fireEvent.blur(screen.getByLabelText("Filters"));
-      change("Keepsake", "20");
+      change("Filters seconds", "45");
+      fireEvent.blur(screen.getByLabelText("Filters seconds"));
+      change("Keepsake seconds", "20");
       act(() => {
         vi.advanceTimersByTime(draftIdleMs);
       });
       expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "filters", seconds: 45 }], ["SetPhaseTimer", { phase: "keepsake", seconds: 20 }]]);
     });
 
-    it("sends 0 for Off, and takes digits only", () => {
+    it("takes digits only, and doesn't send 0 from a timer that can be off: the switch turns it off", () => {
       const { client } = setup(editingSetupView());
-      change("Template", "0a");
-      expect(screen.getByLabelText("Template")).toHaveValue("0");
-      fireEvent.blur(screen.getByLabelText("Template"));
+      change("Template seconds", "0a");
+      expect(screen.getByLabelText("Template seconds")).toHaveValue("0");
+      fireEvent.blur(screen.getByLabelText("Template seconds"));
+      expect(sent(client)).toEqual([]);
+      expect(screen.getByLabelText("Template seconds")).toHaveValue("45");
+    });
+
+    it("turns a timer off with its switch by sending 0, and on again with the seconds it had", () => {
+      const { client, update } = setup(editingSetupView());
+      fireEvent.click(screen.getByRole("switch", { name: "Template timer" }));
       expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "template", seconds: 0 }]]);
+      update(editingSetupView({ phaseTimers: phaseTimers({ template: 0, photographsReview: 0, keepsake: 15 }) }));
+      expect(screen.getByRole("switch", { name: "Template timer" })).toHaveAttribute("aria-checked", "false");
+      expect(screen.getByLabelText("Template seconds")).toBeDisabled();
+      expect(screen.getByLabelText("Template seconds")).toHaveValue("45");
+      fireEvent.click(screen.getByRole("switch", { name: "Template timer" }));
+      expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "template", seconds: 0 }], ["SetPhaseTimer", { phase: "template", seconds: 45 }]]);
+    });
+
+    it("turns on a timer that was off when the setup opened at its default seconds", () => {
+      const { client } = setup(editingSetupView());
+      fireEvent.click(screen.getByRole("switch", { name: "Photographs: review timer" }));
+      expect(screen.getByLabelText("Photographs: review seconds")).toHaveValue("45");
+      expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "photographsReview", seconds: 45 }]]);
+    });
+
+    it("turns on at the default when the seconds it had are out of range", () => {
+      const { client, update } = setup(editingSetupView({ phaseTimers: phaseTimers({ template: 5 }) }));
+      update(editingSetupView({ phaseTimers: phaseTimers({ template: 0 }) }));
+      fireEvent.click(screen.getByRole("switch", { name: "Template timer" }));
+      expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "template", seconds: 30 }]]);
     });
 
     it("sends a value out of range as typed, so the brain can say what is wrong", () => {
       const { client } = setup(editingSetupView());
-      change("Keepsake", "2");
-      fireEvent.blur(screen.getByLabelText("Keepsake"));
+      change("Keepsake seconds", "2");
+      fireEvent.blur(screen.getByLabelText("Keepsake seconds"));
       expect(sent(client)).toEqual([["SetPhaseTimer", { phase: "keepsake", seconds: 2 }]]);
     });
 
     it("goes back to the brain's value when the field is left empty", () => {
       const { client } = setup(editingSetupView());
-      change("Template", "");
-      expect(screen.getByLabelText("Template")).toHaveValue("");
-      fireEvent.blur(screen.getByLabelText("Template"));
-      expect(screen.getByLabelText("Template")).toHaveValue("45");
+      change("Template seconds", "");
+      expect(screen.getByLabelText("Template seconds")).toHaveValue("");
+      fireEvent.blur(screen.getByLabelText("Template seconds"));
+      expect(screen.getByLabelText("Template seconds")).toHaveValue("45");
       expect(sent(client)).toEqual([]);
     });
   });
@@ -961,7 +1087,7 @@ describe("EventSetup", () => {
       expect(within(group("Hardware")).getByText("DELL P2419H")).toBeVisible();
       expect(within(group("Hardware")).getByText("No printer")).toBeVisible();
       goTo("Guests");
-      expect(group("Guests and PIN").querySelector("dl")).toHaveTextContent("Guest galleryOnOperator PINPIN set");
+      expect(group("Guests and PIN").querySelector("dl")).toHaveTextContent("Guest soundsOnGuest galleryOnOperator PINPIN set");
     });
   });
 });

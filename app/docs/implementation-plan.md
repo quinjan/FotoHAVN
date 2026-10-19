@@ -67,10 +67,10 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 | D15 | Display | Full screen, landscape only, touch plus mouse and keyboard. Verify at 1280×720, 1366×768, 1920×1080, and 2560×1440. |
 | D16 | Operator exit | Press and hold a discreet control on the Guest Screen, then enter the Event's operator PIN. The PIN is set in Event setup. With two screens, this is the backup to `END EVENT` (D36). |
 | D17 | Restart rule | Keep today's rule: an Active Event never survives closing or restarting the app. |
-| D18 | Phase timers | Each applicable Guest Cycle phase has a fixed timer, configured in Event setup. It starts when the phase begins and is not reset by guest input. When it runs out, the cycle continues automatically: with the current or default selection, and by starting the capture sequence for empty windows. An abandoned Guest Cycle always reaches a saved Photo Strip (and, later, a print). A visible countdown and `MORE TIME` appear near the end. |
+| D18 | Phase timers | Each applicable Guest Cycle phase has a fixed timer, configured in Event setup. It starts when the phase begins and is not reset by guest input. When it runs out, the cycle continues automatically: with the current or default selection, and by starting the capture sequence for empty windows. An abandoned Guest Cycle always reaches a saved Photo Strip (and, later, a print). The time left is visible for the whole phase, and guests can't extend it (D39). |
 | D19 | Deletion | Delete all of `app/` except `app/docs/research/` (and this plan). Rewrite `app/CONTEXT.md`. Delete ADR 0001 and replace it with new ADRs. |
 | D20 | Plan location | This Markdown file. GitHub issues may be created from the milestones later. |
-| D21 | Start over | Guests get a quiet `START OVER` action on the Template, Photographs, and Filters steps, with a confirmation; Keepsake has none, because the Guest Cycle is already completed when its Photo Strip is committed. It ends the Guest Cycle and returns to Start. Saved Captures stay in the Event; no Photo Strip is made. |
+| D21 | Start over | **Superseded by D39:** guests have no `START OVER`. It was a quiet action on the Template, Photographs, and Filters steps, with a confirmation, that ended the Guest Cycle as `started_over` and returned to Start, keeping its saved Captures. Guest Cycles recorded that way keep the end reason. |
 | D22 | Mirror | The Event's mirror setting applies to both the live preview and the saved Captures, as on the website (resolved Q1). |
 | D23 | Discarded Captures | Rejected Retake candidates and replaced originals are deleted when their Guest Cycle ends (resolved Q3). |
 | D24 | Start screen | Typographic in v1, with no booth photograph (resolved Q4). |
@@ -88,6 +88,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 | D36 | Ending an Event | `END EVENT` on the Operator Screen asks for a confirmation but no PIN, because the Operator Screen is trusted. The hold and PIN on the Guest Screen remain as a backup. |
 | D37 | Guest display lost | If the bound display disconnects during an Active Event, the Event pauses in Operator Assistance: any countdown stops, saved Captures stay, and the Operator Screen alerts. `RETRY` puts the Guest Screen back once the same display returns. |
 | D38 | Single-screen setups | If the Guest Screen's display is the one showing the Operator Screen (or there's only one display), the Guest Screen covers it full screen, and the operator returns with the hold and PIN. |
+| D39 | Forward-only Guest Cycle | A business decision (2026-10-19) removed `START OVER`, `MORE TIME`, going back through the step progress, and stopping a running capture sequence (protocol version 12). Every timed guest phase shows its Phase Timer for the whole phase, and tapping the live preview starts the capture sequence. Guests still switch between the Camera and Arrange tabs within Photographs. The brain enforces it: the removed commands are unknown, and `GoToStep` to the current or an earlier step is refused. A Guest Cycle abandoned at a phase whose timer the operator turned off waits until the operator ends the Event. |
 
 ## 3. Scope
 
@@ -97,7 +98,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 - Event setup: metadata, Camera Binding with live preview and an eligibility check, Guest Display Binding with display identification, "No printer", Template and Look selection with defaults, countdown, mirror, phase timers, guest gallery on or off, and operator PIN.
 - Two screens: the Operator Screen on the primary display and the Guest Screen on the chosen display, with a single-screen fallback.
 - Active Event: Guest Screen with Start (and an optional way into the guest gallery), Guest Cycles, Operator Assistance, and the hold and PIN exit. Operator Screen with the running-Event status panel, its live gallery, `END EVENT`, and work on other Events.
-- Guest Cycle: Template, Photographs (Camera and Arrange), Filters, Keepsake preview, return to Start, `START OVER`, and automatic progress when a phase timer runs out.
+- Guest Cycle: Template, Photographs (Camera and Arrange), Filters, Keepsake preview, return to Start, an always-visible phase timer, and automatic progress when a phase timer runs out. Guests only go forward (D39).
 - Event Gallery: Photo Strips and Captures per Guest Cycle, open folder, and delete a Guest Cycle.
 - Durable storage of every kept Capture and completed Photo Strip.
 - Full-screen kiosk window, touch, wake lock, single instance, and a portable field-test build.
@@ -119,7 +120,7 @@ All of these were agreed in the planning conversation on 2026-10-12 and 2026-10-
 
 | Conflict | Resolution |
 | --- | --- |
-| [`brand/accessibility.md`](../../brand/accessibility.md) says never require a time limit to complete a task, but D18 adds phase timers that don't depend on input. | Warn at least 20 seconds before a timer ends with a visible countdown and a `MORE TIME` action that restarts the phase's full time (every timed phase except Keepsake, where the Photo Strip is already saved). A guest who is present can always extend, so no task requires a time limit; an absent guest can't, so the cycle still completes. The operator may turn a timer off (0). Running out never discards work. Record this as a deliberate departure in `app/DESIGN.md`. |
+| [`brand/accessibility.md`](../../brand/accessibility.md) says never require a time limit to complete a task, but D18 adds phase timers that don't depend on input. | **Unresolved departure (D39).** Every timed phase shows its time left for the whole phase, but a business decision removed `MORE TIME`, so a guest who is present can no longer extend a phase; WCAG 2.2.1 (Timing Adjustable) is met only through the operator, who can turn each Guest Cycle timer off (0) or lengthen it (up to 300 s) in Event Setup. Running out never discards work, and an absent guest's cycle still completes. Record this as a deliberate departure in `app/DESIGN.md`. |
 | [`brand/photography.md`](../../brand/photography.md) says guest images are used publicly only with permission from the Event's Customer or the guests shown, and the guest gallery shows guests each other's Photo Strips. | The guest gallery is off by default. Its Event setup control says to turn it on only with the Customer's permission. It shows only the Active Event's completed Photo Strips. Deleting a Guest Cycle removes it from both gallery views immediately. |
 | [`brand/photography.md`](../../brand/photography.md) asks to treat original media as read-only and to store derivatives separately, recording their source. | Gallery and board thumbnails are derived files in `Data/Cache/thumbnails/`, named by source ID and hash. They are regenerable, never edited in place, and never stored beside originals. |
 | [`brand/motion.md`](../../brand/motion.md) prohibits autoplay carousels but permits browsing a guest album at the user's pace. | The guest gallery never moves on its own; guests browse it by touch. |
@@ -290,13 +291,8 @@ stateDiagram-v2
       Camera --> Arrange: Review
       Arrange --> Countdown: timer with empty windows
     }
-    Photographs --> Template: Back
     Photographs --> Filters: Continue or timer when complete
-    Filters --> Photographs: Back
     Filters --> Keepsake: Finish or timer, Photo Strip committed, cycle completed
-    Template --> [*]: START OVER
-    Photographs --> [*]: START OVER
-    Filters --> [*]: START OVER
     Keepsake --> [*]: display time ends
   }
   GuestCycle --> Start: Guest Cycle ends
@@ -317,9 +313,9 @@ stateDiagram-v2
 
 - **Skipped steps.** If an Event offers one Template, the Template step is skipped. If it offers one Look, the Filters step is skipped, and the Photo Strip is composed with that Look.
 - **Start unavailable.** Outside a Guest Cycle (the guest on Start or in the guest gallery), a Camera that isn't eligible doesn't enter Operator Assistance. Start shows Start unavailable, with `STEP INSIDE` disabled, until a fresh frame proves the Camera again, and recovers by itself with no operator action. The guest gallery keeps working because it needs no camera; returning from it to Start shows Start unavailable. The running-Event panel on the Operator Screen shows the camera state in text either way. Storage works the same way: outside a Guest Cycle, a storage failure shows Start unavailable until storage is writable again, and the guest gallery shows its own inline error if it can't read. A storage failure while creating the Guest Cycle record at `STEP INSIDE` enters Operator Assistance. A Guest Cycle begins only with `STEP INSIDE`; opening the guest gallery doesn't start one.
-- **Back navigation.** The step progress lets guests go back, as on the website. Going back restarts that phase's timer. Changing the Template keeps every kept Capture: they fill the new windows in order, and extras stay in a retained pool. A larger Template can't continue until its new empty windows are filled.
+- **Forward only (D39).** Guests can't go back: the step progress only shows where they are, and the brain refuses a `GoToStep` to the current or an earlier step. The Template is chosen before any photograph, so no Capture is ever refitted to another Template, and there is no retained pool. Within Photographs, guests switch freely between the Camera and Arrange tabs.
 - **Completion.** A Guest Cycle is recorded as completed (`end_reason = 'completed'`) when its Photo Strip is committed. The Keepsake step only displays it, so ending the Event, closing the app, or a timer during Keepsake leaves it completed.
-- **Start over (D21).** A quiet `START OVER` text action appears on the Template, Photographs, and Filters steps, not on Keepsake. It asks "Start over? Your photographs stay with the Event, but no strip will be made." with `START OVER` and `KEEP GOING`. Confirming ends the Guest Cycle (`end_reason = 'started_over'`) and returns to Start. If the phase timer runs out while the confirmation is open, the confirmation closes as `KEEP GOING` and the cycle continues automatically.
+- **No start over (D39, superseding D21).** Guests can't end their own Guest Cycle. It completes, by the guest or by the phase timers, or it ends when the operator ends the Event. `started_over` stays a valid stored end reason for Guest Cycles recorded before D39; nothing records it now.
 - **Hold to exit.** The exit hold and PIN are available on every Guest Screen view, including during a Guest Cycle. Exiting ends an unfinished Guest Cycle (`end_reason = 'operator_exit'`); its saved Captures stay in the Event. A Guest Cycle on Keepsake stays completed. `END EVENT` on the Operator Screen does the same (D36).
 
 ### Steps
@@ -328,7 +324,7 @@ stateDiagram-v2
 | --- | --- | --- | --- | --- |
 | **Start** | Typographic brand moment (D24). When the Event enables the guest gallery and has a completed Photo Strip, a secondary text link to it. | Tap the one primary action, or open the guest gallery | Checks Camera eligibility and storage; creates the Guest Cycle when the guest starts | `FOTOHAVN` wordmark (no separate eyebrow repeating the name), heading "Small room. *Whole other world.*", supporting "Come a little closer.", action `STEP INSIDE →`, text link `SEE THE GOOD COMPANY →` |
 | **Template** | Blank preview of the selected Template as a print object; option list of offered Templates | Select a Template; continue | Composes blank Template previews once per Event start and caches them | "Make a little *Moment*", supporting "Choose your template.", action `CONTINUE TO PHOTOGRAPHS →` |
-| **Photographs: Camera** | Mirrored or plain live preview cropped to the window's ratio; capture progress | Start the sequence; stop it; review | Runs the countdown and flash, takes each Capture from the first fresh frame after the countdown, saves it, then arranges it | "Find your *light.*", supporting "Let this moment become a memory." |
+| **Photographs: Camera** | Mirrored or plain live preview cropped to the window's ratio; capture progress | Start the sequence (`TAKE PHOTOGRAPHS`, or tap the preview); review. A running sequence can't be stopped (D39) | Runs the countdown and flash, takes each Capture from the first fresh frame after the countdown, saves it, then arranges it | "Find your *light.*", supporting "Let this moment become a memory." |
 | **Photographs: Arrange** | The strip with the guest's photographs | Select a photograph, then Retake or Move; drag to reorder; accept or keep the original | Applies the website's transactional retake and swap rules | Arrange hint "Drag to rearrange · Tap a photograph to edit" |
 | **Filters** | The strip with the selected Look; option list of offered Looks with thumbnails | Select a Look; finish | Composes the strip per Look on demand and caches it | "Find the *feeling.*", supporting "Choose a filter for your photographs.", action `FINISH MY STRIP →` |
 | **Keepsake** | The finished Photo Strip as a lifted print object | Nothing; it ends on its own | Composes the final Photo Strip, commits it, completes the Guest Cycle | "A little moment. *Yours.*", supporting "Keep the moment close." |
@@ -340,10 +336,10 @@ The Template step heading copies the website's approved line exactly, including 
 1. The guest taps `TAKE PHOTOGRAPHS`, or the Photographs timer runs out. The brain fills each empty window in order. During a Retake it fills only the target window.
 2. For each window: the countdown runs for the Event's countdown seconds (3, 5, or 10; default 5), with the number pushed every second.
 3. When it reaches zero, the brain asks the camera for the first frame whose timestamp is later than the countdown's end.
-4. The UI plays one flash (320–380 ms, from [`brand/motion.md`](../../brand/motion.md)). With reduced motion, it shows a near-instant static change instead.
+4. The UI plays one flash (320–380 ms, from [`brand/motion.md`](../../brand/motion.md)). With reduced motion, it shows a near-instant static change instead. When the Event's Guest sounds are on (the sequence's `soundsOn`, protocol version 11), the UI also plays one tick for each countdown numeral and one shutter sound with each flash ([`DESIGN.md`](../DESIGN.md#sound)).
 5. The brain applies the Event's mirror setting (D22), encodes a JPEG at quality 92, and commits the Capture (see [Storage](#10-storage)). The Capture is part of the cycle only once it is committed.
 6. It pauses for 800 ms, as the website does, before the next countdown or review.
-7. Stop cancels the remaining countdown; Captures already saved stay. Stopping restarts the Photographs capture timer for the empty windows.
+7. Guests can't stop a running sequence (D39). Only Operator Assistance interrupts one: Captures already saved stay, and after `RETRY` the next sequence fills the next empty window.
 
 ### Retake and arrangement rules
 
@@ -357,23 +353,23 @@ These are ported from the website reducer and its tests in `website/scripts/onli
 
 ### Phase timers (D18)
 
-A phase timer starts when its phase begins and runs regardless of touches or keys. Guest input never resets it; only `MORE TIME`, going back, entering the phase again, or stopping a capture sequence (which restarts the capture timer) restarts it. While a countdown or capture is running, or the Active Event is in Operator Assistance, the timer pauses, and it resumes afterwards, so an automatic step never interrupts a photograph or a recovery.
+A phase timer starts when its phase begins and runs regardless of touches or keys. Guest input never resets it, and guests can't add time (D39); only entering the phase again, which includes the Camera tab appearing again, restarts it. While a countdown or capture is running, or the Active Event is in Operator Assistance, the timer pauses, and it resumes afterwards, so an automatic step never interrupts a photograph or a recovery.
 
 | Phase | Starts when | Default | Range | When it runs out |
 | --- | --- | ---: | --- | --- |
 | Start | — | — | — | No timer |
 | Template | The Template step appears | 30 s | 0 (off) or 20–300 s | Continue with the selected Template (the default unless changed) |
-| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
+| Photographs: capture | The Camera tab appears with empty windows and no sequence running | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
 | Photographs: review | All windows are filled | 45 s | 0 or 20–300 s | Discard any pending Retake candidate (keep the original), cancel a pending Move, and continue to Filters with the current arrangement |
 | Filters | The Filters step appears | 30 s | 0 or 20–300 s | Finish with the selected Look (the default unless changed) |
 | Keepsake | The Photo Strip is saved and shown | 12 s | 5–60 s, never off | Return to Start |
 | Guest gallery | The guest view of the Event Gallery opens (outside a Guest Cycle) | 60 s | 20–300 s, never off | Return to Start |
 
 - **Outcome.** With every timer on, a Guest Cycle that nobody touches after `STEP INSIDE` runs through to a saved Photo Strip: default Template, automatic Captures, default arrangement, default Look, and Keepsake. Later it will also print. It's recorded and shown exactly like a cycle the guest finished (D28).
-- **Warning.** Within the last 20 seconds of the Template, Photographs capture, Photographs review, Filters, and guest gallery phases, the UI shows a polite countdown with `MORE TIME`. That action restarts the phase's full time. The minimum of 20 seconds means the warning always has at least 20 seconds to respond to. The Keepsake phase has no warning and no `MORE TIME`: the Photo Strip is already saved, so returning to Start loses nothing.
-- **Assistive tech.** The warning announces once through a polite live region, not every second.
+- **Visible timer (D39).** The Template, Photographs capture, Photographs review, Filters, Keepsake, and guest gallery phases show the time left for the whole phase (`overlays.phaseTimer`: the phase, whole seconds left rounded up, and whether it is paused), pushed every second while it runs and frozen while a countdown, a Capture, or Operator Assistance pauses it. It is absent on Start, while the phase's timer is off, and while the final Photo Strip is made. There is no warning and no `MORE TIME`: guests can't extend a phase.
+- **Assistive tech.** The timer is never announced every second; the UI decides what it announces (see [`DESIGN.md`](../DESIGN.md)).
 - **Retained work.** A timer never deletes a kept Capture.
-- **Timer off.** If the operator turns a phase's timer off, an abandoned Guest Cycle waits at that phase until someone continues it or uses `START OVER`. Event setup says so beside the field.
+- **Timer off.** If the operator turns a phase's timer off, an abandoned Guest Cycle waits at that phase until someone continues it. Guests can't start over, so if nobody does, the operator clears it by ending the Event (`END EVENT`, or the exit hold and PIN), which records it as ended by the operator. Event setup says so beside the field.
 
 ### Failures inside a Guest Cycle
 
@@ -467,7 +463,7 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 - **Detail view.** Tapping a strip shows it large with its arranged Captures. Discarded Captures never appear.
 - **Guests can:** scroll the row of strips horizontally by touch (the page itself never scrolls), open a strip and its Captures, close the detail, and go back with `BACK TO START ←`.
 - **Guests can't:** delete, open folders, export, zoom beyond the detail size, or see times, Template and Look names, end reasons, counts, or any Event metadata.
-- **Timer.** A `guest_gallery` phase timer (default 60 s, 20–300 s, never off) starts when the guest view opens. Browsing doesn't reset it. It shows the usual warning with `MORE TIME`, then returns to Start.
+- **Timer.** A `guest_gallery` phase timer (default 60 s, 20–300 s, never off) starts when the guest view opens. Browsing doesn't reset it. Its time left shows the whole time, with no `MORE TIME` (D39); then it returns to Start.
 - **Leaving.** The exit hold works here as on every guest screen. A new guest starts from Start, never from the gallery.
 - **Alt text.** Each strip says "Photo Strip from this Event", with no names or faces described.
 - **Empty or disabled.** If the last completed Guest Cycle is deleted while a guest is browsing, the view returns to Start. If the gallery is disabled, it can't be reached at all.
@@ -529,12 +525,12 @@ Reached from the Start screen by `SEE THE GOOD COMPANY →`. The link appears on
 | Area (role) | Commands |
 | --- | --- |
 | Event list (operator) | `OpenNewEvent`, `EditEvent(eventId)`, `StartEvent(eventId)`, `DeleteEvent(eventId)`, `ConfirmDeleteEvent`, `CancelDeleteEvent`, `OpenEventFolder(eventId)`, `DismissNotice` |
-| Event setup (operator) | `ChangeEventField(field, value)`, `SelectCamera(deviceId)`, `SelectGuestDisplay(displayId)`, `IdentifyDisplays`, `SetMirror(bool)`, `SetCountdown(seconds)`, `SetOfferedTemplates(ids)`, `SetDefaultTemplate(id)`, `SetOfferedLooks(ids)`, `SetDefaultLook(id)`, `SetPhaseTimer(phase, seconds)`, `SetGuestGallery(bool)`, `SetPin(pin, confirmation)`, `SaveEvent`, `SaveAndStartEvent`, `LeaveEventSetup`, `ConfirmLeave(choice)` |
+| Event setup (operator) | `ChangeEventField(field, value)`, `SelectCamera(deviceId)`, `SelectGuestDisplay(displayId)`, `IdentifyDisplays`, `SetMirror(bool)`, `SetCountdown(seconds)`, `SetOfferedTemplates(ids)`, `SetDefaultTemplate(id)`, `SetOfferedLooks(ids)`, `SetDefaultLook(id)`, `SetPhaseTimer(phase, seconds)`, `SetGuestGallery(bool)`, `SetGuestSounds(bool)` (protocol version 11), `SetPin(pin, confirmation)`, `SaveEvent`, `SaveAndStartEvent`, `LeaveEventSetup`, `ConfirmLeave(choice)` |
 | Event Gallery (operator) | `OpenGallery(eventId)`, `LoadMoreGuestCycles(cursor)`, `OpenGuestCycle(guestCycleId)`, `CloseGuestCycle`, `OpenGuestCycleFolder(guestCycleId)`, `DeleteGuestCycle(guestCycleId)`, `ConfirmDeleteGuestCycle`, `CancelDeleteGuestCycle`, `CloseGallery` |
 | Running Event (operator) | `EndEvent`, `ConfirmEndEvent`, `KeepRunning`, `RetryAssistance` |
 | Closing FOTOHAVN (operator, protocol version 10) | `ConfirmCloseApp`, `CancelCloseApp` |
 | Storage (operator) | `RetryStorage` |
-| Guest Cycle (guest) | `BeginGuestCycle`, `SelectTemplate(id)`, `GoToStep(step)`, `ShowCameraTab`, `ShowArrangeTab`, `TakePhotographs`, `StopCapture`, `SelectPosition(index)`, `BeginRetake(index)`, `AcceptRetake`, `TryAgain`, `KeepOriginal`, `BeginMove(index)`, `MoveTo(index)`, `CancelMove`, `DragPlace(sourceIndex, captureId, revision, targetIndex)`, `SelectLook(id)`, `FinishStrip`, `RetryComposition` (protocol 8), `MoreTime`, `StartOver`, `ConfirmStartOver`, `KeepGoing` |
+| Guest Cycle (guest) | `BeginGuestCycle`, `SelectTemplate(id)`, `GoToStep(step)`, `ShowCameraTab`, `ShowArrangeTab`, `TakePhotographs`, `SelectPosition(index)`, `BeginRetake(index)`, `AcceptRetake`, `TryAgain`, `KeepOriginal`, `BeginMove(index)`, `MoveTo(index)`, `CancelMove`, `DragPlace(sourceIndex, captureId, revision, targetIndex)`, `SelectLook(id)`, `FinishStrip`, `RetryComposition` (protocol 8). Protocol version 12 removed `StopCapture`, `MoreTime`, `StartOver`, `ConfirmStartOver`, and `KeepGoing` (D39); the brain answers them `unknownCommand`. |
 | Guest Screen (guest) | `BeginExitHold`, `CompleteExitHold`, `SubmitPin(digits)`, `CancelExit`, `RetryAssistance`, `OpenGuestGallery`, `LoadMoreGuestStrips(cursor)`, `OpenGuestStrip(guestCycleId)`, `CloseGuestStrip`, `BackToStart` |
 
 The brain rejects operator commands that would change the running Event (edit, delete, start) with reason `eventRunning`.
@@ -553,8 +549,8 @@ The brain rejects operator commands that would change the running Event (edit, d
 **Guest presentation**
 
 - `surface`: `start`, `startUnavailable`, `guestGallery`, `guestStripDetail`, `template`, `photographs`, `filters`, `keepsake`, `operatorAssistance`, or `fatal`.
-- The Guest Cycle views (protocol version 8): `guestCycle` (`id`, `step`, `steps` with each step's state and `canGoBack`, `startOverAvailable`) is present on every cycle step and on `operatorAssistance` during a cycle, and each cycle surface carries its own view (`template`, `photographs`, `filters`, `keepsake`, `operatorAssistance`), so a screen renders from its view alone (`filters` also carries the selected Template's `width`, `height`, and `landscape`, so the print reserves its shape before its picture loads). `GoToStep(step)` is both Continue and Back. The records and examples are in the M8 contract, built from `FotoHavn.Protocol/Presentations/GuestCycleViews.cs`.
-- Overlays: `exitHold`, `pinDialog`, `phaseTimerWarning` (`phase`, `remainingSeconds`; never on Keepsake), `startOverConfirmation`, and `notice`.
+- The Guest Cycle views (protocol version 8): `guestCycle` (`id`, `step`, and `steps` with each step's state; protocol version 12 removed `canGoBack` and `startOverAvailable`) is present on every cycle step and on `operatorAssistance` during a cycle, and each cycle surface carries its own view (`template`, `photographs`, `filters`, `keepsake`, `operatorAssistance`), so a screen renders from its view alone (`filters` also carries the selected Template's `width`, `height`, and `landscape`, so the print reserves its shape before its picture loads). `GoToStep(step)` is Continue only: a step at or before the current one is refused `notAvailable` (protocol version 12). Protocol version 12 also removed the Photographs view's `retainedCount`, since no Capture is ever refitted to another Template. The records and examples are in the M8 contract, built from `FotoHavn.Protocol/Presentations/GuestCycleViews.cs`.
+- Overlays: `exitHold`, `pinDialog`, `phaseTimer` (`phase`, `remainingSeconds`, `paused`; protocol version 12, replacing `phaseTimerWarning` and `startOverConfirmation`), and `notice`. `phaseTimer` is present for the whole of every timed guest phase whose timer is on, including Keepsake, the guest gallery, and Operator Assistance during a Guest Cycle.
 
 Guest gallery view models carry only image URLs and alt text, never metadata, so the UI can't show what the guest view must hide (protocol version 9): `guestGallery` is `{ strips: [{ guestCycleId, thumbnailUrl, width, height, landscape, alt }], nextCursor, loadingMore }` and `guestStripDetail` is `{ strip: { imageUrl, width, height, landscape, alt }, captures: [{ imageUrl, width, height, alt }] }`; `guestCycleId` is opaque and never shown. The Start link's flag is `start.guestGalleryLinkVisible` (and `startUnavailable.guestGalleryLinkVisible`). The guest presentation never contains operator data.
 
@@ -659,6 +655,7 @@ CREATE TABLE photo_strips (
 );
 ```
 
+- **Later migrations.** `0002_guest_sounds` adds `events.guest_sounds_enabled INTEGER NOT NULL DEFAULT 1` (the Guest sounds setting); every Event saved before it gets sounds on.
 - **PIN.** Hashed with PBKDF2-SHA256 (`Rfc2898DeriveBytes.Pbkdf2`), a 16-byte random salt, and at least 210,000 iterations, and compared in constant time.
 - **Discarded Captures (D23).** A rejected Retake candidate or a replaced original becomes `discarded`, and its file is deleted when the Guest Cycle ends.
 - **Thumbnails.** Event Gallery thumbnails are derived JPEGs in `Data/Cache/thumbnails/`, named `<sourceId>-<sha8>-<width>.jpg` so each records its source and version. They're created on first request by the Event store, never edited, and can be deleted at any time. They aren't Event artifacts and have no rows.
@@ -756,7 +753,7 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | --- | --- |
 | Guest touch targets of at least 64×64; the shutter at least 112×112; operator targets at least 48×48 | Standing distance and touch. The brand minimum is 44; raising it is allowed. |
 | Guest reading text of at least 20 px at 1280×720, scaling fluidly to 2560×1440 | Booth readability takes priority over editorial density ([`brand/mediums.md`](../../brand/mediums.md)). |
-| Phase timers with a warning and `MORE TIME` | D18; see [Conflicts and resolutions](#4-conflicts-and-resolutions). |
+| Phase timers that are always visible but that guests can't extend | D18 and D39; see [Conflicts and resolutions](#4-conflicts-and-resolutions). |
 | No scrolling on guest screens, except the guest gallery's horizontal strip row | Kiosk rule: every guest step fits the viewport at all four resolutions. The guest gallery's row of Photo Strips is the only region that scrolls, horizontally by touch. |
 | A discreet 3 s press-and-hold exit on the Guest Screen | It's an operator-only control, not a guest task; guests never need it. Enter or Space held for 3 s on the focused control is the keyboard path. |
 | The live preview is the only dark surface on the Photographs step | The camera area works best on Dark Walnut; this still fits the "one dark band" rule. |
@@ -807,8 +804,8 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | `HoldControl` | Discreet 3 s press-and-hold with accessible name "Operator exit" and text progress |
 | `PinPad` | On-screen digits, masked entry, lockout state |
 | `Dialog`, `ConfirmDialog` | Focus trap, Escape to cancel, return focus |
-| `InlineStatus`, `Notice`, `PhaseTimerWarning` | Polite live regions; no toasts that disappear before they can be read; the warning carries `MORE TIME` |
-| `StartOverAction` | Quiet text link with confirmation dialog (`START OVER` / `KEEP GOING`) on Template, Photographs, and Filters only |
+| `InlineStatus`, `Notice` | Polite live regions; no toasts that disappear before they can be read |
+| The phase timer | Always visible on every timed guest phase, with no `MORE TIME` (D39); see [`DESIGN.md`](../DESIGN.md) |
 | `GuestCycleList`, `GuestCycleDetail` | One component pair with `operator` and `guest` modes. Strips at native proportion, paged loading, detail with Captures. The guest mode receives a reduced view model with no metadata or actions. |
 | `RunningEventPanel` | Read-only facts with text states, alert line, and actions; updates live |
 | `DisplayPicker` | Option-list rows with display name, resolution, position, and an "Operator Screen" marker; `IDENTIFY DISPLAYS` action |
@@ -821,7 +818,7 @@ These come from [`brand/accessibility.md`](../../brand/accessibility.md):
 - **Contrast:** pairs from [`brand/color.md`](../../brand/color.md) only. Soft Brown text never sits on Cream Paper, and Antique Metal only appears on dark surfaces.
 - **Focus:** a 2 px outline at a 5 px offset, Ebony on light and Off-white on dark.
 - **Order and structure:** keyboard order follows reading order, option lists use arrow keys, landmarks and headings are in order.
-- **No gesture requirements:** never require drag, hover, or precision to finish a task. Phase timers always offer `MORE TIME` (see Departures above).
+- **No gesture requirements:** never require drag, hover, or precision to finish a task. Phase timers can't be extended by guests (D39); see Departures above.
 - **Motion:** reduced motion removes transforms and makes changes instant. High Contrast (`forced-colors`) keeps every control and state visible.
 - **Text:** maximum line lengths still hold at 2560 wide.
 
@@ -1257,7 +1254,7 @@ Tasks:
 - [x] A lint rule that rejects hex colors and raw `cubic-bezier` or duration values outside the token files.
 
 Verification. The implementing agent writes and runs these through the [verification procedure](#verification-procedure-for-the-implementing-agent) before marking the milestone complete:
-- **Unit (UI):** every component's states, ARIA roles and states, keyboard behavior (option-list arrows, dialog focus trap and return), hold-control timing with fake timers, PIN pad entry and masking, `StartOverAction` confirmation flow, and the reduced-motion branches.
+- **Unit (UI):** every component's states, ARIA roles and states, keyboard behavior (option-list arrows, dialog focus trap and return), hold-control timing with fake timers, PIN pad entry and masking, the Phase Timer pill's low-time and paused states, and the reduced-motion branches.
 - **Integration:** fixture gallery in Chromium at 1280×720, 1366×768, 1920×1080, and 2560×1440: screenshots, axe with no violations, no overflow, reduced-motion and forced-colors emulation, and token drift.
 - **End-to-end `@m3`:**
   - `smoke/fonts-and-tokens`: in the real WebView2, Cormorant Garamond and Manrope load from the bundle (no network), and computed colors on the fixture page match brand tokens.
@@ -2036,7 +2033,7 @@ Resolved during M0 (2026-10-13). Each is a proposed default adopted while drafti
 - **Q10** Which folders may `media.fotohavn` serve? → Only files inside `Data/Events` and `Data/Cache/thumbnails`, refusing path traversal. Relied on by M2.
 - **Q11** Which guest regions may scroll? → No guest screen scrolls as a page; only the guest gallery's strip row scrolls, horizontally by touch. Relied on by M3 and M9.
 - **Q12** How is the 3 s exit hold justified and reached by keyboard? → A declared departure in `app/DESIGN.md` (operator-only control, not a guest task); Enter or Space held for 3 s on the focused control. Relied on by M6.
-- **Q13** Does the Keepsake step show the Phase Timer warning? → No warning or `MORE TIME` on Keepsake, because the Photo Strip is already saved; the other timed phases keep the 20-second warning. Relied on by M8.
+- **Q13** Does the Keepsake step show the Phase Timer warning? → No warning or `MORE TIME` on Keepsake, because the Photo Strip is already saved; the other timed phases keep the 20-second warning. Relied on by M8. Superseded by D39: every timed phase, Keepsake included, shows its timer the whole time, and no phase has a warning or `MORE TIME`.
 - **Q14** Are the four guest resolutions physical or effective pixels? → Physical: the host sets the guest WebView2 zoom factor to 1 / (display scale); the Operator Screen follows Windows scaling and may scroll. Relied on by M2 and M3.
 - **Q15** Does Start show an eyebrow as well as the wordmark? → The `FOTOHAVN` wordmark only. Relied on by M8.
 - **Q16** How does Event setup report a camera blocked by Windows privacy settings (`E_ACCESSDENIED`)? → Not available with "Camera access is off in Windows privacy settings." Relied on by M5.
@@ -2059,11 +2056,11 @@ Raised and decided during M6 (2026-10-15):
 
 Raised and decided during M8 (2026-10-15):
 
-- **Q23** Which invariants does the Guest Cycle model's FsCheck test check, and which belong to the brain? → Section 14 never listed them; they are these. Over random action sequences that include stale operation ids and revisions, out-of-range windows, and duplicate Captures, the pure model (GuestCycleRules) keeps: (1) every Capture in a window is a kept Capture and appears at most once across the windows and the retained pool; (2) the window list always has one entry per Template window; (3) a stale or cancelled operation never changes the windows; (4) during a Retake the original stays in its window until AcceptRetake; (5) no kept Capture is ever lost: kept = arranged + retained + candidate + explicitly discarded (the discarded ids the outcomes return); (6) the arrangement revision grows by exactly 1 for each arrangement change (Template, windows, retained pool) and never otherwise; (7) CanContinue implies every window is filled, with no operation and no Move. The model also keeps Filters and Keepsake to complete arrangements and ignores everything once Keepsake is reached. The progress property (an untouched cycle reaches a committed Photo Strip) needs timers, so it is a brain-level test (M8 wave B1) on ManualBrainExecutor and the fake clock with every Phase Timer on. The model keeps no record of discarded ids: a discarded Capture id committed again is a new kept Capture (the brain's ids are unique), so the test takes an id out of its discarded set when it is committed again (found by the FsCheck replay in M8 wave C). Decided in M8 wave A.
-- **Q24** How does Arrange show Captures the Template has no window for? → Only as a count line, "N more photographs are kept for this Event." ("1 more photograph is kept for this Event."), from `retainedCount`; the retained pool has no movable thumbnails. A larger Template refills its windows from the retained Captures automatically. Decided in M8 wave B/C.
+- **Q23** Which invariants does the Guest Cycle model's FsCheck test check, and which belong to the brain? → Section 14 never listed them; they are these. Over random action sequences that include stale operation ids and revisions, out-of-range windows, and duplicate Captures, the pure model (GuestCycleRules) keeps: (1) every Capture in a window is a kept Capture and appears at most once across the windows and the retained pool; (2) the window list always has one entry per Template window; (3) a stale or cancelled operation never changes the windows; (4) during a Retake the original stays in its window until AcceptRetake; (5) no kept Capture is ever lost: kept = arranged + retained + candidate + explicitly discarded (the discarded ids the outcomes return); (6) the arrangement revision grows by exactly 1 for each arrangement change (Template, windows, retained pool) and never otherwise; (7) CanContinue implies every window is filled, with no operation and no Move. The model also keeps Filters and Keepsake to complete arrangements and ignores everything once Keepsake is reached. The progress property (an untouched cycle reaches a committed Photo Strip) needs timers, so it is a brain-level test (M8 wave B1) on ManualBrainExecutor and the fake clock with every Phase Timer on. The model keeps no record of discarded ids: a discarded Capture id committed again is a new kept Capture (the brain's ids are unique), so the test takes an id out of its discarded set when it is committed again (found by the FsCheck replay in M8 wave C). Decided in M8 wave A. D39 removed the retained pool from (1), (5), and (6) and added an eighth invariant: the cycle never returns to an earlier step, and the Template never changes after the Template step.
+- **Q24** How does Arrange show Captures the Template has no window for? → Only as a count line, "N more photographs are kept for this Event." ("1 more photograph is kept for this Event."), from `retainedCount`; the retained pool has no movable thumbnails. A larger Template refills its windows from the retained Captures automatically. Decided in M8 wave B/C. Superseded by D39: guests can't go back to change the Template, so there is no retained pool and protocol version 12 removed `retainedCount`.
 - **Q25** What does the guest see when a composition fails? → The previous strip preview stays on screen, with the inline error "Your strip couldn't be prepared. Try again." and `TRY AGAIN` (`RetryComposition`) in the place of `FINISH MY STRIP →` as the one primary action (`FinishStrip` isn't valid while a failure shows). Decided in M8 wave B/C.
 - **Q26** How does the step progress show a skipped step? → It omits it, and the remaining steps are renumbered consecutively from 01 (a one-Template Event shows 01 Photographs, 02 Filters, 03 Keepsake). The brain still sends all four `steps`, each with its `state`. Decided in M8 wave B/C.
-- **Q27** Which brain decisions in M8 wave B1 does the UI and the end-to-end suite rely on? → (1) `RETRY` in Operator Assistance with a Guest Cycle returns to the step the cycle was on, with the capture sequence cancelled and no countdown started; committed Captures stay and the next `TAKE PHOTOGRAPHS` fills the next empty window. (2) A camera failure on the Keepsake step isn't Operator Assistance (the cycle is already complete); Start then shows Start unavailable. Display loss is Operator Assistance on every step. (3) A failure to encode or commit a Capture is Operator Assistance with reason `storage`. (4) The Phase Timer warning is a non-modal status: nothing behind it is inert, and it is hidden while the timer is paused (a sequence running, or Operator Assistance). (5) Preview keys for guest previews use revisions from 1,000,000 up, so every composition has its own URL and the WebView never shows an older image under a reused one. (6) With Filters skipped, `GoToStep(filters)` from Arrange composes and commits the strip while the guest stays on Photographs with every command refused (`canReview`, `canContinue`, and `canTakePhotographs` false; Arrange shows "Preparing your strip."), then moves to Keepsake, or to Filters with `compositionFailed`. (7) `FiltersView` carries the selected Template's `width`, `height`, and `landscape` (protocol 8, added in wave C), so the print reserves its shape before its picture loads. Decided in M8 wave B/C.
+- **Q27** Which brain decisions in M8 wave B1 does the UI and the end-to-end suite rely on? → (1) `RETRY` in Operator Assistance with a Guest Cycle returns to the step the cycle was on, with the capture sequence cancelled and no countdown started; committed Captures stay and the next `TAKE PHOTOGRAPHS` fills the next empty window. (2) A camera failure on the Keepsake step isn't Operator Assistance (the cycle is already complete); Start then shows Start unavailable. Display loss is Operator Assistance on every step. (3) A failure to encode or commit a Capture is Operator Assistance with reason `storage`. (4) The Phase Timer warning is a non-modal status: nothing behind it is inert, and it is hidden while the timer is paused (a sequence running, or Operator Assistance). (5) Preview keys for guest previews use revisions from 1,000,000 up, so every composition has its own URL and the WebView never shows an older image under a reused one. (6) With Filters skipped, `GoToStep(filters)` from Arrange composes and commits the strip while the guest stays on Photographs with every command refused (`canReview`, `canContinue`, and `canTakePhotographs` false; Arrange shows "Preparing your strip."), then moves to Keepsake, or to Filters with `compositionFailed`. (7) `FiltersView` carries the selected Template's `width`, `height`, and `landscape` (protocol 8, added in wave C), so the print reserves its shape before its picture loads. Decided in M8 wave B/C. D39 supersedes (4): the always-visible timer shows paused instead of hiding.
 - **Q28** Does the guest gallery's first page wait for its thumbnails? → Yes: the view shows `loadingMore: true` and no strips until the whole page's thumbnails exist. Strip thumbnails are warmed when a strip commits, so a page is normally warm. Decided in M9 wave B/C.
 - **Q29** What happens when the last completed strip is deleted while a guest browses? → The guest returns to Start in the same turn, whether on the list or on a strip detail. Decided in M9 wave B/C.
 - **Q30** What does a guest on the Keepsake of a cycle the operator deletes see? → The guest returns to Start. Decided in M9 wave B/C.

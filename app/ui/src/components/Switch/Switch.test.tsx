@@ -95,4 +95,11 @@ describe("Switch", () => {
     );
     expect(control.closest(".extra")).not.toBeNull();
   });
+
+  it("can keep its label for assistive technology only, when a visible label beside it already names it", () => {
+    render(<Switch label="Template timer" hideLabel checked onCheckedChange={vi.fn()} />);
+    const control = screen.getByRole("switch", { name: "Template timer" });
+    expect(control).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("Template timer").parentElement?.className).toContain("visuallyHidden");
+  });
 });

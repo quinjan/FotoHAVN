@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CameraState } from "../protocol/generated.ts";
 import { runningEventPanel } from "../fixtures/operatorSetupFixtures.ts";
@@ -87,20 +87,38 @@ describe("RunningEventSection", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("shows Operator Assistance as an alert line in text, with RETRY as the single primary action", () => {
+  it("shows Operator Assistance as the alert in text, with RETRY as the single primary action", () => {
     renderOperator(<RunningEventSection panel={runningEventPanel({ assistance: { reason: "storage" }, currentStep: "operatorAssistance" })} />);
-    expect(screen.getByRole("group")).toHaveTextContent("The Data folder needs attention.");
+    expect(screen.getByRole("group")).toHaveTextContent("The Data folder can't be written to. Check the disk and the folder, then RETRY.");
     expect(screen.getByRole("button", { name: "RETRY" })).toHaveAttribute("data-fotohavn-action", "primary");
   });
 
   it.each([
-    ["camera", "The camera needs attention."],
-    ["storage", "The Data folder needs attention."],
-    ["guestDisplay", "The guest display isn't connected."],
-  ] as const)("says the %s reason in words, never by color alone, while the step reads Operator Assistance", (reason, words) => {
-    renderOperator(<RunningEventSection panel={runningEventPanel({ assistance: { reason }, currentStep: "operatorAssistance" })} />);
-    expect(document.querySelector("[data-status-tone='alert']")).toHaveTextContent(words);
+    ["storage", null, "The Data folder can't be written to. Check the disk and the folder, then RETRY."],
+    ["guestDisplay", null, "The guest display isn't connected. Reconnect it, then RETRY."],
+    ["camera", null, "The camera needs attention. Check that it is connected, then RETRY."],
+    ["camera", "removed", "The camera was disconnected. Reconnect it, then RETRY."],
+    ["camera", "stale", "The camera stopped sending pictures. Check its cable, then RETRY."],
+    ["camera", "failed", "The camera stopped working. Check its cable, then RETRY."],
+    ["camera", "exclusiveLost", "Another app took over the camera. Close that app, then RETRY."],
+    ["camera", "inUseByAnotherApp", "Another app is using this camera. Close that app, then RETRY."],
+    ["camera", "privacyDenied", "Camera access is off in Windows privacy settings. Turn it on in Windows settings, then RETRY."],
+    ["camera", "noSupportedFormat", "This camera has no picture size FOTOHAVN can use. Try another USB port, then RETRY."],
+    ["camera", "notFound", "FOTOHAVN can't find this camera. Reconnect it, then RETRY."],
+    ["camera", "unknown", "Something went wrong with the camera. Check that it is connected, then RETRY."],
+  ] as const)("says the %s cause (camera failure %s) with what to do, never by color alone, while the step reads Operator Assistance", (reason, failure, words) => {
+    renderOperator(
+      <RunningEventSection
+        panel={runningEventPanel({
+          assistance: { reason },
+          currentStep: "operatorAssistance",
+          camera: failure === null ? { state: "ready", reason: null } : { state: "notAvailable", reason: failure },
+        })}
+      />,
+    );
+    expect(within(screen.getByRole("group")).getByRole("status")).toHaveTextContent(words);
     expect(screen.getByRole("group")).toHaveAttribute("data-assistance", "true");
+    expect(screen.getByRole("group")).toHaveAttribute("data-tone", "dark");
     expect(facts()["CURRENT STEP"]).toBe("Operator Assistance");
     expect(document.querySelectorAll('[data-fotohavn-action="primary"]')).toHaveLength(1);
   });

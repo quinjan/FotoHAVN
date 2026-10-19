@@ -32,7 +32,7 @@ internal static class GuestCyclePlan
         return model.Operation is { Mode: OperationMode.Retake, Candidate: not null } ? PhotographsTab.Arrange : model.Tab;
     }
 
-    /// <summary>The step progress: all four steps in order with their state. A skipped step stays skipped; a done step can be gone back to until the cycle completes.</summary>
+    /// <summary>The step progress: all four steps in order with their state. A skipped step stays skipped; it only shows where the guest is, since guests never go back.</summary>
     public static IReadOnlyList<GuestCycleStepEntry> Steps(GuestCycleStep current, bool templateSkipped, bool filtersSkipped)
     {
         GuestCycleStep[] order = [GuestCycleStep.Template, GuestCycleStep.Photographs, GuestCycleStep.Filters, GuestCycleStep.Keepsake];
@@ -42,7 +42,7 @@ internal static class GuestCyclePlan
             var state = skipped
                 ? GuestStepState.Skipped
                 : step < current ? GuestStepState.Done : step == current ? GuestStepState.Current : GuestStepState.Upcoming;
-            return new GuestCycleStepEntry(ToName(step), state, state == GuestStepState.Done && current != GuestCycleStep.Keepsake);
+            return new GuestCycleStepEntry(ToName(step), state);
         })];
     }
 
@@ -62,24 +62,22 @@ internal static class GuestCyclePlan
         _ => RunningEventStep.Keepsake,
     };
 
-    /// <summary>The whole seconds a warning shows: the time left rounded up, never below 1 while any is left.</summary>
+    /// <summary>The whole seconds the Phase Timer shows: the time left rounded up, never below 1 while any is left.</summary>
     public static int WholeSecondsLeft(TimeSpan remaining) => (int)Math.Ceiling(remaining.TotalSeconds);
 
     /// <summary>
-    /// How long to wait before the timer next matters: until the deadline, or while the warning shows, until the displayed
-    /// whole second changes (so the push lands as the number does).
+    /// How long a running Phase Timer waits before it next matters: until the whole second it shows changes, so the push lands as the number does,
+    /// and the last of those is the expiry. Zero when the time is already up.
     /// </summary>
-    public static TimeSpan WakeDelay(TimeSpan untilDeadline, TimeSpan remaining, bool warning)
+    public static TimeSpan WakeDelay(TimeSpan remaining)
     {
-        var delay = untilDeadline < TimeSpan.Zero ? TimeSpan.Zero : untilDeadline;
-        if (!warning)
+        if (remaining <= TimeSpan.Zero)
         {
-            return delay;
+            return TimeSpan.Zero;
         }
 
-        var fraction = remaining.TotalSeconds - Math.Floor(remaining.TotalSeconds);
-        var untilNumberChanges = fraction > 0 ? TimeSpan.FromSeconds(fraction) : GuestCycleTiming.SecondTick;
-        return untilNumberChanges < delay ? untilNumberChanges : delay;
+        var intoSecond = remaining.Ticks % TimeSpan.TicksPerSecond;
+        return intoSecond > 0 ? TimeSpan.FromTicks(intoSecond) : GuestCycleTiming.SecondTick;
     }
 
     /// <summary>The media URL of a Capture (<c>?v=</c> is the file's hash, a cache buster).</summary>

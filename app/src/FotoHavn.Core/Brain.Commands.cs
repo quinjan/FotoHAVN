@@ -49,6 +49,7 @@ public sealed partial class Brain
         SetDefaultLookPayload look => SetDefaultLook(id, look),
         SetPhaseTimerPayload timer => SetPhaseTimer(id, timer),
         SetGuestGalleryPayload gallery => SetGuestGallery(id, gallery),
+        SetGuestSoundsPayload sounds => SetGuestSounds(id, sounds),
         SetPinPayload pin => SetPin(id, pin),
         SaveEventPayload => SaveEvent(id),
         SaveAndStartEventPayload => SaveAndStartEvent(id),
@@ -74,7 +75,6 @@ public sealed partial class Brain
         ShowCameraTabPayload => ShowCameraTab(id),
         ShowArrangeTabPayload => ShowArrangeTab(id),
         TakePhotographsPayload => TakePhotographs(id),
-        StopCapturePayload => StopCapture(id),
         SelectPositionPayload position => SelectPosition(id, position),
         BeginRetakePayload retake => BeginRetake(id, retake),
         AcceptRetakePayload => AcceptRetake(id),
@@ -87,10 +87,6 @@ public sealed partial class Brain
         SelectLookPayload look => SelectLook(id, look),
         FinishStripPayload => FinishStrip(id),
         RetryCompositionPayload => RetryComposition(id),
-        MoreTimePayload => MoreTime(id),
-        StartOverPayload => StartOver(id),
-        ConfirmStartOverPayload => ConfirmStartOver(id),
-        KeepGoingPayload => KeepGoing(id),
         RetryAssistancePayload => RetryAssistance(id),
 
         // The operator's Event Gallery (Brain.Gallery.cs)

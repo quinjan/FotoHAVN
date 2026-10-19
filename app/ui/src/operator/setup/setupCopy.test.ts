@@ -2,15 +2,19 @@ import { describe, expect, it } from "vitest";
 import { phaseTimers } from "../../fixtures/operatorSetupFixtures.ts";
 import type { CameraFailureKind, EventSetupCameraView, EventSetupErrorCode, PhaseTimer, PhaseTimerOption, StartFailureCode } from "../../protocol/generated.ts";
 import {
+  blocksOnlyStart,
   cameraLine,
   errorSummary,
+  errorSummaryHeading,
+  errorSummaryItem,
   fieldErrorText,
   fieldIds,
   fieldOrder,
   focusTargetId,
   startFailureText,
   timerFieldId,
-  timerRange,
+  timerHelp,
+  timingIntro,
 } from "./setupCopy.ts";
 
 const timers = phaseTimers();
@@ -59,8 +63,8 @@ describe("field errors", () => {
     expect(fieldErrorText("camera", "tooLong", timers)).toBe("That's too long.");
   });
 
-  it("states a timer's own range, and 0 for Off only where it can be off", () => {
-    expect(fieldErrorText("timers.template", "timerOutOfRange", timers)).toBe("Enter 0 to turn it off, or 20 to 300 seconds.");
+  it("states a timer's own range without a hidden 0 for Off", () => {
+    expect(fieldErrorText("timers.template", "timerOutOfRange", timers)).toBe("Enter 20 to 300 seconds.");
     expect(fieldErrorText("timers.keepsake", "timerOutOfRange", timers)).toBe("Enter 5 to 60 seconds.");
     expect(fieldErrorText("timers.guestGallery", "timerOutOfRange", timers)).toBe("Enter 20 to 300 seconds.");
   });
@@ -72,6 +76,45 @@ describe("field errors", () => {
   it("counts what needs attention", () => {
     expect(errorSummary(1)).toBe("One thing needs attention before this Event can be saved.");
     expect(errorSummary(5)).toBe("5 things need attention before this Event can be saved.");
+  });
+});
+
+describe("the error summary", () => {
+  const error = (field: string, code: EventSetupErrorCode) => ({ field, code });
+
+  it("counts only what blocks saving, and says so when only the PIN blocks starting", () => {
+    expect(errorSummaryHeading([])).toBe("");
+    expect(errorSummaryHeading([error("name", "required")])).toBe("One thing needs attention before this Event can be saved.");
+    expect(errorSummaryHeading([error("name", "required"), error("pin", "pinRequired"), error("camera", "cameraRequired")])).toBe(
+      "2 things need attention before this Event can be saved.",
+    );
+    expect(errorSummaryHeading([error("pin", "pinRequired")])).toBe("This Event can be saved, but it needs an Operator PIN to start.");
+    expect(blocksOnlyStart(error("pin", "pinRequired"))).toBe(true);
+    expect(blocksOnlyStart(error("pin", "pinFormat"))).toBe(false);
+    expect(blocksOnlyStart(error("name", "required"))).toBe(false);
+  });
+
+  it.each([
+    ["name", "required", "Name the Event."],
+    ["date", "required", "Date is needed."],
+    ["venue", "tooLong", "Venue is too long."],
+    ["customer", "tooLong", "Customer or host is too long."],
+    ["camera", "tooLong", "That's too long."],
+    ["date", "invalidDate", "The date isn't valid. Choose another."],
+    ["timers.template", "timerOutOfRange", "Template needs 20 to 300 seconds."],
+    ["timers.keepsake", "timerOutOfRange", "Keepsake needs 5 to 60 seconds."],
+    ["timers.unknown", "timerOutOfRange", "A timer needs a number of seconds in range."],
+    ["pin", "pinFormat", "The Operator PIN needs 4 to 6 digits, 0 to 9 only."],
+    ["pin", "pinMismatch", "The two PINs don't match."],
+    ["templates", "atLeastOneTemplate", "Offer at least one Template."],
+    ["camera", "cameraRequired", "Choose a camera."],
+  ] as const)("writes %s %s so it reads away from its field", (field, code, text) => {
+    expect(errorSummaryItem(field, code, timers, true)).toBe(text);
+  });
+
+  it("says a missing PIN doesn't block saving only when something else does", () => {
+    expect(errorSummaryItem("pin", "pinRequired", timers, false)).toBe("Set an Operator PIN to start this Event.");
+    expect(errorSummaryItem("pin", "pinRequired", timers, true)).toBe("Set an Operator PIN to start this Event. Saving doesn't need one.");
   });
 });
 
@@ -157,9 +200,16 @@ describe("start failures", () => {
   });
 });
 
-describe("timer ranges", () => {
-  it("say the limits, and whether 0 turns the timer off", () => {
-    expect(timerRange(timerFor("template"))).toBe("20 to 300 seconds. Enter 0 for Off.");
-    expect(timerRange(timerFor("keepsake"))).toBe("5 to 60 seconds. This timer is always on.");
+describe("timer help", () => {
+  it("says the shared range and what off means once, for the group", () => {
+    expect(timingIntro(timers)).toBe("Most timers run 20 to 300 seconds. Turn a timer off and that step waits for the guest to continue. If they walk away, only ending the Event clears it.");
+    expect(timingIntro([timerFor("keepsake")])).toBe("Turn a timer off and that step waits for the guest to continue. If they walk away, only ending the Event clears it.");
+  });
+
+  it("says only what differs for a phase: the outcome, plus the range and Always on where the group's doesn't apply", () => {
+    expect(timerHelp(timerFor("template"), timers)).toBe("When time runs out, the booth continues with the selected Template.");
+    expect(timerHelp(timerFor("keepsake"), timers)).toBe("5 to 60 seconds. Always on. When time runs out, the booth returns to Start.");
+    expect(timerHelp(timerFor("guestGallery"), timers)).toBe("20 to 300 seconds. Always on. When time runs out, the booth returns to Start.");
+    expect(timerHelp({ ...timerFor("filters"), min: 10 }, timers)).toBe("10 to 300 seconds. When time runs out, the booth finishes the strip with the selected Look.");
   });
 });

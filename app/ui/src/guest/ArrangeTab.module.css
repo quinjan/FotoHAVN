@@ -1,6 +1,6 @@
 /*
- * The Arrange tab: the strip on a Cream Paper mat on the left, the heading, what the selection allows, the retained
- * count, and the one way on on the right. The mat takes whatever height the stage gives it; the print contains itself.
+ * The Arrange tab: the strip on a Cream Paper mat on the left, the heading, what the selection allows, and the one way
+ * on on the right. The mat takes whatever height the stage gives it; the print contains itself.
  */
 .tab {
   display: grid;
@@ -42,8 +42,7 @@
   display: none;
 }
 
-.status,
-.retained {
+.status {
   max-inline-size: var(--app-measure-supporting);
   color: var(--app-tone-ink-secondary);
   font-size: var(--app-text-supporting);

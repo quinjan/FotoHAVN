@@ -43,6 +43,15 @@ export function formatGuestCycles(count: number): string {
   return count === 1 ? "1 Guest Cycle" : `${String(count)} Guest Cycles`;
 }
 
+/**
+ * The Event Gallery's count line, e.g. "8 Guest Cycles, 4 completed". The gallery loads 40 Guest Cycles at a time,
+ * newest first, so while more remain the line says it counts only the newest ones loaded ("Newest 40 Guest Cycles, 22 completed").
+ */
+export function formatGalleryCount(loaded: number, completed: number, moreToLoad: boolean): string {
+  const done = completed === 0 ? "none completed" : `${String(completed)} completed`;
+  return moreToLoad ? `Newest ${formatGuestCycles(loaded)}, ${done}` : `${formatGuestCycles(loaded)}, ${done}`;
+}
+
 const minuteMs = 60_000;
 
 /**

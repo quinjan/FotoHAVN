@@ -44,3 +44,15 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* While the Phase Timer warning's footer row takes some of the stage's height, three or more Templates drop their
+   descriptions (the names and thumbnails stay) and the stack tightens, so the list and the action still fit. */
+@container stage (max-height: 45vw) {
+  .options {
+    gap: var(--space-8);
+  }
+
+  .step[data-many] .description {
+    display: none;
+  }
+}

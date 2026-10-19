@@ -180,3 +180,94 @@
 .timer input {
   max-inline-size: calc(var(--space-48) * 3);
 }
+
+/* One Phase Timer: its name, then the On/Off switch and the seconds with their unit on one line, then its help. */
+.timerField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.timerControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-32);
+}
+
+.timerControls > .timerSwitch,
+.timerControls > .timer {
+  flex: none;
+  inline-size: auto;
+}
+
+/* The error summary above the step (GOV.UK pattern): a heading that says what is blocked, and one link per problem. */
+.errorSummary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  scroll-margin-block-start: calc(var(--setup-bar-height) + var(--space-24));
+}
+
+.errorSummary:focus {
+  outline: none;
+}
+
+.errorSummary[data-open] {
+  padding: var(--space-16) var(--space-24) var(--space-16) calc(var(--space-24) - var(--app-stroke-rule-accent));
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-inline-start: var(--app-stroke-rule-accent) solid var(--app-tone-ink);
+  border-radius: var(--radius-panel);
+  background-color: var(--semantic-surface-editorial);
+}
+
+.errorSummary[data-open]:focus-visible {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}
+
+/* Without problems the wrapper takes no box and the heading stays a live region that takes no space. */
+.errorSummary:not([data-open]) {
+  display: contents;
+}
+
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A problem is a text link in the body role, underlined at rest, as the summary reads in words. */
+.errorLink {
+  min-block-size: var(--app-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--app-tone-ink);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
+  text-align: start;
+  text-decoration-line: underline;
+  text-decoration-color: var(--app-tone-ink-secondary);
+  text-decoration-thickness: var(--stroke-hairline);
+  text-underline-offset: var(--stroke-link-underline-offset);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .errorLink:hover {
+    text-decoration-color: currentcolor;
+  }
+}
+
+.errorLink:focus-visible {
+  outline: var(--stroke-focus) solid var(--app-tone-focus);
+  outline-offset: var(--stroke-focus-offset);
+}

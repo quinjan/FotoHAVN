@@ -9,8 +9,8 @@ import { forgetOpenedStrip } from "./galleryFocus.ts";
 import { GuestGalleryView } from "./GuestGalleryView.tsx";
 import { GuestStripDetailView } from "./GuestStripDetailView.tsx";
 
-const noOverlays: GuestOverlays = { exitHold: null, pinDialog: null, phaseTimerWarning: null, startOverConfirmation: null, notice: null };
-const warning = (remainingSeconds: number, phase: "guestGallery" | "template" = "guestGallery"): Partial<GuestOverlays> => ({ phaseTimerWarning: { phase, remainingSeconds } });
+const noOverlays: GuestOverlays = { exitHold: null, pinDialog: null, phaseTimer: null, notice: null };
+const timer = (remainingSeconds: number): Partial<GuestOverlays> => ({ phaseTimer: { phase: "guestGallery", remainingSeconds, paused: false } });
 
 function galleryOf(name: string): { readonly view: GuestGalleryData; readonly overlays: GuestOverlays } {
   const presentation = guestGalleryFixtures[name]?.presentation;
@@ -179,7 +179,7 @@ describe("the guest strip detail view", () => {
   });
 });
 
-describe("the Phase Timer warning on the gallery screens", () => {
+describe("the Phase Timer on the gallery screens", () => {
   type Mount = (overlays: GuestOverlays, client: BrainClient) => React.ReactNode;
   const screens: readonly (readonly [string, Mount])[] = [
     [
@@ -192,60 +192,48 @@ describe("the Phase Timer warning on the gallery screens", () => {
     ],
   ];
 
-  it.each(screens)("shows the seconds left on %s, with MORE TIME sending MoreTime, and nothing when there is no warning", async (_name, mount) => {
+  it.each(screens)("shows the time left on %s as it ticks, with no MORE TIME, and nothing when there is no timer", (_name, mount) => {
     const client = stubClient();
     const { rerender } = render(mount(noOverlays, client));
+    expect(screen.queryByRole("timer")).toBeNull();
+
+    rerender(mount({ ...noOverlays, ...timer(48) }, client));
+    expect(screen.getByRole("timer")).toHaveTextContent("0:48");
+    rerender(mount({ ...noOverlays, ...timer(47) }, client));
+    expect(screen.getByRole("timer")).toHaveTextContent("0:47");
     expect(screen.queryByRole("button", { name: "MORE TIME" })).toBeNull();
+    expect(sentCommands(client)).toEqual([]);
 
-    rerender(mount({ ...noOverlays, ...warning(18) }, client));
-    expect(screen.getByText("SECONDS LEFT")).toBeVisible();
-    expect(screen.getByText("18")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "MORE TIME" }));
-    await waitFor(() => {
-      expect(sentCommands(client)).toEqual([["MoreTime", {}]]);
-    });
-
-    rerender(mount({ ...noOverlays, ...warning(17) }, client));
-    expect(screen.getByText("17")).toBeVisible();
     rerender(mount(noOverlays, client));
-    expect(screen.queryByRole("button", { name: "MORE TIME" })).toBeNull();
+    expect(screen.queryByRole("timer")).toBeNull();
   });
 
-  it("shows the last second as one second", () => {
-    const { view, overlays } = galleryOf("guest-ui-gallery-four-strips");
-    render(withClient(stubClient(), <GuestGalleryView view={view} overlays={{ ...overlays, ...warning(1) }} />));
-    expect(screen.getByText("SECOND LEFT")).toBeVisible();
-  });
-
-  it("ignores another phase's warning: this screen has only the gallery's", () => {
-    const { view, overlays } = galleryOf("guest-ui-gallery-four-strips");
-    render(withClient(stubClient(), <GuestGalleryView view={view} overlays={{ ...overlays, ...warning(10, "template") }} />));
-    expect(screen.queryByRole("button", { name: "MORE TIME" })).toBeNull();
-  });
-
-  it("arrives once: a warning already under way when the screen mounts shows at rest, a new one arrives", () => {
+  it("fills in the last seconds and says so once", () => {
     const { view, overlays } = galleryOf("guest-ui-gallery-four-strips");
     const client = stubClient();
-    const ui = (extra: Partial<GuestOverlays>) => withClient(client, <GuestGalleryView view={view} overlays={{ ...overlays, ...extra }} />);
-    const mounted = render(ui(warning(12)));
-    expect(document.querySelector("[data-phase='guest-gallery']")).toHaveAttribute("data-motion", "static");
-    mounted.rerender(ui({}));
-    mounted.rerender(ui(warning(20)));
-    expect(document.querySelector("[data-phase='guest-gallery']")).not.toHaveAttribute("data-motion", "static");
+    const ui = (seconds: number) => withClient(client, <GuestGalleryView view={view} overlays={{ ...overlays, ...timer(seconds) }} />);
+    const { rerender } = render(ui(11));
+    const live = screen.getByRole("timer").parentElement?.querySelector("[role='status']");
+    expect(live).toBeEmptyDOMElement();
+    rerender(ui(10));
+    rerender(ui(1));
+    expect(screen.getByRole("timer")).toHaveAttribute("data-low", "true");
+    expect(live).toHaveTextContent("10 seconds left.");
   });
 
-  it("keeps the warning inside the screen's frame, over nothing the guest needs to press", () => {
+  it("sits in the frame beside the screen's own controls, never over the row", () => {
     const { view, overlays } = galleryOf("guest-ui-gallery-four-strips");
-    render(withClient(stubClient(), <GuestGalleryView view={view} overlays={{ ...overlays, ...warning(15) }} />));
-    const frame = document.querySelector("[data-phase='guest-gallery']")?.parentElement;
-    expect(frame).toContainElement(screen.getByRole("button", { name: "BACK TO START" }));
+    render(withClient(stubClient(), <GuestGalleryView view={view} overlays={{ ...overlays, ...timer(15) }} />));
+    const corner = screen.getByRole("timer").closest("[class*='timer']");
+    expect(corner?.parentElement).toContainElement(screen.getByRole("button", { name: "BACK TO START" }));
+    expect(corner).not.toContainElement(screen.getByRole("button", { name: "BACK TO START" }));
   });
 });
-
 describe("what a guest can see in the gallery views", () => {
-  const allowed = [/\d+ seconds? left\. Choose MORE TIME to stay a little longer\./g, /Look at you\./g, /BACK TO START/g, /CLOSE/g, /Loading (more )?photographs\./g, /\d+ SECONDS? LEFT/g, /MORE TIME/g];
+  // The clock goes first: its digits run straight into the announcement's.
+  const allowed = [/\d+:\d\d/g, /\d+ seconds? left\./g, /Look at you\./g, /BACK TO START/g, /CLOSE/g, /Loading (more )?photographs\./g];
 
-  it.each(Object.keys(guestGalleryFixtures))("%s carries no text beyond the heading, the actions, the loading line, and the warning, and no id", (name) => {
+  it.each(Object.keys(guestGalleryFixtures))("%s carries no text beyond the heading, the actions, the loading line, and the Phase Timer, and no id", (name) => {
     const presentation = guestGalleryFixtures[name]?.presentation;
     if (presentation === undefined) {
       throw new Error(`no fixture ${name}`);

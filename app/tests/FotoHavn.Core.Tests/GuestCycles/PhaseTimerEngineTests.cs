@@ -1,4 +1,3 @@
-using FotoHavn.Core.Events;
 using FotoHavn.Core.GuestCycles;
 using FotoHavn.Core.Storage;
 using FsCheck;
@@ -7,7 +6,7 @@ using FsCheck.Xunit;
 
 namespace FotoHavn.Core.Tests.GuestCycles;
 
-/// <summary>The Phase Timer engine (plan section 7, Phase timers; D18) on explicit times: pause and resume around the warning boundary, many pause cycles, restarts, and off.</summary>
+/// <summary>The Phase Timer engine (plan section 7, Phase timers; D18) on explicit times: pause and resume, many pause cycles, restarts, and off.</summary>
 public sealed class PhaseTimerEngineTests
 {
     private static readonly DateTimeOffset T0 = new(2026, 10, 14, 9, 0, 0, TimeSpan.Zero);
@@ -28,8 +27,6 @@ public sealed class PhaseTimerEngineTests
         Assert.Null(timer.Phase);
         Assert.Null(timer.Remaining(T0));
         Assert.False(timer.IsExpired(T0));
-        Assert.False(timer.IsWarning(T0));
-        Assert.Null(timer.NextDeadline(T0));
     }
 
     [Fact]
@@ -62,62 +59,24 @@ public sealed class PhaseTimerEngineTests
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerEngine.Start((PhaseTimerPhase)99, 30, T0));
     }
 
-    [Fact]
-    public void The_warning_covers_the_last_twenty_seconds_and_ends_at_expiry()
-    {
-        var timer = Template(30);
-
-        Assert.False(timer.IsWarning(At(0)));
-        Assert.False(timer.IsWarning(At(9.999)));
-        Assert.True(timer.IsWarning(At(10)));
-        Assert.True(timer.IsWarning(At(29.999)));
-        Assert.False(timer.IsWarning(At(30)));
-    }
-
-    [Fact]
-    public void A_twenty_second_phase_warns_from_the_start()
-    {
-        Assert.True(Template(20).IsWarning(T0));
-    }
-
     [Theory]
-    [InlineData(PhaseTimerPhase.Template, true)]
-    [InlineData(PhaseTimerPhase.PhotographsCapture, true)]
-    [InlineData(PhaseTimerPhase.PhotographsReview, true)]
-    [InlineData(PhaseTimerPhase.Filters, true)]
-    [InlineData(PhaseTimerPhase.GuestGallery, true)]
-    [InlineData(PhaseTimerPhase.Keepsake, false)]
-    public void Every_timed_phase_warns_except_the_Keepsake(PhaseTimerPhase phase, bool warns)
+    [InlineData(PhaseTimerPhase.Template)]
+    [InlineData(PhaseTimerPhase.PhotographsCapture)]
+    [InlineData(PhaseTimerPhase.PhotographsReview)]
+    [InlineData(PhaseTimerPhase.Filters)]
+    [InlineData(PhaseTimerPhase.GuestGallery)]
+    [InlineData(PhaseTimerPhase.Keepsake)]
+    public void Every_timed_phase_counts_down_the_same_way_with_no_warning_window(PhaseTimerPhase phase)
     {
         var timer = PhaseTimerEngine.Start(phase, 25, T0);
 
-        Assert.Equal(warns, timer.IsWarning(At(20)));
+        Assert.Equal(TimeSpan.FromSeconds(5), timer.Remaining(At(20)));
+        Assert.False(timer.IsExpired(At(24.999)));
         Assert.True(timer.IsExpired(At(25)));
     }
 
     [Fact]
-    public void The_next_deadline_is_the_warning_start_and_then_the_expiry()
-    {
-        var timer = Template(30);
-
-        Assert.Equal(At(10), timer.NextDeadline(T0));
-        Assert.Equal(At(10), timer.NextDeadline(At(9.999)));
-        Assert.Equal(At(30), timer.NextDeadline(At(10)));
-        Assert.Equal(At(30), timer.NextDeadline(At(25)));
-        Assert.Equal(At(30), timer.NextDeadline(At(40)));
-    }
-
-    [Fact]
-    public void The_Keepsake_has_only_an_expiry_deadline()
-    {
-        var timer = PhaseTimerEngine.Start(PhaseTimerPhase.Keepsake, 12, T0);
-
-        Assert.Equal(At(12), timer.NextDeadline(T0));
-        Assert.Equal(At(12), timer.NextDeadline(At(5)));
-    }
-
-    [Fact]
-    public void An_off_timer_never_expires_warns_or_wakes_the_brain()
+    public void An_off_timer_never_expires_or_reports_time_left()
     {
         var timer = PhaseTimerEngine.Start(PhaseTimerPhase.Filters, 0, T0);
 
@@ -126,8 +85,6 @@ public sealed class PhaseTimerEngineTests
         Assert.True(timer.IsRunning);
         Assert.Null(timer.Remaining(At(100_000)));
         Assert.False(timer.IsExpired(At(100_000)));
-        Assert.False(timer.IsWarning(At(100_000)));
-        Assert.Null(timer.NextDeadline(T0));
         Assert.False(timer.Pause(At(1)).Resume(At(5)).IsExpired(At(100_000)));
         Assert.True(timer.Restart(At(3)).IsOff);
     }
@@ -142,31 +99,23 @@ public sealed class PhaseTimerEngineTests
         Assert.Equal(TimeSpan.FromSeconds(20), paused.Remaining(At(10)));
         Assert.Equal(TimeSpan.FromSeconds(20), paused.Remaining(At(5000)));
         Assert.False(paused.IsExpired(At(5000)));
-        Assert.Null(paused.NextDeadline(At(500)));
 
         var resumed = paused.Resume(At(100));
         Assert.True(resumed.IsRunning);
         Assert.Equal(TimeSpan.FromSeconds(20), resumed.Remaining(At(100)));
         Assert.Equal(TimeSpan.FromSeconds(5), resumed.Remaining(At(115)));
-        Assert.Equal(At(120), resumed.NextDeadline(At(100)));
+        Assert.True(resumed.IsExpired(At(120)));
     }
 
     [Fact]
-    public void Pausing_and_resuming_around_the_warning_boundary_moves_the_warning_by_the_paused_time()
+    public void Pausing_in_the_last_seconds_freezes_the_time_left_and_moves_the_expiry_by_the_paused_time()
     {
-        var timer = Template(30).Pause(At(9));
+        var paused = Template(30).Pause(At(19)).Resume(At(50)).Pause(At(60));
 
-        Assert.False(timer.IsWarning(At(1000)));
-        timer = timer.Resume(At(50));
-        Assert.False(timer.IsWarning(At(50.5)));
-        Assert.Equal(At(51), timer.NextDeadline(At(50)));
-        Assert.True(timer.IsWarning(At(51)));
-        Assert.Equal(At(71), timer.NextDeadline(At(51)));
-
-        var inWarning = timer.Pause(At(60));
-        Assert.True(inWarning.IsWarning(At(9999)));
-        Assert.Equal(TimeSpan.FromSeconds(11), inWarning.Remaining(At(9999)));
-        Assert.Equal(At(10_071), inWarning.Resume(At(10_060)).NextDeadline(At(10_060)));
+        Assert.Equal(TimeSpan.FromSeconds(1), paused.Remaining(At(9999)));
+        var resumed = paused.Resume(At(10_060));
+        Assert.False(resumed.IsExpired(At(10_060.999)));
+        Assert.True(resumed.IsExpired(At(10_061)));
     }
 
     [Fact]
@@ -208,8 +157,7 @@ public sealed class PhaseTimerEngineTests
         Assert.True(restarted.IsRunning);
         Assert.Equal(TimeSpan.FromSeconds(30), restarted.Remaining(At(25)));
         Assert.Equal(TimeSpan.FromSeconds(10), restarted.Remaining(At(45)));
-        Assert.False(restarted.IsWarning(At(30)));
-        Assert.Equal(At(35), restarted.NextDeadline(At(25)));
+        Assert.True(restarted.IsExpired(At(55)));
     }
 
     [Fact]
@@ -255,7 +203,7 @@ public sealed class PhaseTimerEngineTests
         var paused = Template(30).Pause(At(30));
 
         Assert.True(paused.IsExpired(At(31)));
-        Assert.False(paused.IsWarning(At(31)));
+        Assert.Equal(TimeSpan.Zero, paused.Remaining(At(31)));
     }
 
     [Property(Arbitrary = [typeof(Generators)], MaxTest = 300)]
@@ -275,12 +223,8 @@ public sealed class PhaseTimerEngineTests
 
         var left = TimeSpan.FromSeconds(pattern.Seconds) - running;
         var expected = left < TimeSpan.Zero ? TimeSpan.Zero : left;
-        return timer.Remaining(now) == expected
-            && timer.IsExpired(now) == (expected == TimeSpan.Zero)
-            && timer.IsWarning(now) == (expected > TimeSpan.Zero && expected <= TimeSpan.FromSeconds(PhaseTimerRulesWarning));
+        return timer.Remaining(now) == expected && timer.IsExpired(now) == (expected == TimeSpan.Zero);
     }
-
-    private const int PhaseTimerRulesWarning = PhaseTimerRules.WarningSeconds;
 
     /// <summary>A start time in seconds and run/pause intervals (the running interval is counted, the paused one is not).</summary>
     public sealed record Pattern(int Seconds, IReadOnlyList<(TimeSpan Run, TimeSpan Pause)> Cycles);

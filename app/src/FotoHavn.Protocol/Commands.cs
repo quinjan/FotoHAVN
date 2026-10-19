@@ -42,7 +42,7 @@ public enum LeaveChoice
     KeepEditing,
 }
 
-/// <summary>A Guest Cycle step a guest can go to with the step progress.</summary>
+/// <summary>A Guest Cycle step a guest can go on to with <c>GoToStep</c>. Guests only go forward (protocol version 12).</summary>
 public enum GuestStep
 {
     Template,
@@ -93,6 +93,8 @@ public sealed record SetDefaultLookPayload(string LookId) : ICommandPayload;
 public sealed record SetPhaseTimerPayload(PhaseTimer Phase, int Seconds) : ICommandPayload;
 
 public sealed record SetGuestGalleryPayload(bool Enabled) : ICommandPayload;
+
+public sealed record SetGuestSoundsPayload(bool Enabled) : ICommandPayload;
 
 public sealed record SetPinPayload(string Pin, string Confirmation) : ICommandPayload;
 
@@ -152,8 +154,8 @@ public sealed record BeginGuestCyclePayload : ICommandPayload;
 public sealed record SelectTemplatePayload(string TemplateId) : ICommandPayload;
 
 /// <summary>
-/// Goes to a Guest Cycle step: it is both <c>CONTINUE</c> (to the next step) and <c>BACK</c> (to an earlier one, from the step progress). The brain refuses
-/// Filters until the arrangement is complete, and the step the guest is already on. Keepsake has no command: the brain moves there itself after the Photo Strip is committed.
+/// <c>CONTINUE</c>: goes on to a later Guest Cycle step. Guests never go back (protocol version 12): the brain refuses the step the guest is on and any
+/// earlier one, and Filters until the arrangement is complete. Keepsake has no command: the brain moves there itself after the Photo Strip is committed.
 /// </summary>
 public sealed record GoToStepPayload(GuestStep Step) : ICommandPayload;
 
@@ -162,8 +164,6 @@ public sealed record ShowCameraTabPayload : ICommandPayload;
 public sealed record ShowArrangeTabPayload : ICommandPayload;
 
 public sealed record TakePhotographsPayload : ICommandPayload;
-
-public sealed record StopCapturePayload : ICommandPayload;
 
 public sealed record SelectPositionPayload(int Index) : ICommandPayload;
 
@@ -190,14 +190,6 @@ public sealed record FinishStripPayload : ICommandPayload;
 
 /// <summary><c>TRY AGAIN</c> after a composition failed on Filters: the brain composes again what failed (a Look's preview or the final Photo Strip). Nothing is lost.</summary>
 public sealed record RetryCompositionPayload : ICommandPayload;
-
-public sealed record MoreTimePayload : ICommandPayload;
-
-public sealed record StartOverPayload : ICommandPayload;
-
-public sealed record ConfirmStartOverPayload : ICommandPayload;
-
-public sealed record KeepGoingPayload : ICommandPayload;
 
 // Guest Screen (guest)
 public sealed record BeginExitHoldPayload : ICommandPayload;

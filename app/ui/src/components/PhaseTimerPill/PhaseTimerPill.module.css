@@ -1,0 +1,69 @@
+/* The pill sits in a guest band beside the exit hold; it is a status, not a target, so it is shorter than one. */
+.phaseTimer {
+  display: inline-flex;
+  flex: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-8) var(--space-16) var(--space-8) var(--space-12);
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-round);
+  color: var(--app-tone-ink);
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-duration-standard) var(--motion-easing-editorial),
+    border-color var(--motion-duration-standard) var(--motion-easing-editorial),
+    color var(--motion-duration-standard) var(--motion-easing-editorial);
+}
+
+/* The last 10 seconds: the pill fills with the primary ink, a change of shape as well as of the numbers. */
+.pill[data-low] {
+  border-color: var(--app-tone-action-fill);
+  background-color: var(--app-tone-action-fill);
+  color: var(--app-tone-action-label);
+}
+
+/* Held by the brain: the time stands still in the secondary ink, beside a pause mark. */
+.pill[data-paused]:not([data-low]) {
+  color: var(--app-tone-ink-secondary);
+}
+
+.icon {
+  flex: none;
+  font-size: var(--app-icon-action);
+}
+
+/* Tabular lining figures keep the width steady as the seconds change, so nothing beside the pill shifts. */
+.time {
+  min-inline-size: 3.5ch;
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--typography-subheading-letter-spacing);
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+  text-align: end;
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* High Contrast drops the fill, so the last seconds keep a heavier edge instead. */
+@media (forced-colors: active) {
+  .pill {
+    border-color: CanvasText;
+  }
+
+  .pill[data-low] {
+    border-width: var(--app-stroke-rule-accent);
+  }
+}

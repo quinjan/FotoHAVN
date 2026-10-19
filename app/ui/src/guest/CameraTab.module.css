@@ -1,58 +1,151 @@
 /*
- * The Camera tab (app/DESIGN.md, Photographs: Camera): a Dark Walnut stage that holds the controls on the left and the
- * live preview, dominant, on the right. Nothing scrolls: the preview takes whatever the controls leave and contains its
- * frame in that box.
+ * The Camera tab (app/DESIGN.md, Photographs: Camera, S1): a Dark Walnut band, full width under the top band, that is all
+ * live preview. The capture area takes the band's full height, centred (the window ratios are at most 4:3, so it never
+ * takes the full width), and the picture outside it is dimmed. The tab is a size container, so the band to the right of
+ * the area can be measured for the links out. Nothing scrolls and nothing changes size when the sequence runs.
  */
 .tab {
-  block-size: 100%;
-  min-block-size: 0;
-  padding: var(--app-space-fluid-16) var(--app-gutter) var(--app-space-fluid-24);
-}
-
-.panel {
+  position: relative;
+  container: camera / size;
   display: grid;
-  grid-template-columns: repeat(var(--app-grid-columns), minmax(0, 1fr));
-  align-items: stretch;
-  column-gap: var(--app-space-fluid-32);
   block-size: 100%;
   min-block-size: 0;
-  padding: var(--app-space-fluid-32);
   overflow: hidden;
-  border-radius: var(--radius-hairline);
   background-color: var(--semantic-surface-dark);
   color: var(--app-tone-ink);
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  grid-column: span 4;
-  justify-content: center;
-  align-items: flex-start;
-  gap: var(--app-space-fluid-24);
-  min-block-size: 0;
+.preview {
+  grid-area: 1 / 1;
 }
 
-.shutter {
+/* The photograph count: a glass pill at the bottom centre of the capture area. */
+.count {
+  grid-row: 3;
+  padding: var(--space-12) var(--space-24);
+  border-radius: var(--radius-round);
+  background-color: var(--app-countdown-disc);
+}
+
+/* The whole preview is the one control; its prompt sits at the band's centre, which is the capture area's centre. */
+.start {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--app-tone-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.start[aria-disabled="true"] {
+  cursor: default;
+}
+
+/* The full-band control draws its focus ring inside the band, where the screen doesn't clip it. */
+.start:focus-visible {
+  outline-offset: calc(var(--space-8) * -1);
+}
+
+.prompt {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--app-space-fluid-16);
-  padding-inline: var(--space-8);
+}
+
+/* Glass: Ebony at 64% under Off-white, the countdown disc's tint, so the prompt holds its contrast over any picture. */
+.glassDisc,
+.tap,
+.waiting {
+  background-color: var(--app-countdown-disc);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-editorial),
+    color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+.glassDisc {
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--app-icon-control) * 3.5);
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  font-size: calc(var(--app-icon-control) * 1.5);
+}
+
+.tap {
+  padding: var(--space-16) var(--space-32);
+  border-radius: var(--radius-round);
+  font-family: var(--typography-action-font-family);
+  font-size: var(--app-text-body-lg);
+  font-weight: var(--typography-action-font-weight);
+  letter-spacing: var(--typography-action-letter-spacing);
+  line-height: var(--typography-action-line-height);
+  text-transform: var(--typography-action-text-transform);
+  white-space: nowrap;
+}
+
+/* The camera isn't ready: the disc quietens and the line says why; tapping does nothing. */
+.start[data-state="waiting"] .glassDisc {
+  color: var(--app-tone-ink-secondary);
+}
+
+/* A press answers at once: the glass fills with the ink. */
+.start[data-state="ready"]:active .glassDisc,
+.start[data-state="ready"]:active .tap {
+  background-color: var(--app-tone-action-fill);
+  color: var(--app-tone-action-label);
 }
 
 .waiting {
   max-inline-size: var(--app-measure-supporting);
-  color: var(--app-tone-ink-secondary);
+  padding: var(--space-12) var(--space-24);
+  border-radius: var(--radius-round);
+  font-family: var(--typography-supporting-font-family);
   font-size: var(--app-text-body);
+  font-weight: var(--typography-supporting-font-weight);
   line-height: var(--typography-body-line-height);
   text-align: center;
 }
 
-.stage {
-  position: relative;
-  grid-column: span 8;
-  min-block-size: 0;
-  min-inline-size: 0;
+/* The links out sit in the dimmed band right of the capture area, at its foot, where the primary action sits on every
+   other step; they are above the full-band control, so a tap on them never starts the sequence. */
+.actions {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-8);
+  inline-size: calc((100cqw - min(100cqw, 100cqh * var(--capture-ratio))) / 2);
+  padding: var(--space-12) var(--space-12) var(--app-space-fluid-16);
+  text-align: center;
+  pointer-events: none;
+}
+
+.actions > * {
+  pointer-events: auto;
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
   overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .glassDisc,
+  .tap,
+  .waiting,
+  .count {
+    border: var(--stroke-hairline) solid CanvasText;
+  }
 }

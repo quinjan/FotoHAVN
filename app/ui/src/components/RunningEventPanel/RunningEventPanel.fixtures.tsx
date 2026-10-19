@@ -46,7 +46,7 @@ export const fixtures: readonly ComponentFixture[] = [
         {...running}
         step="operator-assistance"
         guestDisplay="disconnected"
-        assistanceReason="The guest display is disconnected. Reconnect it, then retry."
+        assistance={{ reason: "The guest display isn't connected.", fix: "Reconnect it, then RETRY." }}
       />
     ),
   },
@@ -61,7 +61,7 @@ export const fixtures: readonly ComponentFixture[] = [
           {...running}
           step="operator-assistance"
           camera="not-available"
-          assistanceReason="The camera stopped sending pictures. Check its cable, then retry."
+          assistance={{ reason: "The camera stopped sending pictures.", fix: "Check its cable, then RETRY." }}
         />
       </FocusFirst>
     ),

@@ -33,7 +33,7 @@ async function liftLimit(field: Locator): Promise<void> {
 }
 
 test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
-  test("each required field and range rule blocks SAVE with its message and moves focus to the first invalid field", async ({
+  test("each required field and range rule blocks SAVE with its message, an error summary that takes focus, and a link to the first invalid field", async ({
     app,
     operatorPage,
     camera,
@@ -44,11 +44,13 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     const list = new EventListScreen(operatorPage);
     await expect(list.empty).toBeVisible();
 
-    /** SAVE (on the Guests step) is answered with the field's error text, its step opened, and focus on the first invalid control; nothing is saved. */
+    /** SAVE (on the Guests step) is answered with the field's error text and the error summary focused; its first link opens the field's step and focuses the first invalid control; nothing is saved. */
     async function expectBlocked(setup: EventSetupScreen, rule: Rule): Promise<void> {
       await setup.goTo("Guests");
       await setup.save.click();
+      await expect(setup.errorSummary).toBeFocused();
       await expect(rule.field).toHaveAccessibleDescription(rule.text);
+      await setup.errorSummary.getByRole("button").first().click();
       await expect(rule.focus ?? rule.field).toBeFocused();
       if (rule.single !== false) {
         await expect(setup.statusLine(oneThing)).toBeVisible();
@@ -207,7 +209,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
       await setup.goTo("Timing");
       const timer = setup.timer("Template");
       await timer.fill("10");
-      await expectBlocked(setup, { field: timer, text: /Enter 0 to turn it off, or 20 to 300 seconds\./ });
+      await expectBlocked(setup, { field: timer, text: /Enter 20 to 300 seconds\./ });
       await timer.fill("30");
       await expectValid(setup);
     });

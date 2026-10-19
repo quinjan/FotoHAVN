@@ -47,12 +47,11 @@ test(
       await expect(run.list.runningFact("step")).toHaveText("Photographs");
       await expect(run.list.runningFact("display")).toHaveText("Connected");
 
-      await test.step("the sequence continues from the next empty window", async () => {
-        await tap(reopened.takePhotographs);
-        await run.waitForFilled(2, 30_000);
-        await run.stopCapture(reopened);
+      await test.step("a tap on the preview continues from the next empty window until every window is filled", async () => {
+        await run.takePhotographsUntil(reopened, 4);
+        await run.waitForStep("photographs", "arrange");
         const cycle = await run.onlyCycle();
-        expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept", "2:kept"]);
+        expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept", "2:kept", "3:kept", "4:kept"]);
         run.expectCaptureFiles(cycle.id);
       });
     });

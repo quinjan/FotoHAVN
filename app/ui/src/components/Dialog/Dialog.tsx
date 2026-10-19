@@ -72,7 +72,7 @@ function handleKeyDown(event: KeyboardEvent, panel: HTMLElement, onCancel: () =>
 }
 
 export interface DialogProps {
-  /** The sentence-case title, e.g. "Start over?". It labels the dialog. */
+  /** The sentence-case title, e.g. "End this Event?". It labels the dialog. */
   readonly title: string;
   /** The short line under the title, e.g. "Your photographs stay with the Event, but no strip will be made." It describes the dialog. */
   readonly description?: string;
@@ -93,8 +93,8 @@ export interface DialogProps {
 
 /**
  * A modal dialog (app/DESIGN.md, Dialogs): an Off-white panel with an 8 radius and a Hairline border over an Ebony
- * scrim at about 32%, above every view but the exit hold (`--app-z-dialog`). Use it for the Start Over confirmation,
- * the Operator PIN, and operator confirmations, on either screen.
+ * scrim at about 32%, above every view but the exit hold (`--app-z-dialog`). Use it for the Operator PIN and operator
+ * confirmations, on either screen.
  *
  * Render it while it is open and unmount it to close. It focuses `initialFocus` (or its first control) on open, keeps
  * Tab and Shift+Tab inside, cancels on Escape, and returns focus to the element that opened it when it closes. It

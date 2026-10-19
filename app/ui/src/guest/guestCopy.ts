@@ -26,6 +26,9 @@ export interface UnavailableCopy {
   readonly supporting: string;
 }
 
+/** Said under the Start unavailable statement after a long wait; CSS reveals it after about 25 seconds. Neutral, no cause named. */
+export const startUnavailableWaitHint = "If this takes a while, please ask the FOTOHAVN team.";
+
 /** Start unavailable, by reason: calm and neutral. The brand's "A little interruption." is Operator Assistance, not this. */
 export function startUnavailableCopy(reason: StartUnavailableReason): UnavailableCopy {
   return reason === "camera"

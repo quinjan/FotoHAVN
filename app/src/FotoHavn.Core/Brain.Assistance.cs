@@ -37,7 +37,6 @@ public sealed partial class Brain
         BrainLog.AssistanceEntered(_logger, reason);
         if (CurrentRun is { } run)
         {
-            run.StartOverOpen = false;
             if (run.Sequence is { } sequence)
             {
                 InterruptSequence(run, sequence);

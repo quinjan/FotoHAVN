@@ -74,7 +74,7 @@ public sealed class GuestCycleCaptureTests
     {
         using var rig = await OnCameraTabAsync();
         rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.Equal(new CaptureSequenceView(true, 0, 5, 0, 0, 4, false), rig.Photographs.Sequence);
+        Assert.Equal(new CaptureSequenceView(true, 0, 5, 0, 0, 4, false, true), rig.Photographs.Sequence);
         Assert.False(rig.Photographs.CanTakePhotographs);
 
         var samples = Sample(rig, () => !rig.Photographs.Sequence.Running);
@@ -88,7 +88,7 @@ public sealed class GuestCycleCaptureTests
         Assert.True(view.CanContinue);
         Assert.True(view.CanReview);
         Assert.False(view.CanTakePhotographs);
-        Assert.Equal(new CaptureSequenceView(false, null, null, 4, 0, 0, false), view.Sequence);
+        Assert.Equal(new CaptureSequenceView(false, null, null, 4, 0, 0, false, true), view.Sequence);
         Assert.Equal(4, view.Revision);
     }
 
@@ -139,6 +139,19 @@ public sealed class GuestCycleCaptureTests
 
         // The Event mirrors: the encoder was handed each frame with its row reversed.
         Assert.Equal(recorder.Captures.Select(capture => capture.LastPixelOfRow), rig.Encoder.Frames.Select(frame => frame.FirstPixel));
+    }
+
+    [Fact]
+    public async Task The_sequence_carries_the_Events_Guest_sounds_setting_whether_or_not_a_sequence_runs()
+    {
+        using var on = await OnCameraTabAsync();
+        using var off = await OnCameraTabAsync(new GuestRigOptions { Tweak = record => record with { GuestSoundsEnabled = false } });
+
+        Assert.True(on.Photographs.Sequence.SoundsOn);
+        Assert.False(off.Photographs.Sequence.SoundsOn);
+        off.Guest("TakePhotographs").ShouldBeAccepted();
+        Assert.False(off.Photographs.Sequence.SoundsOn);
+        Assert.True(off.Photographs.Sequence.Running);
     }
 
     [Fact]
@@ -204,78 +217,19 @@ public sealed class GuestCycleCaptureTests
     }
 
     [Fact]
-    public async Task STOP_cancels_the_remaining_countdown_keeps_the_saved_Captures_and_restarts_the_capture_timer()
+    public async Task A_running_capture_sequence_cannot_be_stopped_STOP_is_an_unknown_command()
     {
         using var rig = await OnCameraTabAsync();
         rig.Guest("TakePhotographs").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => rig.Photographs.Windows[0].CaptureId is not null && rig.Photographs.Sequence.CountdownRemaining == 4, TimeSpan.FromSeconds(30), Tick));
+
+        rig.Guest("StopCapture").ShouldBeRejected(RejectReason.UnknownCommand);
+
+        Assert.True(rig.Photographs.Sequence.Running);
         Assert.True(rig.CycleDiagnostics().Timer.Paused);
-
-        rig.Guest("StopCapture").ShouldBeAccepted();
-
-        var view = rig.Photographs;
-        Assert.False(view.Sequence.Running);
-        Assert.Equal(1, view.Windows.Count(window => window.CaptureId is not null));
-        Assert.Equal(PhotographsTabName.Camera, view.Tab);
-        Assert.True(view.CanTakePhotographs);
-        var timer = rig.CycleDiagnostics().Timer;
-        Assert.Equal(PhaseTimer.PhotographsCapture, timer.Phase);
-        Assert.Equal(30_000, timer.RemainingMs);
-        Assert.False(timer.Paused);
-
-        // The next sequence fills only what is empty.
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.Equal(new CaptureSequenceView(true, 1, 5, 1, 0, 3, false), rig.Photographs.Sequence);
         Assert.True(rig.AdvanceUntil(() => !rig.Photographs.Sequence.Running, TimeSpan.FromMinutes(2), Tick));
         Assert.All(rig.Photographs.Windows, window => Assert.NotNull(window.CaptureId));
-    }
-
-    [Fact]
-    public async Task STOP_after_the_frame_is_taken_still_saves_that_Capture_and_then_ends_the_sequence()
-    {
-        using var rig = await OnCameraTabAsync();
-        rig.Store.CommitGate = new TaskCompletionSource();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.FlashSequence == 1, TimeSpan.FromSeconds(20), Tick));
-
-        rig.Guest("StopCapture").ShouldBeAccepted();
-        Assert.True(rig.Photographs.Sequence.Running);
-
-        rig.Store.CommitGate.SetResult();
-        rig.Store.CommitGate = null;
-        rig.Settle();
-        Assert.NotNull(rig.Photographs.Windows[0].CaptureId);
-        Assert.True(rig.AdvanceUntil(() => !rig.Photographs.Sequence.Running, TimeSpan.FromSeconds(5), Tick));
-        Assert.Equal(1, rig.Photographs.Windows.Count(window => window.CaptureId is not null));
-        Assert.Equal(1, rig.Photographs.Sequence.FlashSequence);
-    }
-
-    [Fact]
-    public async Task STOP_during_the_pause_ends_the_sequence_at_once()
-    {
-        using var rig = await OnCameraTabAsync();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.Pausing, TimeSpan.FromSeconds(20), Tick));
-
-        rig.Guest("StopCapture").ShouldBeAccepted();
-
-        Assert.False(rig.Photographs.Sequence.Running);
-        rig.Guest("StopCapture").ShouldBeRejected();
-    }
-
-    [Fact]
-    public async Task A_stop_that_arrives_just_as_a_countdown_tick_does_is_not_undone_by_the_tick()
-    {
-        using var rig = await OnCameraTabAsync();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-
-        // The stop is queued first; the tick the clock fires next lands after it and finds the sequence gone.
-        rig.Active.Guest!.Command("StopCapture");
-        rig.Clock.Advance(TimeSpan.FromSeconds(1));
-        rig.Settle();
-
-        Assert.False(rig.Photographs.Sequence.Running);
-        Assert.Null(rig.Photographs.Sequence.CountdownRemaining);
+        Assert.Equal(4, rig.Photographs.Sequence.FlashSequence);
     }
 
     [Fact]
@@ -291,7 +245,7 @@ public sealed class GuestCycleCaptureTests
         var view = rig.Photographs;
         Assert.Equal(PhotographsTabName.Camera, view.Tab);
         Assert.Equal(new PhotographSelectionView(2, PhotographSelectionMode.Retaking), view.Selection);
-        Assert.Equal(new CaptureSequenceView(true, 2, 5, 4, 0, 1, false), view.Sequence);
+        Assert.Equal(new CaptureSequenceView(true, 2, 5, 4, 0, 1, false, true), view.Sequence);
         Assert.Equal(600.0 / 450.0, view.CropAspect, 6);
         Assert.False(view.CanReview);
 
@@ -346,7 +300,7 @@ public sealed class GuestCycleCaptureTests
         rig.Guest("TryAgain").ShouldBeAccepted();
 
         Assert.Null(rig.Photographs.RetakeCandidate);
-        Assert.Equal(new CaptureSequenceView(true, 1, 5, 5, 0, 1, false), rig.Photographs.Sequence);
+        Assert.Equal(new CaptureSequenceView(true, 1, 5, 5, 0, 1, false, true), rig.Photographs.Sequence);
         Assert.Equal(PhotographsTabName.Camera, rig.Photographs.Tab);
         Assert.True(rig.AdvanceUntil(() => rig.Photographs.RetakeCandidate is not null, TimeSpan.FromSeconds(30), Tick));
         Assert.NotEqual(firstCandidate, rig.Photographs.RetakeCandidate!.ImageUrl);
@@ -386,17 +340,21 @@ public sealed class GuestCycleCaptureTests
     }
 
     [Fact]
-    public async Task STOP_during_a_Retake_countdown_cancels_it_and_restarts_the_timer()
+    public async Task KEEP_ORIGINAL_waits_once_the_Retakes_frame_is_taken_and_the_candidate_then_arrives()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
+        rig.Store.CommitGate = new TaskCompletionSource();
         rig.Guest("BeginRetake", """{"index":3}""").ShouldBeAccepted();
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.FlashSequence == 5, TimeSpan.FromSeconds(20), Tick));
 
-        rig.Guest("StopCapture").ShouldBeAccepted();
+        rig.Guest("KeepOriginal").ShouldBeRejected();
 
-        Assert.False(rig.Photographs.Sequence.Running);
-        Assert.Equal(PhotographsTabName.Arrange, rig.Photographs.Tab);
-        Assert.Equal(45_000, rig.CycleDiagnostics().Timer.RemainingMs);
+        rig.Store.CommitGate.SetResult();
+        rig.Store.CommitGate = null;
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.RetakeCandidate is not null, TimeSpan.FromSeconds(5), Tick));
+        rig.Guest("KeepOriginal").ShouldBeAccepted();
+        Assert.Null(rig.Photographs.RetakeCandidate);
     }
 
     [Fact]
@@ -423,21 +381,20 @@ public sealed class GuestCycleCaptureTests
     }
 
     [Fact]
-    public async Task Going_on_or_back_during_a_countdown_cancels_it_but_waits_for_a_frame_already_taken()
+    public async Task Neither_going_on_nor_going_back_interrupts_a_running_sequence_or_Retake()
     {
         using var rig = await OnCameraTabAsync();
         rig.Guest("TakePhotographs").ShouldBeAccepted();
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        Assert.Equal(GuestSurface.Template, rig.Surface);
-        rig.ToPhotographs();
-        Assert.False(rig.Photographs.Sequence.Running);
 
-        rig.Store.CommitGate = new TaskCompletionSource();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.FlashSequence == 1, TimeSpan.FromSeconds(20), Tick));
         rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
-        rig.Store.CommitGate.SetResult();
-        rig.Store.CommitGate = null;
+        rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeRejected();
+        Assert.True(rig.Photographs.Sequence.Running);
+        Assert.True(rig.AdvanceUntil(() => !rig.Photographs.Sequence.Running, TimeSpan.FromMinutes(2), Tick));
+
+        rig.Guest("BeginRetake", """{"index":1}""").ShouldBeAccepted();
+        rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeRejected();
+        Assert.True(rig.Photographs.Sequence.Running);
+        Assert.Equal(GuestSurface.Photographs, rig.Surface);
     }
 
     private static Task RetakeToCandidateAsync(GuestCycleRig rig, int index)

@@ -126,4 +126,13 @@ describe("TextField", () => {
     expect(screen.getByRole("textbox", { name: "Printer" })).toHaveValue("No printer");
     expect(screen.getByRole("textbox", { name: "Venue" })).toBeDisabled();
   });
+
+  it("writes a unit after the box without making it part of the name, and can keep the label for assistive technology only", () => {
+    render(<TextField label="Template seconds" hideLabel suffix="s" invalid value="45" onChange={vi.fn()} />);
+    const input = screen.getByRole("textbox", { name: "Template seconds" });
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("s")).toHaveAttribute("aria-hidden", "true");
+    expect(input.parentElement).toContainElement(screen.getByText("s"));
+    expect(screen.getByText("Template seconds").closest("div")?.className).toContain("visuallyHidden");
+  });
 });

@@ -90,23 +90,25 @@ test(
       await expect(guest.stepInside).not.toHaveAttribute("aria-disabled", "true", { timeout: 20_000 });
     });
 
-    await test.step("Template, then its Phase Timer warning", async () => {
+    await test.step("Template, then its Phase Timer in the last 10 seconds", async () => {
       await tap(guest.stepInside);
       await record("template", async (g) => {
         await expect(g.surface("template")).toBeVisible();
+        await expect(g.phaseTimer).toBeVisible();
       });
-      await expect.poll(async () => (await run.cycle())?.timer.warning, { timeout: 40_000 }).toBe(true);
-      await record("template-warning", async (g) => {
-        await expect(g.warning).toBeVisible();
+      await expect.poll(async () => (await run.cycle())?.timer.remainingMs ?? Infinity, { timeout: 40_000 }).toBeLessThanOrEqual(10_000);
+      await record("template-timer-low", async (g) => {
+        await expect(g.phaseTimer).toHaveAttribute("data-low", "true");
       });
       await tap(guest.templateContinue);
       await run.waitForStep("photographs", "camera");
     });
 
-    await test.step("Photographs: Camera idle, and the countdown of the first photograph", async () => {
+    await test.step("Photographs: Camera ready to tap, and the countdown of the first photograph", async () => {
       await record("photographs-camera", async (g) => {
         await expect(g.surface("photographs")).toBeVisible();
         await expect(g.takePhotographs).not.toHaveAttribute("aria-disabled", "true");
+        await expect(g.tapToStart).toBeVisible();
       });
       await tap(guest.takePhotographs);
       await expect.poll(async () => (await run.cycle())?.countdownRemaining ?? 0, { timeout: 15_000 }).toBeGreaterThanOrEqual(9);
@@ -118,7 +120,7 @@ test(
       await run.waitForStep("photographs", "arrange");
     });
 
-    await test.step("Photographs: Arrange, with a photograph selected, a Retake candidate, and the Start Over question", async () => {
+    await test.step("Photographs: Arrange, with a photograph selected, and a Retake candidate", async () => {
       await record("photographs-arrange", async (g) => {
         await expect(g.windowButton(4)).toBeVisible();
       });
@@ -128,18 +130,12 @@ test(
         await expect(g.page.getByText("Photograph 2 is selected.")).toBeVisible();
       });
       await tap(guest.retake);
-      await expect(guest.accept).toBeVisible({ timeout: 40_000 });
+      await run.retakeCapture(guest);
       await record("photographs-retake-candidate", async (g) => {
         await expect(g.accept).toBeVisible();
       });
       await tap(guest.keepOriginal);
       await expect(guest.accept).toHaveCount(0);
-      await tap(guest.startOver);
-      await record("start-over-question", async (g) => {
-        await expect(g.confirmDialog).toBeVisible();
-      });
-      await tap(guest.keepGoing());
-      await expect(guest.confirmDialog).toHaveCount(0);
     });
 
     await test.step("Filters, and Operator Assistance when the camera fails there", async () => {

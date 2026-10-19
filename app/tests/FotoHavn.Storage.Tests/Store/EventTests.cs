@@ -41,6 +41,7 @@ public sealed class EventTests
             GuestDisplayName = null,
             Mirror = false,
             GuestGalleryEnabled = false,
+            GuestSoundsEnabled = false,
             CountdownSeconds = 10,
             PhaseTimers = [],
             OfferedTemplateIds = ["a"],
@@ -57,6 +58,7 @@ public sealed class EventTests
         Assert.Null(read.CameraName);
         Assert.False(read.Mirror);
         Assert.False(read.GuestGalleryEnabled);
+        Assert.False(read.GuestSoundsEnabled);
         Assert.Equal(10, read.CountdownSeconds);
         Assert.Empty(read.PhaseTimers);
         Assert.Equal(harness.Clock.UtcNow, read.CreatedAt);
@@ -133,6 +135,7 @@ public sealed class EventTests
             EventDate = new DateOnly(2027, 1, 2),
             Venue = null,
             Mirror = false,
+            GuestSoundsEnabled = false,
             CountdownSeconds = 3,
             OfferedTemplateIds = ["only"],
             OfferedLookIds = ["classic-v1", "sepia-v1"],
@@ -148,6 +151,7 @@ public sealed class EventTests
         Assert.Equal(new DateOnly(2027, 1, 2), read.EventDate);
         Assert.Null(read.Venue);
         Assert.False(read.Mirror);
+        Assert.False(read.GuestSoundsEnabled);
         Assert.Equal(3, read.CountdownSeconds);
         Assert.Equal(["only"], read.OfferedTemplateIds);
         Assert.Equal(["classic-v1", "sepia-v1"], read.OfferedLookIds);
@@ -246,7 +250,7 @@ public sealed class EventTests
             && x.Id == y.Id && x.Name == y.Name && x.EventDate == y.EventDate && x.Venue == y.Venue && x.CustomerName == y.CustomerName
             && x.Notes == y.Notes && x.CameraDeviceId == y.CameraDeviceId && x.CameraName == y.CameraName && x.GuestDisplayId == y.GuestDisplayId
             && x.GuestDisplayName == y.GuestDisplayName && x.Printer == y.Printer && x.Mirror == y.Mirror && x.CountdownSeconds == y.CountdownSeconds
-            && x.DefaultTemplateId == y.DefaultTemplateId && x.DefaultLookId == y.DefaultLookId && x.GuestGalleryEnabled == y.GuestGalleryEnabled
+            && x.DefaultTemplateId == y.DefaultTemplateId && x.DefaultLookId == y.DefaultLookId && x.GuestGalleryEnabled == y.GuestGalleryEnabled && x.GuestSoundsEnabled == y.GuestSoundsEnabled
             && x.CreatedAt == y.CreatedAt && x.UpdatedAt == y.UpdatedAt && x.HasPin == y.HasPin;
 
         public int GetHashCode(EventRecord obj) => obj.Id.GetHashCode(StringComparison.Ordinal);

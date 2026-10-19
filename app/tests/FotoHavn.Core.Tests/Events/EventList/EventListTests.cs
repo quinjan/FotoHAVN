@@ -388,6 +388,7 @@ public sealed class EventListTests
         Assert.True(setup.Mirror);
         Assert.Equal(5, setup.CountdownSeconds);
         Assert.False(setup.GuestGalleryEnabled);
+        Assert.True(setup.GuestSoundsEnabled);
         Assert.Equal(PrinterChoice.None, setup.Printer);
         Assert.All(setup.Templates, template => Assert.True(template.Offered));
         Assert.Equal("signature-strip", setup.Templates.Single(template => template.IsDefault).Id);

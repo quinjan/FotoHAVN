@@ -42,11 +42,8 @@ internal sealed class CaptureSequence(long operationId, OperationMode mode, int 
     /// <summary>The moment the countdown reached zero on the brain's clock: the Capture's taken-at time.</summary>
     public DateTimeOffset TakenAt { get; set; }
 
-    /// <summary>The sequence ends after the Capture in flight (a Stop, or an Operator Assistance that began meanwhile).</summary>
+    /// <summary>The sequence ends after the Capture in flight (an Operator Assistance began meanwhile). Guests can't stop a sequence (protocol version 12).</summary>
     public bool StopRequested { get; set; }
-
-    /// <summary>Whether ending it restarts the capture timer (the guest stopped it) rather than leaving the timer to its next phase.</summary>
-    public bool RestartsTimer { get; set; }
 
     /// <summary>The camera took too long to answer.</summary>
     public bool TimedOut { get; set; }
@@ -98,7 +95,7 @@ internal sealed class GuestCycleRun(ActiveEventState active, string id, GuestCyc
 
     public bool FiltersSkipped => filtersSkipped;
 
-    /// <summary>The cycle ended in the brain (start over, exit, Event ended, or back at Start after the Keepsake): every late result is dropped.</summary>
+    /// <summary>The cycle ended in the brain (the Event ended, or back at Start after the Keepsake): every late result is dropped.</summary>
     public bool Ended { get; set; }
 
     /// <summary>The Photo Strip is committed: the store recorded the cycle completed. The Keepsake step only shows it.</summary>
@@ -111,8 +108,6 @@ internal sealed class GuestCycleRun(ActiveEventState active, string id, GuestCyc
     public long FlashSequence { get; set; }
 
     public CaptureSequence? Sequence { get; set; }
-
-    public bool StartOverOpen { get; set; }
 
     /// <summary>The final Photo Strip is being composed or committed: the guest can't act.</summary>
     public bool Finishing { get; set; }
@@ -132,7 +127,7 @@ internal sealed class GuestCycleRun(ActiveEventState active, string id, GuestCyc
 
     public int TimerGeneration { get; set; }
 
-    /// <summary>The JPEG of every Capture the cycle holds (windows, retained pool, candidate): the compositor takes its photographs from here.</summary>
+    /// <summary>The JPEG of every Capture the cycle holds (windows and a Retake candidate): the compositor takes its photographs from here.</summary>
     public Dictionary<string, byte[]> Jpegs { get; } = new(StringComparer.Ordinal);
 
     /// <summary>Strip previews composed, by Template, Look, and arrangement revision.</summary>

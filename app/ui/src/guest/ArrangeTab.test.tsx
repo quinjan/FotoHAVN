@@ -202,9 +202,32 @@ describe("ArrangeTab", () => {
 
       expect(screen.getByText("Choose where photograph 2 goes.")).toBeVisible();
       expect(screen.getByRole("button", { name: "Photograph 2, moving" })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole("button", { name: "Swap with position 4" }));
+      fireEvent.click(screen.getByRole("button", { name: "Move here: swap with position 4" }));
 
       expect(stub.sent).toEqual([{ name: "MoveTo", payload: { index: 3 } }]);
+    });
+
+    it("labels every destination Move here in text, and the source not at all", () => {
+      const { container } = renderPhotographs(movingSecond(), stubClient());
+
+      const labels = [...container.querySelectorAll("[data-arrange-strip] button")].map((cell) => ({
+        moving: cell.hasAttribute("data-moving"),
+        label: cell.textContent.replace(/^\d+/, ""),
+      }));
+      expect(labels.length).toBeGreaterThanOrEqual(4);
+      for (const { moving, label } of labels) {
+        expect(label).toBe(moving ? "" : "Move here");
+      }
+      expect(labels.filter(({ moving }) => moving)).toHaveLength(1);
+      for (const destination of screen.getAllByRole("button", { name: /^Move here: / })) {
+        expect(destination).toHaveAccessibleName(/^Move here: /);
+      }
+    });
+
+    it("never shows the label outside a Move", () => {
+      const { container } = renderPhotographs(photographsOf("guest-cycle-photographs-arrange"), stubClient());
+
+      expect(container.textContent).not.toContain("Move here");
     });
 
     it("can move into an empty window", () => {
@@ -214,7 +237,7 @@ describe("ArrangeTab", () => {
         stub,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "Move to position 4" }));
+      fireEvent.click(screen.getByRole("button", { name: "Move here: position 4" }));
 
       expect(stub.sent).toEqual([{ name: "MoveTo", payload: { index: 3 } }]);
     });
@@ -234,9 +257,9 @@ describe("ArrangeTab", () => {
       renderPhotographs(movingSecond(), stub);
       layOut();
 
-      press(screen.getByRole("button", { name: "Swap with position 1" }), 50, 45);
-      move(screen.getByRole("button", { name: "Swap with position 1" }), 50, 245);
-      release(screen.getByRole("button", { name: "Swap with position 1" }), 50, 245);
+      press(screen.getByRole("button", { name: "Move here: swap with position 1" }), 50, 45);
+      move(screen.getByRole("button", { name: "Move here: swap with position 1" }), 50, 245);
+      release(screen.getByRole("button", { name: "Move here: swap with position 1" }), 50, 245);
 
       expect(dragged(stub.sent)).toEqual([]);
     });
@@ -408,7 +431,7 @@ describe("ArrangeTab", () => {
       moving.show(photographsOf("guest-cycle-photographs-arrange", { selection: { index: 0, mode: "selected" } }));
       fireEvent.click(screen.getByRole("button", { name: "MOVE" }));
       moving.show(photographsOf("guest-cycle-photographs-arrange", { selection: { index: 0, mode: "moving" } }));
-      fireEvent.click(screen.getByRole("button", { name: "Swap with position 3" }));
+      fireEvent.click(screen.getByRole("button", { name: "Move here: swap with position 3" }));
 
       const [placed] = dragged(dragStub.sent);
       const begin = moveStub.sent.find((command) => command.name === "BeginMove");
@@ -478,19 +501,6 @@ describe("ArrangeTab", () => {
     });
   });
 
-  describe("the retained pool", () => {
-    it("shows only a count, in the voice, and nothing when none are kept", () => {
-      const view = renderPhotographs(photographsOf("guest-ui-arrange-retained"), stubClient());
-      expect(screen.getByText("1 more photograph is kept for this Event.")).toBeVisible();
-
-      view.show(photographsOf("guest-ui-arrange-retained", { retainedCount: 3 }));
-      expect(screen.getByText("3 more photographs are kept for this Event.")).toBeVisible();
-
-      view.show(photographsOf("guest-ui-arrange-retained", { retainedCount: 0 }));
-      expect(screen.queryByText(/kept for this Event/)).toBeNull();
-    });
-  });
-
   describe("live regions", () => {
     const announcements = (container: HTMLElement) =>
       [...container.querySelectorAll("[aria-live='polite']")].map((region) => region.textContent).filter((text) => text !== "");
@@ -517,7 +527,7 @@ describe("ArrangeTab", () => {
 
         show(candidate);
         expect(announcements(container)).toEqual([ready]);
-        show({ ...candidate, retainedCount: 2 });
+        show({ ...candidate, selection: { ...candidate.selection } });
         expect(announcements(container)).toEqual([ready]);
       });
 

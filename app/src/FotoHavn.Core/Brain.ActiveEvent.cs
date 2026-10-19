@@ -165,7 +165,7 @@ public sealed partial class Brain
                 : new PinDialogOverlay(active.LastPinWrong && attemptsRemaining < PinRules.MaxWrongAttempts ? PinDialogError.WrongPin : null, null, attemptsRemaining);
         }
 
-        return new GuestOverlays(exitHold, pinDialog, null, null, null);
+        return new GuestOverlays(exitHold, pinDialog, null, null);
     }
 
     private GuestPresentation RenderGuest() => _fatalReason is { } reason

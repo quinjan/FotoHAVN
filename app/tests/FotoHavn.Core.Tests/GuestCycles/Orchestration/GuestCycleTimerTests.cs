@@ -1,10 +1,11 @@
 using FotoHavn.Core.Storage;
 using FotoHavn.Protocol;
+using FotoHavn.Protocol.Cameras;
 using FotoHavn.Protocol.Presentations;
 
 namespace FotoHavn.Core.Tests.GuestCycles.Orchestration;
 
-/// <summary>The Phase Timers (plan section 7, Phase timers, D18): each phase's outcome, the warning and MORE TIME, pausing, restarting, and the timer's absence.</summary>
+/// <summary>The Phase Timers (plan section 7, Phase timers, D18): each phase's outcome, the always-visible timer with no MORE TIME, pausing, restarting, and the timer's absence.</summary>
 public sealed class GuestCycleTimerTests
 {
     private static readonly TimeSpan Fine = TimeSpan.FromMilliseconds(100);
@@ -15,6 +16,24 @@ public sealed class GuestCycleTimerTests
 
     private static bool Reaches(GuestCycleRig rig, GuestSurface surface, int seconds, TimeSpan? step = null) =>
         rig.AdvanceUntil(() => rig.Surface == surface, TimeSpan.FromSeconds(seconds), step ?? Coarse);
+
+    /// <summary>
+    /// Leaves the cycle on the Camera tab with window 0 filled and the rest empty and no sequence running. Guests can't stop a sequence, so only
+    /// Operator Assistance interrupts one: the camera fails during the second countdown, and RETRY brings the cycle back.
+    /// </summary>
+    private static void InterruptAfterFirstCapture(GuestCycleRig rig)
+    {
+        rig.Guest("TakePhotographs").ShouldBeAccepted();
+        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Windows[0].CaptureId is not null && rig.Photographs.Sequence.CountdownRemaining == 4, TimeSpan.FromSeconds(30), Fine));
+        rig.Active.Camera.Fail(CameraFailureKind.Failed);
+        rig.Settle();
+        Assert.Equal(GuestSurface.OperatorAssistance, rig.Surface);
+        rig.Active.Camera.Recover();
+        rig.Guest("RetryAssistance").ShouldBeAccepted();
+        rig.Advance(TimeSpan.FromSeconds(1), Fine);
+        Assert.Equal(GuestSurface.Photographs, rig.Surface);
+        Assert.False(rig.Photographs.Sequence.Running);
+    }
 
     [Fact]
     public async Task The_Template_timer_continues_with_the_selected_Template()
@@ -44,7 +63,7 @@ public sealed class GuestCycleTimerTests
     }
 
     [Fact]
-    public async Task A_timer_the_operator_turned_off_waits_at_its_phase()
+    public async Task A_timer_the_operator_turned_off_waits_at_its_phase_and_shows_no_timer()
     {
         using var rig = await GuestCycleRig.CreateAsync(With(template: 0, filters: 0));
         rig.Begin();
@@ -54,13 +73,31 @@ public sealed class GuestCycleTimerTests
 
         rig.Advance(TimeSpan.FromMinutes(10), Coarse);
         Assert.Equal(GuestSurface.Template, rig.Surface);
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
+        Assert.Null(rig.View.Overlays.PhaseTimer);
 
         rig.ToPhotographs();
+        Assert.Equal(PhaseTimer.PhotographsCapture, rig.View.Overlays.PhaseTimer!.Phase);
         rig.TakeAll();
         rig.ToFilters();
         rig.Advance(TimeSpan.FromMinutes(10), Coarse);
         Assert.Equal(GuestSurface.Filters, rig.Surface);
+        Assert.Null(rig.View.Overlays.PhaseTimer);
+    }
+
+    [Fact]
+    public async Task A_cycle_abandoned_at_a_phase_with_its_timer_off_is_cleared_only_by_ending_the_Event()
+    {
+        using var rig = await GuestCycleRig.CreateAsync(With(template: 0));
+        rig.Begin();
+        rig.Advance(TimeSpan.FromMinutes(30), Coarse);
+        Assert.Equal(GuestSurface.Template, rig.Surface);
+
+        rig.Operator("EndEvent").ShouldBeAccepted();
+        rig.Operator("ConfirmEndEvent").ShouldBeAccepted();
+        rig.Settle();
+
+        var ended = Assert.Single(rig.Store.Ended);
+        Assert.Equal(GuestCycleEndReason.OperatorExit, ended.Reason);
     }
 
     [Fact]
@@ -80,36 +117,50 @@ public sealed class GuestCycleTimerTests
     }
 
     [Fact]
-    public async Task The_warning_shows_in_the_last_20_seconds_counting_down_once_a_second()
+    public async Task The_timer_shows_for_the_whole_phase_counting_down_once_a_second()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.Begin();
-
-        rig.Advance(TimeSpan.FromSeconds(9), Fine);
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
-        Assert.False(rig.CycleDiagnostics().Timer.Warning);
 
         var shown = new List<int>();
         Assert.True(rig.AdvanceUntil(
             () =>
             {
-                if (rig.View.Overlays.PhaseTimerWarning is { } warning)
+                if (rig.View.Overlays.PhaseTimer is { Phase: PhaseTimer.Template } timer)
                 {
-                    Assert.Equal(PhaseTimer.Template, warning.Phase);
-                    shown.Add(warning.RemainingSeconds);
+                    Assert.False(timer.Paused);
+                    shown.Add(timer.RemainingSeconds);
                 }
 
                 return rig.Surface != GuestSurface.Template;
             },
-            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(35),
             Fine));
 
-        Assert.Equal(Enumerable.Range(1, 20).Reverse(), shown.Distinct());
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
+        Assert.Equal(Enumerable.Range(1, 30).Reverse(), shown.Distinct());
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.PhotographsCapture, 30, false), rig.View.Overlays.PhaseTimer);
     }
 
     [Fact]
-    public async Task The_warning_is_in_the_diagnostics()
+    public async Task The_timer_is_pushed_each_time_the_whole_second_it_shows_changes()
+    {
+        using var rig = await GuestCycleRig.CreateAsync();
+        rig.Begin();
+        var previous = rig.View.Overlays.PhaseTimer!.RemainingSeconds;
+
+        for (var step = 0; step < 50; step++)
+        {
+            rig.Advance(TimeSpan.FromMilliseconds(100));
+            var now = rig.View.Overlays.PhaseTimer!.RemainingSeconds;
+            Assert.InRange(previous - now, 0, 1);
+            previous = now;
+        }
+
+        Assert.Equal(25, previous);
+    }
+
+    [Fact]
+    public async Task The_diagnostics_carry_the_time_left()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.Begin();
@@ -117,37 +168,32 @@ public sealed class GuestCycleTimerTests
         rig.Advance(TimeSpan.FromSeconds(12), Fine);
 
         var timer = rig.CycleDiagnostics().Timer;
-        Assert.True(timer.Warning);
         Assert.False(timer.Paused);
         Assert.InRange(timer.RemainingMs!.Value, 17_000, 18_100);
+        Assert.Equal(18, rig.View.Overlays.PhaseTimer!.RemainingSeconds);
     }
 
     [Fact]
-    public async Task MORE_TIME_restarts_the_phases_full_time_and_clears_the_warning()
+    public async Task Guests_cannot_add_time_MORE_TIME_is_unknown_and_the_phase_ends_on_time()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.Begin();
-        rig.Guest("MoreTime").ShouldBeRejected();
-        rig.Advance(TimeSpan.FromSeconds(15), Fine);
-        Assert.NotNull(rig.View.Overlays.PhaseTimerWarning);
-
-        rig.Guest("MoreTime").ShouldBeAccepted();
-
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
-        Assert.Equal(30_000, rig.CycleDiagnostics().Timer.RemainingMs);
         rig.Advance(TimeSpan.FromSeconds(25), Fine);
-        Assert.Equal(GuestSurface.Template, rig.Surface);
-        Assert.NotNull(rig.View.Overlays.PhaseTimerWarning);
+
+        rig.Guest("MoreTime").ShouldBeRejected(RejectReason.UnknownCommand);
+
+        Assert.InRange(rig.CycleDiagnostics().Timer.RemainingMs!.Value, 4_900, 5_000);
+        Assert.True(Reaches(rig, GuestSurface.Photographs, 6, Fine));
     }
 
     [Fact]
-    public async Task A_phase_of_exactly_20_seconds_warns_from_the_start()
+    public async Task The_timer_shows_the_phases_full_time_as_it_starts()
     {
         using var rig = await GuestCycleRig.CreateAsync(With(template: 20));
 
         rig.Begin();
 
-        Assert.Equal(20, rig.View.Overlays.PhaseTimerWarning!.RemainingSeconds);
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.Template, 20, false), rig.View.Overlays.PhaseTimer);
     }
 
     [Fact]
@@ -156,15 +202,12 @@ public sealed class GuestCycleTimerTests
         using var rig = await GuestCycleRig.CreateAsync(With(capture: 20));
         rig.Begin();
         rig.ToPhotographs();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Windows[0].CaptureId is not null && rig.Photographs.Sequence.CountdownRemaining == 4, TimeSpan.FromSeconds(30), Fine));
-        rig.Guest("StopCapture").ShouldBeAccepted();
         Assert.Equal(20_000, rig.CycleDiagnostics().Timer.RemainingMs);
 
         Assert.True(rig.AdvanceUntil(() => rig.Photographs.Sequence.Running, TimeSpan.FromSeconds(25), Fine));
 
-        Assert.Equal(1, rig.Photographs.Sequence.TargetWindow);
-        Assert.Equal(3, rig.Photographs.Sequence.TotalInSequence);
+        Assert.Equal(0, rig.Photographs.Sequence.TargetWindow);
+        Assert.Equal(4, rig.Photographs.Sequence.TotalInSequence);
         Assert.True(rig.AdvanceUntil(() => !rig.Photographs.Sequence.Running, TimeSpan.FromMinutes(1), Fine));
         Assert.All(rig.Photographs.Windows, window => Assert.NotNull(window.CaptureId));
         Assert.Equal(PhaseTimer.PhotographsReview, rig.CycleDiagnostics().Timer.Phase);
@@ -176,9 +219,7 @@ public sealed class GuestCycleTimerTests
         using var rig = await GuestCycleRig.CreateAsync(With(capture: 20));
         rig.Begin();
         rig.ToPhotographs();
-        rig.Guest("TakePhotographs").ShouldBeAccepted();
-        Assert.True(rig.AdvanceUntil(() => rig.Photographs.Windows[0].CaptureId is not null && rig.Photographs.Sequence.CountdownRemaining == 4, TimeSpan.FromSeconds(30), Fine));
-        rig.Guest("StopCapture").ShouldBeAccepted();
+        InterruptAfterFirstCapture(rig);
         var original = rig.Photographs.Windows[0].CaptureId;
         rig.Guest("BeginRetake", """{"index":0}""").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => rig.Photographs.RetakeCandidate is not null, TimeSpan.FromSeconds(30), Fine));
@@ -216,7 +257,7 @@ public sealed class GuestCycleTimerTests
     }
 
     [Fact]
-    public async Task The_timer_stays_paused_across_a_whole_capture_sequence()
+    public async Task The_timer_stays_paused_and_visible_across_a_whole_capture_sequence()
     {
         using var rig = await GuestCycleRig.CreateAsync(With(capture: 60));
         rig.Begin();
@@ -230,23 +271,23 @@ public sealed class GuestCycleTimerTests
         var during = rig.CycleDiagnostics().Timer;
         Assert.True(during.Paused);
         Assert.Equal(before, during.RemainingMs);
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.PhotographsCapture, 55, true), rig.View.Overlays.PhaseTimer);
     }
 
     [Fact]
-    public async Task Showing_the_Camera_tab_going_back_and_entering_a_phase_again_restart_the_timer()
+    public async Task Showing_the_Camera_tab_and_entering_a_phase_restart_the_timer()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
+        Assert.Equal(PhaseTimer.PhotographsReview, rig.CycleDiagnostics().Timer.Phase);
+        Assert.Equal(45_000, rig.CycleDiagnostics().Timer.RemainingMs);
         rig.Advance(TimeSpan.FromSeconds(10), Coarse);
         rig.Guest("ShowCameraTab").ShouldBeAccepted();
         Assert.Equal(45_000, rig.CycleDiagnostics().Timer.RemainingMs);
 
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        rig.Advance(TimeSpan.FromSeconds(10), Coarse);
-        Assert.InRange(rig.CycleDiagnostics().Timer.RemainingMs!.Value, 19_000, 20_100);
-        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeAccepted();
-        Assert.Equal(PhaseTimer.PhotographsReview, rig.CycleDiagnostics().Timer.Phase);
-        Assert.Equal(45_000, rig.CycleDiagnostics().Timer.RemainingMs);
+        rig.ToFilters();
+        Assert.Equal(PhaseTimer.Filters, rig.CycleDiagnostics().Timer.Phase);
+        Assert.Equal(30_000, rig.CycleDiagnostics().Timer.RemainingMs);
     }
 
     [Fact]
@@ -261,9 +302,15 @@ public sealed class GuestCycleTimerTests
         Assert.True(Reaches(rig, GuestSurface.Filters, 60));
 
         var detail = await rig.OnlyCycleAsync();
-        Assert.Equal(4, detail.Captures.Count);
-        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeAccepted();
-        Assert.Equal(ids, rig.Photographs.Windows.Select(window => window.CaptureId));
+        Assert.Equal(4, detail.Captures.Count(capture => capture.State == CaptureState.Kept));
+        Assert.Equal(ids, await StripArrangementAsync(rig));
+    }
+
+    /// <summary>The Photo Strip's Arrangement once the Filters timer has finished it: guests can't go back to look at the Photographs step.</summary>
+    private static async Task<string?[]> StripArrangementAsync(GuestCycleRig rig)
+    {
+        Assert.True(Reaches(rig, GuestSurface.Keepsake, 60));
+        return [.. (await rig.OnlyCycleAsync()).PhotoStrip!.Arrangement];
     }
 
     [Fact]
@@ -276,9 +323,7 @@ public sealed class GuestCycleTimerTests
 
         Assert.True(Reaches(rig, GuestSurface.Filters, 60));
 
-        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeAccepted();
-        Assert.Equal(ids, rig.Photographs.Windows.Select(window => window.CaptureId));
-        Assert.NotEqual(PhotographSelectionMode.Moving, rig.Photographs.Selection.Mode);
+        Assert.Equal(ids, await StripArrangementAsync(rig));
     }
 
     [Fact]
@@ -318,7 +363,7 @@ public sealed class GuestCycleTimerTests
     }
 
     [Fact]
-    public async Task The_Keepsake_timer_returns_to_Start_with_the_cycle_still_completed_and_never_warns()
+    public async Task The_Keepsake_timer_shows_and_returns_to_Start_with_the_cycle_still_completed()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
@@ -327,38 +372,28 @@ public sealed class GuestCycleTimerTests
         Assert.True(Reaches(rig, GuestSurface.Keepsake, 10, Fine));
         Assert.Equal(PhaseTimer.Keepsake, rig.CycleDiagnostics().Timer.Phase);
 
-        var warned = false;
+        var shown = new List<int>();
         Assert.True(rig.AdvanceUntil(
             () =>
             {
-                warned |= rig.View.Overlays.PhaseTimerWarning is not null;
+                if (rig.View.Overlays.PhaseTimer is { } timer)
+                {
+                    Assert.Equal(PhaseTimer.Keepsake, timer.Phase);
+                    shown.Add(timer.RemainingSeconds);
+                }
+
                 return rig.Surface == GuestSurface.Start;
             },
             TimeSpan.FromSeconds(20),
             Fine));
 
-        Assert.False(warned);
+        Assert.Equal(Enumerable.Range(1, 12).Reverse(), shown.Distinct());
+        Assert.Null(rig.View.Overlays.PhaseTimer);
         Assert.Null(rig.Diagnostics().GuestCycle);
         Assert.Equal(1, rig.OperatorView.RunningEvent!.CompletedGuestCycles);
         Assert.Equal(GuestCycleEndReason.Completed, (await rig.OnlyCycleAsync()).Cycle.EndReason);
         Assert.Empty(rig.Store.Ended);
         rig.Guest("BeginGuestCycle").ShouldBeAccepted();
-    }
-
-    [Fact]
-    public async Task A_timer_that_runs_out_while_the_Start_over_question_is_open_closes_it_and_the_cycle_continues()
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        rig.Begin();
-        rig.Advance(TimeSpan.FromSeconds(5), Fine);
-        rig.Guest("StartOver").ShouldBeAccepted();
-        Assert.NotNull(rig.View.Overlays.StartOverConfirmation);
-
-        Assert.True(Reaches(rig, GuestSurface.Photographs, 40));
-
-        Assert.Null(rig.View.Overlays.StartOverConfirmation);
-        Assert.Empty(rig.Store.Ended);
-        Assert.NotNull(rig.Diagnostics().GuestCycle);
     }
 
     [Fact]

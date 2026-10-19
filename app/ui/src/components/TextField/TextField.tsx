@@ -14,6 +14,12 @@ export interface TextFieldProps
   readonly defaultValue?: string | undefined;
   /** Shows the character counter under the field when `maxLength` applies. On by default. */
   readonly showCount?: boolean | undefined;
+  /** A unit written after the box, such as `s` for seconds; the label should carry it for assistive technology. */
+  readonly suffix?: string | undefined;
+  /** Keeps the label for assistive technology only, when a visible label beside the field already names it. */
+  readonly hideLabel?: boolean | undefined;
+  /** Marks the field invalid when its error is written elsewhere (a timer's row); `error` marks it too. */
+  readonly invalid?: boolean | undefined;
 }
 
 /**
@@ -32,6 +38,9 @@ export function TextField({
   defaultValue,
   maxLength,
   showCount = true,
+  suffix,
+  hideLabel = false,
+  invalid = false,
   required = false,
   className,
   onChange,
@@ -50,25 +59,32 @@ export function TextField({
 
   return (
     <div className={cx(fieldStyles.field, className)}>
-      <div className={fieldStyles.labelRow}>
+      <div className={cx(fieldStyles.labelRow, hideLabel && fieldStyles.visuallyHidden)}>
         <label id={ids.label} htmlFor={ids.control} className={fieldStyles.label}>
           {label}
         </label>
         <RequiredMark required={required} />
       </div>
-      <input
-        {...rest}
-        id={ids.control}
-        type={type}
-        value={value}
-        defaultValue={defaultValue}
-        maxLength={maxLength}
-        required={required}
-        className={cx(fieldStyles.control, styles.input)}
-        aria-invalid={present(error) || undefined}
-        aria-describedby={describedBy(ids, { help, error, counter: counter !== undefined }, external)}
-        onChange={handleChange}
-      />
+      <div className={suffix === undefined ? undefined : styles.withSuffix}>
+        <input
+          {...rest}
+          id={ids.control}
+          type={type}
+          value={value}
+          defaultValue={defaultValue}
+          maxLength={maxLength}
+          required={required}
+          className={cx(fieldStyles.control, styles.input)}
+          aria-invalid={present(error) || invalid || undefined}
+          aria-describedby={describedBy(ids, { help, error, counter: counter !== undefined }, external)}
+          onChange={handleChange}
+        />
+        {suffix !== undefined && (
+          <span className={styles.suffix} aria-hidden="true">
+            {suffix}
+          </span>
+        )}
+      </div>
       <FieldMessages ids={ids} help={help} error={error} counter={counter} />
     </div>
   );

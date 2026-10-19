@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { resolutionName, resolutions, screenshotDir } from "./resolutions.ts";
+import { expectStageContains } from "./stage.ts";
 
 // The M8 UI-2 views through the fixture lane (`?fixture=<name>`): Filters, Keepsake, Operator Assistance, the cycle chrome,
 // and its overlays. The brain-generated `guest-cycle-*` and `guest-assistance-*` files are the real shapes; the hand-written
@@ -97,8 +98,7 @@ const filtersViews: readonly View[] = [
   { fixture: "guest-cycle-filters-composing", surface: "filters", heading: "Find the feeling.", texts: ["Preparing your strip."] },
   { fixture: "guest-cycle-filters-composition-failed", surface: "filters", heading: "Find the feeling.", texts: ["Your strip couldn't be prepared. Try again."] },
   { fixture: "guest-cycle-filters-landscape", surface: "filters", heading: "Find the feeling." },
-  { fixture: "guest-cycle-timer-warning", surface: "template", heading: "Make a little Moment", texts: ["SECONDS LEFT", "MORE TIME"] },
-  { fixture: "guest-cycle-start-over", surface: "photographs", heading: "Arrange your moment.", texts: ["Start over?", "Your photographs stay with the Event, but no strip will be made."] },
+  { fixture: "guest-cycle-timer-low", surface: "template", heading: "Make a little Moment", texts: ["0:15"] },
   { fixture: "guest-ui-filters-four-looks", surface: "filters", heading: "Find the feeling.", texts: ["Naturale", "Monochrome", "Sepia", "Classic"] },
   { fixture: "guest-ui-filters-composing", surface: "filters", heading: "Find the feeling.", texts: ["Preparing your strip."] },
   { fixture: "guest-ui-filters-composition-failed", surface: "filters", heading: "Find the feeling.", texts: ["Your strip couldn't be prepared. Try again."] },
@@ -106,7 +106,9 @@ const filtersViews: readonly View[] = [
   { fixture: "guest-ui-filters-many-looks", surface: "filters", heading: "Find the feeling.", texts: ["Soft Monochrome", "Warm Monochrome"] },
   { fixture: "guest-ui-filters-no-thumbnails", surface: "filters", heading: "Find the feeling." },
   { fixture: "guest-ui-filters-skipped-template", surface: "filters", heading: "Find the feeling." },
-  { fixture: "guest-ui-filters-timer-warning-last-second", surface: "filters", heading: "Find the feeling.", texts: ["SECOND LEFT"] },
+  { fixture: "guest-ui-filters-timer-last-second", surface: "filters", heading: "Find the feeling.", texts: ["0:01"] },
+  { fixture: "guest-ui-filters-timer-paused", surface: "filters", heading: "Find the feeling.", texts: ["0:21", "Preparing your strip."] },
+  { fixture: "guest-ui-filters-no-timer", surface: "filters", heading: "Find the feeling.", texts: ["Soft Monochrome", "Warm Monochrome"] },
   { fixture: "guest-cycle-keepsake", surface: "keepsake", heading: "A little moment. Yours.", texts: ["Keep the moment close."] },
   { fixture: "guest-cycle-keepsake-landscape", surface: "keepsake", heading: "A little moment. Yours." },
   { fixture: "guest-ui-keepsake-skipped-filters", surface: "keepsake", heading: "A little moment. Yours." },
@@ -133,6 +135,7 @@ for (const resolution of resolutions) {
         await expect(page.getByRole("button", { name: "Operator exit" })).toBeVisible();
         await expectNoScrolling(page);
         await expectNoClipping(page);
+        await expectStageContains(page);
         await expectTargets(page);
         await expectAtMostOnePrimary(page);
         await page.screenshot({ path: resolve(screenshotDir, `${view.fixture}-${name}.png`) });
@@ -146,7 +149,9 @@ for (const resolution of resolutions) {
       await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
       await expect(page.getByRole("radiogroup").or(page.getByRole("group", { name: "Filters" }))).toBeVisible();
       await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Template, completed", "02 Photographs, completed", "03 Filters", "04 Keepsake"]);
-      await expect(page.getByRole("button", { name: "START OVER" })).toBeVisible();
+      await expect(page.getByRole("list", { name: "Steps" }).getByRole("button")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "START OVER" })).toHaveCount(0);
+      await expect(page.getByRole("timer")).toBeVisible();
     });
 
     test("Filters: a first composition that failed holds the print's shape, blank, and offers TRY AGAIN", async ({ page }) => {
@@ -184,59 +189,65 @@ for (const resolution of resolutions) {
       await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Photographs, completed", "02 Filters", "03 Keepsake"]);
     });
 
-    test("Keepsake: no warning and no START OVER, and the strip is lifted", async ({ page }) => {
+    test("Keepsake: its Phase Timer and nothing to press but the exit hold, and the strip is lifted", async ({ page }) => {
       await open(page, "guest-cycle-keepsake");
-      await expect(page.getByRole("button", { name: "START OVER" })).toHaveCount(0);
-      await expect(page.getByRole("button", { name: "MORE TIME" })).toHaveCount(0);
+      await expect(page.getByRole("timer")).toBeVisible();
       await expect(page.getByRole("button")).toHaveCount(1);
       await expect(page.getByRole("list", { name: "Steps" }).getByRole("listitem")).toHaveText(["01 Template, completed", "02 Photographs, completed", "03 Filters, completed", "04 Keepsake"]);
       await expect(page.locator('[data-shadow="lifted"]')).toHaveCount(1);
       await expect(page.getByRole("img", { name: "Your Photo Strip" })).toBeVisible();
     });
 
-    test("Start over confirmation: the content behind is inert and focus starts on KEEP GOING", async ({ page }) => {
-      await open(page, "guest-cycle-start-over");
-      const dialog = page.getByRole("alertdialog", { name: "Start over?" });
-      await expect(dialog).toBeVisible();
-      await expect(dialog.getByRole("button", { name: "START OVER" })).toBeVisible();
-      await expect(dialog.getByRole("button", { name: "KEEP GOING" })).toBeFocused();
-      await expect(page.locator("[inert]")).not.toHaveCount(0);
-      const panel = await dialog.boundingBox();
-      expect(panel).not.toBeNull();
-      expect(panel?.y).toBeGreaterThanOrEqual(0);
-      expect((panel?.y ?? 0) + (panel?.height ?? 0)).toBeLessThanOrEqual(resolution.height);
-      const target = await dialog.getByRole("button", { name: "KEEP GOING" }).boundingBox();
-      expect(target?.height).toBeGreaterThanOrEqual(64);
-    });
-
-    async function expectWarningInBand(page: Page, phase: string, message: string): Promise<void> {
-      const warning = page.locator(`[data-phase="${phase}"]`);
-      await expect(warning).toBeVisible();
-      await expect(warning.getByRole("status")).toHaveText(message);
-      const more = await warning.getByRole("button", { name: "MORE TIME" }).boundingBox();
-      expect(more?.height).toBeGreaterThanOrEqual(64);
-      const box = await warning.boundingBox();
-      expect(box).not.toBeNull();
-      // It sits in the top band, clear of the step progress and START OVER, and inside the band's height.
-      const progress = await page.getByRole("list", { name: "Steps" }).boundingBox();
-      const startOver = await page.getByRole("button", { name: "START OVER" }).boundingBox();
-      expect((progress?.x ?? 0) + (progress?.width ?? 0)).toBeLessThanOrEqual(box?.x ?? 0);
-      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(startOver?.x ?? 0);
-      expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(await page.evaluate(() => document.querySelector("header")?.getBoundingClientRect().height ?? 0));
-      expect(box?.y).toBeGreaterThanOrEqual(0);
+    async function expectTimerInBand(page: Page, clock: string, announcement: string | null): Promise<void> {
+      const timer = page.getByRole("timer");
+      await expect(timer).toHaveText(clock);
+      expect(await timer.evaluate((element) => element.closest("header") !== null)).toBe(true);
+      const pill = await timer.boundingBox();
+      const hold = await page.getByRole("button", { name: "Operator exit" }).boundingBox();
+      const steps = await page.getByRole("list", { name: "Steps" }).boundingBox();
+      // In the top band, right of the step progress and just left of the exit hold, level with it.
+      expect(pill?.x).toBeGreaterThanOrEqual((steps?.x ?? 0) + (steps?.width ?? 0));
+      expect((pill?.x ?? 0) + (pill?.width ?? 0)).toBeLessThanOrEqual(hold?.x ?? 0);
+      expect(Math.abs((pill?.y ?? 0) + (pill?.height ?? 0) / 2 - ((hold?.y ?? 0) + (hold?.height ?? 0) / 2))).toBeLessThan(2);
+      const live = page.locator("header [role='status']");
+      if (announcement === null) {
+        await expect(live).toBeEmpty();
+      } else {
+        await expect(live).toHaveText(announcement);
+      }
+      await expect(page.getByRole("button", { name: "MORE TIME" })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "START OVER" })).toHaveCount(0);
+      await expect(page.locator("footer")).toHaveCount(0);
     }
 
-    test("Timer warning: announced once, MORE TIME is reachable, and nothing behind is blocked", async ({ page }) => {
-      await open(page, "guest-cycle-timer-warning");
-      await expectWarningInBand(page, "template", "15 seconds left. Choose MORE TIME to stay a little longer.");
-      await expect(page.getByRole("button", { name: "CONTINUE TO PHOTOGRAPHS" })).toHaveAttribute("aria-disabled", "false");
-    });
-
-    test("Timer warning on Filters: the last second still fits the band beside the longer step progress", async ({ page }) => {
-      await open(page, "guest-ui-filters-timer-warning-last-second");
-      await expectWarningInBand(page, "filters", "1 second left. Choose MORE TIME to stay a little longer.");
+    test("Phase Timer: visible all the phase long, quiet until its last seconds, with no MORE TIME", async ({ page }) => {
+      await open(page, "guest-cycle-filters");
+      const timer = page.getByRole("timer");
+      await expect(timer).not.toHaveAttribute("data-low");
+      await expectTimerInBand(page, (await timer.textContent()) ?? "", null);
       await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
     });
+
+    test("Phase Timer on Filters: the last second fills the pill, is said once, and blocks nothing", async ({ page }) => {
+      await open(page, "guest-ui-filters-timer-last-second");
+      await expectTimerInBand(page, "0:01", "1 second left.");
+      await expect(page.getByRole("timer")).toHaveAttribute("data-low", "true");
+      await expect(page.locator("[inert]")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "FINISH MY STRIP" })).toHaveAttribute("aria-disabled", "false");
+    });
+
+    test("Phase Timer paused: the time stands still and says so", async ({ page }) => {
+      await open(page, "guest-ui-filters-timer-paused");
+      await expectTimerInBand(page, "0:21", null);
+      await expect(page.getByRole("timer")).toHaveAttribute("data-paused", "true");
+      await expect(page.getByRole("timer")).toHaveAccessibleName("Time left: 21 seconds, paused");
+    });
+
+    test("Phase Timer off: the band shows the step progress alone", async ({ page }) => {
+      await open(page, "guest-ui-filters-no-timer");
+      await expect(page.getByRole("timer")).toHaveCount(0);
+    });
+
     test("Operator Assistance: one dark band with RETRY inverted, and the exit hold above it on the canvas", async ({ page }) => {
       await open(page, "guest-assistance-camera");
       const band = page.locator('[data-tone="dark"]');
@@ -264,7 +275,7 @@ for (const resolution of resolutions) {
 test.describe("guest finish views in reduced motion and forced colors", () => {
   test.use({ viewport: resolutions[0] });
 
-  for (const fixture of ["guest-cycle-keepsake", "guest-cycle-filters", "guest-cycle-timer-warning", "guest-assistance-camera"]) {
+  for (const fixture of ["guest-cycle-keepsake", "guest-cycle-filters", "guest-ui-filters-timer-last-second", "guest-assistance-camera"]) {
     test(`${fixture} with reduced motion shows everything at once, with no movement left`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(`/index.html?fixture=${fixture}`);
@@ -312,8 +323,8 @@ test.describe("operator panel in Operator Assistance", () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
   for (const [fixture, reason] of [
-    ["operator-running-assistance-camera", "The camera needs attention."],
-    ["operator-running-assistance-storage", "The Data folder needs attention."],
+    ["operator-running-assistance-camera", "The camera stopped working. Check its cable, then RETRY."],
+    ["operator-running-assistance-storage", "The Data folder can't be written to. Check the disk and the folder, then RETRY."],
   ] as const) {
     test(fixture, async ({ page }) => {
       await open(page, fixture, "operator");

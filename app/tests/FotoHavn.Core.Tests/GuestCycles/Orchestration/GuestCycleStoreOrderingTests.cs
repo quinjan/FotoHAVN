@@ -42,10 +42,11 @@ public sealed class GuestCycleStoreOrderingTests
         Assert.Null(rig.Memory.GetCaptureFile(captureId));
     }
 
-    private static void StartOver(GuestCycleRig rig)
+    /// <summary>Ends the Event from the Operator Screen: the only way an unfinished cycle ends while the app runs, since guests can't start over.</summary>
+    private static void EndEvent(GuestCycleRig rig)
     {
-        rig.Guest("StartOver").ShouldBeAccepted();
-        rig.Guest("ConfirmStartOver").ShouldBeAccepted();
+        rig.Operator("EndEvent").ShouldBeAccepted();
+        rig.Operator("ConfirmEndEvent").ShouldBeAccepted();
     }
 
     [Fact]
@@ -92,32 +93,17 @@ public sealed class GuestCycleStoreOrderingTests
     }
 
     [Fact]
-    public async Task Start_over_with_a_candidate_waiting_discards_it_and_deletes_its_file()
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        rig.ToArrange();
-        var candidate = RetakeToCandidate(rig, 1);
-
-        StartOver(rig);
-
-        Assert.Equal(GuestSurface.Start, rig.Surface);
-        Assert.Equal(GuestCycleEndReason.StartedOver, (await rig.OnlyCycleAsync()).Cycle.EndReason);
-        await AssertDiscardedAndGoneAsync(rig, candidate.Id);
-        Assert.Equal(4, (await rig.OnlyCycleAsync()).Captures.Count(capture => capture.State == CaptureState.Kept));
-    }
-
-    [Fact]
     public async Task END_EVENT_with_a_candidate_waiting_discards_it_and_deletes_its_file()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
         var candidate = RetakeToCandidate(rig, 0);
 
-        rig.Operator("EndEvent").ShouldBeAccepted();
-        rig.Operator("ConfirmEndEvent").ShouldBeAccepted();
+        EndEvent(rig);
 
         Assert.Equal(GuestCycleEndReason.OperatorExit, (await rig.OnlyCycleAsync()).Cycle.EndReason);
         await AssertDiscardedAndGoneAsync(rig, candidate.Id);
+        Assert.Equal(4, (await rig.OnlyCycleAsync()).Captures.Count(capture => capture.State == CaptureState.Kept));
     }
 
     [Fact]
@@ -135,7 +121,7 @@ public sealed class GuestCycleStoreOrderingTests
     }
 
     [Fact]
-    public async Task A_Retake_Capture_that_commits_after_start_over_is_discarded_before_the_cycle_ends()
+    public async Task A_Retake_Capture_that_commits_after_END_EVENT_is_discarded_before_the_cycle_ends()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
@@ -143,19 +129,18 @@ public sealed class GuestCycleStoreOrderingTests
         rig.Guest("BeginRetake", """{"index":1}""").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => rig.Store.InFlight > 0, TimeSpan.FromSeconds(30), Fine));
 
-        StartOver(rig);
+        EndEvent(rig);
         rig.Store.CommitGate.SetResult();
         rig.Store.CommitGate = null;
         rig.Advance(TimeSpan.FromSeconds(1), Fine);
 
-        Assert.Equal(GuestSurface.Start, rig.Surface);
         var detail = await rig.OnlyCycleAsync();
-        Assert.Equal(GuestCycleEndReason.StartedOver, detail.Cycle.EndReason);
+        Assert.Equal(GuestCycleEndReason.OperatorExit, detail.Cycle.EndReason);
         await AssertDiscardedAndGoneAsync(rig, rig.Store.Committed.Single(capture => capture.Sequence == 5).Id);
     }
 
     [Fact]
-    public async Task A_Sequence_Capture_that_commits_after_start_over_stays_kept()
+    public async Task A_Sequence_Capture_that_commits_after_END_EVENT_stays_kept()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.Begin();
@@ -164,13 +149,13 @@ public sealed class GuestCycleStoreOrderingTests
         rig.Guest("TakePhotographs").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => rig.Store.InFlight > 0, TimeSpan.FromSeconds(30), Fine));
 
-        StartOver(rig);
+        EndEvent(rig);
         rig.Store.CommitGate.SetResult();
         rig.Store.CommitGate = null;
         rig.Advance(TimeSpan.FromSeconds(1), Fine);
 
         var detail = await rig.OnlyCycleAsync();
-        Assert.Equal(GuestCycleEndReason.StartedOver, detail.Cycle.EndReason);
+        Assert.Equal(GuestCycleEndReason.OperatorExit, detail.Cycle.EndReason);
         Assert.Equal(CaptureState.Kept, Assert.Single(detail.Captures).State);
     }
 

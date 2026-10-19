@@ -27,6 +27,7 @@ internal static class ProtocolSamples
         [typeof(SetDefaultLookPayload)] = new SetDefaultLookPayload("naturale"),
         [typeof(SetPhaseTimerPayload)] = new SetPhaseTimerPayload(PhaseTimer.PhotographsReview, 45),
         [typeof(SetGuestGalleryPayload)] = new SetGuestGalleryPayload(false),
+        [typeof(SetGuestSoundsPayload)] = new SetGuestSoundsPayload(false),
         [typeof(SetPinPayload)] = new SetPinPayload("4826", "4826"),
         [typeof(ConfirmLeavePayload)] = new ConfirmLeavePayload(LeaveChoice.DiscardChanges),
         [typeof(OpenGalleryPayload)] = new OpenGalleryPayload("event-1"),
@@ -175,6 +176,7 @@ internal static class ProtocolSamples
             SampleLooks,
             SampleTimers,
             false,
+            true,
             new EventSetupPinView(false, false),
             true,
             null,
@@ -208,6 +210,7 @@ internal static class ProtocolSamples
             SampleLooks,
             SampleTimers,
             true,
+            false,
             new EventSetupPinView(true, false),
             false,
             StartDisabledReason.EventRunning,
@@ -286,7 +289,7 @@ internal static class ProtocolSamples
         new(GuestSurface.Start, new StartView(false, false), null, GuestOverlays.None, null, null, null, null, null, null, null, null, null);
 
     public static GuestPresentation GuestStartReady { get; } =
-        new(GuestSurface.Start, new StartView(true, true), null, new GuestOverlays(new ExitHoldOverlay(true), null, null, null, null), null, null, null, null, null, null, null, null, null);
+        new(GuestSurface.Start, new StartView(true, true), null, new GuestOverlays(new ExitHoldOverlay(true), null, null, null), null, null, null, null, null, null, null, null, null);
 
     public static GuestPresentation GuestStartUnavailable { get; } =
         new(GuestSurface.StartUnavailable, null, new StartUnavailableView(StartUnavailableReason.Camera, true), GuestOverlays.None, null, null, null, null, null, null, null, null, null);
@@ -295,7 +298,7 @@ internal static class ProtocolSamples
         GuestSurface.Start,
         new StartView(true, false),
         null,
-        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, null, 3), null, null, null),
+        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, null, 3), null, null),
         null,
         null,
         null,
@@ -310,7 +313,7 @@ internal static class ProtocolSamples
         GuestSurface.Start,
         new StartView(true, false),
         null,
-        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, 27, null), null, null, null),
+        new GuestOverlays(null, new PinDialogOverlay(PinDialogError.WrongPin, 27, null), null, null),
         null,
         null,
         null,
@@ -325,7 +328,7 @@ internal static class ProtocolSamples
         GuestSurface.StartUnavailable,
         null,
         new StartUnavailableView(StartUnavailableReason.Storage, false),
-        new GuestOverlays(new ExitHoldOverlay(true), new PinDialogOverlay(null, null, 5), new PhaseTimerWarningOverlay(PhaseTimer.Template, 14), new StartOverConfirmationOverlay(), new NoticeOverlay("One moment.")),
+        new GuestOverlays(new ExitHoldOverlay(true), new PinDialogOverlay(null, null, 5), new PhaseTimerOverlay(PhaseTimer.Template, 14, false), new NoticeOverlay("One moment.")),
         null,
         null,
         null,
@@ -339,16 +342,15 @@ internal static class ProtocolSamples
     public static GuestPresentation GuestFatal { get; } =
         new(GuestSurface.Fatal, null, null, GuestOverlays.None, new FatalView("Something went wrong."), null, null, null, null, null, null, null, null);
 
-    private static GuestCycleView Cycle(GuestCycleStepName step, bool startOverAvailable = true) => new(
+    private static GuestCycleView Cycle(GuestCycleStepName step) => new(
         "cycle-1",
         step,
         [
-            new GuestCycleStepEntry(GuestCycleStepName.Template, step == GuestCycleStepName.Template ? GuestStepState.Current : GuestStepState.Done, step != GuestCycleStepName.Template && step != GuestCycleStepName.Keepsake),
-            new GuestCycleStepEntry(GuestCycleStepName.Photographs, step switch { GuestCycleStepName.Template => GuestStepState.Upcoming, GuestCycleStepName.Photographs => GuestStepState.Current, _ => GuestStepState.Done }, step is GuestCycleStepName.Filters),
-            new GuestCycleStepEntry(GuestCycleStepName.Filters, step switch { GuestCycleStepName.Filters => GuestStepState.Current, GuestCycleStepName.Keepsake => GuestStepState.Done, _ => GuestStepState.Upcoming }, false),
-            new GuestCycleStepEntry(GuestCycleStepName.Keepsake, step == GuestCycleStepName.Keepsake ? GuestStepState.Current : GuestStepState.Upcoming, false),
-        ],
-        startOverAvailable);
+            new GuestCycleStepEntry(GuestCycleStepName.Template, step == GuestCycleStepName.Template ? GuestStepState.Current : GuestStepState.Done),
+            new GuestCycleStepEntry(GuestCycleStepName.Photographs, step switch { GuestCycleStepName.Template => GuestStepState.Upcoming, GuestCycleStepName.Photographs => GuestStepState.Current, _ => GuestStepState.Done }),
+            new GuestCycleStepEntry(GuestCycleStepName.Filters, step switch { GuestCycleStepName.Filters => GuestStepState.Current, GuestCycleStepName.Keepsake => GuestStepState.Done, _ => GuestStepState.Upcoming }),
+            new GuestCycleStepEntry(GuestCycleStepName.Keepsake, step == GuestCycleStepName.Keepsake ? GuestStepState.Current : GuestStepState.Upcoming),
+        ]);
 
     private static readonly TemplateWindowView[] StripWindows = [.. Enumerable.Range(0, 4).Select(index => new TemplateWindowView(0, index * 450, 600, 450))];
 
@@ -362,12 +364,12 @@ internal static class ProtocolSamples
     public static GuestPresentation GuestTemplate { get; } = new(
         GuestSurface.Template, null, null, GuestOverlays.None, null, Cycle(GuestCycleStepName.Template), new TemplateView(TemplateOptions, "signature-strip", true), null, null, null, null, null, null);
 
-    /// <summary>The Photographs step on the Camera tab, in the middle of a countdown, with the Phase Timer warning showing.</summary>
+    /// <summary>The Photographs step on the Camera tab, in the middle of a countdown, with the Phase Timer paused.</summary>
     public static GuestPresentation GuestPhotographsCountdown { get; } = new(
         GuestSurface.Photographs,
         null,
         null,
-        new GuestOverlays(null, null, new PhaseTimerWarningOverlay(PhaseTimer.PhotographsCapture, 18), null, null),
+        new GuestOverlays(null, null, new PhaseTimerOverlay(PhaseTimer.PhotographsCapture, 18, true), null),
         null,
         Cycle(GuestCycleStepName.Photographs),
         null,
@@ -380,8 +382,7 @@ internal static class ProtocolSamples
                 new PhotographsWindowView(2, null, null),
                 new PhotographsWindowView(3, null, null),
             ],
-            0,
-            new CaptureSequenceView(true, 1, 3, 1, 1, 3, false),
+            new CaptureSequenceView(true, 1, 3, 1, 1, 3, false, true),
             true,
             600.0 / 450,
             new PhotographSelectionView(null, PhotographSelectionMode.None),
@@ -409,8 +410,7 @@ internal static class ProtocolSamples
             PhotographsTabName.Arrange,
             new PhotographsTemplateView("panorama-four", 1800, 600, true, [.. Enumerable.Range(0, 4).Select(index => new TemplateWindowView(index * 450, 0, 450, 600))], null),
             [.. Enumerable.Range(0, 4).Select(index => new PhotographsWindowView(index, $"capture-{index + 1}", $"https://media.fotohavn/events/event-1/guest-cycles/cycle-1/capture-{index + 1}.jpg"))],
-            1,
-            new CaptureSequenceView(false, null, null, 4, 0, 0, false),
+            new CaptureSequenceView(false, null, null, 4, 0, 0, false, false),
             false,
             450.0 / 600,
             new PhotographSelectionView(2, PhotographSelectionMode.Retaking),
@@ -450,14 +450,14 @@ internal static class ProtocolSamples
         null,
         null);
 
-    /// <summary>The Keepsake step, with the Start over confirmation absent and no warning.</summary>
+    /// <summary>The Keepsake step with its Phase Timer running.</summary>
     public static GuestPresentation GuestKeepsake { get; } = new(
         GuestSurface.Keepsake,
         null,
         null,
-        GuestOverlays.None,
+        new GuestOverlays(null, null, new PhaseTimerOverlay(PhaseTimer.Keepsake, 12, false), null),
         null,
-        Cycle(GuestCycleStepName.Keepsake, startOverAvailable: false),
+        Cycle(GuestCycleStepName.Keepsake),
         null,
         null,
         null,
@@ -466,12 +466,12 @@ internal static class ProtocolSamples
         null,
         null);
 
-    /// <summary>Operator Assistance during a cycle, with the Start over confirmation open.</summary>
+    /// <summary>Operator Assistance during a cycle, with the Phase Timer paused.</summary>
     public static GuestPresentation GuestOperatorAssistance { get; } = new(
         GuestSurface.OperatorAssistance,
         null,
         null,
-        new GuestOverlays(null, null, null, new StartOverConfirmationOverlay(), null),
+        new GuestOverlays(null, null, new PhaseTimerOverlay(PhaseTimer.PhotographsCapture, 21, true), null),
         null,
         Cycle(GuestCycleStepName.Photographs),
         null,
@@ -592,7 +592,7 @@ internal static class ProtocolSamples
         GuestSurface.GuestGallery,
         null,
         null,
-        new GuestOverlays(null, null, new PhaseTimerWarningOverlay(PhaseTimer.GuestGallery, 12), null, null),
+        new GuestOverlays(null, null, new PhaseTimerOverlay(PhaseTimer.GuestGallery, 12, false), null),
         null,
         null,
         null,
@@ -728,7 +728,7 @@ internal static class ProtocolSamples
             [],
             new WakeLockDiagnostics(true, "FOTOHAVN Event event-1 is running"),
             10,
-            new GuestCycleDiagnostics("cycle-1", GuestCycleStepName.Photographs, PhotographsTabName.Camera, 1, 4, true, 3, new GuestCycleTimerDiagnostics(PhaseTimer.PhotographsCapture, 18_250, true, true)),
+            new GuestCycleDiagnostics("cycle-1", GuestCycleStepName.Photographs, PhotographsTabName.Camera, 1, 4, true, 3, new GuestCycleTimerDiagnostics(PhaseTimer.PhotographsCapture, 18_250, true)),
             null,
             new InstanceDiagnostics(null))),
         ("get-diagnostics-result-galleries", new DiagnosticsResult(
@@ -748,7 +748,7 @@ internal static class ProtocolSamples
             null,
             new GalleryDiagnostics(
                 new OperatorGalleryDiagnostics("event-1", 40, "MjAyNi0xMC0xM1QwOTozMDowMC4wMDAwMDAwWnw2ZjFjMmE4ZS0zYjRkLTRlNWYtOWEwYi0xYzJkM2U0ZjVhNmI", "6f1c2a8e-3b4d-4e5f-9a0b-1c2d3e4f5a6b"),
-                new GuestGalleryDiagnostics(12, null, null, new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 41_000, false, false))),
+                new GuestGalleryDiagnostics(12, null, null, new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 41_000, false))),
             new InstanceDiagnostics(null))),
         ("set-clock-scale-args", new SetClockScaleArgs(10)),
         ("camera-diagnostics-idle", new CameraDiagnostics(CameraState.Idle, null, null, null, null, null, PreviewTarget.None)),

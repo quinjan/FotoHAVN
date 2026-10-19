@@ -10,12 +10,11 @@ const cycle: GuestCycleView = {
   id: "cycle-1",
   step: "filters",
   steps: [
-    { step: "template", state: "done", canGoBack: true },
-    { step: "photographs", state: "done", canGoBack: true },
-    { step: "filters", state: "current", canGoBack: false },
-    { step: "keepsake", state: "upcoming", canGoBack: false },
+    { step: "template", state: "done" },
+    { step: "photographs", state: "done" },
+    { step: "filters", state: "current" },
+    { step: "keepsake", state: "upcoming" },
   ],
-  startOverAvailable: true,
 };
 
 const looks = [

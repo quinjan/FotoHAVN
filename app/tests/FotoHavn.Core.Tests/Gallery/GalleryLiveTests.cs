@@ -47,7 +47,7 @@ public sealed class GalleryLiveTests
     }
 
     [Fact]
-    public async Task Two_completed_cycles_and_one_start_over_show_three_entries_newest_first()
+    public async Task Two_completed_cycles_and_one_ended_by_the_operator_show_three_entries_newest_first()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         OpenOperatorGallery(rig);
@@ -57,16 +57,16 @@ public sealed class GalleryLiveTests
         ToKeepsake(rig);
         ReturnToStart(rig);
         rig.ToArrange();
-        rig.Guest("StartOver").ShouldBeAccepted();
-        rig.Guest("ConfirmStartOver").ShouldBeAccepted();
+        rig.Operator("EndEvent").ShouldBeAccepted();
+        rig.Operator("ConfirmEndEvent").ShouldBeAccepted();
         rig.Settle();
 
         var items = rig.OperatorView.EventGallery!.Items;
-        Assert.Equal([GalleryOutcome.StartedOver, GalleryOutcome.Completed, GalleryOutcome.Completed], items.Select(item => item.Outcome));
+        Assert.Equal([GalleryOutcome.EndedByOperator, GalleryOutcome.Completed, GalleryOutcome.Completed], items.Select(item => item.Outcome));
         Assert.Null(items[0].Strip);
         Assert.Equal(4, items[0].Captures.Count);
         Assert.Equal(items.Select(item => item.GuestCycleId).Distinct().Count(), items.Count);
-        Assert.Equal(2, rig.OperatorView.RunningEvent!.CompletedGuestCycles);
+        Assert.Equal(2, items.Count(item => item.Strip is not null));
     }
 
     [Fact]

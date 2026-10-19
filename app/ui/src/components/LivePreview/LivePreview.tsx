@@ -18,7 +18,14 @@ export interface LivePreviewProps {
   readonly label?: string;
   /** Shown until the first frame arrives. Default "Getting the camera ready." */
   readonly waitingMessage?: string;
-  /** Overlays above the picture and guide, such as the countdown numerals. */
+  /**
+   * How the picture sits in the box. `contain` (default): the whole camera frame, letterboxed and centred, with the guide
+   * drawn on it (Event setup, diagnostics). `capture`: the capture area (`guideRatio`) at the box's full height (or width,
+   * if that is smaller), centred, with the picture scaled so the guide lands exactly on it and running on past it as far as
+   * the camera reaches, the surround dimmed (the Camera tab). Without a `guideRatio` it falls back to `contain`.
+   */
+  readonly framing?: "contain" | "capture";
+  /** Overlays above the picture and guide, such as the countdown numerals; with `capture`, laid over the capture area. */
   readonly children?: ReactNode;
   readonly className?: string;
 }
@@ -61,7 +68,8 @@ function schedule(callback: () => void): () => void {
 /**
  * The live camera preview (DESIGN.md, Photographs: Camera; Event setup): a canvas on Dark Walnut that draws only
  * the latest frame from its `FrameSource`, contained at the frame's proportion, mirrored by CSS when asked, with the
- * crop guide for the target window's ratio. Until the first frame, it says the camera is getting ready.
+ * crop guide for the target window's ratio. Until the first frame, it says the camera is getting ready. With
+ * `framing="capture"` the capture area itself fills the box's height instead, and the picture around it is dimmed.
  */
 export function LivePreview({
   source,
@@ -69,6 +77,7 @@ export function LivePreview({
   mirrored = false,
   label = "Live camera preview",
   waitingMessage = "Getting the camera ready.",
+  framing = "contain",
   children,
   className,
 }: LivePreviewProps) {
@@ -110,15 +119,48 @@ export function LivePreview({
 
   const frame = size !== null && size.source === source ? size : null;
   const guide = frame !== null && guideRatio !== undefined ? cameraGuideFraction(frame.width, frame.height, guideRatio) : null;
+  const capture = framing === "capture" && guideRatio !== undefined && Number.isFinite(guideRatio) && guideRatio > 0;
   const geometry =
-    frame === null ? undefined : ({ "--frame-ratio": String(frame.width / frame.height) } as CSSProperties);
+    frame === null
+      ? undefined
+      : ({
+          "--frame-ratio": String(frame.width / frame.height),
+          ...(capture && guide !== null ? { "--guide-fraction": String(guide.width) } : {}),
+        } as CSSProperties);
+  const waiting = (
+    <p className={styles.waiting} role="status">
+      {frame === null ? waitingMessage : ""}
+    </p>
+  );
+  const picture = (
+    <div className={styles.picture} role="img" aria-label={label} hidden={frame === null}>
+      <canvas ref={canvasRef} className={styles.canvas} data-mirrored={mirrored || undefined} />
+    </div>
+  );
+
+  if (capture) {
+    return (
+      <div
+        className={cx(styles.preview, className)}
+        data-tone="dark"
+        data-state={frame === null ? "waiting" : "live"}
+        data-framing="capture"
+        style={{ "--capture-ratio": String(guideRatio) } as CSSProperties}
+      >
+        <div className={styles.frame} style={geometry}>
+          {picture}
+        </div>
+        <div className={styles.area} data-fotohavn-crop-guide="" aria-hidden="true" />
+        {children !== undefined && <div className={styles.areaOverlay}>{children}</div>}
+        {waiting}
+      </div>
+    );
+  }
 
   return (
     <div className={cx(styles.preview, className)} data-tone="dark" data-state={frame === null ? "waiting" : "live"}>
       <div className={styles.frame} style={geometry}>
-        <div className={styles.picture} role="img" aria-label={label} hidden={frame === null}>
-          <canvas ref={canvasRef} className={styles.canvas} data-mirrored={mirrored || undefined} />
-        </div>
+        {picture}
         {guide !== null && (
           <div
             className={styles.guide}
@@ -134,9 +176,7 @@ export function LivePreview({
         )}
         {children !== undefined && <div className={styles.overlay}>{children}</div>}
       </div>
-      <p className={styles.waiting} role="status">
-        {frame === null ? waitingMessage : ""}
-      </p>
+      {waiting}
     </div>
   );
 }

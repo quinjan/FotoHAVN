@@ -32,7 +32,6 @@ public static class GuestCycleRules
             KeepOriginalAction => KeepOriginal(model),
             SelectWindowAction a => SelectWindow(model, a),
             MoveStartAction a => MoveStart(model, a),
-            MoveStartFromPoolAction a => MoveStartFromPool(model, a),
             MoveToAction a => MoveTo(model, a),
             DragPlaceAction a => DragPlace(model, a),
             MoveCancelAction => MoveCancel(model),
@@ -53,22 +52,17 @@ public static class GuestCycleRules
 
     private static GuestCycleOutcome SelectTemplate(GuestCycleModel model, SelectTemplateAction action)
     {
-        // The Filters step needs a complete arrangement, so a Template change waits until the guest goes back.
-        if (model.Operation is not null || model.Step == GuestCycleStep.Filters || action.TemplateId == model.TemplateId || action.WindowCount < 1)
+        // The Template is chosen before any photograph is taken, and guests never come back to it: the new Template's windows are all empty.
+        if (model.Step != GuestCycleStep.Template || action.TemplateId == model.TemplateId || action.WindowCount < 1)
         {
             return Ignored(model);
         }
 
-        // Kept Captures keep their order: the filled windows first, then the retained pool, refilled into the new windows.
-        List<string> pool = [.. model.Windows.OfType<string>(), .. model.RetainedPool];
         return Changed(model with
         {
             TemplateId = action.TemplateId,
             WindowCount = action.WindowCount,
-            Windows = [.. Enumerable.Range(0, action.WindowCount).Select(index => index < pool.Count ? pool[index] : null)],
-            RetainedPool = [.. pool.Skip(action.WindowCount)],
-            Selected = null,
-            Move = null,
+            Windows = new string?[action.WindowCount],
             Revision = model.Revision + 1,
         });
     }
@@ -201,18 +195,12 @@ public static class GuestCycleRules
             ? Ignored(model)
             : Changed(model with { Move = new GuestMove(action.Index, captureId, model.Revision) });
 
-    private static GuestCycleOutcome MoveStartFromPool(GuestCycleModel model, MoveStartFromPoolAction action) =>
-        model.Operation is not null || !model.RetainedPool.Contains(action.CaptureId)
-            ? Ignored(model)
-            : Changed(model with { Move = new GuestMove(null, action.CaptureId, model.Revision) });
-
     private static GuestCycleOutcome MoveTo(GuestCycleModel model, MoveToAction action) =>
         model.Move is { } move ? Place(model, move, action.Index) : Ignored(model);
 
     private static GuestCycleOutcome DragPlace(GuestCycleModel model, DragPlaceAction action)
     {
-        // A pointer gesture owns a snapshot of the arrangement it began on, so a late release after a Retake, a Template change,
-        // or another placement is refused.
+        // A pointer gesture owns a snapshot of the arrangement it began on, so a late release after a Retake or another placement is refused.
         if (model.Step != GuestCycleStep.Photographs
             || model.Operation is not null
             || model.Move is not null
@@ -233,39 +221,16 @@ public static class GuestCycleRules
             return Ignored(model);
         }
 
+        var source = move.SourceIndex;
+        if (source == index)
+        {
+            // Dropping a photograph where it is changes nothing but the selection, so the arrangement revision stays.
+            return Changed(model with { Selected = index, Move = null });
+        }
+
         string?[] windows = [.. model.Windows];
-        List<string> pool = [.. model.RetainedPool];
-        if (move.SourceIndex is { } source)
-        {
-            if (source == index)
-            {
-                // Dropping a photograph where it is changes nothing but the selection, so the arrangement revision stays.
-                return Changed(model with { Selected = index, Move = null });
-            }
-
-            (windows[source], windows[index]) = (windows[index], windows[source]);
-        }
-        else
-        {
-            var from = pool.IndexOf(move.CaptureId);
-            if (from < 0)
-            {
-                return Ignored(model);
-            }
-
-            var displaced = windows[index];
-            windows[index] = move.CaptureId;
-            if (displaced is null)
-            {
-                pool.RemoveAt(from);
-            }
-            else
-            {
-                pool[from] = displaced;
-            }
-        }
-
-        return Changed(model with { Windows = windows, RetainedPool = pool, Selected = index, Move = null, Revision = model.Revision + 1 });
+        (windows[source], windows[index]) = (windows[index], windows[source]);
+        return Changed(model with { Windows = windows, Selected = index, Move = null, Revision = model.Revision + 1 });
     }
 
     private static GuestCycleOutcome MoveCancel(GuestCycleModel model) =>
@@ -276,19 +241,16 @@ public static class GuestCycleRules
 
     private static GuestCycleOutcome GoToStep(GuestCycleModel model, GoToStepAction action)
     {
-        if (action.Step == model.Step
+        // Guests only go on. Filters and the Keepsake need a complete arrangement with no operation and no Move, so leaving a step never
+        // cancels anything, and the Photographs step opens on the Camera tab because no photograph is taken before it.
+        if (action.Step <= model.Step
             || (action.Step is GuestCycleStep.Filters or GuestCycleStep.Keepsake && !model.CanContinue)
             || (action.Step == GuestCycleStep.Keepsake && model.Step != GuestCycleStep.Filters))
         {
             return Ignored(model);
         }
 
-        // Leaving a step cancels its operation and Move; a Retake's candidate goes with them.
-        var cancelled = model.Operation is null && model.Move is null ? Changed(model) : CancelOperationAndMove(model);
-        var tab = action.Step == GuestCycleStep.Photographs
-            ? (cancelled.Model.NextEmptyWindow is null ? PhotographsTab.Arrange : PhotographsTab.Camera)
-            : cancelled.Model.Tab;
-        return cancelled with { Model = cancelled.Model with { Step = action.Step, Tab = tab } };
+        return Changed(model with { Step = action.Step });
     }
 
     private static GuestCycleOutcome ShowTab(GuestCycleModel model, ShowTabAction action)

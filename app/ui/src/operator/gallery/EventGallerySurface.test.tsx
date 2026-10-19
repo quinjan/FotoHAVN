@@ -115,6 +115,22 @@ describe("the operator Event Gallery surface", () => {
     });
   });
 
+  it("counts the Guest Cycles and how many completed above the list, and says so truthfully while more pages remain", () => {
+    const { rerender } = renderOperator(surface(baseView()));
+    expect(screen.getByText("Newest 7 Guest Cycles, 3 completed")).toBeVisible();
+    rerender(surface({ ...baseView(), nextCursor: null }));
+    expect(screen.getByText("7 Guest Cycles, 3 completed")).toBeVisible();
+    rerender(surface({ ...baseView(), nextCursor: null, items: baseView().items.filter((item) => item.outcome !== "completed") }));
+    expect(screen.getByText("4 Guest Cycles, none completed")).toBeVisible();
+  });
+
+  it("shows no count line while the gallery is empty or its first page loads", () => {
+    const { rerender } = renderOperator(surface({ ...baseView(), items: [], nextCursor: null, empty: true }));
+    expect(screen.queryByText(/Guest Cycles?, /)).toBeNull();
+    rerender(surface({ ...baseView(), items: [], nextCursor: null, empty: false, loadingMore: true }));
+    expect(screen.queryByText(/Guest Cycles?, /)).toBeNull();
+  });
+
   it("says there are no photographs yet, without paging controls", () => {
     renderOperator(surface({ ...baseView(), items: [], nextCursor: null, empty: true }));
     expect(screen.getByText("No photographs yet.")).toBeVisible();

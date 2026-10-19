@@ -51,20 +51,6 @@ public sealed class PhaseTimerRulesTests
     }
 
     [Fact]
-    public void The_warning_is_20_seconds_and_the_Keepsake_has_none()
-    {
-        Assert.Equal(20, PhaseTimerRules.WarningSeconds);
-        Assert.All(PhaseTimerRules.All.Where(phase => phase != PhaseTimerPhase.Keepsake), phase => Assert.True(PhaseTimerRules.HasWarning(phase)));
-        Assert.False(PhaseTimerRules.HasWarning(PhaseTimerPhase.Keepsake));
-    }
-
-    [Fact]
-    public void The_shortest_timer_leaves_a_whole_warning_to_respond_to()
-    {
-        Assert.All(PhaseTimerRules.All.Where(PhaseTimerRules.HasWarning), phase => Assert.True(PhaseTimerRules.Min(phase) >= PhaseTimerRules.WarningSeconds));
-    }
-
-    [Fact]
     public void Defaults_list_every_phase_once_in_plan_order()
     {
         var defaults = PhaseTimerRules.Defaults();
@@ -99,7 +85,6 @@ public sealed class PhaseTimerRulesTests
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.Min(unknown));
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.Max(unknown));
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.CanBeOff(unknown));
-        Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.HasWarning(unknown));
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.IsValid(unknown, 30));
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.ToProtocol(unknown));
         Assert.Throws<ArgumentOutOfRangeException>(() => PhaseTimerRules.FromProtocol((PhaseTimer)99));

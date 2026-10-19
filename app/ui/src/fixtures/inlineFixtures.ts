@@ -75,7 +75,7 @@ export const guestStart: GuestWelcomeMessage = {
     surface: "start",
     start: { stepInsideAvailable: false, guestGalleryLinkVisible: false },
     startUnavailable: null,
-    overlays: { exitHold: null, pinDialog: null, phaseTimerWarning: null, startOverConfirmation: null, notice: null },
+    overlays: { exitHold: null, pinDialog: null, phaseTimer: null, notice: null },
     fatal: null,
     guestCycle: null,
     template: null,
@@ -91,8 +91,7 @@ export const guestStart: GuestWelcomeMessage = {
 const noGuestOverlays: GuestOverlays = {
   exitHold: null,
   pinDialog: null,
-  phaseTimerWarning: null,
-  startOverConfirmation: null,
+  phaseTimer: null,
   notice: null,
 };
 

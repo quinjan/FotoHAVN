@@ -44,7 +44,7 @@ public sealed class GuestCycleInvariantTests
     {
         internal static readonly (int Weight, int Kind)[] Kinds =
         [
-            (2, 0), (5, 1), (3, 2), (14, 3), (3, 6), (2, 7), (4, 8), (2, 9), (1, 10), (2, 11), (4, 12), (3, 13), (6, 14), (5, 15), (1, 16), (2, 17), (7, 18), (2, 19),
+            (2, 0), (5, 1), (3, 2), (14, 3), (3, 6), (2, 7), (4, 8), (2, 9), (1, 10), (2, 11), (4, 12), (6, 14), (5, 15), (1, 16), (2, 17), (7, 18), (2, 19),
         ];
 
         public static Arbitrary<Script> Scripts()
@@ -119,8 +119,6 @@ public sealed class GuestCycleInvariantTests
                 return new SelectWindowAction(window);
             case 12:
                 return new MoveStartAction(window);
-            case 13:
-                return new MoveStartFromPoolAction(model.RetainedPool.Count > 0 && step.B % 4 != 0 ? model.RetainedPool[step.A % model.RetainedPool.Count] : "missing");
             case 14:
                 return new MoveToAction(window);
             case 15:
@@ -144,15 +142,15 @@ public sealed class GuestCycleInvariantTests
     private static bool Filled(GuestCycleModel model, int index) => model.Windows[index] is { } id && model.KeptCaptures.ContainsKey(id);
 
     private static bool SameArrangement(GuestCycleModel a, GuestCycleModel b) =>
-        a.TemplateId == b.TemplateId && a.Windows.SequenceEqual(b.Windows) && a.RetainedPool.SequenceEqual(b.RetainedPool);
+        a.TemplateId == b.TemplateId && a.Windows.SequenceEqual(b.Windows);
 
     [Property(Arbitrary = [typeof(Generators)], MaxTest = Runs)]
-    public bool Every_window_Capture_is_kept_and_appears_once_across_the_windows_and_the_retained_pool(Script script)
+    public bool Every_window_Capture_is_kept_and_appears_once_across_the_windows(Script script)
     {
         Run(script, seen =>
         {
             var model = seen.After;
-            var placed = model.Windows.OfType<string>().Concat(model.RetainedPool).ToList();
+            var placed = model.Windows.OfType<string>().ToList();
             Assert.True(placed.All(model.KeptCaptures.ContainsKey), seen.ToString());
             Assert.Equal(placed.Count, placed.Distinct().Count());
             Assert.True(model.Operation?.Candidate is null || model.KeptCaptures.ContainsKey(model.Operation.Candidate), seen.ToString());
@@ -216,12 +214,12 @@ public sealed class GuestCycleInvariantTests
     }
 
     [Property(Arbitrary = [typeof(Generators)], MaxTest = Runs)]
-    public bool No_kept_Capture_is_ever_lost_kept_is_arranged_plus_retained_plus_candidate_plus_explicitly_discarded(Script script)
+    public bool No_kept_Capture_is_ever_lost_kept_is_arranged_plus_candidate_plus_explicitly_discarded(Script script)
     {
         Run(script, seen =>
         {
             var model = seen.After;
-            var kept = model.Windows.OfType<string>().Concat(model.RetainedPool).Concat(model.Operation?.Candidate is { } candidate ? [candidate] : []).ToHashSet();
+            var kept = model.Windows.OfType<string>().Concat(model.Operation?.Candidate is { } candidate ? [candidate] : []).ToHashSet();
 
             Assert.Equal(seen.Known.Order(), kept.Union(seen.Discarded).Order());
             Assert.Empty(kept.Intersect(seen.Discarded));
@@ -257,6 +255,20 @@ public sealed class GuestCycleInvariantTests
             if (model.Step is GuestCycleStep.Filters or GuestCycleStep.Keepsake)
             {
                 Assert.True(Enumerable.Range(0, model.WindowCount).All(index => Filled(model, index)), seen.ToString());
+            }
+        });
+        return true;
+    }
+
+    [Property(Arbitrary = [typeof(Generators)], MaxTest = Runs)]
+    public bool The_cycle_never_goes_back_to_an_earlier_step_and_the_Template_never_changes_after_it(Script script)
+    {
+        Run(script, seen =>
+        {
+            Assert.True(seen.After.Step >= seen.Before.Step, seen.ToString());
+            if (seen.Before.Step != GuestCycleStep.Template)
+            {
+                Assert.Equal(seen.Before.TemplateId, seen.After.TemplateId);
             }
         });
         return true;
@@ -303,13 +315,12 @@ public sealed class GuestCycleInvariantTests
                 reached.Add(seen.After.CanContinue ? "continue" : "no");
                 reached.Add(seen.After.Operation is { Mode: OperationMode.Retake, Candidate: not null } ? "candidate" : "no");
                 reached.Add(seen.After.Move is not null ? "move" : "no");
-                reached.Add(seen.After.RetainedPool.Count > 0 ? "pool" : "no");
                 reached.Add(seen.After.Step == GuestCycleStep.Keepsake ? "keepsake" : "no");
                 reached.Add(seen.Action is AcceptRetakeAction && seen.Outcome.Applied ? "accepted" : "no");
             });
         }
 
-        Assert.Superset(new HashSet<string> { "continue", "candidate", "move", "pool", "keepsake", "accepted" }, reached);
+        Assert.Superset(new HashSet<string> { "continue", "candidate", "move", "keepsake", "accepted" }, reached);
     }
 
     private static int WeightedKind(Random random)

@@ -188,7 +188,7 @@ public sealed class GuestCycleFilterTests
     }
 
     [Fact]
-    public async Task Going_back_drops_what_Filters_was_composing()
+    public async Task Filters_cannot_be_left_for_Photographs_even_while_it_composes()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
@@ -196,14 +196,12 @@ public sealed class GuestCycleFilterTests
         rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeAccepted();
         Assert.True(rig.Filters.Composing);
 
-        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeAccepted();
+        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeRejected();
         rig.Compositor.StripGate.SetResult();
         rig.Compositor.StripGate = null;
-        rig.Advance(TimeSpan.FromMilliseconds(200));
 
-        Assert.Equal(GuestSurface.Photographs, rig.Surface);
-        rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => !rig.Filters.Composing, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(50)));
+        Assert.Equal(GuestSurface.Filters, rig.Surface);
         Assert.NotNull(rig.Filters.StripPreviewKey);
     }
 
@@ -238,7 +236,7 @@ public sealed class GuestCycleFilterTests
     }
 
     [Fact]
-    public async Task The_Keepsake_has_no_warning_no_START_OVER_and_the_composed_previews_are_gone()
+    public async Task The_Keepsake_shows_its_timer_and_the_composed_previews_are_gone()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
@@ -247,9 +245,8 @@ public sealed class GuestCycleFilterTests
         rig.Guest("FinishStrip").ShouldBeAccepted();
         Assert.True(rig.AdvanceUntil(() => rig.Surface == GuestSurface.Keepsake, TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(50)));
 
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
-        Assert.False(rig.View.GuestCycle!.StartOverAvailable);
-        Assert.All(rig.View.GuestCycle.Steps, step => Assert.False(step.CanGoBack));
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.Keepsake, 12, false), rig.View.Overlays.PhaseTimer);
+        Assert.Equal(GuestStepState.Current, rig.View.GuestCycle!.Steps[3].State);
         Assert.All(keys, key => Assert.False(Cached(rig, key)));
         Assert.Equal(PhaseTimer.Keepsake, rig.CycleDiagnostics().Timer.Phase);
     }
@@ -285,8 +282,8 @@ public sealed class GuestCycleFilterTests
         rig.Guest("FinishStrip").ShouldBeRejected();
         rig.Guest("SelectLook", """{"lookId":"monochrome-v1"}""").ShouldBeRejected();
         rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeRejected();
-        rig.Guest("StartOver").ShouldBeRejected();
         Assert.Null(rig.CycleDiagnostics().Timer.Phase);
+        Assert.Null(rig.View.Overlays.PhaseTimer);
 
         rig.Compositor.StripGate.SetResult();
         rig.Compositor.StripGate = null;

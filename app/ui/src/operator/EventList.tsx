@@ -101,11 +101,12 @@ function EventRow({ row }: { readonly row: EventListRow }) {
           <h2 className={styles.name}>{row.name}</h2>
           {row.running && <p className={styles.running}>RUNNING</p>}
         </div>
+        {/* The running Event's count and use are live in the panel above, so its row keeps only what the panel doesn't carry. */}
         <p className={styles.facts}>
           <span>{formatEventDate(row.date)}</span>
           {row.venue !== null && <span className={styles.venue}>{row.venue}</span>}
-          <span>{formatGuestCycles(row.completedGuestCycles)}</span>
-          <span>{formatLastUsed(row.lastUsedAt)}</span>
+          {!row.running && <span>{formatGuestCycles(row.completedGuestCycles)}</span>}
+          {!row.running && <span>{formatLastUsed(row.lastUsedAt)}</span>}
         </p>
       </div>
       <RowActions row={row} />

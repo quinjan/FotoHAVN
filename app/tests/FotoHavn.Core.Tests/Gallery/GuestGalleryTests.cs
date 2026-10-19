@@ -306,7 +306,6 @@ public sealed class GuestGalleryTests
         rig.Guest("OpenGuestStrip", """{"guestCycleId":"00000000-0000-0000-0000-000000000001"}""").ShouldBeRejected();
         rig.Guest("CloseGuestStrip").ShouldBeRejected();
         rig.Guest("BackToStart").ShouldBeRejected();
-        rig.Guest("MoreTime").ShouldBeRejected();
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
     }
 
@@ -619,7 +618,7 @@ public sealed class GuestGalleryTests
 
         Assert.Equal(CompletedNewestFirst(seeded), rig.StripIds);
         Assert.Equal(GuestSurface.GuestGallery, rig.GuestView.Surface);
-        Assert.True(rig.GuestView.Overlays is { PhaseTimerWarning: null });
+        Assert.Equal(PhaseTimer.GuestGallery, rig.GuestView.Overlays.PhaseTimer?.Phase);
     }
 
     [Fact]

@@ -13,7 +13,7 @@ function nextFrame(): Promise<void> {
   });
 }
 
-/** Finite animations and transitions still running; looping ones (a spinner, a pulse) never finish and are skipped. */
+/** Finite animations and transitions still running; looping ones (a spinner, a pulse) never finish and are skipped, and so is a delayed reveal, which only waits. */
 function unfinishedAnimations(): Animation[] {
   const getAnimations = (document as Partial<Document>).getAnimations;
   if (typeof getAnimations !== "function") {
@@ -21,7 +21,8 @@ function unfinishedAnimations(): Animation[] {
   }
   return getAnimations.call(document).filter((animation) => {
     const iterations = animation.effect?.getComputedTiming().iterations ?? 1;
-    return animation.playState !== "finished" && Number.isFinite(iterations);
+    const target = (animation.effect as Partial<KeyframeEffect> | null)?.target;
+    return animation.playState !== "finished" && Number.isFinite(iterations) && target?.closest("[data-delayed-reveal]") == null;
   });
 }
 

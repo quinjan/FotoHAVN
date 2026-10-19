@@ -45,7 +45,7 @@ public sealed class ProtocolJsonTests
     public void Nulls_are_written_so_snapshots_are_complete()
     {
         Assert.Equal(
-            """{"surface":"start","start":null,"startUnavailable":null,"overlays":{"exitHold":null,"pinDialog":null,"phaseTimerWarning":null,"startOverConfirmation":null,"notice":null},"fatal":null,"guestCycle":null,"template":null,"photographs":null,"filters":null,"keepsake":null,"operatorAssistance":null,"guestGallery":null,"guestStripDetail":null}""",
+            """{"surface":"start","start":null,"startUnavailable":null,"overlays":{"exitHold":null,"pinDialog":null,"phaseTimer":null,"notice":null},"fatal":null,"guestCycle":null,"template":null,"photographs":null,"filters":null,"keepsake":null,"operatorAssistance":null,"guestGallery":null,"guestStripDetail":null}""",
             ProtocolJson.Serialize(new GuestPresentation(GuestSurface.Start, null, null, GuestOverlays.None, null, null, null, null, null, null, null, null, null)));
     }
 

@@ -43,16 +43,16 @@ public sealed record KeptCapture(string Id, int Sequence, string ImageUrl, int W
 /// <param name="Candidate">A Retake's pending replacement, or null until one is committed.</param>
 public sealed record GuestOperation(long Id, OperationMode Mode, int? Target, string? Candidate);
 
-/// <summary>A Move in progress: which Capture moves and where it started. <see cref="SourceIndex"/> is null for a Capture in the retained pool.</summary>
-/// <param name="SourceIndex">The window the Capture is in, or null when it comes from the retained pool.</param>
+/// <summary>A Move in progress: which Capture moves and where it started.</summary>
+/// <param name="SourceIndex">The window the Capture is in.</param>
 /// <param name="CaptureId">The Capture being moved.</param>
 /// <param name="Revision">The arrangement revision the Move began at.</param>
-public sealed record GuestMove(int? SourceIndex, string CaptureId, long Revision);
+public sealed record GuestMove(int SourceIndex, string CaptureId, long Revision);
 
 /// <summary>
 /// The pure state of one Guest Cycle's arrangement, ported from the website's session reducer (<c>session.ts</c>) minus device
-/// import, frames, and layouts (plan section 7, Retake and arrangement rules). It is immutable: <see cref="GuestCycleRules.Apply"/>
-/// returns a new model, or the same instance when an action is ignored.
+/// import, frames, layouts, going back, and the retained pool a Template change after going back needs (plan section 7, Retake and
+/// arrangement rules). It is immutable: <see cref="GuestCycleRules.Apply"/> returns a new model, or the same instance when an action is ignored.
 /// </summary>
 public sealed record GuestCycleModel
 {
@@ -65,10 +65,7 @@ public sealed record GuestCycleModel
     /// <summary>The Capture id in each window, or null for an empty window. Always <see cref="WindowCount"/> long.</summary>
     public required IReadOnlyList<string?> Windows { get; init; }
 
-    /// <summary>Kept Captures that are in no window: what a smaller Template pushed out. A larger Template pulls them back in.</summary>
-    public IReadOnlyList<string> RetainedPool { get; init; } = [];
-
-    /// <summary>Every Capture the Guest Cycle still holds (in a window, the retained pool, or a Retake candidate), by id.</summary>
+    /// <summary>Every Capture the Guest Cycle still holds (in a window, or a Retake candidate), by id.</summary>
     public IReadOnlyDictionary<string, KeptCapture> KeptCaptures { get; init; } = ImmutableDictionary<string, KeptCapture>.Empty;
 
     /// <summary>The running operation, or null.</summary>
@@ -83,7 +80,7 @@ public sealed record GuestCycleModel
     /// <summary>The selected Look.</summary>
     public required string LookId { get; init; }
 
-    /// <summary>Counts arrangement changes (the Template, a window, or the retained pool changed), so a gesture that began on an older arrangement is refused.</summary>
+    /// <summary>Counts arrangement changes (the Template or a window changed), so a gesture that began on an older arrangement is refused.</summary>
     public long Revision { get; init; }
 
     /// <summary>The current step.</summary>

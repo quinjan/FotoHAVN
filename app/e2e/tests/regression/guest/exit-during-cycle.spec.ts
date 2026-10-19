@@ -12,14 +12,15 @@ test.describe("leaving during a Guest Cycle", { tag: ["@m8", "@camera"] }, () =>
     await tap(guest.stepInside);
     await tap(guest.templateContinue);
     await run.waitForStep("photographs", "camera");
-    await run.takePhotographsUntil(guest, 2);
-    await run.stopCapture(guest);
+    // A sequence can't be stopped, so the cycle is left mid-way on the Arrange tab, before any Photo Strip.
+    await run.takePhotographsUntil(guest, 4);
+    await run.waitForStep("photographs", "arrange");
 
     await run.endEventFromOperator();
 
     const cycle = await run.endedCycle("operator_exit");
     expect(cycle.ended_at).not.toBeNull();
-    expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept", "2:kept"]);
+    expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept", "2:kept", "3:kept", "4:kept"]);
     run.expectCaptureFiles(cycle.id);
     expect(run.strip(cycle.id)).toBeUndefined();
     expect(run.hasStripFile(cycle.id)).toBe(false);
@@ -34,8 +35,8 @@ test.describe("leaving during a Guest Cycle", { tag: ["@m8", "@camera"] }, () =>
     await tap(guest.stepInside);
     await tap(guest.templateContinue);
     await run.waitForStep("photographs", "camera");
-    await run.takePhotographsUntil(guest, 1);
-    await run.stopCapture(guest);
+    await run.takePhotographsUntil(guest, 4);
+    await run.waitForStep("photographs", "arrange");
 
     await test.step("a 3 second touch hold on the exit control opens the PIN pad over the cycle", async () => {
       await holdFor(guest.exitHold, exitHoldMs);
@@ -62,7 +63,7 @@ test.describe("leaving during a Guest Cycle", { tag: ["@m8", "@camera"] }, () =>
     });
 
     const cycle = await run.endedCycle("operator_exit");
-    expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept"]);
+    expect(run.captures(cycle.id).map((capture) => `${String(capture.sequence)}:${capture.state}`)).toEqual(["1:kept", "2:kept", "3:kept", "4:kept"]);
     run.expectCaptureFiles(cycle.id);
     expect(run.strip(cycle.id)).toBeUndefined();
     expect(findDigitsInStore(dataDir, defaultPin)).toEqual([]);

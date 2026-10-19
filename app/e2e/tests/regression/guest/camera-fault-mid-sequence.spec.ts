@@ -49,7 +49,7 @@ test(
       await expect(run.list.runningFact("camera")).toHaveText("Ready");
     });
 
-    await test.step("TAKE PHOTOGRAPHS continues from window 3 and the strip fills", async () => {
+    await test.step("a tap on the live preview continues from window 3 and the strip fills", async () => {
       await tap(guest.takePhotographs);
       await run.waitForFilled(3, 30_000);
       await run.waitForFilled(4, 30_000);

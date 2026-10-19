@@ -69,3 +69,15 @@
   flex: 1;
   min-inline-size: 0;
 }
+
+/* While the Phase Timer warning's footer row takes some of the stage's height, the stack tightens so the Looks and the action still fit;
+   a dense list also drops the supporting line, which a guest in the last seconds has already read. */
+@container stage (max-height: 45vw) {
+  .options {
+    --app-stack-gap: var(--space-8);
+  }
+
+  .options[data-dense-looks] h1 + p {
+    display: none;
+  }
+}

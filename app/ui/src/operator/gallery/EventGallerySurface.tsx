@@ -5,6 +5,7 @@ import { StatementHeading } from "../../components/StatementHeading/index.ts";
 import { TextLink } from "../../components/TextLink/index.ts";
 import type { EventGalleryView, RunningEventPanel } from "../../protocol/generated.ts";
 import { OperatorAssistanceAlert } from "../OperatorAssistanceAlert.tsx";
+import { formatGalleryCount } from "../format.ts";
 import { useSendCommand } from "../OperatorCommands.tsx";
 import { backToEventsLabel, heading, loadFailedLine, runningLabel, runningLine, tryAgainLabel } from "./galleryCopy.ts";
 import { forgetOpened, rememberedFocus, rememberOpened } from "./galleryFocus.ts";
@@ -57,6 +58,15 @@ export function EventGallerySurface({ view, running }: { readonly view: EventGal
           {backToEventsLabel}
         </TextLink>
         <StatementHeading level={1} eyebrow={view.eventName} lead={heading.lead} turn={heading.turn} />
+        {view.items.length > 0 && (
+          <p className={styles.count}>
+            {formatGalleryCount(
+              view.items.length,
+              view.items.filter((item) => item.outcome === "completed").length,
+              view.nextCursor !== null,
+            )}
+          </p>
+        )}
         {view.running && (
           <p className={styles.live}>
             <span className={styles.badge}>{runningLabel}</span>

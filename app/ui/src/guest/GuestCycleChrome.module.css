@@ -6,8 +6,8 @@
   min-block-size: 0;
 }
 
-/* The top band holds a 64 target with 16 to 32 above and below (DESIGN.md, Layout regions); the exit hold sits over its right end.
-   It is not a stacking context, so the Start Over dialog inside it stacks above the warning at the root. */
+/* The top band holds a 64 target with 16 to 32 above and below (DESIGN.md, Layout regions): the step progress on the
+   left, the Phase Timer on the right, and the exit hold over the band's right end, beyond the space it reserves. */
 .band {
   --chrome-hold-reserve: calc(var(--app-target) + var(--space-16) * 2);
 
@@ -23,7 +23,18 @@
   flex: none;
 }
 
+/* The Phase Timer sits level with the exit hold beside it (16 from the top, in a row as tall as the hold), whatever the band's height. */
+.timer {
+  align-self: flex-start;
+  align-items: center;
+  block-size: var(--app-target);
+  margin-block-start: var(--space-16);
+  margin-inline-start: auto;
+}
+
+/* The stage is a size container, so a step can tighten itself on a short screen. */
 .stage {
+  container: stage / size;
   display: grid;
   min-block-size: 0;
   min-inline-size: 0;
@@ -31,12 +42,6 @@
 
 .stage > * {
   min-block-size: 0;
-}
-
-/* The warning sits in the band between the step progress and START OVER, so it covers nothing and nothing moves when it
-   arrives. It stays within the band's height at every scale; at 1280 the free width is just over its own. */
-.warning {
-  flex: none;
 }
 
 /* A step arrives with a soft fade; under reduced motion it simply appears. */

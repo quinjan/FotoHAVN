@@ -144,58 +144,6 @@ public sealed class GuestCycleArrangeTests
         rig.Guest("ShowArrangeTab").ShouldBeAccepted();
         Assert.Equal(PhotographsTabName.Arrange, rig.Photographs.Tab);
     }
-
-    [Fact]
-    public async Task A_smaller_Template_keeps_the_extra_photograph_in_the_pool_and_a_larger_one_takes_it_back()
-    {
-        using var rig = await GuestCycleRig.CreateAsync(new GuestRigOptions
-        {
-            Tweak = record => record with { OfferedTemplateIds = ["signature-strip", "butter-gingham"] },
-        });
-        rig.ToArrange();
-        var ids = Ids(rig);
-
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        rig.Guest("SelectTemplate", """{"templateId":"butter-gingham"}""").ShouldBeAccepted();
-        rig.ToPhotographs();
-        Assert.Equal(3, rig.Photographs.Windows.Count);
-        Assert.Equal(ids[..3], Ids(rig));
-        Assert.Equal(1, rig.Photographs.RetainedCount);
-        Assert.True(rig.Photographs.CanContinue);
-
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        rig.Guest("SelectTemplate", """{"templateId":"signature-strip"}""").ShouldBeAccepted();
-        rig.ToPhotographs();
-        Assert.Equal(ids, Ids(rig));
-        Assert.Equal(0, rig.Photographs.RetainedCount);
-        Assert.Equal(PhotographsTabName.Arrange, rig.Photographs.Tab);
-    }
-
-    [Fact]
-    public async Task A_larger_Template_cannot_continue_until_its_new_window_is_filled()
-    {
-        using var rig = await GuestCycleRig.CreateAsync(new GuestRigOptions
-        {
-            Tweak = record => record with { OfferedTemplateIds = ["butter-gingham", "signature-strip"], DefaultTemplateId = "butter-gingham" },
-        });
-        rig.ToArrange();
-        Assert.Equal(3, rig.Photographs.Windows.Count);
-
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        rig.Guest("SelectTemplate", """{"templateId":"signature-strip"}""").ShouldBeAccepted();
-        rig.ToPhotographs();
-
-        var view = rig.Photographs;
-        Assert.Equal(PhotographsTabName.Camera, view.Tab);
-        Assert.Equal(3, view.Windows.Count(window => window.CaptureId is not null));
-        Assert.False(view.CanContinue);
-        Assert.True(view.CanTakePhotographs);
-        rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeRejected();
-
-        rig.TakeAll();
-        Assert.True(rig.Photographs.CanContinue);
-        Assert.Equal(4, rig.Photographs.Windows.Count(window => window.CaptureId is not null));
-    }
 }
 
 internal static class GuestCycleRigArrangeSupport

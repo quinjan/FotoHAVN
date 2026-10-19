@@ -82,6 +82,7 @@ public sealed class EventSetupCommandTests
         { "SetDefaultLook", """{"lookId":"naturale-v1"}""" },
         { "SetPhaseTimer", """{"phase":"keepsake","seconds":10}""" },
         { "SetGuestGallery", """{"enabled":true}""" },
+        { "SetGuestSounds", """{"enabled":false}""" },
         { "SetPin", """{"pin":"1234","confirmation":"1234"}""" },
         { "SaveEvent", "{}" },
         { "SaveAndStartEvent", "{}" },
@@ -148,10 +149,12 @@ public sealed class EventSetupCommandTests
 
         rig.Accepts("SetMirror", """{"enabled":false}""");
         rig.Accepts("SetGuestGallery", """{"enabled":true}""");
+        rig.Accepts("SetGuestSounds", """{"enabled":false}""");
 
         Assert.False(rig.Setup.Mirror);
         Assert.False(rig.Setup.Camera.Mirrored);
         Assert.True(rig.Setup.GuestGalleryEnabled);
+        Assert.False(rig.Setup.GuestSoundsEnabled);
     }
 
     [Fact]
@@ -305,6 +308,7 @@ public sealed class EventSetupCommandTests
         rig.Field("venue", " The Quay ");
         rig.Field("notes", "   ");
         rig.Accepts("SetCountdown", """{"seconds":10}""");
+        rig.Accepts("SetGuestSounds", """{"enabled":false}""");
         rig.Advance(TimeSpan.FromMilliseconds(500));
         Assert.Equal(EventSetupCameraState.Ready, rig.Setup.Camera.State);
 
@@ -316,6 +320,7 @@ public sealed class EventSetupCommandTests
         Assert.Equal(4, rig.List.Events.Count);
         var saved = (await rig.Store.GetEventAsync(row.Id, TestContext.Current.CancellationToken))!;
         Assert.Equal(("Quay party", "The Quay", null, 10, true), (saved.Name, saved.Venue, saved.Notes, saved.CountdownSeconds, saved.Mirror));
+        Assert.False(saved.GuestSoundsEnabled);
         Assert.Equal(("fake-camera", "Fake camera", "fake-guest", "Fake guest"), (saved.CameraDeviceId, saved.CameraName, saved.GuestDisplayId, saved.GuestDisplayName));
         Assert.Equal(["signature-strip", "panorama-four", "butter-gingham", "polka-keepsake"], saved.OfferedTemplateIds);
         Assert.Equal(6, saved.PhaseTimers.Count);

@@ -31,7 +31,6 @@ public sealed class GuestCycleRuleTests
         Assert.Equal([0, 1, 2], model.EmptyWindows);
         Assert.Equal(0, model.NextEmptyWindow);
         Assert.Empty(model.ArrangedCaptureIds);
-        Assert.Empty(model.RetainedPool);
         Assert.Null(model.Selected);
         Assert.False(model.IsComplete);
         Assert.False(model.CanContinue);
@@ -86,41 +85,32 @@ public sealed class GuestCycleRuleTests
     [Fact]
     public void Choosing_the_same_Template_or_a_template_without_windows_is_ignored()
     {
-        var model = GuestCycleKit.Loaded();
+        var model = GuestCycleKit.Fresh();
 
         AssertIgnored(model, new SelectTemplateAction(GuestCycleKit.Signature, 4));
         AssertIgnored(model, new SelectTemplateAction("other", 0));
     }
 
     [Fact]
-    public void A_Template_change_waits_while_the_guest_is_on_Filters()
+    public void A_Template_is_chosen_only_on_the_Template_step_because_guests_never_come_back_to_it()
     {
+        AssertIgnored(GuestCycleKit.OnPhotographs(), new SelectTemplateAction("pair-v1", 2));
+        AssertIgnored(GuestCycleKit.Loaded(), new SelectTemplateAction("pair-v1", 2));
         AssertIgnored(GuestCycleKit.Loaded().Do(new GoToStepAction(GuestCycleStep.Filters)), new SelectTemplateAction("pair-v1", 2));
     }
 
     [Fact]
-    public void A_Template_change_clears_the_selection_and_a_Move_and_counts_as_an_arrangement_change()
+    public void A_Template_change_gives_the_new_Templates_empty_windows_and_counts_as_an_arrangement_change()
     {
-        var model = GuestCycleKit.Loaded().Do(new MoveStartAction(1));
+        var model = GuestCycleKit.Fresh();
 
         var changed = model.Do(new SelectTemplateAction("butter-gingham", 3));
 
-        Assert.Null(changed.Move);
-        Assert.Null(changed.Selected);
         Assert.Equal("butter-gingham", changed.TemplateId);
         Assert.Equal(3, changed.WindowCount);
+        Assert.Equal([null, null, null], changed.Windows);
+        Assert.Equal(GuestCycleStep.Template, changed.Step);
         Assert.Equal(model.Revision + 1, changed.Revision);
-    }
-
-    [Fact]
-    public void A_Template_change_compacts_filled_windows_into_the_new_windows_in_order()
-    {
-        var model = GuestCycleKit.Loaded("A", "B", "C") with { Windows = ["A", null, "C", null], RetainedPool = ["B"] };
-
-        var changed = model.Do(new SelectTemplateAction("pair-v1", 2));
-
-        Assert.Equal(["A", "C"], changed.Windows);
-        Assert.Equal(["B"], changed.RetainedPool);
     }
 
     // Capture sequence
@@ -352,16 +342,14 @@ public sealed class GuestCycleRuleTests
     }
 
     [Fact]
-    public void A_Move_begins_only_from_an_occupied_window_or_the_pool_and_never_during_an_operation()
+    public void A_Move_begins_only_from_an_occupied_window_and_never_during_an_operation()
     {
         var partial = GuestCycleKit.Loaded("A", "B");
 
         AssertIgnored(partial, new MoveStartAction(3));
         AssertIgnored(partial, new MoveStartAction(4));
         AssertIgnored(partial, new MoveStartAction(-1));
-        AssertIgnored(partial, new MoveStartFromPoolAction("A"));
         AssertIgnored(Retaking(), new MoveStartAction(0));
-        AssertIgnored(Retaking() with { RetainedPool = ["Z"] }, new MoveStartFromPoolAction("Z"));
     }
 
     [Fact]
@@ -370,8 +358,6 @@ public sealed class GuestCycleRuleTests
         var model = GuestCycleKit.Loaded();
 
         Assert.Equal(new GuestMove(2, "C", model.Revision), model.Do(new MoveStartAction(2)).Move);
-        var pooled = model.Do(new SelectTemplateAction("pair-v1", 2));
-        Assert.Equal(new GuestMove(null, "C", pooled.Revision), pooled.Do(new MoveStartFromPoolAction("C")).Move);
     }
 
     [Fact]
@@ -416,14 +402,6 @@ public sealed class GuestCycleRuleTests
         Assert.Equal([null, "B", null, "A"], moved.Windows);
         Assert.Equal(model.Revision + 1, moved.Revision);
         Assert.Equal(3, moved.Selected);
-    }
-
-    [Fact]
-    public void A_Move_from_a_pool_Capture_that_the_pool_no_longer_holds_is_ignored()
-    {
-        var model = GuestCycleKit.Loaded() with { Move = new GuestMove(null, "Z", 0) };
-
-        AssertIgnored(model, new MoveToAction(1));
     }
 
     [Fact]
@@ -517,6 +495,28 @@ public sealed class GuestCycleRuleTests
     {
         AssertIgnored(GuestCycleKit.Fresh(), new GoToStepAction(GuestCycleStep.Template));
         AssertIgnored(GuestCycleKit.Loaded(), new GoToStepAction(GuestCycleStep.Photographs));
+        AssertIgnored(GuestCycleKit.Loaded().Do(new GoToStepAction(GuestCycleStep.Filters)), new GoToStepAction(GuestCycleStep.Filters));
+    }
+
+    [Fact]
+    public void Going_back_to_an_earlier_step_is_ignored()
+    {
+        var filters = GuestCycleKit.Loaded().Do(new GoToStepAction(GuestCycleStep.Filters));
+
+        AssertIgnored(GuestCycleKit.Loaded(), new GoToStepAction(GuestCycleStep.Template));
+        AssertIgnored(WithCandidate(), new GoToStepAction(GuestCycleStep.Template));
+        AssertIgnored(filters, new GoToStepAction(GuestCycleStep.Photographs));
+        AssertIgnored(filters, new GoToStepAction(GuestCycleStep.Template));
+    }
+
+    [Fact]
+    public void Going_on_to_Photographs_opens_the_Camera_with_every_window_empty()
+    {
+        var model = GuestCycleKit.Fresh().Do(new SelectTemplateAction("butter-gingham", 3)).Do(new GoToStepAction(GuestCycleStep.Photographs));
+
+        Assert.Equal(GuestCycleStep.Photographs, model.Step);
+        Assert.Equal(PhotographsTab.Camera, model.Tab);
+        Assert.Equal([null, null, null], model.Windows);
     }
 
     [Fact]
@@ -539,56 +539,17 @@ public sealed class GuestCycleRuleTests
     }
 
     [Fact]
-    public void Going_back_from_Filters_shows_Arrange_when_every_window_is_filled()
-    {
-        var back = GuestCycleKit.Loaded().Do(new GoToStepAction(GuestCycleStep.Filters)).Do(new GoToStepAction(GuestCycleStep.Photographs));
-
-        Assert.Equal(PhotographsTab.Arrange, back.Tab);
-    }
-
-    [Fact]
-    public void Entering_Photographs_with_an_empty_window_shows_the_Camera()
-    {
-        var model = GuestCycleKit.Loaded("A", "B").Do(new GoToStepAction(GuestCycleStep.Template)).Do(new GoToStepAction(GuestCycleStep.Photographs));
-
-        Assert.Equal(PhotographsTab.Camera, model.Tab);
-        Assert.Equal(GuestCycleStep.Photographs, model.Step);
-    }
-
-    [Fact]
-    public void Leaving_Photographs_cancels_a_Retake_and_discards_its_candidate_and_leaves_every_other_Capture()
-    {
-        var outcome = WithCandidate().Try(new GoToStepAction(GuestCycleStep.Template));
-
-        Assert.True(outcome.Applied);
-        Assert.Equal(["E"], outcome.DiscardedCaptureIds);
-        Assert.Null(outcome.Model.Operation);
-        Assert.Equal(["A", "B", "C", "D"], outcome.Model.Windows);
-        Assert.Equal(GuestCycleStep.Template, outcome.Model.Step);
-        Assert.Equal(4, outcome.Model.KeptCaptures.Count);
-    }
-
-    [Fact]
-    public void Leaving_Photographs_cancels_a_pending_Move_and_a_sequence_with_no_discards()
-    {
-        var moving = GuestCycleKit.Loaded().Do(new MoveStartAction(1)).Try(new GoToStepAction(GuestCycleStep.Template));
-        Assert.Null(moving.Model.Move);
-        Assert.Empty(moving.DiscardedCaptureIds);
-
-        var sequence = GuestCycleKit.OnPhotographs().Do(new BeginSequenceAction(1)).Try(new GoToStepAction(GuestCycleStep.Template));
-        Assert.Null(sequence.Model.Operation);
-        Assert.Equal(GuestCycleStep.Template, sequence.Model.Step);
-    }
-
-    [Fact]
-    public void Walking_between_steps_never_loses_a_kept_Capture()
+    public void Going_on_to_Filters_and_the_Keepsake_keeps_every_kept_Capture()
     {
         var state = GuestCycleKit.Loaded();
         var ids = state.KeptCaptures.Keys.Order().ToArray();
 
-        foreach (var step in new[] { GuestCycleStep.Template, GuestCycleStep.Photographs, GuestCycleStep.Filters, GuestCycleStep.Photographs, GuestCycleStep.Template })
+        foreach (var step in new[] { GuestCycleStep.Filters, GuestCycleStep.Keepsake })
         {
-            state = state.Do(new GoToStepAction(step));
+            var outcome = state.Try(new GoToStepAction(step));
+            Assert.True(outcome.Applied);
+            Assert.Empty(outcome.DiscardedCaptureIds);
+            state = outcome.Model;
             Assert.Equal(ids, state.KeptCaptures.Keys.Order().ToArray());
         }
     }
@@ -635,7 +596,6 @@ public sealed class GuestCycleRuleTests
             new KeepOriginalAction(),
             new SelectWindowAction(0),
             new MoveStartAction(0),
-            new MoveStartFromPoolAction("A"),
             new MoveToAction(1),
             new DragPlaceAction(0, "A", done.Revision, 1),
             new MoveCancelAction(),

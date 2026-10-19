@@ -132,11 +132,12 @@ html[data-fotohavn-role="guest"] body {
   overscroll-behavior: none;
 }
 
-/* Reduced motion: state changes become near-instant. Components keep motion transforms inside a no-preference query. */
+/* Reduced motion: state changes become near-instant. Components keep motion transforms inside a no-preference query.
+   A [data-delayed-reveal] element is exempt: its animation-delay is a wait, not motion (Start unavailable's wait hint). */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not([data-delayed-reveal]),
+  *:not([data-delayed-reveal])::before,
+  *:not([data-delayed-reveal])::after {
     scroll-behavior: auto !important;
     transition-delay: var(--app-duration-instant) !important;
     transition-duration: var(--app-duration-instant) !important;

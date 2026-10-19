@@ -3,7 +3,7 @@ namespace FotoHavn.Protocol.Presentations;
 // The Guest Cycle's views (plan section 7, Steps; M8 contract). Each guest screen renders from its view alone, plus the
 // guestCycle record that is present for the whole cycle. Media URLs are built by the brain; the UI never makes one.
 
-/// <summary>A Guest Cycle step as the step progress and diagnostics name it. <see cref="GuestStep"/> (the step a guest can go to) has no Keepsake.</summary>
+/// <summary>A Guest Cycle step as the step progress and diagnostics name it. <see cref="GuestStep"/> (the step a guest can go on to) has no Keepsake.</summary>
 public enum GuestCycleStepName
 {
     Template,
@@ -31,15 +31,14 @@ public enum GuestStepState
 /// <summary>One step in the step progress.</summary>
 /// <param name="Step">The step.</param>
 /// <param name="State">Done, current, upcoming, or skipped.</param>
-/// <param name="CanGoBack">Whether tapping it goes there (<c>GoToStep</c>): true for a done, non-skipped step while the cycle can still change. Never on Keepsake.</param>
-public sealed record GuestCycleStepEntry(GuestCycleStepName Step, GuestStepState State, bool CanGoBack);
+/// <remarks>The step progress only shows where the guest is; guests never go back (protocol version 12).</remarks>
+public sealed record GuestCycleStepEntry(GuestCycleStepName Step, GuestStepState State);
 
 /// <summary>The running Guest Cycle, present on every cycle step and on Operator Assistance during one.</summary>
 /// <param name="Id">The Guest Cycle's id (it is in the media URLs; it is not operator data).</param>
 /// <param name="Step">The step the guest is on (the step the cycle returns to after Operator Assistance).</param>
 /// <param name="Steps">All four steps in order with their state, for the step progress.</param>
-/// <param name="StartOverAvailable">Whether the quiet <c>START OVER</c> action shows: Template, Photographs, and Filters, never Keepsake.</param>
-public sealed record GuestCycleView(string Id, GuestCycleStepName Step, IReadOnlyList<GuestCycleStepEntry> Steps, bool StartOverAvailable);
+public sealed record GuestCycleView(string Id, GuestCycleStepName Step, IReadOnlyList<GuestCycleStepEntry> Steps);
 
 /// <summary>A photograph window in a Template, in the Template's native pixels.</summary>
 public sealed record TemplateWindowView(int X, int Y, int Width, int Height);
@@ -99,6 +98,7 @@ public sealed record PhotographsWindowView(int Index, string? CaptureId, string?
 /// <param name="CapturedInSequence">Captures taken in this sequence so far.</param>
 /// <param name="TotalInSequence">Captures this sequence takes in all.</param>
 /// <param name="Pausing">Whether the 800 ms pause after a flash is running.</param>
+/// <param name="SoundsOn">Whether the Guest Screen plays the countdown tick and the shutter sound (the Event's Guest sounds setting). The UI renders the sound; it never decides it.</param>
 public sealed record CaptureSequenceView(
     bool Running,
     int? TargetWindow,
@@ -106,7 +106,8 @@ public sealed record CaptureSequenceView(
     long FlashSequence,
     int CapturedInSequence,
     int TotalInSequence,
-    bool Pausing);
+    bool Pausing,
+    bool SoundsOn);
 
 /// <summary>What the guest has selected on the strip.</summary>
 public enum PhotographSelectionMode
@@ -138,7 +139,6 @@ public sealed record RetakeCandidateView(int Index, string ImageUrl);
 /// <param name="Tab">The tab showing.</param>
 /// <param name="Template">The selected Template.</param>
 /// <param name="Windows">One entry per window, in order.</param>
-/// <param name="RetainedCount">Kept Captures in the retained pool (a smaller Template pushed them out).</param>
 /// <param name="Sequence">The capture sequence's progress.</param>
 /// <param name="Mirrored">Whether the live preview is mirrored (the Event's mirror setting, D22).</param>
 /// <param name="CropAspect">The current target window's width over height, for the crop guide on the live preview.</param>
@@ -152,7 +152,6 @@ public sealed record PhotographsView(
     PhotographsTabName Tab,
     PhotographsTemplateView Template,
     IReadOnlyList<PhotographsWindowView> Windows,
-    int RetainedCount,
     CaptureSequenceView Sequence,
     bool Mirrored,
     double CropAspect,

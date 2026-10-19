@@ -183,11 +183,10 @@ public sealed record StartUnavailableView(StartUnavailableReason Reason, bool Gu
 public sealed record GuestOverlays(
     ExitHoldOverlay? ExitHold,
     PinDialogOverlay? PinDialog,
-    PhaseTimerWarningOverlay? PhaseTimerWarning,
-    StartOverConfirmationOverlay? StartOverConfirmation,
+    PhaseTimerOverlay? PhaseTimer,
     NoticeOverlay? Notice)
 {
-    public static GuestOverlays None { get; } = new(null, null, null, null, null);
+    public static GuestOverlays None { get; } = new(null, null, null, null);
 }
 
 /// <summary>
@@ -214,18 +213,14 @@ public enum PinDialogError
 public sealed record PinDialogOverlay(PinDialogError? Error, int? LockedRemainingSeconds, int? AttemptsRemaining);
 
 /// <summary>
-/// The Phase Timer warning with <c>MORE TIME</c>: shown in the last 20 seconds of the Template, Photographs capture, Photographs review,
-/// Filters, and guest gallery phases, never on the Keepsake. The UI announces it once, politely, not every second.
+/// The always-visible Phase Timer (protocol version 12): present for the whole of every timed guest phase whose timer is on (Template, Photographs
+/// capture, Photographs review, Filters, Keepsake, and the guest gallery), including on Operator Assistance during a Guest Cycle; null on Start, while
+/// the phase has no timer or it is off, and while the final Photo Strip is being made. Guests can't add time.
 /// </summary>
-/// <param name="Phase">The phase running out.</param>
-/// <param name="RemainingSeconds">Whole seconds left; the brain pushes it every second while the warning shows.</param>
-public sealed record PhaseTimerWarningOverlay(PhaseTimer Phase, int RemainingSeconds);
-
-/// <summary>
-/// The Start over confirmation ("Start over? Your photographs stay with the Event, but no strip will be made." with <c>START OVER</c>
-/// and <c>KEEP GOING</c>). It carries nothing: its presence is the state.
-/// </summary>
-public sealed record StartOverConfirmationOverlay;
+/// <param name="Phase">The phase being timed.</param>
+/// <param name="RemainingSeconds">Whole seconds left, rounded up, so it never shows 0 before the time runs out. The brain pushes it every second while the timer runs.</param>
+/// <param name="Paused">Whether the timer is paused (a countdown or Capture is running, or Operator Assistance): <paramref name="RemainingSeconds"/> stays where it stopped.</param>
+public sealed record PhaseTimerOverlay(PhaseTimer Phase, int RemainingSeconds, bool Paused);
 
 /// <summary>A notice whose copy comes from the brain (it has domain meaning; plan section 9, Copy).</summary>
 public sealed record NoticeOverlay(string Message);

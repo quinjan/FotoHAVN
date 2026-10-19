@@ -4,3 +4,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* A unit after the box ("s" for seconds): the box keeps its own width and the unit sits beside it. */
+.withSuffix {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.suffix {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
+}

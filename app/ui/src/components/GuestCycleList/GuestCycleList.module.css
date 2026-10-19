@@ -6,28 +6,49 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-32);
+  inline-size: 100%;
 }
 
+/*
+ * Prints stand on a common baseline in each row and the captions below them start at one height, whatever each strip's
+ * height or caption length: every item takes three rows (print, caption, actions) of the list's grid through a subgrid,
+ * so a row's rows are as tall as its tallest print and caption. A landscape strip takes two columns. The list has no
+ * row gap: each item adds its own space below, inside the rows it shares, and the last row's is taken back.
+ */
 .list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-48) var(--space-32);
+  --item-width: calc(var(--space-144) + var(--space-16));
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--item-width));
+  justify-content: start;
+  inline-size: 100%;
+  margin-block-end: calc(var(--space-48) * -1);
+  column-gap: var(--space-32);
 }
 
 .item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-12);
-  inline-size: min-content;
-  min-inline-size: calc(var(--space-80) * 2);
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: var(--space-12);
+  min-inline-size: 0;
+  padding-block-end: var(--space-48);
+}
+
+.item[data-wide] {
+  grid-column: span 2;
 }
 
 .open {
   display: block;
   flex: none;
   border-radius: var(--radius-hairline);
+}
+
+/* In the operator list the print stands on the bottom of its row. */
+.item > .open {
+  align-self: end;
+  justify-self: start;
 }
 
 /* Kept Captures of a Guest Cycle with no Photo Strip: loose photographs on a Cream Paper frame. */

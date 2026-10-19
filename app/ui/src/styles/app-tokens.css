@@ -11,10 +11,10 @@
   --app-reference-width: 1280px;
   --app-max-width: 2560px;
 
-  /* Guest type sizes (kiosk scale), by brand role. Eyebrow and Meta are labels; every reading role is >= 20px. */
-  --app-type-eyebrow: clamp(15px, calc(15px + (100vw - 1280px) * 5 / 1280), 20px);
-  --app-type-meta: clamp(14px, calc(14px + (100vw - 1280px) * 4 / 1280), 18px);
-  --app-type-action: clamp(16px, calc(16px + (100vw - 1280px) * 6 / 1280), 22px);
+  /* Guest type sizes (kiosk scale), by brand role. Labels (Eyebrow, Meta) are >= 18px, action labels and every reading role >= 20px, at 1280. */
+  --app-type-eyebrow: clamp(18px, calc(18px + (100vw - 1280px) * 5 / 1280), 23px);
+  --app-type-meta: clamp(18px, calc(18px + (100vw - 1280px) * 4 / 1280), 22px);
+  --app-type-action: clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px);
   --app-type-supporting: clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px);
   --app-type-body: clamp(20px, calc(20px + (100vw - 1280px) * 6 / 1280), 26px);
   --app-type-body-lg: clamp(24px, calc(24px + (100vw - 1280px) * 8 / 1280), 32px);
@@ -23,8 +23,8 @@
   --app-type-heading: clamp(56px, calc(56px + (100vw - 1280px) * 28 / 1280), 84px);
   --app-type-heading-lg: clamp(72px, calc(72px + (100vw - 1280px) * 36 / 1280), 108px);
   --app-type-display: clamp(88px, calc(88px + (100vw - 1280px) * 44 / 1280), 132px);
-  /* The countdown numeral over the live preview, sized to read from 1.5 m */
-  --app-type-countdown: clamp(160px, calc(160px + (100vw - 1280px) * 160 / 1280), 320px);
+  /* The countdown numeral over the live preview, set top-centre on a disc; sized to read from 1.5 m */
+  --app-type-countdown: clamp(128px, calc(128px + (100vw - 1280px) * 128 / 1280), 256px);
 
   /* Guest icon sizes: beside action labels, and primary camera controls (brand: 18-20 beside text, 28-36 camera) */
   --app-icon-action-guest: clamp(24px, calc(24px + (100vw - 1280px) * 8 / 1280), 32px);
@@ -40,7 +40,6 @@
 
   /* Targets (minimums; a target may grow with the scale, never shrink below these) */
   --app-target-guest: 64px;
-  --app-target-shutter: 112px;
   --app-target-operator: 48px;
 
   /* Layout regions */
@@ -58,7 +57,7 @@
   --app-z-stage-overlay: 10;
   --app-z-flash: 20;
   --app-z-chrome: 30;
-  --app-z-timer-warning: 40;
+  --app-z-phase-timer: 40;
   --app-z-dialog: 50;
   --app-z-exit-hold: 60;
 
@@ -68,6 +67,7 @@
   /* Motion helpers */
   --app-motion-nudge: 2px; /* An action arrow's hover nudge (brand motion.md) */
   --app-duration-instant: 1ms; /* Reduced motion: state changes become near-instant (brand motion.md) */
+  --app-wait-hint-delay: 25s; /* How long Start unavailable waits before its neutral "ask the FOTOHAVN team" line appears (a wait, not motion) */
 
   /* The wordmark set as type (brand logo.md: Cormorant Garamond 500, uppercase, tracking -0.05em) */
   --app-wordmark-tracking: -0.05em;
@@ -75,6 +75,10 @@
   /* Derived tints (brand color.md "Derived inks and tints") */
   --app-scrim: color-mix(in srgb, var(--color-ebony) 32%, transparent);
   --app-selection: color-mix(in srgb, var(--color-muted-brass) 24%, transparent);
+  /* The countdown's disc, and the Camera tab's glass disc and pills (tap to start, the photograph count): Ebony at 64% keeps Off-white text above 3:1 even over a white backdrop (a departure from the 32% scrim cap; see DESIGN.md) */
+  --app-countdown-disc: color-mix(in srgb, var(--color-ebony) 64%, transparent);
+  /* The Camera tab's surround: the live picture outside the capture area, dimmed so the capture area reads as the photograph (a departure from the 32% scrim cap; see DESIGN.md) */
+  --app-capture-surround: color-mix(in srgb, var(--color-dark-walnut) 72%, transparent);
 
   /* Role-resolved sizes. Operator (and status screens before a role arrives) use the brand reference sizes. */
   --app-target: var(--app-target-operator);

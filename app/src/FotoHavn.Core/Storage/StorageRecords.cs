@@ -38,6 +38,7 @@ public sealed record PhaseTimerSetting(PhaseTimerPhase Phase, int Seconds);
 /// <param name="DefaultTemplateId">The default Template.</param>
 /// <param name="DefaultLookId">The default Look.</param>
 /// <param name="GuestGalleryEnabled">Whether the Guest Gallery is on.</param>
+/// <param name="GuestSoundsEnabled">Whether the Guest Screen plays the countdown tick and the shutter sound.</param>
 /// <param name="OfferedTemplateIds">The Templates offered to guests, in the order saved.</param>
 /// <param name="OfferedLookIds">The Looks offered to guests, in the order saved.</param>
 /// <param name="PhaseTimers">The Phase Timers, at most one per phase.</param>
@@ -58,6 +59,7 @@ public sealed record EventRecord(
     string DefaultTemplateId,
     string DefaultLookId,
     bool GuestGalleryEnabled,
+    bool GuestSoundsEnabled,
     IReadOnlyList<string> OfferedTemplateIds,
     IReadOnlyList<string> OfferedLookIds,
     IReadOnlyList<PhaseTimerSetting> PhaseTimers)

@@ -7,7 +7,7 @@ Visual and interaction rules for the booth are in [`DESIGN.md`](DESIGN.md). Dura
 ## Operator language
 
 **Event Setup**:
-The operator's configuration of an Event: metadata (name, date, venue, Customer or host, and notes), Camera Binding, Guest Display Binding, printer, offered Templates and Looks with a default of each, countdown, mirror, Phase Timers, guest gallery, and Operator PIN. In v1 the printer is always "No printer".
+The operator's configuration of an Event: metadata (name, date, venue, Customer or host, and notes), Camera Binding, Guest Display Binding, printer, offered Templates and Looks with a default of each, countdown, mirror, Phase Timers, guest gallery, Guest sounds, and Operator PIN. In v1 the printer is always "No printer".
 _Avoid_: Settings, config
 
 **Operator Screen**:
@@ -76,16 +76,20 @@ _Avoid_: Effect, preset
 The order of kept Captures across a Template's photograph windows.
 _Avoid_: Layout
 
+**Guest sounds**:
+The Event Setup switch, on by default, for the countdown tick and the shutter sound the Guest Screen plays during a capture sequence. Groups look at the lens, not the screen, so a sound says "now" where the numeral and the flash can't. The brain holds the setting and sends it in the Guest Screen's presentation; the Guest Screen only plays the sound. An Event saved before the setting existed has it on.
+_Avoid_: Audio, beeps, volume
+
 **Retake**:
 Replacing one arranged Capture with a new one. The original stays in its window until the guest accepts the replacement.
 _Avoid_: Redo
 
 **Phase Timer**:
-The configured maximum time for a Guest Cycle phase, counted from when the phase begins and not reset by guest input. When it runs out, the Guest Cycle continues automatically.
+The configured maximum time for a Guest Cycle phase or the guest gallery, counted from when the phase begins and not reset by guest input. Guests see its time left for the whole phase and can't extend it. When it runs out, the Guest Cycle continues automatically.
 _Avoid_: Idle timeout, inactivity timer
 
-**Start Over**:
-A guest's deliberate end of their Guest Cycle before it completes. Saved Captures stay in the Event; no Photo Strip is made.
+**Start Over** (retired):
+A guest's deliberate end of their Guest Cycle before it completes, kept only as the end reason of Guest Cycles recorded before a business decision removed it on 2026-10-19. Their saved Captures stayed in the Event, with no Photo Strip. Nothing ends a Guest Cycle this way now.
 _Avoid_: Cancel, reset
 
 **Keepsake Preview**:
@@ -112,14 +116,15 @@ _Avoid_: Album, history, photo board
 
 ### Guest Cycles
 
-- A Guest Cycle ends in one of five ways: completed, started over, ended by the operator, app closed, or unrecoverable. Only a completed Guest Cycle has a Photo Strip, and it is recorded as completed when that Photo Strip is committed; the Keepsake Preview only displays it. An unfinished Guest Cycle is recorded as unrecoverable when one of its saved files is found missing or changed at the next launch.
+- A Guest Cycle ends in one of four ways: completed, ended by the operator, app closed, or unrecoverable. Guest Cycles recorded before 2026-10-19 may also have ended as started over, which the Event Gallery still shows. Only a completed Guest Cycle has a Photo Strip, and it is recorded as completed when that Photo Strip is committed; the Keepsake Preview only displays it. An unfinished Guest Cycle is recorded as unrecoverable when one of its saved files is found missing or changed at the next launch.
 - A Guest Cycle completed by Phase Timers is the same as one completed by a guest: the same Keepsake Preview, record, and Event Gallery entry. Nothing records or shows that a timer advanced it.
 - If an Event offers one Template, the Template step is skipped. If it offers one Look, the Filters step is skipped and the Photo Strip uses that Look.
-- Guests may go back to an earlier step. Changing the Template keeps every kept Capture: they fill the new windows in order, extras stay in a retained pool, and a larger Template can't continue until its new empty windows are filled.
+- Guests only go forward. The step progress shows where they are, and the brain refuses going back to an earlier step, so the Template is chosen before any photograph and never changes afterwards. Within Photographs, guests switch freely between the Camera and Arrange tabs.
 - A Capture belongs to the Guest Cycle only once it is committed to storage. The Event's mirror setting applies to both the live preview and the saved Captures.
+- With Guest sounds on, the Guest Screen plays one soft tick for each countdown numeral and one shutter sound for each Capture, aligned with the flash. The sounds add to the numerals and the flash and never replace them, and they play nothing the guest hasn't just asked for: a reload or a return to the Photographs step is silent.
 - A Retake is transactional. `TRY AGAIN` discards only the candidate, and `KEEP ORIGINAL` cancels the Retake. Every arrangement method uses the same swap, and drag is never required.
 - Rejected Retake candidates and replaced originals are discarded Captures. Their files are deleted when the Guest Cycle ends.
-- `START OVER` is offered on the Template, Photographs, and Filters steps, with a confirmation, and never on the Keepsake Preview, where the Guest Cycle is already completed. If a Phase Timer runs out while the confirmation is open, the confirmation closes as `KEEP GOING` and the Guest Cycle continues automatically.
+- Guests can't start over, add time, or stop a running capture sequence: a business decision on 2026-10-19 removed `START OVER`, `MORE TIME`, and `STOP`, and the brain rejects them, not only the UI. Tapping the live preview starts the capture sequence, as `TAKE PHOTOGRAPHS` does; once running, only Operator Assistance interrupts it.
 - Composition failures don't enter Operator Assistance; the guest sees `TRY AGAIN` and nothing is lost.
 - A Camera or storage failure during a Guest Cycle, a storage failure while creating the Guest Cycle record at `STEP INSIDE`, and a guest display failure at any time during the Active Event enter Operator Assistance. `RETRY` is offered on the Guest Screen to anyone and on the Operator Screen.
 - During a Guest Cycle, `RETRY` re-proves the Camera with a fresh frame, checks storage, and checks the bound display, reopening the Guest Screen on it if needed; then the Guest Cycle returns to the step it was on, and remaining Captures continue from the next empty window. When no Guest Cycle is running, as after a guest display loss on Start or in the guest gallery or a storage failure at `STEP INSIDE`, `RETRY` checks only the bound display and storage; then the Guest Screen returns to Start, which shows Start unavailable if the Camera still isn't eligible.
@@ -131,17 +136,17 @@ _Avoid_: Album, history, photo board
 | Phase | Starts when | Default | Range | When it runs out |
 | --- | --- | ---: | --- | --- |
 | Template | The Template step appears | 30 s | 0 (off) or 20–300 s | Continue with the selected Template |
-| Photographs: capture | The Camera tab appears with empty windows and no sequence running, or a sequence is stopped | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
+| Photographs: capture | The Camera tab appears with empty windows and no sequence running | 30 s | 0 or 20–300 s | Keep the original of any pending Retake, then start the capture sequence for every empty window |
 | Photographs: review | All windows are filled | 45 s | 0 or 20–300 s | Discard any pending Retake candidate, cancel a pending move, and continue to Filters with the current Arrangement |
 | Filters | The Filters step appears | 30 s | 0 or 20–300 s | Finish with the selected Look |
 | Keepsake | The Photo Strip is saved and shown | 12 s | 5–60 s, never off | Return to Start |
 | Guest gallery | The guest view of the Event Gallery opens, outside a Guest Cycle | 60 s | 20–300 s, never off | Return to Start |
 
 - Start has no Phase Timer.
-- Only `MORE TIME`, going back, entering the phase again, or stopping a capture sequence (which restarts the capture timer) restarts a Phase Timer. `MORE TIME` appears within the last 20 seconds of the Template, Photographs capture, Photographs review, Filters, and guest gallery phases, and restarts the phase's full time. The Keepsake phase has no warning and no `MORE TIME`, because the Photo Strip is already saved and returning to Start loses nothing.
-- A Phase Timer pauses while a countdown or capture runs and while the Active Event is in Operator Assistance, and resumes afterwards.
+- Every phase in the table shows its time left on the Guest Screen for the whole phase while its timer is on, Keepsake and the guest gallery included. Guests can't add time: `MORE TIME` was removed by the same business decision. Only entering a phase again, including the Camera tab appearing again, restarts its Phase Timer.
+- A Phase Timer pauses while a countdown or capture runs and while the Active Event is in Operator Assistance, and resumes afterwards. While paused, its time left stays visible and doesn't count down.
 - A Phase Timer never deletes a kept Capture. With every Phase Timer on, a Guest Cycle that nobody touches after `STEP INSIDE` reaches a saved Photo Strip with the default Template, automatic Captures, the default Arrangement, and the default Look.
-- When the operator turns a Phase Timer off, an abandoned Guest Cycle waits at that phase until someone continues it or uses `START OVER`.
+- When the operator turns a Phase Timer off, an abandoned Guest Cycle waits at that phase until someone continues it. Guests can't start over, so if nobody continues it, the operator clears it by ending the Event with `END EVENT` or the exit hold and Operator PIN, which records it as ended by the operator.
 
 ### Event Galleries
 

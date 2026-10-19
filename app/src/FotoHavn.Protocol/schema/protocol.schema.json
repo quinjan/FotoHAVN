@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "protocolVersion": {
-      "const": 10
+      "const": 12
     },
     "clientMessage": {
       "$ref": "#/$defs/ClientMessage"
@@ -656,6 +656,9 @@
         },
         "pausing": {
           "type": "boolean"
+        },
+        "soundsOn": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -665,7 +668,8 @@
         "flashSequence",
         "capturedInSequence",
         "totalInSequence",
-        "pausing"
+        "pausing",
+        "soundsOn"
       ],
       "additionalProperties": false
     },
@@ -886,6 +890,9 @@
           "$ref": "#/$defs/SetGuestGalleryCommand"
         },
         {
+          "$ref": "#/$defs/SetGuestSoundsCommand"
+        },
+        {
           "$ref": "#/$defs/SetPinCommand"
         },
         {
@@ -967,9 +974,6 @@
           "$ref": "#/$defs/TakePhotographsCommand"
         },
         {
-          "$ref": "#/$defs/StopCaptureCommand"
-        },
-        {
           "$ref": "#/$defs/SelectPositionCommand"
         },
         {
@@ -1004,18 +1008,6 @@
         },
         {
           "$ref": "#/$defs/RetryCompositionCommand"
-        },
-        {
-          "$ref": "#/$defs/MoreTimeCommand"
-        },
-        {
-          "$ref": "#/$defs/StartOverCommand"
-        },
-        {
-          "$ref": "#/$defs/ConfirmStartOverCommand"
-        },
-        {
-          "$ref": "#/$defs/KeepGoingCommand"
         },
         {
           "$ref": "#/$defs/BeginExitHoldCommand"
@@ -1110,6 +1102,9 @@
         "SetGuestGallery": {
           "$ref": "#/$defs/SetGuestGalleryPayload"
         },
+        "SetGuestSounds": {
+          "$ref": "#/$defs/SetGuestSoundsPayload"
+        },
         "SetPin": {
           "$ref": "#/$defs/SetPinPayload"
         },
@@ -1191,9 +1186,6 @@
         "TakePhotographs": {
           "$ref": "#/$defs/TakePhotographsPayload"
         },
-        "StopCapture": {
-          "$ref": "#/$defs/StopCapturePayload"
-        },
         "SelectPosition": {
           "$ref": "#/$defs/SelectPositionPayload"
         },
@@ -1229,18 +1221,6 @@
         },
         "RetryComposition": {
           "$ref": "#/$defs/RetryCompositionPayload"
-        },
-        "MoreTime": {
-          "$ref": "#/$defs/MoreTimePayload"
-        },
-        "StartOver": {
-          "$ref": "#/$defs/StartOverPayload"
-        },
-        "ConfirmStartOver": {
-          "$ref": "#/$defs/ConfirmStartOverPayload"
-        },
-        "KeepGoing": {
-          "$ref": "#/$defs/KeepGoingPayload"
         },
         "BeginExitHold": {
           "$ref": "#/$defs/BeginExitHoldPayload"
@@ -1291,6 +1271,7 @@
         "SetDefaultLook",
         "SetPhaseTimer",
         "SetGuestGallery",
+        "SetGuestSounds",
         "SetPin",
         "SaveEvent",
         "SaveAndStartEvent",
@@ -1318,7 +1299,6 @@
         "ShowCameraTab",
         "ShowArrangeTab",
         "TakePhotographs",
-        "StopCapture",
         "SelectPosition",
         "BeginRetake",
         "AcceptRetake",
@@ -1331,10 +1311,6 @@
         "SelectLook",
         "FinishStrip",
         "RetryComposition",
-        "MoreTime",
-        "StartOver",
-        "ConfirmStartOver",
-        "KeepGoing",
         "BeginExitHold",
         "CompleteExitHold",
         "SubmitPin",
@@ -1698,37 +1674,6 @@
       "required": [
         "choice"
       ],
-      "additionalProperties": false
-    },
-    "ConfirmStartOverCommand": {
-      "title": "ConfirmStartOverCommand",
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "command"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "const": "ConfirmStartOver"
-        },
-        "payload": {
-          "$ref": "#/$defs/ConfirmStartOverPayload"
-        }
-      },
-      "required": [
-        "type",
-        "id",
-        "name",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "ConfirmStartOverPayload": {
-      "title": "ConfirmStartOverPayload",
-      "type": "object",
       "additionalProperties": false
     },
     "ConfirmationCounts": {
@@ -2775,6 +2720,9 @@
         "guestGalleryEnabled": {
           "type": "boolean"
         },
+        "guestSoundsEnabled": {
+          "type": "boolean"
+        },
         "pin": {
           "$ref": "#/$defs/EventSetupPinView"
         },
@@ -2821,6 +2769,7 @@
         "looks",
         "phaseTimers",
         "guestGalleryEnabled",
+        "guestSoundsEnabled",
         "pin",
         "saveAndStartAvailable",
         "saveAndStartDisabledReason",
@@ -3343,15 +3292,11 @@
         },
         "state": {
           "$ref": "#/$defs/GuestStepState"
-        },
-        "canGoBack": {
-          "type": "boolean"
         }
       },
       "required": [
         "step",
-        "state",
-        "canGoBack"
+        "state"
       ],
       "additionalProperties": false
     },
@@ -3386,16 +3331,12 @@
         },
         "paused": {
           "type": "boolean"
-        },
-        "warning": {
-          "type": "boolean"
         }
       },
       "required": [
         "phase",
         "remainingMs",
-        "paused",
-        "warning"
+        "paused"
       ],
       "additionalProperties": false
     },
@@ -3414,16 +3355,12 @@
           "items": {
             "$ref": "#/$defs/GuestCycleStepEntry"
           }
-        },
-        "startOverAvailable": {
-          "type": "boolean"
         }
       },
       "required": [
         "id",
         "step",
-        "steps",
-        "startOverAvailable"
+        "steps"
       ],
       "additionalProperties": false
     },
@@ -3558,20 +3495,10 @@
             }
           ]
         },
-        "phaseTimerWarning": {
+        "phaseTimer": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhaseTimerWarningOverlay"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "startOverConfirmation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/StartOverConfirmationOverlay"
+              "$ref": "#/$defs/PhaseTimerOverlay"
             },
             {
               "type": "null"
@@ -3592,8 +3519,7 @@
       "required": [
         "exitHold",
         "pinDialog",
-        "phaseTimerWarning",
-        "startOverConfirmation",
+        "phaseTimer",
         "notice"
       ],
       "additionalProperties": false
@@ -4056,37 +3982,6 @@
       ],
       "additionalProperties": false
     },
-    "KeepGoingCommand": {
-      "title": "KeepGoingCommand",
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "command"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "const": "KeepGoing"
-        },
-        "payload": {
-          "$ref": "#/$defs/KeepGoingPayload"
-        }
-      },
-      "required": [
-        "type",
-        "id",
-        "name",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "KeepGoingPayload": {
-      "title": "KeepGoingPayload",
-      "type": "object",
-      "additionalProperties": false
-    },
     "KeepOriginalCommand": {
       "title": "KeepOriginalCommand",
       "type": "object",
@@ -4333,37 +4228,6 @@
         "description",
         "thumbnailKey"
       ],
-      "additionalProperties": false
-    },
-    "MoreTimeCommand": {
-      "title": "MoreTimeCommand",
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "command"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "const": "MoreTime"
-        },
-        "payload": {
-          "$ref": "#/$defs/MoreTimePayload"
-        }
-      },
-      "required": [
-        "type",
-        "id",
-        "name",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "MoreTimePayload": {
-      "title": "MoreTimePayload",
-      "type": "object",
       "additionalProperties": false
     },
     "MoveToCommand": {
@@ -5036,8 +4900,8 @@
       ],
       "additionalProperties": false
     },
-    "PhaseTimerWarningOverlay": {
-      "title": "PhaseTimerWarningOverlay",
+    "PhaseTimerOverlay": {
+      "title": "PhaseTimerOverlay",
       "type": "object",
       "properties": {
         "phase": {
@@ -5045,11 +4909,15 @@
         },
         "remainingSeconds": {
           "type": "integer"
+        },
+        "paused": {
+          "type": "boolean"
         }
       },
       "required": [
         "phase",
-        "remainingSeconds"
+        "remainingSeconds",
+        "paused"
       ],
       "additionalProperties": false
     },
@@ -5144,9 +5012,6 @@
             "$ref": "#/$defs/PhotographsWindowView"
           }
         },
-        "retainedCount": {
-          "type": "integer"
-        },
         "sequence": {
           "$ref": "#/$defs/CaptureSequenceView"
         },
@@ -5186,7 +5051,6 @@
         "tab",
         "template",
         "windows",
-        "retainedCount",
         "sequence",
         "mirrored",
         "cropAspect",
@@ -6173,6 +6037,45 @@
       ],
       "additionalProperties": false
     },
+    "SetGuestSoundsCommand": {
+      "title": "SetGuestSoundsCommand",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "const": "SetGuestSounds"
+        },
+        "payload": {
+          "$ref": "#/$defs/SetGuestSoundsPayload"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "SetGuestSoundsPayload": {
+      "title": "SetGuestSoundsPayload",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
     "SetMirrorCommand": {
       "title": "SetMirrorCommand",
       "type": "object",
@@ -6522,42 +6425,6 @@
         "guestScreenNotReady"
       ]
     },
-    "StartOverCommand": {
-      "title": "StartOverCommand",
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "command"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "const": "StartOver"
-        },
-        "payload": {
-          "$ref": "#/$defs/StartOverPayload"
-        }
-      },
-      "required": [
-        "type",
-        "id",
-        "name",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "StartOverConfirmationOverlay": {
-      "title": "StartOverConfirmationOverlay",
-      "type": "object",
-      "additionalProperties": false
-    },
-    "StartOverPayload": {
-      "title": "StartOverPayload",
-      "type": "object",
-      "additionalProperties": false
-    },
     "StartUnavailableReason": {
       "title": "StartUnavailableReason",
       "enum": [
@@ -6597,37 +6464,6 @@
         "stepInsideAvailable",
         "guestGalleryLinkVisible"
       ],
-      "additionalProperties": false
-    },
-    "StopCaptureCommand": {
-      "title": "StopCaptureCommand",
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "command"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "const": "StopCapture"
-        },
-        "payload": {
-          "$ref": "#/$defs/StopCapturePayload"
-        }
-      },
-      "required": [
-        "type",
-        "id",
-        "name",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "StopCapturePayload": {
-      "title": "StopCapturePayload",
-      "type": "object",
       "additionalProperties": false
     },
     "StorageDiagnostics": {

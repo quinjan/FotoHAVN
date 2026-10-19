@@ -44,7 +44,8 @@ export interface PinPadProps {
 
 /**
  * The Operator PIN pad (app/DESIGN.md, PinPad): on-screen digits, so no system keyboard opens; masked entry shown as
- * dots; a backspace; and the submit action, available at 4 to 6 digits. A wrong PIN is said in text, and the lockout
+ * dots; a backspace; and the submit action, available at 4 to 6 digits, directly under the keys where the hand already
+ * is, with the cancel action opposite it at the bottom-left. A wrong PIN is said in text, and the lockout
  * shows its countdown in text, never color alone. Keys are at least the role's target (64 on the Guest Screen). With
  * focus inside the pad, typed digits and Backspace work too. Compose it in a Dialog.
  */
@@ -180,10 +181,14 @@ export function PinPad({
         </button>
       </div>
       <div className={styles.actions}>
-        <PrimaryAction disabled={!ready} aria-describedby={hintId} onClick={submit}>
+        <PrimaryAction className={styles.submit} disabled={!ready} aria-describedby={hintId} onClick={submit}>
           {submitLabel}
         </PrimaryAction>
-        {onCancel !== undefined && <SecondaryAction onClick={onCancel}>{cancelLabel}</SecondaryAction>}
+        {onCancel !== undefined && (
+          <SecondaryAction className={styles.cancel} onClick={onCancel}>
+            {cancelLabel}
+          </SecondaryAction>
+        )}
       </div>
     </div>
   );

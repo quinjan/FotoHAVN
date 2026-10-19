@@ -58,7 +58,11 @@
   color: var(--app-tone-ink);
 }
 
+/* The text progress opens to the hold's left, over whatever sits beside it (the Phase Timer), so it carries the surface behind it. */
 .progress {
+  padding-inline: var(--space-8);
+  border-radius: var(--radius-round);
+  background-color: var(--app-tone-surface);
   color: var(--app-tone-ink);
   font-family: var(--typography-meta-font-family);
   font-size: var(--app-text-meta);

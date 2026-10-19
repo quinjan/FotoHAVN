@@ -16,7 +16,7 @@ test(
       await run.waitForStep("photographs", "camera");
     });
 
-    await test.step("TAKE PHOTOGRAPHS fills four windows and opens Arrange", async () => {
+    await test.step("a tap on the live preview fills four windows and opens Arrange", async () => {
       await run.takePhotographsUntil(guest, 4);
       await run.waitForStep("photographs", "arrange");
       await expect(guest.windowButton(4)).toBeVisible();
@@ -32,7 +32,7 @@ test(
       await tap(guest.windowButton(2));
       await expect(guest.page.getByText("Photograph 2 is selected.")).toBeVisible();
       await tap(guest.retake);
-      await expect(guest.accept).toBeVisible({ timeout: 30_000 });
+      await run.retakeCapture(guest);
       await tap(guest.accept);
       await expect.poll(() => guest.arrangement()).toEqual([3, 5, 1, 4]);
     });

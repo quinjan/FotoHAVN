@@ -1,16 +1,25 @@
-/* The frame fills the Guest Screen; the warning floats at the end of the footer line, over the gallery's own padding. */
+/* The frame fills the Guest Screen; the Phase Timer sits in its top-right corner beside the exit hold. */
 .frame {
   position: relative;
   block-size: 100%;
   min-block-size: 0;
 
-  /* Warm Ivory runs on under the frame, over the strip the notices row keeps, which would otherwise show the Off-white canvas. */
+  /* Warm Ivory runs on under the frame, over the strip the notices row takes while a notice shows, which would otherwise show the Off-white canvas. */
   box-shadow: 0 var(--space-48) 0 0 var(--semantic-surface-editorial);
 }
 
-.warning {
-  position: absolute;
-  inset-block-end: var(--app-space-fluid-32);
-  inset-inline-end: var(--app-gutter);
-  z-index: var(--app-z-timer-warning);
+/* The exit hold's row: as high as its target and level with it, ending one gap before it (the hold sits 16 from the corner). */
+.timer {
+  position: fixed;
+  inset-block-start: var(--space-16);
+  inset-inline-end: calc(var(--space-16) * 2 + var(--app-target));
+  z-index: var(--app-z-phase-timer);
+  display: flex;
+  align-items: center;
+  block-size: var(--app-target);
+  pointer-events: none;
+}
+
+.pill {
+  pointer-events: auto;
 }

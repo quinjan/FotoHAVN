@@ -344,8 +344,7 @@ public sealed record InstanceDiagnostics(string? MutexName);
 /// <param name="Phase">The phase being timed, or null when no timer is active.</param>
 /// <param name="RemainingMs">Milliseconds left, or null when no timer is active or the phase's timer is off.</param>
 /// <param name="Paused">Whether the timer is paused (a capture or Operator Assistance is running).</param>
-/// <param name="Warning">Whether the timer is in its warning window.</param>
-public sealed record GuestCycleTimerDiagnostics(PhaseTimer? Phase, long? RemainingMs, bool Paused, bool Warning);
+public sealed record GuestCycleTimerDiagnostics(PhaseTimer? Phase, long? RemainingMs, bool Paused);
 
 /// <summary>The running Guest Cycle as the brain sees it, for <c>test.getDiagnostics</c> (the end-to-end scenarios read it instead of scraping the UI).</summary>
 /// <param name="Id">The Guest Cycle's id.</param>

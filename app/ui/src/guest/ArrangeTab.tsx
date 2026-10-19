@@ -85,7 +85,6 @@ export function ArrangeTab({ cycle, view }: { readonly cycle: GuestCycleView; re
             <Selection view={view} commands={commands} />
           )}
         </div>
-        {view.retainedCount > 0 && <p className={styles.retained}>{arrangeCopy.retained(view.retainedCount)}</p>}
         {retakeCandidate === null && (
           <div className={styles.actions}>
             {hasEmptyWindow && idle && selection.mode === "none" && (

@@ -58,7 +58,9 @@ public sealed class GuestCycleAssistanceTests
         rig.Advance(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(1));
         Assert.Equal(remaining, rig.CycleDiagnostics().Timer.RemainingMs);
         Assert.Equal(GuestSurface.OperatorAssistance, rig.Surface);
-        Assert.Null(rig.View.Overlays.PhaseTimerWarning);
+        var overlay = rig.View.Overlays.PhaseTimer!;
+        Assert.Equal((PhaseTimer.Template, true), (overlay.Phase, overlay.Paused));
+        Assert.Equal((int)Math.Ceiling(remaining!.Value / 1000.0), overlay.RemainingSeconds);
     }
 
     [Fact]
@@ -70,8 +72,6 @@ public sealed class GuestCycleAssistanceTests
 
         rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeRejected();
         rig.Guest("SelectTemplate", """{"templateId":"panorama-four"}""").ShouldBeRejected();
-        rig.Guest("StartOver").ShouldBeRejected();
-        rig.Guest("MoreTime").ShouldBeRejected();
         rig.Guest("BeginGuestCycle").ShouldBeRejected();
     }
 
@@ -443,21 +443,6 @@ public sealed class GuestCycleAssistanceTests
         rig.Settle();
 
         AssertInAssistance(rig, AssistanceReason.Camera);
-    }
-
-    [Fact]
-    public async Task Entering_assistance_closes_an_open_Start_over_question()
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        rig.Begin();
-        rig.Guest("StartOver").ShouldBeAccepted();
-
-        FailCamera(rig);
-        rig.Active.Camera.Recover();
-        Retry(rig);
-
-        Assert.Null(rig.View.Overlays.StartOverConfirmation);
-        Assert.Equal(GuestSurface.Template, rig.Surface);
     }
 
     [Fact]

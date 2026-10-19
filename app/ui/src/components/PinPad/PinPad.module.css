@@ -1,11 +1,12 @@
-/* Reading and Tab order: the entry, the keys, then the actions; the keys sit beside both. */
+/* Reading and Tab order: the entry, the keys, then the actions. The submit action sits under the keys, where the hand
+   already is; the cancel action sits opposite it, in the bottom-left. */
 .pad {
   display: grid;
   grid-template-areas:
     "status keys"
-    "actions keys";
+    "cancel submit";
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr auto;
   gap: var(--app-stack-gap) calc(var(--app-stack-gap) * 2);
   color: var(--app-tone-ink);
 }
@@ -67,12 +68,18 @@
 }
 
 .actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: contents;
+}
+
+.submit {
+  grid-area: submit;
+  justify-content: center;
+}
+
+.cancel {
+  grid-area: cancel;
   align-self: end;
-  gap: var(--space-16);
-  grid-area: actions;
+  justify-self: start;
 }
 
 .keys {

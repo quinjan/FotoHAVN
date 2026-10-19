@@ -7,12 +7,11 @@ const cycle: GuestCycleView = {
   id: "cycle-1",
   step: "keepsake",
   steps: [
-    { step: "template", state: "done", canGoBack: false },
-    { step: "photographs", state: "done", canGoBack: false },
-    { step: "filters", state: "done", canGoBack: false },
-    { step: "keepsake", state: "current", canGoBack: false },
+    { step: "template", state: "done" },
+    { step: "photographs", state: "done" },
+    { step: "filters", state: "done" },
+    { step: "keepsake", state: "current" },
   ],
-  startOverAvailable: false,
 };
 
 const portrait: KeepsakeView = {
@@ -51,7 +50,7 @@ describe("KeepsakeStep", () => {
     expect(Number(box?.style.getPropertyValue("--strip-ratio"))).toBeCloseTo(1 / 3);
   });
 
-  it("is a finished moment: no action, no warning, no START OVER", () => {
+  it("is a finished moment: no action, and no START OVER or MORE TIME", () => {
     render(<KeepsakeStep cycle={cycle} view={portrait} />);
     expect(screen.queryAllByRole("button")).toHaveLength(0);
     expect(screen.queryByText("START OVER")).toBeNull();

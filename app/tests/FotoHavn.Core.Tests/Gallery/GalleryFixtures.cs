@@ -97,7 +97,7 @@ internal static class GalleryFixtures
             ["guest-gallery-one"] = () => GuestAsync([new CycleSpec()], rig => rig.OpenGuestGallery().ShouldBeAccepted()),
             ["guest-gallery-four"] = () => GuestAsync([new CycleSpec(), Landscape, new CycleSpec(GuestCycleEndReason.StartedOver, Captures: 2), new CycleSpec(Look: "monochrome-v1"), new CycleSpec()], rig => rig.OpenGuestGallery().ShouldBeAccepted()),
             ["guest-gallery-many"] = () => GuestAsync([.. Enumerable.Range(0, 45).Select(index => index % 11 == 5 ? Landscape : new CycleSpec())], rig => rig.OpenGuestGallery().ShouldBeAccepted()),
-            ["guest-gallery-timer-warning"] = () => GuestAsync([new CycleSpec(), Landscape, new CycleSpec(), new CycleSpec()], rig =>
+            ["guest-gallery-timer-low"] = () => GuestAsync([new CycleSpec(), Landscape, new CycleSpec(), new CycleSpec()], rig =>
             {
                 rig.OpenGuestGallery().ShouldBeAccepted();
                 rig.Advance(TimeSpan.FromSeconds(45), Second);
@@ -107,7 +107,7 @@ internal static class GalleryFixtures
                 rig.OpenGuestGallery().ShouldBeAccepted();
                 rig.OpenStrip(rig.StripIds[0]).ShouldBeAccepted();
             }),
-            ["guest-strip-detail-timer-warning"] = () => GuestAsync([new CycleSpec(), new CycleSpec(), new CycleSpec(Discarded: 1)], rig =>
+            ["guest-strip-detail-timer-low"] = () => GuestAsync([new CycleSpec(), new CycleSpec(), new CycleSpec(Discarded: 1)], rig =>
             {
                 rig.OpenGuestGallery().ShouldBeAccepted();
                 rig.OpenStrip(rig.StripIds[0]).ShouldBeAccepted();

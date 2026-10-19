@@ -3,7 +3,7 @@ import { GuestGalleryScreen, completeCycle, guestGallery } from "../../../src/ga
 import { startGuestEvent, tap } from "../../../src/guest-cycle";
 
 test(
-  "with clock scaling, the guest gallery returns to Start after its timer and warning, and browsing doesn't reset the timer",
+  "with clock scaling, the guest gallery shows its Phase Timer all along, fills it in the last 10 s with no MORE TIME, returns to Start when it runs out, and browsing doesn't reset it",
   { tag: ["@m9", "@camera"] },
   async ({ app, operatorPage, camera, hooks }) => {
     test.setTimeout(300_000);
@@ -18,15 +18,17 @@ test(
     await hooks.setClockScale(10);
     try {
       let opened = 0;
-      await test.step("the timer starts when the gallery opens, and has no warning yet", async () => {
+      await test.step("the timer starts when the gallery opens, and its pill shows the time left, quiet", async () => {
         await guest.open();
         const timer = (await guestGallery(hooks))?.timer;
         expect(timer?.phase).not.toBeNull();
-        expect(timer?.warning).toBe(false);
         opened = timer?.remainingMs ?? 0;
         expect(opened).toBeGreaterThan(60_000);
         expect(opened).toBeLessThanOrEqual(120_000);
-        await expect(guest.warning).toHaveCount(0);
+        await expect(guest.timer).toBeVisible();
+        await expect(guest.timer).toHaveText(/^\d+:\d\d$/);
+        await expect(guest.timer).not.toHaveAttribute("data-low");
+        await expect(guest.page.getByRole("button", { name: "MORE TIME", exact: true })).toHaveCount(0);
       });
 
       await test.step("opening and closing a strip keeps the same timer running down, never restarting it", async () => {
@@ -43,27 +45,24 @@ test(
         }
       });
 
-      await test.step("in its last 20 s the gallery warns, with the countdown and MORE TIME", async () => {
-        // Scale 10 until the warning is 15 s (real) away, then real time, so the 20 s warning lasts 20 real seconds for the checks below.
+      await test.step("in its last 10 s the pill fills and says so once, with no MORE TIME", async () => {
+        // Scale 10 until the last 10 s are 15 s (real) away, then real time, so the checks below see them.
         await expect
           .poll(async () => (await guestGallery(hooks))?.timer.remainingMs ?? Infinity, { timeout: 30_000, intervals: [50] })
-          .toBeLessThanOrEqual(35_000);
+          .toBeLessThanOrEqual(25_000);
         await hooks.setClockScale(1);
-        expect((await guestGallery(hooks))?.timer.warning, "the warning has not begun yet").toBe(false);
-        await expect.poll(async () => (await guestGallery(hooks))?.timer.warning, { timeout: 30_000 }).toBe(true);
-        await expect(guest.warning).toBeVisible();
-        await expect(guest.warning).toContainText(/\d+ SECONDS? LEFT/);
-        await expect(guest.warning.getByRole("button", { name: "MORE TIME", exact: true })).toBeVisible();
-        const timer = (await guestGallery(hooks))?.timer;
-        expect(timer?.warning).toBe(true);
-        expect(timer?.remainingMs ?? Infinity).toBeLessThanOrEqual(20_000);
+        await expect(guest.timer).not.toHaveAttribute("data-low");
+        await expect(guest.timer).toHaveAttribute("data-low", "true", { timeout: 30_000 });
+        expect((await guestGallery(hooks))?.timer.remainingMs ?? Infinity).toBeLessThanOrEqual(10_999);
+        await expect(guest.page.locator("[role='status']").filter({ hasText: /^\d+ seconds? left\.$/ })).toHaveCount(1);
+        await expect(guest.page.getByRole("button", { name: "MORE TIME", exact: true })).toHaveCount(0);
         await hooks.setClockScale(10);
       });
       await test.step("when the time runs out the Guest Screen returns to Start and the gallery is closed", async () => {
         await expect((await run.controls()).surface("start")).toBeVisible({ timeout: 30_000 });
         expect(await guestGallery(hooks)).toBeNull();
         expect(await run.surface()).toBe("start");
-        await expect(guest.warning).toHaveCount(0);
+        await expect(guest.timer).toHaveCount(0);
         await expect(guest.link).toBeVisible();
       });
     } finally {

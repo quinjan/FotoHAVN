@@ -99,20 +99,26 @@ describe("RunningEventPanel", () => {
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
-  it("during Operator Assistance shows the reason in an alert line and RETRY as the single primary action", () => {
+  it("during Operator Assistance becomes the dark band with the reason and the fix, and RETRY as the single primary action", () => {
     const onRetry = vi.fn();
     const { rerender } = render(<RunningEventPanel {...props({ onRetry })} />);
     const region = screen.getByRole("status");
+    expect(screen.getByRole("group")).toHaveAttribute("data-tone", "light");
 
     rerender(
       <RunningEventPanel
-        {...props({ onRetry, step: "operator-assistance", assistanceReason: "The guest display is disconnected." })}
+        {...props({
+          onRetry,
+          step: "operator-assistance",
+          assistance: { reason: "The camera was disconnected.", fix: "Reconnect it, then RETRY." },
+        })}
       />,
     );
     expect(screen.getByRole("status")).toBe(region);
-    expect(region).toHaveTextContent("The guest display is disconnected.");
-    expect(region.parentElement).toHaveAttribute("data-status-tone", "alert");
+    expect(region).toHaveTextContent("The camera was disconnected. Reconnect it, then RETRY.");
+    expect(region.querySelector("[aria-hidden='true'] svg")).not.toBeNull();
     expect(screen.getByRole("group")).toHaveAttribute("data-assistance", "true");
+    expect(screen.getByRole("group")).toHaveAttribute("data-tone", "dark");
 
     const primaries = document.querySelectorAll('[data-fotohavn-action="primary"]');
     expect(primaries).toHaveLength(1);
@@ -128,6 +134,15 @@ describe("RunningEventPanel", () => {
     rerender(<RunningEventPanel {...props({ onRetry })} />);
     expect(screen.queryByRole("button", { name: "RETRY" })).toBeNull();
     expect(region).toBeEmptyDOMElement();
+    expect(screen.getByRole("group")).toHaveAttribute("data-tone", "light");
+  });
+
+  it("announces the alert politely, not as an assertive alert", () => {
+    render(
+      <RunningEventPanel {...props({ step: "operator-assistance", assistance: { reason: "The guest display isn't connected.", fix: "Reconnect it, then RETRY." } })} />,
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("takes a heading level under the screen's heading", () => {

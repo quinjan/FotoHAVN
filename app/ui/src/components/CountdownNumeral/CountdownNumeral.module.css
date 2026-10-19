@@ -1,18 +1,55 @@
+/* Top-centre of the preview, near the camera: the numeral sits on a soft Ebony disc so it holds its contrast over a bright picture. */
 .countdown {
   position: relative;
   z-index: var(--app-z-stage-overlay);
   display: grid;
-  place-items: center;
-  min-inline-size: 1.2em;
-  min-block-size: 1em;
+  place-self: start center;
+  justify-items: center;
+  margin-block-start: var(--app-space-fluid-16);
   color: var(--app-tone-ink);
-  font-family: var(--typography-display-font-family);
-  font-size: var(--app-type-countdown);
-  font-weight: var(--typography-display-font-weight);
-  letter-spacing: var(--typography-display-letter-spacing);
-  line-height: var(--typography-display-line-height);
-  font-variant-numeric: lining-nums tabular-nums;
   pointer-events: none;
+}
+
+.disc {
+  display: grid;
+  place-items: center;
+  inline-size: 1.25em;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  background-color: var(--app-countdown-disc);
+  font-size: var(--app-type-countdown);
+}
+
+.numeral {
+  font-family: var(--typography-display-font-family);
+  font-size: 1em;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--typography-display-letter-spacing);
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The last-second cue sits under the disc. The countdown is start-aligned in the preview, so the disc never moves when the cue arrives. */
+.cue {
+  margin-block-start: var(--space-12);
+  inline-size: max-content;
+  max-inline-size: 100cqw;
+  padding: var(--space-8) var(--space-24);
+  border-radius: var(--radius-round);
+  background-color: var(--app-countdown-disc);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-body-lg);
+  font-weight: var(--typography-supporting-font-weight);
+  line-height: var(--typography-body-lg-line-height);
+  white-space: nowrap;
+  animation: countdown-fade var(--motion-duration-standard) var(--motion-easing-editorial) both;
+}
+
+@media (forced-colors: active) {
+  .disc,
+  .cue {
+    border: var(--stroke-hairline) solid CanvasText;
+  }
 }
 
 /* Each numeral after the first arrives with a crossfade; the rise is added only for users who don't prefer reduced motion. */

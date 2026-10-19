@@ -8,7 +8,7 @@ using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.Tests.Gallery;
 
-/// <summary>The guest gallery's Phase Timer (plan section 7, Phase timers): <c>guest_gallery</c>, 60 s by default, never off, from the moment the gallery opens; browsing never resets it.</summary>
+/// <summary>The guest gallery's Phase Timer (plan section 7, Phase timers): <c>guest_gallery</c>, 60 s by default, never off, always visible from the moment the gallery opens; browsing never resets it and guests can't add time.</summary>
 public sealed class GuestGalleryTimerTests
 {
     private static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
@@ -38,41 +38,52 @@ public sealed class GuestGalleryTimerTests
         var (rig, _) = await OpenAsync();
         using var lifetime = rig;
 
-        Assert.Equal(new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 60_000, false, false), Timer(rig));
+        Assert.Equal(new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 60_000, false), Timer(rig));
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 60, false), rig.GuestView.Overlays.PhaseTimer);
         rig.Advance(TimeSpan.FromSeconds(25), Second);
 
-        Assert.Equal(new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 35_000, false, false), Timer(rig));
-        Assert.Null(rig.GuestView.Overlays.PhaseTimerWarning);
+        Assert.Equal(new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 35_000, false), Timer(rig));
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 35, false), rig.GuestView.Overlays.PhaseTimer);
     }
 
     [Fact]
-    public async Task The_warning_shows_in_the_last_twenty_seconds_once_a_second_and_the_guest_is_back_on_Start_at_zero()
+    public async Task The_timer_shows_every_second_of_the_phase_and_the_guest_is_back_on_Start_at_zero()
     {
         var (rig, _) = await OpenAsync();
         using var lifetime = rig;
-        rig.Advance(TimeSpan.FromSeconds(39), TimeSpan.FromMilliseconds(250));
-        Assert.Null(rig.GuestView.Overlays.PhaseTimerWarning);
 
-        var seen = new List<int>();
-        for (var step = 0; step < 21 * 4; step++)
+        var seen = new List<int> { rig.GuestView.Overlays.PhaseTimer!.RemainingSeconds };
+        for (var step = 0; step < 61 * 4; step++)
         {
             rig.Advance(TimeSpan.FromMilliseconds(250));
-            if (rig.GuestView.Overlays.PhaseTimerWarning is { } warning && (seen.Count == 0 || seen[^1] != warning.RemainingSeconds))
+            if (rig.GuestView.Overlays.PhaseTimer is { } timer && seen[^1] != timer.RemainingSeconds)
             {
-                Assert.Equal(PhaseTimer.GuestGallery, warning.Phase);
-                seen.Add(warning.RemainingSeconds);
+                Assert.Equal(PhaseTimer.GuestGallery, timer.Phase);
+                Assert.False(timer.Paused);
+                seen.Add(timer.RemainingSeconds);
             }
         }
 
-        Assert.Equal(Enumerable.Range(1, 20).Reverse().Take(19), seen.Take(19));
+        Assert.Equal(Enumerable.Range(1, 60).Reverse(), seen);
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
-        Assert.Null(rig.GuestView.Overlays.PhaseTimerWarning);
+        Assert.Null(rig.GuestView.Overlays.PhaseTimer);
         Assert.True(rig.GuestView.Start!.GuestGalleryLinkVisible);
         Assert.Null(rig.Diagnostics().Gallery);
     }
 
     [Fact]
-    public async Task The_warning_is_shown_on_a_strip_detail_too_and_expiry_there_returns_to_Start()
+    public async Task A_part_second_left_shows_as_a_whole_second()
+    {
+        var (rig, _) = await OpenAsync();
+        using var lifetime = rig;
+
+        rig.Advance(TimeSpan.FromMilliseconds(59_100));
+
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 1, false), rig.GuestView.Overlays.PhaseTimer);
+    }
+
+    [Fact]
+    public async Task The_timer_is_shown_on_a_strip_detail_too_and_expiry_there_returns_to_Start()
     {
         var (rig, seeded) = await OpenAsync();
         using var lifetime = rig;
@@ -81,7 +92,7 @@ public sealed class GuestGalleryTimerTests
         rig.Advance(TimeSpan.FromSeconds(45), Second);
 
         Assert.Equal(GuestSurface.GuestStripDetail, rig.GuestView.Surface);
-        Assert.Equal(new PhaseTimerWarningOverlay(PhaseTimer.GuestGallery, 15), rig.GuestView.Overlays.PhaseTimerWarning);
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 15, false), rig.GuestView.Overlays.PhaseTimer);
         rig.Advance(TimeSpan.FromSeconds(15), Second);
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
     }
@@ -102,34 +113,22 @@ public sealed class GuestGalleryTimerTests
 
         Assert.Equal(30_000, Timer(rig).RemainingMs);
         rig.Advance(TimeSpan.FromSeconds(10), Second);
-        Assert.Equal(new PhaseTimerWarningOverlay(PhaseTimer.GuestGallery, 20), rig.GuestView.Overlays.PhaseTimerWarning);
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 20, false), rig.GuestView.Overlays.PhaseTimer);
         rig.Advance(TimeSpan.FromSeconds(30), Second);
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
     }
 
     [Fact]
-    public async Task More_time_during_the_warning_restarts_the_full_time_and_is_otherwise_not_available()
+    public async Task There_is_no_MORE_TIME_the_command_is_unknown_and_the_time_runs_out_regardless()
     {
-        var (rig, seeded) = await OpenAsync();
+        var (rig, _) = await OpenAsync();
         using var lifetime = rig;
-        rig.Advance(TimeSpan.FromSeconds(30), Second);
-        rig.Guest("MoreTime").ShouldBeRejected();
+        rig.Advance(TimeSpan.FromSeconds(50), Second);
 
-        rig.Advance(TimeSpan.FromSeconds(20), Second);
-        Assert.NotNull(rig.GuestView.Overlays.PhaseTimerWarning);
-        rig.Guest("MoreTime").ShouldBeAccepted();
+        rig.Guest("MoreTime").ShouldBeRejected(RejectReason.UnknownCommand);
 
-        Assert.Null(rig.GuestView.Overlays.PhaseTimerWarning);
-        Assert.Equal(new GuestCycleTimerDiagnostics(PhaseTimer.GuestGallery, 60_000, false, false), Timer(rig));
-        rig.Advance(TimeSpan.FromSeconds(55), Second);
-        Assert.Equal(GuestSurface.GuestGallery, rig.GuestView.Surface);
-        Assert.NotNull(rig.GuestView.Overlays.PhaseTimerWarning);
-
-        rig.OpenStrip(seeded[0].Id);
-        rig.Guest("MoreTime").ShouldBeAccepted();
-        Assert.Equal(60_000, Timer(rig).RemainingMs);
-        Assert.Equal(GuestSurface.GuestStripDetail, rig.GuestView.Surface);
-        rig.Advance(TimeSpan.FromSeconds(60), Second);
+        Assert.Equal(10_000, Timer(rig).RemainingMs);
+        rig.Advance(TimeSpan.FromSeconds(10), Second);
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
     }
 
@@ -141,7 +140,7 @@ public sealed class GuestGalleryTimerTests
 
         Assert.Equal(30_000, Timer(rig).RemainingMs);
         rig.Advance(TimeSpan.FromSeconds(10), Second);
-        Assert.Equal(new PhaseTimerWarningOverlay(PhaseTimer.GuestGallery, 20), rig.GuestView.Overlays.PhaseTimerWarning);
+        Assert.Equal(new PhaseTimerOverlay(PhaseTimer.GuestGallery, 20, false), rig.GuestView.Overlays.PhaseTimer);
         rig.Advance(TimeSpan.FromSeconds(20), Second);
         Assert.Equal(GuestSurface.Start, rig.GuestView.Surface);
     }

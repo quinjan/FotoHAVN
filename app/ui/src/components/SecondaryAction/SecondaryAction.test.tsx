@@ -4,8 +4,8 @@ import { SecondaryAction } from "./SecondaryAction.tsx";
 
 describe("SecondaryAction", () => {
   it("is a button named by its label and marked as a secondary action", () => {
-    render(<SecondaryAction>KEEP GOING</SecondaryAction>);
-    const button = screen.getByRole("button", { name: "KEEP GOING" });
+    render(<SecondaryAction>TRY AGAIN</SecondaryAction>);
+    const button = screen.getByRole("button", { name: "TRY AGAIN" });
     expect(button).toHaveAttribute("type", "button");
     expect(button).toHaveAttribute("data-fotohavn-action", "secondary");
     expect(button).toHaveAttribute("aria-disabled", "false");

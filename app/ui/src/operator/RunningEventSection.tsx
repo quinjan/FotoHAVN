@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { RunningEventPanel, type RunningCameraState } from "../components/RunningEventPanel/index.ts";
 import type { CameraState, RunningEventPanel as RunningEventFacts } from "../protocol/generated.ts";
-import { assistanceCopy, panelStep } from "./copy.ts";
+import { assistanceAlertCopy, panelStep } from "./copy.ts";
 import { formatTimeSinceStart } from "./format.ts";
 import { useSendCommand } from "./OperatorCommands.tsx";
 
@@ -51,7 +51,7 @@ export function RunningEventSection({ panel }: { readonly panel: RunningEventFac
       step={panelStep(panel.currentStep)}
       completedGuestCycles={panel.completedGuestCycles}
       timeSinceStart={formatTimeSinceStart(panel.startedAt, now)}
-      {...(panel.assistance === null ? {} : { assistanceReason: assistanceCopy[panel.assistance.reason] })}
+      {...(panel.assistance === null ? {} : { assistance: assistanceAlertCopy(panel.assistance.reason, panel.camera.reason) })}
       onOpenGallery={() => {
         void send("OpenGallery", { eventId: panel.eventId }, { key: "open-gallery" });
       }}

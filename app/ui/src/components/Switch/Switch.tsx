@@ -18,6 +18,8 @@ export interface SwitchProps
   /** The state as text beside the track, so it never rests on the track's position or fill. */
   readonly onLabel?: string | undefined;
   readonly offLabel?: string | undefined;
+  /** Keeps the label for assistive technology only, when a visible label beside the switch already names it (a timer's name). */
+  readonly hideLabel?: boolean | undefined;
 }
 
 /**
@@ -36,6 +38,7 @@ export function Switch({
   disabled = false,
   onLabel = "On",
   offLabel = "Off",
+  hideLabel = false,
   className,
   onClick,
   "aria-describedby": external,
@@ -56,7 +59,7 @@ export function Switch({
 
   return (
     <div className={cx(fieldStyles.field, className)}>
-      <div className={fieldStyles.labelRow}>
+      <div className={cx(fieldStyles.labelRow, hideLabel && fieldStyles.visuallyHidden)}>
         <span id={ids.label} className={fieldStyles.label}>
           {label}
         </span>

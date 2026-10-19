@@ -61,7 +61,8 @@
   text-align: center;
 }
 
-.notices:has(> :not(:empty)) {
+/* A notice that has nothing to say (data-empty) keeps its live region mounted but takes no room. */
+.notices:has(> :not(:empty, [data-empty="true"])) {
   padding-block-end: var(--space-24);
 }
 

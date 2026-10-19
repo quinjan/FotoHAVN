@@ -7,7 +7,7 @@ using FotoHavn.Protocol.Testing;
 
 namespace FotoHavn.Core.Tests.GuestCycles.Orchestration;
 
-/// <summary>Starting a Guest Cycle, its steps and their progress, skipped steps, Template choice, back navigation, Start over, and diagnostics (plan section 7, Steps).</summary>
+/// <summary>Starting a Guest Cycle, its steps and their progress, skipped steps, Template choice, forward-only steps, the removed Start over, and diagnostics (plan section 7, Steps).</summary>
 public sealed class GuestCycleStepTests
 {
     private const string FirstCycle = "00000000-0000-0000-0000-000000000001";
@@ -31,7 +31,6 @@ public sealed class GuestCycleStepTests
         Assert.Equal(GuestSurface.Template, view.Surface);
         Assert.Equal(FirstCycle, view.GuestCycle!.Id);
         Assert.Equal(GuestCycleStepName.Template, view.GuestCycle.Step);
-        Assert.True(view.GuestCycle.StartOverAvailable);
         Assert.Equal([GuestStepState.Current, GuestStepState.Upcoming, GuestStepState.Upcoming, GuestStepState.Upcoming], view.GuestCycle.Steps.Select(step => step.State));
         Assert.Null(view.Photographs);
         Assert.Null(view.Filters);
@@ -159,8 +158,8 @@ public sealed class GuestCycleStepTests
 
         Assert.Equal(GuestSurface.Photographs, rig.Surface);
         var steps = rig.View.GuestCycle!.Steps;
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Skipped, false), steps[0]);
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Current, false), steps[1]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Template, GuestStepState.Skipped), steps[0]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Photographs, GuestStepState.Current), steps[1]);
         rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
     }
 
@@ -171,7 +170,7 @@ public sealed class GuestCycleStepTests
 
         rig.Begin();
 
-        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Skipped, false), rig.View.GuestCycle!.Steps[2]);
+        Assert.Equal(new GuestCycleStepEntry(GuestCycleStepName.Filters, GuestStepState.Skipped), rig.View.GuestCycle!.Steps[2]);
     }
 
     [Fact]
@@ -227,23 +226,35 @@ public sealed class GuestCycleStepTests
         Assert.False(view.CanContinue);
         Assert.True(view.Mirrored);
         Assert.Equal(600.0 / 450.0, view.CropAspect, 6);
-        Assert.Equal(new CaptureSequenceView(false, null, null, 0, 0, 0, false), view.Sequence);
+        Assert.Equal(new CaptureSequenceView(false, null, null, 0, 0, 0, false, true), view.Sequence);
         Assert.Equal([GuestStepState.Done, GuestStepState.Current, GuestStepState.Upcoming, GuestStepState.Upcoming], rig.View.GuestCycle!.Steps.Select(step => step.State));
-        Assert.True(rig.View.GuestCycle.Steps[0].CanGoBack);
     }
 
     [Fact]
-    public async Task BACK_returns_to_the_Template_step_and_keeps_the_photographs()
+    public async Task Guests_never_go_back_to_an_earlier_step()
     {
         using var rig = await GuestCycleRig.CreateAsync();
         rig.ToArrange();
 
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeAccepted();
-        Assert.Equal(GuestSurface.Template, rig.Surface);
-        rig.ToPhotographs();
+        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
+        Assert.Equal(GuestSurface.Photographs, rig.Surface);
 
-        Assert.Equal(PhotographsTabName.Arrange, rig.Photographs.Tab);
-        Assert.All(rig.Photographs.Windows, window => Assert.NotNull(window.CaptureId));
+        rig.ToFilters();
+        rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeRejected();
+        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
+        Assert.Equal(GuestSurface.Filters, rig.Surface);
+        Assert.Equal(4, (await rig.OnlyCycleAsync()).Captures.Count(capture => capture.State == CaptureState.Kept));
+    }
+
+    [Fact]
+    public async Task Going_back_is_refused_on_the_Keepsake_too()
+    {
+        using var rig = await GuestCycleRig.CreateAsync();
+        ToStep(rig, "keepsake");
+
+        rig.Guest("GoToStep", """{"step":"filters"}""").ShouldBeRejected();
+        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
+        Assert.Equal(GuestSurface.Keepsake, rig.Surface);
     }
 
     [Fact]
@@ -267,10 +278,7 @@ public sealed class GuestCycleStepTests
 
         rig.Guest("GoToStep", """{"step":"photographs"}""").ShouldBeRejected();
         rig.Guest("SelectTemplate", """{"templateId":"signature-strip"}""").ShouldBeRejected();
-        rig.Guest("StartOver").ShouldBeRejected();
-        rig.Guest("MoreTime").ShouldBeRejected();
         rig.Guest("TakePhotographs").ShouldBeRejected();
-        rig.Guest("StopCapture").ShouldBeRejected();
     }
 
     [Fact]
@@ -295,69 +303,20 @@ public sealed class GuestCycleStepTests
     [InlineData("template")]
     [InlineData("photographs")]
     [InlineData("filters")]
-    public async Task START_OVER_asks_first_and_KEEP_GOING_closes_the_question(string step)
+    [InlineData("keepsake")]
+    public async Task START_OVER_MORE_TIME_and_STOP_are_unknown_commands_on_every_step(string step)
     {
         using var rig = await GuestCycleRig.CreateAsync();
         ToStep(rig, step);
+        var surface = rig.Surface;
 
-        rig.Guest("StartOver").ShouldBeAccepted();
-        Assert.NotNull(rig.View.Overlays.StartOverConfirmation);
-        rig.Guest("StartOver").ShouldBeRejected();
-        rig.Guest("GoToStep", """{"step":"template"}""").ShouldBeRejected();
+        foreach (var removed in new[] { "StartOver", "ConfirmStartOver", "KeepGoing", "MoreTime", "StopCapture" })
+        {
+            rig.Guest(removed).ShouldBeRejected(RejectReason.UnknownCommand);
+        }
 
-        rig.Guest("KeepGoing").ShouldBeAccepted();
-        Assert.Null(rig.View.Overlays.StartOverConfirmation);
+        Assert.Equal(surface, rig.Surface);
         Assert.Empty(rig.Store.Ended);
-    }
-
-    [Theory]
-    [InlineData("template")]
-    [InlineData("photographs")]
-    [InlineData("filters")]
-    public async Task Confirming_START_OVER_ends_the_cycle_as_started_over_and_returns_to_Start_keeping_the_photographs(string step)
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        ToStep(rig, step);
-        var kept = step == "template" ? 0 : 4;
-
-        rig.Guest("StartOver").ShouldBeAccepted();
-        rig.Guest("ConfirmStartOver").ShouldBeAccepted();
-
-        Assert.Equal(GuestSurface.Start, rig.Surface);
-        Assert.Null(rig.View.GuestCycle);
-        var detail = await rig.OnlyCycleAsync();
-        Assert.Equal(GuestCycleEndReason.StartedOver, detail.Cycle.EndReason);
-        Assert.Equal(kept, detail.Captures.Count(capture => capture.State == CaptureState.Kept));
-        Assert.Null(detail.PhotoStrip);
-        Assert.Equal(0, rig.OperatorView.RunningEvent!.CompletedGuestCycles);
-        Assert.Equal(RunningEventStep.Start, rig.OperatorView.RunningEvent.CurrentStep);
-        Assert.Null(rig.CycleDiagnosticsOrNull());
-
-        // The guest can step inside again: a new cycle.
-        rig.Guest("BeginGuestCycle").ShouldBeAccepted();
-        Assert.NotEqual(FirstCycle, rig.View.GuestCycle!.Id);
-    }
-
-    [Fact]
-    public async Task There_is_no_START_OVER_on_the_Keepsake()
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        ToStep(rig, "keepsake");
-
-        Assert.False(rig.View.GuestCycle!.StartOverAvailable);
-        rig.Guest("StartOver").ShouldBeRejected();
-        rig.Guest("ConfirmStartOver").ShouldBeRejected();
-        rig.Guest("KeepGoing").ShouldBeRejected();
-    }
-
-    [Fact]
-    public async Task START_OVER_is_available_on_every_step_but_the_Keepsake()
-    {
-        using var rig = await GuestCycleRig.CreateAsync();
-        rig.Begin();
-        Assert.True(rig.View.GuestCycle!.StartOverAvailable);
-        rig.ToPhotographs();
-        Assert.True(rig.View.GuestCycle!.StartOverAvailable);
     }
 
     [Fact]
@@ -375,7 +334,6 @@ public sealed class GuestCycleStepTests
         Assert.Equal(PhaseTimer.Template, template.Timer.Phase);
         Assert.Equal(30_000, template.Timer.RemainingMs);
         Assert.False(template.Timer.Paused);
-        Assert.False(template.Timer.Warning);
 
         rig.ToPhotographs();
         var photographs = rig.CycleDiagnostics();

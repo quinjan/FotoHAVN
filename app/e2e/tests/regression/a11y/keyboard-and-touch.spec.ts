@@ -1,15 +1,15 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import { expect, test } from "../../../src/fixtures";
-import { brandColors, openFixture, returnToApp } from "../../../src/gallery";
+import { brandColors, openFixture, openPresentationFixture, returnToApp } from "../../../src/gallery";
 
 // Keyboard and touch in the real host (app/DESIGN.md: Accessibility checks): Tab reaches every control in reading
 // order, each focused control shows the 2 px focus outline at a 5 px offset (Ebony on light surfaces, Off-white on
 // dark), and real touch input (CDP Input.dispatchTouchEvent, not the mouse) taps the 64 px Guest Screen targets and the
-// 112 px Shutter. Fixtures come from the gallery; the Operator window is sized to 1280x720, the smallest Guest layout.
+// Camera tab's live preview, which is the whole band and the one control that starts the sequence (tap to start). Fixtures
+// come from the gallery and the fixture lane; the Operator window is sized to 1280x720, the smallest Guest layout.
 
 const focusables = ':is(a,button,input,select,textarea,[tabindex]:not([tabindex="-1"]))';
 const guestTarget = 64;
-const shutterTarget = 112;
 
 interface FocusedControl {
   readonly index: number;
@@ -198,7 +198,7 @@ test.describe("keyboard and touch in the real host", { tag: ["@m3", "@cursor"] }
     }
   });
 
-  test("touch taps the 64 px PIN pad keys, the 112 px Shutter, and a 64 px Option list row", async ({ operatorPage: page, hooks }) => {
+  test("touch taps the 64 px PIN pad keys, the Camera tab's live preview, and a 64 px Option list row", async ({ operatorPage: page, hooks }) => {
     const cdp = await page.context().newCDPSession(page);
     try {
       await hooks.setWindowBounds("operator", 1280, 720);
@@ -231,17 +231,19 @@ test.describe("keyboard and touch in the real host", { tag: ["@m3", "@cursor"] }
         await expect(filled, "the backspace key removes a digit by touch").toHaveCount(2);
       });
 
-      await test.step("the Shutter is at least 112x112 and a touch tap clicks it (shutter)", async () => {
-        await openFixture(page, "shutter", "guest");
-        const shutter = page.getByRole("button", { name: "Take photographs" });
-        await expectTarget(shutter, shutterTarget, shutterTarget, "Shutter");
+      await test.step("the live preview is one control filling the Camera band, and a touch tap on it clicks it (guest-cycle-photographs-camera)", async () => {
+        await openPresentationFixture(page, "guest-cycle-photographs-camera", "guest");
+        const preview = page.getByRole("button", { name: "Tap to start taking photographs" });
+        const band = await page.locator("[data-photographs-tab='camera']").boundingBox();
+        await expectTarget(preview, Math.round((band?.width ?? 0) - 1), Math.round((band?.height ?? 0) - 1), "Live preview");
+        await expect(preview.getByText("TAP TO START")).toBeVisible();
         await recordPointerEvents(page);
-        await tap(cdp, shutter);
+        await tap(cdp, preview);
         const events = await recordedEvents(page);
         expect(events.map((event) => `${event.type}:${event.pointerType}:${event.target}`)).toEqual([
-          "pointerdown:touch:Take photographs",
-          "pointerup:touch:Take photographs",
-          "click:touch:Take photographs",
+          "pointerdown:touch:Tap to start taking photographs",
+          "pointerup:touch:Tap to start taking photographs",
+          "click:touch:Tap to start taking photographs",
         ]);
       });
 

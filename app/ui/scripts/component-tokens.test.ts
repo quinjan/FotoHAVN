@@ -30,15 +30,26 @@ function contrast(a: string, b: string): number {
 }
 
 describe("app tokens", () => {
-  it("declares the accent rule stroke and the countdown size", async () => {
+  it("declares the accent rule stroke, the countdown size, the countdown disc, and the capture surround", async () => {
     const tokens = await read("styles/app-tokens.css");
     expect(tokens).toMatch(/--app-stroke-rule-accent:\s*2px;/);
     expect(tokens).toContain(
-      "--app-type-countdown: clamp(160px, calc(160px + (100vw - 1280px) * 160 / 1280), 320px);",
+      "--app-type-countdown: clamp(128px, calc(128px + (100vw - 1280px) * 128 / 1280), 256px);",
     );
+    expect(tokens).toContain("--app-countdown-disc: color-mix(in srgb, var(--color-ebony) 64%, transparent);");
+    expect(tokens).toContain("--app-capture-surround: color-mix(in srgb, var(--color-dark-walnut) 72%, transparent);");
+    expect(tokens).not.toContain("--app-camera-strip");
+    expect(tokens).not.toContain("--app-target-shutter");
   });
 
-  it("sizes the countdown numeral with the countdown token", async () => {
+  it("keeps guest labels at 18 px and action labels at 20 px at the 1280 reference", async () => {
+    const tokens = await read("styles/app-tokens.css");
+    expect(tokens).toContain("--app-type-eyebrow: clamp(18px,");
+    expect(tokens).toContain("--app-type-meta: clamp(18px,");
+    expect(tokens).toContain("--app-type-action: clamp(20px,");
+  });
+
+  it("sizes the countdown numeral on its disc with the countdown token", async () => {
     const css = await read("components/CountdownNumeral/CountdownNumeral.module.css");
     expect(css).toContain("font-size: var(--app-type-countdown);");
   });

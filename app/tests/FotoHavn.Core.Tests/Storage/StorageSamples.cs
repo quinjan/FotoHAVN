@@ -22,6 +22,7 @@ internal static class StorageSamples
         "signature-strip",
         "naturale-v1",
         true,
+        true,
         ["signature-strip", "panorama-four"],
         ["naturale-v1", "monochrome-v1"],
         [new PhaseTimerSetting(PhaseTimerPhase.Template, 60), new PhaseTimerSetting(PhaseTimerPhase.Keepsake, 0)]);

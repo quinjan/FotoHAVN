@@ -10,7 +10,7 @@ export const fixtures: readonly ComponentFixture[] = [
     title: "Secondary action, guest",
     surface: "light",
     role: "guest",
-    render: () => <SecondaryAction onClick={noop}>KEEP GOING</SecondaryAction>,
+    render: () => <SecondaryAction onClick={noop}>TRY AGAIN</SecondaryAction>,
   },
   {
     id: "secondary-action-operator",
@@ -37,8 +37,8 @@ export const fixtures: readonly ComponentFixture[] = [
     role: "guest",
     render: () => (
       <div className={styles.row}>
-        <PrimaryAction onClick={noop}>START OVER</PrimaryAction>
-        <SecondaryAction onClick={noop}>KEEP GOING</SecondaryAction>
+        <PrimaryAction onClick={noop}>ACCEPT</PrimaryAction>
+        <SecondaryAction onClick={noop}>TRY AGAIN</SecondaryAction>
       </div>
     ),
   },

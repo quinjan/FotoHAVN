@@ -125,9 +125,9 @@ async function stepInside(guest: Page): Promise<void> {
   await action.click();
 }
 
-/** The Camera tab's shutter takes photographs until `windows` windows are filled; Arrange opens once all are. */
+/** A tap on the Camera tab's live preview takes photographs until every window is filled; Arrange opens once all are. */
 async function takePhotographs(guest: Page): Promise<void> {
-  await button(guest, "Take photographs").click();
+  await button(guest, "Tap to start taking photographs").click();
 }
 
 async function waitForArrange(guest: Page): Promise<void> {
@@ -308,7 +308,7 @@ test("the keyboard-only cycle moves a photograph with Move instead of drag", asy
     await expect(surface(guest, "start")).toBeVisible();
     await keyboardActivate(guest, button(guest, "STEP INSIDE", false));
     await keyboardActivate(guest, button(guest, "CONTINUE TO PHOTOGRAPHS", false));
-    await keyboardActivate(guest, button(guest, "Take photographs"));
+    await keyboardActivate(guest, button(guest, "Tap to start taking photographs"));
     await waitForArrange(guest);
     expect(await arrangement(guest)).toEqual([1, 2, 3, 4]);
 
@@ -316,7 +316,7 @@ test("the keyboard-only cycle moves a photograph with Move instead of drag", asy
     await expect(guest.getByText("Photograph 1 is selected.")).toBeVisible();
     await keyboardActivate(guest, button(guest, "MOVE"));
     await expect(guest.getByText("Choose where photograph 1 goes.")).toBeVisible();
-    await keyboardActivate(guest, button(guest, "Swap with position 3"));
+    await keyboardActivate(guest, button(guest, "Move here: swap with position 3"));
     await expect.poll(() => arrangement(guest)).toEqual([3, 2, 1, 4]);
 
     await keyboardActivate(guest, button(guest, "CONTINUE TO FILTERS", false));
@@ -336,88 +336,39 @@ test("the keyboard-only cycle moves a photograph with Move instead of drag", asy
   }
 });
 
-test("Start Over from Template, Photographs, and Filters ends each cycle as started_over, keeps the saved Captures, and makes no strip", async ({ browser, host }) => {
+test("no way back and no more time: the Phase Timer ticks, the step progress only shows, and a running sequence can't be stopped", async ({ browser, host }) => {
   test.setTimeout(180_000);
-  const name = "Start over";
+  const name = "No way back";
   await withRunningEvent(browser, host, { name }, async ({ guest }) => {
-    const startOver = async (): Promise<void> => {
-      await button(guest, "START OVER").click();
-      await expect(guest.getByRole("alertdialog")).toContainText("Your photographs stay with the Event, but no strip will be made.");
-      await guest.getByRole("alertdialog").getByRole("button", { name: "START OVER", exact: true }).click();
-      await expect(surface(guest, "start")).toBeVisible();
-    };
-
     await stepInside(guest);
     await expect(surface(guest, "template")).toBeVisible();
-    await startOver();
+    const timer = guest.getByRole("timer");
+    await expect(timer).toBeVisible();
+    const first = await timer.textContent();
+    await expect.poll(() => timer.textContent(), { timeout: 5_000 }).not.toBe(first);
+    for (const label of ["START OVER", "MORE TIME"]) {
+      await expect(button(guest, label)).toHaveCount(0);
+    }
 
-    await stepInside(guest);
     await button(guest, "CONTINUE TO PHOTOGRAPHS", false).click();
+    await expect(surface(guest, "photographs")).toBeVisible();
+    const steps = guest.getByRole("list", { name: "Steps" });
+    await expect(steps.getByRole("button")).toHaveCount(0);
+    await steps.getByText("Template").click();
+    await expect(surface(guest, "photographs")).toBeVisible();
+
     await takePhotographs(guest);
-    await expect(guest.getByRole("progressbar", { name: "Photographs" })).toHaveAttribute("aria-valuenow", "1", { timeout: 30_000 });
-    await button(guest, "Stop taking photographs").click();
-    await expect(button(guest, "Take photographs")).toBeVisible();
-    await startOver();
-
-    await stepInside(guest);
-    await guest.getByRole("radio", { name: /^Butter Gingham\b/ }).click();
-    await expect(guest.locator("[data-selected-template]")).toHaveAttribute("data-selected-template", "butter-gingham");
-    await button(guest, "CONTINUE TO PHOTOGRAPHS", false).click();
-    await takePhotographs(guest);
-    await waitForArrange(guest);
-    await button(guest, "CONTINUE TO FILTERS", false).click();
-    await expect(surface(guest, "filters")).toBeVisible();
-    await startOver();
-  });
-
-  const all = await endedCycles(host, name, 3);
-  expect(all.map((cycle) => cycle.end_reason)).toEqual(["started_over", "started_over", "started_over"]);
-  expect(all.map((cycle) => kept(host, cycle.id).length)).toEqual([0, 1, 3]);
-  for (const cycle of all) {
-    expect(strip(host, cycle.id)).toBeUndefined();
-  }
-});
-
-test("changing the Template after Captures keeps them, and an empty window blocks continuing", async ({ browser, host }) => {
-  test.setTimeout(180_000);
-  const name = "Template change";
-  await withRunningEvent(browser, host, { name }, async ({ guest }) => {
-    const changeTemplate = async (template: TemplateName, id: string): Promise<void> => {
-      await guest.getByRole("list", { name: "Steps" }).getByRole("button", { name: /Template/ }).click();
-      await expect(surface(guest, "template")).toBeVisible();
-      await guest.getByRole("radio", { name: new RegExp(`^${template}\\b`) }).click();
-      await expect(guest.locator("[data-selected-template]")).toHaveAttribute("data-selected-template", id);
-      await button(guest, "CONTINUE TO PHOTOGRAPHS", false).click();
-      await expect(surface(guest, "photographs")).toBeVisible();
-    };
-
-    await stepInside(guest);
-    await button(guest, "CONTINUE TO PHOTOGRAPHS", false).click();
-    await takePhotographs(guest);
-    await expect(guest.getByRole("progressbar", { name: "Photographs" })).toHaveAttribute("aria-valuenow", "2", { timeout: 30_000 });
-    await button(guest, "Stop taking photographs").click();
-    await expect(button(guest, "Take photographs")).toBeVisible();
-
-    await changeTemplate("Butter Gingham", "butter-gingham");
-    await button(guest, "SEE MY PHOTOGRAPHS", false).click();
-    await expect(guest.locator('[data-photographs-tab="arrange"]')).toBeVisible();
-    expect(await arrangement(guest)).toEqual([1, 2, null]);
-    await expect(button(guest, /^CONTINUE TO FILTERS/, false)).toHaveAttribute("aria-disabled", "true");
-
-    await changeTemplate("Signature Strip", "signature-strip");
-    await button(guest, "SEE MY PHOTOGRAPHS", false).click();
-    expect(await arrangement(guest)).toEqual([1, 2, null, null]);
-    await expect(button(guest, /^CONTINUE TO FILTERS/, false)).toHaveAttribute("aria-disabled", "true");
-
-    await button(guest, "TAKE MORE PHOTOGRAPHS", false).click();
-    await takePhotographs(guest);
+    const preview = button(guest, "Tap to start taking photographs");
+    await expect(preview).toHaveAttribute("aria-disabled", "true", { timeout: 10_000 });
+    await expect(guest.getByText("TAP TO START")).toHaveCount(0);
+    // A tap while the sequence runs is not a stop: every window still fills.
+    await preview.click({ force: true });
+    await expect(button(guest, /stop/i, false)).toHaveCount(0);
     await waitForArrange(guest);
     expect(await arrangement(guest)).toEqual([1, 2, 3, 4]);
-    await expect(button(guest, /^CONTINUE TO FILTERS/, false)).not.toHaveAttribute("aria-disabled", "true");
   });
 
-  const all = await endedCycles(host, name, 1);
-  const [cycle] = all;
+  const [cycle] = await endedCycles(host, name, 1);
   expect(cycle?.end_reason).toBe("operator_exit");
   if (cycle !== undefined) {
     expect(kept(host, cycle.id).map((capture) => capture.sequence)).toEqual([1, 2, 3, 4]);

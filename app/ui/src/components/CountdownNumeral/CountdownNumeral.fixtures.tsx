@@ -34,4 +34,16 @@ export const fixtures: readonly ComponentFixture[] = [
     role: "guest",
     render: () => <CountdownNumeral value={1} />,
   },
+  {
+    id: "countdown-numeral-1-cue",
+    title: "Countdown numeral, the last second, with its cue",
+    surface: "dark",
+    role: "guest",
+    layout: "fill",
+    render: () => (
+      <OverlayFrame stage>
+        <CountdownNumeral value={1} cue="Look at the camera." />
+      </OverlayFrame>
+    ),
+  },
 ];

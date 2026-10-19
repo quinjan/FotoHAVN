@@ -51,17 +51,17 @@ const guestViews: readonly View[] = [
   { fixture: "guest-ui-gallery-many-strips", surface: "guestGallery", heading: "Look at you." },
   { fixture: "guest-ui-gallery-loading-more", surface: "guestGallery", heading: "Look at you." },
   { fixture: "guest-ui-gallery-loading-first", surface: "guestGallery", heading: "Look at you.", texts: ["Loading photographs."] },
-  { fixture: "guest-ui-gallery-timer-warning", surface: "guestGallery", heading: "Look at you.", texts: ["SECONDS LEFT", "MORE TIME"] },
+  { fixture: "guest-ui-gallery-timer-low", surface: "guestGallery", heading: "Look at you.", texts: ["0:08"] },
   { fixture: "guest-ui-strip-detail", surface: "guestStripDetail", heading: "", texts: ["CLOSE", "BACK TO START"] },
   { fixture: "guest-ui-strip-detail-landscape", surface: "guestStripDetail", heading: "" },
-  { fixture: "guest-ui-strip-detail-timer-warning", surface: "guestStripDetail", heading: "", texts: ["SECOND LEFT", "MORE TIME"] },
+  { fixture: "guest-ui-strip-detail-timer-low", surface: "guestStripDetail", heading: "", texts: ["0:01"] },
   // The brain-generated fixtures (FotoHavn.Core tests write them).
   { fixture: "guest-gallery-one", surface: "guestGallery", heading: "Look at you.", texts: ["BACK TO START"] },
   { fixture: "guest-gallery-four", surface: "guestGallery", heading: "Look at you." },
   { fixture: "guest-gallery-many", surface: "guestGallery", heading: "Look at you." },
-  { fixture: "guest-gallery-timer-warning", surface: "guestGallery", heading: "Look at you.", texts: ["MORE TIME"] },
+  { fixture: "guest-gallery-timer-low", surface: "guestGallery", heading: "Look at you.", texts: ["0:15"] },
   { fixture: "guest-strip-detail", surface: "guestStripDetail", heading: "", texts: ["CLOSE", "BACK TO START"] },
-  { fixture: "guest-strip-detail-timer-warning", surface: "guestStripDetail", heading: "", texts: ["MORE TIME"] },
+  { fixture: "guest-strip-detail-timer-low", surface: "guestStripDetail", heading: "", texts: ["0:10"] },
   { fixture: "guest-start-gallery-link", surface: "start", heading: "", texts: ["SEE THE GOOD COMPANY"] },
 ];
 
@@ -228,6 +228,26 @@ for (const resolution of resolutions) {
 test.describe("operator gallery, behaviour", () => {
   test.use({ viewport: resolutions[0] });
 
+  test("the count line sits above the list, and captions start at one height in each row whatever the strip's height", async ({ page }) => {
+    await open(page, "operator-ui-gallery-mixed", "operator");
+    await expect(page.getByText("Newest 7 Guest Cycles, 3 completed")).toBeVisible();
+    const rows = await page.evaluate(() => {
+      const captions = [...document.querySelectorAll<HTMLElement>('ul[aria-label="Guest Cycles"] > li > p')];
+      const byRow = new Map<number, number[]>();
+      for (const caption of captions) {
+        const item = caption.parentElement?.getBoundingClientRect();
+        if (item !== undefined) {
+          byRow.set(Math.round(item.bottom), [...(byRow.get(Math.round(item.bottom)) ?? []), Math.round(caption.getBoundingClientRect().top)]);
+        }
+      }
+      return [...byRow.values()];
+    });
+    expect(rows.some((tops) => tops.length > 1)).toBe(true);
+    for (const tops of rows) {
+      expect(new Set(tops).size, `caption tops ${tops.join(", ")}`).toBe(1);
+    }
+  });
+
   test("a 320-Guest-Cycle list scrolls the page, lists every item once, and keeps SHOW MORE out when everything is loaded", async ({ page }) => {
     await open(page, "operator-ui-gallery-large", "operator");
     await expect(page.getByRole("list", { name: "Guest Cycles" }).getByRole("listitem")).toHaveCount(320);
@@ -339,21 +359,34 @@ test.describe("guest gallery, behaviour", () => {
     }
   });
 
-  test("the warning sits clear of BACK TO START and the Captures, with MORE TIME at 64", async ({ page }) => {
-    for (const fixture of ["guest-ui-gallery-timer-warning", "guest-ui-strip-detail-timer-warning"]) {
+  test("the Phase Timer sits top-right beside the exit hold, clear of the heading, the row, and the controls, with no MORE TIME", async ({ page }) => {
+    for (const fixture of ["guest-ui-gallery-four-strips", "guest-ui-gallery-timer-low", "guest-ui-strip-detail", "guest-ui-strip-detail-timer-low"]) {
       await open(page, fixture, "guest");
-      const warning = page.locator('[data-phase="guest-gallery"]');
-      await expect(warning).toBeVisible();
-      const more = await warning.getByRole("button", { name: "MORE TIME" }).boundingBox();
-      expect(more?.height).toBeGreaterThanOrEqual(64);
-      const box = await warning.boundingBox();
-      const back = await page.getByRole("button", { name: "BACK TO START" }).boundingBox();
-      expect(box).not.toBeNull();
-      expect(back).not.toBeNull();
-      const apart = (box?.x ?? 0) >= (back?.x ?? 0) + (back?.width ?? 0) || (box?.y ?? 0) >= (back?.y ?? 0) + (back?.height ?? 0);
-      expect(apart, `${fixture}: the warning overlaps BACK TO START`).toBe(true);
-      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(resolutions[0].width);
-      expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(resolutions[0].height);
+      const timer = page.getByRole("timer");
+      await expect(timer, fixture).toBeVisible();
+      await expect(page.getByRole("button", { name: "MORE TIME" })).toHaveCount(0);
+      const pill = await timer.boundingBox();
+      const hold = await page.getByRole("button", { name: "Operator exit" }).boundingBox();
+      expect(pill).not.toBeNull();
+      expect((pill?.x ?? 0) + (pill?.width ?? 0), fixture).toBeLessThanOrEqual(hold?.x ?? 0);
+      expect(Math.abs((pill?.y ?? 0) + (pill?.height ?? 0) / 2 - ((hold?.y ?? 0) + (hold?.height ?? 0) / 2)), fixture).toBeLessThan(2);
+      const others = await page.evaluate(() =>
+        [...document.querySelectorAll("main h1, main button:not([aria-label='Operator exit']), main img")].map((element) => {
+          const { x, y, width, height } = element.getBoundingClientRect();
+          return { x, y, width, height, name: element.getAttribute("aria-label") ?? element.getAttribute("alt") ?? element.textContent.trim() };
+        }),
+      );
+      for (const other of others) {
+        if (other.width === 0 || other.height === 0) {
+          continue;
+        }
+        const apart =
+          (pill?.x ?? 0) >= other.x + other.width ||
+          (pill?.x ?? 0) + (pill?.width ?? 0) <= other.x ||
+          (pill?.y ?? 0) >= other.y + other.height ||
+          (pill?.y ?? 0) + (pill?.height ?? 0) <= other.y;
+        expect(apart, `${fixture}: the timer overlaps ${other.name}`).toBe(true);
+      }
     }
   });
 
@@ -388,7 +421,7 @@ test.describe("gallery views in reduced motion and forced colors", () => {
     ["operator-ui-gallery-detail", "operator"],
     ["operator-ui-gallery-detail-delete", "operator"],
     ["guest-ui-gallery-many-strips", "guest"],
-    ["guest-ui-gallery-timer-warning", "guest"],
+    ["guest-ui-gallery-timer-low", "guest"],
     ["guest-ui-strip-detail-landscape", "guest"],
   ];
 

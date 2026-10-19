@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commandNotice, formatDeletionCounts, formatEventDate, formatGuestCycles, formatGuestCycleTime, formatLastUsed, formatTimeSinceStart, hookNotice } from "./format.ts";
+import { commandNotice, formatDeletionCounts, formatEventDate, formatGalleryCount, formatGuestCycles, formatGuestCycleTime, formatLastUsed, formatTimeSinceStart, hookNotice } from "./format.ts";
 
 describe("operator formatting", () => {
   it("formats an Event date as a calendar day, whatever the time zone", () => {
@@ -19,6 +19,14 @@ describe("operator formatting", () => {
     expect(formatGuestCycles(0)).toBe("0 Guest Cycles");
     expect(formatGuestCycles(1)).toBe("1 Guest Cycle");
     expect(formatGuestCycles(2)).toBe("2 Guest Cycles");
+  });
+
+  it("words the Event Gallery's count line by what is loaded, truthfully while more remain", () => {
+    expect(formatGalleryCount(8, 4, false)).toBe("8 Guest Cycles, 4 completed");
+    expect(formatGalleryCount(1, 1, false)).toBe("1 Guest Cycle, 1 completed");
+    expect(formatGalleryCount(3, 0, false)).toBe("3 Guest Cycles, none completed");
+    expect(formatGalleryCount(40, 22, true)).toBe("Newest 40 Guest Cycles, 22 completed");
+    expect(formatGalleryCount(40, 0, true)).toBe("Newest 40 Guest Cycles, none completed");
   });
 
   it("explains each command outcome politely", () => {

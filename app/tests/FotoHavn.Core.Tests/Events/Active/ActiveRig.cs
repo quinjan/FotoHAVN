@@ -175,6 +175,7 @@ internal sealed class ActiveRig : IDisposable
         "signature-strip",
         "naturale-v1",
         true,
+        true,
         ["signature-strip", "panorama-four"],
         ["naturale-v1", "monochrome-v1"],
         PhaseTimerRules.Defaults());

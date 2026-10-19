@@ -8,7 +8,7 @@ import { guestDetail } from "./guestGalleryMapping.ts";
 /**
  * The guest strip detail (plan section 8, Guest view), drawn from the brain's view alone: the strip lifted large beside its
  * arranged Captures, `CLOSE` (`CloseGuestStrip`), and `BACK TO START ←` (`BackToStart`). Nothing zooms past this size. Focus
- * starts on `CLOSE`. The Phase Timer's warning is `GuestGalleryChrome`'s, as on the row; the timer is not reset by opening a strip.
+ * starts on `CLOSE`. The Phase Timer is `GuestGalleryChrome`'s, as on the row; the timer is not reset by opening a strip.
  */
 export function GuestStripDetailView({ view, overlays }: { readonly view: GuestStripDetailData; readonly overlays: GuestOverlays }) {
   const client = useBrainClient();

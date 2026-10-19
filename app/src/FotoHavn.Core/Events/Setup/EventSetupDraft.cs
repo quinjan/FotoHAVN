@@ -63,6 +63,7 @@ internal sealed class EventSetupDraft
 
     public bool GuestGalleryEnabled { get; private set; }
 
+    public bool GuestSoundsEnabled { get; private set; }
     /// <summary>Whether the Event already has a saved PIN.</summary>
     public bool HasSavedPin { get; private set; }
 
@@ -92,7 +93,7 @@ internal sealed class EventSetupDraft
 
     public int TimerSeconds(PhaseTimerPhase phase) => _timers[phase];
 
-    /// <summary>A new Event with its defaults (plan section 8): every Template and Look offered, mirror on, countdown 5, timers at their defaults.</summary>
+    /// <summary>A new Event with its defaults (plan section 8): every Template and Look offered, mirror on, guest sounds on, countdown 5, timers at their defaults.</summary>
     public static EventSetupDraft CreateNew(ICatalog catalog, DateOnly today)
     {
         ArgumentNullException.ThrowIfNull(catalog);
@@ -100,6 +101,7 @@ internal sealed class EventSetupDraft
         {
             Date = EventSetupLimits.FormatDate(today),
             Mirror = EventSetupLimits.DefaultMirror,
+            GuestSoundsEnabled = EventSetupLimits.DefaultGuestSounds,
             CountdownSeconds = EventSetupLimits.DefaultCountdownSeconds,
             _offeredTemplateIds = [.. catalog.Templates.Select(template => template.Id)],
             DefaultTemplateId = catalog.Templates.Count > 0 ? catalog.Templates[0].Id : null,
@@ -137,6 +139,7 @@ internal sealed class EventSetupDraft
             DefaultTemplateId = record.DefaultTemplateId,
             DefaultLookId = record.DefaultLookId,
             GuestGalleryEnabled = record.GuestGalleryEnabled,
+            GuestSoundsEnabled = record.GuestSoundsEnabled,
             HasSavedPin = record.HasPin,
             _offeredTemplateIds = InCatalogOrder(record.OfferedTemplateIds, catalog.Templates.Select(template => template.Id)),
             _offeredLookIds = InCatalogOrder(record.OfferedLookIds, catalog.Looks.Select(look => look.Id)),
@@ -192,6 +195,8 @@ internal sealed class EventSetupDraft
     public void SetCountdown(int seconds) => CountdownSeconds = seconds;
 
     public void SetGuestGallery(bool enabled) => GuestGalleryEnabled = enabled;
+
+    public void SetGuestSounds(bool enabled) => GuestSoundsEnabled = enabled;
 
     /// <summary>
     /// Replaces the offered Templates: unknown ids are dropped and the rest are kept in catalog order. The default stays when it is
@@ -287,6 +292,7 @@ internal sealed class EventSetupDraft
             DefaultTemplateId!,
             DefaultLookId!,
             GuestGalleryEnabled,
+            GuestSoundsEnabled,
             [.. _offeredTemplateIds],
             [.. _offeredLookIds],
             [.. PhaseTimerRules.All.Select(phase => new PhaseTimerSetting(phase, _timers[phase]))]);
@@ -315,5 +321,6 @@ internal sealed class EventSetupDraft
         string.Join(',', _offeredLookIds),
         DefaultLookId ?? string.Empty,
         GuestGalleryEnabled,
+        GuestSoundsEnabled,
         string.Join(',', PhaseTimerRules.All.Select(phase => _timers[phase])));
 }

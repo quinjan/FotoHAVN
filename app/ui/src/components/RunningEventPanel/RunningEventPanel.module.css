@@ -70,3 +70,78 @@
   align-items: center;
   gap: var(--space-16) var(--space-24);
 }
+
+/* The alert's live region stays mounted and takes no space while empty. */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-16);
+  max-inline-size: var(--app-measure-prose);
+}
+
+.alert[data-empty="true"] {
+  display: contents;
+}
+
+.alertIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  block-size: calc(var(--app-text-heading-sm) * var(--typography-heading-sm-line-height));
+  font-size: var(--app-text-heading-sm);
+}
+
+.alertText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.reason {
+  font-family: var(--typography-heading-font-family);
+  font-size: var(--app-text-heading-sm);
+  font-weight: var(--typography-heading-font-weight);
+  letter-spacing: var(--typography-heading-sm-letter-spacing);
+  line-height: var(--typography-heading-sm-line-height);
+  text-wrap: balance;
+}
+
+.fix {
+  font-size: var(--app-text-body-lg);
+  line-height: var(--typography-body-lg-line-height);
+}
+
+/*
+ * Operator Assistance: the panel is the Operator Screen's one dark band. The alert reads first, `RETRY` sits right under
+ * it, and the facts follow behind a rule.
+ */
+.panel[data-assistance] {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-32);
+  padding-block: var(--space-40);
+  background-color: var(--app-tone-surface);
+}
+
+.panel[data-assistance] .summary {
+  display: contents;
+}
+
+.panel[data-assistance] .title {
+  order: 1;
+}
+
+.panel[data-assistance] .alert {
+  order: 2;
+}
+
+.panel[data-assistance] .actions {
+  order: 3;
+}
+
+.panel[data-assistance] .facts {
+  order: 4;
+  inline-size: 100%;
+  padding-block-start: var(--space-24);
+  border-block-start: var(--stroke-hairline) solid var(--app-tone-rule);
+}

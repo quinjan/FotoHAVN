@@ -15,6 +15,18 @@ describe("settleFixtureDocument", () => {
     await expect(settleFixtureDocument()).resolves.toBeUndefined();
   });
 
+  it("ignores a delayed reveal, which only waits", async () => {
+    const hint = document.createElement("p");
+    hint.setAttribute("data-delayed-reveal", "");
+    const waiting = {
+      playState: "running",
+      effect: { getComputedTiming: () => ({ iterations: 1 }), target: hint },
+      finished: new Promise(() => undefined),
+    } as unknown as Animation;
+    Object.defineProperty(document, "getAnimations", { configurable: true, value: () => [waiting] });
+    await expect(settleFixtureDocument()).resolves.toBeUndefined();
+  });
+
   it("waits for finite animations to finish and ignores looping ones", async () => {
     let finish: () => void = () => undefined;
     const running = animation("running", 1, new Promise<void>((resolve) => (finish = resolve)));

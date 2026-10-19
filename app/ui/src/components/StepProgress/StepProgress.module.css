@@ -10,7 +10,8 @@
   display: flex;
 }
 
-/* Every step reserves the 2 px underline, so the current step never shifts the row. */
+/* Every step reserves the 2 px underline, so the current step never shifts the row. The row keeps the guest target height
+   so the band reads the same as before, though no step is a control. */
 .step {
   display: inline-flex;
   align-items: center;
@@ -45,33 +46,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* A step the guest can return to reads as a text action: Hairline underline at rest, the ink on hover or press. */
-.step[data-revisit="true"] .label {
-  text-decoration-line: underline;
-  text-decoration-color: var(--app-tone-rule);
-  text-decoration-thickness: var(--stroke-hairline);
-  text-underline-offset: var(--stroke-link-underline-offset);
-  transition: text-decoration-color var(--motion-duration-fast) var(--motion-easing-editorial);
-}
-
-@media (hover: hover) {
-  .step[data-revisit="true"]:hover {
-    color: var(--app-tone-ink);
-  }
-
-  .step[data-revisit="true"]:hover .label {
-    text-decoration-color: currentcolor;
-  }
-}
-
-.step[data-revisit="true"]:active {
-  color: var(--app-tone-ink);
-}
-
-.step[data-revisit="true"]:active .label {
-  text-decoration-color: currentcolor;
-}
-
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -84,9 +58,5 @@
 @media (forced-colors: active) {
   .step[data-state="current"] {
     border-block-end-color: CanvasText;
-  }
-
-  .step[data-revisit="true"] .label {
-    text-decoration-color: currentcolor;
   }
 }

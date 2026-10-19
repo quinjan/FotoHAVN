@@ -5,11 +5,11 @@ import type { GuestStep } from "../protocol/generated.ts";
 /** Every command the Template and Photographs steps send. The brain decides each; none of them answers the guest with an error. */
 export interface PhotographsCommands {
   readonly selectTemplate: (templateId: string) => void;
+  /** Forward only: Template continues to Photographs and Arrange to Filters. */
   readonly goToStep: (step: GuestStep) => void;
   readonly showCameraTab: () => void;
   readonly showArrangeTab: () => void;
   readonly takePhotographs: () => void;
-  readonly stopCapture: () => void;
   readonly selectPosition: (index: number) => void;
   readonly beginRetake: (index: number) => void;
   readonly acceptRetake: () => void;
@@ -31,7 +31,6 @@ export function usePhotographsCommands(): PhotographsCommands {
       showCameraTab: () => void client.sendCommand("ShowCameraTab", {}),
       showArrangeTab: () => void client.sendCommand("ShowArrangeTab", {}),
       takePhotographs: () => void client.sendCommand("TakePhotographs", {}),
-      stopCapture: () => void client.sendCommand("StopCapture", {}),
       selectPosition: (index) => void client.sendCommand("SelectPosition", { index }),
       beginRetake: (index) => void client.sendCommand("BeginRetake", { index }),
       acceptRetake: () => void client.sendCommand("AcceptRetake", {}),

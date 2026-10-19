@@ -162,6 +162,7 @@ export function setupView(overrides: Partial<EventSetupView> = {}): EventSetupVi
     looks: looks(allLookIds, "naturale-v1"),
     phaseTimers: phaseTimers(),
     guestGalleryEnabled: false,
+    guestSoundsEnabled: true,
     pin: { isSet: false, changing: false },
     saveAndStartAvailable: true,
     saveAndStartDisabledReason: null,
@@ -238,6 +239,14 @@ export function operatorSetupFixtures(): Record<string, OperatorWelcomeMessage> 
           { field: "defaultLook", code: "defaultLookNotOffered" },
           { field: "pin", code: "pinMismatch" },
         ],
+      }),
+    ),
+    "operator-setup-errors-start-only": setupMessage(
+      editingSetupView({
+        dirty: true,
+        showErrors: true,
+        pin: { isSet: false, changing: false },
+        fieldErrors: [{ field: "pin", code: "pinRequired" }],
       }),
     ),
     "operator-setup-editing": setupMessage(editingSetupView()),

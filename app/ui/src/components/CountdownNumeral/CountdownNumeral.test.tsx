@@ -59,6 +59,30 @@ describe("CountdownNumeral", () => {
     expect(screen.getByText("4")).toHaveAttribute("data-enter", "true");
   });
 
+  it("shows the cue only during the last second, and never announces it", () => {
+    const { container, rerender } = render(<CountdownNumeral value={3} cue="Look at the camera." />);
+    expect(screen.queryByText("Look at the camera.")).toBeNull();
+    rerender(<CountdownNumeral value={2} cue="Look at the camera." />);
+    expect(screen.queryByText("Look at the camera.")).toBeNull();
+    rerender(<CountdownNumeral value={1} cue="Look at the camera." />);
+    expect(screen.getByText("Look at the camera.")).toBeInTheDocument();
+    expect(screen.getByText("Look at the camera.").closest("[aria-live]")).toBeNull();
+    expect(live(container)).toHaveTextContent("Next photograph in 3 seconds.");
+    rerender(<CountdownNumeral value={0} cue="Look at the camera." />);
+    expect(screen.queryByText("Look at the camera.")).toBeNull();
+  });
+
+  it("shows no cue unless one is given", () => {
+    render(<CountdownNumeral value={1} />);
+    expect(screen.queryByText("Look at the camera.")).toBeNull();
+  });
+
+  it("sets the numeral on a soft disc at weight 500, top-centre, with no transform outside the motion query", () => {
+    expect(css).toMatch(/\.disc \{[^}]*background-color: var\(--app-countdown-disc\)/);
+    expect(css).toMatch(/\.numeral \{[^}]*font-weight: var\(--font-weight-medium\)/);
+    expect(css).toMatch(/\.countdown \{[^}]*place-self: start center/);
+  });
+
   it("moves numerals only when the user doesn't prefer reduced motion", () => {
     const outsideNoPreference = css.replace(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}/g, "");
     expect(outsideNoPreference).not.toMatch(/transform|translate|scale/);

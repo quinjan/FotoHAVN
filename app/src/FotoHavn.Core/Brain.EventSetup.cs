@@ -67,7 +67,7 @@ public sealed partial class Brain
                 PhaseTimerRules.Max(phase),
                 PhaseTimerRules.CanBeOff(phase)))],
             draft.GuestGalleryEnabled,
-            new EventSetupPinView(draft.HasSavedPin, draft.HasPendingPin),
+            draft.GuestSoundsEnabled,            new EventSetupPinView(draft.HasSavedPin, draft.HasPendingPin),
             !running,
             running ? StartDisabledReason.EventRunning : null,
             draft.StartFailure,
@@ -484,6 +484,13 @@ public sealed partial class Brain
         Edit(id, draft =>
         {
             draft.SetGuestGallery(payload.Enabled);
+            return true;
+        });
+
+    private CommandResultMessage SetGuestSounds(string id, SetGuestSoundsPayload payload) =>
+        Edit(id, draft =>
+        {
+            draft.SetGuestSounds(payload.Enabled);
             return true;
         });
 

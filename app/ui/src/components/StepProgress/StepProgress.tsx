@@ -16,13 +16,6 @@ export interface StepProgressProps {
   /** The step the guest is on; it carries `aria-current="step"`. */
   readonly current: GuestStepId;
   /**
-   * Going back, as on the website: when given, each completed step is a button that calls this with its id. Omit it
-   * where going back isn't possible (Keepsake, where the Guest Cycle is already completed).
-   */
-  readonly onSelectStep?: (step: GuestStepId) => void;
-  /** Completed steps the guest may not return to; they show as completed but aren't offered. */
-  readonly skipped?: readonly GuestStepId[];
-  /**
    * The steps the Event shows, in order, renumbered consecutively from `01`: a one-Template Event leaves Template out and a
    * one-Look Event leaves Filters out (M8, Q26). Default: all four.
    */
@@ -35,60 +28,23 @@ export interface StepProgressProps {
 /**
  * The guest's step progress (brand components.md): a numbered row, `01 Template` to `04 Keepsake`, in the guest top
  * band. Numbers use the Meta role. The current step is the ink with a 2 px ink underline and `aria-current="step"`;
- * the others take the secondary ink. Completed steps the guest may return to are buttons with a Hairline underline,
- * so going back never depends on color; every completed step also says "completed" to assistive technology.
+ * the others take the secondary ink, and every completed step also says "completed" to assistive technology.
+ * It only shows where the guest is: no step is a control, so a guest never goes back by it (app/DESIGN.md, Deliberate departures).
  */
-export function StepProgress({ current, onSelectStep, skipped = [], steps, label = "Steps", className }: StepProgressProps) {
+export function StepProgress({ current, steps, label = "Steps", className }: StepProgressProps) {
   const shown = steps === undefined ? guestSteps : guestSteps.filter((step) => steps.includes(step.id));
   const currentIndex = shown.findIndex((step) => step.id === current);
   return (
     <ol className={cx(styles.progress, className)} aria-label={label}>
       {shown.map((step, index) => {
-        const content = (
-          <>
-            <span className={styles.number}>{String(index + 1).padStart(2, "0")}</span>{" "}
-            <span className={styles.label}>{step.label}</span>
-          </>
-        );
-        if (index >= currentIndex) {
-          const isCurrent = index === currentIndex;
-          return (
-            <li key={step.id} className={styles.item}>
-              <span
-                className={styles.step}
-                data-state={isCurrent ? "current" : "upcoming"}
-                aria-current={isCurrent ? "step" : undefined}
-              >
-                {content}
-              </span>
-            </li>
-          );
-        }
-        const completed = (
-          <>
-            {content}
-            <span className={styles.visuallyHidden}>, completed</span>
-          </>
-        );
+        const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "upcoming";
         return (
           <li key={step.id} className={styles.item}>
-            {onSelectStep !== undefined && !skipped.includes(step.id) ? (
-              <button
-                type="button"
-                className={styles.step}
-                data-state="completed"
-                data-revisit="true"
-                onClick={() => {
-                  onSelectStep(step.id);
-                }}
-              >
-                {completed}
-              </button>
-            ) : (
-              <span className={styles.step} data-state="completed">
-                {completed}
-              </span>
-            )}
+            <span className={styles.step} data-state={state} aria-current={state === "current" ? "step" : undefined}>
+              <span className={styles.number}>{String(index + 1).padStart(2, "0")}</span>{" "}
+              <span className={styles.label}>{step.label}</span>
+              {state === "completed" && <span className={styles.visuallyHidden}>, completed</span>}
+            </span>
           </li>
         );
       })}

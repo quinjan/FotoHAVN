@@ -1,6 +1,22 @@
 /* The box, label, and messages come from shared/field.module.css. A date is short, so the field doesn't stretch. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-16);
+}
+
 .date {
   max-inline-size: calc(var(--app-target) * 5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The date in words, in the format every other date uses; the native input keeps Windows' own. */
+.words {
+  color: var(--app-tone-ink);
+  font-family: var(--typography-body-font-family);
+  font-size: var(--app-text-body);
+  line-height: var(--typography-body-line-height);
   font-variant-numeric: tabular-nums;
 }
 

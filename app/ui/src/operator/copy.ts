@@ -1,4 +1,5 @@
-import type { AssistanceReason, OperatorNoticeCode, RunningEventStep as ProtocolStep } from "../protocol/generated.ts";
+import type { AssistanceReason, CameraFailureKind, OperatorNoticeCode, RunningEventStep as ProtocolStep } from "../protocol/generated.ts";
+import { cameraReasonCopy } from "../components/CameraDiagnosticsScreen/cameraText.ts";
 import type { RunningEventStep } from "../components/RunningEventPanel/index.ts";
 import { formatDeletionCounts } from "./format.ts";
 
@@ -21,6 +22,54 @@ export const assistanceCopy: Readonly<Record<AssistanceReason, string>> = {
   storage: "The Data folder needs attention.",
   guestDisplay: "The guest display isn't connected.",
 };
+
+/** The running-Event panel's alert: what went wrong, then what to do, ending with `RETRY` (DESIGN.md, Operator Assistance). */
+export interface AssistanceAlertCopy {
+  readonly reason: string;
+  readonly fix: string;
+}
+
+const cameraFixCopy: Readonly<Record<CameraFailureKind, string>> = {
+  stale: "Check its cable, then RETRY.",
+  failed: "Check its cable, then RETRY.",
+  removed: "Reconnect it, then RETRY.",
+  exclusiveLost: "Close that app, then RETRY.",
+  inUseByAnotherApp: "Close that app, then RETRY.",
+  privacyDenied: "Turn it on in Windows settings, then RETRY.",
+  noSupportedFormat: "Try another USB port, then RETRY.",
+  notFound: "Reconnect it, then RETRY.",
+  unknown: "Check that it is connected, then RETRY.",
+};
+
+const storageAlertCopy: AssistanceAlertCopy = {
+  reason: "The Data folder can't be written to.",
+  fix: "Check the disk and the folder, then RETRY.",
+};
+
+const guestDisplayAlertCopy: AssistanceAlertCopy = {
+  reason: "The guest display isn't connected.",
+  fix: "Reconnect it, then RETRY.",
+};
+
+/** For a camera whose failure the brain doesn't name (it may have recovered while the Event still waits for `RETRY`). */
+const cameraGenericAlertCopy: AssistanceAlertCopy = {
+  reason: "The camera needs attention.",
+  fix: "Check that it is connected, then RETRY.",
+};
+
+/** The panel's Operator Assistance alert for the brain's cause; a camera cause reads the camera's own failure kind when it has one. */
+export function assistanceAlertCopy(reason: AssistanceReason, cameraFailure: CameraFailureKind | null): AssistanceAlertCopy {
+  switch (reason) {
+    case "camera":
+      return cameraFailure === null
+        ? cameraGenericAlertCopy
+        : { reason: cameraReasonCopy[cameraFailure], fix: cameraFixCopy[cameraFailure] };
+    case "storage":
+      return storageAlertCopy;
+    case "guestDisplay":
+      return guestDisplayAlertCopy;
+  }
+}
 
 /** The text link back to the running-Event panel, on every view but the Event list. */
 export const returnToRunningEventLabel = "GO TO THE RUNNING EVENT";

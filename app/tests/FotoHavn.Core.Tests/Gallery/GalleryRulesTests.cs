@@ -258,11 +258,11 @@ public sealed class GalleryRulesTests
         string[] allowed =
         [
             "surface", "start", "startUnavailable", "overlays", "fatal", "guestCycle", "template", "photographs", "filters", "keepsake", "operatorAssistance", "guestGallery", "guestStripDetail",
-            "exitHold", "pinDialog", "phaseTimerWarning", "startOverConfirmation", "notice", "phase", "remainingSeconds",
+            "exitHold", "pinDialog", "phaseTimer", "notice", "phase", "remainingSeconds", "paused",
             .. GuestGalleryNames,
             .. GuestDetailNames,
         ];
-        var overlays = new GuestOverlays(null, null, new PhaseTimerWarningOverlay(PhaseTimer.GuestGallery, 12), null, null);
+        var overlays = new GuestOverlays(null, null, new PhaseTimerOverlay(PhaseTimer.GuestGallery, 12, false), null);
         var list = new GuestPresentation(
             GuestSurface.GuestGallery,
             null,
@@ -294,7 +294,7 @@ public sealed class GalleryRulesTests
     }
 
     [Fact]
-    public void The_guest_gallery_Phase_Timer_is_60_seconds_between_20_and_300_never_off_and_warns()
+    public void The_guest_gallery_Phase_Timer_is_60_seconds_between_20_and_300_and_never_off()
     {
         var phase = PhaseTimerPhase.GuestGallery;
 
@@ -302,7 +302,6 @@ public sealed class GalleryRulesTests
         Assert.Equal(20, PhaseTimerRules.Min(phase));
         Assert.Equal(300, PhaseTimerRules.Max(phase));
         Assert.False(PhaseTimerRules.CanBeOff(phase));
-        Assert.True(PhaseTimerRules.HasWarning(phase));
         Assert.Equal(PhaseTimer.GuestGallery, PhaseTimerRules.ToProtocol(phase));
         Assert.Equal("guestGallery", ProtocolNames.Of(PhaseTimer.GuestGallery));
         Assert.Equal("guest_gallery", StorageSqlNames.ToSql(phase));

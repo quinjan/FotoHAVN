@@ -13,6 +13,7 @@
   overflow: hidden;
   background-color: var(--semantic-surface-dark);
   container-type: size;
+  isolation: isolate;
 }
 
 .frame {
@@ -71,9 +72,71 @@
   text-align: center;
 }
 
+/*
+ * Capture framing (the Camera tab): the capture area is the largest box of the window's ratio in the preview, centred, so
+ * it takes the full height (the ratios offered are at most 4:3, narrower than the band). The frame is scaled so its crop
+ * guide lands exactly on that area, and runs on beyond it as far as the camera reaches; everything outside the area is
+ * dimmed with the surround tint, so the area reads as the photograph.
+ */
+.preview[data-framing="capture"] {
+  --capture-inline: min(100cqw, 100cqh * var(--capture-ratio));
+}
+
+.preview[data-framing="capture"] .frame {
+  --frame-fade: calc((1 - var(--guide-fraction, 1)) / 2 * 100%);
+
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: calc(var(--capture-inline) / var(--guide-fraction, 1));
+  translate: -50% -50%;
+
+  /* Where the camera's picture ends inside the band, it fades into the Dark Walnut over the dimmed surround instead of
+     stopping at an edge; the fade ends exactly at the capture area, so the area itself is never touched. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    var(--color-ebony) var(--frame-fade),
+    var(--color-ebony) calc(100% - var(--frame-fade)),
+    transparent
+  );
+}
+
+.area,
+.areaOverlay {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  z-index: var(--app-z-stage-overlay);
+  inline-size: var(--capture-inline);
+  aspect-ratio: var(--capture-ratio);
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.area {
+  border: var(--stroke-hairline) solid color-mix(in srgb, var(--app-tone-ink) 50%, transparent);
+  box-shadow: 0 0 0 100vmax var(--app-capture-surround);
+}
+
+.areaOverlay {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  padding-block-end: var(--app-space-fluid-24);
+}
+
+/* Until the first frame the message sits at the top of the capture area, clear of what the area's centre holds. */
+.preview[data-framing="capture"] .waiting {
+  z-index: var(--app-z-stage-overlay);
+  align-self: start;
+  margin-block-start: var(--app-space-fluid-24);
+}
+
 /* High Contrast: the guide keeps a system-colored edge; the dimming shadow is dropped by the browser. */
 @media (forced-colors: active) {
-  .guide {
+  .guide,
+  .area {
     border-color: CanvasText;
   }
 }

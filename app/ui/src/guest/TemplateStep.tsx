@@ -23,12 +23,12 @@ export function TemplateStep({ view }: { readonly cycle: GuestCycleView; readonl
   const items: readonly OptionListItem[] = view.templates.map((template) => ({
     value: template.id,
     title: template.name,
-    description: template.description,
+    description: <span className={styles.description}>{template.description}</span>,
     thumbnail: <img src={templateImageSource(template, client.previewUrl)} alt="" draggable={false} />,
   }));
 
   return (
-    <div className={styles.step} data-selected-template={view.selectedId}>
+    <div className={styles.step} data-selected-template={view.selectedId} data-many={view.templates.length >= 3 || undefined}>
       <div className={styles.print}>
         <StatementHeading
           level={1}

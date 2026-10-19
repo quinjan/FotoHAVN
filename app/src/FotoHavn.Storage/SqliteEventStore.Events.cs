@@ -7,7 +7,7 @@ public sealed partial class SqliteEventStore
 {
     private const string EventColumns =
         "id, name, event_date, venue, customer_name, notes, camera_device_id, camera_name, guest_display_id, guest_display_name, " +
-        "printer, mirror, countdown_seconds, default_template_id, default_look_id, guest_gallery_enabled, created_at, updated_at, pin_hash IS NOT NULL";
+        "printer, mirror, countdown_seconds, default_template_id, default_look_id, guest_gallery_enabled, guest_sounds_enabled, created_at, updated_at, pin_hash IS NOT NULL";
 
     private static readonly string[] ChildTables = ["event_templates", "event_looks", "event_phase_timers"];
 
@@ -49,9 +49,9 @@ public sealed partial class SqliteEventStore
                 transaction,
                 """
                 INSERT INTO events (id, name, event_date, venue, customer_name, notes, camera_device_id, camera_name, guest_display_id, guest_display_name,
-                                    printer, mirror, countdown_seconds, default_template_id, default_look_id, guest_gallery_enabled, created_at, updated_at)
+                                    printer, mirror, countdown_seconds, default_template_id, default_look_id, guest_gallery_enabled, guest_sounds_enabled, created_at, updated_at)
                 VALUES (@id, @name, @date, @venue, @customer, @notes, @cameraId, @cameraName, @displayId, @displayName,
-                        @printer, @mirror, @countdown, @template, @look, @gallery, @now, @now);
+                        @printer, @mirror, @countdown, @template, @look, @gallery, @sounds, @now, @now);
                 """,
                 [.. EventParameters(record), ("@now", now)]);
             InsertChildren(db, transaction, record);
@@ -70,7 +70,7 @@ public sealed partial class SqliteEventStore
                 UPDATE events SET name = @name, event_date = @date, venue = @venue, customer_name = @customer, notes = @notes,
                        camera_device_id = @cameraId, camera_name = @cameraName, guest_display_id = @displayId, guest_display_name = @displayName,
                        printer = @printer, mirror = @mirror, countdown_seconds = @countdown, default_template_id = @template,
-                       default_look_id = @look, guest_gallery_enabled = @gallery, updated_at = @now
+                       default_look_id = @look, guest_gallery_enabled = @gallery, guest_sounds_enabled = @sounds, updated_at = @now
                 WHERE id = @id AND deleting_at IS NULL;
                 """,
                 [.. EventParameters(record), ("@now", StorageTimestamp.Format(_clock.UtcNow))]);
@@ -139,6 +139,7 @@ public sealed partial class SqliteEventStore
         ("@template", record.DefaultTemplateId),
         ("@look", record.DefaultLookId),
         ("@gallery", record.GuestGalleryEnabled),
+        ("@sounds", record.GuestSoundsEnabled),
     ];
 
     private static void InsertChildren(SqliteConnection db, SqliteTransaction transaction, EventRecord record)
@@ -188,13 +189,14 @@ public sealed partial class SqliteEventStore
                 reader.GetString(13),
                 reader.GetString(14),
                 reader.GetBoolean(15),
+                reader.GetBoolean(16),
                 [],
                 [],
                 [])
             {
-                CreatedAt = StorageTimestamp.Parse(reader.GetString(16)),
-                UpdatedAt = StorageTimestamp.Parse(reader.GetString(17)),
-                HasPin = reader.GetBoolean(18),
+                CreatedAt = StorageTimestamp.Parse(reader.GetString(17)),
+                UpdatedAt = StorageTimestamp.Parse(reader.GetString(18)),
+                HasPin = reader.GetBoolean(19),
             },
             ("@id", eventId));
         if (rows.Count == 0)

@@ -101,12 +101,7 @@ internal static class GuestCycleFixtures
             }),
             ["guest-cycle-keepsake"] = () => GuestAsync(Keepsake),
             ["guest-cycle-keepsake-landscape"] = () => GuestAsync(Keepsake, Panorama),
-            ["guest-cycle-start-over"] = () => GuestAsync(rig =>
-            {
-                rig.ToArrange();
-                rig.Guest("StartOver");
-            }),
-            ["guest-cycle-timer-warning"] = () => GuestAsync(rig =>
+            ["guest-cycle-timer-low"] = () => GuestAsync(rig =>
             {
                 rig.Begin();
                 rig.Advance(TimeSpan.FromSeconds(15), Fine);

@@ -15,6 +15,7 @@
   min-block-size: var(--app-target);
   padding-inline: var(--space-16);
   --segment-border: var(--stroke-hairline);
+  --segment-check: calc(var(--app-icon-action) * 0.8);
 
   border: var(--segment-border) solid var(--app-tone-ink-secondary);
   border-radius: var(--radius-control);
@@ -34,8 +35,17 @@
 
 .check {
   display: inline-flex;
+  flex: none;
+  inline-size: var(--segment-check);
   visibility: hidden;
-  font-size: calc(var(--app-icon-action) * 0.8);
+  font-size: var(--segment-check);
+}
+
+/* An empty twin of the check's slot after the label, so the label sits in the middle whether or not the check shows. */
+.segment::after {
+  content: "";
+  flex: none;
+  inline-size: var(--segment-check);
 }
 
 /* The native radio covers the segment's border box, so the target is the whole segment. */

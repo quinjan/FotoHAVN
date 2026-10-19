@@ -222,6 +222,11 @@ export function ArrangeStrip({ template, revision, windows, mode, selected, inte
                 >
                   {occupied && <img className={styles.photo} src={imageUrl} alt="" draggable={false} />}
                   {badge}
+                  {moving && selected !== index && (
+                    <span className={styles.moveHere} aria-hidden="true">
+                      {arrangeCopy.moveHere}
+                    </span>
+                  )}
                 </button>
               );
             })}

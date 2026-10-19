@@ -61,6 +61,14 @@ export async function openFixture(page: Page, fixtureId: string, role: ManifestF
   await expect(page.locator(`main[data-fotohavn-fixture="${fixtureId}"]`)).toBeVisible();
 }
 
+/** One brain-generated presentation fixture (`?fixture=<name>`, development and E2E builds only), in the given role. */
+export async function openPresentationFixture(page: Page, name: string, role: ManifestFixture["role"]): Promise<void> {
+  await page.goto(`${galleryUrl}?fixture=${encodeURIComponent(name)}`);
+  await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", role);
+  await expect(page.locator("main")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+}
+
 interface TokenFile {
   color: Record<string, { $value: string }>;
 }
@@ -153,7 +161,8 @@ export class GuestGalleryScreen {
   readonly link: Locator;
   readonly backToStart: Locator;
   readonly close: Locator;
-  readonly warning: Locator;
+  /** The gallery's Phase Timer pill, top-right beside the exit hold; it can't be extended. */
+  readonly timer: Locator;
   readonly row: Locator;
 
   constructor(readonly page: Page) {
@@ -163,7 +172,7 @@ export class GuestGalleryScreen {
     this.link = page.locator('main[data-fotohavn-surface="start"]').getByRole("button", { name: "SEE THE GOOD COMPANY" });
     this.backToStart = page.getByRole("button", { name: "BACK TO START" });
     this.close = this.detail.getByRole("button", { name: "CLOSE", exact: true });
-    this.warning = page.locator('[data-phase="guest-gallery"]');
+    this.timer = page.getByRole("timer");
     this.row = this.list.locator("[data-fotohavn-scroll-region]");
   }
 
@@ -215,7 +224,7 @@ export async function completeCycle(run: GuestRun, options: { readonly retake?: 
     await tap(guest.windowButton(2));
     await expect(guest.page.getByText("Photograph 2 is selected.")).toBeVisible();
     await tap(guest.retake);
-    await expect(guest.accept).toBeVisible({ timeout: 30_000 });
+    await run.retakeCapture(guest);
     await tap(guest.accept);
     await expect(guest.accept).toHaveCount(0);
   }
@@ -227,19 +236,22 @@ export async function completeCycle(run: GuestRun, options: { readonly retake?: 
   return await waitForEndedCycle(run, "completed", before);
 }
 
-/** One guest takes a photograph and starts over: the cycle ends as started_over, keeping the Capture, with no Photo Strip. */
-export async function startOverCycle(run: GuestRun): Promise<StoredCycle> {
+/**
+ * One guest steps inside and walks away on the Template step. There is no START OVER, so the Phase Timers carry the cycle on:
+ * the selected Template, the empty windows photographed, the original photographs kept, the default Look, and the Keepsake
+ * running out. The clock runs `clockScale` times faster meanwhile. Returns the stored cycle once it has ended as completed.
+ */
+export async function abandonedCycle(run: GuestRun, clockScale = 10): Promise<StoredCycle> {
   const before = (await run.cycles()).filter((cycle) => cycle.end_reason !== null).length;
   const guest = await run.stepInside();
   await expect(guest.surface("template")).toBeVisible();
-  await tap(guest.templateContinue);
-  await run.waitForStep("photographs", "camera");
-  await run.takePhotographsUntil(guest, 1);
-  await run.stopCapture(guest);
-  await tap(guest.startOver);
-  await tap(guest.confirmStartOver());
-  await expect(guest.surface("start")).toBeVisible();
-  return await waitForEndedCycle(run, "started_over", before);
+  await expect(guest.phaseTimer).toBeVisible();
+  await run.hooks.setClockScale(clockScale);
+  try {
+    return await waitForEndedCycle(run, "completed", before);
+  } finally {
+    await run.hooks.setClockScale(1);
+  }
 }
 
 /** The thumbnails of a Guest Cycle's strip (named by the cycle's id) and of its Captures (named by their ids) in the Data folder's cache. */

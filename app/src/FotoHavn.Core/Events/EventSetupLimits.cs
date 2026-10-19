@@ -19,6 +19,9 @@ public static class EventSetupLimits
     /// <summary>The Mirror default: on.</summary>
     public const bool DefaultMirror = true;
 
+    /// <summary>The Guest sounds default: on, for a new Event and for every Event saved before the setting existed.</summary>
+    public const bool DefaultGuestSounds = true;
+
     /// <summary>The only printer value in v1 (shown as "No printer").</summary>
     public const string Printer = "none";
 

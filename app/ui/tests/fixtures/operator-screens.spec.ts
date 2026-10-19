@@ -29,7 +29,8 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-list-running-display-disconnected", surface: "eventList", text: ["Disconnected"] },
   { fixture: "operator-list-running-camera-not-available", surface: "eventList", text: ["Not available"] },
   { fixture: "operator-list-running-camera-checking", surface: "eventList", text: ["Checking"] },
-  { fixture: "operator-list-running-assistance", surface: "eventList", text: ["The guest display isn't connected.", "RETRY", "NEW EVENT"] },
+  { fixture: "operator-list-running-assistance", surface: "eventList", text: ["The guest display isn't connected.", "Reconnect it, then RETRY.", "RETRY", "NEW EVENT"] },
+  { fixture: "operator-list-running-assistance-camera-removed", surface: "eventList", text: ["The camera was disconnected.", "Reconnect it, then RETRY.", "RETRY", "NEW EVENT"] },
   { fixture: "operator-list-confirm-delete", surface: "eventList", text: ["Delete this Event?", "12 Guest Cycles, 11 Photo Strips, and 41 photographs", "KEEP EVENT"] },
   { fixture: "operator-list-confirm-end", surface: "eventList", text: ["End this Event?", "Their photographs are kept.", "KEEP RUNNING"] },
   { fixture: "operator-list-confirm-close", surface: "eventList", text: ["End the running Event and close FOTOHAVN?", "Their photographs are kept.", "END EVENT AND CLOSE", "KEEP RUNNING"] },
@@ -37,16 +38,17 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-single-screen", surface: "guestScreenActive", text: ["The booth is running on this screen."] },
   { fixture: "operator-setup-new", surface: "eventSetup", text: ["Name", "CONTINUE TO HARDWARE", "New Event"] },
   { fixture: "operator-setup-new", surface: "eventSetup", step: "Guests", text: ["OPERATOR PIN", "SAVE AND START"] },
-  { fixture: "operator-setup-new-errors", surface: "eventSetup", text: ["Name the Event.", "5 things need attention before this Event can be saved."] },
+  { fixture: "operator-setup-new-errors", surface: "eventSetup", text: ["Name the Event.", "4 things need attention before this Event can be saved.", "Set an Operator PIN to start this Event. Saving doesn't need one."] },
   { fixture: "operator-setup-new-errors", surface: "eventSetup", step: "Hardware", text: ["Choose a camera.", "Choose the guest display."] },
   { fixture: "operator-setup-new-errors", surface: "eventSetup", step: "Timing", text: ["Enter 5 to 60 seconds."] },
   { fixture: "operator-setup-errors-offered", surface: "eventSetup", text: ["Keep the name to 80 characters or fewer."] },
   { fixture: "operator-setup-errors-offered", surface: "eventSetup", step: "Templates", text: ["Offer at least one Template."] },
   { fixture: "operator-setup-errors-offered", surface: "eventSetup", step: "Guests", text: ["The two PINs don't match."] },
+  { fixture: "operator-setup-errors-start-only", surface: "eventSetup", step: "Guests", text: ["This Event can be saved, but it needs an Operator PIN to start.", "Set an Operator PIN to start this Event."] },
   { fixture: "operator-setup-editing", surface: "eventSetup", text: ["Harbour gala", "CONTINUE TO HARDWARE"] },
   { fixture: "operator-setup-editing", surface: "eventSetup", step: "Hardware", text: ["Ready", "IDENTIFY DISPLAYS"] },
   { fixture: "operator-setup-editing", surface: "eventSetup", step: "Templates", text: ["Offered Templates", "Offered Looks"] },
-  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Timing", text: ["Off now."] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Timing", text: ["Most timers run 20 to 300 seconds.", "Photographs: review"] },
   { fixture: "operator-setup-editing", surface: "eventSetup", step: "Guests", text: ["PIN set", "SAVE AND START"] },
   { fixture: "operator-setup-camera-checking", surface: "eventSetup", step: "Hardware", text: ["Checking"] },
   { fixture: "operator-setup-camera-not-available", surface: "eventSetup", step: "Hardware", text: ["Camera access is off in Windows privacy settings."] },
@@ -128,6 +130,8 @@ test.describe("operator screens, behaviour", () => {
     const rows = page.getByRole("list", { name: "Events" }).getByRole("listitem");
     const running = rows.first();
     await expect(running).toContainText("RUNNING");
+    await expect(running).not.toContainText("Not used yet");
+    await expect(running).not.toContainText("Guest Cycle");
     await expect(running.getByRole("button")).toHaveText(["GALLERY", "OPEN FOLDER"]);
     const other = rows.nth(1);
     await expect(other.getByRole("button")).toHaveText(["START", "GALLERY", "EDIT", "OPEN FOLDER", "DELETE"]);

@@ -14,8 +14,8 @@ namespace FotoHavn.Core;
 // The guest gallery and its strip detail (plan section 8, Event Gallery, Guest view; M9 contract section 4.2). The guest view carries only image
 // URLs and alt text (Gallery/GalleryRules.cs builds it), and its commands can never reach an operator action: the roles are checked before dispatch
 // (CommandRegistry). It exists from OpenGuestGallery until the guest leaves, the time runs out, Operator Assistance begins, or the Event ends. Its
-// Phase Timer (guest_gallery, default 60 s, never off) starts when the gallery opens and is not reset by browsing; the last 20 seconds show the usual
-// phaseTimerWarning overlay with phase guestGallery, and MoreTime (Brain.GuestCycleTimers.cs) restarts the full time.
+// Phase Timer (guest_gallery, default 60 s, never off) starts when the gallery opens and is not reset by browsing; the usual always-visible
+// phaseTimer overlay shows it with phase guestGallery the whole time. Guests can't add time (protocol version 12).
 public sealed partial class Brain
 {
     private GuestGalleryState? _guestGallery;
@@ -238,7 +238,7 @@ public sealed partial class Brain
         }
     }
 
-    // The guest gallery's Phase Timer: one PhaseTimerEngine and one wake-up at its next deadline or, while the warning shows, at the next whole second.
+    // The guest gallery's Phase Timer: one PhaseTimerEngine and one wake-up at the next whole second it shows, the last being the expiry.
 
     private void StartGuestGalleryTimer(GuestGalleryState state)
     {
@@ -253,14 +253,8 @@ public sealed partial class Brain
         state.TimerWake?.Dispose();
         state.TimerWake = null;
         var generation = ++state.TimerGeneration;
-        var now = _dependencies.Clock.UtcNow;
-        if (state.Timer.NextDeadline(now) is not { } deadline)
-        {
-            return;
-        }
-
-        var delay = GuestCyclePlan.WakeDelay(deadline - now, state.Timer.Remaining(now)!.Value, state.Timer.IsWarning(now));
-        state.TimerWake = _dependencies.Clock.Schedule(delay, () => Post(() => OnGuestGalleryTimerWake(state, generation)));
+        var left = state.Timer.Remaining(_dependencies.Clock.UtcNow)!.Value;
+        state.TimerWake = _dependencies.Clock.Schedule(GuestCyclePlan.WakeDelay(left), () => Post(() => OnGuestGalleryTimerWake(state, generation)));
     }
 
     private void OnGuestGalleryTimerWake(GuestGalleryState state, int generation)
@@ -282,32 +276,10 @@ public sealed partial class Brain
         PublishChanges();
     }
 
-    /// <summary><c>MoreTime</c> on the gallery or a strip detail: restarts the full time while the warning shows. Called by <see cref="MoreTime"/> when no Guest Cycle takes it.</summary>
-    private CommandResultMessage MoreTimeInGallery(string id)
-    {
-        var now = _dependencies.Clock.UtcNow;
-        if (ActiveGuestGallery is not { } state || !state.Timer.IsWarning(now))
-        {
-            return NotAvailable(id);
-        }
-
-        state.Timer = state.Timer.Restart(now);
-        RescheduleGuestGalleryTimer(state);
-        return Accepted(id);
-    }
-
-    private PhaseTimerWarningOverlay? GalleryWarningOverlay(GuestGalleryState state)
-    {
-        var now = _dependencies.Clock.UtcNow;
-        return state.Timer.IsWarning(now)
-            ? new PhaseTimerWarningOverlay(PhaseTimerRules.ToProtocol(PhaseTimerPhase.GuestGallery), GuestCyclePlan.WholeSecondsLeft(state.Timer.Remaining(now)!.Value))
-            : null;
-    }
-
     /// <summary>
     /// The Guest Screen's presentation while the guest gallery or a strip detail is open, or null when the guest is on Start (or in a Guest Cycle,
-    /// which <c>RenderGuestCycle</c> renders first). <paramref name="overlays"/> holds the exit hold and PIN dialog; the gallery adds
-    /// <c>phaseTimerWarning</c>.
+    /// which <c>RenderGuestCycle</c> renders first). <paramref name="overlays"/> holds the exit hold and PIN dialog; the gallery adds the
+    /// always-visible <c>phaseTimer</c>.
     /// </summary>
     private GuestPresentation? RenderGuestGallery(ActiveEventState active, GuestOverlays overlays)
     {
@@ -316,7 +288,7 @@ public sealed partial class Brain
             return null;
         }
 
-        var shown = overlays with { PhaseTimerWarning = GalleryWarningOverlay(state) };
+        var shown = overlays with { PhaseTimer = PhaseTimerOverlayOf(state.Timer) };
         if (state.Detail is { } detail)
         {
             return new GuestPresentation(GuestSurface.GuestStripDetail, null, null, shown, null, null, null, null, null, null, null, null, detail);
@@ -341,7 +313,6 @@ public sealed partial class Brain
             new GuestCycleTimerDiagnostics(
                 PhaseTimerRules.ToProtocol(PhaseTimerPhase.GuestGallery),
                 (long)state.Timer.Remaining(now)!.Value.TotalMilliseconds,
-                state.Timer.IsPaused,
-                state.Timer.IsWarning(now)));
+                state.Timer.IsPaused));
     }
 }

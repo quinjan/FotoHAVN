@@ -110,37 +110,60 @@ function FocusFirstAction({ children }: { readonly children: ReactNode }) {
 const operator = { mode: "operator", onOpen: noop, onDelete: noop, onLoadMore: noop } as const;
 const guest = { mode: "guest", onOpen: noop, onBack: noop } as const;
 
+/** The operator list lays out in the width its screen gives it (the Operator Screen's gutters), so its fixtures fill the viewport. */
+function OperatorStage({ children }: { readonly children: ReactNode }) {
+  return <div style={{ padding: "var(--app-gutter)" }}>{children}</div>;
+}
+
 export const fixtures: readonly ComponentFixture[] = [
   {
     id: "guest-cycle-list-operator",
     title: "Guest Cycle list, operator, with more to load",
     surface: "light",
     role: "operator",
-    render: () => <GuestCycleList {...operator} cycles={cycles} hasMore />,
+    layout: "fill",
+    render: () => (
+      <OperatorStage>
+        <GuestCycleList {...operator} cycles={cycles} hasMore />
+      </OperatorStage>
+    ),
   },
   {
     id: "guest-cycle-list-operator-endings",
     title: "Guest Cycle list, operator, every way a Guest Cycle ends without a Photo Strip, all loaded",
     surface: "light",
     role: "operator",
-    render: () => <GuestCycleList {...operator} cycles={endings} hasMore={false} />,
+    layout: "fill",
+    render: () => (
+      <OperatorStage>
+        <GuestCycleList {...operator} cycles={endings} hasMore={false} />
+      </OperatorStage>
+    ),
   },
   {
     id: "guest-cycle-list-operator-loading",
     title: "Guest Cycle list, operator, loading the next page",
     surface: "light",
     role: "operator",
-    render: () => <GuestCycleList {...operator} cycles={cycles.slice(0, 3)} hasMore loading />,
+    layout: "fill",
+    render: () => (
+      <OperatorStage>
+        <GuestCycleList {...operator} cycles={cycles.slice(0, 3)} hasMore loading />
+      </OperatorStage>
+    ),
   },
   {
     id: "guest-cycle-list-operator-focus",
     title: "Guest Cycle list, operator, keyboard focus on OPEN",
     surface: "light",
     role: "operator",
+    layout: "fill",
     render: () => (
-      <FocusFirstAction>
-        <GuestCycleList {...operator} cycles={cycles.slice(0, 2)} hasMore={false} />
-      </FocusFirstAction>
+      <OperatorStage>
+        <FocusFirstAction>
+          <GuestCycleList {...operator} cycles={cycles.slice(0, 2)} hasMore={false} />
+        </FocusFirstAction>
+      </OperatorStage>
     ),
   },
   {
@@ -148,19 +171,23 @@ export const fixtures: readonly ComponentFixture[] = [
     title: "Guest Cycle list, operator, empty",
     surface: "light",
     role: "operator",
-    render: () => <GuestCycleList {...operator} cycles={[]} hasMore={false} />,
+    layout: "fill",
+    render: () => (
+      <OperatorStage>
+        <GuestCycleList {...operator} cycles={[]} hasMore={false} />
+      </OperatorStage>
+    ),
   },
   {
     id: "guest-cycle-list-operator-unavailable",
     title: "Guest Cycle list, operator, a Guest Cycle whose files are gone",
     surface: "light",
     role: "operator",
+    layout: "fill",
     render: () => (
-      <GuestCycleList
-        {...operator}
-        cycles={[gone, ...cycles.slice(1, 3)]}
-        hasMore={false}
-      />
+      <OperatorStage>
+        <GuestCycleList {...operator} cycles={[gone, ...cycles.slice(1, 3)]} hasMore={false} />
+      </OperatorStage>
     ),
   },
   {

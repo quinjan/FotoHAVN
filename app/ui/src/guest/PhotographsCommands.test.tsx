@@ -17,7 +17,6 @@ describe("usePhotographsCommands", () => {
     commands.showCameraTab();
     commands.showArrangeTab();
     commands.takePhotographs();
-    commands.stopCapture();
     commands.selectPosition(2);
     commands.beginRetake(1);
     commands.acceptRetake();
@@ -34,7 +33,6 @@ describe("usePhotographsCommands", () => {
       { name: "ShowCameraTab", payload: {} },
       { name: "ShowArrangeTab", payload: {} },
       { name: "TakePhotographs", payload: {} },
-      { name: "StopCapture", payload: {} },
       { name: "SelectPosition", payload: { index: 2 } },
       { name: "BeginRetake", payload: { index: 1 } },
       { name: "AcceptRetake", payload: {} },

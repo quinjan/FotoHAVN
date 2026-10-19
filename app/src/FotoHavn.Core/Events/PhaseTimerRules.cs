@@ -9,9 +9,6 @@ namespace FotoHavn.Core.Events;
 /// </summary>
 public static class PhaseTimerRules
 {
-    /// <summary>The warning shows in the last 20 seconds of every timed phase except the Keepsake (which has no warning).</summary>
-    public const int WarningSeconds = 20;
-
     private const int OffableMinimum = 20;
     private const int OffableMaximum = 300;
     private const int KeepsakeMinimum = 5;
@@ -68,14 +65,6 @@ public static class PhaseTimerRules
     /// <summary>Whether <paramref name="seconds"/> is allowed: 0 only where the phase can be off, otherwise within <see cref="Min"/> and <see cref="Max"/>.</summary>
     public static bool IsValid(PhaseTimerPhase phase, int seconds) =>
         seconds == 0 ? CanBeOff(phase) : seconds >= Min(phase) && seconds <= Max(phase);
-
-    /// <summary>Whether the phase shows the warning with <c>MORE TIME</c>: every timed phase except the Keepsake.</summary>
-    public static bool HasWarning(PhaseTimerPhase phase) => phase switch
-    {
-        PhaseTimerPhase.Keepsake => false,
-        _ when Enum.IsDefined(phase) => true,
-        _ => throw NotAPhase(phase),
-    };
 
     /// <summary>A new Event's Phase Timers: every phase at its default.</summary>
     public static IReadOnlyList<PhaseTimerSetting> Defaults() => [.. Phases.Select(phase => new PhaseTimerSetting(phase, Default(phase)))];

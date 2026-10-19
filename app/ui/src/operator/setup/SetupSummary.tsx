@@ -166,6 +166,7 @@ function groups(view: EventSetupView, previewUrl: ((key: string) => string) | un
       detail: (
         <Facts
           rows={[
+            [s.rows.guestSounds, view.guestSoundsEnabled ? s.on : s.off],
             [s.rows.guestGallery, view.guestGalleryEnabled ? s.on : s.off],
             [s.rows.pin, pinText],
           ]}

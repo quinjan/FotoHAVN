@@ -53,7 +53,7 @@ export function FiltersStep({ view }: { readonly cycle: GuestCycleView; readonly
           landscape={view.landscape}
         />
       </div>
-      <div className={styles.options}>
+      <div className={styles.options} data-dense-looks={dense || undefined}>
         <StatementHeading level={1} size="heading" {...filtersCopy} />
         <div
           className={styles.looks}

@@ -2,6 +2,13 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PinPad } from "./PinPad.tsx";
 
+// The stylesheet as written, read from disk relative to app/ui, where Vitest runs (it turns CSS imports into modules).
+const fsModule = "node:fs";
+const { readFileSync } = (await import(/* @vite-ignore */ fsModule)) as {
+  readFileSync: (path: string, encoding: "utf8") => string;
+};
+const padCss = readFileSync("src/components/PinPad/PinPad.module.css", "utf8");
+
 function key(name: string): HTMLElement {
   return screen.getByRole("button", { name });
 }
@@ -105,6 +112,19 @@ describe("PinPad", () => {
       fireEvent.keyDown(one, { key: digit });
     }
     expect(filledDots(container)).toBe(6);
+  });
+
+  it("places the submit action under the keys and the cancel action opposite it, in that Tab order", () => {
+    const { container } = render(<PinPad onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    const keys = screen.getByRole("group", { name: "PIN digits" });
+    const submit = key("END EVENT");
+    const cancel = key("KEEP RUNNING");
+    expect(keys.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(submit.compareDocumentPosition(cancel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.firstElementChild).toContainElement(submit);
+    expect(padCss).toMatch(/"status keys"\s+"cancel submit"/);
+    expect(padCss).toMatch(/\.submit \{\s*grid-area: submit;/);
+    expect(padCss).toMatch(/\.cancel \{\s*grid-area: cancel;/);
   });
 
   it("says a wrong PIN in text, and announces each new wrong attempt", () => {
