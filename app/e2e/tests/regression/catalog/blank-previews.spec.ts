@@ -14,6 +14,7 @@ test.describe("blank Template previews in Event setup", { tag: ["@m6", "@m7"] },
     await new EventListScreen(operatorPage).newEvent.click();
     const setup = new EventSetupScreen(operatorPage);
     await expect(setup.heading).toBeVisible();
+    await setup.goTo("Templates");
 
     for (const template of templates) {
       await test.step(`${template.name}: ${String(template.width)} × ${String(template.height)}${template.rotated ? ", rotated" : ""}`, async () => {

@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /** A row action of the Event list, named as the visible link (the accessible name adds the Event's name). */
 export type RowAction = "START" | "GALLERY" | "EDIT" | "OPEN FOLDER" | "DELETE";
@@ -145,7 +145,10 @@ export class PinDialogScreen {
   }
 }
 
-/** Event setup's fields, pickers, and actions, each found by its label. */
+/** Event setup's steps, by their labels in the step row. */
+export type SetupStep = "Event" | "Hardware" | "Templates" | "Timing" | "Guests";
+
+/** Event setup's fields, pickers, and actions, each found by its label. Each lives on one step; open it with `goTo`. */
 export class EventSetupScreen {
   readonly main: Locator;
   readonly heading: Locator;
@@ -243,6 +246,17 @@ export class EventSetupScreen {
 
   countdown(seconds: 3 | 5 | 10): Locator {
     return this.main.getByRole("radio", { name: `${String(seconds)} seconds`, exact: true });
+  }
+
+  /** A step in the step row (`01 Event` to `05 Guests`); its name ends ", needs attention" while a field on it is marked. */
+  step(label: SetupStep): Locator {
+    return this.main.getByRole("navigation", { name: "Event setup steps" }).getByRole("button", { name: new RegExp(`^\\d\\d ${label}`) });
+  }
+
+  /** Opens a step from the step row and waits until it is the current one. SAVE and SAVE AND START are on the Guests step. */
+  async goTo(label: SetupStep): Promise<void> {
+    await this.step(label).click();
+    await expect(this.step(label)).toHaveAttribute("aria-current", "step");
   }
 
   /** The alert line that explains a failed save or start (error summary, start failure). */

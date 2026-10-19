@@ -59,6 +59,7 @@ test.describe("Start when the guest display is missing", { tag: ["@m6", "@camera
       await hooks.connectDisplay(virtualGuestId);
       await expect(setup.display(guestDisplay.name)).toBeEnabled();
       await expect(setup.display(guestDisplay.name)).toBeChecked();
+      await setup.goTo("Guests");
       await setup.saveAndStart.click();
       await expect(list.runningPanel(name)).toBeVisible({ timeout: 30_000 });
       expect((await hooks.getDiagnostics()).guestScreenOpen).toBe(true);

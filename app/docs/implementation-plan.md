@@ -413,7 +413,7 @@ The app always opens here, on the Operator Screen (D17, D32).
 
 ### Event setup
 
-The form is one screen, with grouped sections in this order. It saves as a draft; `SAVE` and `SAVE AND START` validate. `SAVE` is the primary action; `SAVE AND START` is a secondary action, disabled with "End the running Event to start another." while another Event runs.
+The form is five steps, holding grouped sections in this order: **Event** (Event), **Hardware** (Camera, Guest display, Printer), **Templates** (Templates, Filters), **Timing** (Timing), and **Guests** (Guests, Operator PIN). Any step can be opened at any time, and a summary of the whole draft stays beside the step ([`DESIGN.md`](../DESIGN.md), Event setup). It saves as a draft; `SAVE` and `SAVE AND START` validate, and a refused save opens the step of the first invalid field. `SAVE` is the primary action of the Guests step, where `SAVE AND START` is a secondary action, disabled with "End the running Event to start another." while another Event runs; the other steps' primary action is `CONTINUE TO` the next step.
 
 | Section | Field | Rules |
 | --- | --- | --- |
@@ -788,7 +788,7 @@ Palette and semantic roles, the type pairing and roles, the italic turn, voice a
 | Guest Cycle detail | The Photo Strip as a print object on the left; its Captures in a Cream Paper media frame on the right; metadata and actions below | Print object, media frame, text links |
 | Guest gallery | Warm Ivory surface; centered "Look at *you.*" heading (a single-subject moment); Photo Strips as print objects at native proportion with the `print-contact` shadow in a horizontally scrolling row sized for touch; `BACK TO START ←` | Statement heading (centered), print objects, text link |
 | Guest strip detail | The strip lifted with the `print` shadow, its arranged Captures beside it in a media frame, `CLOSE` | Print object, media frame, text link |
-| Event setup | Left-aligned sections with eyebrows; inputs with a 4 radius and Hairline borders; Template and Look pickers reuse option-list rows with checkboxes and a default radio; `SAVE` is the primary action and `SAVE AND START` a secondary action, disabled with its reason while another Event runs | Eyebrow, inputs, option list, primary and secondary actions |
+| Event setup | Five steps (Event, Hardware, Templates, Timing, Guests) under a top bar with the step row and the step's one primary action, and a summary of the draft beside the step (see [`DESIGN.md`](../DESIGN.md)); left-aligned sections with eyebrows; inputs with a 4 radius and Hairline borders; Template and Look pickers reuse option-list rows with checkboxes and a default radio; on the Guests step `SAVE` is the primary action and `SAVE AND START` a secondary action, disabled with its reason while another Event runs | Eyebrow, step progress, inputs, option list, primary and secondary actions |
 | Dialogs (PIN, confirm) | Off-white panel, 8 radius, Hairline border, Ebony scrim at about 32% | Primary and secondary actions |
 
 ### Components to build

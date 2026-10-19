@@ -148,6 +148,7 @@ export type CreateFinish = "save" | "saveAndStart" | "none";
 
 /** Chooses the context's camera in Event setup and waits for the field to say Ready. */
 export async function chooseCamera(context: OperatorContext, setup: EventSetupScreen): Promise<void> {
+  await setup.goTo("Hardware");
   await setup.camera.selectOption({ label: context.camera.name });
   await expect(setup.cameraStatus).toHaveText("Ready", { timeout: cameraReadyTimeoutMs });
 }
@@ -176,10 +177,12 @@ export async function openNewEventAndFill(context: OperatorContext, details: Eve
     await chooseCamera(context, setup);
   }
   if (details.display !== undefined) {
+    await setup.goTo("Hardware");
     await setup.display(details.display).click();
     await expect(setup.display(details.display)).toBeChecked();
   }
   if (details.pin !== undefined) {
+    await setup.goTo("Guests");
     await setup.pin.fill(details.pin);
     await setup.pinConfirmation.fill(details.pin);
     await setup.pinConfirmation.blur();
@@ -200,6 +203,7 @@ export async function createEvent(context: OperatorContext, details: EventDetail
     await waitForCommandResult(context.app.hooks, "SetPin");
   }
   const list = new EventListScreen(context.page);
+  await setup.goTo("Guests");
   if (finish === "save") {
     await setup.save.click();
     await expect(list.row(details.name)).toBeVisible();

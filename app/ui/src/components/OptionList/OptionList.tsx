@@ -59,8 +59,8 @@ export interface OptionListCheckboxProps extends OptionListBaseProps {
 export type OptionListProps = OptionListRadioProps | OptionListCheckboxProps;
 
 /**
- * The brand option list (brand components.md): rows separated by Hairline rules, each with an optional thumbnail, a
- * serif title, a description, a meta line, and a circular radio or a checkbox at the end. The selected row takes Warm
+ * The brand option list (brand components.md): rows separated by Hairline rules, each with a circular radio or a
+ * checkbox first, then an optional thumbnail, a serif title, a description, and a meta line. The selected row takes Warm
  * Ivory, a 2 px Muted Brass left rule, and the checked mark, never color alone. Works on both screens: targets and
  * type follow the role.
  *
@@ -167,6 +167,7 @@ export function OptionList(props: OptionListProps) {
                     handleMainKey(event, index);
                   }}
                 />
+                <ChoiceMark kind={props.variant} />
                 {present(item.thumbnail) && (
                   <span className={styles.thumbnail} aria-hidden="true">
                     {item.thumbnail}
@@ -194,7 +195,6 @@ export function OptionList(props: OptionListProps) {
                     </span>
                   )}
                 </span>
-                <ChoiceMark kind={props.variant} className={styles.mark} />
               </label>
               {defaultChoice !== undefined && (
                 <label className={styles.default}>

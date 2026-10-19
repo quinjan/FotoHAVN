@@ -196,7 +196,7 @@ describe("OperatorRoot", () => {
       expect(screen.getByText("The camera needs attention.")).toBeVisible();
       await click(screen.getByRole("button", { name: "GO TO THE RUNNING EVENT" }));
       expect(sentCommands(client)).toEqual([["LeaveEventSetup", {}]]);
-      expect(screen.getByRole("button", { name: "SAVE" })).toHaveAttribute("data-fotohavn-action", "primary");
+      expect(screen.getByRole("button", { name: "CONTINUE TO HARDWARE" })).toHaveAttribute("data-fotohavn-action", "primary");
       expect(document.querySelectorAll('[data-fotohavn-action="primary"]')).toHaveLength(1);
     });
 
@@ -225,7 +225,7 @@ describe("OperatorRoot", () => {
       ...operatorWelcome("eventSetup", { eventSetup: view }).presentation,
       overlays: { confirmation: null, identifyDisplays: { displays: [{ id: "display-1", number: 1, name: "Built-in display" }] }, notice: null },
     });
-    expect(screen.getByRole("button", { name: "IDENTIFY DISPLAYS" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "IDENTIFY DISPLAYS", hidden: true })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("lists the rows it was given", () => {

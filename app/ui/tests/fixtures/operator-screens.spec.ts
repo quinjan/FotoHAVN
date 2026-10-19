@@ -11,8 +11,17 @@ import { resolutionName, resolutions, screenshotDir } from "./resolutions.ts";
 interface OperatorScreen {
   readonly fixture: string;
   readonly surface: string;
+  /** For Event setup: the step to open first, by its label in the step row (the step the view opens on otherwise). */
+  readonly step?: string;
   /** Text that must be on the screen. */
   readonly text: readonly string[];
+}
+
+/** Opens an Event setup step from the step row, as the operator would. */
+async function openSetupStep(page: Page, step: string): Promise<void> {
+  const button = page.getByRole("navigation", { name: "Event setup steps" }).getByRole("button", { name: new RegExp(`^\\d\\d ${step}`) });
+  await button.click();
+  await expect(button).toHaveAttribute("aria-current", "step");
 }
 
 const screens: readonly OperatorScreen[] = [
@@ -26,19 +35,29 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-list-confirm-close", surface: "eventList", text: ["End the running Event and close FOTOHAVN?", "Their photographs are kept.", "END EVENT AND CLOSE", "KEEP RUNNING"] },
   { fixture: "operator-list-notice", surface: "eventList", text: ["The Event couldn't be deleted."] },
   { fixture: "operator-single-screen", surface: "guestScreenActive", text: ["The booth is running on this screen."] },
-  { fixture: "operator-setup-new", surface: "eventSetup", text: ["Name", "Camera", "OPERATOR PIN", "SAVE AND START"] },
-  { fixture: "operator-setup-new-errors", surface: "eventSetup", text: ["Name the Event.", "Choose a camera.", "Choose the guest display.", "Enter 5 to 60 seconds.", "5 things need attention before this Event can be saved."] },
-  { fixture: "operator-setup-errors-offered", surface: "eventSetup", text: ["Keep the name to 80 characters or fewer.", "Offer at least one Template.", "The two PINs don't match."] },
-  { fixture: "operator-setup-editing", surface: "eventSetup", text: ["PIN set", "Off now."] },
-  { fixture: "operator-setup-camera-checking", surface: "eventSetup", text: ["Checking"] },
-  { fixture: "operator-setup-camera-not-available", surface: "eventSetup", text: ["Camera access is off in Windows privacy settings."] },
-  { fixture: "operator-setup-camera-in-use", surface: "eventSetup", text: ["In use by another app"] },
-  { fixture: "operator-setup-camera-in-use-by-running-event", surface: "eventSetup", text: ["In use by the running Event", "End the running Event to start another."] },
-  { fixture: "operator-setup-camera-not-checked", surface: "eventSetup", text: ["Not checked while an Event is running."] },
-  { fixture: "operator-setup-camera-missing", surface: "eventSetup", text: ["This camera isn't connected."] },
-  { fixture: "operator-setup-camera-none-found", surface: "eventSetup", text: ["No camera found.", "Connect a camera and it will appear here."] },
-  { fixture: "operator-setup-display-missing", surface: "eventSetup", text: ["The chosen guest display isn't connected.", "Not connected"] },
-  { fixture: "operator-setup-covers-operator-screen", surface: "eventSetup", text: ["The Guest Screen will cover this screen. Use the hold and PIN to return."] },
+  { fixture: "operator-setup-new", surface: "eventSetup", text: ["Name", "CONTINUE TO HARDWARE", "New Event"] },
+  { fixture: "operator-setup-new", surface: "eventSetup", step: "Guests", text: ["OPERATOR PIN", "SAVE AND START"] },
+  { fixture: "operator-setup-new-errors", surface: "eventSetup", text: ["Name the Event.", "5 things need attention before this Event can be saved."] },
+  { fixture: "operator-setup-new-errors", surface: "eventSetup", step: "Hardware", text: ["Choose a camera.", "Choose the guest display."] },
+  { fixture: "operator-setup-new-errors", surface: "eventSetup", step: "Timing", text: ["Enter 5 to 60 seconds."] },
+  { fixture: "operator-setup-errors-offered", surface: "eventSetup", text: ["Keep the name to 80 characters or fewer."] },
+  { fixture: "operator-setup-errors-offered", surface: "eventSetup", step: "Templates", text: ["Offer at least one Template."] },
+  { fixture: "operator-setup-errors-offered", surface: "eventSetup", step: "Guests", text: ["The two PINs don't match."] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", text: ["Harbour gala", "CONTINUE TO HARDWARE"] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Hardware", text: ["Ready", "IDENTIFY DISPLAYS"] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Templates", text: ["Offered Templates", "Offered Looks"] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Timing", text: ["Off now."] },
+  { fixture: "operator-setup-editing", surface: "eventSetup", step: "Guests", text: ["PIN set", "SAVE AND START"] },
+  { fixture: "operator-setup-camera-checking", surface: "eventSetup", step: "Hardware", text: ["Checking"] },
+  { fixture: "operator-setup-camera-not-available", surface: "eventSetup", step: "Hardware", text: ["Camera access is off in Windows privacy settings."] },
+  { fixture: "operator-setup-camera-in-use", surface: "eventSetup", step: "Hardware", text: ["In use by another app"] },
+  { fixture: "operator-setup-camera-in-use-by-running-event", surface: "eventSetup", step: "Hardware", text: ["In use by the running Event"] },
+  { fixture: "operator-setup-camera-in-use-by-running-event", surface: "eventSetup", step: "Guests", text: ["End the running Event to start another."] },
+  { fixture: "operator-setup-camera-not-checked", surface: "eventSetup", step: "Hardware", text: ["Not checked while an Event is running."] },
+  { fixture: "operator-setup-camera-missing", surface: "eventSetup", step: "Hardware", text: ["This camera isn't connected."] },
+  { fixture: "operator-setup-camera-none-found", surface: "eventSetup", step: "Hardware", text: ["No camera found.", "Connect a camera and it will appear here."] },
+  { fixture: "operator-setup-display-missing", surface: "eventSetup", step: "Hardware", text: ["The chosen guest display isn't connected.", "Not connected"] },
+  { fixture: "operator-setup-covers-operator-screen", surface: "eventSetup", step: "Hardware", text: ["The Guest Screen will cover this screen. Use the hold and PIN to return."] },
   { fixture: "operator-setup-leave-confirmation", surface: "eventSetup", text: ["Save your changes?", "DISCARD CHANGES", "KEEP EDITING"] },
   { fixture: "operator-setup-start-failure-display", surface: "eventSetup", text: ["The chosen guest display isn't connected."] },
   { fixture: "operator-setup-start-failure-camera", surface: "eventSetup", text: ["The camera isn't ready to start. The camera stopped sending pictures."] },
@@ -46,7 +65,7 @@ const screens: readonly OperatorScreen[] = [
   { fixture: "operator-setup-start-failure-guest-screen", surface: "eventSetup", text: ["The guest display didn't respond. Check it, then try again."] },
   { fixture: "operator-setup-assistance", surface: "eventSetup", text: ["The camera needs attention.", "GO TO THE RUNNING EVENT"] },
   { fixture: "operator-setup-saving", surface: "eventSetup", text: ["Saving…"] },
-  { fixture: "operator-setup-pin-changing", surface: "eventSetup", text: ["New PIN", "KEEP CURRENT PIN"] },
+  { fixture: "operator-setup-pin-changing", surface: "eventSetup", step: "Guests", text: ["New PIN", "KEEP CURRENT PIN"] },
 ];
 
 async function expectNoHorizontalScrolling(page: Page): Promise<void> {
@@ -75,10 +94,14 @@ for (const resolution of resolutions) {
     test.use({ viewport: resolution });
 
     for (const screen of screens) {
-      test(screen.fixture, async ({ page }) => {
+      const shot = screen.step === undefined ? screen.fixture : `${screen.fixture}-${screen.step.toLowerCase()}`;
+      test(shot, async ({ page }) => {
         await page.goto(`/index.html?fixture=${screen.fixture}`);
         await expect(page.locator("html")).toHaveAttribute("data-fotohavn-role", "operator");
         await expect(page.locator(`main[data-fotohavn-surface="${screen.surface}"]`)).toBeVisible();
+        if (screen.step !== undefined) {
+          await openSetupStep(page, screen.step);
+        }
         for (const text of screen.text) {
           await expect(page.getByText(text).first()).toBeVisible();
         }
@@ -89,7 +112,7 @@ for (const resolution of resolutions) {
           () => [...document.querySelectorAll('main [data-fotohavn-action="primary"]')].filter((action) => action.closest("[inert]") === null).length,
         );
         expect(primaries, `${screen.fixture} primary actions`).toBeLessThanOrEqual(1);
-        await page.screenshot({ path: resolve(screenshotDir, `${screen.fixture}-${name}.png`), fullPage: true });
+        await page.screenshot({ path: resolve(screenshotDir, `${shot}-${name}.png`), fullPage: true });
         const axe = await new AxeBuilder({ page }).analyze();
         expect(axe.violations, `${screen.fixture} axe violations`).toEqual([]);
       });
@@ -140,6 +163,7 @@ test.describe("operator screens, behaviour", () => {
 
   test("Event setup keeps SAVE AND START unavailable with its reason while an Event runs", async ({ page }) => {
     await page.goto("/index.html?fixture=operator-setup-camera-in-use-by-running-event");
+    await openSetupStep(page, "Guests");
     const saveAndStart = page.getByRole("button", { name: "SAVE AND START" });
     await expect(saveAndStart).toHaveAttribute("aria-disabled", "true");
     await expect(saveAndStart).toHaveAccessibleDescription("End the running Event to start another.");

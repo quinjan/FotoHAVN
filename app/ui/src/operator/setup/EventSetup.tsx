@@ -8,7 +8,7 @@ import { StatementHeading } from "../../components/StatementHeading/index.ts";
 import { Switch } from "../../components/Switch/index.ts";
 import { TextField } from "../../components/TextField/index.ts";
 import { TextLink } from "../../components/TextLink/index.ts";
-import type { AssistanceReason, CommandPayloadMap, EventField, EventSetupView } from "../../protocol/generated.ts";
+import type { AssistanceReason, CommandPayloadMap, EventField, EventSetupFieldError, EventSetupView } from "../../protocol/generated.ts";
 import { eventRunningCopy } from "../copy.ts";
 import { OperatorAssistanceAlert } from "../OperatorAssistanceAlert.tsx";
 import { useSendCommand } from "../OperatorCommands.tsx";
@@ -27,7 +27,11 @@ import {
   limits,
   startFailureText,
 } from "./setupCopy.ts";
+import { SetupStepNav } from "./SetupStepNav.tsx";
+import { setupSteps, stepForField, stepForStartFailure, type SetupStepId } from "./setupSteps.ts";
+import { SetupSummary } from "./SetupSummary.tsx";
 import styles from "./EventSetup.module.css";
+import wizard from "./SetupWizard.module.css";
 
 const countdownOptions = [3, 5, 10].map((seconds) => ({
   value: String(seconds),
@@ -60,6 +64,25 @@ function focusField(root: HTMLElement, id: string): void {
   target.focus();
 }
 
+/** The first field the brain marked, in the order the steps show them. */
+function firstError(errors: readonly EventSetupFieldError[], view: EventSetupView): EventSetupFieldError | undefined {
+  const order = fieldOrder(view.phaseTimers);
+  return [...errors].sort((a, b) => order.indexOf(a.field) - order.indexOf(b.field))[0];
+}
+
+/**
+ * The step that opens first: the step that fixes a start failure the view opens with (START from the Event list), else the
+ * one with the first marked field when the brain shows errors, otherwise the Event step.
+ */
+function openingStep(view: EventSetupView): SetupStepId {
+  const failed = view.startFailure === null ? null : stepForStartFailure(view.startFailure);
+  if (failed !== null) {
+    return failed;
+  }
+  const first = view.showErrors ? firstError(view.fieldErrors, view) : undefined;
+  return first === undefined ? "event" : stepForField(first.field);
+}
+
 export interface EventSetupProps {
   readonly view: EventSetupView;
   /** `IDENTIFY DISPLAYS` is showing its numbers on the displays. */
@@ -69,29 +92,73 @@ export interface EventSetupProps {
 }
 
 /**
- * Event setup: one screen of sections in the plan's order, every control sending its command and showing only what the
- * brain's draft says. Errors appear in words under their fields after a save attempt; a failed save moves focus to the
- * first invalid field and announces how many things need attention.
+ * Event setup in five steps (DESIGN.md, Event setup): `01 Event`, `02 Hardware`, `03 Templates`, `04 Timing`, and
+ * `05 Guests`, with a summary of the whole draft beside the step. Which step shows is the page's own view state; every
+ * control sends its command and shows only what the brain's draft says, and the brain validates only at save, so any
+ * step can be opened at any time. Every step stays mounted while hidden, so what is being typed survives a step change.
+ * A refused save opens the step of the first invalid field and moves focus to it.
  */
 export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   const send = useSendCommand();
   const rootRef = useRef<HTMLDivElement>(null);
-  const focusPending = useRef(false);
-  const [, requestRender] = useState(0);
+  const headRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState<SetupStepId>(() => openingStep(view));
+  /** How many times the operator has changed step; each change moves focus to the new step's content. */
+  const [moves, setMoves] = useState(0);
+  /** Counts refused saves; `jumpedFor` and `focusedFor` record which refusal has opened its step and taken focus. */
+  const [refusals, setRefusals] = useState(0);
+  const [jumpedFor, setJumpedFor] = useState(0);
+  const focusedFor = useRef(0);
 
   const errors = view.showErrors ? view.fieldErrors : [];
+  const stepIndex = setupSteps.findIndex((candidate) => candidate.id === step);
+  const nextStep = setupSteps[stepIndex + 1];
+  const attention = new Set(errors.map((error) => stepForField(error.field)));
+  const first = firstError(errors, view);
+
+  // A refused save opens the step of the first invalid field, once the brain's errors are here (they can arrive after
+  // the refusal). Adjusted while rendering, like useDraftText, so the step shows in the same commit.
+  if (refusals !== jumpedFor && first !== undefined) {
+    setJumpedFor(refusals);
+    setStep(stepForField(first.field));
+  }
+
+  // A start that didn't go ahead opens the step where the operator can fix what the brain named.
+  const [seenFailure, setSeenFailure] = useState(view.startFailure?.code ?? null);
+  if ((view.startFailure?.code ?? null) !== seenFailure) {
+    setSeenFailure(view.startFailure?.code ?? null);
+    const target = view.startFailure === null ? null : stepForStartFailure(view.startFailure);
+    if (target !== null) {
+      setStep(target);
+    }
+  }
 
   useEffect(() => {
-    if (!focusPending.current || errors.length === 0 || rootRef.current === null) {
+    if (refusals === focusedFor.current || refusals !== jumpedFor || first === undefined || rootRef.current === null) {
       return;
     }
-    const order = fieldOrder(view.phaseTimers);
-    const first = [...errors].sort((a, b) => order.indexOf(a.field) - order.indexOf(b.field))[0];
-    focusPending.current = false;
-    if (first !== undefined) {
-      focusField(rootRef.current, focusTargetId(first.field, first.code));
+    if (stepForField(first.field) !== step) {
+      return;
     }
+    focusedFor.current = refusals;
+    focusField(rootRef.current, focusTargetId(first.field, first.code));
   });
+
+  // A step change moves focus to the top of the view (the heading), which also scrolls it back into view below the bar,
+  // so the keyboard continues from the status lines into the new step.
+  useEffect(() => {
+    if (moves > 0) {
+      headRef.current?.focus();
+    }
+  }, [moves]);
+
+  function goTo(target: SetupStepId): void {
+    if (target === step) {
+      return;
+    }
+    setStep(target);
+    setMoves((count) => count + 1);
+  }
 
   const errorText = (field: string): string | undefined => {
     const error = errors.find((candidate) => candidate.field === field);
@@ -106,8 +173,7 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   async function save(name: "SaveEvent" | "SaveAndStartEvent"): Promise<void> {
     const result = await send(name, {}, { key: "save-event", expected: ["validationFailed"] });
     if (result !== null && result.status === "rejected" && result.reason === "validationFailed") {
-      focusPending.current = true;
-      requestRender((count) => count + 1);
+      setRefusals((count) => count + 1);
     }
   }
 
@@ -118,44 +184,22 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
   const startReasonId = "setup-save-and-start-reason";
   const startBlocked = !view.saveAndStartAvailable;
 
-  return (
-    <div ref={rootRef} className={styles.setup}>
-      <header className={styles.header}>
-        <TextLink
-          arrow="left"
-          onClick={() => {
-            command("LeaveEventSetup", {}, "leave-setup");
-          }}
-        >
-          {copy.back}
-        </TextLink>
-        <StatementHeading level={1} lead={copy.heading.lead} turn={copy.heading.turn} />
-      </header>
-
-      <div className={styles.statuses}>
-        <OperatorAssistanceAlert
-          reason={assistance}
-          onReturn={() => {
-            command("LeaveEventSetup", {}, "leave-setup");
-          }}
-        />
-        <InlineStatus tone="alert">{view.startFailure === null ? "" : startFailureText(view.startFailure)}</InlineStatus>
-        <InlineStatus tone="alert">{errors.length === 0 ? "" : errorSummary(errors.length)}</InlineStatus>
-        <InlineStatus>{view.saving ? copy.saving : ""}</InlineStatus>
-      </div>
-
-      <div className={styles.form}>
-        <Section id="setup-section-event" title={copy.sections.event}>
-          <DraftTextField id={fieldIds.name} label={copy.fields.name} required maxLength={limits.name} value={view.fields.name} error={errorText("name")} onCommit={field("name")} />
-          <DraftDateField id={fieldIds.date} label={copy.fields.date} required value={view.fields.date} error={errorText("date")} onCommit={field("date")} />
-          <DraftTextField id={fieldIds.venue} label={copy.fields.venue} maxLength={limits.venue} value={view.fields.venue} error={errorText("venue")} onCommit={field("venue")} />
-          <DraftTextField id={fieldIds.customer} label={copy.fields.customer} maxLength={limits.customer} value={view.fields.customer} error={errorText("customer")} onCommit={field("customer")} />
-          <DraftTextArea id={fieldIds.notes} label={copy.fields.notes} maxLength={limits.notes} value={view.fields.notes} error={errorText("notes")} onCommit={field("notes")} />
-        </Section>
-
+  const stepContent: Record<SetupStepId, ReactNode> = {
+    event: (
+      <Section id="setup-section-event" title={copy.sections.event}>
+        <DraftTextField id={fieldIds.name} label={copy.fields.name} required maxLength={limits.name} value={view.fields.name} error={errorText("name")} onCommit={field("name")} />
+        <DraftDateField id={fieldIds.date} label={copy.fields.date} required value={view.fields.date} error={errorText("date")} onCommit={field("date")} />
+        <DraftTextField id={fieldIds.venue} label={copy.fields.venue} maxLength={limits.venue} value={view.fields.venue} error={errorText("venue")} onCommit={field("venue")} />
+        <DraftTextField id={fieldIds.customer} label={copy.fields.customer} maxLength={limits.customer} value={view.fields.customer} error={errorText("customer")} onCommit={field("customer")} />
+        <DraftTextArea id={fieldIds.notes} label={copy.fields.notes} maxLength={limits.notes} value={view.fields.notes} error={errorText("notes")} onCommit={field("notes")} />
+      </Section>
+    ),
+    hardware: (
+      <>
         <Section id="setup-section-camera" title={copy.sections.camera}>
           <CameraField
             camera={view.camera}
+            active={step === "hardware"}
             error={errorText("camera")}
             onSelect={(deviceId) => {
               command("SelectCamera", { deviceId });
@@ -178,7 +222,6 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-
         <Section id="setup-section-display" title={copy.sections.guestDisplay}>
           <DisplayField
             guestDisplay={view.guestDisplay}
@@ -192,11 +235,13 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-
         <Section id="setup-section-printer" title={copy.sections.printer}>
           <TextField label={copy.fields.printer} value={copy.fields.printerValue} readOnly showCount={false} />
         </Section>
-
+      </>
+    ),
+    templates: (
+      <>
         <Section id="setup-section-templates" title={copy.sections.templates}>
           <TemplatePicker
             templates={view.templates}
@@ -209,7 +254,6 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-
         <Section id="setup-section-filters" title={copy.sections.filters}>
           <LookPicker
             looks={view.looks}
@@ -222,20 +266,24 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-
-        <Section id="setup-section-timing" title={copy.sections.timing}>
-          {view.phaseTimers.map((timer) => (
-            <TimerField
-              key={timer.phase}
-              timer={timer}
-              error={errorText(`timers.${timer.phase}`)}
-              onCommit={(phase, seconds) => {
-                command("SetPhaseTimer", { phase, seconds });
-              }}
-            />
-          ))}
-        </Section>
-
+      </>
+    ),
+    timing: (
+      <Section id="setup-section-timing" title={copy.sections.timing}>
+        {view.phaseTimers.map((timer) => (
+          <TimerField
+            key={timer.phase}
+            timer={timer}
+            error={errorText(`timers.${timer.phase}`)}
+            onCommit={(phase, seconds) => {
+              command("SetPhaseTimer", { phase, seconds });
+            }}
+          />
+        ))}
+      </Section>
+    ),
+    guests: (
+      <>
         <Section id="setup-section-guests" title={copy.sections.guests}>
           <Switch
             label={copy.fields.guestGallery}
@@ -246,7 +294,6 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-
         <Section id="setup-section-pin" title={copy.sections.pin}>
           <PinSection
             pin={view.pin}
@@ -257,31 +304,108 @@ export function EventSetup({ view, identifying, assistance }: EventSetupProps) {
             }}
           />
         </Section>
-      </div>
+      </>
+    ),
+  };
 
-      <div className={styles.actions}>
-        <PrimaryAction
-          disabled={view.saving}
-          onClick={() => {
-            void save("SaveEvent");
-          }}
-        >
-          {copy.save}
-        </PrimaryAction>
-        <SecondaryAction
-          disabled={view.saving || startBlocked}
-          aria-describedby={startBlocked ? startReasonId : undefined}
-          onClick={() => {
-            void save("SaveAndStartEvent");
-          }}
-        >
-          {copy.saveAndStart}
-        </SecondaryAction>
-        {startBlocked && (
-          <p id={startReasonId} className={styles.reason}>
-            {view.saveAndStartDisabledReason === "eventRunning" ? eventRunningCopy : ""}
-          </p>
-        )}
+  return (
+    <div ref={rootRef} className={styles.setup}>
+      <header className={wizard.bar}>
+        <div className={wizard.barBack}>
+          <TextLink
+            arrow="left"
+            onClick={() => {
+              command("LeaveEventSetup", {}, "leave-setup");
+            }}
+          >
+            {copy.back}
+          </TextLink>
+        </div>
+        <div className={wizard.barNav}>
+          <SetupStepNav current={step} attention={attention} onSelect={goTo} />
+        </div>
+        <div className={wizard.barActions}>
+          {nextStep === undefined ? (
+            <>
+              <SecondaryAction
+                disabled={view.saving || startBlocked}
+                aria-describedby={startBlocked ? startReasonId : undefined}
+                onClick={() => {
+                  void save("SaveAndStartEvent");
+                }}
+              >
+                {copy.saveAndStart}
+              </SecondaryAction>
+              <PrimaryAction
+                disabled={view.saving}
+                onClick={() => {
+                  void save("SaveEvent");
+                }}
+              >
+                {copy.save}
+              </PrimaryAction>
+            </>
+          ) : (
+            <PrimaryAction
+              arrow="right"
+              onClick={() => {
+                goTo(nextStep.id);
+              }}
+            >
+              {copy.continueTo(nextStep.label)}
+            </PrimaryAction>
+          )}
+        </div>
+      </header>
+
+      <div className={styles.body}>
+        <div className={styles.main}>
+          <div ref={headRef} className={styles.head} tabIndex={-1}>
+            <StatementHeading level={1} lead={copy.heading.lead} turn={copy.heading.turn} />
+          </div>
+
+          <div className={styles.statuses}>
+            <OperatorAssistanceAlert
+              reason={assistance}
+              onReturn={() => {
+                command("LeaveEventSetup", {}, "leave-setup");
+              }}
+            />
+            <InlineStatus tone="alert">{view.startFailure === null ? "" : startFailureText(view.startFailure)}</InlineStatus>
+            <InlineStatus tone="alert">{errors.length === 0 ? "" : errorSummary(errors.length)}</InlineStatus>
+            <InlineStatus>{view.saving ? copy.saving : ""}</InlineStatus>
+          </div>
+
+          <div className={styles.panel} data-moved={moves > 0}>
+            {setupSteps.map((candidate) => (
+              <div key={candidate.id} className={styles.form} data-setup-step={candidate.id} hidden={candidate.id !== step}>
+                {stepContent[candidate.id]}
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.stepFoot}>
+            {stepIndex > 0 && (
+              <TextLink
+                arrow="left"
+                onClick={() => {
+                  goTo(setupSteps[stepIndex - 1]?.id ?? "event");
+                }}
+              >
+                {copy.previousStep}
+              </TextLink>
+            )}
+            {startBlocked && nextStep === undefined && (
+              <p id={startReasonId} className={styles.reason}>
+                {view.saveAndStartDisabledReason === "eventRunning" ? eventRunningCopy : ""}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.aside}>
+          <SetupSummary view={view} current={step} onEdit={goTo} />
+        </div>
       </div>
     </div>
   );

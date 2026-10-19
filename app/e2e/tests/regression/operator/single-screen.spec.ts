@@ -22,12 +22,14 @@ test.describe("a single screen", { tag: ["@m6", "@camera"] }, () => {
         { app, page: operatorPage, camera },
         { name, display: screens.operator.name, pin },
       );
+      await opened.goTo("Hardware");
       await expect(opened.displayGroup).toContainText("Operator Screen");
       await expect(opened.main.getByText("The Guest Screen will cover this screen. Use the hold and PIN to return.", { exact: true })).toBeVisible();
       return opened;
     });
 
     await test.step("SAVE AND START puts the Guest Screen over the Operator window on the same display", async () => {
+      await setup.goTo("Guests");
       await setup.saveAndStart.click();
       const guest = await guestPage(app);
       await expect(new GuestStartScreen(guest).stepInside).toBeVisible();

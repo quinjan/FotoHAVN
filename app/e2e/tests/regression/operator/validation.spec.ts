@@ -44,8 +44,9 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     const list = new EventListScreen(operatorPage);
     await expect(list.empty).toBeVisible();
 
-    /** SAVE is answered with the field's error text and focus on the first invalid control; nothing is saved. */
+    /** SAVE (on the Guests step) is answered with the field's error text, its step opened, and focus on the first invalid control; nothing is saved. */
     async function expectBlocked(setup: EventSetupScreen, rule: Rule): Promise<void> {
+      await setup.goTo("Guests");
       await setup.save.click();
       await expect(rule.field).toHaveAccessibleDescription(rule.text);
       await expect(rule.focus ?? rule.field).toBeFocused();
@@ -84,6 +85,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     });
 
     await test.step("empty name", async () => {
+      await setup.goTo("Event");
       await setup.name.fill("");
       await expectBlocked(setup, { field: setup.name, text: /Name the Event\./ });
       await expect(setup.name).toHaveAttribute("aria-invalid", "true");
@@ -133,6 +135,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     });
 
     await test.step("no Template offered", async () => {
+      await setup.goTo("Templates");
       for (const name of templateNames) {
         await setup.template(name).click();
         await expect(setup.template(name)).not.toBeChecked();
@@ -201,6 +204,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     });
 
     await test.step("a Template timer out of range (10 s)", async () => {
+      await setup.goTo("Timing");
       const timer = setup.timer("Template");
       await timer.fill("10");
       await expectBlocked(setup, { field: timer, text: /Enter 0 to turn it off, or 20 to 300 seconds\./ });
@@ -217,6 +221,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     });
 
     await test.step("mismatched PINs", async () => {
+      await setup.goTo("Guests");
       await setup.pin.fill("4821");
       await setup.pinConfirmation.fill("4822");
       await expectBlocked(setup, { field: setup.pinConfirmation, text: /The two PINs don't match\./ });
@@ -234,6 +239,7 @@ test.describe("Event setup validation", { tag: ["@m6", "@camera"] }, () => {
     });
 
     await test.step("with every rule met, SAVE goes back to the Event list with the Event", async () => {
+      await setup.goTo("Guests");
       await setup.save.click();
       await expect(list.row(baseName)).toBeVisible();
       expect(storedEventCount(dataDir)).toBe(1);

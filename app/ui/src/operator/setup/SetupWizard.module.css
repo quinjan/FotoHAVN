@@ -1,0 +1,347 @@
+/* Event setup as steps (DESIGN.md, Event setup): the top bar with the step row and the view's one primary action, and the summary beside the step. */
+
+/* The top bar stays in view while the step scrolls. */
+.bar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--app-z-chrome);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "back nav actions";
+  align-items: center;
+  gap: 0 var(--space-24);
+  min-block-size: var(--setup-bar-height);
+  padding-inline: var(--app-gutter);
+  border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
+  background-color: var(--app-tone-surface);
+}
+
+.barBack {
+  grid-area: back;
+  justify-self: start;
+}
+
+.barNav {
+  grid-area: nav;
+  align-self: stretch;
+  justify-self: center;
+}
+
+/* The actions keep their one-line labels; the step row gives way first. */
+.barActions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--space-12);
+  white-space: nowrap;
+}
+
+.barActions > * {
+  flex: none;
+}
+
+/* A narrow Operator Screen (a small display, or high Windows scaling) puts the step row on its own line. */
+@media (width < 75rem) {
+  .bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "back actions"
+      "nav nav";
+    padding-block-start: var(--space-12);
+  }
+
+  .barNav {
+    justify-self: start;
+  }
+}
+
+.nav {
+  block-size: 100%;
+}
+
+.steps {
+  display: flex;
+  block-size: 100%;
+  gap: 0 var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepItem {
+  display: flex;
+}
+
+/* Every step reserves the 2 px underline, so the current step never shifts the row. */
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-inline-size: var(--app-target);
+  min-block-size: var(--app-target);
+  padding-block: 0 var(--app-stroke-rule-accent);
+  padding-inline: var(--space-12);
+  border: 0;
+  background: none;
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-supporting-font-family);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-body-line-height);
+  cursor: pointer;
+  transition: color var(--motion-duration-fast) var(--motion-easing-editorial);
+}
+
+.step[data-state="current"] {
+  padding-block-end: 0;
+  border-block-end: var(--app-stroke-rule-accent) solid var(--app-tone-ink);
+  color: var(--app-tone-ink);
+}
+
+@media (hover: hover) {
+  .step:hover {
+    color: var(--app-tone-ink);
+  }
+}
+
+.stepNumber {
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.stepIcon {
+  display: inline-flex;
+  color: var(--app-tone-ink);
+  font-size: var(--app-text-body);
+}
+
+.visuallyHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The summary: a panel of collapsible groups, the current step's groups open with the Muted Brass rule. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-radius: var(--radius-panel);
+  background-color: var(--semantic-surface-canvas);
+}
+
+.summaryHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-24);
+  border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
+  background-color: var(--semantic-surface-editorial);
+}
+
+.summaryTitle {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--typography-subheading-font-family);
+  font-size: var(--app-text-subheading);
+  font-weight: var(--typography-subheading-font-weight);
+  letter-spacing: var(--typography-subheading-letter-spacing);
+  line-height: var(--typography-subheading-line-height);
+}
+
+.summaryFacts {
+  margin: 0;
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.summaryBody {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.group {
+  border-block-end: var(--stroke-hairline) solid var(--app-tone-rule);
+  border-inline-start: var(--app-stroke-rule-accent) solid transparent;
+}
+
+.group:last-child {
+  border-block-end: 0;
+}
+
+.group[data-current] {
+  border-inline-start-color: var(--app-tone-accent);
+  background-color: var(--semantic-surface-editorial);
+}
+
+.groupSummary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+  min-block-size: calc(var(--app-target) + var(--space-8));
+  padding: var(--space-8) var(--space-24) var(--space-8) calc(var(--space-24) - var(--app-stroke-rule-accent));
+  list-style: none;
+  cursor: pointer;
+}
+
+.groupSummary::-webkit-details-marker {
+  display: none;
+}
+
+@media (hover: hover) {
+  .group:not([data-current]) .groupSummary:hover {
+    background-color: var(--app-tone-wash);
+  }
+}
+
+.groupTitle {
+  font-size: var(--app-text-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--typography-body-line-height);
+}
+
+.groupValue {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--space-8);
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--app-tone-ink-secondary);
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupValue[data-attention] {
+  color: var(--app-tone-ink);
+  font-weight: var(--font-weight-semibold);
+}
+
+.groupIcon {
+  display: inline-flex;
+  font-size: var(--app-text-body);
+}
+
+.caret {
+  display: inline-flex;
+  font-size: var(--app-text-body);
+  transition: rotate var(--motion-duration-standard) var(--motion-easing-editorial);
+}
+
+.group[open] .caret {
+  rotate: 180deg;
+}
+
+.groupDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: 0 var(--space-24) var(--space-16) calc(var(--space-24) - var(--app-stroke-rule-accent));
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: 100%;
+  margin: 0;
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-16);
+}
+
+.fact dt {
+  color: var(--app-tone-ink-secondary);
+}
+
+.fact dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.prints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-16) var(--space-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.printItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  inline-size: var(--space-96);
+  text-align: center;
+}
+
+.printFrame {
+  display: block;
+  inline-size: var(--space-64);
+  block-size: var(--space-120);
+}
+
+.printCaption {
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  font-size: var(--app-text-supporting);
+  line-height: var(--typography-supporting-line-height);
+  list-style: none;
+}
+
+.names > li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+}
+
+.defaultMark {
+  color: var(--app-tone-ink-secondary);
+  font-family: var(--typography-meta-font-family);
+  font-size: var(--app-text-meta);
+  font-weight: var(--typography-meta-font-weight);
+  letter-spacing: var(--typography-meta-letter-spacing);
+  line-height: var(--typography-meta-line-height);
+  text-transform: var(--typography-meta-text-transform);
+}
+
+@media (forced-colors: active) {
+  .step[data-state="current"] {
+    border-block-end-color: CanvasText;
+  }
+
+  .group[data-current] {
+    border-inline-start-color: CanvasText;
+  }
+}

@@ -73,9 +73,16 @@ test.describe("operator screens in the real host: empty Event list and Event set
     await list.newEvent.click();
     await recordAtEveryResolution(operatorPage, hooks, testInfo, "setup-new", async () => {
       await expect(setup.heading).toBeVisible();
-      await expect(setup.templatePreview("Signature Strip")).toHaveCount(1);
+      await expect(setup.name).toBeVisible();
     });
 
+    await setup.goTo("Templates");
+    await recordAtEveryResolution(operatorPage, hooks, testInfo, "setup-templates", async () => {
+      await expect(setup.templatePreview("Signature Strip")).toHaveCount(1);
+      await expect(setup.templatePreview("Signature Strip")).toBeVisible();
+    });
+
+    await setup.goTo("Guests");
     await setup.save.click();
     await expect(setup.statusLine(/need attention/).first()).toBeVisible();
     await recordAtEveryResolution(operatorPage, hooks, testInfo, "setup-errors", async () => {

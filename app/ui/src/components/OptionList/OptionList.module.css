@@ -22,7 +22,7 @@
   background-color: var(--semantic-surface-editorial);
 }
 
-/* The main choice: thumbnail, text, then the mark at the end; its native input covers the whole area. */
+/* The main choice: the mark first, then the thumbnail and text; its native input covers the whole area. */
 .choice {
   position: relative;
   display: flex;
@@ -120,11 +120,7 @@
   text-transform: var(--typography-meta-text-transform);
 }
 
-.mark {
-  margin-inline-start: auto;
-}
-
-/* The checkbox variant's "Default" radio, in its own column after a Hairline rule. */
+/* The checkbox variant's "Default" radio, at the row's end with no rule before it. */
 .default {
   position: relative;
   display: flex;
@@ -134,7 +130,6 @@
   min-inline-size: var(--app-target);
   min-block-size: var(--app-target);
   padding-inline: var(--space-16);
-  border-inline-start: var(--stroke-hairline) solid var(--app-tone-rule);
   cursor: pointer;
 }
 

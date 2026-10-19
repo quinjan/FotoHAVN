@@ -9,6 +9,8 @@ import styles from "./EventSetup.module.css";
 
 export interface CameraFieldProps {
   readonly camera: EventSetupCameraView;
+  /** The Hardware step is showing: the live preview draws only then. Default true. */
+  readonly active?: boolean;
   readonly error: string | undefined;
   readonly onSelect: (deviceId: string) => void;
 }
@@ -28,7 +30,7 @@ function cameraOptions(camera: EventSetupCameraView): SelectOption[] {
  * reason, In use by another app or by the running Event, Not checked, or not connected), and the live preview while the
  * brain sends this camera's frames. A bound camera that has gone stays chosen and visible, never swapped for another.
  */
-export function CameraField({ camera, error, onSelect }: CameraFieldProps) {
+export function CameraField({ camera, active = true, error, onSelect }: CameraFieldProps) {
   const client = useBrainClient();
   const line = cameraLine(camera);
   return (
@@ -49,7 +51,7 @@ export function CameraField({ camera, error, onSelect }: CameraFieldProps) {
         }}
       />
       <InlineStatus tone={line?.tone ?? "neutral"}>{line?.text}</InlineStatus>
-      {camera.previewActive && (
+      {camera.previewActive && active && (
         <div className={styles.preview}>
           <LivePreview source={client.frames ?? silentFrameSource} mirrored={camera.mirrored} />
         </div>

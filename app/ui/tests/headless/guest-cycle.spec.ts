@@ -30,18 +30,18 @@ interface Running {
   readonly name: string;
 }
 
-/** Creates the Event through Event setup (fake camera, the fake guest display, a PIN, a 3 s countdown) and starts it. */
+/** Creates the Event through Event setup's steps (fake camera, the fake guest display, a PIN, a 3 s countdown) and starts it. */
 async function startEvent(operator: Page, options: EventOptions): Promise<void> {
   await operator.getByRole("button", { name: "NEW EVENT" }).click();
   const main = operator.locator('main[data-fotohavn-surface="eventSetup"]');
+  const continueTo = (step: string) => main.getByRole("button", { name: `CONTINUE TO ${step}`, exact: true }).click();
   await main.getByLabel("Name", { exact: true }).fill(options.name);
+  await continueTo("HARDWARE");
   await main.getByLabel("Camera", { exact: true }).selectOption({ label: "Fake camera" });
   await expect(main.locator('section[aria-labelledby="setup-section-camera"]').getByRole("status").first()).toHaveText("Ready");
   await main.getByRole("radio", { name: "Fake guest", exact: true }).click();
   await main.getByRole("radio", { name: "3 seconds", exact: true }).click();
-  await main.getByLabel(/^(New )?PIN$/).fill(pin);
-  await main.getByLabel(/^Confirm (new )?PIN$/).fill(pin);
-  await main.getByLabel(/^Confirm (new )?PIN$/).blur();
+  await continueTo("TEMPLATES");
   if (options.templates !== undefined) {
     const [first] = options.templates;
     await main.getByRole("radio", { name: `Default ${first ?? ""}`, exact: true }).click();
@@ -58,6 +58,11 @@ async function startEvent(operator: Page, options: EventOptions): Promise<void> 
       await expect(main.getByRole("checkbox", { name: look, exact: true })).not.toBeChecked();
     }
   }
+  await continueTo("TIMING");
+  await continueTo("GUESTS");
+  await main.getByLabel(/^(New )?PIN$/).fill(pin);
+  await main.getByLabel(/^Confirm (new )?PIN$/).fill(pin);
+  await main.getByLabel(/^Confirm (new )?PIN$/).blur();
   await main.getByRole("button", { name: "SAVE AND START", exact: true }).click();
   await expect(operator.getByRole("button", { name: "END EVENT", exact: true })).toBeVisible({ timeout: 30_000 });
 }

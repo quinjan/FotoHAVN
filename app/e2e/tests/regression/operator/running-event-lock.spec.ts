@@ -46,6 +46,7 @@ test.describe("the running Event's lock", { tag: ["@m6", "@camera"] }, () => {
       await setup.camera.selectOption({ label: camera.name });
       await expect(setup.cameraStatus).toContainText("In use by the running Event");
       await expect(setup.camera.locator("option:checked")).toHaveText(camera.name);
+      await setup.goTo("Guests");
       await expect(setup.saveAndStart).toHaveAttribute("aria-disabled", "true");
       await expect(setup.main.getByText(reason, { exact: true })).toBeVisible();
       await setup.save.click();
@@ -85,9 +86,12 @@ test.describe("the running Event's lock", { tag: ["@m6", "@camera"] }, () => {
       await list.rowAction(nameB, "EDIT").click();
       await expect(setup.heading).toBeVisible();
       await expect(setup.name).toHaveValue(nameB);
+      await setup.goTo("Hardware");
       await expect(setup.camera.locator("option:checked")).toHaveText(camera.name);
       await expect(setup.cameraStatus).toContainText("In use by the running Event");
+      await setup.goTo("Event");
       await setup.name.fill("Event B, renamed");
+      await setup.goTo("Guests");
       await setup.save.click();
       await expect(list.row("Event B, renamed")).toBeVisible();
       await expect(list.row(nameB)).toHaveCount(0);

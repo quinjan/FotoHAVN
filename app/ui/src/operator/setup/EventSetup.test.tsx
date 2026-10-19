@@ -12,11 +12,27 @@ interface Options {
   readonly client?: StubClient;
   readonly identifying?: boolean;
   readonly assistance?: AssistanceReason | null;
+  /** The step to open after rendering, by its label in the step row; default the describe block's `openStep`. */
+  readonly step?: string;
 }
 
-function setup(view: EventSetupView, { client = stubClient(), identifying = false, assistance = null }: Options = {}) {
+/** The step each test opens, set by its describe block (the Event step unless a block says otherwise). */
+let openStep = "Event";
+
+const stepButton = (label: string) =>
+  within(screen.getByRole("navigation", { name: "Event setup steps" })).getByRole("button", { name: new RegExp(`^\\d\\d ${label}`) });
+
+/** Opens a step from the step row, as the operator would. */
+function goTo(label: string): void {
+  fireEvent.click(stepButton(label));
+}
+
+function setup(view: EventSetupView, { client = stubClient(), identifying = false, assistance = null, step = openStep }: Options = {}) {
   const ui = (next: EventSetupView) => <EventSetup view={next} identifying={identifying} assistance={assistance} />;
   const result = renderOperator(ui(view), client);
+  if (step !== "Event") {
+    goTo(step);
+  }
   return { ...result, update: (next: EventSetupView) => { result.rerender(ui(next)); } };
 }
 
@@ -29,18 +45,71 @@ const sent = (client: BrainClient) => sentCommands(client);
 describe("EventSetup", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: false });
+    openStep = "Event";
   });
   afterEach(() => {
     vi.useRealTimers();
   });
 
   describe("the form", () => {
-    it("has the plan's sections, in order, each opened by an eyebrow", () => {
+    it("has five steps, Event first, each holding the plan's sections in order, each opened by an eyebrow", () => {
       setup(editingSetupView());
-      const sections = screen.getAllByRole("region").map((region) => region.getAttribute("aria-labelledby"));
+      const nav = screen.getByRole("navigation", { name: "Event setup steps" });
+      expect(within(nav).getAllByRole("button").map((button) => button.textContent)).toEqual(["01 Event", "02 Hardware", "03 Templates", "04 Timing", "05 Guests"]);
+      expect(stepButton("Event")).toHaveAttribute("aria-current", "step");
+      const sections = screen.getAllByRole("region", { hidden: true }).map((region) => region.getAttribute("aria-labelledby"));
       const names = sections.map((id) => document.getElementById(id ?? "")?.textContent);
       expect(names).toEqual(["EVENT", "CAMERA", "GUEST DISPLAY", "PRINTER", "TEMPLATES", "FILTERS", "TIMING", "GUESTS", "OPERATOR PIN"]);
+      expect(screen.getAllByRole("region").map((region) => document.getElementById(region.getAttribute("aria-labelledby") ?? "")?.textContent)).toEqual(["EVENT"]);
       expect(screen.getByRole("heading", { level: 1, name: "Set up the Event." })).toBeVisible();
+    });
+
+    it("shows each step's sections when its step opens, and hides the others", () => {
+      setup(editingSetupView());
+      const shown = () => screen.getAllByRole("region").map((region) => document.getElementById(region.getAttribute("aria-labelledby") ?? "")?.textContent);
+      goTo("Hardware");
+      expect(shown()).toEqual(["CAMERA", "GUEST DISPLAY", "PRINTER"]);
+      expect(stepButton("Hardware")).toHaveAttribute("aria-current", "step");
+      goTo("Templates");
+      expect(shown()).toEqual(["TEMPLATES", "FILTERS"]);
+      goTo("Timing");
+      expect(shown()).toEqual(["TIMING"]);
+      goTo("Guests");
+      expect(shown()).toEqual(["GUESTS", "OPERATOR PIN"]);
+      goTo("Event");
+      expect(shown()).toEqual(["EVENT"]);
+    });
+
+    it("moves on with CONTINUE TO the next step, the view's one primary action, and back with PREVIOUS STEP", () => {
+      const { client } = setup(editingSetupView());
+      expect(screen.queryByRole("button", { name: "PREVIOUS STEP" })).toBeNull();
+      for (const next of ["Hardware", "Templates", "Timing", "Guests"]) {
+        const primary = document.querySelectorAll('[data-fotohavn-action="primary"]');
+        expect(primary).toHaveLength(1);
+        expect(primary[0]).toHaveTextContent(`CONTINUE TO ${next.toUpperCase()}`);
+        fireEvent.click(screen.getByRole("button", { name: `CONTINUE TO ${next.toUpperCase()}` }));
+        expect(stepButton(next)).toHaveAttribute("aria-current", "step");
+      }
+      expect(screen.queryByRole("button", { name: /^CONTINUE TO/ })).toBeNull();
+      expect(screen.getByRole("button", { name: "SAVE" })).toHaveAttribute("data-fotohavn-action", "primary");
+      fireEvent.click(screen.getByRole("button", { name: "PREVIOUS STEP" }));
+      expect(stepButton("Timing")).toHaveAttribute("aria-current", "step");
+      expect(sent(client)).toEqual([]);
+    });
+
+    it("moves focus to the top of the view when a step opens", () => {
+      setup(editingSetupView());
+      goTo("Timing");
+      expect(document.activeElement).toBe(screen.getByRole("heading", { level: 1 }).closest('[tabindex="-1"]'));
+      expect(document.activeElement).not.toBeNull();
+    });
+
+    it("keeps what is being typed on a step while another is open", () => {
+      setup(setupView());
+      change(/^Name/, "Harbour");
+      goTo("Hardware");
+      goTo("Event");
+      expect(screen.getByLabelText(/^Name/)).toHaveValue("Harbour");
     });
 
     it("shows the brain's draft in every field", () => {
@@ -51,12 +120,13 @@ describe("EventSetup", () => {
       expect(screen.getByLabelText(/^Customer or host/)).toHaveValue("Lindqvist & Co");
       expect(screen.getByLabelText(/^Notes/)).toHaveValue("Bring the props. The Customer would like the strips in warm tones.");
       expect(screen.getByLabelText(/^Camera/)).toHaveValue("camera-1");
-      expect(screen.getByRole("radio", { name: "DELL P2419H" })).toBeChecked();
-      expect(screen.getByRole("switch", { name: "Mirror" })).toBeChecked();
-      expect(screen.getByRole("radio", { name: "10 seconds" })).toBeChecked();
+      expect(screen.getByRole("radio", { name: "DELL P2419H", hidden: true })).toBeChecked();
+      expect(screen.getByRole("switch", { name: "Mirror", hidden: true })).toBeChecked();
+      expect(screen.getByRole("radio", { name: "10 seconds", hidden: true })).toBeChecked();
       expect(screen.getByLabelText("Printer")).toHaveValue("No printer");
       expect(screen.getByLabelText("Printer")).toHaveAttribute("readonly");
-      expect(screen.getByRole("switch", { name: "Guest gallery" })).toBeChecked();
+      expect(screen.getByRole("switch", { name: "Guest gallery", hidden: true })).toBeChecked();
+      goTo("Guests");
       expect(screen.getByText("Turn this on only with the Customer's permission.")).toBeVisible();
     });
 
@@ -64,9 +134,9 @@ describe("EventSetup", () => {
       setup(setupView());
       expect(screen.getByLabelText(/^Name/)).toHaveValue("");
       expect(screen.getByLabelText(/^Camera/)).toHaveValue("");
-      expect(screen.getAllByRole("radio", { checked: true }).map((radio) => radio.closest("li")?.querySelector("[id$='-title']")?.textContent ?? radio.getAttribute("aria-label"))).toContain("Signature Strip");
-      expect(screen.getByRole("switch", { name: "Guest gallery" })).not.toBeChecked();
-      expect(screen.getByRole("radio", { name: "5 seconds" })).toBeChecked();
+      expect(screen.getAllByRole("radio", { checked: true, hidden: true }).map((radio) => radio.closest("li")?.querySelector("[id$='-title']")?.textContent ?? radio.getAttribute("aria-label"))).toContain("Signature Strip");
+      expect(screen.getByRole("switch", { name: "Guest gallery", hidden: true })).not.toBeChecked();
+      expect(screen.getByRole("radio", { name: "5 seconds", hidden: true })).toBeChecked();
     });
 
     it("shows the character counters and limits", () => {
@@ -177,10 +247,29 @@ describe("EventSetup", () => {
       );
       expect(screen.getByLabelText(/^Camera/)).toHaveAccessibleDescription(expect.stringContaining("Choose a camera."));
       expect(screen.getByText("Choose the guest display.")).toBeVisible();
+      goTo("Templates");
       expect(screen.getByText("Offer at least one Template.")).toBeVisible();
       expect(screen.getByText("Choose the default from the Looks you offer.")).toBeVisible();
       expect(screen.getByLabelText("PIN")).toHaveAccessibleDescription(expect.stringContaining("Use 4 to 6 digits, 0 to 9 only."));
       expect(screen.getByLabelText("Confirm PIN")).not.toHaveAttribute("aria-invalid");
+    });
+
+    it("opens on the step of the first marked field, and marks every step and summary group that needs attention, in words", () => {
+      setup(
+        errors({
+          phaseTimers: phaseTimers({ keepsake: 2 }),
+          fieldErrors: [
+            { field: "timers.keepsake", code: "timerOutOfRange" },
+            { field: "camera", code: "cameraRequired" },
+          ],
+        }),
+      );
+      expect(stepButton("Hardware")).toHaveAttribute("aria-current", "step");
+      expect(stepButton("Hardware")).toHaveAccessibleName("02 Hardware, needs attention");
+      expect(stepButton("Timing")).toHaveAccessibleName("04 Timing, needs attention");
+      expect(stepButton("Event")).toHaveAccessibleName("01 Event");
+      const summary = screen.getByRole("complementary", { name: "New Event" });
+      expect(within(summary).getAllByText("Needs attention")).toHaveLength(2);
     });
 
     it("puts a mismatch on the confirmation, and a default Template that isn't offered on the Templates", () => {
@@ -219,6 +308,10 @@ describe("EventSetup", () => {
   });
 
   describe("saving", () => {
+    beforeEach(() => {
+      openStep = "Guests";
+    });
+
     it("sends SaveEvent from the primary action and SaveAndStartEvent from the secondary one", async () => {
       const { client } = setup(editingSetupView());
       const save = screen.getByRole("button", { name: "SAVE" });
@@ -283,6 +376,10 @@ describe("EventSetup", () => {
   });
 
   describe("focus to the first invalid field", () => {
+    beforeEach(() => {
+      openStep = "Guests";
+    });
+
     const refused: CommandResult = { status: "rejected", reason: "validationFailed" };
     const failing = (fieldErrors: EventSetupView["fieldErrors"], overrides: Partial<EventSetupView> = {}) =>
       editingSetupView({
@@ -365,6 +462,10 @@ describe("EventSetup", () => {
   });
 
   describe("the camera field", () => {
+    beforeEach(() => {
+      openStep = "Hardware";
+    });
+
     it("lists the connected cameras and sends SelectCamera for the one chosen", () => {
       const { client } = setup(setupView());
       const select = screen.getByLabelText(/^Camera/);
@@ -440,6 +541,10 @@ describe("EventSetup", () => {
   });
 
   describe("the Guest display field", () => {
+    beforeEach(() => {
+      openStep = "Hardware";
+    });
+
     it("sends SelectGuestDisplay and IdentifyDisplays", async () => {
       const { client } = setup(setupView());
       fireEvent.click(screen.getByRole("radio", { name: "DELL P2419H" }));
@@ -469,21 +574,26 @@ describe("EventSetup", () => {
 
   describe("Mirror, Countdown, and Guest gallery", () => {
     it("send SetMirror, SetCountdown, and SetGuestGallery with the new value", async () => {
-      const { client } = setup(editingSetupView());
+      const { client } = setup(editingSetupView(), { step: "Hardware" });
       fireEvent.click(screen.getByRole("switch", { name: "Mirror" }));
       fireEvent.click(screen.getByRole("radio", { name: "3 seconds" }));
+      goTo("Guests");
       fireEvent.click(screen.getByRole("switch", { name: "Guest gallery" }));
       await flush();
       expect(sent(client)).toEqual([["SetMirror", { enabled: false }], ["SetCountdown", { seconds: 3 }], ["SetGuestGallery", { enabled: false }]]);
     });
 
     it("offers 3, 5, and 10 seconds", () => {
-      setup(setupView());
+      setup(setupView(), { step: "Hardware" });
       expect(within(screen.getByRole("group", { name: "Countdown" })).getAllByRole("radio").map((radio) => radio.getAttribute("aria-label"))).toEqual(["3 seconds", "5 seconds", "10 seconds"]);
     });
   });
 
   describe("Templates and Looks", () => {
+    beforeEach(() => {
+      openStep = "Templates";
+    });
+
     it("show the offered ones checked, and the default marked", () => {
       setup(editingSetupView());
       const templates = within(screen.getByRole("group", { name: "Offered Templates" }));
@@ -550,6 +660,10 @@ describe("EventSetup", () => {
   });
 
   describe("Phase Timers", () => {
+    beforeEach(() => {
+      openStep = "Timing";
+    });
+
     it("shows one numeric control per phase, with its range, what happens at the end, and Off where allowed", () => {
       setup(editingSetupView());
       for (const [name, value] of [["Template", "45"], ["Photographs: capture", "30"], ["Photographs: review", "0"], ["Filters", "30"], ["Keepsake", "15"], ["Guest gallery view", "60"]] as const) {
@@ -602,9 +716,13 @@ describe("EventSetup", () => {
   });
 
   describe("the Operator PIN", () => {
+    beforeEach(() => {
+      openStep = "Guests";
+    });
+
     it("says the PIN is set and offers to change it, showing no input until then", () => {
       setup(editingSetupView());
-      expect(screen.getByText("PIN set")).toBeVisible();
+      expect(within(screen.getByRole("region", { name: "OPERATOR PIN" })).getByText("PIN set")).toBeVisible();
       expect(screen.queryByLabelText("PIN")).toBeNull();
       expect(screen.queryByLabelText("New PIN")).toBeNull();
       fireEvent.click(screen.getByRole("button", { name: "CHANGE PIN" }));
@@ -649,7 +767,7 @@ describe("EventSetup", () => {
       change("New PIN", "1234");
       fireEvent.click(screen.getByRole("button", { name: "KEEP CURRENT PIN" }));
       expect(sent(client)).toEqual([["SetPin", { pin: "", confirmation: "" }]]);
-      expect(screen.getByText("PIN set")).toBeVisible();
+      expect(within(screen.getByRole("region", { name: "OPERATOR PIN" })).getByText("PIN set")).toBeVisible();
       act(() => {
         vi.advanceTimersByTime(draftIdleMs * 2);
       });
@@ -675,12 +793,12 @@ describe("EventSetup", () => {
       change("PIN", "48219");
 
       // SAVE AND START saved the Event and its PIN, then the start failed: the brain reports the PIN as set, nothing pending.
-      update(editingSetupView({ pin: { isSet: true, changing: false }, startFailure: { code: "guestDisplayMissing", cameraReason: null } }));
+      update(editingSetupView({ pin: { isSet: true, changing: false }, startFailure: { code: "storageNotWritable", cameraReason: null } }));
       act(() => {
         vi.advanceTimersByTime(draftIdleMs * 2);
       });
 
-      expect(screen.getByText("PIN set")).toBeVisible();
+      expect(within(screen.getByRole("region", { name: "OPERATOR PIN" })).getByText("PIN set")).toBeVisible();
       expect(screen.queryByLabelText("New PIN")).toBeNull();
       expect(sent(client)).toEqual([["SetPin", { pin: "4821", confirmation: "4821" }]]);
 
@@ -727,6 +845,27 @@ describe("EventSetup", () => {
       expect(line.closest("section")).toBeNull();
     });
 
+    it.each([
+      ["guestDisplayMissing", "Hardware"],
+      ["cameraNotEligible", "Hardware"],
+      ["pinMissing", "Guests"],
+    ] as const)("opens the step that fixes a start failure %s when it arrives", (code, step) => {
+      const { update } = setup(editingSetupView());
+      update(editingSetupView({ startFailure: { code, cameraReason: null } }));
+      expect(stepButton(step)).toHaveAttribute("aria-current", "step");
+    });
+
+    it("opens on the step that fixes the start failure it opens with, as after START from the Event list", () => {
+      setup(editingSetupView({ startFailure: { code: "cameraNotEligible", cameraReason: "notFound" } }));
+      expect(stepButton("Hardware")).toHaveAttribute("aria-current", "step");
+    });
+
+    it("stays on the step for a start failure no step fixes", () => {
+      const { update } = setup(editingSetupView(), { step: "Timing" });
+      update(editingSetupView({ startFailure: { code: "storageNotWritable", cameraReason: null } }));
+      expect(stepButton("Timing")).toHaveAttribute("aria-current", "step");
+    });
+
     it("shows the Operator Assistance alert, with a link back to the running Event", async () => {
       const { client } = setup(editingSetupView(), { assistance: "guestDisplay" });
       expect(screen.getByText("The guest display isn't connected.")).toBeVisible();
@@ -738,6 +877,91 @@ describe("EventSetup", () => {
     it("shows no alert while the running Event needs nothing", () => {
       setup(editingSetupView(), { assistance: null });
       expect(screen.queryByRole("button", { name: "GO TO THE RUNNING EVENT" })).toBeNull();
+    });
+  });
+
+  describe("the summary", () => {
+    const summary = () => screen.getByRole("complementary", { name: "Harbour gala" });
+    const group = (title: string | RegExp) => {
+      const found = [...summary().querySelectorAll("details")].find((details) => {
+        const text = details.querySelector("summary")?.firstElementChild?.textContent ?? "";
+        return typeof title === "string" ? text === title : title.test(text);
+      });
+      if (found === undefined) {
+        throw new Error(`no summary group ${String(title)}`);
+      }
+      return found;
+    };
+
+    it("names the Event with its date and venue, and each group with its value", () => {
+      setup(editingSetupView());
+      expect(within(summary()).getByText("Friday 12 June 2026, Harbour Hall")).toBeVisible();
+      expect(group("Event").querySelector("summary")).toHaveTextContent("EventFriday 12 June 2026");
+      expect(group("Hardware").querySelector("summary")).toHaveTextContent("Logitech BRIO");
+      expect(group("3 Templates").querySelector("summary")).toHaveTextContent("Panorama Four by default");
+      expect(group("4 Looks").querySelector("summary")).toHaveTextContent("Naturale by default");
+      expect(group("Timing").querySelector("summary")).toHaveTextContent("1 off");
+      expect(group("Guests and PIN").querySelector("summary")).toHaveTextContent("PIN set");
+    });
+
+    it("says New Event while the name is empty, and what is missing in words", () => {
+      setup(
+        setupView({
+          pin: { isSet: false, changing: false },
+          templates: setupView().templates.map((template) => ({ ...template, offered: false, isDefault: false })),
+        }),
+      );
+      const aside = screen.getByRole("complementary", { name: "New Event" });
+      expect(within(aside).getAllByText("No camera chosen").length).toBeGreaterThan(0);
+      expect(within(aside).getByText("None offered")).toBeInTheDocument();
+      expect(within(aside).getByText("All on")).toBeInTheDocument();
+      expect(within(aside).getAllByText("PIN not set").length).toBeGreaterThan(0);
+    });
+
+    it("says a new PIN is entered while the brain holds one", () => {
+      setup(editingSetupView({ pin: { isSet: true, changing: true } }));
+      expect(group("Guests and PIN").querySelector("summary")).toHaveTextContent("New PIN entered");
+    });
+
+    it("opens the current step's groups, marks them, and offers EDIT on the others to open their step", () => {
+      setup(editingSetupView());
+      expect(group("Event")).toHaveAttribute("open");
+      expect(group("Event")).toHaveAttribute("data-current", "true");
+      expect(group("Hardware")).not.toHaveAttribute("open");
+      expect(within(group("Event")).queryByRole("button", { name: /^Edit/ })).toBeNull();
+      fireEvent.click(within(group("3 Templates")).getByRole("button", { name: "Edit Templates", hidden: true }));
+      expect(stepButton("Templates")).toHaveAttribute("aria-current", "step");
+      expect(group("3 Templates")).toHaveAttribute("open");
+      expect(group("4 Looks")).toHaveAttribute("open");
+      expect(group("Event")).not.toHaveAttribute("open");
+    });
+
+    it("keeps a group the operator opened open across step changes", () => {
+      setup(editingSetupView());
+      const timing = group("Timing");
+      timing.open = true;
+      fireEvent(timing, new Event("toggle"));
+      goTo("Hardware");
+      expect(group("Timing")).toHaveAttribute("open");
+      expect(within(group("Timing")).getByText("45 s")).toBeVisible();
+      expect(within(group("Timing")).getByText("Off")).toBeVisible();
+    });
+
+    it("shows the offered Templates as prints with the default marked, and the offered Looks by name", () => {
+      setup(editingSetupView(), { step: "Templates" });
+      const templates = group("3 Templates");
+      expect(templates.querySelectorAll("img")).toHaveLength(3);
+      expect(within(templates).getByText("Panorama Four").parentElement).toHaveTextContent("Panorama FourDefault");
+      expect(within(group("4 Looks")).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Monochrome", "NaturaleDefault", "Sepia", "Classic"]);
+    });
+
+    it("lists the hardware and the guests in words", () => {
+      setup(editingSetupView(), { step: "Hardware" });
+      expect(within(group("Hardware")).getByText("10 seconds")).toBeVisible();
+      expect(within(group("Hardware")).getByText("DELL P2419H")).toBeVisible();
+      expect(within(group("Hardware")).getByText("No printer")).toBeVisible();
+      goTo("Guests");
+      expect(group("Guests and PIN").querySelector("dl")).toHaveTextContent("Guest galleryOnOperator PINPIN set");
     });
   });
 });

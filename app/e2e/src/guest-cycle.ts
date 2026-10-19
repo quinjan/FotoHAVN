@@ -504,6 +504,7 @@ export async function startGuestEvent(context: OperatorContext, options: GuestEv
   const setup = await openNewEventAndFill(context, { name: options.name, display: "Virtual guest", pin });
   await waitForCommandResult(app.hooks, "SetPin");
   if (options.countdown !== undefined) {
+    await setup.goTo("Hardware");
     await setup.countdown(options.countdown).click();
     await expect(setup.countdown(options.countdown)).toBeChecked();
   }
@@ -512,6 +513,7 @@ export async function startGuestEvent(context: OperatorContext, options: GuestEv
     if (first === undefined) {
       throw new Error("Offer at least one Template.");
     }
+    await setup.goTo("Templates");
     await setup.defaultTemplate(first).click();
     for (const name of templateNames) {
       if (!options.templates.includes(name)) {
@@ -525,6 +527,7 @@ export async function startGuestEvent(context: OperatorContext, options: GuestEv
     if (first === undefined) {
       throw new Error("Offer at least one Look.");
     }
+    await setup.goTo("Templates");
     await setup.defaultLook(first).click();
     for (const name of lookNames) {
       if (!options.looks.includes(name)) {
@@ -534,12 +537,17 @@ export async function startGuestEvent(context: OperatorContext, options: GuestEv
     }
   }
   if (options.guestGallery === true) {
+    await setup.goTo("Guests");
     await setup.guestGallery.click();
     await expect(setup.guestGallery).toBeChecked();
   }
-  for (const [label, seconds] of Object.entries(options.timers ?? {})) {
-    await setup.timer(label).fill(String(seconds));
+  if (options.timers !== undefined) {
+    await setup.goTo("Timing");
+    for (const [label, seconds] of Object.entries(options.timers)) {
+      await setup.timer(label).fill(String(seconds));
+    }
   }
+  await setup.goTo("Guests");
   await setup.saveAndStart.click();
   const list = new EventListScreen(page);
   await expect(list.runningPanel(options.name)).toBeVisible({ timeout: 30_000 });

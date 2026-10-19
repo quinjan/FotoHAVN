@@ -44,6 +44,7 @@ test.describe("Start when the camera isn't eligible", { tag: ["@m6", "@camera"] 
 
     await test.step("with the fault cleared, SAVE AND START starts the Event", async () => {
       await hooks.clearCameraFault();
+      await setup.goTo("Guests");
       await setup.saveAndStart.click();
       await expect(list.runningPanel(name)).toBeVisible({ timeout: 30_000 });
       expect((await hooks.getDiagnostics()).camera.state).toBe("ready");

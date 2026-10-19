@@ -13,6 +13,7 @@ test.describe("identifying displays", { tag: ["@m6", "@timing"] }, () => {
     await new EventListScreen(operatorPage).newEvent.click();
     const setup = new EventSetupScreen(operatorPage);
     await expect(setup.heading).toBeVisible();
+    await setup.goTo("Hardware");
 
     const pickerNumbers = await test.step("the picker numbers the displays left to right", async () => {
       const rows = await setup.displayRows();
