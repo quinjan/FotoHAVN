@@ -17,7 +17,7 @@ Use these project rules with the managed Next.js block above.
 - Read `../CONTEXT.md` and `CONTEXT.md` before changing website behavior or product language.
 - Read `../brand/README.md` and the affected `../brand/` documents, then `DESIGN.md`, before changing visuals, layout, motion, imagery, icons, or customer-facing copy. `DESIGN.md` is the website's interpretation of `../brand/`.
 - Read `docs/website-analytics.md` before changing analytics, consent, inquiry tracking, or privacy behavior.
-- Read `../deploy/fotohavn/docs/adr/0002-deploy-website-as-an-immutable-container.md` and `../deploy/fotohavn/AGENTS.md` for container or production work.
+- Read `../deploy/fotohavn/docs/adr/0003-host-website-on-vercel.md` and `../deploy/fotohavn/AGENTS.md` for hosting or production work.
 
 ## Sources
 

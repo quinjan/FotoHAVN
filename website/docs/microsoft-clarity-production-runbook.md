@@ -1,6 +1,6 @@
 # Microsoft Clarity production setup runbook
 
-Use this runbook once for the FotoHAVN production Clarity project, then repeat the verification section before every analytics-affecting release. The website already owns the tracking script, consent interface, fixed custom-event contract, and complete Online Booth masking. Do not paste a second tracking snippet into the site, Caddy, or another tag manager.
+Use this runbook once for the FotoHAVN production Clarity project, then repeat the verification section before every analytics-affecting release. The website already owns the tracking script, consent interface, fixed custom-event contract, and complete Online Booth masking. Do not paste a second tracking snippet into the site, Vercel configuration, or another tag manager.
 
 ## Expected result
 
@@ -43,46 +43,31 @@ Reference: [Clarity Consent Mode](https://learn.microsoft.com/en-us/clarity/setu
 
 Reference: [Clarity masking](https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-masking).
 
-## 4. Add the GitHub production environment variable
+## 4. Add the Vercel production environment variable
 
-The deployment workflow reads this environment-scoped configuration:
+Production builds on Vercel read this project environment variable:
 
 ```text
-Environment: production
-Variable: FOTOHAVN_CLARITY_PROJECT_ID
+Project: fotohavn
+Environment: Production
+Variable: NEXT_PUBLIC_CLARITY_PROJECT_ID
 Value: <the exact Clarity Project ID>
 ```
 
-The workflow maps it to `NEXT_PUBLIC_CLARITY_PROJECT_ID` during both the Next.js verification build and immutable container build. The `publish` job references the `production` environment with `deployment: false`, so it can read the variable without creating a duplicate GitHub deployment record. Existing production protection rules still apply.
-
-Manual GitHub setup:
-
-1. Open `quinjan/FotoHAVN` on GitHub.
-2. Go to **Settings > Environments > production**.
-3. Under **Environment variables**, select **Add variable**.
-4. Enter `FOTOHAVN_CLARITY_PROJECT_ID` and the copied Project ID.
-5. Save the variable.
-
-GitHub CLI fallback for an authenticated repository owner:
+Set it in **Vercel > fotohavn > Settings > Environment Variables**, or with the Vercel CLI:
 
 ```powershell
-gh variable set FOTOHAVN_CLARITY_PROJECT_ID --env production --repo quinjan/FotoHAVN --body "<project-id>"
-gh variable get FOTOHAVN_CLARITY_PROJECT_ID --env production --repo quinjan/FotoHAVN
+vercel env add NEXT_PUBLIC_CLARITY_PROJECT_ID production
 ```
 
-The variable is intentionally not a GitHub secret because the Project ID is embedded in public browser JavaScript. Never place Microsoft account credentials or unrelated tokens in this variable.
+The value is a plain variable, not a secret, because the Project ID is embedded in public browser JavaScript. Never place Microsoft account credentials or unrelated tokens in it. Next.js inlines `NEXT_PUBLIC_` values at build time, so a change takes effect only after the next production deployment.
 
-References: [GitHub environment variables](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) and [GitHub Actions variable API](https://docs.github.com/en/rest/actions/variables).
+## 5. Release through Vercel
 
-## 5. Release from GitHub Actions
-
-1. Merge the verified implementation into `main`.
-2. Open **Actions > Deploy FotoHAVN production**.
-3. Run `publish-only` first if you want to build and publish the immutable candidate without changing production.
-4. Run `deploy` when ready to update `https://fotohavn.com/`.
-5. Approve the `production` environment gate when GitHub requests it.
-
-The workflow performs lint, type checking, analytics contract tests, a production Next.js build, immutable container build, and container smoke test before publishing the digest. Deployment remains isolated to FotoHAVN and must not restart unrelated VPS services.
+1. Run `npm run check` from `website/`.
+2. Merge the verified implementation into `main`; Vercel builds and promotes the production deployment automatically.
+3. Confirm the deployment is `Ready` in the Vercel dashboard before running the verification below.
+4. To roll back, promote the previous production deployment in Vercel (**Deployments > ... > Promote** or instant rollback).
 
 ## 6. Verify consent and cookies on production HTTPS
 

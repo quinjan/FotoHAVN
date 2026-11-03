@@ -1,5 +1,7 @@
 # DigitalOcean VPS deployment findings
 
+> **Superseded:** the website moved to Vercel on 2026-11-03 (see `docs/adr/0003-host-website-on-vercel.md`). This document describes the retired DigitalOcean path and is kept for history and rollback only.
+
 ## Snapshot
 
 - **Observed:** 2026-08-22 04:03-04:09 UTC (2026-08-22 12:03-12:09 Asia/Manila)

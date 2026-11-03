@@ -1,5 +1,7 @@
 # FotoHAVN production bootstrap runbook
 
+> **Superseded:** the website moved to Vercel on 2026-11-03 (see `docs/adr/0003-host-website-on-vercel.md`). This document describes the retired DigitalOcean path and is kept for history and rollback only.
+
 This runbook provisions and refreshes the VPS seam required by the accepted deployment design in [ADR-0002](adr/0002-deploy-website-as-an-immutable-container.md). Run it for initial setup and whenever the workflow reports that the installed deployment bundle is stale. It does not deploy an image. Review the script and every path below before execution.
 
 ## Scope

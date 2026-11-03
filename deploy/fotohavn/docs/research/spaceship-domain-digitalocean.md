@@ -1,5 +1,7 @@
 # Connect the Spaceship domain to the FotoHAVN DigitalOcean deployment
 
+> **Superseded:** the website moved to Vercel on 2026-11-03 (see `docs/adr/0003-host-website-on-vercel.md`). This document describes the retired DigitalOcean path and is kept for history and rollback only.
+
 Research date: 2026-09-15
 
 ## Execution status

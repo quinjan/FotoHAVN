@@ -6,7 +6,7 @@ FotoHAVN contains the software and supporting material for an enclosed photograp
 - `website/` contains the public Next.js website and online booth.
 - `brand/` contains the shared FOTOHAVN brand system: foundation, voice, color, type, photography, logo, motion, accessibility, medium guidance, DTCG tokens, master marks, and reference images.
 - `app/DESIGN.md` interprets the brand system for the desktop booth.
-- `deploy/fotohavn/` and the production workflow contain the immutable website deployment path.
+- The website is hosted on Vercel (project `fotohavn`) and deploys from `main`; see `deploy/fotohavn/docs/adr/0003-host-website-on-vercel.md`. `deploy/fotohavn/` keeps the retired DigitalOcean container path for rollback only.
 - `marketing/reels/` contains independent Remotion projects for social video.
 
 ## Start here

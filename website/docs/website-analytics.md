@@ -6,7 +6,7 @@ FotoHAVN uses Microsoft Clarity as its only website analytics provider. The inte
 
 ## Production configuration
 
-Set the GitHub repository variable `FOTOHAVN_CLARITY_PROJECT_ID` to the public Clarity project ID. The production workflow passes it into the immutable image as `NEXT_PUBLIC_CLARITY_PROJECT_ID` at build time. Local development may set the same `NEXT_PUBLIC_` variable in an ignored `.env.local` file.
+Set the Vercel production environment variable `NEXT_PUBLIC_CLARITY_PROJECT_ID` on the `fotohavn` project to the public Clarity project ID; Next.js inlines it at build time, so redeploy after changing it. Local development may set the same `NEXT_PUBLIC_` variable in an ignored `.env.local` file.
 
 Before release, configure the Clarity project as follows:
 

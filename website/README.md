@@ -30,6 +30,6 @@ Visual and interaction changes also require rendered-browser checks at the width
 
 ## Production
 
-The website is built as an immutable standalone container through the manually dispatched production workflow. Read the deployment ADR and `../deploy/fotohavn/AGENTS.md` before changing or running that path.
+The website is hosted on Vercel (project `fotohavn`, root directory `website/`). Pushes to `main` deploy to production at `https://fotohavn.com/`; other branches create preview deployments. Read `../deploy/fotohavn/docs/adr/0003-host-website-on-vercel.md` and `../deploy/fotohavn/AGENTS.md` before changing hosting, domains, or environment variables.
 
 Follow [the Microsoft Clarity production runbook](docs/microsoft-clarity-production-runbook.md) when enabling or changing analytics.

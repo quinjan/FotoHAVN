@@ -4,6 +4,8 @@ status: superseded by 0003-host-website-on-vercel.md
 
 # Deploy the website as an immutable container
 
+> **Superseded** by `0003-host-website-on-vercel.md`. Production is on Vercel; this record is historical.
+
 FotoHAVN production deployments use a manually dispatched GitHub Actions workflow that always builds the current `main` revision on a GitHub-hosted runner, publishes a public GHCR image identified by commit SHA and digest, and deploys that digest through a dedicated restricted `fotohavn-deploy` SSH identity. The VPS runs the standalone Next.js image as an isolated, resource-limited Compose service behind the existing Caddy container at `https://fotohavn.com/`; a separately reviewed bootstrap creates the forced deployment command, shared proxy network, imported Caddy route, and server directories.
 
 Deployments are serialized, keep SSH secrets in a reviewer-free `production` environment, require build and container gates, and restore the previous digest if internal or public health checks fail. The canonical apex is indexed and served over HTTPS, `www` redirects to the apex, and legacy public `/fotohavn` paths redirect to their root equivalents. The HTTP raw-IP `/fotohavn` route remains only as a compatibility boundary for restoring the last pre-domain image; the IP root continues to return `404`.
