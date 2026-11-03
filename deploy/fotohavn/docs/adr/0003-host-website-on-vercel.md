@@ -17,4 +17,4 @@ Spaceship remains the authoritative DNS provider. The apex points to Vercel's A 
 
 - The DigitalOcean FotoHAVN container, Caddy route, and `deploy-fotohavn-staging.yml` workflow remain only as a rollback path; rolling back means pointing the Spaceship apex A record back to `159.223.47.227`. Decommissioning them is separate work.
 - The raw-IP `http://159.223.47.227/fotohavn` compatibility route is no longer part of the public topology.
-- `output: "standalone"` stays in `next.config.ts` for the rollback image; Vercel ignores it.
+- `output: "standalone"` is applied only outside Vercel (`process.env.VERCEL` unset) so the rollback image still builds; Vercel's build adapter fails with standalone output.

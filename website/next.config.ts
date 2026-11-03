@@ -6,7 +6,7 @@ import eventPhotoSizes from "./event-photo-sizes.json";
 const nextConfig: NextConfig = {
   basePath: siteBasePath,
   devIndicators: false,
-  output: "standalone",
+  output: process.env.VERCEL ? undefined : "standalone",
   images: eventPhotoSizes,
   async redirects() {
     return [
