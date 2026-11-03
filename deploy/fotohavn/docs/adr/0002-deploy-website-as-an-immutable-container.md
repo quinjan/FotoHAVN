@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0003-host-website-on-vercel.md
 ---
 
 # Deploy the website as an immutable container

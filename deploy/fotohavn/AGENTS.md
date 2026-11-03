@@ -4,6 +4,7 @@ Use this guide for the deployment bundle, production workflow, container packagi
 
 ## Load
 
+- Production is hosted on Vercel per `docs/adr/0003-host-website-on-vercel.md`; the container path below is retained only for rollback.
 - Read `docs/adr/0002-deploy-website-as-an-immutable-container.md` for the accepted immutable-container topology and shared-host boundaries.
 - Read `docs/fotohavn-bootstrap-runbook.md` for bootstrap or host-integration work.
 - Read `../../.github/workflows/deploy-fotohavn-staging.yml` and the executable files in this directory for the release path.
